@@ -2,13 +2,12 @@
 
 ## Current Phase
 
-Phase 2B: Task contract creation.
+Phase 2C: Advisory validation checks.
 
 ## Current State
 
-PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, and `pcae task new` for creating structured Markdown task contracts.
+PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, `pcae task new`, and advisory `pcae check` validation.
 
 ## Next
 
-- Implement `pcae check`.
 - Implement `pcae end`.

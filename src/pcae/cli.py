@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 
+from pcae.commands.check import run_check
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
 from pcae.commands.task import run_task_new
@@ -26,6 +27,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Inspect PCAE memory files and local harness wiring.",
     )
     inspect_parser.set_defaults(handler=run_inspect)
+
+    check_parser = subparsers.add_parser(
+        "check",
+        help="Run advisory PCAE validation checks.",
+    )
+    check_parser.set_defaults(handler=run_check)
 
     task_parser = subparsers.add_parser(
         "task",

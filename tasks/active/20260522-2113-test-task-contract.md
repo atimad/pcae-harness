@@ -18,11 +18,20 @@ implementation
 
 ## Goal
 
-TBD
+Implement advisory PCAE check validation.
 
 ## Allowed Files
 
-- TBD
+- src/pcae/cli.py
+- src/pcae/core/tasks.py
+- src/pcae/commands/check.py
+- src/pcae/core/check.py
+- src/pcae/core/git_status.py
+- tests/test_check.py
+- PROJECT_STATUS.md
+- tasks/DONE.md
+- tasks/TODO.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
