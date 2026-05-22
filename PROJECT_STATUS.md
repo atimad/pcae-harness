@@ -2,15 +2,14 @@
 
 ## Current Phase
 
-Phase 1: CLI package skeleton and `pcae init`.
+Phase 2A: Read-only harness inspection.
 
 ## Current State
 
-PCAE Harness is being initialized as a Python CLI project.
+PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, and explicit init coverage for `.githooks/pre-commit`.
 
 ## Next
 
-- Implement `pcae inspect`.
 - Implement `pcae task new`.
 - Implement `pcae check`.
 - Implement `pcae end`.

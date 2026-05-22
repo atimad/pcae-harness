@@ -3,9 +3,24 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.paths import HarnessPath
 from pcae.core.templates import INIT_TEMPLATES
+
+
+def test_init_command_creates_pre_commit_hook(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init"])
+
+    output = capsys.readouterr().out
+    pre_commit = tmp_path / ".githooks" / "pre-commit"
+    assert exit_code == 0
+    assert pre_commit.is_file()
+    assert os.access(pre_commit, os.X_OK)
+    assert "Created:" in output
+    assert "  .githooks/pre-commit" in output
 
 
 def test_init_creates_required_files(tmp_path: Path) -> None:

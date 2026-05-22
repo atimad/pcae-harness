@@ -21,6 +21,9 @@ dev = [
 [project.scripts]
 pcae = "pcae.cli:main"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/pcae"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

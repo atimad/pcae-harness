@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Sequence
 
 from pcae.commands.init import run_init
+from pcae.commands.inspect import run_inspect
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -18,6 +19,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Create PCAE memory files in the current repository.",
     )
     init_parser.set_defaults(handler=run_init)
+
+    inspect_parser = subparsers.add_parser(
+        "inspect",
+        help="Inspect PCAE memory files and local harness wiring.",
+    )
+    inspect_parser.set_defaults(handler=run_inspect)
 
     return parser
 
