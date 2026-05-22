@@ -1,0 +1,64 @@
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from pathlib import Path
+
+from pcae.cli import main
+from pcae.core.paths import HarnessPath
+from pcae.core.tasks import create_task_contract, slugify_title
+
+
+def test_slugify_title_uses_safe_filename_parts() -> None:
+    assert slugify_title("Implement inspect command") == "implement-inspect-command"
+    assert slugify_title(" Fix: hooks/install!! ") == "fix-hooks-install"
+    assert slugify_title("!!!") == "task"
+
+
+def test_create_task_contract_writes_markdown_file(tmp_path: Path) -> None:
+    created_at = datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc)
+
+    contract = create_task_contract(
+        HarnessPath(tmp_path),
+        "Implement inspect command",
+        created_at=created_at,
+    )
+
+    assert contract.task_id == "20260522-1930-implement-inspect-command"
+    assert contract.relative_path == Path(
+        "tasks/active/20260522-1930-implement-inspect-command.md"
+    )
+
+    task_file = tmp_path / contract.relative_path
+    assert task_file.is_file()
+    content = task_file.read_text(encoding="utf-8")
+    assert "## Task ID" in content
+    assert "20260522-1930-implement-inspect-command" in content
+    assert "## Title" in content
+    assert "Implement inspect command" in content
+    assert "## Status" in content
+    assert "active" in content
+    assert "## Mode" in content
+    assert "implementation" in content
+    assert "## Goal" in content
+    assert "## Allowed Files" in content
+    assert "## Forbidden Files" in content
+    assert "## Forbidden Changes" in content
+    assert "## Acceptance Checks" in content
+    assert "## Documentation Requirements" in content
+    assert "## Created Timestamp" in content
+    assert "2026-05-22T19:30:00+00:00" in content
+
+
+def test_task_new_command_creates_one_active_task_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "new", "Implement inspect command"])
+
+    output = capsys.readouterr().out
+    task_files = list((tmp_path / "tasks" / "active").glob("*.md"))
+    assert exit_code == 0
+    assert len(task_files) == 1
+    assert task_files[0].name.endswith("-implement-inspect-command.md")
+    assert "Created task contract: tasks/active/" in output

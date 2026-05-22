@@ -9,3 +9,4 @@
 - Implemented read-only `pcae inspect`.
 - Added manifest-driven inspection and reporting tests.
 - Added command-level coverage that `pcae init` creates `.githooks/pre-commit`.
+- Implemented `pcae task new` for structured Markdown task contracts.

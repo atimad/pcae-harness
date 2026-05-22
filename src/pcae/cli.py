@@ -5,6 +5,7 @@ from collections.abc import Sequence
 
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
+from pcae.commands.task import run_task_new
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -25,6 +26,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Inspect PCAE memory files and local harness wiring.",
     )
     inspect_parser.set_defaults(handler=run_inspect)
+
+    task_parser = subparsers.add_parser(
+        "task",
+        help="Manage PCAE task contracts.",
+    )
+    task_subparsers = task_parser.add_subparsers(dest="task_command", required=True)
+
+    task_new_parser = task_subparsers.add_parser(
+        "new",
+        help="Create a structured task contract.",
+    )
+    task_new_parser.add_argument("title")
+    task_new_parser.set_defaults(handler=run_task_new)
 
     return parser
 
