@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 2C: Advisory validation checks.
+Phase 2D: Explicit Git hook installation.
 
 ## Current State
 
-PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, `pcae task new`, and advisory `pcae check` validation.
+PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, `pcae task new`, advisory `pcae check`, and explicit `pcae hooks install`.
 
 ## Next
 

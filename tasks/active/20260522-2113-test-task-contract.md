@@ -32,6 +32,10 @@ Implement advisory PCAE check validation.
 - tasks/DONE.md
 - tasks/TODO.md
 - CHANGELOG.md
+- .githooks/pre-commit
+- src/pcae/commands/hooks.py
+- src/pcae/core/hooks.py
+- tests/test_hooks.py
 
 ## Forbidden Files
 

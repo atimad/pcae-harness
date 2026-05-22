@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Sequence
 
 from pcae.commands.check import run_check
+from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
 from pcae.commands.task import run_task_new
@@ -46,6 +47,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     task_new_parser.add_argument("title")
     task_new_parser.set_defaults(handler=run_task_new)
+
+    hooks_parser = subparsers.add_parser(
+        "hooks",
+        help="Manage PCAE Git hook integration.",
+    )
+    hooks_subparsers = hooks_parser.add_subparsers(
+        dest="hooks_command",
+        required=True,
+    )
+
+    hooks_install_parser = hooks_subparsers.add_parser(
+        "install",
+        help="Configure Git to use .githooks.",
+    )
+    hooks_install_parser.set_defaults(handler=run_hooks_install)
 
     return parser
 

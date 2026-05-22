@@ -7,3 +7,4 @@
 - Added read-only `pcae inspect` with manifest-driven required path reporting.
 - Added `pcae task new` for creating active Markdown task contracts.
 - Added advisory `pcae check` validation for required files, task scope, forbidden files, and documentation updates.
+- Added explicit `pcae hooks install` to configure Git to use `.githooks`.

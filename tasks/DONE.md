@@ -11,3 +11,4 @@
 - Added command-level coverage that `pcae init` creates `.githooks/pre-commit`.
 - Implemented `pcae task new` for structured Markdown task contracts.
 - Implemented advisory `pcae check` validation for required files, active task scope, forbidden files, and documentation updates.
+- Implemented explicit `pcae hooks install` for configuring Git `core.hooksPath`.
