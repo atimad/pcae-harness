@@ -608,6 +608,55 @@ def test_check_classifies_changed_files_by_architecture_zone(tmp_path: Path) -> 
     }
 
 
+def test_check_classifies_common_project_files_without_unclassified(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/cli.py",
+            "scripts/check-docs-updated.sh",
+            ".githooks/pre-commit",
+            "pyproject.toml",
+            ".pcae/session.json",
+            ".pcae/policy.toml",
+        ],
+        override_protected_files=[
+            "pyproject.toml",
+            ".pcae/session.json",
+            ".pcae/policy.toml",
+        ],
+    )
+    write_file(tmp_path / "src" / "pcae" / "cli.py", "print('old')\n")
+    write_file(tmp_path / "scripts" / "check-docs-updated.sh", "old\n")
+    write_file(tmp_path / ".githooks" / "pre-commit", "old\n")
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'old'\n")
+    write_file(tmp_path / ".pcae" / "session.json", "{}\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "cli.py", "print('new')\n")
+    write_file(tmp_path / "scripts" / "check-docs-updated.sh", "new\n")
+    write_file(tmp_path / ".githooks" / "pre-commit", "new\n")
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'new'\n")
+    write_file(tmp_path / ".pcae" / "session.json", '{"updated": true}\n')
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        default_policy_text() + "# changed for zone classification\n",
+    )
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    counts = zone_counts(result)
+    assert "unclassified" not in counts
+    assert counts["cli"] == 1
+    assert counts["scripts"] == 1
+    assert counts["hooks"] == 1
+    assert counts["package"] == 1
+    assert counts["session"] == 1
+    assert counts["policy"] == 1
+
+
 def test_check_omits_architecture_zone_summary_when_clean(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["src/allowed.py"])
@@ -1186,6 +1235,62 @@ patterns = [
 
 [architecture.zones]
 {rendered_zones}
+"""
+
+
+def default_policy_text() -> str:
+    return """[protected]
+patterns = [
+  ".git/**",
+  ".env",
+  ".env.*",
+  "*.pem",
+  "*.key",
+  "*.p12",
+  "*.pfx",
+  "**/__pycache__/**",
+  ".venv/**",
+  "venv/**",
+  "node_modules/**",
+  "pyproject.toml",
+  "poetry.lock",
+  "package-lock.json",
+  "pnpm-lock.yaml",
+  "yarn.lock",
+  "Cargo.toml",
+  "Cargo.lock",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+commands = ["src/pcae/commands/**"]
+cli = ["src/pcae/cli.py", "src/pcae/__main__.py", "src/pcae/__init__.py"]
+tests = ["tests/**"]
+docs = ["docs/**", "*.md"]
+tasks = ["tasks/**"]
+scripts = ["scripts/**"]
+hooks = [".githooks/**"]
+package = ["pyproject.toml"]
+session = [".pcae/session.json"]
+policy = [".pcae/policy.toml"]
+config = [".pcae/**", "pyproject.toml"]
+
+[architecture.rules]
+core = ["core"]
+commands = ["core", "commands"]
+cli = ["core", "commands", "cli"]
+tests = ["*"]
+docs = ["*"]
+tasks = ["*"]
+scripts = ["*"]
+hooks = ["hooks"]
+package = ["package"]
+session = ["session"]
+policy = ["policy"]
+config = ["config"]
+
+[architecture.enforcement]
+mode = "advisory"
 """
 
 

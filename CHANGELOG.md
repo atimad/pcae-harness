@@ -26,3 +26,4 @@
 - Added task-scoped architecture zone validation to `pcae check`.
 - Added default architecture zone sections to new task contracts.
 - Added `pcae task new` options for allowed and forbidden architecture zones.
+- Added architecture zones for common PCAE project files to reduce unclassified drift.

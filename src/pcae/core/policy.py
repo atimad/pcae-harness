@@ -33,18 +33,30 @@ DEFAULT_PROTECTED_PATTERNS = (
 DEFAULT_ARCHITECTURE_ZONES = {
     "core": ("src/pcae/core/**",),
     "commands": ("src/pcae/commands/**",),
+    "cli": ("src/pcae/cli.py", "src/pcae/__main__.py", "src/pcae/__init__.py"),
     "tests": ("tests/**",),
     "docs": ("docs/**", "*.md"),
     "tasks": ("tasks/**",),
+    "scripts": ("scripts/**",),
+    "hooks": (".githooks/**",),
+    "package": ("pyproject.toml",),
+    "session": (".pcae/session.json",),
+    "policy": (".pcae/policy.toml",),
     "config": (".pcae/**", "pyproject.toml"),
 }
 
 DEFAULT_ARCHITECTURE_RULES = {
     "core": ("core",),
     "commands": ("core", "commands"),
+    "cli": ("core", "commands", "cli"),
     "tests": ("*",),
     "docs": ("*",),
     "tasks": ("*",),
+    "scripts": ("*",),
+    "hooks": ("hooks",),
+    "package": ("package",),
+    "session": ("session",),
+    "policy": ("policy",),
     "config": ("config",),
 }
 

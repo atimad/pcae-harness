@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 12C: Task new zone options.
+Phase 12D: Reduce unclassified architecture drift.
 
 ## Current State
 
-`pcae task new` can populate task-scoped architecture zones from CLI options.
+Architecture policy now classifies common PCAE project files such as CLI, scripts, hooks, package, session, and policy files.
 
 ## Next
 

@@ -60,8 +60,14 @@ def test_inspection_report_includes_repo_policy_status(tmp_path: Path) -> None:
     assert "protected patterns: 18" in report
     assert "architecture zones:" in report
     assert "core: 1 patterns" in report
+    assert "cli: 3 patterns" in report
     assert "docs: 2 patterns" in report
-    assert "architecture rules: 6" in report
+    assert "scripts: 1 patterns" in report
+    assert "hooks: 1 patterns" in report
+    assert "package: 1 patterns" in report
+    assert "session: 1 patterns" in report
+    assert "policy: 1 patterns" in report
+    assert "architecture rules: 12" in report
 
 
 def test_inspection_report_includes_default_policy_status_when_missing(

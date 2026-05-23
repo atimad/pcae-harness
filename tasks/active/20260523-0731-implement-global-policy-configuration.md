@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add `pcae task new` options for architecture zones.
+Reduce unclassified architecture drift for common PCAE project files.
 
 ## Allowed Files
 
