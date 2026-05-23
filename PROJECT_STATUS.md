@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 3B: Wildcard and directory task scopes.
+Phase 4A: Architecture protection with forbidden scopes.
 
 ## Current State
 
-PCAE Harness has advisory `pcae check` validation with active task discovery, clearer diagnostics, and wildcard allowed-file scopes.
+PCAE Harness has advisory `pcae check` validation with active task discovery, wildcard allowed-file scopes, and forbidden-file enforcement.
 
 ## Next
 

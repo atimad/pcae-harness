@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement advisory PCAE check validation.
+Implement architecture protection with forbidden task scopes.
 
 ## Allowed Files
 
@@ -37,6 +37,7 @@ Implement advisory PCAE check validation.
 - src/pcae/core/hooks.py
 - tests/test_hooks.py
 - tests/test_task.py
+- tasks/active/20260522-2113-test-task-contract.md
 
 ## Forbidden Files
 

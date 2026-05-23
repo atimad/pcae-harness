@@ -70,7 +70,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
     changed_paths = tuple(change.path for change in changes)
 
     if active_task is not None:
-        violations.extend(check_forbidden_changes(changes, active_task.forbidden_files))
+        violations.extend(check_forbidden_changes(changes, active_task))
         violations.extend(check_allowed_scope(changes, active_task))
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
@@ -87,20 +87,30 @@ def run_checks(root: HarnessPath) -> CheckResult:
 
 
 def check_forbidden_changes(
-    changes: tuple[GitChange, ...], forbidden_patterns: tuple[str, ...]
+    changes: tuple[GitChange, ...], active_task: ActiveTask
 ) -> tuple[CheckMessage, ...]:
-    return tuple(
-        CheckMessage(reason="Forbidden file changed.", path=change.path)
-        for change in changes
-        if path_matches_any(change.path, forbidden_patterns)
-    )
+    violations: list[CheckMessage] = []
+    for change in changes:
+        matched_pattern = first_matching_pattern(change.path, active_task.forbidden_files)
+        if matched_pattern is None:
+            continue
+        violations.append(
+            CheckMessage(
+                reason=forbidden_failure_reason(active_task, matched_pattern),
+                path=change.path,
+            )
+        )
+    return tuple(violations)
 
 
 def check_allowed_scope(
     changes: tuple[GitChange, ...], active_task: ActiveTask
 ) -> tuple[CheckMessage, ...]:
     scoped_changes = tuple(
-        change for change in changes if not is_documentation_path(change.path)
+        change
+        for change in changes
+        if not is_documentation_path(change.path)
+        and not path_matches_any(change.path, active_task.forbidden_files)
     )
     if not scoped_changes:
         return ()
@@ -126,14 +136,18 @@ def check_allowed_scope(
 
 
 def path_matches_any(path: Path, patterns: tuple[str, ...]) -> bool:
+    return first_matching_pattern(path, patterns) is not None
+
+
+def first_matching_pattern(path: Path, patterns: tuple[str, ...]) -> str | None:
     path_text = path.as_posix()
     for pattern in patterns:
         normalized = pattern.strip()
         if not normalized:
             continue
         if path_matches_pattern(path_text, normalized):
-            return True
-    return False
+            return normalized
+    return None
 
 
 def path_matches_pattern(path_text: str, pattern: str) -> bool:
@@ -157,6 +171,14 @@ def scope_failure_reason(active_task: ActiveTask) -> str:
     return (
         "Changed file is outside active task scope "
         f"for task {active_task.task_id}; no allowed-file pattern matched."
+    )
+
+
+def forbidden_failure_reason(active_task: ActiveTask, matched_pattern: str) -> str:
+    return (
+        "Forbidden file changed "
+        f"for task {active_task.task_id} ({active_task.title}); "
+        f"matched forbidden pattern '{matched_pattern}'."
     )
 
 

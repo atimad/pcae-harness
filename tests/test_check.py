@@ -61,10 +61,9 @@ def test_check_detects_forbidden_file_changes(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(
         tmp_path,
-        allowed_files=["src/allowed.py"],
+        allowed_files=["pyproject.toml"],
         forbidden_files=["pyproject.toml"],
     )
-    write_file(tmp_path / "src" / "allowed.py", "print('allowed')\n")
     write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
     commit_baseline(tmp_path)
 
@@ -73,7 +72,13 @@ def test_check_detects_forbidden_file_changes(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert not result.passed
-    assert has_violation(result, "pyproject.toml: Forbidden file changed.")
+    assert has_violation(
+        result,
+        "pyproject.toml: Forbidden file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched forbidden pattern 'pyproject.toml'.",
+    )
+    assert not has_violation(result, "outside active task scope")
 
 
 def test_check_command_passes_when_changes_are_in_scope_and_documented(
@@ -218,6 +223,101 @@ def test_check_supports_basename_wildcard_scope(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert result.passed
+
+
+def test_check_forbidden_direct_directory_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/*"],
+        forbidden_files=["src/pcae/core/*"],
+    )
+    target = tmp_path / "src" / "pcae" / "core" / "protected.py"
+    write_file(target, "print('protected')\n")
+    commit_baseline(tmp_path)
+
+    write_file(target, "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/core/protected.py: Forbidden file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched forbidden pattern 'src/pcae/core/*'.",
+    )
+
+
+def test_check_forbidden_direct_directory_wildcard_ignores_nested_files(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/**"],
+        forbidden_files=["src/pcae/core/*"],
+    )
+    target = tmp_path / "src" / "pcae" / "core" / "nested" / "allowed.py"
+    write_file(target, "print('nested')\n")
+    commit_baseline(tmp_path)
+
+    write_file(target, "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+
+
+def test_check_forbidden_recursive_directory_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/commands/**"],
+        forbidden_files=["src/pcae/commands/**"],
+    )
+    target = tmp_path / "src" / "pcae" / "commands" / "nested" / "protected.py"
+    write_file(target, "print('protected')\n")
+    commit_baseline(tmp_path)
+
+    write_file(target, "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/commands/nested/protected.py: Forbidden file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched forbidden pattern 'src/pcae/commands/**'.",
+    )
+
+
+def test_check_forbidden_basename_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/protected.toml"],
+        forbidden_files=["*.toml"],
+    )
+    target = tmp_path / "src" / "pcae" / "core" / "protected.toml"
+    write_file(target, "name = 'protected'\n")
+    commit_baseline(tmp_path)
+
+    write_file(target, "name = 'changed'\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/core/protected.toml: Forbidden file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched forbidden pattern '*.toml'.",
+    )
 
 
 def write_task(

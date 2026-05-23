@@ -14,3 +14,4 @@
 - Implemented explicit `pcae hooks install` for configuring Git `core.hooksPath`.
 - Improved `pcae check` active task discovery and violation diagnostics.
 - Added wildcard and directory matching for task allowed-file scopes.
+- Added forbidden-file enforcement with exact, wildcard, and directory task scopes.
