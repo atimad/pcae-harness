@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Allow `pcae task close` to close a specific active task by ID or filename.
+Add `pcae task list` for active and done task visibility.
 
 ## Allowed Files
 

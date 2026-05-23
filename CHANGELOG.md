@@ -12,3 +12,4 @@
 - Added policy status reporting to `pcae inspect`.
 - Added validation diagnostics for invalid `.pcae/policy.toml` files.
 - Extended `pcae task close` to close a specific active task by ID or filename.
+- Added `pcae task list` for active and done task visibility.

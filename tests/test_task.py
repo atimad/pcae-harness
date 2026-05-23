@@ -10,6 +10,7 @@ from pcae.core.tasks import (
     close_latest_active_task,
     create_task_contract,
     find_latest_active_task,
+    read_task_summaries,
     slugify_title,
 )
 
@@ -289,3 +290,105 @@ def test_task_close_command_reports_missing_active_task(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "No active task contract found in tasks/active/." in output
+
+
+def test_read_task_summaries_reads_active_and_done_tasks(tmp_path: Path) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Active task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    done_task = create_task_contract(
+        HarnessPath(tmp_path),
+        "Done task",
+        created_at=datetime(2026, 5, 22, 19, 31, tzinfo=timezone.utc),
+    )
+    close_active_task_by_identifier(HarnessPath(tmp_path), done_task.task_id)
+
+    active_tasks = read_task_summaries(HarnessPath(tmp_path), "active")
+    done_tasks = read_task_summaries(HarnessPath(tmp_path), "done")
+
+    assert [task.task_id for task in active_tasks] == ["20260522-1930-active-task"]
+    assert [task.task_id for task in done_tasks] == ["20260522-1931-done-task"]
+    assert done_tasks[0].status == "done"
+
+
+def test_task_list_command_shows_active_then_done_tasks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Active task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    done_task = create_task_contract(
+        HarnessPath(tmp_path),
+        "Done task",
+        created_at=datetime(2026, 5, 22, 19, 31, tzinfo=timezone.utc),
+    )
+    close_active_task_by_identifier(HarnessPath(tmp_path), done_task.task_id)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert output.index("Active tasks:") < output.index("Done tasks:")
+    assert "[active] 20260522-1930-active-task - Active task" in output
+    assert "[done] 20260522-1931-done-task - Done task" in output
+
+
+def test_task_list_command_works_without_done_directory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Active task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Active tasks:" in output
+    assert "[active] 20260522-1930-active-task - Active task" in output
+    assert "Done tasks:\n  none" in output
+
+
+def test_task_list_command_reports_no_tasks(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No task contracts found." in output
+
+
+def test_task_list_command_does_not_modify_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Active task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    before = {
+        path.relative_to(tmp_path).as_posix(): path.read_text(encoding="utf-8")
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "list"])
+
+    after = {
+        path.relative_to(tmp_path).as_posix(): path.read_text(encoding="utf-8")
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    capsys.readouterr()
+    assert exit_code == 0
+    assert after == before

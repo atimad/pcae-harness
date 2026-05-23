@@ -10,7 +10,7 @@ Test task contract
 
 ## Status
 
-active
+done
 
 ## Mode
 

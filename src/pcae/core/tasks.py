@@ -27,6 +27,14 @@ class ClosedTask:
 
 
 @dataclass(frozen=True)
+class TaskSummary:
+    task_id: str
+    title: str
+    status: str
+    path: Path
+
+
+@dataclass(frozen=True)
 class ActiveTask:
     path: Path
     task_id: str
@@ -103,6 +111,28 @@ def close_active_task(active_task: ActiveTask) -> ClosedTask:
 def active_task_path_for_identifier(root: HarnessPath, identifier: str) -> Path:
     filename = identifier if identifier.endswith(".md") else f"{identifier}.md"
     return root.join(Path("tasks") / "active" / filename)
+
+
+def list_task_summaries(root: HarnessPath) -> tuple[TaskSummary, ...]:
+    return read_task_summaries(root, "active") + read_task_summaries(root, "done")
+
+
+def read_task_summaries(root: HarnessPath, status: str) -> tuple[TaskSummary, ...]:
+    task_dir = root.join(Path("tasks") / status)
+    if not task_dir.is_dir():
+        return ()
+
+    return tuple(read_task_summary(path, status) for path in sorted(task_dir.glob("*.md")))
+
+
+def read_task_summary(task_path: Path, fallback_status: str) -> TaskSummary:
+    content = task_path.read_text(encoding="utf-8")
+    return TaskSummary(
+        task_id=read_task_section_text(content, "Task ID") or task_path.stem,
+        title=read_task_section_text(content, "Title") or "Untitled task",
+        status=read_task_section_text(content, "Status") or fallback_status,
+        path=task_path,
+    )
 
 
 def slugify_title(title: str) -> str:

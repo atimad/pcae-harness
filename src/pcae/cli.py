@@ -7,7 +7,7 @@ from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
-from pcae.commands.task import run_task_close, run_task_new
+from pcae.commands.task import run_task_close, run_task_list, run_task_new
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -54,6 +54,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     task_close_parser.add_argument("identifier", nargs="?")
     task_close_parser.set_defaults(handler=run_task_close)
+
+    task_list_parser = task_subparsers.add_parser(
+        "list",
+        help="List active and done task contracts.",
+    )
+    task_list_parser.set_defaults(handler=run_task_list)
 
     hooks_parser = subparsers.add_parser(
         "hooks",
