@@ -15,3 +15,4 @@
 - Added `pcae task list` for active and done task visibility.
 - Added `pcae session write` for `.pcae/session.json` handoff snapshots.
 - Added `pcae session read` for `.pcae/session.json` handoff summaries.
+- Added `pcae session update` for `.pcae/session.json` handoff metadata.

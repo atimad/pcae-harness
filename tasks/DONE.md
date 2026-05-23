@@ -24,3 +24,4 @@
 - Added `pcae task list` for viewing active and done tasks.
 - Added `pcae session write` for writing resumable session handoff snapshots.
 - Added `pcae session read` for reading resumable session handoff snapshots.
+- Added `pcae session update` for enriching session handoff metadata.

@@ -8,7 +8,12 @@ import subprocess
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.paths import HarnessPath
-from pcae.core.session import read_session_snapshot, write_session_snapshot
+from pcae.core.session import (
+    SessionUpdate,
+    read_session_snapshot,
+    update_session_snapshot,
+    write_session_snapshot,
+)
 from pcae.core.tasks import create_task_contract
 
 
@@ -88,6 +93,71 @@ def test_session_write_does_not_overwrite_policy_config(tmp_path: Path) -> None:
     write_session_snapshot(
         HarnessPath(tmp_path),
         created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+
+    assert policy_file.read_text(encoding="utf-8") == before
+
+
+def test_session_update_replaces_and_appends_fields(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+
+    snapshot = update_session_snapshot(
+        HarnessPath(tmp_path),
+        SessionUpdate(
+            objective="Implement session update",
+            completed_step="Added core updater",
+            next_step="Run checks",
+            blocker="None",
+            warning="Keep policy untouched",
+            note="Preserve git fields",
+        ),
+    )
+
+    assert snapshot.data["current_objective"] == "Implement session update"
+    assert snapshot.data["last_completed_step"] == "Added core updater"
+    assert snapshot.data["next_recommended_step"] == "Run checks"
+    assert snapshot.data["blockers"] == ["None"]
+    assert snapshot.data["warnings"] == ["Keep policy untouched"]
+    assert snapshot.data["architectural_notes"] == ["Preserve git fields"]
+    assert snapshot.data["git"]["branch"] in {"main", "master"}
+
+
+def test_session_update_creates_snapshot_when_missing(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update handoff",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+
+    snapshot = update_session_snapshot(
+        HarnessPath(tmp_path),
+        SessionUpdate(objective="Create on update"),
+    )
+
+    assert (tmp_path / ".pcae" / "session.json").is_file()
+    assert snapshot.data["current_objective"] == "Create on update"
+    assert snapshot.data["active_task"] == {
+        "id": "20260523-0730-update-handoff",
+        "title": "Update handoff",
+    }
+
+
+def test_session_update_does_not_overwrite_policy_config(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    policy_file = tmp_path / ".pcae" / "policy.toml"
+    before = policy_file.read_text(encoding="utf-8")
+
+    update_session_snapshot(
+        HarnessPath(tmp_path),
+        SessionUpdate(objective="Keep policy stable"),
     )
 
     assert policy_file.read_text(encoding="utf-8") == before
@@ -193,6 +263,47 @@ def test_session_read_command_reports_missing_snapshot(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "No session snapshot found at .pcae/session.json." in output
+
+
+def test_session_update_command_updates_read_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    update_exit_code = main(
+        [
+            "session",
+            "update",
+            "--objective",
+            "Finish Phase 8A",
+            "--completed-step",
+            "Added update command",
+            "--next-step",
+            "Run validation",
+            "--blocker",
+            "None",
+            "--warning",
+            "Watch docs",
+            "--note",
+            "Session JSON stays readable",
+        ]
+    )
+    update_output = capsys.readouterr().out
+
+    read_exit_code = main(["session", "read"])
+    read_output = capsys.readouterr().out
+
+    assert update_exit_code == 0
+    assert "Updated session snapshot: .pcae/session.json" in update_output
+    assert read_exit_code == 0
+    assert "Current objective: Finish Phase 8A" in read_output
+    assert "Last completed step: Added update command" in read_output
+    assert "Next recommended step: Run validation" in read_output
+    assert "  - None" in read_output
+    assert "  - Watch docs" in read_output
+    assert "  - Session JSON stays readable" in read_output
 
 
 def init_git_repo(root: Path) -> None:

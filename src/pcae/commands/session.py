@@ -4,7 +4,12 @@ import argparse
 from typing import Any
 
 from pcae.core.paths import HarnessPath
-from pcae.core.session import read_session_snapshot, write_session_snapshot
+from pcae.core.session import (
+    SessionUpdate,
+    read_session_snapshot,
+    update_session_snapshot,
+    write_session_snapshot,
+)
 
 
 def run_session_write(args: argparse.Namespace) -> int:
@@ -23,6 +28,24 @@ def run_session_read(args: argparse.Namespace) -> int:
         return 1
 
     print_session_snapshot(snapshot.data)
+    return 0
+
+
+def run_session_update(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    snapshot = update_session_snapshot(
+        root,
+        SessionUpdate(
+            objective=args.objective,
+            completed_step=args.completed_step,
+            next_step=args.next_step,
+            blocker=args.blocker,
+            warning=args.warning,
+            note=args.note,
+        ),
+    )
+
+    print(f"Updated session snapshot: {snapshot.relative_path.as_posix()}")
     return 0
 
 

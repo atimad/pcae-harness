@@ -7,7 +7,11 @@ from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
-from pcae.commands.session import run_session_read, run_session_write
+from pcae.commands.session import (
+    run_session_read,
+    run_session_update,
+    run_session_write,
+)
 from pcae.commands.task import run_task_close, run_task_list, run_task_new
 
 
@@ -97,6 +101,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Read the current session snapshot.",
     )
     session_read_parser.set_defaults(handler=run_session_read)
+
+    session_update_parser = session_subparsers.add_parser(
+        "update",
+        help="Update handoff metadata in the current session snapshot.",
+    )
+    session_update_parser.add_argument("--objective")
+    session_update_parser.add_argument("--completed-step")
+    session_update_parser.add_argument("--next-step")
+    session_update_parser.add_argument("--blocker")
+    session_update_parser.add_argument("--warning")
+    session_update_parser.add_argument("--note")
+    session_update_parser.set_defaults(handler=run_session_update)
 
     return parser
 

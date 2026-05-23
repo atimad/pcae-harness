@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 7B: Session handoff read.
+Phase 8A: Session handoff update.
 
 ## Current State
 
-PCAE Harness can write and read `.pcae/session.json` handoff snapshots.
+PCAE Harness can write, read, and manually update `.pcae/session.json` handoff snapshots.
 
 ## Next
 

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Print complete `pcae session read` handoff details.
+Add `pcae session update` for resumable handoff metadata.
 
 ## Allowed Files
 
