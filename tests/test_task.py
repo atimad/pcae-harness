@@ -6,6 +6,7 @@ from pathlib import Path
 from pcae.cli import main
 from pcae.core.paths import HarnessPath
 from pcae.core.tasks import (
+    close_active_task_by_identifier,
     close_latest_active_task,
     create_task_contract,
     find_latest_active_task,
@@ -162,6 +163,55 @@ def test_close_latest_active_task_closes_newest_task(tmp_path: Path) -> None:
     assert (tmp_path / "tasks" / "done" / "20260522-1931-new-task.md").is_file()
 
 
+def test_close_active_task_by_identifier_closes_specific_task(tmp_path: Path) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Old task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "New task",
+        created_at=datetime(2026, 5, 22, 19, 31, tzinfo=timezone.utc),
+    )
+
+    closed_task = close_active_task_by_identifier(
+        HarnessPath(tmp_path),
+        "20260522-1930-old-task",
+    )
+
+    assert closed_task is not None
+    assert closed_task.task_id == "20260522-1930-old-task"
+    assert (tmp_path / "tasks" / "done" / "20260522-1930-old-task.md").is_file()
+    assert (tmp_path / "tasks" / "active" / "20260522-1931-new-task.md").is_file()
+
+
+def test_close_active_task_by_filename_closes_specific_task(tmp_path: Path) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Target task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+
+    closed_task = close_active_task_by_identifier(
+        HarnessPath(tmp_path),
+        "20260522-1930-target-task.md",
+    )
+
+    assert closed_task is not None
+    assert closed_task.task_id == "20260522-1930-target-task"
+    assert (tmp_path / "tasks" / "done" / "20260522-1930-target-task.md").is_file()
+
+
+def test_close_active_task_by_identifier_returns_none_when_missing(
+    tmp_path: Path,
+) -> None:
+    assert (
+        close_active_task_by_identifier(HarnessPath(tmp_path), "missing-task")
+        is None
+    )
+
+
 def test_close_latest_active_task_returns_none_without_active_task(tmp_path: Path) -> None:
     assert close_latest_active_task(HarnessPath(tmp_path)) is None
 
@@ -181,6 +231,52 @@ def test_task_close_command_reports_closed_task(tmp_path: Path, monkeypatch, cap
     assert "Closed task: 20260522-1930-clean-up-bootstrap-task" in output
     assert "Title: Clean up bootstrap task" in output
     assert "Moved to: tasks/done/20260522-1930-clean-up-bootstrap-task.md" in output
+
+
+def test_task_close_command_accepts_task_id(tmp_path: Path, monkeypatch, capsys) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Specific task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close", "20260522-1930-specific-task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Closed task: 20260522-1930-specific-task" in output
+    assert (tmp_path / "tasks" / "done" / "20260522-1930-specific-task.md").is_file()
+
+
+def test_task_close_command_accepts_task_filename(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Specific task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close", "20260522-1930-specific-task.md"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Closed task: 20260522-1930-specific-task" in output
+    assert (tmp_path / "tasks" / "done" / "20260522-1930-specific-task.md").is_file()
+
+
+def test_task_close_command_reports_missing_identifier(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close", "missing-task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found for: missing-task" in output
 
 
 def test_task_close_command_reports_missing_active_task(

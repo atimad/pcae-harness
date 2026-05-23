@@ -18,11 +18,12 @@ implementation
 
 ## Goal
 
-Validate repo-level policy configuration during `pcae inspect` and `pcae check`.
+Allow `pcae task close` to close a specific active task by ID or filename.
 
 ## Allowed Files
 
 - .pcae/policy.toml
+- src/pcae/cli.py
 - src/pcae/core/**
 - src/pcae/commands/**
 - tests/**

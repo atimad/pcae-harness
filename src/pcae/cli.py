@@ -50,8 +50,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     task_close_parser = task_subparsers.add_parser(
         "close",
-        help="Close the latest active task contract.",
+        help="Close an active task contract.",
     )
+    task_close_parser.add_argument("identifier", nargs="?")
     task_close_parser.set_defaults(handler=run_task_close)
 
     hooks_parser = subparsers.add_parser(

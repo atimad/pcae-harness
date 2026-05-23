@@ -69,10 +69,23 @@ def close_latest_active_task(root: HarnessPath) -> ClosedTask | None:
     active_task = find_latest_active_task(root)
     if active_task is None:
         return None
+    return close_active_task(active_task)
 
+
+def close_active_task_by_identifier(
+    root: HarnessPath,
+    identifier: str,
+) -> ClosedTask | None:
+    task_path = active_task_path_for_identifier(root, identifier)
+    if not task_path.is_file():
+        return None
+    return close_active_task(read_active_task(task_path))
+
+
+def close_active_task(active_task: ActiveTask) -> ClosedTask:
     source_path = active_task.path
     content = source_path.read_text(encoding="utf-8")
-    destination_path = root.join(Path("tasks") / "done" / source_path.name)
+    destination_path = source_path.parents[1] / "done" / source_path.name
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     with source_path.open("w", encoding="utf-8", newline="\n") as file:
@@ -85,6 +98,11 @@ def close_latest_active_task(root: HarnessPath) -> ClosedTask | None:
         source_path=source_path,
         destination_path=destination_path,
     )
+
+
+def active_task_path_for_identifier(root: HarnessPath, identifier: str) -> Path:
+    filename = identifier if identifier.endswith(".md") else f"{identifier}.md"
+    return root.join(Path("tasks") / "active" / filename)
 
 
 def slugify_title(title: str) -> str:

@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 5C: Policy validation.
+Phase 6A: Close task by explicit task ID.
 
 ## Current State
 
-PCAE Harness validates `.pcae/policy.toml` during `pcae inspect` and `pcae check`.
+PCAE Harness can close the latest active task or a specific active task by ID or filename.
 
 ## Next
 

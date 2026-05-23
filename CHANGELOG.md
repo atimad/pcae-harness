@@ -11,3 +11,4 @@
 - Added `.pcae/policy.toml` for repo-level protected-file configuration.
 - Added policy status reporting to `pcae inspect`.
 - Added validation diagnostics for invalid `.pcae/policy.toml` files.
+- Extended `pcae task close` to close a specific active task by ID or filename.

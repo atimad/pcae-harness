@@ -20,3 +20,4 @@
 - Added repo-level `.pcae/policy.toml` configuration for protected-file patterns.
 - Added policy source and protected pattern reporting to `pcae inspect`.
 - Added policy validation diagnostics to `pcae inspect` and `pcae check`.
+- Extended `pcae task close` to accept an explicit task ID or filename.
