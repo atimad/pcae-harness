@@ -37,6 +37,8 @@ class Policy:
     source: str
     path: Path
     file_exists: bool
+    valid: bool
+    error: str | None = None
 
 
 def load_policy(root: HarnessPath) -> Policy:
@@ -47,27 +49,35 @@ def load_policy(root: HarnessPath) -> Policy:
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
+            valid=True,
         )
 
-    patterns = parse_protected_patterns(policy_path.read_text(encoding="utf-8"))
-    if not patterns:
+    try:
+        patterns = parse_protected_patterns(policy_path.read_text(encoding="utf-8"))
+    except ValueError as error:
         return Policy(
-            protected_patterns=DEFAULT_PROTECTED_PATTERNS,
-            source=POLICY_SOURCE_DEFAULTS,
+            protected_patterns=(),
+            source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
+            valid=False,
+            error=str(error),
         )
+
     return Policy(
         protected_patterns=patterns,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
+        valid=True,
     )
 
 
 def parse_protected_patterns(content: str) -> tuple[str, ...]:
     lines = content.splitlines()
     in_protected_section = False
+    saw_protected_section = False
+    saw_patterns = False
     in_patterns = False
     patterns: list[str] = []
 
@@ -76,8 +86,11 @@ def parse_protected_patterns(content: str) -> tuple[str, ...]:
         if not stripped or stripped.startswith("#"):
             continue
 
-        if stripped.startswith("[") and stripped.endswith("]"):
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
             in_protected_section = stripped == "[protected]"
+            saw_protected_section = saw_protected_section or in_protected_section
             in_patterns = False
             continue
 
@@ -85,10 +98,17 @@ def parse_protected_patterns(content: str) -> tuple[str, ...]:
             continue
 
         if stripped.startswith("patterns"):
-            in_patterns = True
-            if "[" in stripped and "]" in stripped:
-                patterns.extend(parse_inline_strings(stripped))
+            saw_patterns = True
+            if "=" not in stripped:
+                raise ValueError("Invalid policy: protected.patterns must be assigned.")
+            value = stripped.split("=", 1)[1].strip()
+            if not value.startswith("["):
+                raise ValueError("Invalid policy: protected.patterns must be a list.")
+            if "]" in value:
+                patterns.extend(parse_pattern_values(value))
                 in_patterns = False
+            else:
+                in_patterns = True
             continue
 
         if not in_patterns:
@@ -98,25 +118,46 @@ def parse_protected_patterns(content: str) -> tuple[str, ...]:
             in_patterns = False
             continue
 
-        patterns.extend(parse_inline_strings(stripped))
+        patterns.extend(parse_pattern_values(stripped))
+
+    if in_patterns:
+        raise ValueError("Invalid TOML: unterminated protected.patterns list.")
+    if not saw_protected_section:
+        raise ValueError("Invalid policy: [protected] section is missing.")
+    if not saw_patterns:
+        raise ValueError("Invalid policy: protected.patterns is missing.")
+    if not patterns:
+        raise ValueError("Invalid policy: protected.patterns must contain patterns.")
 
     return tuple(patterns)
 
 
-def parse_inline_strings(line: str) -> tuple[str, ...]:
-    values: list[str] = []
-    in_string = False
-    current: list[str] = []
+def parse_pattern_values(line: str) -> tuple[str, ...]:
+    stripped = line.strip()
+    if stripped in {"[", "]"}:
+        return ()
+    if stripped.startswith("["):
+        stripped = stripped[1:].strip()
+    if stripped.endswith("]"):
+        stripped = stripped[:-1].strip()
+    if not stripped:
+        return ()
 
-    for character in line:
-        if character == '"':
-            if in_string:
-                values.append("".join(current))
-                current = []
-            in_string = not in_string
+    values: list[str] = []
+    for raw_value in stripped.split(","):
+        value = raw_value.strip()
+        if not value:
             continue
-        if in_string:
-            current.append(character)
+        if not (value.startswith('"') and value.endswith('"')):
+            raise ValueError(
+                "Invalid policy: every protected pattern must be a non-empty string."
+            )
+        pattern = value[1:-1]
+        if not pattern:
+            raise ValueError(
+                "Invalid policy: every protected pattern must be a non-empty string."
+            )
+        values.append(pattern)
 
     return tuple(values)
 

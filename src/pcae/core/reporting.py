@@ -20,6 +20,10 @@ def format_inspection(result: InspectionResult) -> str:
     lines.append("Policy:")
     lines.append(f"  [{policy_status}] {result.policy.relative_path.as_posix()}")
     lines.append(f"  source: {result.policy.source}")
+    validation = "valid" if result.policy.valid else "invalid"
+    lines.append(f"  validation: {validation}")
+    if result.policy.error is not None:
+        lines.append(f"  error: {result.policy.error}")
     lines.append(
         f"  protected patterns: {result.policy.protected_pattern_count}"
     )

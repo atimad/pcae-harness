@@ -56,6 +56,7 @@ def test_inspection_report_includes_repo_policy_status(tmp_path: Path) -> None:
     assert "Policy:" in report
     assert "[present] .pcae/policy.toml" in report
     assert "source: repo config" in report
+    assert "validation: valid" in report
     assert "protected patterns: 18" in report
 
 
@@ -70,7 +71,22 @@ def test_inspection_report_includes_default_policy_status_when_missing(
     assert "Policy:" in report
     assert "[missing] .pcae/policy.toml" in report
     assert "source: built-in defaults" in report
+    assert "validation: valid" in report
     assert "protected patterns: 18" in report
+
+
+def test_inspection_report_includes_invalid_policy_reason(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").write_text(
+        "[protected\npatterns = []\n",
+        encoding="utf-8",
+    )
+
+    report = format_inspection(inspect_harness(HarnessPath(tmp_path)))
+
+    assert "[present] .pcae/policy.toml" in report
+    assert "validation: invalid" in report
+    assert "error: Invalid TOML: malformed table header." in report
 
 
 def test_inspect_command_runs_from_current_directory(

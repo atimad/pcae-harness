@@ -10,3 +10,4 @@
 - Added explicit `pcae hooks install` to configure Git to use `.githooks`.
 - Added `.pcae/policy.toml` for repo-level protected-file configuration.
 - Added policy status reporting to `pcae inspect`.
+- Added validation diagnostics for invalid `.pcae/policy.toml` files.

@@ -39,6 +39,8 @@ class PolicyInspection:
     present: bool
     source: str
     protected_pattern_count: int
+    valid: bool
+    error: str | None
 
 
 def inspect_harness(root: HarnessPath) -> InspectionResult:
@@ -55,5 +57,7 @@ def inspect_harness(root: HarnessPath) -> InspectionResult:
             present=policy.file_exists,
             source=policy.source,
             protected_pattern_count=len(policy.protected_patterns),
+            valid=policy.valid,
+            error=policy.error,
         ),
     )

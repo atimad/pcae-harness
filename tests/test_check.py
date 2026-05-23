@@ -378,6 +378,22 @@ def test_check_missing_policy_file_falls_back_to_default_protection(
     assert has_violation(result, "matched protected pattern 'pyproject.toml'.")
 
 
+def test_check_fails_when_policy_file_is_invalid(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / ".pcae" / "policy.toml", "[protected]\npatterns = [42]\n")
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        ".pcae/policy.toml: Invalid policy: every protected pattern "
+        "must be a non-empty string.",
+    )
+
+
 def test_check_global_protected_wildcard_file_fails(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["secrets/private.pem"])

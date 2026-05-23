@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 5B: Policy inspection reporting.
+Phase 5C: Policy validation.
 
 ## Current State
 
-PCAE Harness reports repo policy presence, source, and protected pattern count during `pcae inspect`.
+PCAE Harness validates `.pcae/policy.toml` during `pcae inspect` and `pcae check`.
 
 ## Next
 

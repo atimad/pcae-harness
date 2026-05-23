@@ -69,6 +69,13 @@ def run_checks(root: HarnessPath) -> CheckResult:
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
     policy = load_policy(root)
+    if not policy.valid:
+        violations.append(
+            CheckMessage(
+                reason=policy.error or "Invalid policy file.",
+                path=policy.path.relative_to(root.path),
+            )
+        )
 
     if active_task is not None:
         violations.extend(check_forbidden_changes(changes, active_task))

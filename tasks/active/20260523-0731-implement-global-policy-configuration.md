@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Report repo-level policy status from `pcae inspect`.
+Validate repo-level policy configuration during `pcae inspect` and `pcae check`.
 
 ## Allowed Files
 
