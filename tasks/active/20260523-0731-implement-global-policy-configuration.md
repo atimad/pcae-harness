@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add task-scoped architecture enforcement mode overrides.
+Add append-only architecture history snapshots.
 
 ## Allowed Files
 

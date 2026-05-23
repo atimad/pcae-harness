@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 13B: Task-scoped enforcement mode.
+Phase 14A: Architecture history snapshot.
 
 ## Current State
 
-Active task contracts can override architecture dependency enforcement mode for the current task.
+PCAE can append architecture check summaries to `.pcae/architecture-history.json`.
 
 ## Next
 

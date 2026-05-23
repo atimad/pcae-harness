@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from fnmatch import fnmatch
+import json
 from pathlib import Path
 
-from pcae.core.git_status import GitChange
+from pcae.core.git_status import GitChange, read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
+
+
+ARCHITECTURE_HISTORY_RELATIVE_PATH = Path(".pcae") / "architecture-history.json"
 
 
 @dataclass(frozen=True)
@@ -37,6 +42,92 @@ class ArchitectureParseWarning:
 class ArchitectureAnalysisResult:
     dependency_warnings: tuple[ArchitectureDependencyWarning, ...]
     parse_warnings: tuple[ArchitectureParseWarning, ...]
+
+
+@dataclass(frozen=True)
+class ArchitectureHistorySnapshot:
+    relative_path: Path
+    entry: dict
+    entries: tuple[dict, ...]
+
+
+def write_architecture_history_snapshot(
+    root: HarnessPath,
+    check_result,
+    created_at: datetime | None = None,
+) -> ArchitectureHistorySnapshot:
+    timestamp = created_at or datetime.now(timezone.utc)
+    entry = build_architecture_history_entry(root, check_result, timestamp)
+    entries = read_architecture_history(root) + (entry,)
+    target = root.join(ARCHITECTURE_HISTORY_RELATIVE_PATH)
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as file:
+        json.dump(list(entries), file, indent=2, sort_keys=True)
+        file.write("\n")
+
+    return ArchitectureHistorySnapshot(
+        relative_path=ARCHITECTURE_HISTORY_RELATIVE_PATH,
+        entry=entry,
+        entries=entries,
+    )
+
+
+def build_architecture_history_entry(
+    root: HarnessPath,
+    check_result,
+    timestamp: datetime,
+) -> dict:
+    changes = read_git_changes(root)
+    active_task = None
+    if check_result.active_task_id is not None:
+        active_task = {
+            "id": check_result.active_task_id,
+            "title": check_result.active_task_title,
+        }
+
+    return {
+        "active_task": active_task,
+        "architecture_zones_touched": {
+            zone.name: zone.file_count
+            for zone in check_result.architecture_zones_touched
+        },
+        "changed_files_count": len(changes),
+        "dependency_warnings_count": len(check_result.architecture_dependency_warnings),
+        "enforcement_mode": check_result.architecture_enforcement_mode,
+        "git_branch": read_git_branch(root),
+        "session_continuity": session_continuity_status(check_result),
+        "timestamp": timestamp.isoformat(),
+    }
+
+
+def read_architecture_history(root: HarnessPath) -> tuple[dict, ...]:
+    target = root.join(ARCHITECTURE_HISTORY_RELATIVE_PATH)
+    if not target.is_file():
+        return ()
+
+    data = json.loads(target.read_text(encoding="utf-8"))
+    if not isinstance(data, list):
+        return ()
+    return tuple(entry for entry in data if isinstance(entry, dict))
+
+
+def session_continuity_status(check_result) -> str:
+    if any("Session continuity verified." in info.text for info in check_result.infos):
+        return "verified"
+    if any(
+        "Session snapshot missing" in warning.text
+        for warning in check_result.warnings
+    ):
+        return "missing"
+    if any(
+        "Session active task does not match current active task" in violation.text
+        for violation in check_result.violations
+    ):
+        return "mismatch"
+    if any("Invalid session JSON" in violation.text for violation in check_result.violations):
+        return "invalid"
+    return "unknown"
 
 
 def analyze_changed_python_dependencies(

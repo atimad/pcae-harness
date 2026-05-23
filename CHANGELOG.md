@@ -29,3 +29,4 @@
 - Added architecture zones for common PCAE project files to reduce unclassified drift.
 - Added task-scoped architecture dependency governance to `pcae check`.
 - Added task-scoped architecture enforcement mode overrides.
+- Added `pcae architecture snapshot` for append-only architecture history.

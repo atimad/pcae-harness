@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import json
 from pathlib import Path
+import subprocess
 
+from pcae.cli import main
+from pcae.commands.init import init_harness
 from pcae.core.architecture import analyze_changed_python_dependencies
+from pcae.core.architecture import write_architecture_history_snapshot
+from pcae.core.check import run_checks
 from pcae.core.git_status import GitChange
 from pcae.core.paths import HarnessPath
 
@@ -141,6 +148,127 @@ def test_architecture_analysis_skips_unclassified_source(tmp_path: Path) -> None
 
     assert result.dependency_warnings == ()
     assert result.parse_warnings == ()
+
+
+def test_architecture_snapshot_creates_history_file(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path)
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+    result = run_checks(HarnessPath(tmp_path))
+
+    snapshot = write_architecture_history_snapshot(
+        HarnessPath(tmp_path),
+        result,
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+
+    history_file = tmp_path / ".pcae" / "architecture-history.json"
+    data = json.loads(history_file.read_text(encoding="utf-8"))
+    assert snapshot.relative_path == Path(".pcae/architecture-history.json")
+    assert len(data) == 1
+    assert data[0]["timestamp"] == "2026-05-23T08:00:00+00:00"
+    assert data[0]["active_task"] == {
+        "id": "20260522-1930-test-task",
+        "title": "Test task",
+    }
+    assert data[0]["architecture_zones_touched"] == {
+        "core": 1,
+        "docs": 1,
+    }
+    assert data[0]["changed_files_count"] == 2
+    assert data[0]["dependency_warnings_count"] == 0
+    assert data[0]["enforcement_mode"] == "advisory"
+    assert data[0]["git_branch"] in {"main", "master"}
+    assert data[0]["session_continuity"] == "missing"
+
+
+def test_architecture_snapshot_appends_history_entries(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path)
+    commit_baseline(tmp_path)
+    result = run_checks(HarnessPath(tmp_path))
+
+    write_architecture_history_snapshot(
+        HarnessPath(tmp_path),
+        result,
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+    write_architecture_history_snapshot(
+        HarnessPath(tmp_path),
+        result,
+        created_at=datetime(2026, 5, 23, 8, 1, tzinfo=timezone.utc),
+    )
+
+    data = json.loads(
+        (tmp_path / ".pcae" / "architecture-history.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert [entry["timestamp"] for entry in data] == [
+        "2026-05-23T08:00:00+00:00",
+        "2026-05-23T08:01:00+00:00",
+    ]
+
+
+def test_architecture_snapshot_command_writes_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "snapshot"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Wrote architecture history: .pcae/architecture-history.json" in output
+    assert "Entries: 1" in output
+    assert (tmp_path / ".pcae" / "architecture-history.json").is_file()
+
+
+def write_task(root: Path) -> None:
+    task_path = root / "tasks" / "active" / "20260522-1930-test-task.md"
+    write_file(
+        task_path,
+        """# Task Contract
+
+## Task ID
+
+20260522-1930-test-task
+
+## Title
+
+Test task
+
+## Allowed Files
+
+- src/pcae/core/changed.py
+- CHANGELOG.md
+""",
+    )
+
+
+def commit_baseline(root: Path) -> None:
+    run_git(root, "init")
+    run_git(root, "config", "user.email", "test@example.com")
+    run_git(root, "config", "user.name", "Test User")
+    run_git(root, "add", ".")
+    run_git(root, "commit", "-m", "baseline")
+
+
+def run_git(root: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
 
 def write_file(path: Path, content: str) -> None:

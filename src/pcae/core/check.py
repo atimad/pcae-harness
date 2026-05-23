@@ -63,6 +63,7 @@ class CheckResult:
     infos: tuple[CheckMessage, ...]
     architecture_zones_touched: tuple[ArchitectureZoneCount, ...]
     architecture_dependency_warnings: tuple[CheckMessage, ...]
+    architecture_enforcement_mode: str
     active_task_id: str | None = None
     active_task_title: str | None = None
 
@@ -172,6 +173,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
             policy.architecture_zones,
         ),
         architecture_dependency_warnings=architecture_dependency_warnings,
+        architecture_enforcement_mode=architecture_enforcement_mode,
         active_task_id=active_task.task_id if active_task is not None else None,
         active_task_title=active_task.title if active_task is not None else None,
     )

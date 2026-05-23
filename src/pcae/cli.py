@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 
+from pcae.commands.architecture import run_architecture_snapshot
 from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
@@ -39,6 +40,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run advisory PCAE validation checks.",
     )
     check_parser.set_defaults(handler=run_check)
+
+    architecture_parser = subparsers.add_parser(
+        "architecture",
+        help="Manage PCAE architecture history.",
+    )
+    architecture_subparsers = architecture_parser.add_subparsers(
+        dest="architecture_command",
+        required=True,
+    )
+
+    architecture_snapshot_parser = architecture_subparsers.add_parser(
+        "snapshot",
+        help="Write an architecture check history snapshot.",
+    )
+    architecture_snapshot_parser.set_defaults(handler=run_architecture_snapshot)
 
     task_parser = subparsers.add_parser(
         "task",
