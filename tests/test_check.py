@@ -341,6 +341,43 @@ def test_check_global_protected_exact_file_fails(tmp_path: Path) -> None:
     )
 
 
+def test_check_reads_protected_patterns_from_policy_file(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["custom.lock"])
+    write_file(tmp_path / ".pcae" / "policy.toml", policy_with_patterns(["custom.lock"]))
+    write_file(tmp_path / "custom.lock", "locked\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "custom.lock", "changed\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "custom.lock: Protected file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched protected pattern 'custom.lock'.",
+    )
+
+
+def test_check_missing_policy_file_falls_back_to_default_protection(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").unlink()
+    write_task(tmp_path, allowed_files=["pyproject.toml"])
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'changed'\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(result, "matched protected pattern 'pyproject.toml'.")
+
+
 def test_check_global_protected_wildcard_file_fails(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["secrets/private.pem"])
@@ -510,3 +547,12 @@ def write_file(path: Path, content: str) -> None:
 
 def has_violation(result, text: str) -> bool:
     return any(text in violation.text for violation in result.violations)
+
+
+def policy_with_patterns(patterns: list[str]) -> str:
+    rendered_patterns = "\n".join(f'  "{pattern}",' for pattern in patterns)
+    return f"""[protected]
+patterns = [
+{rendered_patterns}
+]
+"""

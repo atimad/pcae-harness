@@ -7,6 +7,7 @@ from pathlib import Path
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
+from pcae.core.policy import load_policy
 from pcae.core.tasks import ActiveTask, find_latest_active_task
 
 
@@ -21,28 +22,6 @@ DOCUMENTATION_PATHS = {
 }
 
 SOURCE_PREFIXES = ("src/", "tests/")
-
-GLOBAL_PROTECTED_PATTERNS = (
-    ".git/**",
-    ".env",
-    ".env.*",
-    "*.pem",
-    "*.key",
-    "*.p12",
-    "*.pfx",
-    "**/__pycache__/**",
-    ".venv/**",
-    "venv/**",
-    "node_modules/**",
-    "pyproject.toml",
-    "poetry.lock",
-    "package-lock.json",
-    "pnpm-lock.yaml",
-    "yarn.lock",
-    "Cargo.toml",
-    "Cargo.lock",
-)
-
 
 @dataclass(frozen=True)
 class CheckMessage:
@@ -89,11 +68,18 @@ def run_checks(root: HarnessPath) -> CheckResult:
 
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
+    policy = load_policy(root)
 
     if active_task is not None:
         violations.extend(check_forbidden_changes(changes, active_task))
-        violations.extend(check_global_protected_changes(changes, active_task))
-        violations.extend(check_allowed_scope(changes, active_task))
+        violations.extend(
+            check_global_protected_changes(
+                changes,
+                active_task,
+                policy.protected_patterns,
+            )
+        )
+        violations.extend(check_allowed_scope(changes, active_task, policy.protected_patterns))
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
         violations.append(
@@ -126,14 +112,16 @@ def check_forbidden_changes(
 
 
 def check_allowed_scope(
-    changes: tuple[GitChange, ...], active_task: ActiveTask
+    changes: tuple[GitChange, ...],
+    active_task: ActiveTask,
+    protected_patterns: tuple[str, ...],
 ) -> tuple[CheckMessage, ...]:
     scoped_changes = tuple(
         change
         for change in changes
         if not is_documentation_path(change.path)
         and not path_matches_any(change.path, active_task.forbidden_files)
-        and not protected_change_is_blocked(change.path, active_task)
+        and not protected_change_is_blocked(change.path, active_task, protected_patterns)
     )
     if not scoped_changes:
         return ()
@@ -159,13 +147,15 @@ def check_allowed_scope(
 
 
 def check_global_protected_changes(
-    changes: tuple[GitChange, ...], active_task: ActiveTask
+    changes: tuple[GitChange, ...],
+    active_task: ActiveTask,
+    protected_patterns: tuple[str, ...],
 ) -> tuple[CheckMessage, ...]:
     violations: list[CheckMessage] = []
     for change in changes:
         if path_matches_any(change.path, active_task.forbidden_files):
             continue
-        matched_pattern = first_matching_pattern(change.path, GLOBAL_PROTECTED_PATTERNS)
+        matched_pattern = first_matching_pattern(change.path, protected_patterns)
         if matched_pattern is None:
             continue
         if path_matches_any(change.path, active_task.override_protected_files):
@@ -179,8 +169,12 @@ def check_global_protected_changes(
     return tuple(violations)
 
 
-def protected_change_is_blocked(path: Path, active_task: ActiveTask) -> bool:
-    if first_matching_pattern(path, GLOBAL_PROTECTED_PATTERNS) is None:
+def protected_change_is_blocked(
+    path: Path,
+    active_task: ActiveTask,
+    protected_patterns: tuple[str, ...],
+) -> bool:
+    if first_matching_pattern(path, protected_patterns) is None:
         return False
     return not path_matches_any(path, active_task.override_protected_files)
 

@@ -57,3 +57,15 @@ def test_init_creates_cross_platform_check_scripts(tmp_path: Path) -> None:
     assert pre_commit.is_file()
     assert os.access(shell_check, os.X_OK)
     assert os.access(pre_commit, os.X_OK)
+
+
+def test_init_creates_default_policy_file(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+
+    policy_file = tmp_path / ".pcae" / "policy.toml"
+
+    assert policy_file.is_file()
+    content = policy_file.read_text(encoding="utf-8")
+    assert "[protected]" in content
+    assert '  ".env",' in content
+    assert '  "pyproject.toml",' in content

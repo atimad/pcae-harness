@@ -1,0 +1,21 @@
+[protected]
+patterns = [
+  ".git/**",
+  ".env",
+  ".env.*",
+  "*.pem",
+  "*.key",
+  "*.p12",
+  "*.pfx",
+  "**/__pycache__/**",
+  ".venv/**",
+  "venv/**",
+  "node_modules/**",
+  "pyproject.toml",
+  "poetry.lock",
+  "package-lock.json",
+  "pnpm-lock.yaml",
+  "yarn.lock",
+  "Cargo.toml",
+  "Cargo.lock",
+]

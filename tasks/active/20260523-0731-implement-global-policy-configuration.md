@@ -10,7 +10,7 @@ Implement global policy configuration
 
 ## Status
 
-done
+active
 
 ## Mode
 
@@ -22,6 +22,7 @@ Move global protected file patterns into repo-level policy configuration.
 
 ## Allowed Files
 
+- .pcae/policy.toml
 - src/pcae/core/**
 - src/pcae/commands/**
 - tests/**

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pcae.core.policy import render_default_policy
+
 INIT_TEMPLATES: dict[Path, str] = {
     Path("AGENTS.md"): """# AGENTS.md
 
@@ -79,6 +81,7 @@ Before ending a session:
 4. Record durable decisions in `tasks/DECISIONS.md`.
 5. Run available checks.
 """,
+    Path(".pcae/policy.toml"): render_default_policy(),
     Path(".githooks/pre-commit"): """#!/usr/bin/env sh
 set -eu
 

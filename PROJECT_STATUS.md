@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 4C: Task lifecycle naming cleanup.
+Phase 5A: Repo-level policy configuration.
 
 ## Current State
 
-PCAE Harness has task creation plus `pcae task close` for archiving the latest active task into `tasks/done/`.
+PCAE Harness loads protected-file patterns from `.pcae/policy.toml`, with built-in defaults as a fallback.
 
 ## Next
 
