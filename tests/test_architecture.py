@@ -231,6 +231,73 @@ def test_architecture_snapshot_command_writes_history(
     assert (tmp_path / ".pcae" / "architecture-history.json").is_file()
 
 
+def test_architecture_history_command_prints_latest_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path)
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+    result = run_checks(HarnessPath(tmp_path))
+    write_architecture_history_snapshot(
+        HarnessPath(tmp_path),
+        result,
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+    write_architecture_history_snapshot(
+        HarnessPath(tmp_path),
+        result,
+        created_at=datetime(2026, 5, 23, 8, 1, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "history"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture history: .pcae/architecture-history.json" in output
+    assert "Total entries: 2" in output
+    assert "Latest snapshot: 2026-05-23T08:01:00+00:00" in output
+    assert "Latest active task: 20260522-1930-test-task" in output
+    assert "Latest active task title: Test task" in output
+    assert "Latest enforcement mode: advisory" in output
+    assert "Latest session continuity: missing" in output
+    assert "Latest dependency warnings: 0" in output
+    assert "Latest architecture zones touched:" in output
+    assert "  core: 1 files" in output
+    assert "  docs: 1 files" in output
+
+
+def test_architecture_history_command_reports_missing_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "history"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No architecture history found at .pcae/architecture-history.json." in output
+
+
+def test_architecture_history_command_reports_malformed_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    history_file = tmp_path / ".pcae" / "architecture-history.json"
+    history_file.parent.mkdir(parents=True, exist_ok=True)
+    history_file.write_text("{broken\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "history"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid architecture history JSON:" in output
+
+
 def write_task(root: Path) -> None:
     task_path = root / "tasks" / "active" / "20260522-1930-test-task.md"
     write_file(

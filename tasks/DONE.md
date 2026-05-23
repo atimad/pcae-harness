@@ -39,3 +39,4 @@
 - Added task-scoped architecture dependency governance to `pcae check`.
 - Added task-scoped architecture enforcement mode overrides.
 - Added `pcae architecture snapshot` for append-only architecture history.
+- Added `pcae architecture history` for read-only architecture history summaries.

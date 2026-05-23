@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 14A: Architecture history snapshot.
+Phase 14B: Architecture history read command.
 
 ## Current State
 
-PCAE can append architecture check summaries to `.pcae/architecture-history.json`.
+PCAE can append architecture check summaries to `.pcae/architecture-history.json` and summarize the latest history entry with `pcae architecture history`.
 
 ## Next
 

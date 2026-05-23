@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add append-only architecture history snapshots.
+Add a read-only architecture history summary command.
 
 ## Allowed Files
 

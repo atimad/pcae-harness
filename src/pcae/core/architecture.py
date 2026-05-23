@@ -51,6 +51,13 @@ class ArchitectureHistorySnapshot:
     entries: tuple[dict, ...]
 
 
+@dataclass(frozen=True)
+class ArchitectureHistorySummary:
+    relative_path: Path
+    entries: tuple[dict, ...]
+    latest: dict
+
+
 def write_architecture_history_snapshot(
     root: HarnessPath,
     check_result,
@@ -110,6 +117,29 @@ def read_architecture_history(root: HarnessPath) -> tuple[dict, ...]:
     if not isinstance(data, list):
         return ()
     return tuple(entry for entry in data if isinstance(entry, dict))
+
+
+def read_architecture_history_summary(root: HarnessPath) -> ArchitectureHistorySummary:
+    target = root.join(ARCHITECTURE_HISTORY_RELATIVE_PATH)
+    if not target.is_file():
+        raise ValueError("No architecture history found at .pcae/architecture-history.json.")
+
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid architecture history JSON: {error.msg}.") from error
+
+    if not isinstance(data, list):
+        raise ValueError("Invalid architecture history: expected a list of entries.")
+    entries = tuple(entry for entry in data if isinstance(entry, dict))
+    if not entries:
+        raise ValueError("Invalid architecture history: no entries found.")
+
+    return ArchitectureHistorySummary(
+        relative_path=ARCHITECTURE_HISTORY_RELATIVE_PATH,
+        entries=entries,
+        latest=entries[-1],
+    )
 
 
 def session_continuity_status(check_result) -> str:
