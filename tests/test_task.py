@@ -50,7 +50,9 @@ def test_create_task_contract_writes_markdown_file(tmp_path: Path) -> None:
     assert "## Allowed Files" in content
     assert "## Forbidden Files" in content
     assert "## Allowed Zones" in content
+    assert "## Allowed Zones\n\n- TBD" in content
     assert "## Forbidden Zones" in content
+    assert "## Forbidden Zones\n\n- TBD" in content
     assert "## Forbidden Changes" in content
     assert "## Acceptance Checks" in content
     assert "## Documentation Requirements" in content
@@ -70,6 +72,9 @@ def test_task_new_command_creates_one_active_task_file(
     assert exit_code == 0
     assert len(task_files) == 1
     assert task_files[0].name.endswith("-implement-inspect-command.md")
+    content = task_files[0].read_text(encoding="utf-8")
+    assert "## Allowed Zones\n\n- TBD" in content
+    assert "## Forbidden Zones\n\n- TBD" in content
     assert "Created task contract: tasks/active/" in output
 
 

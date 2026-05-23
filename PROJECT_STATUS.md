@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 12A: Task-scoped architecture zones.
+Phase 12B: Task contract template zones.
 
 ## Current State
 
-PCAE Harness can constrain changed files by task-declared architecture zones during `pcae check`.
+New PCAE task contracts include task-scoped architecture zone sections by default.
 
 ## Next
 

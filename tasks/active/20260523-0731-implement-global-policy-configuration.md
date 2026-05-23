@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add task-scoped architecture zone validation to `pcae check`.
+Add default architecture zone sections to new task contracts.
 
 ## Allowed Files
 

@@ -24,3 +24,4 @@
 - Added advisory Python import dependency warnings to `pcae check`.
 - Added configurable advisory or strict architecture dependency enforcement mode.
 - Added task-scoped architecture zone validation to `pcae check`.
+- Added default architecture zone sections to new task contracts.
