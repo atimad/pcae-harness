@@ -16,3 +16,4 @@
 - Added `pcae session write` for `.pcae/session.json` handoff snapshots.
 - Added `pcae session read` for `.pcae/session.json` handoff summaries.
 - Added `pcae session update` for `.pcae/session.json` handoff metadata.
+- Added session continuity checks to `pcae check`.

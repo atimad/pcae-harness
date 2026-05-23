@@ -469,6 +469,81 @@ def test_check_forbidden_files_win_over_protected_override(tmp_path: Path) -> No
     assert not has_violation(result, "matched protected pattern 'pyproject.toml'.")
 
 
+def test_check_warns_when_session_snapshot_is_missing(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert has_warning(result, "Session snapshot missing at .pcae/session.json.")
+
+
+def test_check_passes_when_session_active_task_matches(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert has_warning(result, "Session active task matches current active task.")
+
+
+def test_check_fails_when_session_active_task_differs(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_session(
+        tmp_path,
+        task_id="20260522-1931-other-task",
+        title="Other task",
+    )
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        ".pcae/session.json: Session active task does not match current active task. "
+        "Run `pcae session write`.",
+    )
+
+
+def test_check_fails_when_session_json_is_invalid(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / ".pcae" / "session.json", "{invalid\n")
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(result, ".pcae/session.json: Invalid session JSON:")
+
+
+def test_check_command_prints_missing_session_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "warning: Session snapshot missing at .pcae/session.json." in output
+    assert "PCAE check passed." in output
+
+
 def write_task(
     root: Path,
     allowed_files: list[str],
@@ -538,6 +613,31 @@ Test check behavior.
     )
 
 
+def write_session(root: Path, task_id: str, title: str) -> None:
+    write_file(
+        root / ".pcae" / "session.json",
+        f"""{{
+  "active_task": {{
+    "id": "{task_id}",
+    "title": "{title}"
+  }},
+  "architectural_notes": [],
+  "blockers": [],
+  "current_objective": "",
+  "git": {{
+    "branch": "main",
+    "changed_files": [],
+    "status_summary": "clean"
+  }},
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-05-23T08:00:00+00:00",
+  "warnings": []
+}}
+""",
+    )
+
+
 def commit_baseline(root: Path) -> None:
     run_git(root, "init")
     run_git(root, "config", "user.email", "test@example.com")
@@ -563,6 +663,10 @@ def write_file(path: Path, content: str) -> None:
 
 def has_violation(result, text: str) -> bool:
     return any(text in violation.text for violation in result.violations)
+
+
+def has_warning(result, text: str) -> bool:
+    return any(text in warning.text for warning in result.warnings)
 
 
 def policy_with_patterns(patterns: list[str]) -> str:

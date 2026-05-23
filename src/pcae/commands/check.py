@@ -15,6 +15,9 @@ def run_check(args: argparse.Namespace) -> int:
     else:
         print("Active task: none")
 
+    for warning in result.warnings:
+        print(f"  - warning: {warning.text}")
+
     if result.passed:
         print("PCAE check passed.")
         return 0
@@ -22,8 +25,5 @@ def run_check(args: argparse.Namespace) -> int:
     print("PCAE check found violations:")
     for violation in result.violations:
         print(f"  - {violation.text}")
-
-    for warning in result.warnings:
-        print(f"  - warning: {warning.text}")
 
     return 1

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add `pcae session update` for resumable handoff metadata.
+Add session-aware task continuity checks to `pcae check`.
 
 ## Allowed Files
 

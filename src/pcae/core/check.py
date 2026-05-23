@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from fnmatch import fnmatch
+import json
 from pathlib import Path
 
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
+from pcae.core.session import read_session_snapshot
 from pcae.core.tasks import ActiveTask, find_latest_active_task
 
 
@@ -65,6 +67,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
         violations.append(
             CheckMessage("No active task contract found in tasks/active/.")
         )
+    violations.extend(check_session_continuity(root, active_task, warnings))
 
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
@@ -99,6 +102,53 @@ def run_checks(root: HarnessPath) -> CheckResult:
         active_task_id=active_task.task_id if active_task is not None else None,
         active_task_title=active_task.title if active_task is not None else None,
     )
+
+
+def check_session_continuity(
+    root: HarnessPath,
+    active_task: ActiveTask | None,
+    warnings: list[CheckMessage],
+) -> tuple[CheckMessage, ...]:
+    try:
+        snapshot = read_session_snapshot(root)
+    except json.JSONDecodeError as error:
+        return (
+            CheckMessage(
+                reason=f"Invalid session JSON: {error.msg}.",
+                path=Path(".pcae/session.json"),
+            ),
+        )
+
+    if snapshot is None:
+        warnings.append(
+            CheckMessage(
+                "Session snapshot missing at .pcae/session.json. "
+                "Run `pcae session write`."
+            )
+        )
+        return ()
+
+    session_task = snapshot.data.get("active_task")
+    current_task = None
+    if active_task is not None:
+        current_task = {
+            "id": active_task.task_id,
+            "title": active_task.title,
+        }
+
+    if session_task != current_task:
+        return (
+            CheckMessage(
+                reason=(
+                    "Session active task does not match current active task. "
+                    "Run `pcae session write`."
+                ),
+                path=Path(".pcae/session.json"),
+            ),
+        )
+
+    warnings.append(CheckMessage("Session active task matches current active task."))
+    return ()
 
 
 def check_forbidden_changes(

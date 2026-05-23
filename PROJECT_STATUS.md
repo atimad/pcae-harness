@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 8A: Session handoff update.
+Phase 9A: Session-aware task continuity.
 
 ## Current State
 
-PCAE Harness can write, read, and manually update `.pcae/session.json` handoff snapshots.
+PCAE Harness can write, read, manually update, and check task continuity for `.pcae/session.json` handoff snapshots.
 
 ## Next
 
