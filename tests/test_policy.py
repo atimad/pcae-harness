@@ -4,11 +4,14 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import (
+    DEFAULT_ARCHITECTURE_ZONES,
     DEFAULT_PROTECTED_PATTERNS,
     POLICY_SOURCE_DEFAULTS,
     POLICY_SOURCE_REPO,
     load_policy,
+    parse_policy,
     parse_protected_patterns,
+    render_default_policy,
 )
 
 
@@ -21,6 +24,26 @@ patterns = [
 """
 
     assert parse_protected_patterns(content) == (".env", "*.pem")
+
+
+def test_parse_policy_reads_architecture_zones() -> None:
+    content = """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+docs = ["docs/**", "*.md"]
+"""
+
+    policy = parse_policy(content)
+
+    assert policy.protected_patterns == (".env",)
+    assert policy.architecture_zones == {
+        "core": ("src/pcae/core/**",),
+        "docs": ("docs/**", "*.md"),
+    }
 
 
 def test_load_policy_reads_repo_policy_file(tmp_path: Path) -> None:
@@ -38,15 +61,42 @@ patterns = [
     policy = load_policy(HarnessPath(tmp_path))
 
     assert policy.protected_patterns == ("custom.lock",)
+    assert policy.architecture_zones == {}
     assert policy.source == POLICY_SOURCE_REPO
     assert policy.file_exists
     assert policy.valid
+
+
+def test_load_policy_reads_architecture_zones_from_repo_policy_file(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+commands = ["src/pcae/commands/**"]
+"""
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.architecture_zones == {
+        "core": ("src/pcae/core/**",),
+        "commands": ("src/pcae/commands/**",),
+    }
 
 
 def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None:
     policy = load_policy(HarnessPath(tmp_path))
 
     assert policy.protected_patterns == DEFAULT_PROTECTED_PATTERNS
+    assert policy.architecture_zones == {}
     assert policy.source == POLICY_SOURCE_DEFAULTS
     assert not policy.file_exists
     assert policy.valid
@@ -115,6 +165,91 @@ def test_load_policy_rejects_non_string_pattern(tmp_path: Path) -> None:
     assert policy.error == (
         "Invalid policy: every protected pattern must be a non-empty string."
     )
+
+
+def test_load_policy_rejects_non_list_architecture_zone(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = "src/pcae/core/**"
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture zone 'core' patterns must be a list."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_zone_name(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+"" = ["src/pcae/core/**"]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture zone names must be non-empty strings."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_zone_pattern(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = [""]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture zone patterns must be non-empty strings."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_zone(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = []
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture zone 'core' patterns must contain patterns."
+    )
+
+
+def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> None:
+    write_policy(tmp_path, render_default_policy())
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.architecture_zones == DEFAULT_ARCHITECTURE_ZONES
 
 
 def write_policy(root: Path, content: str) -> None:

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add session-aware task continuity checks to `pcae check`.
+Add repo-level architecture zone loading and inspect reporting.
 
 ## Allowed Files
 

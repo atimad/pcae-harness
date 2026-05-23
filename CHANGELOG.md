@@ -17,3 +17,4 @@
 - Added `pcae session read` for `.pcae/session.json` handoff summaries.
 - Added `pcae session update` for `.pcae/session.json` handoff metadata.
 - Added session continuity checks to `pcae check`.
+- Added architecture zone reporting to `pcae inspect`.

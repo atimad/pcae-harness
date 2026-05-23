@@ -30,10 +30,20 @@ DEFAULT_PROTECTED_PATTERNS = (
     "Cargo.lock",
 )
 
+DEFAULT_ARCHITECTURE_ZONES = {
+    "core": ("src/pcae/core/**",),
+    "commands": ("src/pcae/commands/**",),
+    "tests": ("tests/**",),
+    "docs": ("docs/**", "*.md"),
+    "tasks": ("tasks/**",),
+    "config": (".pcae/**", "pyproject.toml"),
+}
+
 
 @dataclass(frozen=True)
 class Policy:
     protected_patterns: tuple[str, ...]
+    architecture_zones: dict[str, tuple[str, ...]]
     source: str
     path: Path
     file_exists: bool
@@ -46,6 +56,7 @@ def load_policy(root: HarnessPath) -> Policy:
     if not policy_path.is_file():
         return Policy(
             protected_patterns=DEFAULT_PROTECTED_PATTERNS,
+            architecture_zones={},
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -53,10 +64,11 @@ def load_policy(root: HarnessPath) -> Policy:
         )
 
     try:
-        patterns = parse_protected_patterns(policy_path.read_text(encoding="utf-8"))
+        parsed = parse_policy(policy_path.read_text(encoding="utf-8"))
     except ValueError as error:
         return Policy(
             protected_patterns=(),
+            architecture_zones={},
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -65,11 +77,25 @@ def load_policy(root: HarnessPath) -> Policy:
         )
 
     return Policy(
-        protected_patterns=patterns,
+        protected_patterns=parsed.protected_patterns,
+        architecture_zones=parsed.architecture_zones,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
         valid=True,
+    )
+
+
+@dataclass(frozen=True)
+class ParsedPolicy:
+    protected_patterns: tuple[str, ...]
+    architecture_zones: dict[str, tuple[str, ...]]
+
+
+def parse_policy(content: str) -> ParsedPolicy:
+    return ParsedPolicy(
+        protected_patterns=parse_protected_patterns(content),
+        architecture_zones=parse_architecture_zones(content),
     )
 
 
@@ -132,6 +158,82 @@ def parse_protected_patterns(content: str) -> tuple[str, ...]:
     return tuple(patterns)
 
 
+def parse_architecture_zones(content: str) -> dict[str, tuple[str, ...]]:
+    lines = content.splitlines()
+    in_zones_section = False
+    in_zone_patterns = False
+    current_zone: str | None = None
+    zones: dict[str, tuple[str, ...]] = {}
+    pending_patterns: list[str] = []
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if in_zone_patterns:
+                raise ValueError(
+                    f"Invalid TOML: unterminated architecture zone '{current_zone}'."
+                )
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_zones_section = stripped == "[architecture.zones]"
+            current_zone = None
+            continue
+
+        if not in_zones_section:
+            continue
+
+        if in_zone_patterns:
+            if stripped.startswith("]"):
+                zones[current_zone or ""] = tuple(pending_patterns)
+                in_zone_patterns = False
+                current_zone = None
+                pending_patterns = []
+                continue
+            pending_patterns.extend(parse_architecture_pattern_values(stripped))
+            continue
+
+        if "=" not in stripped:
+            raise ValueError("Invalid policy: architecture zone must be assigned.")
+        raw_name, raw_value = stripped.split("=", 1)
+        zone_name = parse_architecture_zone_name(raw_name)
+        value = raw_value.strip()
+        if not value.startswith("["):
+            raise ValueError(
+                f"Invalid policy: architecture zone '{zone_name}' patterns must be a list."
+            )
+        if "]" in value:
+            zones[zone_name] = parse_architecture_pattern_values(value)
+        else:
+            in_zone_patterns = True
+            current_zone = zone_name
+            pending_patterns = []
+
+    if in_zone_patterns:
+        raise ValueError(f"Invalid TOML: unterminated architecture zone '{current_zone}'.")
+
+    for zone_name, patterns in zones.items():
+        if not patterns:
+            raise ValueError(
+                f"Invalid policy: architecture zone '{zone_name}' patterns must contain patterns."
+            )
+
+    return zones
+
+
+def parse_architecture_zone_name(raw_name: str) -> str:
+    zone_name = raw_name.strip()
+    if zone_name.startswith('"') and zone_name.endswith('"'):
+        zone_name = zone_name[1:-1]
+    if not zone_name:
+        raise ValueError(
+            "Invalid policy: architecture zone names must be non-empty strings."
+        )
+    return zone_name
+
+
 def parse_pattern_values(line: str) -> tuple[str, ...]:
     stripped = line.strip()
     if stripped in {"[", "]"}:
@@ -162,10 +264,34 @@ def parse_pattern_values(line: str) -> tuple[str, ...]:
     return tuple(values)
 
 
+def parse_architecture_pattern_values(line: str) -> tuple[str, ...]:
+    try:
+        return parse_pattern_values(line)
+    except ValueError as error:
+        message = str(error)
+        if "every protected pattern" in message:
+            raise ValueError(
+                "Invalid policy: architecture zone patterns must be non-empty strings."
+            ) from error
+        raise
+
+
 def render_default_policy() -> str:
     patterns = "\n".join(f'  "{pattern}",' for pattern in DEFAULT_PROTECTED_PATTERNS)
+    zones = "\n".join(
+        f"{name} = {render_inline_pattern_list(zone_patterns)}"
+        for name, zone_patterns in DEFAULT_ARCHITECTURE_ZONES.items()
+    )
     return f"""[protected]
 patterns = [
 {patterns}
 ]
+
+[architecture.zones]
+{zones}
 """
+
+
+def render_inline_pattern_list(patterns: tuple[str, ...]) -> str:
+    rendered_patterns = ", ".join(f'"{pattern}"' for pattern in patterns)
+    return f"[{rendered_patterns}]"

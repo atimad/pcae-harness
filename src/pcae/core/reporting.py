@@ -27,6 +27,12 @@ def format_inspection(result: InspectionResult) -> str:
     lines.append(
         f"  protected patterns: {result.policy.protected_pattern_count}"
     )
+    lines.append("  architecture zones:")
+    if result.policy.architecture_zones:
+        for name, pattern_count in result.policy.architecture_zones.items():
+            lines.append(f"    {name}: {pattern_count} patterns")
+    else:
+        lines.append("    none")
     lines.append("")
 
     if result.missing_paths:

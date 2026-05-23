@@ -58,6 +58,9 @@ def test_inspection_report_includes_repo_policy_status(tmp_path: Path) -> None:
     assert "source: repo config" in report
     assert "validation: valid" in report
     assert "protected patterns: 18" in report
+    assert "architecture zones:" in report
+    assert "core: 1 patterns" in report
+    assert "docs: 2 patterns" in report
 
 
 def test_inspection_report_includes_default_policy_status_when_missing(
@@ -73,6 +76,7 @@ def test_inspection_report_includes_default_policy_status_when_missing(
     assert "source: built-in defaults" in report
     assert "validation: valid" in report
     assert "protected patterns: 18" in report
+    assert "architecture zones:\n    none" in report
 
 
 def test_inspection_report_includes_invalid_policy_reason(tmp_path: Path) -> None:
@@ -87,6 +91,26 @@ def test_inspection_report_includes_invalid_policy_reason(tmp_path: Path) -> Non
     assert "[present] .pcae/policy.toml" in report
     assert "validation: invalid" in report
     assert "error: Invalid TOML: malformed table header." in report
+
+
+def test_inspection_report_includes_invalid_architecture_zone_reason(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").write_text(
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ""
+""",
+        encoding="utf-8",
+    )
+
+    report = format_inspection(inspect_harness(HarnessPath(tmp_path)))
+
+    assert "validation: invalid" in report
+    assert "error: Invalid policy: architecture zone 'core' patterns must be a list." in report
 
 
 def test_inspect_command_runs_from_current_directory(

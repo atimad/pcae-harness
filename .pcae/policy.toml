@@ -19,3 +19,11 @@ patterns = [
   "Cargo.toml",
   "Cargo.lock",
 ]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+commands = ["src/pcae/commands/**"]
+tests = ["tests/**"]
+docs = ["docs/**", "*.md"]
+tasks = ["tasks/**"]
+config = [".pcae/**", "pyproject.toml"]

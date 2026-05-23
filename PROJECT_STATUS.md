@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 9A: Session-aware task continuity.
+Phase 10A: Architecture boundary configuration.
 
 ## Current State
 
-PCAE Harness can write, read, manually update, and check task continuity for `.pcae/session.json` handoff snapshots.
+PCAE Harness can load repo policy, report architecture zones, and check task continuity for `.pcae/session.json` handoff snapshots.
 
 ## Next
 
