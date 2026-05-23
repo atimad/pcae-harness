@@ -19,3 +19,4 @@
 - Added session continuity checks to `pcae check`.
 - Added architecture zone reporting to `pcae inspect`.
 - Added advisory architecture zone summaries to `pcae check`.
+- Changed successful session continuity output from warning to info.

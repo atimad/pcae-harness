@@ -47,6 +47,7 @@ class ArchitectureZoneCount:
 class CheckResult:
     violations: tuple[CheckMessage, ...]
     warnings: tuple[CheckMessage, ...]
+    infos: tuple[CheckMessage, ...]
     architecture_zones_touched: tuple[ArchitectureZoneCount, ...]
     active_task_id: str | None = None
     active_task_title: str | None = None
@@ -59,6 +60,7 @@ class CheckResult:
 def run_checks(root: HarnessPath) -> CheckResult:
     violations: list[CheckMessage] = []
     warnings: list[CheckMessage] = []
+    infos: list[CheckMessage] = []
 
     for entry in MANIFEST_ENTRIES:
         if not root.join(entry.relative_path).is_file():
@@ -74,7 +76,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
         violations.append(
             CheckMessage("No active task contract found in tasks/active/.")
         )
-    violations.extend(check_session_continuity(root, active_task, warnings))
+    violations.extend(check_session_continuity(root, active_task, warnings, infos))
 
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
@@ -106,6 +108,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
     return CheckResult(
         violations=tuple(violations),
         warnings=tuple(warnings),
+        infos=tuple(infos),
         architecture_zones_touched=classify_architecture_zones(
             changed_paths,
             policy.architecture_zones,
@@ -154,6 +157,7 @@ def check_session_continuity(
     root: HarnessPath,
     active_task: ActiveTask | None,
     warnings: list[CheckMessage],
+    infos: list[CheckMessage],
 ) -> tuple[CheckMessage, ...]:
     try:
         snapshot = read_session_snapshot(root)
@@ -193,7 +197,7 @@ def check_session_continuity(
             ),
         )
 
-    warnings.append(CheckMessage("Session active task matches current active task."))
+    infos.append(CheckMessage("Session continuity verified."))
     return ()
 
 

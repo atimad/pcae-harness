@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 10B: Architecture zone matching in check.
+Phase 10C: Session continuity message cleanup.
 
 ## Current State
 
-PCAE Harness can load repo policy, report architecture zones, and classify changed files by architecture zone during `pcae check`.
+PCAE Harness reports verified session continuity as info while preserving warnings for missing handoff snapshots.
 
 ## Next
 

@@ -493,7 +493,7 @@ def test_check_passes_when_session_active_task_matches(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert result.passed
-    assert has_warning(result, "Session active task matches current active task.")
+    assert has_info(result, "Session continuity verified.")
 
 
 def test_check_fails_when_session_active_task_differs(tmp_path: Path) -> None:
@@ -541,6 +541,28 @@ def test_check_command_prints_missing_session_warning(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "warning: Session snapshot missing at .pcae/session.json." in output
+    assert "PCAE check passed." in output
+
+
+def test_check_command_prints_session_continuity_info(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "info: Session continuity verified." in output
+    assert "warning: Session active task matches current active task." not in output
     assert "PCAE check passed." in output
 
 
@@ -752,6 +774,10 @@ def has_violation(result, text: str) -> bool:
 
 def has_warning(result, text: str) -> bool:
     return any(text in warning.text for warning in result.warnings)
+
+
+def has_info(result, text: str) -> bool:
+    return any(text in info.text for info in result.infos)
 
 
 def zone_counts(result) -> dict[str, int]:

@@ -28,3 +28,4 @@
 - Added session continuity checks to `pcae check`.
 - Added repo-level architecture zone loading and inspect reporting.
 - Added advisory architecture zone summaries to `pcae check`.
+- Changed successful session continuity output from warning to info.

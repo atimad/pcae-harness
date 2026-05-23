@@ -23,6 +23,9 @@ def run_check(args: argparse.Namespace) -> int:
     for warning in result.warnings:
         print(f"  - warning: {warning.text}")
 
+    for info in result.infos:
+        print(f"  - info: {info.text}")
+
     if result.passed:
         print("PCAE check passed.")
         return 0

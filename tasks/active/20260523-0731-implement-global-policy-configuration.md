@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Classify changed files by architecture zone during `pcae check`.
+Change successful session continuity output from warning to info.
 
 ## Allowed Files
 
