@@ -25,6 +25,7 @@ class ActiveTask:
     title: str
     allowed_files: tuple[str, ...]
     forbidden_files: tuple[str, ...]
+    override_protected_files: tuple[str, ...]
 
 
 def create_task_contract(
@@ -131,6 +132,10 @@ def read_active_task(task_path: Path) -> ActiveTask:
         title=read_task_section_text(content, "Title") or "Untitled task",
         allowed_files=read_task_section_items_from_text(content, "Allowed Files"),
         forbidden_files=read_task_section_items_from_text(content, "Forbidden Files"),
+        override_protected_files=read_task_section_items_from_text(
+            content,
+            "Override Protected Files",
+        ),
     )
 
 

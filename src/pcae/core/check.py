@@ -22,6 +22,27 @@ DOCUMENTATION_PATHS = {
 
 SOURCE_PREFIXES = ("src/", "tests/")
 
+GLOBAL_PROTECTED_PATTERNS = (
+    ".git/**",
+    ".env",
+    ".env.*",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "**/__pycache__/**",
+    ".venv/**",
+    "venv/**",
+    "node_modules/**",
+    "pyproject.toml",
+    "poetry.lock",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "Cargo.toml",
+    "Cargo.lock",
+)
+
 
 @dataclass(frozen=True)
 class CheckMessage:
@@ -71,6 +92,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
 
     if active_task is not None:
         violations.extend(check_forbidden_changes(changes, active_task))
+        violations.extend(check_global_protected_changes(changes, active_task))
         violations.extend(check_allowed_scope(changes, active_task))
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
@@ -111,6 +133,7 @@ def check_allowed_scope(
         for change in changes
         if not is_documentation_path(change.path)
         and not path_matches_any(change.path, active_task.forbidden_files)
+        and not protected_change_is_blocked(change.path, active_task)
     )
     if not scoped_changes:
         return ()
@@ -133,6 +156,33 @@ def check_allowed_scope(
         for change in scoped_changes
         if not path_matches_any(change.path, allowed_patterns)
     )
+
+
+def check_global_protected_changes(
+    changes: tuple[GitChange, ...], active_task: ActiveTask
+) -> tuple[CheckMessage, ...]:
+    violations: list[CheckMessage] = []
+    for change in changes:
+        if path_matches_any(change.path, active_task.forbidden_files):
+            continue
+        matched_pattern = first_matching_pattern(change.path, GLOBAL_PROTECTED_PATTERNS)
+        if matched_pattern is None:
+            continue
+        if path_matches_any(change.path, active_task.override_protected_files):
+            continue
+        violations.append(
+            CheckMessage(
+                reason=protected_failure_reason(active_task, matched_pattern),
+                path=change.path,
+            )
+        )
+    return tuple(violations)
+
+
+def protected_change_is_blocked(path: Path, active_task: ActiveTask) -> bool:
+    if first_matching_pattern(path, GLOBAL_PROTECTED_PATTERNS) is None:
+        return False
+    return not path_matches_any(path, active_task.override_protected_files)
 
 
 def path_matches_any(path: Path, patterns: tuple[str, ...]) -> bool:
@@ -179,6 +229,16 @@ def forbidden_failure_reason(active_task: ActiveTask, matched_pattern: str) -> s
         "Forbidden file changed "
         f"for task {active_task.task_id} ({active_task.title}); "
         f"matched forbidden pattern '{matched_pattern}'."
+    )
+
+
+def protected_failure_reason(active_task: ActiveTask, matched_pattern: str) -> str:
+    return (
+        "Protected file changed "
+        f"for task {active_task.task_id} ({active_task.title}); "
+        f"matched protected pattern '{matched_pattern}'. "
+        "To allow this intentionally, list the file or pattern under "
+        "'Override Protected Files'."
     )
 
 

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement architecture protection with forbidden task scopes.
+Implement global protected files with explicit task overrides.
 
 ## Allowed Files
 
@@ -40,6 +40,10 @@ Implement architecture protection with forbidden task scopes.
 - tasks/active/20260522-2113-test-task-contract.md
 
 ## Forbidden Files
+
+- TBD
+
+## Override Protected Files
 
 - TBD
 

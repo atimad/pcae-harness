@@ -320,17 +320,116 @@ def test_check_forbidden_basename_wildcard_scope(tmp_path: Path) -> None:
     )
 
 
+def test_check_global_protected_exact_file_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["pyproject.toml"])
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'changed'\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "pyproject.toml: Protected file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched protected pattern 'pyproject.toml'. "
+        "To allow this intentionally, list the file or pattern under "
+        "'Override Protected Files'.",
+    )
+
+
+def test_check_global_protected_wildcard_file_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["secrets/private.pem"])
+    write_file(tmp_path / "secrets" / "private.pem", "secret\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "secrets" / "private.pem", "changed\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "secrets/private.pem: Protected file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched protected pattern '*.pem'.",
+    )
+
+
+def test_check_global_protected_directory_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["node_modules/pkg/index.js"])
+    write_file(tmp_path / "node_modules" / "pkg" / "index.js", "module.exports = 1;\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "node_modules" / "pkg" / "index.js", "module.exports = 2;\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "node_modules/pkg/index.js: Protected file changed "
+        "for task 20260522-1930-test-task (Test task); "
+        "matched protected pattern 'node_modules/**'.",
+    )
+
+
+def test_check_override_protected_files_allows_protected_change(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["pyproject.toml"],
+        override_protected_files=["pyproject.toml"],
+    )
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'changed'\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+
+
+def test_check_forbidden_files_win_over_protected_override(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["pyproject.toml"],
+        forbidden_files=["pyproject.toml"],
+        override_protected_files=["pyproject.toml"],
+    )
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "pyproject.toml", "[project]\nname = 'changed'\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(result, "matched forbidden pattern 'pyproject.toml'.")
+    assert not has_violation(result, "matched protected pattern 'pyproject.toml'.")
+
+
 def write_task(
     root: Path,
     allowed_files: list[str],
     forbidden_files: list[str] | None = None,
+    override_protected_files: list[str] | None = None,
     task_id: str = "20260522-1930-test-task",
     title: str = "Test task",
 ) -> None:
     forbidden_files = forbidden_files or []
+    override_protected_files = override_protected_files or []
     task_path = root / "tasks" / "active" / f"{task_id}.md"
     allowed = "\n".join(f"- {path}" for path in allowed_files)
     forbidden = "\n".join(f"- {path}" for path in forbidden_files) or "- TBD"
+    overrides = "\n".join(f"- {path}" for path in override_protected_files) or "- TBD"
     write_file(
         task_path,
         f"""# Task Contract
@@ -362,6 +461,10 @@ Test check behavior.
 ## Forbidden Files
 
 {forbidden}
+
+## Override Protected Files
+
+{overrides}
 
 ## Forbidden Changes
 

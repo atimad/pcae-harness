@@ -78,3 +78,39 @@ def test_find_latest_active_task_reads_task_identity(tmp_path: Path) -> None:
     assert active_task is not None
     assert active_task.task_id == "20260522-1931-new-task"
     assert active_task.title == "New task"
+
+
+def test_find_latest_active_task_reads_override_protected_files(tmp_path: Path) -> None:
+    task_path = tmp_path / "tasks" / "active" / "20260522-1930-test-task.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        """# Task Contract
+
+## Task ID
+
+20260522-1930-test-task
+
+## Title
+
+Test task
+
+## Allowed Files
+
+- pyproject.toml
+
+## Forbidden Files
+
+- TBD
+
+## Override Protected Files
+
+- pyproject.toml
+- *.pem
+""",
+        encoding="utf-8",
+    )
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+
+    assert active_task is not None
+    assert active_task.override_protected_files == ("pyproject.toml", "*.pem")

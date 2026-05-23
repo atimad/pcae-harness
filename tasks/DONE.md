@@ -15,3 +15,4 @@
 - Improved `pcae check` active task discovery and violation diagnostics.
 - Added wildcard and directory matching for task allowed-file scopes.
 - Added forbidden-file enforcement with exact, wildcard, and directory task scopes.
+- Added global protected-file checks with explicit task-level overrides.
