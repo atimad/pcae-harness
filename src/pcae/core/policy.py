@@ -39,11 +39,21 @@ DEFAULT_ARCHITECTURE_ZONES = {
     "config": (".pcae/**", "pyproject.toml"),
 }
 
+DEFAULT_ARCHITECTURE_RULES = {
+    "core": ("core",),
+    "commands": ("core", "commands"),
+    "tests": ("*",),
+    "docs": ("*",),
+    "tasks": ("*",),
+    "config": ("config",),
+}
+
 
 @dataclass(frozen=True)
 class Policy:
     protected_patterns: tuple[str, ...]
     architecture_zones: dict[str, tuple[str, ...]]
+    architecture_rules: dict[str, tuple[str, ...]]
     source: str
     path: Path
     file_exists: bool
@@ -57,6 +67,7 @@ def load_policy(root: HarnessPath) -> Policy:
         return Policy(
             protected_patterns=DEFAULT_PROTECTED_PATTERNS,
             architecture_zones={},
+            architecture_rules={},
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -69,6 +80,7 @@ def load_policy(root: HarnessPath) -> Policy:
         return Policy(
             protected_patterns=(),
             architecture_zones={},
+            architecture_rules={},
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -79,6 +91,7 @@ def load_policy(root: HarnessPath) -> Policy:
     return Policy(
         protected_patterns=parsed.protected_patterns,
         architecture_zones=parsed.architecture_zones,
+        architecture_rules=parsed.architecture_rules,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -90,12 +103,15 @@ def load_policy(root: HarnessPath) -> Policy:
 class ParsedPolicy:
     protected_patterns: tuple[str, ...]
     architecture_zones: dict[str, tuple[str, ...]]
+    architecture_rules: dict[str, tuple[str, ...]]
 
 
 def parse_policy(content: str) -> ParsedPolicy:
+    architecture_zones = parse_architecture_zones(content)
     return ParsedPolicy(
         protected_patterns=parse_protected_patterns(content),
-        architecture_zones=parse_architecture_zones(content),
+        architecture_zones=architecture_zones,
+        architecture_rules=parse_architecture_rules(content, architecture_zones),
     )
 
 
@@ -223,6 +239,94 @@ def parse_architecture_zones(content: str) -> dict[str, tuple[str, ...]]:
     return zones
 
 
+def parse_architecture_rules(
+    content: str,
+    architecture_zones: dict[str, tuple[str, ...]],
+) -> dict[str, tuple[str, ...]]:
+    lines = content.splitlines()
+    in_rules_section = False
+    in_rule_targets = False
+    current_source: str | None = None
+    rules: dict[str, tuple[str, ...]] = {}
+    pending_targets: list[str] = []
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if in_rule_targets:
+                raise ValueError(
+                    f"Invalid TOML: unterminated architecture rule '{current_source}'."
+                )
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_rules_section = stripped == "[architecture.rules]"
+            current_source = None
+            continue
+
+        if not in_rules_section:
+            continue
+
+        if in_rule_targets:
+            if stripped.startswith("]"):
+                rules[current_source or ""] = tuple(pending_targets)
+                in_rule_targets = False
+                current_source = None
+                pending_targets = []
+                continue
+            pending_targets.extend(parse_architecture_rule_values(stripped))
+            continue
+
+        if "=" not in stripped:
+            raise ValueError("Invalid policy: architecture rule must be assigned.")
+        raw_source, raw_value = stripped.split("=", 1)
+        source_zone = parse_architecture_zone_name(raw_source)
+        value = raw_value.strip()
+        if not value.startswith("["):
+            raise ValueError(
+                f"Invalid policy: architecture rule '{source_zone}' targets must be a list."
+            )
+        if "]" in value:
+            rules[source_zone] = parse_architecture_rule_values(value)
+        else:
+            in_rule_targets = True
+            current_source = source_zone
+            pending_targets = []
+
+    if in_rule_targets:
+        raise ValueError(f"Invalid TOML: unterminated architecture rule '{current_source}'.")
+
+    validate_architecture_rules(rules, architecture_zones)
+    return rules
+
+
+def validate_architecture_rules(
+    rules: dict[str, tuple[str, ...]],
+    architecture_zones: dict[str, tuple[str, ...]],
+) -> None:
+    known_zones = set(architecture_zones)
+    for source_zone, target_zones in rules.items():
+        if source_zone not in known_zones:
+            raise ValueError(
+                f"Invalid policy: architecture rule source '{source_zone}' "
+                "must exist in architecture.zones."
+            )
+        if not target_zones:
+            raise ValueError(
+                f"Invalid policy: architecture rule '{source_zone}' targets must contain zones."
+            )
+        for target_zone in target_zones:
+            if target_zone == "*":
+                continue
+            if target_zone not in known_zones:
+                raise ValueError(
+                    f"Invalid policy: architecture rule '{source_zone}' references "
+                    f"unknown target zone '{target_zone}'."
+                )
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -276,11 +380,27 @@ def parse_architecture_pattern_values(line: str) -> tuple[str, ...]:
         raise
 
 
+def parse_architecture_rule_values(line: str) -> tuple[str, ...]:
+    try:
+        return parse_pattern_values(line)
+    except ValueError as error:
+        message = str(error)
+        if "every protected pattern" in message:
+            raise ValueError(
+                "Invalid policy: architecture rule targets must be non-empty strings."
+            ) from error
+        raise
+
+
 def render_default_policy() -> str:
     patterns = "\n".join(f'  "{pattern}",' for pattern in DEFAULT_PROTECTED_PATTERNS)
     zones = "\n".join(
         f"{name} = {render_inline_pattern_list(zone_patterns)}"
         for name, zone_patterns in DEFAULT_ARCHITECTURE_ZONES.items()
+    )
+    rules = "\n".join(
+        f"{name} = {render_inline_pattern_list(target_zones)}"
+        for name, target_zones in DEFAULT_ARCHITECTURE_RULES.items()
     )
     return f"""[protected]
 patterns = [
@@ -289,6 +409,9 @@ patterns = [
 
 [architecture.zones]
 {zones}
+
+[architecture.rules]
+{rules}
 """
 
 

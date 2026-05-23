@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 10C: Session continuity message cleanup.
+Phase 11A: Architecture dependency rules configuration.
 
 ## Current State
 
-PCAE Harness reports verified session continuity as info while preserving warnings for missing handoff snapshots.
+PCAE Harness can load and inspect advisory architecture dependency rules from repo policy.
 
 ## Next
 

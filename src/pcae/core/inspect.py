@@ -40,6 +40,7 @@ class PolicyInspection:
     source: str
     protected_pattern_count: int
     architecture_zones: dict[str, int]
+    architecture_rule_count: int
     valid: bool
     error: str | None
 
@@ -62,6 +63,7 @@ def inspect_harness(root: HarnessPath) -> InspectionResult:
                 name: len(patterns)
                 for name, patterns in policy.architecture_zones.items()
             },
+            architecture_rule_count=len(policy.architecture_rules),
             valid=policy.valid,
             error=policy.error,
         ),

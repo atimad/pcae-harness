@@ -20,3 +20,4 @@
 - Added architecture zone reporting to `pcae inspect`.
 - Added advisory architecture zone summaries to `pcae check`.
 - Changed successful session continuity output from warning to info.
+- Added advisory architecture dependency rules to repo policy inspection.

@@ -8,17 +8,18 @@
     "Session metadata is intended to make agent handoff resumable.",
     "pcae check now detects missing, invalid, matching, and mismatched session task context",
     "Architecture zones are advisory only; dependency enforcement is not implemented yet",
-    "Zone summaries are advisory only and do not change pass/fail behavior"
+    "Zone summaries are advisory only and do not change pass/fail behavior",
+    "Architecture dependency rules are advisory config only; import scanning is not implemented"
   ],
   "blockers": [],
-  "current_objective": "Implement Phase 10B architecture zone matching in check",
+  "current_objective": "Implement Phase 11A architecture dependency rules configuration",
   "git": {
     "branch": "main",
     "changed_files": [],
     "status_summary": "clean"
   },
-  "last_completed_step": "Added advisory architecture zone classification to pcae check",
-  "next_recommended_step": "Run full tests and pcae check",
+  "last_completed_step": "Added policy parsing and inspect reporting for architecture rules",
+  "next_recommended_step": "Run pcae inspect and pcae check",
   "timestamp": "2026-05-23T09:24:22.008544+00:00",
   "warnings": []
 }

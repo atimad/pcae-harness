@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Change successful session continuity output from warning to info.
+Add advisory architecture dependency rules to repo policy.
 
 ## Allowed Files
 

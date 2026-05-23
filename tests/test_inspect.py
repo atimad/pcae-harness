@@ -61,6 +61,7 @@ def test_inspection_report_includes_repo_policy_status(tmp_path: Path) -> None:
     assert "architecture zones:" in report
     assert "core: 1 patterns" in report
     assert "docs: 2 patterns" in report
+    assert "architecture rules: 6" in report
 
 
 def test_inspection_report_includes_default_policy_status_when_missing(
@@ -77,6 +78,7 @@ def test_inspection_report_includes_default_policy_status_when_missing(
     assert "validation: valid" in report
     assert "protected patterns: 18" in report
     assert "architecture zones:\n    none" in report
+    assert "architecture rules: 0" in report
 
 
 def test_inspection_report_includes_invalid_policy_reason(tmp_path: Path) -> None:
@@ -111,6 +113,32 @@ core = ""
 
     assert "validation: invalid" in report
     assert "error: Invalid policy: architecture zone 'core' patterns must be a list." in report
+
+
+def test_inspection_report_includes_invalid_architecture_rule_reason(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").write_text(
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = ["commands"]
+""",
+        encoding="utf-8",
+    )
+
+    report = format_inspection(inspect_harness(HarnessPath(tmp_path)))
+
+    assert "validation: invalid" in report
+    assert (
+        "error: Invalid policy: architecture rule 'core' references "
+        "unknown target zone 'commands'."
+    ) in report
 
 
 def test_inspect_command_runs_from_current_directory(

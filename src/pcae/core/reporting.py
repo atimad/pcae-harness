@@ -33,6 +33,7 @@ def format_inspection(result: InspectionResult) -> str:
             lines.append(f"    {name}: {pattern_count} patterns")
     else:
         lines.append("    none")
+    lines.append(f"  architecture rules: {result.policy.architecture_rule_count}")
     lines.append("")
 
     if result.missing_paths:

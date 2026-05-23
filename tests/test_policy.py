@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import (
+    DEFAULT_ARCHITECTURE_RULES,
     DEFAULT_ARCHITECTURE_ZONES,
     DEFAULT_PROTECTED_PATTERNS,
     POLICY_SOURCE_DEFAULTS,
@@ -44,6 +45,33 @@ docs = ["docs/**", "*.md"]
         "core": ("src/pcae/core/**",),
         "docs": ("docs/**", "*.md"),
     }
+    assert policy.architecture_rules == {}
+
+
+def test_parse_policy_reads_architecture_rules() -> None:
+    content = """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+commands = ["src/pcae/commands/**"]
+tests = ["tests/**"]
+
+[architecture.rules]
+core = ["core"]
+commands = ["core", "commands"]
+tests = ["*"]
+"""
+
+    policy = parse_policy(content)
+
+    assert policy.architecture_rules == {
+        "core": ("core",),
+        "commands": ("core", "commands"),
+        "tests": ("*",),
+    }
 
 
 def test_load_policy_reads_repo_policy_file(tmp_path: Path) -> None:
@@ -62,6 +90,7 @@ patterns = [
 
     assert policy.protected_patterns == ("custom.lock",)
     assert policy.architecture_zones == {}
+    assert policy.architecture_rules == {}
     assert policy.source == POLICY_SOURCE_REPO
     assert policy.file_exists
     assert policy.valid
@@ -90,6 +119,36 @@ commands = ["src/pcae/commands/**"]
         "core": ("src/pcae/core/**",),
         "commands": ("src/pcae/commands/**",),
     }
+    assert policy.architecture_rules == {}
+
+
+def test_load_policy_reads_architecture_rules_from_repo_policy_file(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+commands = ["src/pcae/commands/**"]
+
+[architecture.rules]
+core = ["core"]
+commands = ["core", "commands"]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.architecture_rules == {
+        "core": ("core",),
+        "commands": ("core", "commands"),
+    }
 
 
 def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None:
@@ -97,6 +156,7 @@ def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None
 
     assert policy.protected_patterns == DEFAULT_PROTECTED_PATTERNS
     assert policy.architecture_zones == {}
+    assert policy.architecture_rules == {}
     assert policy.source == POLICY_SOURCE_DEFAULTS
     assert not policy.file_exists
     assert policy.valid
@@ -243,6 +303,140 @@ core = []
     )
 
 
+def test_load_policy_rejects_non_list_architecture_rule(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = "core"
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture rule 'core' targets must be a list."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_rule_source(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+"" = ["core"]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture zone names must be non-empty strings."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_rule_target(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = [""]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture rule targets must be non-empty strings."
+    )
+
+
+def test_load_policy_rejects_empty_architecture_rule_targets(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = []
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture rule 'core' targets must contain zones."
+    )
+
+
+def test_load_policy_rejects_rule_for_unknown_source_zone(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+commands = ["core"]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture rule source 'commands' "
+        "must exist in architecture.zones."
+    )
+
+
+def test_load_policy_rejects_rule_for_unknown_target_zone(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = ["commands"]
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture rule 'core' references "
+        "unknown target zone 'commands'."
+    )
+
+
 def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> None:
     write_policy(tmp_path, render_default_policy())
 
@@ -250,6 +444,7 @@ def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> 
 
     assert policy.valid
     assert policy.architecture_zones == DEFAULT_ARCHITECTURE_ZONES
+    assert policy.architecture_rules == DEFAULT_ARCHITECTURE_RULES
 
 
 def write_policy(root: Path, content: str) -> None:
