@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 12B: Task contract template zones.
+Phase 12C: Task new zone options.
 
 ## Current State
 
-New PCAE task contracts include task-scoped architecture zone sections by default.
+`pcae task new` can populate task-scoped architecture zones from CLI options.
 
 ## Next
 

@@ -50,6 +50,8 @@ def create_task_contract(
     root: HarnessPath,
     title: str,
     created_at: datetime | None = None,
+    allowed_zones: tuple[str, ...] = (),
+    forbidden_zones: tuple[str, ...] = (),
 ) -> TaskContract:
     timestamp = created_at or datetime.now().astimezone()
     slug = slugify_title(title)
@@ -59,6 +61,8 @@ def create_task_contract(
         task_id=task_id,
         title=title,
         created_at=timestamp,
+        allowed_zones=allowed_zones,
+        forbidden_zones=forbidden_zones,
     )
 
     target = root.join(relative_path)
@@ -144,7 +148,15 @@ def slugify_title(title: str) -> str:
     return slug or "task"
 
 
-def render_task_contract(task_id: str, title: str, created_at: datetime) -> str:
+def render_task_contract(
+    task_id: str,
+    title: str,
+    created_at: datetime,
+    allowed_zones: tuple[str, ...] = (),
+    forbidden_zones: tuple[str, ...] = (),
+) -> str:
+    allowed_zone_items = render_task_items(allowed_zones)
+    forbidden_zone_items = render_task_items(forbidden_zones)
     return f"""# Task Contract
 
 ## Task ID
@@ -177,11 +189,11 @@ TBD
 
 ## Allowed Zones
 
-- TBD
+{allowed_zone_items}
 
 ## Forbidden Zones
 
-- TBD
+{forbidden_zone_items}
 
 ## Forbidden Changes
 
@@ -199,6 +211,12 @@ TBD
 
 {created_at.isoformat()}
 """
+
+
+def render_task_items(items: tuple[str, ...]) -> str:
+    if not items:
+        return "- TBD"
+    return "\n".join(f"- {item}" for item in items)
 
 
 def find_latest_active_task(root: HarnessPath) -> ActiveTask | None:

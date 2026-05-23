@@ -34,3 +34,4 @@
 - Added configurable architecture dependency enforcement mode.
 - Added task-scoped architecture zone validation to `pcae check`.
 - Added default Allowed Zones and Forbidden Zones sections to new task contracts.
+- Added `pcae task new` options for allowed and forbidden architecture zones.

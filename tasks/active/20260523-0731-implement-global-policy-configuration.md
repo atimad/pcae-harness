@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add default architecture zone sections to new task contracts.
+Add `pcae task new` options for architecture zones.
 
 ## Allowed Files
 

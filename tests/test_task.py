@@ -60,6 +60,22 @@ def test_create_task_contract_writes_markdown_file(tmp_path: Path) -> None:
     assert "2026-05-22T19:30:00+00:00" in content
 
 
+def test_create_task_contract_writes_requested_zones(tmp_path: Path) -> None:
+    created_at = datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc)
+
+    contract = create_task_contract(
+        HarnessPath(tmp_path),
+        "Implement zone task",
+        created_at=created_at,
+        allowed_zones=("core", "tests"),
+        forbidden_zones=("commands",),
+    )
+
+    content = (tmp_path / contract.relative_path).read_text(encoding="utf-8")
+    assert "## Allowed Zones\n\n- core\n- tests" in content
+    assert "## Forbidden Zones\n\n- commands" in content
+
+
 def test_task_new_command_creates_one_active_task_file(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -76,6 +92,58 @@ def test_task_new_command_creates_one_active_task_file(
     assert "## Allowed Zones\n\n- TBD" in content
     assert "## Forbidden Zones\n\n- TBD" in content
     assert "Created task contract: tasks/active/" in output
+
+
+def test_task_new_command_writes_allowed_and_forbidden_zones(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy_with_zones(tmp_path, ["core", "tests", "commands", "docs"])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "task",
+            "new",
+            "Fix check bug",
+            "--allowed-zone",
+            "core",
+            "--allowed-zone",
+            "tests",
+            "--forbidden-zone",
+            "commands",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    task_files = list((tmp_path / "tasks" / "active").glob("*.md"))
+    content = task_files[0].read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert len(task_files) == 1
+    assert "## Allowed Zones\n\n- core\n- tests" in content
+    assert "## Forbidden Zones\n\n- commands" in content
+    assert "Created task contract: tasks/active/" in output
+
+
+def test_task_new_command_rejects_unknown_zone(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy_with_zones(tmp_path, ["core"])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "task",
+            "new",
+            "Fix check bug",
+            "--allowed-zone",
+            "missing",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown architecture zone: missing" in output
+    assert not (tmp_path / "tasks" / "active").exists()
 
 
 def test_find_latest_active_task_reads_task_identity(tmp_path: Path) -> None:
@@ -321,6 +389,26 @@ def test_task_close_command_reports_missing_identifier(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "No active task contract found for: missing-task" in output
+
+
+def write_policy_with_zones(root: Path, zones: list[str]) -> None:
+    rendered_zones = "\n".join(
+        f'{zone} = ["src/{zone}/**"]'
+        for zone in zones
+    )
+    policy_file = root / ".pcae" / "policy.toml"
+    policy_file.parent.mkdir(parents=True, exist_ok=True)
+    policy_file.write_text(
+        f"""[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+{rendered_zones}
+""",
+        encoding="utf-8",
+    )
 
 
 def test_task_close_command_reports_missing_active_task(

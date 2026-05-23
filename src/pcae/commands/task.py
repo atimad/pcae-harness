@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from pcae.core.paths import HarnessPath
+from pcae.core.policy import load_policy
 from pcae.core.tasks import (
     close_active_task_by_identifier,
     close_latest_active_task,
@@ -14,10 +15,39 @@ from pcae.core.tasks import (
 
 def run_task_new(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
-    contract = create_task_contract(root, args.title)
+    allowed_zones = tuple(args.allowed_zone)
+    forbidden_zones = tuple(args.forbidden_zone)
+    validation_error = validate_requested_zones(root, allowed_zones + forbidden_zones)
+    if validation_error is not None:
+        print(validation_error)
+        return 1
+
+    contract = create_task_contract(
+        root,
+        args.title,
+        allowed_zones=allowed_zones,
+        forbidden_zones=forbidden_zones,
+    )
 
     print(f"Created task contract: {contract.relative_path.as_posix()}")
     return 0
+
+
+def validate_requested_zones(root: HarnessPath, requested_zones: tuple[str, ...]) -> str | None:
+    if not requested_zones:
+        return None
+
+    policy = load_policy(root)
+    if not policy.file_exists:
+        return None
+    if not policy.valid:
+        return policy.error or "Invalid policy file."
+
+    known_zones = set(policy.architecture_zones)
+    for zone in requested_zones:
+        if zone not in known_zones:
+            return f"Unknown architecture zone: {zone}"
+    return None
 
 
 def run_task_close(args: argparse.Namespace) -> int:
