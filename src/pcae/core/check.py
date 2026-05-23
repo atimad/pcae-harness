@@ -38,9 +38,16 @@ class CheckMessage:
 
 
 @dataclass(frozen=True)
+class ArchitectureZoneCount:
+    name: str
+    file_count: int
+
+
+@dataclass(frozen=True)
 class CheckResult:
     violations: tuple[CheckMessage, ...]
     warnings: tuple[CheckMessage, ...]
+    architecture_zones_touched: tuple[ArchitectureZoneCount, ...]
     active_task_id: str | None = None
     active_task_title: str | None = None
 
@@ -99,9 +106,48 @@ def run_checks(root: HarnessPath) -> CheckResult:
     return CheckResult(
         violations=tuple(violations),
         warnings=tuple(warnings),
+        architecture_zones_touched=classify_architecture_zones(
+            changed_paths,
+            policy.architecture_zones,
+        ),
         active_task_id=active_task.task_id if active_task is not None else None,
         active_task_title=active_task.title if active_task is not None else None,
     )
+
+
+def classify_architecture_zones(
+    paths: tuple[Path, ...],
+    zones: dict[str, tuple[str, ...]],
+) -> tuple[ArchitectureZoneCount, ...]:
+    if not paths:
+        return ()
+
+    counts = {zone_name: 0 for zone_name in zones}
+    unclassified_count = 0
+
+    for path in paths:
+        matched = False
+        for zone_name, patterns in zones.items():
+            if path_matches_any(path, patterns):
+                counts[zone_name] += 1
+                matched = True
+        if not matched:
+            unclassified_count += 1
+
+    zone_counts = [
+        ArchitectureZoneCount(name=zone_name, file_count=count)
+        for zone_name, count in counts.items()
+        if count
+    ]
+    if unclassified_count:
+        zone_counts.append(
+            ArchitectureZoneCount(
+                name="unclassified",
+                file_count=unclassified_count,
+            )
+        )
+
+    return tuple(zone_counts)
 
 
 def check_session_continuity(

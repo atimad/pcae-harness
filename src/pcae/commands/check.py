@@ -15,6 +15,11 @@ def run_check(args: argparse.Namespace) -> int:
     else:
         print("Active task: none")
 
+    if result.architecture_zones_touched:
+        print("Architecture zones touched:")
+        for zone in result.architecture_zones_touched:
+            print(f"  {zone.name}: {zone.file_count} files")
+
     for warning in result.warnings:
         print(f"  - warning: {warning.text}")
 

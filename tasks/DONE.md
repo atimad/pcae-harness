@@ -27,3 +27,4 @@
 - Added `pcae session update` for enriching session handoff metadata.
 - Added session continuity checks to `pcae check`.
 - Added repo-level architecture zone loading and inspect reporting.
+- Added advisory architecture zone summaries to `pcae check`.

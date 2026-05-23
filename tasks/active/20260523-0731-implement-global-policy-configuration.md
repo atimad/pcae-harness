@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add repo-level architecture zone loading and inspect reporting.
+Classify changed files by architecture zone during `pcae check`.
 
 ## Allowed Files
 

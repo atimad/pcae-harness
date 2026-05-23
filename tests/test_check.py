@@ -544,6 +544,91 @@ def test_check_command_prints_missing_session_warning(
     assert "PCAE check passed." in output
 
 
+def test_check_classifies_changed_files_by_architecture_zone(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/core/changed.py",
+            "tests/test_changed.py",
+            "CHANGELOG.md",
+            "misc.txt",
+        ],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones(
+            {
+                "core": ["src/pcae/core/**"],
+                "tests": ["tests/**"],
+                "docs": ["*.md"],
+            }
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "tests" / "test_changed.py", "def test_old(): pass\n")
+    write_file(tmp_path / "misc.txt", "old\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "tests" / "test_changed.py", "def test_new(): pass\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+    write_file(tmp_path / "misc.txt", "new\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert zone_counts(result) == {
+        "core": 1,
+        "tests": 1,
+        "docs": 1,
+        "unclassified": 1,
+    }
+
+
+def test_check_omits_architecture_zone_summary_when_clean(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / ".pcae" / "policy.toml", policy_with_architecture_zones({"core": ["src/**"]}))
+    commit_baseline(tmp_path)
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert result.architecture_zones_touched == ()
+
+
+def test_check_command_prints_architecture_zone_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md", "misc.txt"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones({"core": ["src/pcae/core/**"]}),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "misc.txt", "old\n")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+    write_file(tmp_path / "misc.txt", "new\n")
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture zones touched:" in output
+    assert "  core: 1 files" in output
+    assert "  unclassified: 2 files" in output
+    assert "PCAE check passed." in output
+
+
 def write_task(
     root: Path,
     allowed_files: list[str],
@@ -669,6 +754,13 @@ def has_warning(result, text: str) -> bool:
     return any(text in warning.text for warning in result.warnings)
 
 
+def zone_counts(result) -> dict[str, int]:
+    return {
+        zone.name: zone.file_count
+        for zone in result.architecture_zones_touched
+    }
+
+
 def policy_with_patterns(patterns: list[str]) -> str:
     rendered_patterns = "\n".join(f'  "{pattern}",' for pattern in patterns)
     return f"""[protected]
@@ -676,3 +768,22 @@ patterns = [
 {rendered_patterns}
 ]
 """
+
+
+def policy_with_architecture_zones(zones: dict[str, list[str]]) -> str:
+    rendered_zones = "\n".join(
+        f"{name} = [{', '.join(render_string(pattern) for pattern in patterns)}]"
+        for name, patterns in zones.items()
+    )
+    return f"""[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+{rendered_zones}
+"""
+
+
+def render_string(value: str) -> str:
+    return f'"{value}"'
