@@ -32,7 +32,11 @@ def test_check_detects_out_of_scope_file_changes(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert not result.passed
-    assert has_violation(result, "src/other.py: Changed file is outside active task scope.")
+    assert has_violation(
+        result,
+        "src/other.py: Changed file is outside active task scope "
+        "for task 20260522-1930-test-task; no allowed-file pattern matched.",
+    )
     assert result.active_task_id == "20260522-1930-test-task"
     assert result.active_task_title == "Test task"
 
@@ -111,7 +115,8 @@ def test_check_command_reports_active_task_and_violating_file(
     assert exit_code == 1
     assert "Active task: 20260522-1930-test-task" in output
     assert "Title: Test task" in output
-    assert "src/other.py: Changed file is outside active task scope." in output
+    assert "src/other.py: Changed file is outside active task scope" in output
+    assert "for task 20260522-1930-test-task" in output
 
 
 def test_check_detects_missing_required_files(tmp_path: Path) -> None:
@@ -152,6 +157,67 @@ def test_check_uses_newest_active_task(tmp_path: Path) -> None:
     assert result.passed
     assert result.active_task_id == "20260522-1931-new-task"
     assert result.active_task_title == "New task"
+
+
+def test_check_supports_direct_directory_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/pcae/core/*"])
+    write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('ok')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+
+
+def test_check_direct_directory_wildcard_does_not_match_nested_files(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/pcae/core/*"])
+    nested = tmp_path / "src" / "pcae" / "core" / "nested" / "file.py"
+    write_file(nested, "print('nested')\n")
+    commit_baseline(tmp_path)
+
+    write_file(nested, "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(result, "src/pcae/core/nested/file.py:")
+
+
+def test_check_supports_recursive_directory_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/pcae/commands/**"])
+    nested = tmp_path / "src" / "pcae" / "commands" / "nested" / "file.py"
+    write_file(nested, "print('nested')\n")
+    commit_baseline(tmp_path)
+
+    write_file(nested, "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+
+
+def test_check_supports_basename_wildcard_scope(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["*.py"])
+    write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('ok')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
 
 
 def write_task(

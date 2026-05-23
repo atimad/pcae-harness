@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
 
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
-from pcae.core.tasks import find_latest_active_task
+from pcae.core.tasks import ActiveTask, find_latest_active_task
 
 
 DOCUMENTATION_PATHS = {
@@ -70,7 +71,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
 
     if active_task is not None:
         violations.extend(check_forbidden_changes(changes, active_task.forbidden_files))
-        violations.extend(check_allowed_scope(changes, active_task.allowed_files))
+        violations.extend(check_allowed_scope(changes, active_task))
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
         violations.append(
@@ -96,7 +97,7 @@ def check_forbidden_changes(
 
 
 def check_allowed_scope(
-    changes: tuple[GitChange, ...], allowed_patterns: tuple[str, ...]
+    changes: tuple[GitChange, ...], active_task: ActiveTask
 ) -> tuple[CheckMessage, ...]:
     scoped_changes = tuple(
         change for change in changes if not is_documentation_path(change.path)
@@ -104,10 +105,11 @@ def check_allowed_scope(
     if not scoped_changes:
         return ()
 
+    allowed_patterns = active_task.allowed_files
     if not allowed_patterns:
         return tuple(
             CheckMessage(
-                reason="Changed file is outside active task scope.",
+                reason=scope_failure_reason(active_task),
                 path=change.path,
             )
             for change in scoped_changes
@@ -115,7 +117,7 @@ def check_allowed_scope(
 
     return tuple(
         CheckMessage(
-            reason="Changed file is outside active task scope.",
+            reason=scope_failure_reason(active_task),
             path=change.path,
         )
         for change in scoped_changes
@@ -126,11 +128,36 @@ def check_allowed_scope(
 def path_matches_any(path: Path, patterns: tuple[str, ...]) -> bool:
     path_text = path.as_posix()
     for pattern in patterns:
-        if pattern.endswith("/") and path_text.startswith(pattern):
-            return True
-        if path_text == pattern:
+        normalized = pattern.strip()
+        if not normalized:
+            continue
+        if path_matches_pattern(path_text, normalized):
             return True
     return False
+
+
+def path_matches_pattern(path_text: str, pattern: str) -> bool:
+    if pattern.endswith("/"):
+        return path_text.startswith(pattern)
+    if pattern.endswith("/**"):
+        prefix = pattern[:-3]
+        return path_text == prefix or path_text.startswith(f"{prefix}/")
+    if pattern.endswith("/*"):
+        prefix = pattern[:-2]
+        if not path_text.startswith(f"{prefix}/"):
+            return False
+        remainder = path_text[len(prefix) + 1 :]
+        return "/" not in remainder
+    if "/" not in pattern and fnmatch(Path(path_text).name, pattern):
+        return True
+    return fnmatch(path_text, pattern)
+
+
+def scope_failure_reason(active_task: ActiveTask) -> str:
+    return (
+        "Changed file is outside active task scope "
+        f"for task {active_task.task_id}; no allowed-file pattern matched."
+    )
 
 
 def source_changed(paths: tuple[Path, ...]) -> bool:
