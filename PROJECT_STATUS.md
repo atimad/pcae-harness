@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 5A: Repo-level policy configuration.
+Phase 5B: Policy inspection reporting.
 
 ## Current State
 
-PCAE Harness loads protected-file patterns from `.pcae/policy.toml`, with built-in defaults as a fallback.
+PCAE Harness reports repo policy presence, source, and protected pattern count during `pcae inspect`.
 
 ## Next
 

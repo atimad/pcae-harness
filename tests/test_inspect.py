@@ -48,6 +48,31 @@ def test_inspection_report_includes_required_categories(tmp_path: Path) -> None:
     assert "[present] scripts/check-docs-updated.ps1" in report
 
 
+def test_inspection_report_includes_repo_policy_status(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+
+    report = format_inspection(inspect_harness(HarnessPath(tmp_path)))
+
+    assert "Policy:" in report
+    assert "[present] .pcae/policy.toml" in report
+    assert "source: repo config" in report
+    assert "protected patterns: 18" in report
+
+
+def test_inspection_report_includes_default_policy_status_when_missing(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").unlink()
+
+    report = format_inspection(inspect_harness(HarnessPath(tmp_path)))
+
+    assert "Policy:" in report
+    assert "[missing] .pcae/policy.toml" in report
+    assert "source: built-in defaults" in report
+    assert "protected patterns: 18" in report
+
+
 def test_inspect_command_runs_from_current_directory(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -59,6 +84,7 @@ def test_inspect_command_runs_from_current_directory(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert f"PCAE inspection for {tmp_path}" in output
+    assert "Policy:" in output
     assert "All required PCAE paths are present." in output
 
 

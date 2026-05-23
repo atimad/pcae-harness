@@ -5,6 +5,9 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 
+POLICY_RELATIVE_PATH = Path(".pcae") / "policy.toml"
+POLICY_SOURCE_REPO = "repo config"
+POLICY_SOURCE_DEFAULTS = "built-in defaults"
 
 DEFAULT_PROTECTED_PATTERNS = (
     ".git/**",
@@ -31,15 +34,35 @@ DEFAULT_PROTECTED_PATTERNS = (
 @dataclass(frozen=True)
 class Policy:
     protected_patterns: tuple[str, ...]
+    source: str
+    path: Path
+    file_exists: bool
 
 
 def load_policy(root: HarnessPath) -> Policy:
-    policy_path = root.join(Path(".pcae") / "policy.toml")
+    policy_path = root.join(POLICY_RELATIVE_PATH)
     if not policy_path.is_file():
-        return Policy(protected_patterns=DEFAULT_PROTECTED_PATTERNS)
+        return Policy(
+            protected_patterns=DEFAULT_PROTECTED_PATTERNS,
+            source=POLICY_SOURCE_DEFAULTS,
+            path=policy_path,
+            file_exists=False,
+        )
 
     patterns = parse_protected_patterns(policy_path.read_text(encoding="utf-8"))
-    return Policy(protected_patterns=patterns or DEFAULT_PROTECTED_PATTERNS)
+    if not patterns:
+        return Policy(
+            protected_patterns=DEFAULT_PROTECTED_PATTERNS,
+            source=POLICY_SOURCE_DEFAULTS,
+            path=policy_path,
+            file_exists=True,
+        )
+    return Policy(
+        protected_patterns=patterns,
+        source=POLICY_SOURCE_REPO,
+        path=policy_path,
+        file_exists=True,
+    )
 
 
 def parse_protected_patterns(content: str) -> tuple[str, ...]:

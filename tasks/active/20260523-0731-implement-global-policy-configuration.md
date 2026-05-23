@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Move global protected file patterns into repo-level policy configuration.
+Report repo-level policy status from `pcae inspect`.
 
 ## Allowed Files
 

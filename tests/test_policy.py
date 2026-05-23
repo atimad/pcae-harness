@@ -3,7 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from pcae.core.paths import HarnessPath
-from pcae.core.policy import DEFAULT_PROTECTED_PATTERNS, load_policy, parse_protected_patterns
+from pcae.core.policy import (
+    DEFAULT_PROTECTED_PATTERNS,
+    POLICY_SOURCE_DEFAULTS,
+    POLICY_SOURCE_REPO,
+    load_policy,
+    parse_protected_patterns,
+)
 
 
 def test_parse_protected_patterns_from_policy_text() -> None:
@@ -32,9 +38,13 @@ patterns = [
     policy = load_policy(HarnessPath(tmp_path))
 
     assert policy.protected_patterns == ("custom.lock",)
+    assert policy.source == POLICY_SOURCE_REPO
+    assert policy.file_exists
 
 
 def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None:
     policy = load_policy(HarnessPath(tmp_path))
 
     assert policy.protected_patterns == DEFAULT_PROTECTED_PATTERNS
+    assert policy.source == POLICY_SOURCE_DEFAULTS
+    assert not policy.file_exists

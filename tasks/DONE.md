@@ -18,3 +18,4 @@
 - Added global protected-file checks with explicit task-level overrides.
 - Added `pcae task close` for moving the latest active task to `tasks/done/`.
 - Added repo-level `.pcae/policy.toml` configuration for protected-file patterns.
+- Added policy source and protected pattern reporting to `pcae inspect`.

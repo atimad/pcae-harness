@@ -16,6 +16,15 @@ def format_inspection(result: InspectionResult) -> str:
             lines.append(f"  [{status}] {inspected.relative_path.as_posix()}")
         lines.append("")
 
+    policy_status = "present" if result.policy.present else "missing"
+    lines.append("Policy:")
+    lines.append(f"  [{policy_status}] {result.policy.relative_path.as_posix()}")
+    lines.append(f"  source: {result.policy.source}")
+    lines.append(
+        f"  protected patterns: {result.policy.protected_pattern_count}"
+    )
+    lines.append("")
+
     if result.missing_paths:
         lines.append("Missing required PCAE paths:")
         for inspected in result.missing_paths:
