@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 2D: Explicit Git hook installation.
+Phase 3A: Active task discovery diagnostics.
 
 ## Current State
 
-PCAE Harness has a package skeleton, `pcae init`, read-only `pcae inspect`, `pcae task new`, advisory `pcae check`, and explicit `pcae hooks install`.
+PCAE Harness has advisory `pcae check` validation with active task discovery and clearer task/file diagnostics.
 
 ## Next
 

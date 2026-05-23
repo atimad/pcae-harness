@@ -9,6 +9,12 @@ from pcae.core.paths import HarnessPath
 def run_check(args: argparse.Namespace) -> int:
     result = run_checks(HarnessPath.cwd())
 
+    if result.active_task_id is not None:
+        print(f"Active task: {result.active_task_id}")
+        print(f"Title: {result.active_task_title}")
+    else:
+        print("Active task: none")
+
     if result.passed:
         print("PCAE check passed.")
         return 0

@@ -32,7 +32,9 @@ def test_check_detects_out_of_scope_file_changes(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert not result.passed
-    assert has_violation(result, "Changed file is outside active task scope: src/other.py")
+    assert has_violation(result, "src/other.py: Changed file is outside active task scope.")
+    assert result.active_task_id == "20260522-1930-test-task"
+    assert result.active_task_title == "Test task"
 
 
 def test_check_detects_source_changes_without_documentation_updates(
@@ -67,7 +69,7 @@ def test_check_detects_forbidden_file_changes(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert not result.passed
-    assert has_violation(result, "Forbidden file changed: pyproject.toml")
+    assert has_violation(result, "pyproject.toml: Forbidden file changed.")
 
 
 def test_check_command_passes_when_changes_are_in_scope_and_documented(
@@ -86,7 +88,30 @@ def test_check_command_passes_when_changes_are_in_scope_and_documented(
 
     output = capsys.readouterr().out
     assert exit_code == 0
+    assert "Active task: 20260522-1930-test-task" in output
+    assert "Title: Test task" in output
     assert "PCAE check passed." in output
+
+
+def test_check_command_reports_active_task_and_violating_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / "src" / "other.py", "print('other')\n")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    write_file(tmp_path / "src" / "other.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Active task: 20260522-1930-test-task" in output
+    assert "Title: Test task" in output
+    assert "src/other.py: Changed file is outside active task scope." in output
 
 
 def test_check_detects_missing_required_files(tmp_path: Path) -> None:
@@ -99,16 +124,45 @@ def test_check_detects_missing_required_files(tmp_path: Path) -> None:
     result = run_checks(HarnessPath(tmp_path))
 
     assert not result.passed
-    assert has_violation(result, "Missing required PCAE file: AGENTS.md")
+    assert has_violation(result, "AGENTS.md: Missing required PCAE file.")
+
+
+def test_check_uses_newest_active_task(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/old.py"],
+        task_id="20260522-1930-old-task",
+        title="Old task",
+    )
+    write_task(
+        tmp_path,
+        allowed_files=["src/new.py"],
+        task_id="20260522-1931-new-task",
+        title="New task",
+    )
+    write_file(tmp_path / "src" / "new.py", "print('new')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "new.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert result.active_task_id == "20260522-1931-new-task"
+    assert result.active_task_title == "New task"
 
 
 def write_task(
     root: Path,
     allowed_files: list[str],
     forbidden_files: list[str] | None = None,
+    task_id: str = "20260522-1930-test-task",
+    title: str = "Test task",
 ) -> None:
     forbidden_files = forbidden_files or []
-    task_path = root / "tasks" / "active" / "20260522-1930-test-task.md"
+    task_path = root / "tasks" / "active" / f"{task_id}.md"
     allowed = "\n".join(f"- {path}" for path in allowed_files)
     forbidden = "\n".join(f"- {path}" for path in forbidden_files) or "- TBD"
     write_file(
@@ -117,11 +171,11 @@ def write_task(
 
 ## Task ID
 
-20260522-1930-test-task
+{task_id}
 
 ## Title
 
-Test task
+{title}
 
 ## Status
 

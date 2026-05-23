@@ -36,6 +36,7 @@ Implement advisory PCAE check validation.
 - src/pcae/commands/hooks.py
 - src/pcae/core/hooks.py
 - tests/test_hooks.py
+- tests/test_task.py
 
 ## Forbidden Files
 

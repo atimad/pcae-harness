@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pcae.cli import main
 from pcae.core.paths import HarnessPath
-from pcae.core.tasks import create_task_contract, slugify_title
+from pcae.core.tasks import create_task_contract, find_latest_active_task, slugify_title
 
 
 def test_slugify_title_uses_safe_filename_parts() -> None:
@@ -62,3 +62,19 @@ def test_task_new_command_creates_one_active_task_file(
     assert len(task_files) == 1
     assert task_files[0].name.endswith("-implement-inspect-command.md")
     assert "Created task contract: tasks/active/" in output
+
+
+def test_find_latest_active_task_reads_task_identity(tmp_path: Path) -> None:
+    created_at = datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc)
+    create_task_contract(HarnessPath(tmp_path), "Old task", created_at=created_at)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "New task",
+        created_at=datetime(2026, 5, 22, 19, 31, tzinfo=timezone.utc),
+    )
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+
+    assert active_task is not None
+    assert active_task.task_id == "20260522-1931-new-task"
+    assert active_task.title == "New task"

@@ -18,6 +18,15 @@ class TaskContract:
     content: str
 
 
+@dataclass(frozen=True)
+class ActiveTask:
+    path: Path
+    task_id: str
+    title: str
+    allowed_files: tuple[str, ...]
+    forbidden_files: tuple[str, ...]
+
+
 def create_task_contract(
     root: HarnessPath,
     title: str,
@@ -103,7 +112,7 @@ TBD
 """
 
 
-def find_latest_active_task(root: HarnessPath) -> Path | None:
+def find_latest_active_task(root: HarnessPath) -> ActiveTask | None:
     active_dir = root.join(Path("tasks") / "active")
     if not active_dir.is_dir():
         return None
@@ -111,11 +120,29 @@ def find_latest_active_task(root: HarnessPath) -> Path | None:
     task_files = sorted(active_dir.glob("*.md"))
     if not task_files:
         return None
-    return task_files[-1]
+    return read_active_task(task_files[-1])
+
+
+def read_active_task(task_path: Path) -> ActiveTask:
+    content = task_path.read_text(encoding="utf-8")
+    return ActiveTask(
+        path=task_path,
+        task_id=read_task_section_text(content, "Task ID") or task_path.stem,
+        title=read_task_section_text(content, "Title") or "Untitled task",
+        allowed_files=read_task_section_items_from_text(content, "Allowed Files"),
+        forbidden_files=read_task_section_items_from_text(content, "Forbidden Files"),
+    )
 
 
 def read_task_section_items(task_path: Path, section_name: str) -> tuple[str, ...]:
-    lines = task_path.read_text(encoding="utf-8").splitlines()
+    return read_task_section_items_from_text(
+        task_path.read_text(encoding="utf-8"),
+        section_name,
+    )
+
+
+def read_task_section_items_from_text(content: str, section_name: str) -> tuple[str, ...]:
+    lines = content.splitlines()
     items: list[str] = []
     in_section = False
 
@@ -137,3 +164,24 @@ def read_task_section_items(task_path: Path, section_name: str) -> tuple[str, ..
             items.append(item)
 
     return tuple(items)
+
+
+def read_task_section_text(content: str, section_name: str) -> str | None:
+    lines = content.splitlines()
+    in_section = False
+    values: list[str] = []
+
+    for line in lines:
+        if line.startswith("## "):
+            current_section = line.removeprefix("## ").strip()
+            if in_section:
+                break
+            in_section = current_section == section_name
+            continue
+
+        if in_section and line.strip():
+            values.append(line.strip())
+
+    if not values:
+        return None
+    return "\n".join(values)

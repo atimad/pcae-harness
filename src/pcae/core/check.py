@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from fnmatch import fnmatch
 from pathlib import Path
 
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
-from pcae.core.tasks import find_latest_active_task, read_task_section_items
+from pcae.core.tasks import find_latest_active_task
 
 
 DOCUMENTATION_PATHS = {
@@ -25,13 +24,22 @@ SOURCE_PREFIXES = ("src/", "tests/")
 
 @dataclass(frozen=True)
 class CheckMessage:
-    text: str
+    reason: str
+    path: Path | None = None
+
+    @property
+    def text(self) -> str:
+        if self.path is None:
+            return self.reason
+        return f"{self.path.as_posix()}: {self.reason}"
 
 
 @dataclass(frozen=True)
 class CheckResult:
     violations: tuple[CheckMessage, ...]
     warnings: tuple[CheckMessage, ...]
+    active_task_id: str | None = None
+    active_task_title: str | None = None
 
     @property
     def passed(self) -> bool:
@@ -45,35 +53,43 @@ def run_checks(root: HarnessPath) -> CheckResult:
     for entry in MANIFEST_ENTRIES:
         if not root.join(entry.relative_path).is_file():
             violations.append(
-                CheckMessage(f"Missing required PCAE file: {entry.relative_path.as_posix()}")
+                CheckMessage(
+                    reason="Missing required PCAE file.",
+                    path=entry.relative_path,
+                )
             )
 
     active_task = find_latest_active_task(root)
     if active_task is None:
-        violations.append(CheckMessage("No active task contract found in tasks/active/."))
+        violations.append(
+            CheckMessage("No active task contract found in tasks/active/.")
+        )
 
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
 
     if active_task is not None:
-        allowed = read_task_section_items(active_task, "Allowed Files")
-        forbidden = read_task_section_items(active_task, "Forbidden Files")
-        violations.extend(check_forbidden_changes(changes, forbidden))
-        violations.extend(check_allowed_scope(changes, allowed))
+        violations.extend(check_forbidden_changes(changes, active_task.forbidden_files))
+        violations.extend(check_allowed_scope(changes, active_task.allowed_files))
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
         violations.append(
             CheckMessage("Source files changed without documentation file updates.")
         )
 
-    return CheckResult(violations=tuple(violations), warnings=tuple(warnings))
+    return CheckResult(
+        violations=tuple(violations),
+        warnings=tuple(warnings),
+        active_task_id=active_task.task_id if active_task is not None else None,
+        active_task_title=active_task.title if active_task is not None else None,
+    )
 
 
 def check_forbidden_changes(
     changes: tuple[GitChange, ...], forbidden_patterns: tuple[str, ...]
 ) -> tuple[CheckMessage, ...]:
     return tuple(
-        CheckMessage(f"Forbidden file changed: {change.path.as_posix()}")
+        CheckMessage(reason="Forbidden file changed.", path=change.path)
         for change in changes
         if path_matches_any(change.path, forbidden_patterns)
     )
@@ -90,12 +106,18 @@ def check_allowed_scope(
 
     if not allowed_patterns:
         return tuple(
-            CheckMessage(f"Changed file is outside active task scope: {change.path.as_posix()}")
+            CheckMessage(
+                reason="Changed file is outside active task scope.",
+                path=change.path,
+            )
             for change in scoped_changes
         )
 
     return tuple(
-        CheckMessage(f"Changed file is outside active task scope: {change.path.as_posix()}")
+        CheckMessage(
+            reason="Changed file is outside active task scope.",
+            path=change.path,
+        )
         for change in scoped_changes
         if not path_matches_any(change.path, allowed_patterns)
     )
@@ -105,8 +127,6 @@ def path_matches_any(path: Path, patterns: tuple[str, ...]) -> bool:
     path_text = path.as_posix()
     for pattern in patterns:
         if pattern.endswith("/") and path_text.startswith(pattern):
-            return True
-        if fnmatch(path_text, pattern):
             return True
         if path_text == pattern:
             return True
