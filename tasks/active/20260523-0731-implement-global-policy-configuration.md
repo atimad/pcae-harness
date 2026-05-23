@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add `pcae task list` for active and done task visibility.
+Add `pcae session write` for resumable handoff snapshots.
 
 ## Allowed Files
 

@@ -24,6 +24,18 @@ def read_git_changes(root: HarnessPath) -> tuple[GitChange, ...]:
     return tuple(parse_status_line(line) for line in completed.stdout.splitlines() if line)
 
 
+def read_git_branch(root: HarnessPath) -> str:
+    completed = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=root.path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    branch = completed.stdout.strip()
+    return branch or "HEAD"
+
+
 def parse_status_line(line: str) -> GitChange:
     status = line[:2]
     raw_path = line[3:]

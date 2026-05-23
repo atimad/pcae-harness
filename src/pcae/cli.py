@@ -7,6 +7,7 @@ from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
+from pcae.commands.session import run_session_write
 from pcae.commands.task import run_task_close, run_task_list, run_task_new
 
 
@@ -75,6 +76,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Configure Git to use .githooks.",
     )
     hooks_install_parser.set_defaults(handler=run_hooks_install)
+
+    session_parser = subparsers.add_parser(
+        "session",
+        help="Manage PCAE session handoff snapshots.",
+    )
+    session_subparsers = session_parser.add_subparsers(
+        dest="session_command",
+        required=True,
+    )
+
+    session_write_parser = session_subparsers.add_parser(
+        "write",
+        help="Write a resumable session snapshot.",
+    )
+    session_write_parser.set_defaults(handler=run_session_write)
 
     return parser
 

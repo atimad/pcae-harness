@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 6B: Task list command.
+Phase 7A: Session handoff snapshot.
 
 ## Current State
 
-PCAE Harness can list active and done tasks with task ID, title, and status.
+PCAE Harness can write `.pcae/session.json` snapshots with active task and Git state.
 
 ## Next
 

@@ -1,0 +1,59 @@
+{
+  "active_task": {
+    "id": "20260523-0731-implement-global-policy-configuration",
+    "title": "Implement global policy configuration"
+  },
+  "architectural_notes": [],
+  "blockers": [],
+  "current_objective": "",
+  "git": {
+    "branch": "main",
+    "changed_files": [
+      {
+        "path": "CHANGELOG.md",
+        "status": " M"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/git_status.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260523-0731-implement-global-policy-configuration.md",
+        "status": " M"
+      },
+      {
+        "path": ".pcae/session.json",
+        "status": "??"
+      },
+      {
+        "path": "src/pcae/commands/session.py",
+        "status": "??"
+      },
+      {
+        "path": "src/pcae/core/session.py",
+        "status": "??"
+      },
+      {
+        "path": "tests/test_session.py",
+        "status": "??"
+      }
+    ],
+    "status_summary": "10 changed files"
+  },
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-05-23T09:11:58.734179+00:00",
+  "warnings": []
+}
