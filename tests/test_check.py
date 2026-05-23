@@ -700,6 +700,100 @@ def test_check_command_prints_architecture_dependency_warnings(
     assert "PCAE check passed." in output
 
 
+def test_check_strict_architecture_mode_fails_on_dependency_warning(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/core/changed.py",
+            "CHANGELOG.md",
+        ],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            },
+            rules={
+                "core": ["core"],
+                "commands": ["core", "commands"],
+                "docs": ["*"],
+            },
+            enforcement_mode="strict",
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/core/changed.py: core -> commands is not allowed by policy",
+    )
+    assert any(
+        "src/pcae/core/changed.py: core -> commands is not allowed by policy"
+        in warning.text
+        for warning in result.architecture_dependency_warnings
+    )
+
+
+def test_check_missing_architecture_enforcement_defaults_to_advisory(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/core/changed.py",
+            "CHANGELOG.md",
+        ],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            },
+            rules={
+                "core": ["core"],
+                "commands": ["core", "commands"],
+                "docs": ["*"],
+            },
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert result.architecture_dependency_warnings
+    assert not has_violation(result, "is not allowed by policy")
+
+
 def test_check_warns_when_changed_python_file_cannot_be_parsed(
     tmp_path: Path,
 ) -> None:
@@ -896,6 +990,7 @@ patterns = [
 def policy_with_architecture_rules(
     zones: dict[str, list[str]],
     rules: dict[str, list[str]],
+    enforcement_mode: str | None = None,
 ) -> str:
     rendered_zones = "\n".join(
         f"{name} = [{', '.join(render_string(pattern) for pattern in patterns)}]"
@@ -905,6 +1000,12 @@ def policy_with_architecture_rules(
         f"{name} = [{', '.join(render_string(target) for target in targets)}]"
         for name, targets in rules.items()
     )
+    enforcement = ""
+    if enforcement_mode is not None:
+        enforcement = f"""
+[architecture.enforcement]
+mode = "{enforcement_mode}"
+"""
     return f"""[protected]
 patterns = [
   ".env",
@@ -915,7 +1016,7 @@ patterns = [
 
 [architecture.rules]
 {rendered_rules}
-"""
+{enforcement}"""
 
 
 def render_string(value: str) -> str:

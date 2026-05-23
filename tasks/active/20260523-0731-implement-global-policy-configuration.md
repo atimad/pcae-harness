@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add advisory Python import dependency analysis to `pcae check`.
+Add configurable architecture dependency enforcement mode.
 
 ## Allowed Files
 

@@ -22,3 +22,4 @@
 - Changed successful session continuity output from warning to info.
 - Added advisory architecture dependency rules to repo policy inspection.
 - Added advisory Python import dependency warnings to `pcae check`.
+- Added configurable advisory or strict architecture dependency enforcement mode.

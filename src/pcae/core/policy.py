@@ -48,12 +48,20 @@ DEFAULT_ARCHITECTURE_RULES = {
     "config": ("config",),
 }
 
+ARCHITECTURE_ENFORCEMENT_ADVISORY = "advisory"
+ARCHITECTURE_ENFORCEMENT_STRICT = "strict"
+SUPPORTED_ARCHITECTURE_ENFORCEMENT_MODES = (
+    ARCHITECTURE_ENFORCEMENT_ADVISORY,
+    ARCHITECTURE_ENFORCEMENT_STRICT,
+)
+
 
 @dataclass(frozen=True)
 class Policy:
     protected_patterns: tuple[str, ...]
     architecture_zones: dict[str, tuple[str, ...]]
     architecture_rules: dict[str, tuple[str, ...]]
+    architecture_enforcement_mode: str
     source: str
     path: Path
     file_exists: bool
@@ -68,6 +76,7 @@ def load_policy(root: HarnessPath) -> Policy:
             protected_patterns=DEFAULT_PROTECTED_PATTERNS,
             architecture_zones={},
             architecture_rules={},
+            architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -81,6 +90,7 @@ def load_policy(root: HarnessPath) -> Policy:
             protected_patterns=(),
             architecture_zones={},
             architecture_rules={},
+            architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -92,6 +102,7 @@ def load_policy(root: HarnessPath) -> Policy:
         protected_patterns=parsed.protected_patterns,
         architecture_zones=parsed.architecture_zones,
         architecture_rules=parsed.architecture_rules,
+        architecture_enforcement_mode=parsed.architecture_enforcement_mode,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -104,6 +115,7 @@ class ParsedPolicy:
     protected_patterns: tuple[str, ...]
     architecture_zones: dict[str, tuple[str, ...]]
     architecture_rules: dict[str, tuple[str, ...]]
+    architecture_enforcement_mode: str
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -112,6 +124,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         protected_patterns=parse_protected_patterns(content),
         architecture_zones=architecture_zones,
         architecture_rules=parse_architecture_rules(content, architecture_zones),
+        architecture_enforcement_mode=parse_architecture_enforcement_mode(content),
     )
 
 
@@ -327,6 +340,45 @@ def validate_architecture_rules(
                 )
 
 
+def parse_architecture_enforcement_mode(content: str) -> str:
+    lines = content.splitlines()
+    in_enforcement_section = False
+    mode: str | None = None
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_enforcement_section = stripped == "[architecture.enforcement]"
+            continue
+
+        if not in_enforcement_section:
+            continue
+
+        if not stripped.startswith("mode"):
+            continue
+        if "=" not in stripped:
+            raise ValueError("Invalid policy: architecture.enforcement.mode must be assigned.")
+        value = stripped.split("=", 1)[1].strip()
+        mode = parse_string_value(
+            value,
+            "Invalid policy: architecture.enforcement.mode must be a string.",
+        )
+
+    if mode is None:
+        return ARCHITECTURE_ENFORCEMENT_ADVISORY
+    if mode not in SUPPORTED_ARCHITECTURE_ENFORCEMENT_MODES:
+        raise ValueError(
+            "Invalid policy: architecture.enforcement.mode must be "
+            "'advisory' or 'strict'."
+        )
+    return mode
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -336,6 +388,15 @@ def parse_architecture_zone_name(raw_name: str) -> str:
             "Invalid policy: architecture zone names must be non-empty strings."
         )
     return zone_name
+
+
+def parse_string_value(value: str, error: str) -> str:
+    if not (value.startswith('"') and value.endswith('"')):
+        raise ValueError(error)
+    parsed = value[1:-1]
+    if not parsed:
+        raise ValueError(error)
+    return parsed
 
 
 def parse_pattern_values(line: str) -> tuple[str, ...]:
@@ -412,6 +473,9 @@ patterns = [
 
 [architecture.rules]
 {rules}
+
+[architecture.enforcement]
+mode = "{ARCHITECTURE_ENFORCEMENT_ADVISORY}"
 """
 
 

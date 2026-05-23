@@ -4,6 +4,8 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import (
+    ARCHITECTURE_ENFORCEMENT_ADVISORY,
+    ARCHITECTURE_ENFORCEMENT_STRICT,
     DEFAULT_ARCHITECTURE_RULES,
     DEFAULT_ARCHITECTURE_ZONES,
     DEFAULT_PROTECTED_PATTERNS,
@@ -46,6 +48,7 @@ docs = ["docs/**", "*.md"]
         "docs": ("docs/**", "*.md"),
     }
     assert policy.architecture_rules == {}
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
 
 
 def test_parse_policy_reads_architecture_rules() -> None:
@@ -72,6 +75,28 @@ tests = ["*"]
         "commands": ("core", "commands"),
         "tests": ("*",),
     }
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
+
+
+def test_parse_policy_reads_architecture_enforcement_mode() -> None:
+    content = """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = ["core"]
+
+[architecture.enforcement]
+mode = "strict"
+"""
+
+    policy = parse_policy(content)
+
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_STRICT
 
 
 def test_load_policy_reads_repo_policy_file(tmp_path: Path) -> None:
@@ -91,6 +116,7 @@ patterns = [
     assert policy.protected_patterns == ("custom.lock",)
     assert policy.architecture_zones == {}
     assert policy.architecture_rules == {}
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
     assert policy.source == POLICY_SOURCE_REPO
     assert policy.file_exists
     assert policy.valid
@@ -120,6 +146,7 @@ commands = ["src/pcae/commands/**"]
         "commands": ("src/pcae/commands/**",),
     }
     assert policy.architecture_rules == {}
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
 
 
 def test_load_policy_reads_architecture_rules_from_repo_policy_file(
@@ -149,6 +176,32 @@ commands = ["core", "commands"]
         "core": ("core",),
         "commands": ("core", "commands"),
     }
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
+
+
+def test_load_policy_reads_architecture_enforcement_mode(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+core = ["src/pcae/core/**"]
+
+[architecture.rules]
+core = ["core"]
+
+[architecture.enforcement]
+mode = "strict"
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_STRICT
 
 
 def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None:
@@ -157,6 +210,7 @@ def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None
     assert policy.protected_patterns == DEFAULT_PROTECTED_PATTERNS
     assert policy.architecture_zones == {}
     assert policy.architecture_rules == {}
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
     assert policy.source == POLICY_SOURCE_DEFAULTS
     assert not policy.file_exists
     assert policy.valid
@@ -437,6 +491,49 @@ core = ["commands"]
     )
 
 
+def test_load_policy_rejects_invalid_architecture_enforcement_mode(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.enforcement]
+mode = "blocking"
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture.enforcement.mode must be "
+        "'advisory' or 'strict'."
+    )
+
+
+def test_load_policy_rejects_non_string_architecture_enforcement_mode(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[architecture.enforcement]
+mode = 42
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: architecture.enforcement.mode must be a string."
+    )
+
+
 def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> None:
     write_policy(tmp_path, render_default_policy())
 
@@ -445,6 +542,7 @@ def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> 
     assert policy.valid
     assert policy.architecture_zones == DEFAULT_ARCHITECTURE_ZONES
     assert policy.architecture_rules == DEFAULT_ARCHITECTURE_RULES
+    assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
 
 
 def write_policy(root: Path, content: str) -> None:

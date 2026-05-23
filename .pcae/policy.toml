@@ -35,3 +35,6 @@ tests = ["*"]
 docs = ["*"]
 tasks = ["*"]
 config = ["config"]
+
+[architecture.enforcement]
+mode = "advisory"

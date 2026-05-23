@@ -9,7 +9,7 @@ from pcae.core.architecture import analyze_changed_python_dependencies
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
-from pcae.core.policy import load_policy
+from pcae.core.policy import ARCHITECTURE_ENFORCEMENT_STRICT, load_policy
 from pcae.core.session import read_session_snapshot
 from pcae.core.tasks import ActiveTask, find_latest_active_task
 
@@ -117,6 +117,12 @@ def run_checks(root: HarnessPath) -> CheckResult:
         CheckMessage(warning.reason, warning.path)
         for warning in architecture_result.parse_warnings
     )
+    architecture_dependency_warnings = tuple(
+        CheckMessage(warning.text)
+        for warning in architecture_result.dependency_warnings
+    )
+    if policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_STRICT:
+        violations.extend(architecture_dependency_warnings)
 
     return CheckResult(
         violations=tuple(violations),
@@ -126,10 +132,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
             changed_paths,
             policy.architecture_zones,
         ),
-        architecture_dependency_warnings=tuple(
-            CheckMessage(warning.text)
-            for warning in architecture_result.dependency_warnings
-        ),
+        architecture_dependency_warnings=architecture_dependency_warnings,
         active_task_id=active_task.task_id if active_task is not None else None,
         active_task_title=active_task.title if active_task is not None else None,
     )
