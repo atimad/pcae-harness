@@ -19,6 +19,14 @@ class TaskContract:
 
 
 @dataclass(frozen=True)
+class ClosedTask:
+    task_id: str
+    title: str
+    source_path: Path
+    destination_path: Path
+
+
+@dataclass(frozen=True)
 class ActiveTask:
     path: Path
     task_id: str
@@ -54,6 +62,28 @@ def create_task_contract(
         relative_path=relative_path,
         created_at=timestamp,
         content=content,
+    )
+
+
+def close_latest_active_task(root: HarnessPath) -> ClosedTask | None:
+    active_task = find_latest_active_task(root)
+    if active_task is None:
+        return None
+
+    source_path = active_task.path
+    content = source_path.read_text(encoding="utf-8")
+    destination_path = root.join(Path("tasks") / "done" / source_path.name)
+
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    with source_path.open("w", encoding="utf-8", newline="\n") as file:
+        file.write(replace_task_status(content, "done"))
+    source_path.replace(destination_path)
+
+    return ClosedTask(
+        task_id=active_task.task_id,
+        title=active_task.title,
+        source_path=source_path,
+        destination_path=destination_path,
     )
 
 
@@ -190,3 +220,22 @@ def read_task_section_text(content: str, section_name: str) -> str | None:
     if not values:
         return None
     return "\n".join(values)
+
+
+def replace_task_status(content: str, status: str) -> str:
+    lines = content.splitlines()
+    in_status_section = False
+
+    for index, line in enumerate(lines):
+        if line.startswith("## "):
+            current_section = line.removeprefix("## ").strip()
+            if in_status_section:
+                break
+            in_status_section = current_section == "Status"
+            continue
+
+        if in_status_section and line.strip():
+            lines[index] = status
+            return "\n".join(lines) + "\n"
+
+    return content

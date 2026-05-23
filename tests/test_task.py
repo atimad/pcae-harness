@@ -5,7 +5,12 @@ from pathlib import Path
 
 from pcae.cli import main
 from pcae.core.paths import HarnessPath
-from pcae.core.tasks import create_task_contract, find_latest_active_task, slugify_title
+from pcae.core.tasks import (
+    close_latest_active_task,
+    create_task_contract,
+    find_latest_active_task,
+    slugify_title,
+)
 
 
 def test_slugify_title_uses_safe_filename_parts() -> None:
@@ -114,3 +119,77 @@ Test task
 
     assert active_task is not None
     assert active_task.override_protected_files == ("pyproject.toml", "*.pem")
+
+
+def test_close_latest_active_task_marks_done_and_moves_file(tmp_path: Path) -> None:
+    created_at = datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc)
+    contract = create_task_contract(
+        HarnessPath(tmp_path),
+        "Implement inspect command",
+        created_at=created_at,
+    )
+
+    closed_task = close_latest_active_task(HarnessPath(tmp_path))
+
+    assert closed_task is not None
+    assert closed_task.task_id == "20260522-1930-implement-inspect-command"
+    assert closed_task.title == "Implement inspect command"
+    assert not (tmp_path / contract.relative_path).exists()
+
+    done_path = tmp_path / "tasks" / "done" / contract.relative_path.name
+    assert done_path.is_file()
+    content = done_path.read_text(encoding="utf-8")
+    assert "## Status\n\ndone" in content
+
+
+def test_close_latest_active_task_closes_newest_task(tmp_path: Path) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Old task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "New task",
+        created_at=datetime(2026, 5, 22, 19, 31, tzinfo=timezone.utc),
+    )
+
+    closed_task = close_latest_active_task(HarnessPath(tmp_path))
+
+    assert closed_task is not None
+    assert closed_task.task_id == "20260522-1931-new-task"
+    assert (tmp_path / "tasks" / "active" / "20260522-1930-old-task.md").is_file()
+    assert (tmp_path / "tasks" / "done" / "20260522-1931-new-task.md").is_file()
+
+
+def test_close_latest_active_task_returns_none_without_active_task(tmp_path: Path) -> None:
+    assert close_latest_active_task(HarnessPath(tmp_path)) is None
+
+
+def test_task_close_command_reports_closed_task(tmp_path: Path, monkeypatch, capsys) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Clean up bootstrap task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Closed task: 20260522-1930-clean-up-bootstrap-task" in output
+    assert "Title: Clean up bootstrap task" in output
+    assert "Moved to: tasks/done/20260522-1930-clean-up-bootstrap-task.md" in output
+
+
+def test_task_close_command_reports_missing_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found in tasks/active/." in output

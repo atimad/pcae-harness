@@ -7,7 +7,7 @@ from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
-from pcae.commands.task import run_task_new
+from pcae.commands.task import run_task_close, run_task_new
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -47,6 +47,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     task_new_parser.add_argument("title")
     task_new_parser.set_defaults(handler=run_task_new)
+
+    task_close_parser = task_subparsers.add_parser(
+        "close",
+        help="Close the latest active task contract.",
+    )
+    task_close_parser.set_defaults(handler=run_task_close)
 
     hooks_parser = subparsers.add_parser(
         "hooks",

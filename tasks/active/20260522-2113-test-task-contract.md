@@ -18,11 +18,12 @@ implementation
 
 ## Goal
 
-Implement global protected files with explicit task overrides.
+Implement task lifecycle naming cleanup.
 
 ## Allowed Files
 
 - src/pcae/cli.py
+- src/pcae/commands/task.py
 - src/pcae/core/tasks.py
 - src/pcae/commands/check.py
 - src/pcae/core/check.py

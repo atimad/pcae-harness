@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 4B: Global protected files.
+Phase 4C: Task lifecycle naming cleanup.
 
 ## Current State
 
-PCAE Harness has advisory `pcae check` validation with active task discovery, wildcard scopes, forbidden-file enforcement, and global protected-file checks with explicit overrides.
+PCAE Harness has task creation plus `pcae task close` for archiving the latest active task into `tasks/done/`.
 
 ## Next
 

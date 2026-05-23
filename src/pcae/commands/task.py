@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from pcae.core.paths import HarnessPath
-from pcae.core.tasks import create_task_contract
+from pcae.core.tasks import close_latest_active_task, create_task_contract
 
 
 def run_task_new(args: argparse.Namespace) -> int:
@@ -11,4 +11,17 @@ def run_task_new(args: argparse.Namespace) -> int:
     contract = create_task_contract(root, args.title)
 
     print(f"Created task contract: {contract.relative_path.as_posix()}")
+    return 0
+
+
+def run_task_close(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    closed_task = close_latest_active_task(root)
+    if closed_task is None:
+        print("No active task contract found in tasks/active/.")
+        return 1
+
+    print(f"Closed task: {closed_task.task_id}")
+    print(f"Title: {closed_task.title}")
+    print(f"Moved to: {closed_task.destination_path.relative_to(root.path).as_posix()}")
     return 0
