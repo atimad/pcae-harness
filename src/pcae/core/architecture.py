@@ -44,8 +44,9 @@ def analyze_changed_python_dependencies(
     changes: tuple[GitChange, ...],
     architecture_zones: dict[str, tuple[str, ...]],
     architecture_rules: dict[str, tuple[str, ...]],
+    forbidden_dependencies: tuple[tuple[str, str], ...] = (),
 ) -> ArchitectureAnalysisResult:
-    if not architecture_rules:
+    if not architecture_rules and not forbidden_dependencies:
         return ArchitectureAnalysisResult(dependency_warnings=(), parse_warnings=())
 
     dependency_warnings: list[ArchitectureDependencyWarning] = []
@@ -84,6 +85,7 @@ def analyze_changed_python_dependencies(
                     source_zones,
                     target_zones,
                     architecture_rules,
+                    forbidden_dependencies,
                 )
             )
 
@@ -141,13 +143,27 @@ def disallowed_dependencies(
     source_zones: tuple[str, ...],
     target_zones: tuple[str, ...],
     architecture_rules: dict[str, tuple[str, ...]],
+    forbidden_dependencies: tuple[tuple[str, str], ...] = (),
 ) -> tuple[ArchitectureDependencyWarning, ...]:
     warnings: list[ArchitectureDependencyWarning] = []
     for source_zone in source_zones:
         allowed_targets = architecture_rules.get(source_zone, ())
-        if "*" in allowed_targets:
-            continue
         for target_zone in target_zones:
+            if dependency_is_forbidden(
+                source_zone,
+                target_zone,
+                forbidden_dependencies,
+            ):
+                warnings.append(
+                    ArchitectureDependencyWarning(
+                        path=path,
+                        source_zone=source_zone,
+                        target_zone=target_zone,
+                    )
+                )
+                continue
+            if "*" in allowed_targets:
+                continue
             if target_zone in allowed_targets:
                 continue
             warnings.append(
@@ -158,6 +174,18 @@ def disallowed_dependencies(
                 )
             )
     return tuple(warnings)
+
+
+def dependency_is_forbidden(
+    source_zone: str,
+    target_zone: str,
+    forbidden_dependencies: tuple[tuple[str, str], ...],
+) -> bool:
+    return any(
+        source_zone == forbidden_source
+        and (forbidden_target == "*" or target_zone == forbidden_target)
+        for forbidden_source, forbidden_target in forbidden_dependencies
+    )
 
 
 def deduplicate_dependency_warnings(

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Reduce unclassified architecture drift for common PCAE project files.
+Add task-scoped architecture dependency governance to `pcae check`.
 
 ## Allowed Files
 

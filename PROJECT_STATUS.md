@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 12D: Reduce unclassified architecture drift.
+Phase 13A: Task-scoped dependency governance.
 
 ## Current State
 
-Architecture policy now classifies common PCAE project files such as CLI, scripts, hooks, package, session, and policy files.
+Active task contracts can override repo architecture dependency rules with allowed and forbidden dependency sections.
 
 ## Next
 

@@ -25,6 +25,7 @@ DOCUMENTATION_PATHS = {
 }
 
 SOURCE_PREFIXES = ("src/", "tests/")
+DEPENDENCY_SEPARATOR = "->"
 
 @dataclass(frozen=True)
 class CheckMessage:
@@ -42,6 +43,13 @@ class CheckMessage:
 class ArchitectureZoneCount:
     name: str
     file_count: int
+
+
+@dataclass(frozen=True)
+class TaskDependencyScope:
+    allowed_rules: dict[str, tuple[str, ...]]
+    forbidden_dependencies: tuple[tuple[str, str], ...]
+    violations: tuple[CheckMessage, ...]
 
 
 @dataclass(frozen=True)
@@ -114,11 +122,23 @@ def run_checks(root: HarnessPath) -> CheckResult:
             CheckMessage("Source files changed without documentation file updates.")
         )
 
+    architecture_rules = policy.architecture_rules
+    forbidden_dependencies: tuple[tuple[str, str], ...] = ()
+    if active_task is not None:
+        dependency_scope = build_task_dependency_scope(
+            active_task,
+            policy.architecture_zones,
+        )
+        violations.extend(dependency_scope.violations)
+        architecture_rules = dependency_scope.allowed_rules or policy.architecture_rules
+        forbidden_dependencies = dependency_scope.forbidden_dependencies
+
     architecture_result = analyze_changed_python_dependencies(
         root,
         changes,
         policy.architecture_zones,
-        policy.architecture_rules,
+        architecture_rules,
+        forbidden_dependencies,
     )
     warnings.extend(
         CheckMessage(warning.reason, warning.path)
@@ -178,6 +198,93 @@ def classify_architecture_zones(
         )
 
     return tuple(zone_counts)
+
+
+def build_task_dependency_scope(
+    active_task: ActiveTask,
+    architecture_zones: dict[str, tuple[str, ...]],
+) -> TaskDependencyScope:
+    known_zones = set(architecture_zones)
+    allowed_rules, allowed_violations = parse_dependency_rules(
+        active_task.allowed_dependencies,
+        known_zones,
+        "Allowed Dependencies",
+    )
+    forbidden_dependencies, forbidden_violations = parse_dependency_pairs(
+        active_task.forbidden_dependencies,
+        known_zones,
+        "Forbidden Dependencies",
+    )
+    return TaskDependencyScope(
+        allowed_rules=allowed_rules,
+        forbidden_dependencies=forbidden_dependencies,
+        violations=allowed_violations + forbidden_violations,
+    )
+
+
+def parse_dependency_rules(
+    dependencies: tuple[str, ...],
+    known_zones: set[str],
+    section_name: str,
+) -> tuple[dict[str, tuple[str, ...]], tuple[CheckMessage, ...]]:
+    pairs, violations = parse_dependency_pairs(dependencies, known_zones, section_name)
+    rules: dict[str, list[str]] = {}
+    for source_zone, target_zone in pairs:
+        rules.setdefault(source_zone, []).append(target_zone)
+    return (
+        {source_zone: tuple(targets) for source_zone, targets in rules.items()},
+        violations,
+    )
+
+
+def parse_dependency_pairs(
+    dependencies: tuple[str, ...],
+    known_zones: set[str],
+    section_name: str,
+) -> tuple[tuple[tuple[str, str], ...], tuple[CheckMessage, ...]]:
+    pairs: list[tuple[str, str]] = []
+    violations: list[CheckMessage] = []
+    for dependency in dependencies:
+        parsed = parse_dependency_pair(dependency)
+        if parsed is None:
+            violations.append(
+                CheckMessage(
+                    f"Invalid dependency format in task {section_name}: "
+                    f"'{dependency}'. Expected 'source -> target'."
+                )
+            )
+            continue
+
+        source_zone, target_zone = parsed
+        if source_zone not in known_zones:
+            violations.append(
+                CheckMessage(
+                    f"Unknown architecture zone '{source_zone}' listed in task "
+                    f"{section_name}."
+                )
+            )
+        if target_zone != "*" and target_zone not in known_zones:
+            violations.append(
+                CheckMessage(
+                    f"Unknown architecture zone '{target_zone}' listed in task "
+                    f"{section_name}."
+                )
+            )
+        pairs.append((source_zone, target_zone))
+
+    return tuple(pairs), tuple(violations)
+
+
+def parse_dependency_pair(dependency: str) -> tuple[str, str] | None:
+    if dependency.count(DEPENDENCY_SEPARATOR) != 1:
+        return None
+    source_zone, target_zone = (
+        part.strip()
+        for part in dependency.split(DEPENDENCY_SEPARATOR, 1)
+    )
+    if not source_zone or not target_zone:
+        return None
+    return source_zone, target_zone
 
 
 def check_session_continuity(

@@ -54,6 +54,29 @@ def test_architecture_analysis_reports_forbidden_dependency(tmp_path: Path) -> N
     assert result.parse_warnings == ()
 
 
+def test_architecture_analysis_forbidden_dependency_wins_over_wildcard(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+
+    result = analyze_changed_python_dependencies(
+        HarnessPath(tmp_path),
+        (GitChange(Path("src/pcae/core/changed.py"), " M"),),
+        ZONES,
+        {"core": ("*",)},
+        (("core", "commands"),),
+    )
+
+    assert len(result.dependency_warnings) == 1
+    assert result.dependency_warnings[0].text == (
+        "src/pcae/core/changed.py: core -> commands is not allowed by policy"
+    )
+
+
 def test_architecture_analysis_ignores_external_imports(tmp_path: Path) -> None:
     write_file(
         tmp_path / "src" / "pcae" / "core" / "changed.py",

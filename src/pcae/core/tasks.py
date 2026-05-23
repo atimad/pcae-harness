@@ -44,6 +44,8 @@ class ActiveTask:
     override_protected_files: tuple[str, ...]
     allowed_zones: tuple[str, ...]
     forbidden_zones: tuple[str, ...]
+    allowed_dependencies: tuple[str, ...]
+    forbidden_dependencies: tuple[str, ...]
 
 
 def create_task_contract(
@@ -195,6 +197,14 @@ TBD
 
 {forbidden_zone_items}
 
+## Allowed Dependencies
+
+- TBD
+
+## Forbidden Dependencies
+
+- TBD
+
 ## Forbidden Changes
 
 - TBD
@@ -244,6 +254,14 @@ def read_active_task(task_path: Path) -> ActiveTask:
         ),
         allowed_zones=read_task_section_items_from_text(content, "Allowed Zones"),
         forbidden_zones=read_task_section_items_from_text(content, "Forbidden Zones"),
+        allowed_dependencies=read_task_section_items_from_text(
+            content,
+            "Allowed Dependencies",
+        ),
+        forbidden_dependencies=read_task_section_items_from_text(
+            content,
+            "Forbidden Dependencies",
+        ),
     )
 
 
