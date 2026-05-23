@@ -651,6 +651,88 @@ def test_check_command_prints_architecture_zone_summary(
     assert "PCAE check passed." in output
 
 
+def test_check_command_prints_architecture_dependency_warnings(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/core/changed.py",
+            "CHANGELOG.md",
+        ],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            },
+            rules={
+                "core": ["core"],
+                "commands": ["core", "commands"],
+                "docs": ["*"],
+            },
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture dependency warnings:" in output
+    assert (
+        "src/pcae/core/changed.py: core -> commands is not allowed by policy"
+        in output
+    )
+    assert "PCAE check passed." in output
+
+
+def test_check_warns_when_changed_python_file_cannot_be_parsed(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=[
+            "src/pcae/core/changed.py",
+            "CHANGELOG.md",
+        ],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={"core": ["src/pcae/core/**"]},
+            rules={"core": ["core"]},
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "def broken(:\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert has_warning(
+        result,
+        "src/pcae/core/changed.py: Could not parse Python imports:",
+    )
+
+
 def write_task(
     root: Path,
     allowed_files: list[str],
@@ -808,6 +890,31 @@ patterns = [
 
 [architecture.zones]
 {rendered_zones}
+"""
+
+
+def policy_with_architecture_rules(
+    zones: dict[str, list[str]],
+    rules: dict[str, list[str]],
+) -> str:
+    rendered_zones = "\n".join(
+        f"{name} = [{', '.join(render_string(pattern) for pattern in patterns)}]"
+        for name, patterns in zones.items()
+    )
+    rendered_rules = "\n".join(
+        f"{name} = [{', '.join(render_string(target) for target in targets)}]"
+        for name, targets in rules.items()
+    )
+    return f"""[protected]
+patterns = [
+  ".env",
+]
+
+[architecture.zones]
+{rendered_zones}
+
+[architecture.rules]
+{rendered_rules}
 """
 
 

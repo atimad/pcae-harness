@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add advisory architecture dependency rules to repo policy.
+Add advisory Python import dependency analysis to `pcae check`.
 
 ## Allowed Files
 

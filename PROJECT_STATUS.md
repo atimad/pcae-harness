@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 11A: Architecture dependency rules configuration.
+Phase 11B: Advisory Python import dependency analysis.
 
 ## Current State
 
-PCAE Harness can load and inspect advisory architecture dependency rules from repo policy.
+PCAE Harness can scan changed Python imports and report advisory architecture dependency warnings during `pcae check`.
 
 ## Next
 

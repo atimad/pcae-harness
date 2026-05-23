@@ -30,3 +30,4 @@
 - Added advisory architecture zone summaries to `pcae check`.
 - Changed successful session continuity output from warning to info.
 - Added advisory architecture dependency rule loading and inspect reporting.
+- Added advisory Python import dependency analysis to `pcae check`.

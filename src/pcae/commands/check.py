@@ -20,6 +20,11 @@ def run_check(args: argparse.Namespace) -> int:
         for zone in result.architecture_zones_touched:
             print(f"  {zone.name}: {zone.file_count} files")
 
+    if result.architecture_dependency_warnings:
+        print("Architecture dependency warnings:")
+        for warning in result.architecture_dependency_warnings:
+            print(f"  {warning.text}")
+
     for warning in result.warnings:
         print(f"  - warning: {warning.text}")
 

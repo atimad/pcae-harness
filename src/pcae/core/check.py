@@ -5,6 +5,7 @@ from fnmatch import fnmatch
 import json
 from pathlib import Path
 
+from pcae.core.architecture import analyze_changed_python_dependencies
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
@@ -49,6 +50,7 @@ class CheckResult:
     warnings: tuple[CheckMessage, ...]
     infos: tuple[CheckMessage, ...]
     architecture_zones_touched: tuple[ArchitectureZoneCount, ...]
+    architecture_dependency_warnings: tuple[CheckMessage, ...]
     active_task_id: str | None = None
     active_task_title: str | None = None
 
@@ -105,6 +107,17 @@ def run_checks(root: HarnessPath) -> CheckResult:
             CheckMessage("Source files changed without documentation file updates.")
         )
 
+    architecture_result = analyze_changed_python_dependencies(
+        root,
+        changes,
+        policy.architecture_zones,
+        policy.architecture_rules,
+    )
+    warnings.extend(
+        CheckMessage(warning.reason, warning.path)
+        for warning in architecture_result.parse_warnings
+    )
+
     return CheckResult(
         violations=tuple(violations),
         warnings=tuple(warnings),
@@ -112,6 +125,10 @@ def run_checks(root: HarnessPath) -> CheckResult:
         architecture_zones_touched=classify_architecture_zones(
             changed_paths,
             policy.architecture_zones,
+        ),
+        architecture_dependency_warnings=tuple(
+            CheckMessage(warning.text)
+            for warning in architecture_result.dependency_warnings
         ),
         active_task_id=active_task.task_id if active_task is not None else None,
         active_task_title=active_task.title if active_task is not None else None,
