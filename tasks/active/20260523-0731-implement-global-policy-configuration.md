@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add task-scoped architecture dependency governance to `pcae check`.
+Add task-scoped architecture enforcement mode overrides.
 
 ## Allowed Files
 

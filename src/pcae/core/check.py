@@ -9,7 +9,11 @@ from pcae.core.architecture import analyze_changed_python_dependencies, zones_fo
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
-from pcae.core.policy import ARCHITECTURE_ENFORCEMENT_STRICT, load_policy
+from pcae.core.policy import (
+    ARCHITECTURE_ENFORCEMENT_ADVISORY,
+    ARCHITECTURE_ENFORCEMENT_STRICT,
+    load_policy,
+)
 from pcae.core.session import read_session_snapshot
 from pcae.core.tasks import ActiveTask, find_latest_active_task
 
@@ -122,6 +126,14 @@ def run_checks(root: HarnessPath) -> CheckResult:
             CheckMessage("Source files changed without documentation file updates.")
         )
 
+    architecture_enforcement_mode = policy.architecture_enforcement_mode
+    if active_task is not None:
+        task_mode, mode_violation = task_enforcement_mode(active_task)
+        if mode_violation is not None:
+            violations.append(mode_violation)
+        elif task_mode is not None:
+            architecture_enforcement_mode = task_mode
+
     architecture_rules = policy.architecture_rules
     forbidden_dependencies: tuple[tuple[str, str], ...] = ()
     if active_task is not None:
@@ -148,7 +160,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
         CheckMessage(warning.text)
         for warning in architecture_result.dependency_warnings
     )
-    if policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_STRICT:
+    if architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_STRICT:
         violations.extend(architecture_dependency_warnings)
 
     return CheckResult(
@@ -285,6 +297,23 @@ def parse_dependency_pair(dependency: str) -> tuple[str, str] | None:
     if not source_zone or not target_zone:
         return None
     return source_zone, target_zone
+
+
+def task_enforcement_mode(active_task: ActiveTask) -> tuple[str | None, CheckMessage | None]:
+    mode = active_task.enforcement_mode
+    if mode is None:
+        return None, None
+    if mode in {"TBD", ""}:
+        return None, None
+    if mode in {ARCHITECTURE_ENFORCEMENT_ADVISORY, ARCHITECTURE_ENFORCEMENT_STRICT}:
+        return mode, None
+    return (
+        None,
+        CheckMessage(
+            "Invalid task Enforcement Mode: "
+            f"'{mode}'. Expected 'advisory' or 'strict'."
+        ),
+    )
 
 
 def check_session_continuity(

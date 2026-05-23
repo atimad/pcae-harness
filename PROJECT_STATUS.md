@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 13A: Task-scoped dependency governance.
+Phase 13B: Task-scoped enforcement mode.
 
 ## Current State
 
-Active task contracts can override repo architecture dependency rules with allowed and forbidden dependency sections.
+Active task contracts can override architecture dependency enforcement mode for the current task.
 
 ## Next
 

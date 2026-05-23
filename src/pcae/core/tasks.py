@@ -46,6 +46,7 @@ class ActiveTask:
     forbidden_zones: tuple[str, ...]
     allowed_dependencies: tuple[str, ...]
     forbidden_dependencies: tuple[str, ...]
+    enforcement_mode: str | None
 
 
 def create_task_contract(
@@ -205,6 +206,10 @@ TBD
 
 - TBD
 
+## Enforcement Mode
+
+TBD
+
 ## Forbidden Changes
 
 - TBD
@@ -262,6 +267,7 @@ def read_active_task(task_path: Path) -> ActiveTask:
             content,
             "Forbidden Dependencies",
         ),
+        enforcement_mode=read_task_section_text(content, "Enforcement Mode"),
     )
 
 

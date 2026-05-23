@@ -924,6 +924,120 @@ def test_check_task_forbidden_dependency_wins_over_allowed(tmp_path: Path) -> No
     )
 
 
+def test_check_task_advisory_enforcement_overrides_policy_strict(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md"],
+        enforcement_mode="advisory",
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            },
+            rules={
+                "core": ["core"],
+                "commands": ["core", "commands"],
+                "docs": ["*"],
+            },
+            enforcement_mode="strict",
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+    assert result.architecture_dependency_warnings
+
+
+def test_check_task_strict_enforcement_overrides_policy_advisory(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md"],
+        enforcement_mode="strict",
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            },
+            rules={
+                "core": ["core"],
+                "commands": ["core", "commands"],
+                "docs": ["*"],
+            },
+            enforcement_mode="advisory",
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "core" / "changed.py",
+        "import pcae.commands.task\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/core/changed.py: core -> commands is not allowed by policy",
+    )
+
+
+def test_check_invalid_task_enforcement_mode_fails_clearly(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md"],
+        enforcement_mode="blocking",
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_rules(
+            zones={"core": ["src/pcae/core/**"], "docs": ["*.md"]},
+            rules={"core": ["core"], "docs": ["*"]},
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "Invalid task Enforcement Mode: 'blocking'. Expected 'advisory' or 'strict'.",
+    )
+
+
 def test_check_invalid_task_dependency_format_fails_clearly(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(
@@ -1213,6 +1327,7 @@ def write_task(
     forbidden_zones: list[str] | None = None,
     allowed_dependencies: list[str] | None = None,
     forbidden_dependencies: list[str] | None = None,
+    enforcement_mode: str | None = None,
     task_id: str = "20260522-1930-test-task",
     title: str = "Test task",
 ) -> None:
@@ -1234,6 +1349,7 @@ def write_task(
     forbidden_dependency_items = (
         "\n".join(f"- {dependency}" for dependency in forbidden_dependencies) or "- TBD"
     )
+    rendered_enforcement_mode = enforcement_mode or "TBD"
     write_file(
         task_path,
         f"""# Task Contract
@@ -1285,6 +1401,10 @@ Test check behavior.
 ## Forbidden Dependencies
 
 {forbidden_dependency_items}
+
+## Enforcement Mode
+
+{rendered_enforcement_mode}
 
 ## Forbidden Changes
 
