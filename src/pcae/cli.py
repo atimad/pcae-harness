@@ -7,7 +7,7 @@ from pcae.commands.check import run_check
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
-from pcae.commands.session import run_session_write
+from pcae.commands.session import run_session_read, run_session_write
 from pcae.commands.task import run_task_close, run_task_list, run_task_new
 
 
@@ -91,6 +91,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write a resumable session snapshot.",
     )
     session_write_parser.set_defaults(handler=run_session_write)
+
+    session_read_parser = session_subparsers.add_parser(
+        "read",
+        help="Read the current session snapshot.",
+    )
+    session_read_parser.set_defaults(handler=run_session_read)
 
     return parser
 

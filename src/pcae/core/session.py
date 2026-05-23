@@ -19,6 +19,17 @@ class SessionSnapshot:
     data: dict
 
 
+def read_session_snapshot(root: HarnessPath) -> SessionSnapshot | None:
+    target = root.join(SESSION_RELATIVE_PATH)
+    if not target.is_file():
+        return None
+
+    return SessionSnapshot(
+        relative_path=SESSION_RELATIVE_PATH,
+        data=json.loads(target.read_text(encoding="utf-8")),
+    )
+
+
 def write_session_snapshot(
     root: HarnessPath,
     created_at: datetime | None = None,

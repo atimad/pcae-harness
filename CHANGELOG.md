@@ -14,3 +14,4 @@
 - Extended `pcae task close` to close a specific active task by ID or filename.
 - Added `pcae task list` for active and done task visibility.
 - Added `pcae session write` for `.pcae/session.json` handoff snapshots.
+- Added `pcae session read` for `.pcae/session.json` handoff summaries.

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add `pcae session write` for resumable handoff snapshots.
+Print complete `pcae session read` handoff details.
 
 ## Allowed Files
 
