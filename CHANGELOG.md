@@ -23,3 +23,4 @@
 - Added advisory architecture dependency rules to repo policy inspection.
 - Added advisory Python import dependency warnings to `pcae check`.
 - Added configurable advisory or strict architecture dependency enforcement mode.
+- Added task-scoped architecture zone validation to `pcae check`.

@@ -5,7 +5,7 @@ from fnmatch import fnmatch
 import json
 from pathlib import Path
 
-from pcae.core.architecture import analyze_changed_python_dependencies
+from pcae.core.architecture import analyze_changed_python_dependencies, zones_for_path
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
 from pcae.core.paths import HarnessPath
@@ -101,6 +101,13 @@ def run_checks(root: HarnessPath) -> CheckResult:
             )
         )
         violations.extend(check_allowed_scope(changes, active_task, policy.protected_patterns))
+        violations.extend(
+            check_task_zone_scope(
+                changes,
+                active_task,
+                policy.architecture_zones,
+            )
+        )
 
     if source_changed(changed_paths) and not documentation_changed(changed_paths):
         violations.append(
@@ -219,6 +226,91 @@ def check_session_continuity(
 
     infos.append(CheckMessage("Session continuity verified."))
     return ()
+
+
+def check_task_zone_scope(
+    changes: tuple[GitChange, ...],
+    active_task: ActiveTask,
+    architecture_zones: dict[str, tuple[str, ...]],
+) -> tuple[CheckMessage, ...]:
+    if not active_task.allowed_zones and not active_task.forbidden_zones:
+        return ()
+
+    violations: list[CheckMessage] = []
+    known_zones = set(architecture_zones) | {"unclassified"}
+    violations.extend(
+        unknown_task_zone_violations(
+            active_task.allowed_zones,
+            known_zones,
+            "Allowed Zones",
+        )
+    )
+    violations.extend(
+        unknown_task_zone_violations(
+            active_task.forbidden_zones,
+            known_zones,
+            "Forbidden Zones",
+        )
+    )
+    if violations:
+        return tuple(violations)
+
+    for change in changes:
+        changed_zones = zones_for_changed_path(change.path, architecture_zones)
+        forbidden_matches = tuple(
+            zone for zone in changed_zones if zone in active_task.forbidden_zones
+        )
+        if forbidden_matches:
+            violations.extend(
+                CheckMessage(
+                    reason=(
+                        f"Changed file touches forbidden architecture zone '{zone}' "
+                        f"for task {active_task.task_id}."
+                    ),
+                    path=change.path,
+                )
+                for zone in forbidden_matches
+            )
+            continue
+
+        if not active_task.allowed_zones:
+            continue
+
+        violations.extend(
+            CheckMessage(
+                reason=(
+                    f"Changed file touches architecture zone '{zone}' outside "
+                    f"Allowed Zones for task {active_task.task_id}."
+                ),
+                path=change.path,
+            )
+            for zone in changed_zones
+            if zone not in active_task.allowed_zones
+        )
+
+    return tuple(violations)
+
+
+def zones_for_changed_path(
+    path: Path,
+    architecture_zones: dict[str, tuple[str, ...]],
+) -> tuple[str, ...]:
+    matched_zones = zones_for_path(path, architecture_zones)
+    return matched_zones or ("unclassified",)
+
+
+def unknown_task_zone_violations(
+    zones: tuple[str, ...],
+    known_zones: set[str],
+    section_name: str,
+) -> tuple[CheckMessage, ...]:
+    return tuple(
+        CheckMessage(
+            f"Unknown architecture zone '{zone}' listed in task {section_name}."
+        )
+        for zone in zones
+        if zone not in known_zones
+    )
 
 
 def check_forbidden_changes(

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add configurable architecture dependency enforcement mode.
+Add task-scoped architecture zone validation to `pcae check`.
 
 ## Allowed Files
 

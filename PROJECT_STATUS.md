@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 11C: Configurable architecture enforcement mode.
+Phase 12A: Task-scoped architecture zones.
 
 ## Current State
 
-PCAE Harness can keep architecture dependency warnings advisory or make them blocking with policy enforcement mode.
+PCAE Harness can constrain changed files by task-declared architecture zones during `pcae check`.
 
 ## Next
 

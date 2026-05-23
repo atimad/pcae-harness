@@ -794,6 +794,194 @@ def test_check_missing_architecture_enforcement_defaults_to_advisory(
     assert not has_violation(result, "is not allowed by policy")
 
 
+def test_check_allowed_task_zone_passes(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md"],
+        allowed_zones=["core", "docs"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones(
+            {
+                "core": ["src/pcae/core/**"],
+                "docs": ["*.md"],
+            }
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert result.passed
+
+
+def test_check_disallowed_task_zone_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/commands/changed.py", "CHANGELOG.md"],
+        allowed_zones=["core", "docs"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones(
+            {
+                "core": ["src/pcae/core/**"],
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            }
+        ),
+    )
+    write_file(
+        tmp_path / "src" / "pcae" / "commands" / "changed.py",
+        "print('old')\n",
+    )
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "commands" / "changed.py",
+        "print('new')\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/commands/changed.py: Changed file touches architecture zone "
+        "'commands' outside Allowed Zones",
+    )
+
+
+def test_check_forbidden_task_zone_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/commands/changed.py", "CHANGELOG.md"],
+        allowed_zones=["commands", "docs"],
+        forbidden_zones=["commands"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones(
+            {
+                "commands": ["src/pcae/commands/**"],
+                "docs": ["*.md"],
+            }
+        ),
+    )
+    write_file(
+        tmp_path / "src" / "pcae" / "commands" / "changed.py",
+        "print('old')\n",
+    )
+    commit_baseline(tmp_path)
+
+    write_file(
+        tmp_path / "src" / "pcae" / "commands" / "changed.py",
+        "print('new')\n",
+    )
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "src/pcae/commands/changed.py: Changed file touches forbidden architecture "
+        "zone 'commands'",
+    )
+    assert not has_violation(result, "outside Allowed Zones")
+
+
+def test_check_unclassified_zone_requires_allowed_entry(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["misc.txt"],
+        allowed_zones=["core"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones({"core": ["src/pcae/core/**"]}),
+    )
+    write_file(tmp_path / "misc.txt", "old\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "misc.txt", "new\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "misc.txt: Changed file touches architecture zone 'unclassified' outside "
+        "Allowed Zones",
+    )
+
+
+def test_check_unclassified_forbidden_zone_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["misc.txt"],
+        forbidden_zones=["unclassified"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones({"core": ["src/pcae/core/**"]}),
+    )
+    write_file(tmp_path / "misc.txt", "old\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "misc.txt", "new\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "misc.txt: Changed file touches forbidden architecture zone 'unclassified'",
+    )
+
+
+def test_check_unknown_task_zone_fails_clearly(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(
+        tmp_path,
+        allowed_files=["src/pcae/core/changed.py", "CHANGELOG.md"],
+        allowed_zones=["unknown"],
+    )
+    write_file(
+        tmp_path / ".pcae" / "policy.toml",
+        policy_with_architecture_zones(
+            {
+                "core": ["src/pcae/core/**"],
+                "docs": ["*.md"],
+            }
+        ),
+    )
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    commit_baseline(tmp_path)
+
+    write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    result = run_checks(HarnessPath(tmp_path))
+
+    assert not result.passed
+    assert has_violation(
+        result,
+        "Unknown architecture zone 'unknown' listed in task Allowed Zones.",
+    )
+
+
 def test_check_warns_when_changed_python_file_cannot_be_parsed(
     tmp_path: Path,
 ) -> None:
@@ -832,15 +1020,21 @@ def write_task(
     allowed_files: list[str],
     forbidden_files: list[str] | None = None,
     override_protected_files: list[str] | None = None,
+    allowed_zones: list[str] | None = None,
+    forbidden_zones: list[str] | None = None,
     task_id: str = "20260522-1930-test-task",
     title: str = "Test task",
 ) -> None:
     forbidden_files = forbidden_files or []
     override_protected_files = override_protected_files or []
+    allowed_zones = allowed_zones or []
+    forbidden_zones = forbidden_zones or []
     task_path = root / "tasks" / "active" / f"{task_id}.md"
     allowed = "\n".join(f"- {path}" for path in allowed_files)
     forbidden = "\n".join(f"- {path}" for path in forbidden_files) or "- TBD"
     overrides = "\n".join(f"- {path}" for path in override_protected_files) or "- TBD"
+    allowed_zone_items = "\n".join(f"- {zone}" for zone in allowed_zones) or "- TBD"
+    forbidden_zone_items = "\n".join(f"- {zone}" for zone in forbidden_zones) or "- TBD"
     write_file(
         task_path,
         f"""# Task Contract
@@ -876,6 +1070,14 @@ Test check behavior.
 ## Override Protected Files
 
 {overrides}
+
+## Allowed Zones
+
+{allowed_zone_items}
+
+## Forbidden Zones
+
+{forbidden_zone_items}
 
 ## Forbidden Changes
 

@@ -32,3 +32,4 @@
 - Added advisory architecture dependency rule loading and inspect reporting.
 - Added advisory Python import dependency analysis to `pcae check`.
 - Added configurable architecture dependency enforcement mode.
+- Added task-scoped architecture zone validation to `pcae check`.

@@ -49,6 +49,8 @@ def test_create_task_contract_writes_markdown_file(tmp_path: Path) -> None:
     assert "## Goal" in content
     assert "## Allowed Files" in content
     assert "## Forbidden Files" in content
+    assert "## Allowed Zones" in content
+    assert "## Forbidden Zones" in content
     assert "## Forbidden Changes" in content
     assert "## Acceptance Checks" in content
     assert "## Documentation Requirements" in content
@@ -121,6 +123,42 @@ Test task
 
     assert active_task is not None
     assert active_task.override_protected_files == ("pyproject.toml", "*.pem")
+
+
+def test_find_latest_active_task_reads_allowed_and_forbidden_zones(
+    tmp_path: Path,
+) -> None:
+    task_path = tmp_path / "tasks" / "active" / "20260522-1930-test-task.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        """# Task Contract
+
+## Task ID
+
+20260522-1930-test-task
+
+## Title
+
+Test task
+
+## Allowed Zones
+
+- core
+- tests
+
+## Forbidden Zones
+
+- commands
+- config
+""",
+        encoding="utf-8",
+    )
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+
+    assert active_task is not None
+    assert active_task.allowed_zones == ("core", "tests")
+    assert active_task.forbidden_zones == ("commands", "config")
 
 
 def test_close_latest_active_task_marks_done_and_moves_file(tmp_path: Path) -> None:
