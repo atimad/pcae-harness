@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Validate CI-safe exit-code behavior for machine enforcement.
+Add a controlled end-of-session workflow command.
 
 ## Allowed Files
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 from typing import Any
 
+from pcae.core.architecture import write_architecture_history_snapshot
+from pcae.core.check import run_checks
 from pcae.core.paths import HarnessPath
 from pcae.core.session import (
     SessionUpdate,
@@ -47,6 +49,38 @@ def run_session_update(args: argparse.Namespace) -> int:
 
     print(f"Updated session snapshot: {snapshot.relative_path.as_posix()}")
     return 0
+
+
+def run_session_end(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    check_result = run_checks(root)
+    if not check_result.passed:
+        print("Session end stopped: pcae check failed.")
+        for violation in check_result.violations:
+            print(f"  - {violation.text}")
+        return 1
+
+    session_snapshot = write_session_snapshot(root)
+    architecture_snapshot = write_architecture_history_snapshot(root, check_result)
+
+    print("Session end complete.")
+    print_session_end_summary(session_snapshot.data, len(architecture_snapshot.entries))
+    return 0
+
+
+def print_session_end_summary(data: dict, architecture_history_count: int) -> None:
+    active_task = data.get("active_task")
+    if active_task is None:
+        print("Active task: none")
+    else:
+        print(f"Active task: {active_task.get('id', 'unknown')}")
+        print(f"Title: {active_task.get('title', 'Untitled task')}")
+
+    git = data.get("git", {})
+    print(f"Git status: {git.get('status_summary', 'unknown')}")
+    print(f"Architecture history entries: {architecture_history_count}")
+    next_step = data.get("next_recommended_step") or "none"
+    print(f"Next recommended step: {next_step}")
 
 
 def print_session_snapshot(data: dict) -> None:

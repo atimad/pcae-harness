@@ -306,6 +306,109 @@ def test_session_update_command_updates_read_output(
     assert "  - Session JSON stays readable" in read_output
 
 
+def test_session_end_stops_when_check_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "end"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Session end stopped: pcae check failed." in output
+    assert "No active task contract found in tasks/active/." in output
+    assert not (tmp_path / ".pcae" / "session.json").exists()
+    assert not (tmp_path / ".pcae" / "architecture-history.json").exists()
+
+
+def test_session_end_writes_snapshot_and_architecture_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "End session",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    task_file = tmp_path / "tasks" / "active" / "20260523-0730-end-session.md"
+    task_file.write_text(
+        task_file.read_text(encoding="utf-8").replace(
+            "## Allowed Files\n\n- TBD",
+            "## Allowed Files\n\n- .pcae/**",
+        ),
+        encoding="utf-8",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "end"])
+
+    output = capsys.readouterr().out
+    session_file = tmp_path / ".pcae" / "session.json"
+    history_file = tmp_path / ".pcae" / "architecture-history.json"
+    session_data = json.loads(session_file.read_text(encoding="utf-8"))
+    history_data = json.loads(history_file.read_text(encoding="utf-8"))
+    task_file = tmp_path / "tasks" / "active" / "20260523-0730-end-session.md"
+    assert exit_code == 0
+    assert "Session end complete." in output
+    assert "Active task: 20260523-0730-end-session" in output
+    assert "Title: End session" in output
+    assert "Git status: clean" in output
+    assert "Architecture history entries: 1" in output
+    assert "Next recommended step: none" in output
+    assert session_data["active_task"] == {
+        "id": "20260523-0730-end-session",
+        "title": "End session",
+    }
+    assert len(history_data) == 1
+    assert history_data[0]["active_task"] == {
+        "id": "20260523-0730-end-session",
+        "title": "End session",
+    }
+    assert "## Status\n\nactive" in task_file.read_text(encoding="utf-8")
+
+
+def test_session_end_appends_architecture_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "End session",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    task_file = tmp_path / "tasks" / "active" / "20260523-0730-end-session.md"
+    task_file.write_text(
+        task_file.read_text(encoding="utf-8").replace(
+            "## Allowed Files\n\n- TBD",
+            "## Allowed Files\n\n- .pcae/**",
+        ),
+        encoding="utf-8",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    first_exit_code = main(["session", "end"])
+    capsys.readouterr()
+    second_exit_code = main(["session", "end"])
+
+    output = capsys.readouterr().out
+    history_data = json.loads(
+        (tmp_path / ".pcae" / "architecture-history.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert first_exit_code == 0
+    assert second_exit_code == 0
+    assert len(history_data) == 2
+    assert "Architecture history entries: 2" in output
+
+
 def init_git_repo(root: Path) -> None:
     run_git(root, "init")
     run_git(root, "config", "user.email", "test@example.com")

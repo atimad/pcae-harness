@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 17B: CI-safe exit codes and machine enforcement.
+Phase 18A: Session end workflow.
 
 ## Current State
 
-PCAE can preview and refresh adoption with init options, inspect repo readiness in human-readable or JSON form, manage task lifecycle, validate task scope and policy with CI-safe exit codes, enforce strict architecture dependency gates, maintain session handoff state, and report architecture history and drift metrics.
+PCAE can preview and refresh adoption with init options, inspect repo readiness in human-readable or JSON form, manage task lifecycle, validate task scope and policy with CI-safe exit codes, enforce strict architecture dependency gates, maintain session handoff state, and finalize a session with `pcae session end`.
 
 ## Next
 
