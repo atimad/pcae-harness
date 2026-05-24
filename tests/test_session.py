@@ -409,6 +409,138 @@ def test_session_end_appends_architecture_history(
     assert "Architecture history entries: 2" in output
 
 
+def test_session_start_stops_when_check_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "start"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Session start stopped: pcae check failed." in output
+    assert "No active task contract found in tasks/active/." in output
+
+
+def test_session_start_reports_missing_session_and_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Start session",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "start"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session start summary." in output
+    assert "No session snapshot found at .pcae/session.json." in output
+    assert "No architecture history found at .pcae/architecture-history.json." in output
+
+
+def test_session_start_prints_resume_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Start session",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+    update_session_snapshot(
+        HarnessPath(tmp_path),
+        SessionUpdate(
+            objective="Resume governed work",
+            completed_step="Finished previous phase",
+            next_step="Run implementation",
+            blocker="Need review",
+            warning="Watch scope",
+        ),
+    )
+    write_file(
+        tmp_path / ".pcae" / "architecture-history.json",
+        json.dumps(
+            [
+                {
+                    "active_task": {
+                        "id": "20260523-0730-start-session",
+                        "title": "Start session",
+                    },
+                    "architecture_zones_touched": {},
+                    "changed_files_count": 0,
+                    "dependency_warnings_count": 0,
+                    "enforcement_mode": "advisory",
+                    "git_branch": "main",
+                    "session_continuity": "verified",
+                    "timestamp": "2026-05-23T08:00:00+00:00",
+                }
+            ]
+        ),
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "start"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session start summary." in output
+    assert "Active task: 20260523-0730-start-session" in output
+    assert "Title: Start session" in output
+    assert "Git branch:" in output
+    assert "Git status:" in output
+    assert "Current objective: Resume governed work" in output
+    assert "Last completed step: Finished previous phase" in output
+    assert "Next recommended step: Run implementation" in output
+    assert "Blockers:\n  - Need review" in output
+    assert "Warnings:\n  - Watch scope" in output
+    assert "Architecture history entries: 1" in output
+    assert "Latest enforcement mode: advisory" in output
+    assert "Latest session continuity: verified" in output
+
+
+def test_session_start_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Start session",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+    write_file(
+        tmp_path / ".pcae" / "architecture-history.json",
+        "[]\n",
+    )
+    commit_baseline(tmp_path)
+    before = text_file_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "start"])
+
+    after = text_file_snapshot(tmp_path)
+    capsys.readouterr()
+    assert exit_code == 0
+    assert after == before
+
+
 def init_git_repo(root: Path) -> None:
     run_git(root, "init")
     run_git(root, "config", "user.email", "test@example.com")
@@ -433,3 +565,11 @@ def run_git(root: Path, *args: str) -> None:
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def text_file_snapshot(root: Path) -> dict[str, str]:
+    return {
+        path.relative_to(root).as_posix(): path.read_text(encoding="utf-8")
+        for path in root.rglob("*")
+        if path.is_file() and ".git" not in path.relative_to(root).parts
+    }

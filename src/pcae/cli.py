@@ -15,6 +15,7 @@ from pcae.commands.inspect import run_inspect
 from pcae.commands.session import (
     run_session_end,
     run_session_read,
+    run_session_start,
     run_session_update,
     run_session_write,
 )
@@ -210,6 +211,12 @@ def build_parser() -> argparse.ArgumentParser:
     session_update_parser.add_argument("--warning")
     session_update_parser.add_argument("--note")
     session_update_parser.set_defaults(handler=run_session_update)
+
+    session_start_parser = session_subparsers.add_parser(
+        "start",
+        help="Summarize the current governed engineering session.",
+    )
+    session_start_parser.set_defaults(handler=run_session_start)
 
     session_end_parser = session_subparsers.add_parser(
         "end",

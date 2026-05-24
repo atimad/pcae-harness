@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a controlled end-of-session workflow command.
+Add a controlled start-of-session workflow command.
 
 ## Allowed Files
 

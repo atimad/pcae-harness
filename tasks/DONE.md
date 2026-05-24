@@ -51,3 +51,4 @@
 - Hardened strict architecture enforcement with regression coverage for policy and task-level gates.
 - Added CI-focused `pcae check` exit-code coverage for warnings, strict failures, invalid policy, and session mismatch.
 - Added `pcae session end` to run check, write session state, append architecture history, and print a summary.
+- Added `pcae session start` for read-only governed session resume summaries.
