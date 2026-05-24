@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add structured task lifecycle status commands.
+Validate strict architecture dependency enforcement as a real gate.
 
 ## Allowed Files
 

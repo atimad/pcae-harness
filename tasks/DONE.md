@@ -48,3 +48,4 @@
 - Added `pcae task show` for read-only active task display.
 - Added `pcae task update` for controlled active task contract edits.
 - Added `pcae task pause`, `pcae task resume`, and `pcae task complete` lifecycle commands.
+- Hardened strict architecture enforcement with regression coverage for policy and task-level gates.
