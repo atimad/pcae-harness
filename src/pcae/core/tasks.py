@@ -39,6 +39,9 @@ class ActiveTask:
     path: Path
     task_id: str
     title: str
+    status: str
+    mode: str
+    goal: str | None
     allowed_files: tuple[str, ...]
     forbidden_files: tuple[str, ...]
     override_protected_files: tuple[str, ...]
@@ -47,6 +50,8 @@ class ActiveTask:
     allowed_dependencies: tuple[str, ...]
     forbidden_dependencies: tuple[str, ...]
     enforcement_mode: str | None
+    acceptance_checks: tuple[str, ...]
+    documentation_requirements: tuple[str, ...]
 
 
 def create_task_contract(
@@ -251,6 +256,9 @@ def read_active_task(task_path: Path) -> ActiveTask:
         path=task_path,
         task_id=read_task_section_text(content, "Task ID") or task_path.stem,
         title=read_task_section_text(content, "Title") or "Untitled task",
+        status=read_task_section_text(content, "Status") or "active",
+        mode=read_task_section_text(content, "Mode") or "unspecified",
+        goal=read_task_section_text(content, "Goal"),
         allowed_files=read_task_section_items_from_text(content, "Allowed Files"),
         forbidden_files=read_task_section_items_from_text(content, "Forbidden Files"),
         override_protected_files=read_task_section_items_from_text(
@@ -268,6 +276,14 @@ def read_active_task(task_path: Path) -> ActiveTask:
             "Forbidden Dependencies",
         ),
         enforcement_mode=read_task_section_text(content, "Enforcement Mode"),
+        acceptance_checks=read_task_section_items_from_text(
+            content,
+            "Acceptance Checks",
+        ),
+        documentation_requirements=read_task_section_items_from_text(
+            content,
+            "Documentation Requirements",
+        ),
     )
 
 

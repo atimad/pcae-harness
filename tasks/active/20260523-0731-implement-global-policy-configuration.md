@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Enrich architecture snapshots with a post-append metrics summary.
+Add a read-only command to display the latest active task.
 
 ## Allowed Files
 

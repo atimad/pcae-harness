@@ -5,9 +5,11 @@ import argparse
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.tasks import (
+    ActiveTask,
     close_active_task_by_identifier,
     close_latest_active_task,
     create_task_contract,
+    find_latest_active_task,
     read_task_summaries,
     TaskSummary,
 )
@@ -84,6 +86,17 @@ def run_task_list(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_task_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    active_task = find_latest_active_task(root)
+    if active_task is None:
+        print("No active task contract found in tasks/active/.")
+        return 1
+
+    print(format_active_task(active_task))
+    return 0
+
+
 def print_task_section(title: str, tasks: tuple[TaskSummary, ...]) -> None:
     print(f"{title}:")
     if not tasks:
@@ -92,3 +105,38 @@ def print_task_section(title: str, tasks: tuple[TaskSummary, ...]) -> None:
 
     for task in tasks:
         print(f"  [{task.status}] {task.task_id} - {task.title}")
+
+
+def format_active_task(active_task: ActiveTask) -> str:
+    lines = [
+        "Active task:",
+        f"  Task ID: {active_task.task_id}",
+        f"  Title: {active_task.title}",
+        f"  Status: {active_task.status}",
+        f"  Mode: {active_task.mode}",
+        f"  Goal: {active_task.goal or 'TBD'}",
+        "Allowed files:",
+        *format_items(active_task.allowed_files),
+        "Forbidden files:",
+        *format_items(active_task.forbidden_files),
+        "Allowed zones:",
+        *format_items(active_task.allowed_zones),
+        "Forbidden zones:",
+        *format_items(active_task.forbidden_zones),
+        "Allowed dependencies:",
+        *format_items(active_task.allowed_dependencies),
+        "Forbidden dependencies:",
+        *format_items(active_task.forbidden_dependencies),
+        f"Enforcement mode: {active_task.enforcement_mode or 'TBD'}",
+        "Acceptance checks:",
+        *format_items(active_task.acceptance_checks),
+        "Documentation requirements:",
+        *format_items(active_task.documentation_requirements),
+    ]
+    return "\n".join(lines)
+
+
+def format_items(items: tuple[str, ...]) -> list[str]:
+    if not items:
+        return ["  - none"]
+    return [f"  - {item}" for item in items]

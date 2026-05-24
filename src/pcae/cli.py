@@ -17,7 +17,12 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
-from pcae.commands.task import run_task_close, run_task_list, run_task_new
+from pcae.commands.task import (
+    run_task_close,
+    run_task_list,
+    run_task_new,
+    run_task_show,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -114,6 +119,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="List active and done task contracts.",
     )
     task_list_parser.set_defaults(handler=run_task_list)
+
+    task_show_parser = task_subparsers.add_parser(
+        "show",
+        help="Show the latest active task contract.",
+    )
+    task_show_parser.set_defaults(handler=run_task_show)
 
     hooks_parser = subparsers.add_parser(
         "hooks",

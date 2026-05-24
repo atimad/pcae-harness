@@ -163,6 +163,9 @@ def test_find_latest_active_task_reads_task_identity(tmp_path: Path) -> None:
     assert active_task is not None
     assert active_task.task_id == "20260522-1931-new-task"
     assert active_task.title == "New task"
+    assert active_task.status == "active"
+    assert active_task.mode == "implementation"
+    assert active_task.goal == "TBD"
 
 
 def test_find_latest_active_task_reads_override_protected_files(tmp_path: Path) -> None:
@@ -579,6 +582,138 @@ def test_task_list_command_does_not_modify_files(
     monkeypatch.chdir(tmp_path)
 
     exit_code = main(["task", "list"])
+
+    after = {
+        path.relative_to(tmp_path).as_posix(): path.read_text(encoding="utf-8")
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    capsys.readouterr()
+    assert exit_code == 0
+    assert after == before
+
+
+def test_task_show_command_displays_latest_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    task_path = tmp_path / "tasks" / "active" / "20260522-1930-show-task.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        """# Task Contract
+
+## Task ID
+
+20260522-1930-show-task
+
+## Title
+
+Show task
+
+## Status
+
+active
+
+## Mode
+
+implementation
+
+## Goal
+
+Display the active task clearly.
+
+## Allowed Files
+
+- src/pcae/core/tasks.py
+- tests/test_task.py
+
+## Forbidden Files
+
+- pyproject.toml
+
+## Allowed Zones
+
+- core
+- tests
+
+## Forbidden Zones
+
+- config
+
+## Allowed Dependencies
+
+- core -> core
+- tests -> *
+
+## Forbidden Dependencies
+
+- core -> commands
+
+## Enforcement Mode
+
+strict
+
+## Acceptance Checks
+
+- pcae task show works
+- tests pass
+
+## Documentation Requirements
+
+- Update project memory files.
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Active task:" in output
+    assert "Task ID: 20260522-1930-show-task" in output
+    assert "Title: Show task" in output
+    assert "Status: active" in output
+    assert "Mode: implementation" in output
+    assert "Goal: Display the active task clearly." in output
+    assert "Allowed files:\n  - src/pcae/core/tasks.py\n  - tests/test_task.py" in output
+    assert "Forbidden files:\n  - pyproject.toml" in output
+    assert "Allowed zones:\n  - core\n  - tests" in output
+    assert "Forbidden zones:\n  - config" in output
+    assert "Allowed dependencies:\n  - core -> core\n  - tests -> *" in output
+    assert "Forbidden dependencies:\n  - core -> commands" in output
+    assert "Enforcement mode: strict" in output
+    assert "Acceptance checks:\n  - pcae task show works\n  - tests pass" in output
+    assert "Documentation requirements:\n  - Update project memory files." in output
+
+
+def test_task_show_command_reports_missing_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found in tasks/active/." in output
+
+
+def test_task_show_command_does_not_modify_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Read only task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    before = {
+        path.relative_to(tmp_path).as_posix(): path.read_text(encoding="utf-8")
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "show"])
 
     after = {
         path.relative_to(tmp_path).as_posix(): path.read_text(encoding="utf-8")
