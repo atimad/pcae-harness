@@ -228,6 +228,12 @@ def test_architecture_snapshot_command_writes_history(
     assert exit_code == 0
     assert "Wrote architecture history: .pcae/architecture-history.json" in output
     assert "Entries: 1" in output
+    assert "Snapshot metrics:" in output
+    assert "  Total snapshots: 1" in output
+    assert "  Latest dependency warnings: 0" in output
+    assert "  Max dependency warnings: 0" in output
+    assert "  Snapshots with warnings: 0" in output
+    assert "  Most frequently touched zone: none" in output
     assert (tmp_path / ".pcae" / "architecture-history.json").is_file()
 
 

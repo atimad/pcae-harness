@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add read-only architecture drift metrics from persistent history.
+Enrich architecture snapshots with a post-append metrics summary.
 
 ## Allowed Files
 

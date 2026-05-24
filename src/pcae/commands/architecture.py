@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from pcae.core.architecture import (
+    ArchitectureHistorySummary,
     calculate_architecture_drift_metrics,
     read_architecture_history_summary,
     write_architecture_history_snapshot,
@@ -15,9 +16,24 @@ def run_architecture_snapshot(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     check_result = run_checks(root)
     snapshot = write_architecture_history_snapshot(root, check_result)
+    summary = ArchitectureHistorySummary(
+        relative_path=snapshot.relative_path,
+        entries=snapshot.entries,
+        latest=snapshot.entry,
+    )
+    metrics = calculate_architecture_drift_metrics(summary)
 
     print(f"Wrote architecture history: {snapshot.relative_path.as_posix()}")
     print(f"Entries: {len(snapshot.entries)}")
+    print("Snapshot metrics:")
+    print(f"  Total snapshots: {metrics.total_snapshots}")
+    print(f"  Latest dependency warnings: {metrics.latest_dependency_warnings}")
+    print(f"  Max dependency warnings: {metrics.max_dependency_warnings}")
+    print(f"  Snapshots with warnings: {metrics.snapshots_with_warnings}")
+    print(
+        "  Most frequently touched zone: "
+        f"{metrics.most_frequently_touched_zone or 'none'}"
+    )
     return 0
 
 
