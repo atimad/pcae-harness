@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Keep generated governance export bundles as local ignored artifacts.
+Add a safe dry-run preview for governance bundle imports.
 
 ## Allowed Files
 

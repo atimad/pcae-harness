@@ -12,6 +12,7 @@ from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
+from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
 from pcae.commands.session import (
@@ -103,6 +104,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write a portable governance JSON bundle.",
     )
     export_bundle_parser.set_defaults(handler=run_export_bundle)
+
+    import_parser = subparsers.add_parser(
+        "import",
+        help="Preview importing PCAE governance state.",
+    )
+    import_subparsers = import_parser.add_subparsers(
+        dest="import_command",
+        required=True,
+    )
+
+    import_bundle_parser = import_subparsers.add_parser(
+        "bundle",
+        help="Preview a governance JSON bundle import.",
+    )
+    import_bundle_parser.add_argument("bundle")
+    import_bundle_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview import actions without writing files.",
+    )
+    import_bundle_parser.set_defaults(handler=run_import_bundle)
 
     architecture_parser = subparsers.add_parser(
         "architecture",

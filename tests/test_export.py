@@ -7,23 +7,16 @@ import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
-from pcae.core.export import write_governance_export_bundle
+from pcae.core.export import (
+    GOVERNANCE_BUNDLE_REQUIRED_KEYS,
+    write_governance_export_bundle,
+)
 from pcae.core.paths import HarnessPath
 from pcae.core.session import write_session_snapshot
 from pcae.core.tasks import create_task_contract
 
 
-EXPECTED_BUNDLE_KEYS = {
-    "active_task",
-    "architecture_metrics",
-    "check_summary",
-    "generated_timestamp",
-    "git_status_summary",
-    "health_summary",
-    "latest_architecture_history_summary",
-    "policy_summary",
-    "session_snapshot",
-}
+EXPECTED_BUNDLE_KEYS = set(GOVERNANCE_BUNDLE_REQUIRED_KEYS)
 
 
 def test_export_bundle_command_writes_governance_bundle(

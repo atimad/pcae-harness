@@ -49,3 +49,4 @@
 - Added `pcae architecture metrics --json` for machine-readable drift metrics.
 - Added `pcae export bundle` for portable governance state snapshots.
 - Added `.pcae/exports/.gitignore` so generated governance bundles stay local by default.
+- Added `pcae import bundle <path> --dry-run` for safe governance bundle import previews.

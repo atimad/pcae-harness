@@ -20,6 +20,19 @@ from pcae.core.session import read_session_snapshot, summarize_git_changes
 
 
 EXPORTS_RELATIVE_PATH = Path(".pcae") / "exports"
+GOVERNANCE_BUNDLE_REQUIRED_KEYS = frozenset(
+    {
+        "active_task",
+        "architecture_metrics",
+        "check_summary",
+        "generated_timestamp",
+        "git_status_summary",
+        "health_summary",
+        "latest_architecture_history_summary",
+        "policy_summary",
+        "session_snapshot",
+    }
+)
 
 
 @dataclass(frozen=True)
