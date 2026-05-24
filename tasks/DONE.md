@@ -53,3 +53,4 @@
 - Added `pcae session end` to run check, write session state, append architecture history, and print a summary.
 - Added `pcae session start` for read-only governed session resume summaries.
 - Added top-level `pcae health` for concise governance readiness reporting.
+- Added `pcae health --json` for machine-readable governance health output.

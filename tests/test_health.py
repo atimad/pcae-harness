@@ -41,6 +41,40 @@ def test_health_command_reports_healthy_governance(
     assert "Git status: clean" in output
 
 
+def test_health_json_command_reports_healthy_governance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    write_architecture_history(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["overall_status"] == "healthy"
+    assert data["required_files_status"] == "all present"
+    assert data["policy_validation"] == "valid"
+    assert data["policy_source"] == "repo config"
+    assert data["active_task"] == {
+        "id": "20260524-0800-health-task",
+        "title": "Health task",
+    }
+    assert data["session_continuity"] == "verified"
+    assert data["architecture_history_entries"] == 1
+    assert data["latest_enforcement_mode"] == "advisory"
+    assert data["latest_dependency_warnings"] == 0
+    assert data["git_status"] == "clean"
+    assert data["warnings"] == []
+    assert data["violations"] == []
+
+
 def test_health_command_reports_warnings_without_failing(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -59,6 +93,30 @@ def test_health_command_reports_warnings_without_failing(
     assert "warning: No architecture history found at .pcae/architecture-history.json." in output
 
 
+def test_health_json_command_reports_warnings_without_failing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_ready_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["overall_status"] == "healthy"
+    assert data["session_continuity"] == "missing"
+    assert data["architecture_history_entries"] is None
+    assert data["latest_dependency_warnings"] is None
+    assert "Session snapshot missing at .pcae/session.json." in data["warnings"][0]
+    assert (
+        "No architecture history found at .pcae/architecture-history.json."
+        in data["warnings"][1]
+    )
+    assert data["violations"] == []
+
+
 def test_health_command_returns_nonzero_when_check_fails(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -74,6 +132,24 @@ def test_health_command_returns_nonzero_when_check_fails(
     assert "Overall status: unhealthy" in output
     assert "Health check failed:" in output
     assert "No active task contract found in tasks/active/." in output
+
+
+def test_health_json_command_returns_nonzero_when_check_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 1
+    assert data["overall_status"] == "unhealthy"
+    assert data["active_task"] is None
+    assert "No active task contract found in tasks/active/." in data["violations"]
 
 
 def test_health_command_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:

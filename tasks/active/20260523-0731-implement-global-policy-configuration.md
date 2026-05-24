@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a top-level governance health report command.
+Add machine-readable JSON output for governance health.
 
 ## Allowed Files
 

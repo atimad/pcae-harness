@@ -76,6 +76,11 @@ def build_parser() -> argparse.ArgumentParser:
         "health",
         help="Summarize PCAE governance readiness.",
     )
+    health_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON health output.",
+    )
     health_parser.set_defaults(handler=run_health)
 
     architecture_parser = subparsers.add_parser(
