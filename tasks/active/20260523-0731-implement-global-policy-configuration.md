@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable JSON output for architecture drift metrics.
+Add portable JSON export bundles for PCAE governance state.
 
 ## Allowed Files
 

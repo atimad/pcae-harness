@@ -56,3 +56,4 @@
 - Added `pcae health --json` for machine-readable governance health output.
 - Added `pcae check --json` for machine-readable governance validation output.
 - Added `pcae architecture metrics --json` for machine-readable drift metrics.
+- Added `pcae export bundle` for portable governance state snapshots.

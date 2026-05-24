@@ -1,0 +1,189 @@
+{
+  "active_task": {
+    "id": "20260523-0731-implement-global-policy-configuration",
+    "title": "Implement global policy configuration"
+  },
+  "architecture_metrics": {
+    "average_dependency_warnings": 0.0,
+    "latest_dependency_warnings": 0,
+    "latest_enforcement_mode": "advisory",
+    "latest_session_continuity": "verified",
+    "max_dependency_warnings": 0,
+    "most_frequently_touched_zone": "docs",
+    "snapshots_with_warnings": 0,
+    "total_snapshots": 6
+  },
+  "check_summary": {
+    "active_task": {
+      "id": "20260523-0731-implement-global-policy-configuration",
+      "title": "Implement global policy configuration"
+    },
+    "architecture_zones_touched": {
+      "cli": 1,
+      "commands": 1,
+      "core": 1,
+      "docs": 4,
+      "tasks": 2,
+      "tests": 1
+    },
+    "dependency_warnings": [],
+    "enforcement_mode": "advisory",
+    "git_status": {
+      "changed_file_count": 8,
+      "changed_files": [
+        {
+          "path": "CHANGELOG.md",
+          "status": "M"
+        },
+        {
+          "path": "PROJECT_STATUS.md",
+          "status": "M"
+        },
+        {
+          "path": "src/pcae/cli.py",
+          "status": "M"
+        },
+        {
+          "path": "tasks/DONE.md",
+          "status": "M"
+        },
+        {
+          "path": "tasks/active/20260523-0731-implement-global-policy-configuration.md",
+          "status": "M"
+        },
+        {
+          "path": "src/pcae/commands/export.py",
+          "status": "??"
+        },
+        {
+          "path": "src/pcae/core/export.py",
+          "status": "??"
+        },
+        {
+          "path": "tests/test_export.py",
+          "status": "??"
+        }
+      ]
+    },
+    "session_continuity": "verified",
+    "status": "passed",
+    "violations": [],
+    "warnings": []
+  },
+  "generated_timestamp": "2026-05-24T19:51:40.515285+00:00",
+  "git_status_summary": {
+    "branch": "main",
+    "changed_file_count": 8,
+    "changed_files": [
+      {
+        "path": "CHANGELOG.md",
+        "status": "M"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "status": "M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": "M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": "M"
+      },
+      {
+        "path": "tasks/active/20260523-0731-implement-global-policy-configuration.md",
+        "status": "M"
+      },
+      {
+        "path": "src/pcae/commands/export.py",
+        "status": "??"
+      },
+      {
+        "path": "src/pcae/core/export.py",
+        "status": "??"
+      },
+      {
+        "path": "tests/test_export.py",
+        "status": "??"
+      }
+    ],
+    "summary": "8 changed files"
+  },
+  "health_summary": {
+    "active_task": {
+      "id": "20260523-0731-implement-global-policy-configuration",
+      "title": "Implement global policy configuration"
+    },
+    "architecture_history_entries": 6,
+    "git_status": "8 changed files",
+    "latest_dependency_warnings": 0,
+    "latest_enforcement_mode": "advisory",
+    "overall_status": "healthy",
+    "policy_source": "repo config",
+    "policy_validation": "valid",
+    "required_files_status": "all present",
+    "session_continuity": "verified",
+    "violations": [],
+    "warnings": []
+  },
+  "latest_architecture_history_summary": {
+    "entries": 6,
+    "latest": {
+      "active_task": {
+        "id": "20260523-0731-implement-global-policy-configuration",
+        "title": "Implement global policy configuration"
+      },
+      "architecture_zones_touched": {},
+      "changed_files_count": 1,
+      "dependency_warnings_count": 0,
+      "enforcement_mode": "advisory",
+      "git_branch": "main",
+      "session_continuity": "verified",
+      "timestamp": "2026-05-24T11:15:16.739467+00:00"
+    },
+    "path": ".pcae/architecture-history.json"
+  },
+  "policy_summary": {
+    "architecture_enforcement_mode": "advisory",
+    "architecture_rule_count": 12,
+    "architecture_zones": {
+      "cli": 3,
+      "commands": 1,
+      "config": 2,
+      "core": 1,
+      "docs": 2,
+      "hooks": 1,
+      "package": 1,
+      "policy": 1,
+      "scripts": 1,
+      "session": 1,
+      "tasks": 1,
+      "tests": 1
+    },
+    "error": null,
+    "file_exists": true,
+    "path": ".pcae/policy.toml",
+    "protected_pattern_count": 18,
+    "source": "repo config",
+    "valid": true
+  },
+  "session_snapshot": {
+    "active_task": {
+      "id": "20260523-0731-implement-global-policy-configuration",
+      "title": "Implement global policy configuration"
+    },
+    "architectural_notes": [],
+    "blockers": [],
+    "current_objective": "",
+    "git": {
+      "branch": "main",
+      "changed_files": [],
+      "status_summary": "clean"
+    },
+    "last_completed_step": "",
+    "next_recommended_step": "",
+    "timestamp": "2026-05-24T11:15:16.724185+00:00",
+    "warnings": []
+  }
+}

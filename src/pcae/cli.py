@@ -9,6 +9,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
+from pcae.commands.export import run_export_bundle
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
@@ -87,6 +88,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON health output.",
     )
     health_parser.set_defaults(handler=run_health)
+
+    export_parser = subparsers.add_parser(
+        "export",
+        help="Export PCAE governance state.",
+    )
+    export_subparsers = export_parser.add_subparsers(
+        dest="export_command",
+        required=True,
+    )
+
+    export_bundle_parser = export_subparsers.add_parser(
+        "bundle",
+        help="Write a portable governance JSON bundle.",
+    )
+    export_bundle_parser.set_defaults(handler=run_export_bundle)
 
     architecture_parser = subparsers.add_parser(
         "architecture",
