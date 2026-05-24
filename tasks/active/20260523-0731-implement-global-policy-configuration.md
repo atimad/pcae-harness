@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Validate strict architecture dependency enforcement as a real gate.
+Validate CI-safe exit-code behavior for machine enforcement.
 
 ## Allowed Files
 

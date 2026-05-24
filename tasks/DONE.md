@@ -49,3 +49,4 @@
 - Added `pcae task update` for controlled active task contract edits.
 - Added `pcae task pause`, `pcae task resume`, and `pcae task complete` lifecycle commands.
 - Hardened strict architecture enforcement with regression coverage for policy and task-level gates.
+- Added CI-focused `pcae check` exit-code coverage for warnings, strict failures, invalid policy, and session mismatch.

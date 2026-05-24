@@ -394,6 +394,26 @@ def test_check_fails_when_policy_file_is_invalid(tmp_path: Path) -> None:
     )
 
 
+def test_check_command_invalid_policy_returns_nonzero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / ".pcae" / "policy.toml", "[protected]\npatterns = [42]\n")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "PCAE check found violations:" in output
+    assert (
+        ".pcae/policy.toml: Invalid policy: every protected pattern "
+        "must be a non-empty string."
+    ) in output
+
+
 def test_check_global_protected_wildcard_file_fails(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["secrets/private.pem"])
@@ -514,6 +534,30 @@ def test_check_fails_when_session_active_task_differs(tmp_path: Path) -> None:
         ".pcae/session.json: Session active task does not match current active task. "
         "Run `pcae session write`.",
     )
+
+
+def test_check_command_mismatched_session_returns_nonzero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_session(
+        tmp_path,
+        task_id="20260522-1931-other-task",
+        title="Other task",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "PCAE check found violations:" in output
+    assert (
+        ".pcae/session.json: Session active task does not match current active task. "
+        "Run `pcae session write`."
+    ) in output
 
 
 def test_check_fails_when_session_json_is_invalid(tmp_path: Path) -> None:
