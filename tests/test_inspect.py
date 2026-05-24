@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from pcae.cli import main
@@ -160,6 +161,75 @@ def test_inspect_command_runs_from_current_directory(
     assert f"PCAE inspection for {tmp_path}" in output
     assert "Policy:" in output
     assert "All required PCAE paths are present." in output
+
+
+def test_inspect_json_command_reports_machine_readable_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["inspect", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["root"] == str(tmp_path)
+    assert data["overall_status"] == "ok"
+    assert data["required_files"]["missing"] == []
+    assert "AGENTS.md" in data["required_files"]["present"]
+    assert data["task_files"]["missing"] == []
+    assert "tasks/TODO.md" in data["task_files"]["present"]
+    assert data["hooks"]["missing"] == []
+    assert ".githooks/pre-commit" in data["hooks"]["present"]
+    assert data["check_scripts"]["missing"] == []
+    assert "scripts/check-docs-updated.sh" in data["check_scripts"]["present"]
+    assert "scripts/check-docs-updated.ps1" in data["check_scripts"]["present"]
+    assert data["policy"]["present"] is True
+    assert data["policy"]["source"] == "repo config"
+    assert data["policy"]["valid"] is True
+    assert data["policy"]["protected_pattern_count"] == 18
+    assert data["architecture"]["zones"]["core"] == 1
+    assert data["architecture"]["rules_count"] == 12
+
+
+def test_inspect_json_reports_missing_paths_and_attention_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").unlink()
+    (tmp_path / ".githooks" / "pre-commit").unlink()
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["inspect", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["overall_status"] == "attention_required"
+    assert data["task_files"]["missing"] == ["tasks/DONE.md"]
+    assert data["hooks"]["missing"] == [".githooks/pre-commit"]
+
+
+def test_inspect_json_reports_invalid_policy_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / ".pcae" / "policy.toml").write_text(
+        "[protected\npatterns = []\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["inspect", "--json"])
+
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["overall_status"] == "attention_required"
+    assert data["policy"]["present"] is True
+    assert data["policy"]["valid"] is False
+    assert data["policy"]["error"] == "Invalid TOML: malformed table header."
 
 
 def test_inspect_does_not_modify_files(tmp_path: Path) -> None:

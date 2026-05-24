@@ -47,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
         "inspect",
         help="Inspect PCAE memory files and local harness wiring.",
     )
+    inspect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON inspection output.",
+    )
     inspect_parser.set_defaults(handler=run_inspect)
 
     check_parser = subparsers.add_parser(

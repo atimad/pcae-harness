@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 15B: Init force refresh.
+Phase 15C: Inspect JSON output.
 
 ## Current State
 
-PCAE can preview adoption with `pcae init --dry-run`, refresh PCAE-managed templates with `pcae init --force`, initialize memory files, validate task scope and policy, maintain session handoff state, and report architecture history and drift metrics.
+PCAE can preview and refresh adoption with init options, inspect repo readiness in human-readable or JSON form, validate task scope and policy, maintain session handoff state, and report architecture history and drift metrics.
 
 ## Next
 
