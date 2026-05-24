@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a controlled command to update the latest active task.
+Add structured task lifecycle status commands.
 
 ## Allowed Files
 

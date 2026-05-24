@@ -962,3 +962,184 @@ def test_task_show_reflects_task_update(
     assert "Goal: Show updated task" in output
     assert "Allowed files:\n  - src/pcae/core/tasks.py" in output
     assert "Enforcement mode: advisory" in output
+
+
+def test_task_pause_command_changes_active_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Pause task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "pause"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert "Paused task: 20260522-1930-pause-task" in output
+    assert active_task is not None
+    assert active_task.status == "paused"
+
+
+def test_task_resume_command_changes_paused_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Resume task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    paused_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert paused_task is not None
+    paused_task.path.write_text(
+        paused_task.path.read_text(encoding="utf-8").replace(
+            "## Status\n\nactive",
+            "## Status\n\npaused",
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "resume"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert "Resumed task: 20260522-1930-resume-task" in output
+    assert active_task is not None
+    assert active_task.status == "active"
+
+
+def test_task_complete_command_marks_done_and_moves_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Complete task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "complete"])
+
+    output = capsys.readouterr().out
+    done_path = tmp_path / "tasks" / "done" / "20260522-1930-complete-task.md"
+    assert exit_code == 0
+    assert "Completed task: 20260522-1930-complete-task" in output
+    assert "Moved to: tasks/done/20260522-1930-complete-task.md" in output
+    assert done_path.is_file()
+    assert "## Status\n\ndone" in done_path.read_text(encoding="utf-8")
+    assert not (
+        tmp_path / "tasks" / "active" / "20260522-1930-complete-task.md"
+    ).exists()
+
+
+def test_task_pause_command_reports_missing_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "pause"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found to pause." in output
+
+
+def test_task_pause_command_rejects_paused_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Already paused",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    main_cwd = tmp_path
+    monkeypatch.chdir(main_cwd)
+    assert main(["task", "pause"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["task", "pause"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found to pause." in output
+
+
+def test_task_resume_command_rejects_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Already active",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "resume"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No paused task contract found to resume." in output
+
+
+def test_task_complete_command_rejects_paused_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Paused task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+    assert main(["task", "pause"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["task", "complete"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found to complete." in output
+    assert (tmp_path / "tasks" / "active" / "20260522-1930-paused-task.md").is_file()
+
+
+def test_task_show_reflects_paused_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Pause show task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+    assert main(["task", "pause"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["task", "show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Status: paused" in output
+
+
+def test_task_close_command_still_closes_latest_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Close lifecycle task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "close"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Closed task: 20260522-1930-close-lifecycle-task" in output
+    assert (
+        tmp_path / "tasks" / "done" / "20260522-1930-close-lifecycle-task.md"
+    ).is_file()

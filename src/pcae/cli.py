@@ -19,8 +19,11 @@ from pcae.commands.session import (
 )
 from pcae.commands.task import (
     run_task_close,
+    run_task_complete,
     run_task_list,
     run_task_new,
+    run_task_pause,
+    run_task_resume,
     run_task_show,
     run_task_update,
 )
@@ -114,6 +117,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     task_close_parser.add_argument("identifier", nargs="?")
     task_close_parser.set_defaults(handler=run_task_close)
+
+    task_pause_parser = task_subparsers.add_parser(
+        "pause",
+        help="Pause the latest active task contract.",
+    )
+    task_pause_parser.set_defaults(handler=run_task_pause)
+
+    task_resume_parser = task_subparsers.add_parser(
+        "resume",
+        help="Resume the latest paused task contract.",
+    )
+    task_resume_parser.set_defaults(handler=run_task_resume)
+
+    task_complete_parser = task_subparsers.add_parser(
+        "complete",
+        help="Complete the latest active task contract.",
+    )
+    task_complete_parser.set_defaults(handler=run_task_complete)
 
     task_list_parser = task_subparsers.add_parser(
         "list",

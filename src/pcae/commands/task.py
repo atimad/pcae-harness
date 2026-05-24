@@ -9,9 +9,12 @@ from pcae.core.tasks import (
     TaskUpdate,
     close_active_task_by_identifier,
     close_latest_active_task,
+    complete_latest_active_task,
     create_task_contract,
     find_latest_active_task,
+    pause_latest_active_task,
     read_task_summaries,
+    resume_latest_paused_task,
     TaskSummary,
     update_latest_active_task,
 )
@@ -71,6 +74,43 @@ def run_task_close(args: argparse.Namespace) -> int:
     print(f"Closed task: {closed_task.task_id}")
     print(f"Title: {closed_task.title}")
     print(f"Moved to: {closed_task.destination_path.relative_to(root.path).as_posix()}")
+    return 0
+
+
+def run_task_pause(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    paused_task = pause_latest_active_task(root)
+    if paused_task is None:
+        print("No active task contract found to pause.")
+        return 1
+
+    print(f"Paused task: {paused_task.task_id}")
+    print(f"Title: {paused_task.title}")
+    return 0
+
+
+def run_task_resume(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    resumed_task = resume_latest_paused_task(root)
+    if resumed_task is None:
+        print("No paused task contract found to resume.")
+        return 1
+
+    print(f"Resumed task: {resumed_task.task_id}")
+    print(f"Title: {resumed_task.title}")
+    return 0
+
+
+def run_task_complete(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    completed_task = complete_latest_active_task(root)
+    if completed_task is None:
+        print("No active task contract found to complete.")
+        return 1
+
+    print(f"Completed task: {completed_task.task_id}")
+    print(f"Title: {completed_task.title}")
+    print(f"Moved to: {completed_task.destination_path.relative_to(root.path).as_posix()}")
     return 0
 
 

@@ -106,6 +106,27 @@ def close_latest_active_task(root: HarnessPath) -> ClosedTask | None:
     return close_active_task(active_task)
 
 
+def pause_latest_active_task(root: HarnessPath) -> ActiveTask | None:
+    active_task = find_latest_active_task_with_status(root, "active")
+    if active_task is None:
+        return None
+    return set_active_task_status(active_task, "paused")
+
+
+def resume_latest_paused_task(root: HarnessPath) -> ActiveTask | None:
+    paused_task = find_latest_active_task_with_status(root, "paused")
+    if paused_task is None:
+        return None
+    return set_active_task_status(paused_task, "active")
+
+
+def complete_latest_active_task(root: HarnessPath) -> ClosedTask | None:
+    active_task = find_latest_active_task_with_status(root, "active")
+    if active_task is None:
+        return None
+    return close_active_task(active_task)
+
+
 def close_active_task_by_identifier(
     root: HarnessPath,
     identifier: str,
@@ -132,6 +153,13 @@ def close_active_task(active_task: ActiveTask) -> ClosedTask:
         source_path=source_path,
         destination_path=destination_path,
     )
+
+
+def set_active_task_status(active_task: ActiveTask, status: str) -> ActiveTask:
+    content = active_task.path.read_text(encoding="utf-8")
+    with active_task.path.open("w", encoding="utf-8", newline="\n") as file:
+        file.write(replace_task_status(content, status))
+    return read_active_task(active_task.path)
 
 
 def active_task_path_for_identifier(root: HarnessPath, identifier: str) -> Path:
@@ -312,6 +340,21 @@ def find_latest_active_task(root: HarnessPath) -> ActiveTask | None:
     if not task_files:
         return None
     return read_active_task(task_files[-1])
+
+
+def find_latest_active_task_with_status(
+    root: HarnessPath,
+    status: str,
+) -> ActiveTask | None:
+    active_dir = root.join(Path("tasks") / "active")
+    if not active_dir.is_dir():
+        return None
+
+    for task_file in reversed(sorted(active_dir.glob("*.md"))):
+        active_task = read_active_task(task_file)
+        if active_task.status == status:
+            return active_task
+    return None
 
 
 def read_active_task(task_path: Path) -> ActiveTask:
