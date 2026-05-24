@@ -43,3 +43,4 @@
 - Added `pcae architecture metrics` for read-only architecture drift metrics.
 - Enriched `pcae architecture snapshot` output with post-append metrics.
 - Added `pcae init --dry-run` to preview created, present, and skipped init paths.
+- Added `pcae init --force` to refresh PCAE-managed template files without overwriting user memory files.

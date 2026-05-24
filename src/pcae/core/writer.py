@@ -11,6 +11,7 @@ from pcae.core.paths import HarnessPath
 class WriteResult:
     relative_path: Path
     created: bool
+    overwritten: bool = False
 
 
 @dataclass(frozen=True)
@@ -18,18 +19,41 @@ class WritePlan:
     relative_path: Path
     kind: str
     exists: bool
+    force_managed: bool = False
 
     @property
     def would_create(self) -> bool:
         return not self.exists
 
+    @property
+    def would_overwrite(self) -> bool:
+        return self.exists and self.kind == "file" and self.force_managed
 
-def write_missing_files(root: HarnessPath, templates: dict[Path, str]) -> list[WriteResult]:
+
+def write_missing_files(
+    root: HarnessPath,
+    templates: dict[Path, str],
+    force_managed: set[Path] | None = None,
+) -> list[WriteResult]:
     results: list[WriteResult] = []
+    managed = force_managed or set()
 
     for relative_path, content in templates.items():
         target = root.join(relative_path)
         if target.exists():
+            if relative_path in managed:
+                with target.open("w", encoding="utf-8", newline="\n") as file:
+                    file.write(content)
+                make_executable_when_needed(target)
+                results.append(
+                    WriteResult(
+                        relative_path=relative_path,
+                        created=False,
+                        overwritten=True,
+                    )
+                )
+                continue
+
             results.append(WriteResult(relative_path=relative_path, created=False))
             continue
 
@@ -42,9 +66,14 @@ def write_missing_files(root: HarnessPath, templates: dict[Path, str]) -> list[W
     return results
 
 
-def plan_missing_files(root: HarnessPath, templates: dict[Path, str]) -> list[WritePlan]:
+def plan_missing_files(
+    root: HarnessPath,
+    templates: dict[Path, str],
+    force_managed: set[Path] | None = None,
+) -> list[WritePlan]:
     plans: list[WritePlan] = []
     directories = parent_directories(templates)
+    managed = force_managed or set()
 
     for relative_path in directories:
         plans.append(
@@ -61,6 +90,7 @@ def plan_missing_files(root: HarnessPath, templates: dict[Path, str]) -> list[Wr
                 relative_path=relative_path,
                 kind="file",
                 exists=root.join(relative_path).exists(),
+                force_managed=relative_path in managed,
             )
         )
 

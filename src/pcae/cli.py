@@ -36,6 +36,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview files and directories without writing them.",
     )
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite PCAE-managed template files.",
+    )
     init_parser.set_defaults(handler=run_init)
 
     inspect_parser = subparsers.add_parser(

@@ -4,6 +4,14 @@ from pathlib import Path
 
 from pcae.core.policy import render_default_policy
 
+FORCE_MANAGED_TEMPLATES: set[Path] = {
+    Path(".agent-prompts/end-session.md"),
+    Path(".pcae/policy.toml"),
+    Path(".githooks/pre-commit"),
+    Path("scripts/check-docs-updated.sh"),
+    Path("scripts/check-docs-updated.ps1"),
+}
+
 INIT_TEMPLATES: dict[Path, str] = {
     Path("AGENTS.md"): """# AGENTS.md
 

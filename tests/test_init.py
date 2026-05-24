@@ -75,6 +75,65 @@ def test_init_dry_run_reports_existing_directories(
     assert not (tmp_path / "tasks" / "TODO.md").exists()
 
 
+def test_init_force_overwrites_managed_template_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    managed = tmp_path / ".githooks" / "pre-commit"
+    managed.write_text("custom hook\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Overwritten:" in output
+    assert "  .githooks/pre-commit" in output
+    assert managed.read_text(encoding="utf-8") == INIT_TEMPLATES[
+        Path(".githooks/pre-commit")
+    ]
+    assert os.access(managed, os.X_OK)
+
+
+def test_init_force_does_not_overwrite_user_memory_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    agents = tmp_path / "AGENTS.md"
+    agents.write_text("custom agent notes\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert agents.read_text(encoding="utf-8") == "custom agent notes\n"
+    assert "Already present:" in output
+    assert "  AGENTS.md" in output
+
+
+def test_init_dry_run_force_writes_nothing_and_reports_overwrites(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    managed = tmp_path / ".pcae" / "policy.toml"
+    agents = tmp_path / "AGENTS.md"
+    managed.write_text("custom policy\n", encoding="utf-8")
+    agents.write_text("custom agent notes\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--dry-run", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Would overwrite files:" in output
+    assert "  .pcae/policy.toml" in output
+    assert managed.read_text(encoding="utf-8") == "custom policy\n"
+    assert agents.read_text(encoding="utf-8") == "custom agent notes\n"
+    assert "Would skip files:" in output
+    assert "  AGENTS.md" in output
+
+
 def test_init_creates_required_files(tmp_path: Path) -> None:
     results = init_harness(HarnessPath(tmp_path))
 
