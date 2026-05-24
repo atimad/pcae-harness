@@ -113,6 +113,11 @@ def build_parser() -> argparse.ArgumentParser:
         "metrics",
         help="Summarize architecture history drift metrics.",
     )
+    architecture_metrics_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON architecture metrics output.",
+    )
     architecture_metrics_parser.set_defaults(handler=run_architecture_metrics)
 
     task_parser = subparsers.add_parser(

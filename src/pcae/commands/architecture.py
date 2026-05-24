@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from pcae.core.architecture import (
+    ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     calculate_architecture_drift_metrics,
     read_architecture_history_summary,
@@ -81,6 +83,16 @@ def run_architecture_metrics(args: argparse.Namespace) -> int:
         return 1
 
     metrics = calculate_architecture_drift_metrics(summary)
+    if args.json:
+        print(
+            json.dumps(
+                architecture_metrics_json_data(metrics),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
     most_touched_zone = metrics.most_frequently_touched_zone or "none"
 
     print("Architecture drift metrics")
@@ -96,3 +108,18 @@ def run_architecture_metrics(args: argparse.Namespace) -> int:
     print(f"Latest enforcement mode: {metrics.latest_enforcement_mode}")
     print(f"Latest session continuity: {metrics.latest_session_continuity}")
     return 0
+
+
+def architecture_metrics_json_data(
+    metrics: ArchitectureDriftMetrics,
+) -> dict[str, object]:
+    return {
+        "average_dependency_warnings": metrics.average_dependency_warnings,
+        "latest_dependency_warnings": metrics.latest_dependency_warnings,
+        "latest_enforcement_mode": metrics.latest_enforcement_mode,
+        "latest_session_continuity": metrics.latest_session_continuity,
+        "max_dependency_warnings": metrics.max_dependency_warnings,
+        "most_frequently_touched_zone": metrics.most_frequently_touched_zone,
+        "snapshots_with_warnings": metrics.snapshots_with_warnings,
+        "total_snapshots": metrics.total_snapshots,
+    }

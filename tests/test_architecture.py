@@ -350,6 +350,50 @@ def test_architecture_metrics_command_prints_drift_metrics(
     assert "Latest session continuity: verified" in output
 
 
+def test_architecture_metrics_json_command_prints_drift_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_history(
+        tmp_path,
+        [
+            {
+                "architecture_zones_touched": {"core": 2, "docs": 1},
+                "dependency_warnings_count": 0,
+                "enforcement_mode": "advisory",
+                "session_continuity": "missing",
+            },
+            {
+                "architecture_zones_touched": {"core": 1, "tests": 4},
+                "dependency_warnings_count": 3,
+                "enforcement_mode": "strict",
+                "session_continuity": "verified",
+            },
+            {
+                "architecture_zones_touched": {"docs": 2},
+                "dependency_warnings_count": 1,
+                "enforcement_mode": "advisory",
+                "session_continuity": "verified",
+            },
+        ],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "metrics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "average_dependency_warnings": 4 / 3,
+        "latest_dependency_warnings": 1,
+        "latest_enforcement_mode": "advisory",
+        "latest_session_continuity": "verified",
+        "max_dependency_warnings": 3,
+        "most_frequently_touched_zone": "tests",
+        "snapshots_with_warnings": 2,
+        "total_snapshots": 3,
+    }
+
+
 def test_architecture_metrics_command_reports_missing_history(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

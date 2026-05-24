@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable JSON output for PCAE check results.
+Add machine-readable JSON output for architecture drift metrics.
 
 ## Allowed Files
 
