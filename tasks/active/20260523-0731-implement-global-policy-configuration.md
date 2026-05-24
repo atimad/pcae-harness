@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a controlled start-of-session workflow command.
+Add a top-level governance health report command.
 
 ## Allowed Files
 

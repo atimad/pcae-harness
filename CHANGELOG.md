@@ -43,3 +43,4 @@
 - Added CI-focused `pcae check` exit-code coverage for warnings, strict failures, invalid policy, and session mismatch.
 - Added `pcae session end` to run check, write session state, append architecture history, and print a summary.
 - Added `pcae session start` for read-only governed session resume summaries.
+- Added top-level `pcae health` for concise governance readiness reporting.

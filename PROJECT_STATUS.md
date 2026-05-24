@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 18B: Session start workflow.
+Phase 19A: Governance health report.
 
 ## Current State
 
-PCAE can preview and refresh adoption with init options, inspect repo readiness in human-readable or JSON form, manage task lifecycle, validate task scope and policy with CI-safe exit codes, enforce strict architecture dependency gates, and start or end governed engineering sessions.
+PCAE can preview and refresh adoption with init options, inspect repo readiness in human-readable or JSON form, report governance health, manage task lifecycle, validate task scope and policy with CI-safe exit codes, enforce strict architecture dependency gates, and start or end governed engineering sessions.
 
 ## Next
 

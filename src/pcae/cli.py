@@ -9,6 +9,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
+from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
@@ -70,6 +71,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run advisory PCAE validation checks.",
     )
     check_parser.set_defaults(handler=run_check)
+
+    health_parser = subparsers.add_parser(
+        "health",
+        help="Summarize PCAE governance readiness.",
+    )
+    health_parser.set_defaults(handler=run_health)
 
     architecture_parser = subparsers.add_parser(
         "architecture",
