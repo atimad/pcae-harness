@@ -31,6 +31,11 @@ def build_parser() -> argparse.ArgumentParser:
         "init",
         help="Create PCAE memory files in the current repository.",
     )
+    init_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview files and directories without writing them.",
+    )
     init_parser.set_defaults(handler=run_init)
 
     inspect_parser = subparsers.add_parser(

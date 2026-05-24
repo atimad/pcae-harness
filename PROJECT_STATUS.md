@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 14D: Architecture snapshot metrics enrichment.
+Phase 15A: Init dry-run.
 
 ## Current State
 
-PCAE can append architecture check summaries to `.pcae/architecture-history.json`, summarize the latest history entry with `pcae architecture history`, report basic drift metrics with `pcae architecture metrics`, and print a compact metrics summary after `pcae architecture snapshot`.
+PCAE can preview adoption with `pcae init --dry-run`, initialize memory files, validate task scope and policy, maintain session handoff state, and report architecture history and drift metrics.
 
 ## Next
 

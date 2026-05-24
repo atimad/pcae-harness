@@ -23,6 +23,58 @@ def test_init_command_creates_pre_commit_hook(tmp_path: Path, monkeypatch, capsy
     assert "  .githooks/pre-commit" in output
 
 
+def test_init_dry_run_writes_nothing(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE init dry run in" in output
+    assert "Would create directories:" in output
+    assert "  tasks" in output
+    assert "Would create files:" in output
+    assert "  AGENTS.md" in output
+    assert "  .githooks/pre-commit" in output
+    for relative_path in INIT_TEMPLATES:
+        assert not (tmp_path / relative_path).exists()
+
+
+def test_init_dry_run_reports_existing_files_and_skips(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    existing = tmp_path / "AGENTS.md"
+    existing.write_text("custom agent notes\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert existing.read_text(encoding="utf-8") == "custom agent notes\n"
+    assert "Already present files:" in output
+    assert "  AGENTS.md" in output
+    assert "Would skip files:" in output
+    assert "  AGENTS.md" in output
+    assert "  PROJECT_STATUS.md" in output
+    assert not (tmp_path / "PROJECT_STATUS.md").exists()
+
+
+def test_init_dry_run_reports_existing_directories(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks").mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["init", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Already present directories:" in output
+    assert "  tasks" in output
+    assert not (tmp_path / "tasks" / "TODO.md").exists()
+
+
 def test_init_creates_required_files(tmp_path: Path) -> None:
     results = init_harness(HarnessPath(tmp_path))
 
