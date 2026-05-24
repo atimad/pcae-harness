@@ -70,6 +70,11 @@ def build_parser() -> argparse.ArgumentParser:
         "check",
         help="Run advisory PCAE validation checks.",
     )
+    check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON check output.",
+    )
     check_parser.set_defaults(handler=run_check)
 
     health_parser = subparsers.add_parser(

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable JSON output for governance health.
+Add machine-readable JSON output for PCAE check results.
 
 ## Allowed Files
 

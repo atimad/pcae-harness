@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
 
@@ -102,6 +103,40 @@ def test_check_command_passes_when_changes_are_in_scope_and_documented(
     assert "PCAE check passed." in output
 
 
+def test_check_json_command_reports_passed_result(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / "src" / "allowed.py", "print('allowed')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    write_file(tmp_path / "src" / "allowed.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    exit_code = main(["check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["status"] == "passed"
+    assert data["active_task"] == {
+        "id": "20260522-1930-test-task",
+        "title": "Test task",
+    }
+    assert data["git_status"]["changed_file_count"] == 2
+    assert data["session_continuity"] == "verified"
+    assert data["violations"] == []
+    assert data["warnings"] == []
+    assert data["dependency_warnings"] == []
+    assert data["enforcement_mode"] == "advisory"
+
+
 def test_check_command_reports_active_task_and_violating_file(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -122,6 +157,32 @@ def test_check_command_reports_active_task_and_violating_file(
     assert "Title: Test task" in output
     assert "src/other.py: Changed file is outside active task scope" in output
     assert "for task 20260522-1930-test-task" in output
+
+
+def test_check_json_command_reports_failed_result(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / "src" / "other.py", "print('other')\n")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    write_file(tmp_path / "src" / "other.py", "print('changed')\n")
+    write_file(tmp_path / "CHANGELOG.md", "# Changelog\n\nUpdated docs.\n")
+
+    exit_code = main(["check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["status"] == "failed"
+    assert data["active_task"]["id"] == "20260522-1930-test-task"
+    assert data["session_continuity"] == "missing"
+    assert any(
+        "src/other.py: Changed file is outside active task scope" in violation
+        for violation in data["violations"]
+    )
+    assert any("Session snapshot missing" in warning for warning in data["warnings"])
 
 
 def test_check_detects_missing_required_files(tmp_path: Path) -> None:
