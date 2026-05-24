@@ -58,6 +58,18 @@ class ArchitectureHistorySummary:
     latest: dict
 
 
+@dataclass(frozen=True)
+class ArchitectureDriftMetrics:
+    total_snapshots: int
+    latest_dependency_warnings: int
+    max_dependency_warnings: int
+    average_dependency_warnings: float
+    snapshots_with_warnings: int
+    most_frequently_touched_zone: str | None
+    latest_enforcement_mode: str
+    latest_session_continuity: str
+
+
 def write_architecture_history_snapshot(
     root: HarnessPath,
     check_result,
@@ -140,6 +152,57 @@ def read_architecture_history_summary(root: HarnessPath) -> ArchitectureHistoryS
         entries=entries,
         latest=entries[-1],
     )
+
+
+def calculate_architecture_drift_metrics(
+    summary: ArchitectureHistorySummary,
+) -> ArchitectureDriftMetrics:
+    warning_counts = tuple(
+        integer_value(entry.get("dependency_warnings_count"))
+        for entry in summary.entries
+    )
+    zone_counts: dict[str, int] = {}
+    for entry in summary.entries:
+        zones = entry.get("architecture_zones_touched")
+        if not isinstance(zones, dict):
+            continue
+        for zone_name, count in zones.items():
+            if not isinstance(zone_name, str):
+                continue
+            zone_counts[zone_name] = zone_counts.get(zone_name, 0) + integer_value(count)
+
+    most_frequently_touched_zone = None
+    if zone_counts:
+        most_frequently_touched_zone = sorted(
+            zone_counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )[0][0]
+
+    latest = summary.latest
+    total_snapshots = len(summary.entries)
+    latest_dependency_warnings = warning_counts[-1]
+    return ArchitectureDriftMetrics(
+        total_snapshots=total_snapshots,
+        latest_dependency_warnings=latest_dependency_warnings,
+        max_dependency_warnings=max(warning_counts),
+        average_dependency_warnings=sum(warning_counts) / total_snapshots,
+        snapshots_with_warnings=sum(1 for count in warning_counts if count > 0),
+        most_frequently_touched_zone=most_frequently_touched_zone,
+        latest_enforcement_mode=string_value(latest.get("enforcement_mode")),
+        latest_session_continuity=string_value(latest.get("session_continuity")),
+    )
+
+
+def integer_value(value) -> int:
+    if isinstance(value, int):
+        return value
+    return 0
+
+
+def string_value(value) -> str:
+    if isinstance(value, str) and value:
+        return value
+    return "unknown"
 
 
 def session_continuity_status(check_result) -> str:

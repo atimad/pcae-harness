@@ -5,6 +5,7 @@ from collections.abc import Sequence
 
 from pcae.commands.architecture import (
     run_architecture_history,
+    run_architecture_metrics,
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
@@ -64,6 +65,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Read the latest architecture history summary.",
     )
     architecture_history_parser.set_defaults(handler=run_architecture_history)
+
+    architecture_metrics_parser = architecture_subparsers.add_parser(
+        "metrics",
+        help="Summarize architecture history drift metrics.",
+    )
+    architecture_metrics_parser.set_defaults(handler=run_architecture_metrics)
 
     task_parser = subparsers.add_parser(
         "task",

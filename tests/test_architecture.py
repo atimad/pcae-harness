@@ -298,6 +298,92 @@ def test_architecture_history_command_reports_malformed_history(
     assert "Invalid architecture history JSON:" in output
 
 
+def test_architecture_metrics_command_prints_drift_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_history(
+        tmp_path,
+        [
+            {
+                "architecture_zones_touched": {"core": 2, "docs": 1},
+                "dependency_warnings_count": 0,
+                "enforcement_mode": "advisory",
+                "session_continuity": "missing",
+                "timestamp": "2026-05-23T08:00:00+00:00",
+            },
+            {
+                "architecture_zones_touched": {"core": 1, "tests": 4},
+                "dependency_warnings_count": 3,
+                "enforcement_mode": "strict",
+                "session_continuity": "verified",
+                "timestamp": "2026-05-23T08:01:00+00:00",
+            },
+            {
+                "architecture_zones_touched": {"docs": 2},
+                "dependency_warnings_count": 1,
+                "enforcement_mode": "advisory",
+                "session_continuity": "verified",
+                "timestamp": "2026-05-23T08:02:00+00:00",
+            },
+        ],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "metrics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture drift metrics" in output
+    assert "Total snapshots: 3" in output
+    assert "Latest dependency warnings: 1" in output
+    assert "Max dependency warnings: 3" in output
+    assert "Average dependency warnings: 1.33" in output
+    assert "Snapshots with warnings: 2" in output
+    assert "Most frequently touched zone: tests" in output
+    assert "Latest enforcement mode: advisory" in output
+    assert "Latest session continuity: verified" in output
+
+
+def test_architecture_metrics_command_reports_missing_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "metrics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No architecture history found at .pcae/architecture-history.json." in output
+
+
+def test_architecture_metrics_command_reports_malformed_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    history_file = tmp_path / ".pcae" / "architecture-history.json"
+    history_file.parent.mkdir(parents=True, exist_ok=True)
+    history_file.write_text("{broken\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "metrics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid architecture history JSON:" in output
+
+
+def test_architecture_metrics_command_reports_empty_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_history(tmp_path, [])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["architecture", "metrics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid architecture history: no entries found." in output
+
+
 def write_task(root: Path) -> None:
     task_path = root / "tasks" / "active" / "20260522-1930-test-task.md"
     write_file(
@@ -341,3 +427,9 @@ def run_git(root: Path, *args: str) -> None:
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def write_history(root: Path, entries: list[dict]) -> None:
+    history_file = root / ".pcae" / "architecture-history.json"
+    history_file.parent.mkdir(parents=True, exist_ok=True)
+    history_file.write_text(json.dumps(entries), encoding="utf-8")

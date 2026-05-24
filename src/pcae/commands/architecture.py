@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from pcae.core.architecture import (
+    calculate_architecture_drift_metrics,
     read_architecture_history_summary,
     write_architecture_history_snapshot,
 )
@@ -52,4 +53,30 @@ def run_architecture_history(args: argparse.Namespace) -> int:
             print(f"  {zone_name}: {count} files")
     else:
         print("  none")
+    return 0
+
+
+def run_architecture_metrics(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        summary = read_architecture_history_summary(root)
+    except ValueError as error:
+        print(error)
+        return 1
+
+    metrics = calculate_architecture_drift_metrics(summary)
+    most_touched_zone = metrics.most_frequently_touched_zone or "none"
+
+    print("Architecture drift metrics")
+    print(f"Total snapshots: {metrics.total_snapshots}")
+    print(f"Latest dependency warnings: {metrics.latest_dependency_warnings}")
+    print(f"Max dependency warnings: {metrics.max_dependency_warnings}")
+    print(
+        "Average dependency warnings: "
+        f"{metrics.average_dependency_warnings:.2f}"
+    )
+    print(f"Snapshots with warnings: {metrics.snapshots_with_warnings}")
+    print(f"Most frequently touched zone: {most_touched_zone}")
+    print(f"Latest enforcement mode: {metrics.latest_enforcement_mode}")
+    print(f"Latest session continuity: {metrics.latest_session_continuity}")
     return 0

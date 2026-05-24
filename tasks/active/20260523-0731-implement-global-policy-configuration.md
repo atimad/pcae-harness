@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a read-only architecture history summary command.
+Add read-only architecture drift metrics from persistent history.
 
 ## Allowed Files
 
