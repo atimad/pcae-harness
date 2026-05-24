@@ -46,3 +46,4 @@
 - Added `pcae init --force` to refresh PCAE-managed template files without overwriting user memory files.
 - Added `pcae inspect --json` for machine-readable repo adoption status.
 - Added `pcae task show` for read-only active task display.
+- Added `pcae task update` for controlled active task contract edits.

@@ -6,12 +6,14 @@ from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.tasks import (
     ActiveTask,
+    TaskUpdate,
     close_active_task_by_identifier,
     close_latest_active_task,
     create_task_contract,
     find_latest_active_task,
     read_task_summaries,
     TaskSummary,
+    update_latest_active_task,
 )
 
 
@@ -94,6 +96,70 @@ def run_task_show(args: argparse.Namespace) -> int:
         return 1
 
     print(format_active_task(active_task))
+    return 0
+
+
+def run_task_update(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    active_task = find_latest_active_task(root)
+    if active_task is None:
+        print("No active task contract found in tasks/active/.")
+        return 1
+
+    allowed_zones = tuple(args.allowed_zone or ())
+    forbidden_zones = tuple(args.forbidden_zone or ())
+    validation_error = validate_requested_zones(root, allowed_zones + forbidden_zones)
+    if validation_error is not None:
+        print(validation_error)
+        return 1
+
+    if args.enforcement_mode is not None and args.enforcement_mode not in {
+        "advisory",
+        "strict",
+        "TBD",
+    }:
+        print("Invalid enforcement mode: expected advisory, strict, or TBD.")
+        return 1
+
+    updated_task = update_latest_active_task(
+        root,
+        TaskUpdate(
+            goal=args.goal,
+            mode=args.mode,
+            allowed_files=(
+                tuple(args.allowed_file)
+                if args.allowed_file is not None
+                else None
+            ),
+            forbidden_files=(
+                tuple(args.forbidden_file)
+                if args.forbidden_file is not None
+                else None
+            ),
+            allowed_zones=(
+                allowed_zones
+                if args.allowed_zone is not None
+                else None
+            ),
+            forbidden_zones=(
+                forbidden_zones
+                if args.forbidden_zone is not None
+                else None
+            ),
+            enforcement_mode=args.enforcement_mode,
+            acceptance_checks=(
+                tuple(args.acceptance_check)
+                if args.acceptance_check is not None
+                else None
+            ),
+        ),
+    )
+    if updated_task is None:
+        print("No active task contract found in tasks/active/.")
+        return 1
+
+    print(f"Updated task: {updated_task.task_id}")
+    print(f"Title: {updated_task.title}")
     return 0
 
 

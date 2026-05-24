@@ -723,3 +723,242 @@ def test_task_show_command_does_not_modify_files(
     capsys.readouterr()
     assert exit_code == 0
     assert after == before
+
+
+def test_task_update_command_updates_goal_and_preserves_unspecified_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--goal", "Ship task updates"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert "Updated task: 20260522-1930-update-task" in output
+    assert active_task is not None
+    assert active_task.goal == "Ship task updates"
+    assert active_task.mode == "implementation"
+    assert active_task.allowed_files == ()
+
+
+def test_task_update_command_replaces_repeatable_allowed_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "task",
+            "update",
+            "--allowed-file",
+            "src/pcae/core/tasks.py",
+            "--allowed-file",
+            "tests/test_task.py",
+        ]
+    )
+
+    capsys.readouterr()
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert active_task is not None
+    assert active_task.allowed_files == (
+        "src/pcae/core/tasks.py",
+        "tests/test_task.py",
+    )
+
+
+def test_task_update_command_replaces_repeatable_allowed_zones(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy_with_zones(tmp_path, ["core", "tests", "docs"])
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "task",
+            "update",
+            "--allowed-zone",
+            "core",
+            "--allowed-zone",
+            "tests",
+        ]
+    )
+
+    capsys.readouterr()
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert active_task is not None
+    assert active_task.allowed_zones == ("core", "tests")
+
+
+def test_task_update_command_updates_enforcement_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--enforcement-mode", "strict"])
+
+    capsys.readouterr()
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert active_task is not None
+    assert active_task.enforcement_mode == "strict"
+
+
+def test_task_update_command_replaces_acceptance_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "task",
+            "update",
+            "--acceptance-check",
+            "pcae task show reflects updates",
+            "--acceptance-check",
+            "tests pass",
+        ]
+    )
+
+    capsys.readouterr()
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert active_task is not None
+    assert active_task.acceptance_checks == (
+        "pcae task show reflects updates",
+        "tests pass",
+    )
+
+
+def test_task_update_command_rejects_invalid_zone(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy_with_zones(tmp_path, ["core"])
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--allowed-zone", "missing"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 1
+    assert "Unknown architecture zone: missing" in output
+    assert active_task is not None
+    assert active_task.allowed_zones == ()
+
+
+def test_task_update_command_rejects_invalid_enforcement_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--enforcement-mode", "blocking"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 1
+    assert "Invalid enforcement mode: expected advisory, strict, or TBD." in output
+    assert active_task is not None
+    assert active_task.enforcement_mode == "TBD"
+
+
+def test_task_update_command_reports_missing_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--goal", "No task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found in tasks/active/." in output
+
+
+def test_task_update_command_does_not_modify_done_tasks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    done_task = create_task_contract(
+        HarnessPath(tmp_path),
+        "Done task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    close_active_task_by_identifier(HarnessPath(tmp_path), done_task.task_id)
+    done_path = tmp_path / "tasks" / "done" / f"{done_task.task_id}.md"
+    before = done_path.read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "update", "--goal", "No active task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found in tasks/active/." in output
+    assert done_path.read_text(encoding="utf-8") == before
+
+
+def test_task_show_reflects_task_update(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update task",
+        created_at=datetime(2026, 5, 22, 19, 30, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    update_exit = main(
+        [
+            "task",
+            "update",
+            "--goal",
+            "Show updated task",
+            "--allowed-file",
+            "src/pcae/core/tasks.py",
+            "--enforcement-mode",
+            "advisory",
+        ]
+    )
+    capsys.readouterr()
+    show_exit = main(["task", "show"])
+
+    output = capsys.readouterr().out
+    assert update_exit == 0
+    assert show_exit == 0
+    assert "Goal: Show updated task" in output
+    assert "Allowed files:\n  - src/pcae/core/tasks.py" in output
+    assert "Enforcement mode: advisory" in output

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a read-only command to display the latest active task.
+Add a controlled command to update the latest active task.
 
 ## Allowed Files
 

@@ -54,6 +54,18 @@ class ActiveTask:
     documentation_requirements: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class TaskUpdate:
+    goal: str | None = None
+    mode: str | None = None
+    allowed_files: tuple[str, ...] | None = None
+    forbidden_files: tuple[str, ...] | None = None
+    allowed_zones: tuple[str, ...] | None = None
+    forbidden_zones: tuple[str, ...] | None = None
+    enforcement_mode: str | None = None
+    acceptance_checks: tuple[str, ...] | None = None
+
+
 def create_task_contract(
     root: HarnessPath,
     title: str,
@@ -147,6 +159,58 @@ def read_task_summary(task_path: Path, fallback_status: str) -> TaskSummary:
         status=read_task_section_text(content, "Status") or fallback_status,
         path=task_path,
     )
+
+
+def update_latest_active_task(root: HarnessPath, update: TaskUpdate) -> ActiveTask | None:
+    active_task = find_latest_active_task(root)
+    if active_task is None:
+        return None
+
+    content = active_task.path.read_text(encoding="utf-8")
+    if update.goal is not None:
+        content = replace_task_section_text(content, "Goal", update.goal)
+    if update.mode is not None:
+        content = replace_task_section_text(content, "Mode", update.mode)
+    if update.allowed_files is not None:
+        content = replace_task_section_items(
+            content,
+            "Allowed Files",
+            update.allowed_files,
+        )
+    if update.forbidden_files is not None:
+        content = replace_task_section_items(
+            content,
+            "Forbidden Files",
+            update.forbidden_files,
+        )
+    if update.allowed_zones is not None:
+        content = replace_task_section_items(
+            content,
+            "Allowed Zones",
+            update.allowed_zones,
+        )
+    if update.forbidden_zones is not None:
+        content = replace_task_section_items(
+            content,
+            "Forbidden Zones",
+            update.forbidden_zones,
+        )
+    if update.enforcement_mode is not None:
+        content = replace_task_section_text(
+            content,
+            "Enforcement Mode",
+            update.enforcement_mode,
+        )
+    if update.acceptance_checks is not None:
+        content = replace_task_section_items(
+            content,
+            "Acceptance Checks",
+            update.acceptance_checks,
+        )
+
+    with active_task.path.open("w", encoding="utf-8", newline="\n") as file:
+        file.write(content)
+    return read_active_task(active_task.path)
 
 
 def slugify_title(title: str) -> str:
@@ -357,3 +421,47 @@ def replace_task_status(content: str, status: str) -> str:
             return "\n".join(lines) + "\n"
 
     return content
+
+
+def replace_task_section_text(content: str, section_name: str, value: str) -> str:
+    return replace_task_section(content, section_name, (value,))
+
+
+def replace_task_section_items(
+    content: str,
+    section_name: str,
+    items: tuple[str, ...],
+) -> str:
+    return replace_task_section(
+        content,
+        section_name,
+        tuple(f"- {item}" for item in items),
+    )
+
+
+def replace_task_section(
+    content: str,
+    section_name: str,
+    replacement_lines: tuple[str, ...],
+) -> str:
+    lines = content.splitlines()
+    start_index = None
+    end_index = len(lines)
+
+    for index, line in enumerate(lines):
+        if not line.startswith("## "):
+            continue
+        current_section = line.removeprefix("## ").strip()
+        if current_section == section_name:
+            start_index = index
+            continue
+        if start_index is not None:
+            end_index = index
+            break
+
+    if start_index is None:
+        return content
+
+    replacement = ["", *replacement_lines, ""]
+    updated_lines = lines[: start_index + 1] + replacement + lines[end_index:]
+    return "\n".join(updated_lines).rstrip() + "\n"

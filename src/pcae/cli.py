@@ -22,6 +22,7 @@ from pcae.commands.task import (
     run_task_list,
     run_task_new,
     run_task_show,
+    run_task_update,
 )
 
 
@@ -125,6 +126,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show the latest active task contract.",
     )
     task_show_parser.set_defaults(handler=run_task_show)
+
+    task_update_parser = task_subparsers.add_parser(
+        "update",
+        help="Update the latest active task contract.",
+    )
+    task_update_parser.add_argument("--goal")
+    task_update_parser.add_argument("--mode")
+    task_update_parser.add_argument("--allowed-file", action="append")
+    task_update_parser.add_argument("--forbidden-file", action="append")
+    task_update_parser.add_argument("--allowed-zone", action="append")
+    task_update_parser.add_argument("--forbidden-zone", action="append")
+    task_update_parser.add_argument("--enforcement-mode")
+    task_update_parser.add_argument("--acceptance-check", action="append")
+    task_update_parser.set_defaults(handler=run_task_update)
 
     hooks_parser = subparsers.add_parser(
         "hooks",
