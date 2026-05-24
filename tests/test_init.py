@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
+from pcae.core.export import write_governance_export_bundle
 from pcae.core.paths import HarnessPath
 from pcae.core.templates import INIT_TEMPLATES
 
@@ -35,6 +37,7 @@ def test_init_dry_run_writes_nothing(tmp_path: Path, monkeypatch, capsys) -> Non
     assert "  tasks" in output
     assert "Would create files:" in output
     assert "  AGENTS.md" in output
+    assert "  .pcae/exports/.gitignore" in output
     assert "  .githooks/pre-commit" in output
     for relative_path in INIT_TEMPLATES:
         assert not (tmp_path / relative_path).exists()
@@ -180,3 +183,60 @@ def test_init_creates_default_policy_file(tmp_path: Path) -> None:
     assert "[protected]" in content
     assert '  ".env",' in content
     assert '  "pyproject.toml",' in content
+
+
+def test_init_creates_export_gitignore(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+
+    export_ignore = tmp_path / ".pcae" / "exports" / ".gitignore"
+
+    assert export_ignore.is_file()
+    assert export_ignore.read_text(encoding="utf-8") == (
+        "governance-bundle-*.json\n"
+    )
+
+
+def test_governance_export_bundles_are_gitignored(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+
+    write_governance_export_bundle(HarnessPath(tmp_path))
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert status.stdout == ""
+
+
+def init_git_repo(root: Path) -> None:
+    subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def commit_baseline(root: Path) -> None:
+    subprocess.run(["git", "add", "."], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "baseline"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )

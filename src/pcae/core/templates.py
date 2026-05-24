@@ -90,6 +90,8 @@ Before ending a session:
 5. Run available checks.
 """,
     Path(".pcae/policy.toml"): render_default_policy(),
+    Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
+""",
     Path(".githooks/pre-commit"): """#!/usr/bin/env sh
 set -eu
 

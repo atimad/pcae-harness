@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add portable JSON export bundles for PCAE governance state.
+Keep generated governance export bundles as local ignored artifacts.
 
 ## Allowed Files
 
