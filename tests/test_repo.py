@@ -141,6 +141,88 @@ def test_repo_trial_dry_run_writes_nothing(
     assert after == before
 
 
+def test_repo_apply_dry_run_reports_planned_actions(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    (target / "AGENTS.md").write_text("custom\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE repo apply dry run" in output
+    assert f"Target repo: {target}" in output
+    assert "Would create:" in output
+    assert "  PROJECT_STATUS.md" in output
+    assert "Would skip:" in output
+    assert "  AGENTS.md" in output
+    assert "Would overwrite:" in output
+    assert "  none" in output
+
+
+def test_repo_apply_without_dry_run_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target)])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Real repo apply is not implemented yet. Use --dry-run." in output
+
+
+def test_repo_apply_missing_path_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(missing), "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert f"Target repo path does not exist: {missing}" in output
+
+
+def test_repo_apply_non_git_path_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert f"Target path is not a Git repo: {target}" in output
+
+
+def test_repo_apply_dry_run_writes_nothing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    before = text_file_snapshot(target)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--dry-run"])
+
+    after = text_file_snapshot(target)
+    capsys.readouterr()
+    assert exit_code == 0
+    assert after == before
+
+
 def init_git_repo(root: Path) -> None:
     subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
 

@@ -63,3 +63,4 @@
 - Added `pcae import bundle <path> --merge-history` to merge architecture history by timestamp.
 - Added `pcae repo trial <path> --dry-run` for safe external repo adoption previews.
 - Added `pcae repo trial <path> --dry-run --json` for machine-readable repo trial output.
+- Added `pcae repo apply <path> --dry-run` for safe external repo onboarding previews.

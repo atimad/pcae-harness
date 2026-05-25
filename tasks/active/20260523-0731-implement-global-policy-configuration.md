@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable JSON output for repo trial previews.
+Add dry-run repo apply planning for external Git repositories.
 
 ## Allowed Files
 

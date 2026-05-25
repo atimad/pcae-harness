@@ -25,6 +25,21 @@ def run_repo_trial(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_repo_apply(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("Real repo apply is not implemented yet. Use --dry-run.")
+        return 1
+
+    try:
+        trial = build_repo_trial(Path(args.path))
+    except ValueError as error:
+        print(error)
+        return 1
+
+    print_repo_apply_plan(trial)
+    return 0
+
+
 def print_repo_trial(trial: RepoTrial) -> None:
     print("PCAE repo trial")
     print(f"Target repo: {trial.target_path}")
@@ -46,6 +61,29 @@ def print_repo_trial(trial: RepoTrial) -> None:
         path
         for path in trial.init_plans
         if not path.would_create
+    )
+
+
+def print_repo_apply_plan(trial: RepoTrial) -> None:
+    print("PCAE repo apply dry run")
+    print(f"Target repo: {trial.target_path}")
+    print("Would create:")
+    print_plan_paths(
+        path
+        for path in trial.init_plans
+        if path.would_create
+    )
+    print("Would skip:")
+    print_plan_paths(
+        path
+        for path in trial.init_plans
+        if not path.would_create and not path.would_overwrite
+    )
+    print("Would overwrite:")
+    print_plan_paths(
+        path
+        for path in trial.init_plans
+        if path.would_overwrite
     )
 
 
