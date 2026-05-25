@@ -46,6 +46,7 @@ def run_agent_status(args: argparse.Namespace) -> int:
 def print_agent_status(status: dict[str, object]) -> None:
     if not status["locked"]:
         print("Agent lock: available")
+        print(f"Stale after seconds: {status['stale_after_seconds']}")
         return
 
     lock = status.get("lock")
@@ -53,9 +54,14 @@ def print_agent_status(status: dict[str, object]) -> None:
         print("Agent lock: unavailable")
         return
 
-    print("Agent lock: held")
+    if status["stale"]:
+        print("Agent lock: stale")
+    else:
+        print("Agent lock: held")
     print(f"Agent ID: {lock.get('agent_id')}")
     print(f"Acquired at: {lock.get('acquired_at')}")
+    print(f"Age seconds: {status.get('age_seconds')}")
+    print(f"Stale after seconds: {status.get('stale_after_seconds')}")
     print(f"Git branch: {lock.get('git_branch')}")
     active_task = lock.get("active_task")
     if isinstance(active_task, dict):

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add agent session leasing.
+Add stale agent lock detection.
 
 ## Allowed Files
 

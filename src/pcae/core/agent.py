@@ -11,6 +11,7 @@ from pcae.core.tasks import find_latest_active_task
 
 
 AGENT_LOCK_RELATIVE_PATH = Path(".pcae") / "agent-lock.json"
+AGENT_LOCK_STALE_AFTER_SECONDS = 4 * 60 * 60
 
 
 @dataclass(frozen=True)
@@ -76,17 +77,31 @@ def read_agent_lock(root: HarnessPath) -> AgentLock | None:
     return AgentLock(relative_path=AGENT_LOCK_RELATIVE_PATH, data=data)
 
 
-def build_agent_status(root: HarnessPath) -> dict[str, object]:
+def build_agent_status(
+    root: HarnessPath,
+    now: datetime | None = None,
+) -> dict[str, object]:
     lock = read_agent_lock(root)
     if lock is None:
         return {
-            "locked": False,
+            "age_seconds": None,
             "lock": None,
+            "locked": False,
+            "stale": False,
+            "stale_after_seconds": AGENT_LOCK_STALE_AFTER_SECONDS,
         }
 
+    age_seconds = calculate_lock_age_seconds(
+        lock.data.get("acquired_at"),
+        now or datetime.now(timezone.utc),
+    )
     return {
-        "locked": True,
+        "age_seconds": age_seconds,
         "lock": lock.data,
+        "locked": True,
+        "stale": age_seconds is not None
+        and age_seconds > AGENT_LOCK_STALE_AFTER_SECONDS,
+        "stale_after_seconds": AGENT_LOCK_STALE_AFTER_SECONDS,
     }
 
 
@@ -107,3 +122,23 @@ def build_agent_lock_data(
         "agent_id": agent_id,
         "git_branch": read_git_branch(root),
     }
+
+
+def calculate_lock_age_seconds(
+    acquired_at: object,
+    now: datetime,
+) -> int | None:
+    if not isinstance(acquired_at, str):
+        return None
+
+    try:
+        acquired = datetime.fromisoformat(acquired_at)
+    except ValueError:
+        return None
+
+    if acquired.tzinfo is None:
+        acquired = acquired.replace(tzinfo=timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    return max(0, int((now - acquired).total_seconds()))

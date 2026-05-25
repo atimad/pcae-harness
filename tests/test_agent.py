@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
-from pcae.core.agent import acquire_agent_lock
+from pcae.core.agent import acquire_agent_lock, build_agent_status
 from pcae.core.paths import HarnessPath
 from pcae.core.tasks import create_task_contract
 
@@ -128,8 +128,84 @@ def test_agent_status_json_parses(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     assert data["locked"] is True
+    assert data["stale"] is False
+    assert isinstance(data["age_seconds"], int)
+    assert data["stale_after_seconds"] == 14400
     assert data["lock"]["agent_id"] == "agent-a"
     assert data["lock"]["active_task"]["title"] == "Agent task"
+
+
+def test_agent_status_json_reports_available_metadata(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agent", "status", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "age_seconds": None,
+        "lock": None,
+        "locked": False,
+        "stale": False,
+        "stale_after_seconds": 14400,
+    }
+
+
+def test_agent_fresh_lock_is_not_stale(tmp_path: Path) -> None:
+    init_agent_repo(tmp_path)
+    acquired_at = datetime(2026, 5, 25, 8, 0, tzinfo=timezone.utc)
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a", acquired_at=acquired_at)
+
+    status = build_agent_status(
+        HarnessPath(tmp_path),
+        now=acquired_at + timedelta(hours=3, minutes=59),
+    )
+
+    assert status["locked"] is True
+    assert status["stale"] is False
+    assert status["age_seconds"] == 14340
+    assert status["stale_after_seconds"] == 14400
+
+
+def test_agent_old_lock_is_stale(tmp_path: Path) -> None:
+    init_agent_repo(tmp_path)
+    acquired_at = datetime(2026, 5, 25, 8, 0, tzinfo=timezone.utc)
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a", acquired_at=acquired_at)
+
+    status = build_agent_status(
+        HarnessPath(tmp_path),
+        now=acquired_at + timedelta(hours=4, seconds=1),
+    )
+
+    assert status["locked"] is True
+    assert status["stale"] is True
+    assert status["age_seconds"] == 14401
+
+
+def test_agent_status_reports_stale_lock(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(
+        HarnessPath(tmp_path),
+        "agent-a",
+        acquired_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agent", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent lock: stale" in output
+    assert "Stale after seconds: 14400" in output
 
 
 def test_agent_lock_is_ignored_by_git(
