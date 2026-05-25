@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add stale agent lock detection.
+Add force release for stale agent locks.
 
 ## Allowed Files
 

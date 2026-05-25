@@ -29,7 +29,11 @@ def run_agent_acquire(args: argparse.Namespace) -> int:
 
 
 def run_agent_release(args: argparse.Namespace) -> int:
-    result = release_agent_lock(HarnessPath.cwd(), args.agent_id)
+    result = release_agent_lock(
+        HarnessPath.cwd(),
+        args.agent_id,
+        force_stale=args.force_stale,
+    )
     print(result.message)
     return 0 if result.released else 1
 

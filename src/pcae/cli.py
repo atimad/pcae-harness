@@ -128,6 +128,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Release the local PCAE agent lock.",
     )
     agent_release_parser.add_argument("--agent-id", required=True)
+    agent_release_parser.add_argument(
+        "--force-stale",
+        action="store_true",
+        help="Release a stale lock even if held by another agent.",
+    )
     agent_release_parser.set_defaults(handler=run_agent_release)
 
     agent_status_parser = agent_subparsers.add_parser(

@@ -81,6 +81,68 @@ def test_agent_release_correct_agent_succeeds(
     assert not (tmp_path / ".pcae" / "agent-lock.json").exists()
 
 
+def test_agent_force_stale_releases_stale_different_agent(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(
+        HarnessPath(tmp_path),
+        "agent-a",
+        acquired_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["agent", "release", "--agent-id", "agent-b", "--force-stale"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Force-released stale agent lock held by agent-a." in output
+    assert not (tmp_path / ".pcae" / "agent-lock.json").exists()
+
+
+def test_agent_force_stale_refuses_fresh_different_agent(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["agent", "release", "--agent-id", "agent-b", "--force-stale"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert (
+        "Agent lock is not stale; agent-b cannot release lock held by agent-a."
+        in output
+    )
+    assert (tmp_path / ".pcae" / "agent-lock.json").exists()
+
+
+def test_agent_force_stale_with_no_lock_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["agent", "release", "--agent-id", "agent-b", "--force-stale"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No agent lock is currently held." in output
+
+
 def test_agent_status_reports_available(
     tmp_path: Path,
     monkeypatch,

@@ -83,3 +83,4 @@
 - Added `pcae pipeline list` and `pcae pipeline list --json` for available pipeline discovery.
 - Added local agent session leasing with acquire, release, and status commands.
 - Added stale agent lock detection to `pcae agent status` and JSON status output.
+- Added `pcae agent release --force-stale` for explicit cleanup of stale agent locks.

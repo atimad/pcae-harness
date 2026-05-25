@@ -52,13 +52,35 @@ def acquire_agent_lock(
     return AgentLock(relative_path=AGENT_LOCK_RELATIVE_PATH, data=data)
 
 
-def release_agent_lock(root: HarnessPath, agent_id: str) -> AgentReleaseResult:
+def release_agent_lock(
+    root: HarnessPath,
+    agent_id: str,
+    force_stale: bool = False,
+) -> AgentReleaseResult:
     target = root.join(AGENT_LOCK_RELATIVE_PATH)
     lock = read_agent_lock(root)
     if lock is None:
         return AgentReleaseResult(False, "No agent lock is currently held.")
 
     if lock.agent_id != agent_id:
+        if force_stale:
+            status = build_agent_status(root)
+            if status["stale"]:
+                target.unlink()
+                return AgentReleaseResult(
+                    True,
+                    (
+                        "Force-released stale agent lock held by "
+                        f"{lock.agent_id}."
+                    ),
+                )
+            return AgentReleaseResult(
+                False,
+                (
+                    "Agent lock is not stale; "
+                    f"{agent_id} cannot release lock held by {lock.agent_id}."
+                ),
+            )
         return AgentReleaseResult(
             False,
             f"Agent lock is held by {lock.agent_id}; {agent_id} cannot release it.",
