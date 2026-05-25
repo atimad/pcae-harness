@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 
+from pcae.commands.analytics import run_analytics_trends
 from pcae.commands.architecture import (
     run_architecture_history,
     run_architecture_metrics,
@@ -100,6 +101,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON health output.",
     )
     health_parser.set_defaults(handler=run_health)
+
+    analytics_parser = subparsers.add_parser(
+        "analytics",
+        help="Analyze PCAE governance history.",
+    )
+    analytics_subparsers = analytics_parser.add_subparsers(
+        dest="analytics_command",
+        required=True,
+    )
+    analytics_trends_parser = analytics_subparsers.add_parser(
+        "trends",
+        help="Summarize governance trends from architecture history.",
+    )
+    analytics_trends_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON analytics trends output.",
+    )
+    analytics_trends_parser.set_defaults(handler=run_analytics_trends)
 
     fleet_parser = subparsers.add_parser(
         "fleet",

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable fleet apply output.
+Add governance trend analytics.
 
 ## Allowed Files
 
