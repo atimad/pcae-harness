@@ -4,7 +4,12 @@ import argparse
 import json
 from pathlib import Path
 
-from pcae.core.fleet import add_fleet_repo, build_fleet_health, read_fleet_repos
+from pcae.core.fleet import (
+    add_fleet_repo,
+    build_fleet_health,
+    read_fleet_repos,
+    write_fleet_export,
+)
 from pcae.core.paths import HarnessPath
 
 
@@ -40,6 +45,12 @@ def run_fleet_health(args: argparse.Namespace) -> int:
     else:
         print_fleet_health(data)
     return 0 if data["overall_status"] == "healthy" else 1
+
+
+def run_fleet_export(args: argparse.Namespace) -> int:
+    export = write_fleet_export(HarnessPath.cwd())
+    print(f"Wrote fleet governance bundle: {export.relative_path.as_posix()}")
+    return 0
 
 
 def print_fleet_health(data: dict) -> None:

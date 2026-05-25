@@ -10,7 +10,12 @@ from pcae.commands.architecture import (
 )
 from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
-from pcae.commands.fleet import run_fleet_add, run_fleet_health, run_fleet_list
+from pcae.commands.fleet import (
+    run_fleet_add,
+    run_fleet_export,
+    run_fleet_health,
+    run_fleet_list,
+)
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
@@ -124,6 +129,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON fleet health output.",
     )
     fleet_health_parser.set_defaults(handler=run_fleet_health)
+
+    fleet_export_parser = fleet_subparsers.add_parser(
+        "export",
+        help="Write a portable fleet governance JSON bundle.",
+    )
+    fleet_export_parser.set_defaults(handler=run_fleet_export)
 
     export_parser = subparsers.add_parser(
         "export",

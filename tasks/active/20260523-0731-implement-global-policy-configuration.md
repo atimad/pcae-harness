@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add fleet-wide governance health aggregation.
+Add portable fleet governance export bundles.
 
 ## Allowed Files
 
