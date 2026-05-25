@@ -10,6 +10,7 @@ from pcae.commands.architecture import (
 )
 from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
+from pcae.commands.fleet import run_fleet_add, run_fleet_list
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
@@ -90,6 +91,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON health output.",
     )
     health_parser.set_defaults(handler=run_health)
+
+    fleet_parser = subparsers.add_parser(
+        "fleet",
+        help="Manage the local PCAE governed repository registry.",
+    )
+    fleet_subparsers = fleet_parser.add_subparsers(
+        dest="fleet_command",
+        required=True,
+    )
+
+    fleet_add_parser = fleet_subparsers.add_parser(
+        "add",
+        help="Register a governed repository path.",
+    )
+    fleet_add_parser.add_argument("path")
+    fleet_add_parser.set_defaults(handler=run_fleet_add)
+
+    fleet_list_parser = fleet_subparsers.add_parser(
+        "list",
+        help="List registered governed repositories.",
+    )
+    fleet_list_parser.set_defaults(handler=run_fleet_list)
 
     export_parser = subparsers.add_parser(
         "export",

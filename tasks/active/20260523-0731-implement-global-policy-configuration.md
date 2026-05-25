@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add explicit force mode for applying PCAE onboarding to external Git repositories.
+Add a local fleet registry for governed Git repositories.
 
 ## Allowed Files
 
