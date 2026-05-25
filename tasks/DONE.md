@@ -64,3 +64,4 @@
 - Added `pcae repo trial <path> --dry-run` for safe external repo adoption previews.
 - Added `pcae repo trial <path> --dry-run --json` for machine-readable repo trial output.
 - Added `pcae repo apply <path> --dry-run` for safe external repo onboarding previews.
+- Added `pcae repo apply <path> --force` for explicit PCAE onboarding writes.

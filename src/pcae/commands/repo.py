@@ -4,7 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from pcae.core.repo import RepoTrial, build_repo_trial
+from pcae.core.repo import RepoTrial, apply_repo_onboarding, build_repo_trial
+from pcae.core.writer import WriteResult
 
 
 def run_repo_trial(args: argparse.Namespace) -> int:
@@ -26,17 +27,34 @@ def run_repo_trial(args: argparse.Namespace) -> int:
 
 
 def run_repo_apply(args: argparse.Namespace) -> int:
-    if not args.dry_run:
-        print("Real repo apply is not implemented yet. Use --dry-run.")
+    if not args.dry_run and not args.force:
+        print("Real repo apply is not implemented yet. Use --dry-run or --force.")
         return 1
 
     try:
-        trial = build_repo_trial(Path(args.path))
+        if args.dry_run:
+            trial = build_repo_trial(Path(args.path))
+            print_repo_apply_plan(trial)
+            return 0
+        results = apply_repo_onboarding(Path(args.path))
     except ValueError as error:
         print(error)
         return 1
 
-    print_repo_apply_plan(trial)
+    print("PCAE repo apply completed.")
+    print_write_results("Created:", (result for result in results if result.created))
+    print_write_results(
+        "Overwritten:",
+        (result for result in results if result.overwritten),
+    )
+    print_write_results(
+        "Skipped:",
+        (
+            result
+            for result in results
+            if not result.created and not result.overwritten
+        ),
+    )
     return 0
 
 
@@ -94,6 +112,16 @@ def print_plan_paths(plans) -> None:
         return
     for plan in paths:
         print(f"  {plan.relative_path.as_posix()}")
+
+
+def print_write_results(title: str, results) -> None:
+    items: tuple[WriteResult, ...] = tuple(results)
+    print(title)
+    if not items:
+        print("  none")
+        return
+    for result in items:
+        print(f"  {result.relative_path.as_posix()}")
 
 
 def yes_no(value: bool) -> str:

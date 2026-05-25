@@ -176,7 +176,7 @@ def test_repo_apply_without_dry_run_fails_clearly(
 
     output = capsys.readouterr().out
     assert exit_code == 1
-    assert "Real repo apply is not implemented yet. Use --dry-run." in output
+    assert "Real repo apply is not implemented yet. Use --dry-run or --force." in output
 
 
 def test_repo_apply_missing_path_fails_clearly(
@@ -221,6 +221,117 @@ def test_repo_apply_dry_run_writes_nothing(
     capsys.readouterr()
     assert exit_code == 0
     assert after == before
+
+
+def test_repo_apply_force_creates_missing_pcae_infrastructure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE repo apply completed." in output
+    assert "Created:" in output
+    assert "  AGENTS.md" in output
+    assert "  .pcae/policy.toml" in output
+    assert (target / "AGENTS.md").is_file()
+    assert (target / ".pcae" / "policy.toml").is_file()
+    assert (target / ".pcae" / "exports" / ".gitignore").is_file()
+    assert (target / ".githooks" / "pre-commit").is_file()
+
+
+def test_repo_apply_force_preserves_user_memory_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    (target / "AGENTS.md").write_text("custom agent notes\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (target / "AGENTS.md").read_text(encoding="utf-8") == (
+        "custom agent notes\n"
+    )
+    assert "Skipped:" in output
+    assert "  AGENTS.md" in output
+
+
+def test_repo_apply_force_overwrites_managed_templates(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    init_harness(HarnessPath(target))
+    managed = target / ".pcae" / "exports" / ".gitignore"
+    managed.write_text("custom ignore\n", encoding="utf-8")
+    hook = target / ".githooks" / "pre-commit"
+    hook.write_text("custom hook\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Overwritten:" in output
+    assert "  .pcae/exports/.gitignore" in output
+    assert "  .githooks/pre-commit" in output
+    assert managed.read_text(encoding="utf-8") == "governance-bundle-*.json\n"
+    assert "scripts/check-docs-updated.sh" in hook.read_text(encoding="utf-8")
+
+
+def test_repo_apply_force_then_trial_reports_no_missing_pcae_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    monkeypatch.chdir(tmp_path)
+
+    apply_exit_code = main(["repo", "apply", str(target), "--force"])
+    capsys.readouterr()
+    trial_exit_code = main(["repo", "trial", str(target), "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert apply_exit_code == 0
+    assert trial_exit_code == 0
+    assert "PCAE files: 9 present, 0 missing" in output
+
+
+def test_repo_apply_force_missing_path_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(missing), "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert f"Target repo path does not exist: {missing}" in output
+
+
+def test_repo_apply_force_non_git_path_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "apply", str(target), "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert f"Target path is not a Git repo: {target}" in output
 
 
 def init_git_repo(root: Path) -> None:

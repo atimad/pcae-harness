@@ -168,6 +168,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview apply actions without modifying the target repo.",
     )
+    repo_apply_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Apply PCAE onboarding templates to the target repo.",
+    )
     repo_apply_parser.set_defaults(handler=run_repo_apply)
 
     architecture_parser = subparsers.add_parser(

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add dry-run repo apply planning for external Git repositories.
+Add explicit force mode for applying PCAE onboarding to external Git repositories.
 
 ## Allowed Files
 

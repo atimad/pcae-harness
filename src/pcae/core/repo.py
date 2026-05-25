@@ -5,8 +5,8 @@ from pathlib import Path
 
 from pcae.core.inspect import inspect_harness
 from pcae.core.paths import HarnessPath
-from pcae.core.templates import INIT_TEMPLATES
-from pcae.core.writer import WritePlan, plan_missing_files
+from pcae.core.templates import FORCE_MANAGED_TEMPLATES, INIT_TEMPLATES
+from pcae.core.writer import WritePlan, WriteResult, plan_missing_files, write_missing_files
 
 
 @dataclass(frozen=True)
@@ -22,12 +22,7 @@ class RepoTrial:
 
 
 def build_repo_trial(target_path: Path) -> RepoTrial:
-    if not target_path.exists():
-        raise ValueError(f"Target repo path does not exist: {target_path}")
-    if not target_path.is_dir():
-        raise ValueError(f"Target repo path is not a directory: {target_path}")
-    if not target_path.joinpath(".git").exists():
-        raise ValueError(f"Target path is not a Git repo: {target_path}")
+    validate_target_repo(target_path)
 
     root = HarnessPath(target_path)
     inspection = inspect_harness(root)
@@ -43,3 +38,23 @@ def build_repo_trial(target_path: Path) -> RepoTrial:
         and any(active_tasks.glob("*.md")),
         hooks_exist=target_path.joinpath(".githooks", "pre-commit").is_file(),
     )
+
+
+def apply_repo_onboarding(target_path: Path) -> tuple[WriteResult, ...]:
+    validate_target_repo(target_path)
+    return tuple(
+        write_missing_files(
+            HarnessPath(target_path),
+            INIT_TEMPLATES,
+            force_managed=FORCE_MANAGED_TEMPLATES,
+        )
+    )
+
+
+def validate_target_repo(target_path: Path) -> None:
+    if not target_path.exists():
+        raise ValueError(f"Target repo path does not exist: {target_path}")
+    if not target_path.is_dir():
+        raise ValueError(f"Target repo path is not a directory: {target_path}")
+    if not target_path.joinpath(".git").exists():
+        raise ValueError(f"Target path is not a Git repo: {target_path}")
