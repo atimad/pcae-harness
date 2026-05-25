@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add portable fleet governance export bundles.
+Add fleet-wide PCAE readiness inspection.
 
 ## Allowed Files
 

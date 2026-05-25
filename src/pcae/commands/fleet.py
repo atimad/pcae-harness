@@ -7,6 +7,7 @@ from pathlib import Path
 from pcae.core.fleet import (
     add_fleet_repo,
     build_fleet_health,
+    build_fleet_inspection,
     read_fleet_repos,
     write_fleet_export,
 )
@@ -47,6 +48,15 @@ def run_fleet_health(args: argparse.Namespace) -> int:
     return 0 if data["overall_status"] == "healthy" else 1
 
 
+def run_fleet_inspect(args: argparse.Namespace) -> int:
+    data = build_fleet_inspection(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print_fleet_inspection(data)
+    return 0 if data["overall_status"] == "ready" else 1
+
+
 def run_fleet_export(args: argparse.Namespace) -> int:
     export = write_fleet_export(HarnessPath.cwd())
     print(f"Wrote fleet governance bundle: {export.relative_path.as_posix()}")
@@ -77,3 +87,31 @@ def print_fleet_health(data: dict) -> None:
             print(f"  Latest dependency warnings: {warnings}")
         if repo["details"] != "ok":
             print(f"  Details: {repo['details']}")
+
+
+def print_fleet_inspection(data: dict) -> None:
+    print("Fleet inspection")
+    print(f"Overall status: {data['overall_status']}")
+    print(f"Repos: {data['repo_count']}")
+    print(f"Ready: {data['ready_count']}")
+    print(f"Not ready: {data['not_ready_count']}")
+    for repo in data["repos"]:
+        print(f"Repo: {repo['path']}")
+        print(f"  Status: {repo['status']}")
+        if repo["pcae_files_present"] is None:
+            print("  PCAE files: unknown")
+        else:
+            print(
+                "  PCAE files: "
+                f"{repo['pcae_files_present']} present, "
+                f"{repo['pcae_files_missing']} missing"
+            )
+        print(f"  Policy exists: {yes_no(repo['policy_exists'])}")
+        print(f"  Hooks exist: {yes_no(repo['hooks_exist'])}")
+        print(f"  Active tasks exist: {yes_no(repo['active_tasks_exist'])}")
+        if repo["details"] != "ok":
+            print(f"  Details: {repo['details']}")
+
+
+def yes_no(value: bool) -> str:
+    return "yes" if value else "no"

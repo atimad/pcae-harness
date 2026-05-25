@@ -14,6 +14,7 @@ from pcae.commands.fleet import (
     run_fleet_add,
     run_fleet_export,
     run_fleet_health,
+    run_fleet_inspect,
     run_fleet_list,
 )
 from pcae.commands.health import run_health
@@ -129,6 +130,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON fleet health output.",
     )
     fleet_health_parser.set_defaults(handler=run_fleet_health)
+
+    fleet_inspect_parser = fleet_subparsers.add_parser(
+        "inspect",
+        help="Inspect PCAE readiness across registered repositories.",
+    )
+    fleet_inspect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON fleet inspection output.",
+    )
+    fleet_inspect_parser.set_defaults(handler=run_fleet_inspect)
 
     fleet_export_parser = fleet_subparsers.add_parser(
         "export",

@@ -224,6 +224,97 @@ def test_fleet_health_reports_non_git_repo_without_crashing(
     assert data["repos"][0]["details"] == f"Target path is not a Git repo: {repo}"
 
 
+def test_fleet_inspect_reports_registered_repo_readiness(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    init_healthy_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "inspect"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Fleet inspection" in output
+    assert "Overall status: ready" in output
+    assert "Repos: 1" in output
+    assert "Ready: 1" in output
+    assert "Not ready: 0" in output
+    assert f"Repo: {repo.resolve().as_posix()}" in output
+    assert "Status: ready" in output
+    assert "PCAE files: 9 present, 0 missing" in output
+    assert "Policy exists: yes" in output
+    assert "Hooks exist: yes" in output
+    assert "Active tasks exist: yes" in output
+
+
+def test_fleet_inspect_json_reports_registered_repo_readiness(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    init_healthy_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "inspect", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "ready"
+    assert data["repo_count"] == 1
+    assert data["ready_count"] == 1
+    assert data["not_ready_count"] == 0
+    assert data["repos"][0] == {
+        "active_tasks_exist": True,
+        "details": "ok",
+        "hooks_exist": True,
+        "path": repo.resolve().as_posix(),
+        "pcae_files_missing": 0,
+        "pcae_files_present": 9,
+        "policy_exists": True,
+        "status": "ready",
+    }
+
+
+def test_fleet_inspect_reports_missing_repo_without_crashing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    write_fleet_registry(tmp_path, [missing.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "inspect"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Overall status: not_ready" in output
+    assert "Not ready: 1" in output
+    assert f"Repo: {missing.as_posix()}" in output
+    assert "PCAE files: unknown" in output
+    assert f"Details: Target repo path does not exist: {missing}" in output
+
+
+def test_fleet_inspect_reports_non_git_repo_without_crashing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    write_fleet_registry(tmp_path, [repo.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "inspect", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["overall_status"] == "not_ready"
+    assert data["repo_count"] == 1
+    assert data["ready_count"] == 0
+    assert data["not_ready_count"] == 1
+    assert data["repos"][0]["status"] == "not_ready"
+    assert data["repos"][0]["details"] == f"Target path is not a Git repo: {repo}"
+
+
 def test_fleet_export_writes_portable_bundle(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

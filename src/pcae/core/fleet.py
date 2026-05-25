@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
-from pcae.core.repo import validate_target_repo
+from pcae.core.repo import build_repo_trial, validate_target_repo
 
 
 FLEET_RELATIVE_PATH = Path(".pcae") / "fleet.json"
@@ -63,6 +63,19 @@ def build_fleet_health(root: HarnessPath) -> dict:
         "repo_count": len(repos),
         "repos": repos,
         "unhealthy_count": unhealthy_count,
+    }
+
+
+def build_fleet_inspection(root: HarnessPath) -> dict:
+    repos = [fleet_repo_inspection(repo) for repo in read_fleet_repos(root)]
+    ready_count = sum(1 for repo in repos if repo["status"] == "ready")
+    not_ready_count = len(repos) - ready_count
+    return {
+        "not_ready_count": not_ready_count,
+        "overall_status": "ready" if not_ready_count == 0 else "not_ready",
+        "ready_count": ready_count,
+        "repo_count": len(repos),
+        "repos": repos,
     }
 
 
@@ -129,4 +142,33 @@ def fleet_repo_health(repo: str) -> dict:
         "path": repo,
         "session_continuity": health["session_continuity"],
         "status": health["overall_status"],
+    }
+
+
+def fleet_repo_inspection(repo: str) -> dict:
+    path = Path(repo)
+    try:
+        trial = build_repo_trial(path)
+    except ValueError as error:
+        return {
+            "active_tasks_exist": False,
+            "details": str(error),
+            "hooks_exist": False,
+            "path": repo,
+            "pcae_files_missing": None,
+            "pcae_files_present": None,
+            "policy_exists": False,
+            "status": "not_ready",
+        }
+
+    status = "ready" if trial.pcae_files_missing == 0 else "not_ready"
+    return {
+        "active_tasks_exist": trial.active_tasks_exist,
+        "details": "ok" if status == "ready" else "missing PCAE files",
+        "hooks_exist": trial.hooks_exist,
+        "path": repo,
+        "pcae_files_missing": trial.pcae_files_missing,
+        "pcae_files_present": trial.pcae_files_present,
+        "policy_exists": trial.policy_exists,
+        "status": status,
     }

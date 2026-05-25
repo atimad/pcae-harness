@@ -68,3 +68,4 @@
 - Added `pcae fleet add` and `pcae fleet list` for local governed repo tracking.
 - Added `pcae fleet health` and `pcae fleet health --json` for fleet health aggregation.
 - Added `pcae fleet export` for portable fleet governance snapshots.
+- Added `pcae fleet inspect` and `pcae fleet inspect --json` for fleet readiness reporting.
