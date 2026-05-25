@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
+from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import CheckResult, run_checks
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.paths import HarnessPath
@@ -53,6 +54,7 @@ def check_json_data(root: HarnessPath, result: CheckResult) -> dict[str, object]
     changes = read_git_changes(root)
     return {
         "active_task": active_task_data(result),
+        "agent_lock": build_agent_lock_state(root),
         "architecture_zones_touched": {
             zone.name: zone.file_count for zone in result.architecture_zones_touched
         },

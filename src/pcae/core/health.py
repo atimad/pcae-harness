@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pcae.core.architecture import read_architecture_history_summary
+from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import CheckResult, run_checks
 from pcae.core.git_status import read_git_changes
 from pcae.core.inspect import InspectionResult, inspect_harness
@@ -36,6 +37,7 @@ def build_health_data(root: HarnessPath) -> dict:
 
     return {
         "active_task": active_task_data(check_result),
+        "agent_lock": build_agent_lock_state(root),
         "architecture_history_entries": architecture_history_entries,
         "git_status": summarize_git_changes(changes),
         "latest_dependency_warnings": latest_dependency_warnings,

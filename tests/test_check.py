@@ -6,6 +6,7 @@ import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
+from pcae.core.agent import acquire_agent_lock
 from pcae.core.check import run_checks
 from pcae.core.paths import HarnessPath
 
@@ -129,12 +130,51 @@ def test_check_json_command_reports_passed_result(
         "id": "20260522-1930-test-task",
         "title": "Test task",
     }
+    assert data["agent_lock"] == {
+        "age_seconds": None,
+        "agent_id": None,
+        "locked": False,
+        "stale": False,
+        "stale_after_seconds": 14400,
+    }
     assert data["git_status"]["changed_file_count"] == 2
     assert data["session_continuity"] == "verified"
     assert data["violations"] == []
     assert data["warnings"] == []
     assert data["dependency_warnings"] == []
     assert data["enforcement_mode"] == "advisory"
+
+
+def test_check_json_command_reports_agent_lock(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"])
+    write_file(tmp_path / "src" / "allowed.py", "print('allowed')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
+    run_git(tmp_path, "init")
+    run_git(tmp_path, "config", "user.email", "test@example.com")
+    run_git(tmp_path, "config", "user.name", "Test User")
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a")
+    run_git(tmp_path, "add", ".")
+    run_git(tmp_path, "commit", "-m", "baseline")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_lock"]["locked"] is True
+    assert data["agent_lock"]["stale"] is False
+    assert data["agent_lock"]["agent_id"] == "agent-a"
+    assert isinstance(data["agent_lock"]["age_seconds"], int)
+    assert data["agent_lock"]["stale_after_seconds"] == 14400
 
 
 def test_check_command_reports_active_task_and_violating_file(

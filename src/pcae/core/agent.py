@@ -129,6 +129,40 @@ def build_agent_status(
     }
 
 
+def build_agent_lock_state(root: HarnessPath) -> dict[str, object]:
+    try:
+        status = build_agent_status(root)
+    except ValueError:
+        lock = read_agent_lock(root)
+        return compact_agent_lock_state(
+            {
+                "age_seconds": None,
+                "lock": None if lock is None else lock.data,
+                "locked": lock is not None,
+                "stale": False,
+                "stale_after_seconds": AGENT_LOCK_STALE_AFTER_SECONDS,
+            }
+        )
+    return compact_agent_lock_state(status)
+
+
+def compact_agent_lock_state(status: dict[str, object]) -> dict[str, object]:
+    lock = status.get("lock")
+    agent_id = None
+    if isinstance(lock, dict):
+        value = lock.get("agent_id")
+        if isinstance(value, str):
+            agent_id = value
+
+    return {
+        "age_seconds": status.get("age_seconds"),
+        "agent_id": agent_id,
+        "locked": status["locked"],
+        "stale": status["stale"],
+        "stale_after_seconds": status["stale_after_seconds"],
+    }
+
+
 def build_agent_lock_data(
     root: HarnessPath,
     agent_id: str,

@@ -23,6 +23,7 @@ def print_health(data: dict) -> None:
     print(f"Required PCAE files: {data['required_files_status']}")
     print(f"Policy validation: {policy_validation_text(data)}")
     print_active_task(data["active_task"])
+    print_agent_lock(data["agent_lock"])
     print(f"Session continuity: {data['session_continuity']}")
     if data["architecture_history_entries"] is None:
         print("Architecture history entries: missing")
@@ -50,3 +51,13 @@ def print_active_task(active_task: dict | None) -> None:
 
     print(f"Active task: {active_task['id']}")
     print(f"Title: {active_task['title']}")
+
+
+def print_agent_lock(agent_lock: dict) -> None:
+    if not agent_lock["locked"]:
+        print("Agent lock: available")
+        return
+    if agent_lock["stale"]:
+        print(f"Agent lock: stale ({agent_lock['agent_id']})")
+        return
+    print(f"Agent lock: held by {agent_lock['agent_id']}")

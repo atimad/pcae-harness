@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add configurable agent stale threshold.
+Expose agent lease state in health and check JSON.
 
 ## Allowed Files
 

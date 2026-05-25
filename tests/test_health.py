@@ -7,6 +7,7 @@ import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
+from pcae.core.agent import acquire_agent_lock
 from pcae.core.paths import HarnessPath
 from pcae.core.session import write_session_snapshot
 from pcae.core.tasks import create_task_contract
@@ -34,6 +35,7 @@ def test_health_command_reports_healthy_governance(
     assert "Policy validation: valid (repo config)" in output
     assert "Active task: 20260524-0800-health-task" in output
     assert "Title: Health task" in output
+    assert "Agent lock: available" in output
     assert "Session continuity: verified" in output
     assert "Architecture history entries: 1" in output
     assert "Latest enforcement mode: advisory" in output
@@ -66,6 +68,13 @@ def test_health_json_command_reports_healthy_governance(
         "id": "20260524-0800-health-task",
         "title": "Health task",
     }
+    assert data["agent_lock"] == {
+        "age_seconds": None,
+        "agent_id": None,
+        "locked": False,
+        "stale": False,
+        "stale_after_seconds": 14400,
+    }
     assert data["session_continuity"] == "verified"
     assert data["architecture_history_entries"] == 1
     assert data["latest_enforcement_mode"] == "advisory"
@@ -73,6 +82,54 @@ def test_health_json_command_reports_healthy_governance(
     assert data["git_status"] == "clean"
     assert data["warnings"] == []
     assert data["violations"] == []
+
+
+def test_health_command_reports_fresh_agent_lock(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    write_architecture_history(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a")
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent lock: held by agent-a" in output
+
+
+def test_health_command_reports_stale_agent_lock(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    write_architecture_history(tmp_path)
+    acquire_agent_lock(
+        HarnessPath(tmp_path),
+        "agent-a",
+        acquired_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent lock: stale (agent-a)" in output
 
 
 def test_health_command_reports_warnings_without_failing(
