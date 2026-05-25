@@ -95,11 +95,29 @@ def run_fleet_apply(args: argparse.Namespace) -> int:
 
     if args.dry_run:
         data = build_fleet_apply_plan(HarnessPath.cwd())
-        print_fleet_apply_plan(data)
+        if args.json:
+            print(
+                json.dumps(
+                    fleet_apply_json_data(data, dry_run=True),
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print_fleet_apply_plan(data)
         return 0 if data["overall_status"] == "ready" else 1
 
     data = apply_fleet_governance(HarnessPath.cwd())
-    print_fleet_apply_results(data)
+    if args.json:
+        print(
+            json.dumps(
+                fleet_apply_json_data(data, dry_run=False),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print_fleet_apply_results(data)
     return 0 if data["overall_status"] == "applied" else 1
 
 
@@ -212,6 +230,37 @@ def print_paths(title: str, paths: list[str]) -> None:
         return
     for path in paths:
         print(f"    {path}")
+
+
+def fleet_apply_json_data(data: dict, *, dry_run: bool) -> dict:
+    return {
+        "overall_status": data["overall_status"],
+        "repo_count": data["repo_count"],
+        "repos": [
+            fleet_apply_repo_json_data(repo, dry_run=dry_run)
+            for repo in data["repos"]
+        ],
+    }
+
+
+def fleet_apply_repo_json_data(repo: dict, *, dry_run: bool) -> dict:
+    if dry_run:
+        created = repo["would_create"]
+        overwritten = repo["would_overwrite"]
+        skipped = repo["would_skip"]
+    else:
+        created = repo["created"]
+        overwritten = repo["overwritten"]
+        skipped = repo["skipped"]
+
+    return {
+        "created": created,
+        "errors": [] if repo["status"] != "error" else [repo["details"]],
+        "overwritten": overwritten,
+        "path": repo["path"],
+        "skipped": skipped,
+        "status": repo["status"],
+    }
 
 
 def yes_no(value: bool) -> str:

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Fix managed pre-commit hook template regression.
+Add machine-readable fleet apply output.
 
 ## Allowed Files
 

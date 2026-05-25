@@ -545,6 +545,29 @@ def test_fleet_apply_dry_run_reports_plan_without_writing(
     assert not repo.joinpath(".pcae", "policy.toml").exists()
 
 
+def test_fleet_apply_dry_run_json_reports_plan_without_writing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "ready"
+    assert data["repo_count"] == 1
+    assert data["repos"][0]["path"] == repo.resolve().as_posix()
+    assert data["repos"][0]["status"] == "ready"
+    assert ".pcae/policy.toml" in data["repos"][0]["created"]
+    assert data["repos"][0]["overwritten"] == []
+    assert data["repos"][0]["errors"] == []
+    assert not repo.joinpath(".pcae", "policy.toml").exists()
+
+
 def test_fleet_apply_force_writes_registered_repo(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -563,6 +586,30 @@ def test_fleet_apply_force_writes_registered_repo(
     assert repo.joinpath(".pcae", "policy.toml").is_file()
     assert repo.joinpath(".githooks", "pre-commit").is_file()
     assert repo.joinpath("tasks", "TODO.md").is_file()
+
+
+def test_fleet_apply_force_json_writes_registered_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply", "--force", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "applied"
+    assert data["repo_count"] == 1
+    assert data["repos"][0]["path"] == repo.resolve().as_posix()
+    assert data["repos"][0]["status"] == "applied"
+    assert ".pcae/policy.toml" in data["repos"][0]["created"]
+    assert data["repos"][0]["overwritten"] == []
+    assert data["repos"][0]["errors"] == []
+    assert repo.joinpath(".pcae", "policy.toml").is_file()
+    assert repo.joinpath(".githooks", "pre-commit").is_file()
 
 
 def test_fleet_apply_force_respects_overwrite_boundaries(

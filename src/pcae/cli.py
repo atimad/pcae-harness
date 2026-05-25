@@ -182,6 +182,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Apply governance files using PCAE-managed overwrite rules.",
     )
+    fleet_apply_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON fleet apply output.",
+    )
     fleet_apply_parser.set_defaults(handler=run_fleet_apply)
 
     fleet_export_parser = fleet_subparsers.add_parser(

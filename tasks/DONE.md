@@ -73,3 +73,4 @@
 - Added `pcae fleet drift` and `pcae fleet drift --json` for fleet governance drift detection.
 - Added `pcae fleet apply --dry-run` and `pcae fleet apply --force` for fleet-wide governance onboarding orchestration.
 - Fixed the managed pre-commit hook template so force/apply writes a hook that runs `pcae check`.
+- Added `pcae fleet apply --dry-run --json` and `pcae fleet apply --force --json` for machine-readable fleet apply output.
