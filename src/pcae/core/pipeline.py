@@ -21,6 +21,26 @@ from pcae.core.session import SESSION_RELATIVE_PATH, write_session_snapshot
 
 
 DEFAULT_PIPELINE_NAME = "default"
+DEFAULT_PIPELINE_DESCRIPTION = "Run the standard PCAE governance workflow."
+DEFAULT_PIPELINE_STEPS = (
+    "pcae health",
+    "pcae check",
+    "pcae analytics risk",
+    "pcae analytics trends",
+    "pcae architecture metrics",
+    "pcae export bundle",
+    "pcae fleet export",
+    "pcae session end",
+)
+
+
+@dataclass(frozen=True)
+class PipelineDefinition:
+    name: str
+    description: str
+    steps: tuple[str, ...]
+    supports_dry_run: bool
+    supports_json: bool
 
 
 @dataclass(frozen=True)
@@ -51,6 +71,18 @@ class TrackedFileSnapshot:
     relative_path: Path
     existed: bool
     content: str | None
+
+
+def available_pipelines() -> tuple[PipelineDefinition, ...]:
+    return (
+        PipelineDefinition(
+            name=DEFAULT_PIPELINE_NAME,
+            description=DEFAULT_PIPELINE_DESCRIPTION,
+            steps=DEFAULT_PIPELINE_STEPS,
+            supports_dry_run=True,
+            supports_json=True,
+        ),
+    )
 
 
 def run_default_pipeline(

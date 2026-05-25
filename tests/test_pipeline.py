@@ -13,6 +13,47 @@ from pcae.core.session import write_session_snapshot
 from pcae.core.tasks import create_task_contract
 
 
+def test_pipeline_list_works(capsys) -> None:
+    exit_code = main(["pipeline", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Available pipelines:" in output
+    assert "- default" in output
+    assert "Description: Run the standard PCAE governance workflow." in output
+    assert "Dry-run supported: yes" in output
+    assert "JSON output supported: yes" in output
+    assert "1. pcae health" in output
+    assert "8. pcae session end" in output
+
+
+def test_pipeline_list_json_works(capsys) -> None:
+    exit_code = main(["pipeline", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "pipelines": [
+            {
+                "description": "Run the standard PCAE governance workflow.",
+                "name": "default",
+                "steps": [
+                    "pcae health",
+                    "pcae check",
+                    "pcae analytics risk",
+                    "pcae analytics trends",
+                    "pcae architecture metrics",
+                    "pcae export bundle",
+                    "pcae fleet export",
+                    "pcae session end",
+                ],
+                "supports_dry_run": True,
+                "supports_json": True,
+            }
+        ]
+    }
+
+
 def test_pipeline_run_default_works(tmp_path: Path, monkeypatch, capsys) -> None:
     init_pipeline_repo(tmp_path)
     monkeypatch.chdir(tmp_path)

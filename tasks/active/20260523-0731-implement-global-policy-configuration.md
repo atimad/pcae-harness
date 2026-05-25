@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add pipeline dry-run.
+Add pipeline list.
 
 ## Allowed Files
 

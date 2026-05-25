@@ -26,7 +26,7 @@ from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
-from pcae.commands.pipeline import run_pipeline
+from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.session import (
     run_session_end,
@@ -140,6 +140,17 @@ def build_parser() -> argparse.ArgumentParser:
         dest="pipeline_command",
         required=True,
     )
+    pipeline_list_parser = pipeline_subparsers.add_parser(
+        "list",
+        help="List available governance pipelines.",
+    )
+    pipeline_list_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON pipeline list output.",
+    )
+    pipeline_list_parser.set_defaults(handler=run_pipeline_list)
+
     pipeline_run_parser = pipeline_subparsers.add_parser(
         "run",
         help="Run a predefined governance pipeline.",
