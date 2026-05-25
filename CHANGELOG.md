@@ -57,3 +57,4 @@
 - Added `pcae repo apply <path> --dry-run` for safe external repo onboarding previews.
 - Added `pcae repo apply <path> --force` for explicit PCAE onboarding writes.
 - Added `pcae fleet add` and `pcae fleet list` for local governed repo tracking.
+- Added `pcae fleet health` and `pcae fleet health --json` for fleet health aggregation.

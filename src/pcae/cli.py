@@ -10,7 +10,7 @@ from pcae.commands.architecture import (
 )
 from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
-from pcae.commands.fleet import run_fleet_add, run_fleet_list
+from pcae.commands.fleet import run_fleet_add, run_fleet_health, run_fleet_list
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
@@ -113,6 +113,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="List registered governed repositories.",
     )
     fleet_list_parser.set_defaults(handler=run_fleet_list)
+
+    fleet_health_parser = fleet_subparsers.add_parser(
+        "health",
+        help="Summarize governance health across registered repositories.",
+    )
+    fleet_health_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON fleet health output.",
+    )
+    fleet_health_parser.set_defaults(handler=run_fleet_health)
 
     export_parser = subparsers.add_parser(
         "export",

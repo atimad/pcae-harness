@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a local fleet registry for governed Git repositories.
+Add fleet-wide governance health aggregation.
 
 ## Allowed Files
 

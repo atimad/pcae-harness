@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
 
 from pcae.cli import main
+from pcae.commands.init import init_harness
+from pcae.core.paths import HarnessPath
+from pcae.core.session import write_session_snapshot
+from pcae.core.tasks import create_task_contract
 
 
 def test_fleet_add_registers_absolute_repo_path(
@@ -130,5 +135,139 @@ def test_fleet_registry_is_sorted_and_readable(
     }
 
 
+def test_fleet_health_reports_registered_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    init_healthy_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "health"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Fleet health" in output
+    assert "Overall status: healthy" in output
+    assert "Repos: 1" in output
+    assert "Healthy: 1" in output
+    assert "Unhealthy: 0" in output
+    assert f"Repo: {repo.resolve().as_posix()}" in output
+    assert "Status: healthy" in output
+    assert "Active task: 20260525-0800-fleet-health-task" in output
+    assert "Session continuity: verified" in output
+    assert "Latest enforcement mode: advisory" in output
+
+
+def test_fleet_health_json_reports_registered_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    init_healthy_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "health", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "healthy"
+    assert data["repo_count"] == 1
+    assert data["healthy_count"] == 1
+    assert data["unhealthy_count"] == 0
+    assert data["repos"][0]["path"] == repo.resolve().as_posix()
+    assert data["repos"][0]["status"] == "healthy"
+    assert data["repos"][0]["active_task"] == {
+        "id": "20260525-0800-fleet-health-task",
+        "title": "Fleet health task",
+    }
+    assert data["repos"][0]["session_continuity"] == "verified"
+    assert data["repos"][0]["latest_enforcement_mode"] == "advisory"
+    assert data["repos"][0]["latest_dependency_warnings"] is None
+
+
+def test_fleet_health_reports_missing_repo_without_crashing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    write_fleet_registry(tmp_path, [missing.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "health"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Overall status: unhealthy" in output
+    assert "Unhealthy: 1" in output
+    assert f"Repo: {missing.as_posix()}" in output
+    assert f"Details: Target repo path does not exist: {missing}" in output
+
+
+def test_fleet_health_reports_non_git_repo_without_crashing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    write_fleet_registry(tmp_path, [repo.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "health", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["overall_status"] == "unhealthy"
+    assert data["repo_count"] == 1
+    assert data["healthy_count"] == 0
+    assert data["unhealthy_count"] == 1
+    assert data["repos"][0]["status"] == "unhealthy"
+    assert data["repos"][0]["details"] == f"Target path is not a Git repo: {repo}"
+
+
 def init_git_repo(root: Path) -> None:
     subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def init_healthy_repo(root: Path) -> None:
+    root.mkdir()
+    init_git_repo(root)
+    init_harness(HarnessPath(root))
+    create_task_contract(
+        HarnessPath(root),
+        "Fleet health task",
+        created_at=datetime(2026, 5, 25, 8, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(
+        HarnessPath(root),
+        created_at=datetime(2026, 5, 25, 8, 1, tzinfo=timezone.utc),
+    )
+    subprocess.run(["git", "add", "."], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "baseline"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def write_fleet_registry(root: Path, repos: list[str]) -> None:
+    target = root / ".pcae" / "fleet.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps({"repos": repos}, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
