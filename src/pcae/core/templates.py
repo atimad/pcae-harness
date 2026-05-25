@@ -96,9 +96,9 @@ Before ending a session:
     Path(".githooks/pre-commit"): """#!/usr/bin/env sh
 set -eu
 
-if [ -x scripts/check-docs-updated.sh ]; then
-  scripts/check-docs-updated.sh
-fi
+# Legacy docs hook script is covered by pcae check:
+# scripts/check-docs-updated.sh
+pcae check
 """,
     Path("scripts/check-docs-updated.sh"): """#!/usr/bin/env sh
 set -eu

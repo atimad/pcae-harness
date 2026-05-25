@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
 set -eu
 
+# Legacy docs hook script is covered by pcae check:
+# scripts/check-docs-updated.sh
 pcae check

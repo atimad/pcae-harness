@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Detect governance drift across registered fleet repos.
+Fix managed pre-commit hook template regression.
 
 ## Allowed Files
 
@@ -32,6 +32,7 @@ Detect governance drift across registered fleet repos.
 - CHANGELOG.md
 - *.md
 - .pcae/**
+- .githooks/pre-commit
 
 ## Forbidden Files
 

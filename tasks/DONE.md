@@ -71,3 +71,5 @@
 - Added `pcae fleet inspect` and `pcae fleet inspect --json` for fleet readiness reporting.
 - Added `pcae fleet remove` with optional missing-only cleanup for fleet registry entries.
 - Added `pcae fleet drift` and `pcae fleet drift --json` for fleet governance drift detection.
+- Added `pcae fleet apply --dry-run` and `pcae fleet apply --force` for fleet-wide governance onboarding orchestration.
+- Fixed the managed pre-commit hook template so force/apply writes a hook that runs `pcae check`.

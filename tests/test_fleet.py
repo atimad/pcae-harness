@@ -524,6 +524,105 @@ def test_fleet_drift_reports_missing_and_non_git_repos(
     assert f"Target path is not a Git repo: {non_git}" in output
 
 
+def test_fleet_apply_dry_run_reports_plan_without_writing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Fleet apply dry run" in output
+    assert "Overall status: ready" in output
+    assert f"Repo: {repo.resolve().as_posix()}" in output
+    assert "Would create:" in output
+    assert ".pcae/policy.toml" in output
+    assert not repo.joinpath(".pcae", "policy.toml").exists()
+
+
+def test_fleet_apply_force_writes_registered_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Fleet apply" in output
+    assert "Overall status: applied" in output
+    assert repo.joinpath(".pcae", "policy.toml").is_file()
+    assert repo.joinpath(".githooks", "pre-commit").is_file()
+    assert repo.joinpath("tasks", "TODO.md").is_file()
+
+
+def test_fleet_apply_force_respects_overwrite_boundaries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    init_harness(HarnessPath(repo))
+    repo.joinpath("AGENTS.md").write_text("user memory\n", encoding="utf-8")
+    repo.joinpath(".pcae", "policy.toml").write_text("old policy\n", encoding="utf-8")
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Overwritten:" in output
+    assert ".pcae/policy.toml" in output
+    assert repo.joinpath("AGENTS.md").read_text(encoding="utf-8") == "user memory\n"
+    assert "old policy" not in repo.joinpath(".pcae", "policy.toml").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_fleet_apply_requires_explicit_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "apply"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Fleet apply requires --dry-run or --force." in output
+
+
+def test_fleet_apply_reports_missing_and_non_git_repos(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    non_git = tmp_path / "non-git"
+    non_git.mkdir()
+    write_fleet_registry(tmp_path, [missing.as_posix(), non_git.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    dry_run_exit_code = main(["fleet", "apply", "--dry-run"])
+    dry_run_output = capsys.readouterr().out
+    force_exit_code = main(["fleet", "apply", "--force"])
+    force_output = capsys.readouterr().out
+
+    assert dry_run_exit_code == 1
+    assert force_exit_code == 1
+    assert f"Target repo path does not exist: {missing}" in dry_run_output
+    assert f"Target path is not a Git repo: {non_git}" in dry_run_output
+    assert f"Target repo path does not exist: {missing}" in force_output
+    assert f"Target path is not a Git repo: {non_git}" in force_output
+
+
 def test_fleet_export_writes_portable_bundle(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

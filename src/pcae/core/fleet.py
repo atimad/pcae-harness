@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
-from pcae.core.repo import build_repo_trial, validate_target_repo
+from pcae.core.repo import apply_repo_onboarding, build_repo_trial, validate_target_repo
 
 
 FLEET_RELATIVE_PATH = Path(".pcae") / "fleet.json"
@@ -109,6 +109,98 @@ def build_fleet_drift(root: HarnessPath) -> dict:
         "drift_findings": findings,
         "overall_status": "drift" if drift_detected else "no_drift",
         "repo_count": len(repos),
+    }
+
+
+def build_fleet_apply_plan(root: HarnessPath) -> dict:
+    repos = [fleet_repo_apply_plan(repo) for repo in read_fleet_repos(root)]
+    failed_count = sum(1 for repo in repos if repo["status"] == "error")
+    return {
+        "failed_count": failed_count,
+        "overall_status": "ready" if failed_count == 0 else "errors",
+        "repo_count": len(repos),
+        "repos": repos,
+    }
+
+
+def apply_fleet_governance(root: HarnessPath) -> dict:
+    repos = [fleet_repo_apply(repo) for repo in read_fleet_repos(root)]
+    failed_count = sum(1 for repo in repos if repo["status"] == "error")
+    return {
+        "failed_count": failed_count,
+        "overall_status": "applied" if failed_count == 0 else "errors",
+        "repo_count": len(repos),
+        "repos": repos,
+    }
+
+
+def fleet_repo_apply_plan(repo: str) -> dict:
+    try:
+        trial = build_repo_trial(Path(repo))
+    except ValueError as error:
+        return {
+            "details": str(error),
+            "path": repo,
+            "status": "error",
+            "would_create": [],
+            "would_overwrite": [],
+            "would_skip": [],
+        }
+
+    return {
+        "details": "ok",
+        "path": repo,
+        "status": "ready",
+        "would_create": [
+            plan.relative_path.as_posix()
+            for plan in trial.init_plans
+            if plan.would_create
+        ],
+        "would_overwrite": [
+            plan.relative_path.as_posix()
+            for plan in trial.init_plans
+            if plan.would_overwrite
+        ],
+        "would_skip": [
+            plan.relative_path.as_posix()
+            for plan in trial.init_plans
+            if not plan.would_create and not plan.would_overwrite
+        ],
+    }
+
+
+def fleet_repo_apply(repo: str) -> dict:
+    try:
+        results = apply_repo_onboarding(Path(repo))
+    except ValueError as error:
+        return {
+            "created": [],
+            "details": str(error),
+            "overwritten": [],
+            "path": repo,
+            "skipped": [],
+            "status": "error",
+        }
+
+    return {
+        "created": [
+            result.relative_path.as_posix()
+            for result in results
+            if result.created
+        ],
+        "details": "ok",
+        "overwritten": [
+            result.relative_path.as_posix()
+            for result in results
+            if result.overwritten
+        ],
+        "path": repo,
+        "skipped": [
+            result.relative_path.as_posix()
+            for result in results
+            if not result.created and not result.overwritten
+        ],
+        "status": "applied",
     }
 
 

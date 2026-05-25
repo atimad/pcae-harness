@@ -12,6 +12,7 @@ from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
+    run_fleet_apply,
     run_fleet_drift,
     run_fleet_export,
     run_fleet_health,
@@ -166,6 +167,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON fleet drift output.",
     )
     fleet_drift_parser.set_defaults(handler=run_fleet_drift)
+
+    fleet_apply_parser = fleet_subparsers.add_parser(
+        "apply",
+        help="Apply PCAE governance onboarding across registered repositories.",
+    )
+    fleet_apply_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview fleet governance apply actions without writing files.",
+    )
+    fleet_apply_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Apply governance files using PCAE-managed overwrite rules.",
+    )
+    fleet_apply_parser.set_defaults(handler=run_fleet_apply)
 
     fleet_export_parser = fleet_subparsers.add_parser(
         "export",

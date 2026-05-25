@@ -32,7 +32,13 @@ def build_repo_trial(target_path: Path) -> RepoTrial:
         is_git_repo=True,
         pcae_files_present=len(inspection.present_paths),
         pcae_files_missing=len(inspection.missing_paths),
-        init_plans=tuple(plan_missing_files(root, INIT_TEMPLATES)),
+        init_plans=tuple(
+            plan_missing_files(
+                root,
+                INIT_TEMPLATES,
+                force_managed=FORCE_MANAGED_TEMPLATES,
+            )
+        ),
         policy_exists=inspection.policy.present,
         active_tasks_exist=active_tasks.is_dir()
         and any(active_tasks.glob("*.md")),
