@@ -81,3 +81,4 @@
 - Added `pcae pipeline run --json` and `pcae pipeline run default --json` for machine-readable pipeline execution output.
 - Added `pcae pipeline run --dry-run`, `pcae pipeline run default --dry-run`, and dry-run JSON output.
 - Added `pcae pipeline list` and `pcae pipeline list --json` for available pipeline discovery.
+- Added local agent session leasing with acquire, release, and status commands.

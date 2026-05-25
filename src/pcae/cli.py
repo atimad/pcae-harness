@@ -4,6 +4,11 @@ import argparse
 from collections.abc import Sequence
 
 from pcae.commands.analytics import run_analytics_risk, run_analytics_trends
+from pcae.commands.agent import (
+    run_agent_acquire,
+    run_agent_release,
+    run_agent_status,
+)
 from pcae.commands.architecture import (
     run_architecture_history,
     run_architecture_metrics,
@@ -102,6 +107,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON health output.",
     )
     health_parser.set_defaults(handler=run_health)
+
+    agent_parser = subparsers.add_parser(
+        "agent",
+        help="Manage local PCAE agent session leases.",
+    )
+    agent_subparsers = agent_parser.add_subparsers(
+        dest="agent_command",
+        required=True,
+    )
+    agent_acquire_parser = agent_subparsers.add_parser(
+        "acquire",
+        help="Acquire the local PCAE agent lock.",
+    )
+    agent_acquire_parser.add_argument("--agent-id", required=True)
+    agent_acquire_parser.set_defaults(handler=run_agent_acquire)
+
+    agent_release_parser = agent_subparsers.add_parser(
+        "release",
+        help="Release the local PCAE agent lock.",
+    )
+    agent_release_parser.add_argument("--agent-id", required=True)
+    agent_release_parser.set_defaults(handler=run_agent_release)
+
+    agent_status_parser = agent_subparsers.add_parser(
+        "status",
+        help="Show the local PCAE agent lock status.",
+    )
+    agent_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON agent lock status.",
+    )
+    agent_status_parser.set_defaults(handler=run_agent_status)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

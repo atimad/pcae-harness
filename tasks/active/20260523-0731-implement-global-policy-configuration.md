@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add pipeline list.
+Add agent session leasing.
 
 ## Allowed Files
 
