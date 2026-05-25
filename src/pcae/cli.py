@@ -124,6 +124,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview import actions without writing files.",
     )
+    import_bundle_parser.add_argument(
+        "--merge-history",
+        action="store_true",
+        help="Merge architecture history instead of replacing it.",
+    )
     import_bundle_parser.set_defaults(handler=run_import_bundle)
 
     architecture_parser = subparsers.add_parser(

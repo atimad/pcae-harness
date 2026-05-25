@@ -51,3 +51,4 @@
 - Added `.pcae/exports/.gitignore` so generated governance bundles stay local by default.
 - Added `pcae import bundle <path> --dry-run` for safe governance bundle import previews.
 - Added guarded `pcae import bundle <path>` restore for session and architecture history state.
+- Added `pcae import bundle <path> --merge-history` to merge architecture history by timestamp.

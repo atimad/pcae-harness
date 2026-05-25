@@ -50,7 +50,11 @@ def read_governance_bundle_preview(path: Path) -> GovernanceBundlePreview:
     return GovernanceBundlePreview(data=data)
 
 
-def restore_governance_bundle(root: Path, path: Path) -> GovernanceBundleRestore:
+def restore_governance_bundle(
+    root: Path,
+    path: Path,
+    merge_history: bool = False,
+) -> GovernanceBundleRestore:
     preview = read_governance_bundle_preview(path)
     validate_restorable_bundle(preview.data)
 
@@ -62,12 +66,18 @@ def restore_governance_bundle(root: Path, path: Path) -> GovernanceBundleRestore
         write_json_file(root / RESTORE_TARGETS[0], session_snapshot)
         written_paths.append(RESTORE_TARGETS[0])
 
-    history_summary = preview.data.get("latest_architecture_history_summary")
-    if isinstance(history_summary, dict):
-        latest_history = history_summary.get("latest")
-        if latest_history is not None:
-            write_json_file(root / RESTORE_TARGETS[1], [latest_history])
-            written_paths.append(RESTORE_TARGETS[1])
+    imported_history = imported_history_entries(preview.data)
+    if imported_history:
+        history_path = root / RESTORE_TARGETS[1]
+        if merge_history:
+            history = merge_history_entries(
+                read_local_history_entries(history_path),
+                imported_history,
+            )
+        else:
+            history = imported_history
+        write_json_file(history_path, history)
+        written_paths.append(RESTORE_TARGETS[1])
 
     return GovernanceBundleRestore(written_paths=tuple(written_paths))
 
@@ -83,6 +93,52 @@ def validate_restorable_bundle(data: dict) -> None:
             "Refusing to restore governance bundle because health/check status "
             f"is not healthy/passed: health={health_status}, check={check_status}."
         )
+
+
+def imported_history_entries(data: dict) -> list[dict]:
+    history_summary = data.get("latest_architecture_history_summary")
+    if not isinstance(history_summary, dict):
+        return []
+
+    entries = history_summary.get("entries_data")
+    if isinstance(entries, list):
+        return [entry for entry in entries if isinstance(entry, dict)]
+
+    latest_history = history_summary.get("latest")
+    if isinstance(latest_history, dict):
+        return [latest_history]
+    return []
+
+
+def read_local_history_entries(path: Path) -> list[dict]:
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(data, list):
+        return []
+    return [entry for entry in data if isinstance(entry, dict)]
+
+
+def merge_history_entries(
+    local_entries: list[dict],
+    imported_entries: list[dict],
+) -> list[dict]:
+    by_timestamp: dict[str, dict] = {}
+    untimestamped: list[dict] = []
+    for entry in local_entries + imported_entries:
+        timestamp = entry.get("timestamp")
+        if isinstance(timestamp, str) and timestamp:
+            by_timestamp.setdefault(timestamp, entry)
+        else:
+            untimestamped.append(entry)
+
+    return untimestamped + [
+        by_timestamp[timestamp]
+        for timestamp in sorted(by_timestamp)
+    ]
 
 
 def status_value(value, key: str) -> str:

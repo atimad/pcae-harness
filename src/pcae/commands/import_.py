@@ -14,10 +14,14 @@ def run_import_bundle(args: argparse.Namespace) -> int:
     try:
         if args.dry_run:
             preview = read_governance_bundle_preview(Path(args.bundle))
-            print_import_preview(preview)
+            print_import_preview(preview, merge_history=args.merge_history)
             return 0
 
-        restore = restore_governance_bundle(Path.cwd(), Path(args.bundle))
+        restore = restore_governance_bundle(
+            Path.cwd(),
+            Path(args.bundle),
+            merge_history=args.merge_history,
+        )
     except ValueError as error:
         print(error)
         return 1
@@ -28,7 +32,10 @@ def run_import_bundle(args: argparse.Namespace) -> int:
     return 0
 
 
-def print_import_preview(preview: GovernanceBundlePreview) -> None:
+def print_import_preview(
+    preview: GovernanceBundlePreview,
+    merge_history: bool = False,
+) -> None:
     data = preview.data
     print("Governance bundle import preview")
     print(f"Bundle timestamp: {data.get('generated_timestamp', 'unknown')}")
@@ -41,6 +48,10 @@ def print_import_preview(preview: GovernanceBundlePreview) -> None:
         f"{availability(data.get('architecture_metrics'))}"
     )
     print(f"Policy summary: {availability(data.get('policy_summary'))}")
+    if merge_history:
+        print("Architecture history restore mode: merge")
+    else:
+        print("Architecture history restore mode: replace")
     print("Files that would be touched by a future real import:")
     for target in preview.future_import_targets:
         print(f"  {target}")

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add guarded governance bundle restore for session and architecture history state.
+Add merge-safe architecture history restore for governance bundle imports.
 
 ## Allowed Files
 
