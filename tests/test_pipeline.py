@@ -53,6 +53,59 @@ def test_pipeline_run_default_name_works(
     assert "Pipeline result: passed" in output
 
 
+def test_pipeline_run_json_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["pipeline_name"] == "default"
+    assert data["overall_status"] == "passed"
+    assert data["stopped_at"] is None
+    assert "generated_timestamp" in data
+    assert [step["name"] for step in data["steps"]] == [
+        "pcae health",
+        "pcae check",
+        "pcae analytics risk",
+        "pcae analytics trends",
+        "pcae architecture metrics",
+        "pcae export bundle",
+        "pcae fleet export",
+        "pcae session end",
+    ]
+    export_step = data["steps"][5]
+    fleet_step = data["steps"][6]
+    session_step = data["steps"][7]
+    assert export_step["artifacts"][0].startswith(
+        ".pcae/exports/governance-bundle-"
+    )
+    assert fleet_step["artifacts"][0].startswith(
+        ".pcae/fleet-exports/fleet-governance-bundle-"
+    )
+    assert session_step["artifacts"] == [
+        ".pcae/session.json",
+        ".pcae/architecture-history.json",
+    ]
+
+
+def test_pipeline_run_default_json_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "default", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["pipeline_name"] == "default"
+    assert data["overall_status"] == "passed"
+
+
 def test_pipeline_stops_on_failed_health(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -66,6 +119,28 @@ def test_pipeline_stops_on_failed_health(
     assert "- pcae health: failed" in output
     assert "pcae check" not in output
     assert not (tmp_path / ".pcae" / "exports").exists()
+
+
+def test_pipeline_stop_json_reports_stopped_at(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["overall_status"] == "failed"
+    assert data["stopped_at"] == "pcae health"
+    assert data["steps"] == [
+        {
+            "artifacts": [],
+            "name": "pcae health",
+            "status": "failed",
+            "summary": "governance health is unhealthy",
+        }
+    ]
 
 
 def test_pipeline_stops_on_failed_check(

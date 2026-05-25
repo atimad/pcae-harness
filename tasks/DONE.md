@@ -78,3 +78,4 @@
 - Added `pcae analytics risk` and `pcae analytics risk --json` for simple governance risk scoring.
 - Added `pcae pipeline run` and `pcae pipeline run default` for the default governance workflow.
 - Added pipeline hygiene so tracked session and architecture history files are restored after successful pipeline runs.
+- Added `pcae pipeline run --json` and `pcae pipeline run default --json` for machine-readable pipeline execution output.

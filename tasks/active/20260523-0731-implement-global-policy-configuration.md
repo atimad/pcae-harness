@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Prevent pipeline operational state from dirtying Git.
+Add machine-readable pipeline output.
 
 ## Allowed Files
 

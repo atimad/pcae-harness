@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 
@@ -27,6 +28,7 @@ class PipelineStepResult:
     name: str
     status: str
     message: str
+    artifacts: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -34,6 +36,14 @@ class PipelineResult:
     name: str
     status: str
     steps: tuple[PipelineStepResult, ...]
+    generated_timestamp: str
+
+    @property
+    def stopped_at(self) -> str | None:
+        for step in self.steps:
+            if step.status == "failed":
+                return step.name
+        return None
 
 
 @dataclass(frozen=True)
@@ -43,7 +53,11 @@ class TrackedFileSnapshot:
     content: str | None
 
 
-def run_default_pipeline(root: HarnessPath) -> PipelineResult:
+def run_default_pipeline(
+    root: HarnessPath,
+    generated_at: datetime | None = None,
+) -> PipelineResult:
+    timestamp = generated_at or datetime.now(timezone.utc)
     steps: list[PipelineStepResult] = []
 
     health = build_health_data(root)
@@ -55,7 +69,7 @@ def run_default_pipeline(root: HarnessPath) -> PipelineResult:
                 message="governance health is unhealthy",
             )
         )
-        return PipelineResult(name=DEFAULT_PIPELINE_NAME, status="failed", steps=tuple(steps))
+        return build_pipeline_result("failed", steps, timestamp)
     steps.append(
         PipelineStepResult(
             name="pcae health",
@@ -73,7 +87,7 @@ def run_default_pipeline(root: HarnessPath) -> PipelineResult:
                 message="governance check failed",
             )
         )
-        return PipelineResult(name=DEFAULT_PIPELINE_NAME, status="failed", steps=tuple(steps))
+        return build_pipeline_result("failed", steps, timestamp)
     steps.append(
         PipelineStepResult(
             name="pcae check",
@@ -111,20 +125,24 @@ def run_default_pipeline(root: HarnessPath) -> PipelineResult:
     )
 
     governance_bundle = write_governance_export_bundle(root)
+    governance_artifact = governance_bundle.relative_path.as_posix()
     steps.append(
         PipelineStepResult(
             name="pcae export bundle",
             status="passed",
-            message=governance_bundle.relative_path.as_posix(),
+            message=governance_artifact,
+            artifacts=(governance_artifact,),
         )
     )
 
     fleet_bundle = write_fleet_export(root)
+    fleet_artifact = fleet_bundle.relative_path.as_posix()
     steps.append(
         PipelineStepResult(
             name="pcae fleet export",
             status="passed",
-            message=fleet_bundle.relative_path.as_posix(),
+            message=fleet_artifact,
+            artifacts=(fleet_artifact,),
         )
     )
 
@@ -132,21 +150,33 @@ def run_default_pipeline(root: HarnessPath) -> PipelineResult:
     session_snapshot = write_session_snapshot(root)
     architecture_snapshot = write_architecture_history_snapshot(root, check_result)
     restore_tracked_operational_snapshots(root, operational_snapshots)
+    session_artifact = session_snapshot.relative_path.as_posix()
+    architecture_artifact = architecture_snapshot.relative_path.as_posix()
     steps.append(
         PipelineStepResult(
             name="pcae session end",
             status="passed",
             message=(
-                f"{session_snapshot.relative_path.as_posix()}, "
-                f"{architecture_snapshot.relative_path.as_posix()}"
+                f"{session_artifact}, "
+                f"{architecture_artifact}"
             ),
+            artifacts=(session_artifact, architecture_artifact),
         )
     )
 
+    return build_pipeline_result("passed", steps, timestamp)
+
+
+def build_pipeline_result(
+    status: str,
+    steps: list[PipelineStepResult],
+    timestamp: datetime,
+) -> PipelineResult:
     return PipelineResult(
         name=DEFAULT_PIPELINE_NAME,
-        status="passed",
+        status=status,
         steps=tuple(steps),
+        generated_timestamp=timestamp.isoformat(),
     )
 
 

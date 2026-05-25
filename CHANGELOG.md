@@ -67,3 +67,4 @@
 - Added `pcae analytics trends` and `pcae analytics trends --json` for governance trend summaries.
 - Added `pcae analytics risk` and `pcae analytics risk --json` for simple governance risk scoring.
 - Added `pcae pipeline run` and `pcae pipeline run default` for the default governance workflow.
+- Added `pcae pipeline run --json` and `pcae pipeline run default --json` for machine-readable pipeline execution output.

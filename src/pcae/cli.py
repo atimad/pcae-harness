@@ -150,6 +150,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="default",
         help="Pipeline name to run.",
     )
+    pipeline_run_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON pipeline output.",
+    )
     pipeline_run_parser.set_defaults(handler=run_pipeline)
 
     fleet_parser = subparsers.add_parser(
