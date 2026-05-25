@@ -9,6 +9,7 @@ from pcae.core.fleet import (
     build_fleet_health,
     build_fleet_inspection,
     read_fleet_repos,
+    remove_fleet_repo,
     write_fleet_export,
 )
 from pcae.core.paths import HarnessPath
@@ -36,6 +37,24 @@ def run_fleet_list(args: argparse.Namespace) -> int:
         return 0
     for repo in repos:
         print(f"  {repo}")
+    return 0
+
+
+def run_fleet_remove(args: argparse.Namespace) -> int:
+    try:
+        repo_path, removed = remove_fleet_repo(
+            HarnessPath.cwd(),
+            Path(args.path),
+            missing_only=args.missing_only,
+        )
+    except ValueError as error:
+        print(error)
+        return 1
+
+    if removed:
+        print(f"Removed fleet repo: {repo_path}")
+    else:
+        print(f"Fleet repo still exists; not removed: {repo_path}")
     return 0
 
 

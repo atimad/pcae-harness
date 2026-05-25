@@ -31,6 +31,25 @@ def add_fleet_repo(root: HarnessPath, repo_path: Path) -> tuple[str, bool]:
     return absolute_path, added
 
 
+def remove_fleet_repo(
+    root: HarnessPath,
+    repo_path: Path,
+    *,
+    missing_only: bool = False,
+) -> tuple[str, bool]:
+    absolute_path = repo_path.resolve().as_posix()
+    entries = list(read_fleet_repos(root))
+    if absolute_path not in entries:
+        raise ValueError(f"Fleet repo is not registered: {absolute_path}")
+
+    if missing_only and repo_path.exists():
+        return absolute_path, False
+
+    entries.remove(absolute_path)
+    write_fleet_repos(root, tuple(entries))
+    return absolute_path, True
+
+
 def read_fleet_repos(root: HarnessPath) -> tuple[str, ...]:
     target = root.join(FLEET_RELATIVE_PATH)
     if not target.is_file():

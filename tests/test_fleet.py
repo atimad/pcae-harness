@@ -81,6 +81,77 @@ def test_fleet_list_handles_empty_registry(
     assert "  none" in output
 
 
+def test_fleet_remove_deletes_registered_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "remove", str(repo)])
+
+    output = capsys.readouterr().out
+    data = json.loads((tmp_path / ".pcae" / "fleet.json").read_text())
+    assert exit_code == 0
+    assert f"Removed fleet repo: {repo.resolve().as_posix()}" in output
+    assert data == {"repos": []}
+
+
+def test_fleet_remove_unknown_repo_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    unknown = tmp_path / "unknown"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "remove", str(unknown)])
+
+    output = capsys.readouterr().out
+    data = json.loads((tmp_path / ".pcae" / "fleet.json").read_text())
+    assert exit_code == 1
+    assert f"Fleet repo is not registered: {unknown.resolve().as_posix()}" in output
+    assert data == {"repos": [repo.resolve().as_posix()]}
+
+
+def test_fleet_remove_missing_only_preserves_existing_path(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "remove", str(repo), "--missing-only"])
+
+    output = capsys.readouterr().out
+    data = json.loads((tmp_path / ".pcae" / "fleet.json").read_text())
+    assert exit_code == 0
+    assert f"Fleet repo still exists; not removed: {repo.resolve().as_posix()}" in output
+    assert data == {"repos": [repo.resolve().as_posix()]}
+
+
+def test_fleet_remove_missing_only_removes_missing_path(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    write_fleet_registry(tmp_path, [missing.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "remove", str(missing), "--missing-only"])
+
+    output = capsys.readouterr().out
+    data = json.loads((tmp_path / ".pcae" / "fleet.json").read_text())
+    assert exit_code == 0
+    assert f"Removed fleet repo: {missing.resolve().as_posix()}" in output
+    assert data == {"repos": []}
+
+
 def test_fleet_add_missing_path_fails_clearly(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

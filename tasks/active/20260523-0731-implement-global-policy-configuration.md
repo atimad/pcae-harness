@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add fleet-wide PCAE readiness inspection.
+Add fleet registry removal.
 
 ## Allowed Files
 

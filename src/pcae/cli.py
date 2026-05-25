@@ -16,6 +16,7 @@ from pcae.commands.fleet import (
     run_fleet_health,
     run_fleet_inspect,
     run_fleet_list,
+    run_fleet_remove,
 )
 from pcae.commands.health import run_health
 from pcae.commands.hooks import run_hooks_install
@@ -119,6 +120,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="List registered governed repositories.",
     )
     fleet_list_parser.set_defaults(handler=run_fleet_list)
+
+    fleet_remove_parser = fleet_subparsers.add_parser(
+        "remove",
+        help="Remove a governed repository path from the fleet registry.",
+    )
+    fleet_remove_parser.add_argument("path")
+    fleet_remove_parser.add_argument(
+        "--missing-only",
+        action="store_true",
+        help="Remove the repo only if the registered path no longer exists.",
+    )
+    fleet_remove_parser.set_defaults(handler=run_fleet_remove)
 
     fleet_health_parser = fleet_subparsers.add_parser(
         "health",
