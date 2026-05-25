@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add a safe dry-run preview for governance bundle imports.
+Add guarded governance bundle restore for session and architecture history state.
 
 ## Allowed Files
 

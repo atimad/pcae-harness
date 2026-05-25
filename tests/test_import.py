@@ -47,18 +47,30 @@ def test_import_bundle_dry_run_previews_generated_bundle(
     assert "  tasks/active/" in output
 
 
-def test_import_bundle_without_dry_run_fails_clearly(
+def test_import_bundle_without_dry_run_restores_session(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    bundle = tmp_path / "bundle.json"
-    bundle.write_text("{}", encoding="utf-8")
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    commit_baseline(tmp_path)
+    bundle = write_governance_export_bundle(
+        HarnessPath(tmp_path),
+        generated_at=datetime(2026, 5, 24, 9, 2, tzinfo=timezone.utc),
+    )
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["import", "bundle", "bundle.json"])
+    (tmp_path / ".pcae" / "session.json").unlink()
+
+    exit_code = main(["import", "bundle", bundle.relative_path.as_posix()])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Real import is not implemented yet. Use --dry-run." in output
+    assert exit_code == 0
+    assert "Restored governance bundle." in output
+    assert "  wrote .pcae/session.json" in output
+    assert (tmp_path / ".pcae" / "session.json").is_file()
 
 
 def test_import_bundle_missing_file_fails_clearly(
@@ -123,6 +135,77 @@ def test_import_bundle_dry_run_is_read_only(
     assert after == before
 
 
+def test_import_bundle_restores_session_and_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    write_history(tmp_path)
+    commit_baseline(tmp_path)
+    bundle = write_governance_export_bundle(
+        HarnessPath(tmp_path),
+        generated_at=datetime(2026, 5, 24, 9, 3, tzinfo=timezone.utc),
+    )
+    (tmp_path / ".pcae" / "session.json").unlink()
+    (tmp_path / ".pcae" / "architecture-history.json").unlink()
+    policy_before = (tmp_path / ".pcae" / "policy.toml").read_text(encoding="utf-8")
+    task_before = next((tmp_path / "tasks" / "active").glob("*.md")).read_text(
+        encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["import", "bundle", bundle.relative_path.as_posix()])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "  wrote .pcae/session.json" in output
+    assert "  wrote .pcae/architecture-history.json" in output
+    session_data = json.loads((tmp_path / ".pcae" / "session.json").read_text())
+    history_data = json.loads(
+        (tmp_path / ".pcae" / "architecture-history.json").read_text()
+    )
+    assert session_data["active_task"]["id"] == "20260524-0800-import-task"
+    assert history_data[0]["active_task"]["id"] == "20260524-0800-import-task"
+    assert (tmp_path / ".pcae" / "policy.toml").read_text(
+        encoding="utf-8"
+    ) == policy_before
+    assert next((tmp_path / "tasks" / "active").glob("*.md")).read_text(
+        encoding="utf-8"
+    ) == task_before
+
+
+def test_import_bundle_refuses_unhealthy_bundle(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(
+        HarnessPath(tmp_path),
+        created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
+    )
+    commit_baseline(tmp_path)
+    bundle = write_governance_export_bundle(
+        HarnessPath(tmp_path),
+        generated_at=datetime(2026, 5, 24, 9, 4, tzinfo=timezone.utc),
+    )
+    bundle_path = tmp_path / bundle.relative_path
+    data = json.loads(bundle_path.read_text(encoding="utf-8"))
+    data["health_summary"]["overall_status"] = "unhealthy"
+    bundle_path.write_text(json.dumps(data), encoding="utf-8")
+    before = text_file_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["import", "bundle", bundle.relative_path.as_posix()])
+
+    after = text_file_snapshot(tmp_path)
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Refusing to restore governance bundle" in output
+    assert after == before
+
+
 def init_ready_repo(root: Path) -> None:
     init_harness(HarnessPath(root))
     init_git_repo(root)
@@ -131,6 +214,27 @@ def init_ready_repo(root: Path) -> None:
         "Import task",
         created_at=datetime(2026, 5, 24, 8, 0, tzinfo=timezone.utc),
     )
+
+
+def write_history(root: Path) -> None:
+    history = [
+        {
+            "active_task": {
+                "id": "20260524-0800-import-task",
+                "title": "Import task",
+            },
+            "architecture_zones_touched": {},
+            "changed_files_count": 0,
+            "dependency_warnings_count": 0,
+            "enforcement_mode": "advisory",
+            "git_branch": "main",
+            "session_continuity": "verified",
+            "timestamp": "2026-05-24T08:00:00+00:00",
+        }
+    ]
+    path = root / ".pcae" / "architecture-history.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(history), encoding="utf-8")
 
 
 def init_git_repo(root: Path) -> None:

@@ -3,21 +3,28 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from pcae.core.import_ import GovernanceBundlePreview, read_governance_bundle_preview
+from pcae.core.import_ import (
+    GovernanceBundlePreview,
+    read_governance_bundle_preview,
+    restore_governance_bundle,
+)
 
 
 def run_import_bundle(args: argparse.Namespace) -> int:
-    if not args.dry_run:
-        print("Real import is not implemented yet. Use --dry-run.")
-        return 1
-
     try:
-        preview = read_governance_bundle_preview(Path(args.bundle))
+        if args.dry_run:
+            preview = read_governance_bundle_preview(Path(args.bundle))
+            print_import_preview(preview)
+            return 0
+
+        restore = restore_governance_bundle(Path.cwd(), Path(args.bundle))
     except ValueError as error:
         print(error)
         return 1
 
-    print_import_preview(preview)
+    print("Restored governance bundle.")
+    for path in restore.written_paths:
+        print(f"  wrote {path.as_posix()}")
     return 0
 
 
