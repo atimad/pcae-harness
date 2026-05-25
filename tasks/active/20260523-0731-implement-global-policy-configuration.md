@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add governance risk scoring.
+Prevent pipeline operational state from dirtying Git.
 
 ## Allowed Files
 
