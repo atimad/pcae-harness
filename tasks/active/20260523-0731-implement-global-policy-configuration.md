@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Expose agent lease state in health and check JSON.
+Add governance daemon dry-run.
 
 ## Allowed Files
 

@@ -75,3 +75,4 @@
 - Added `pcae agent release --force-stale` for explicit cleanup of stale agent locks.
 - Added policy-configured agent stale thresholds under `[agent].stale_after_seconds`.
 - Exposed agent lease state in `pcae health`, `pcae health --json`, and `pcae check --json`.
+- Added `pcae daemon run --dry-run` and JSON output for one simulated governance monitoring cycle.
