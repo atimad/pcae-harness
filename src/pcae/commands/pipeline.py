@@ -13,16 +13,18 @@ def run_pipeline(args: argparse.Namespace) -> int:
         print(f"Unknown pipeline: {name}")
         return 1
 
-    result = run_default_pipeline(HarnessPath.cwd())
+    result = run_default_pipeline(HarnessPath.cwd(), dry_run=args.dry_run)
     if args.json:
         print(json.dumps(pipeline_json_data(result), indent=2, sort_keys=True))
     else:
         print_pipeline_result(result)
-    return 0 if result.status == "passed" else 1
+    return 0 if result.status in {"passed", "planned"} else 1
 
 
 def print_pipeline_result(result: PipelineResult) -> None:
     print(f"Pipeline: {result.name}")
+    if result.status == "planned":
+        print("Mode: dry-run")
     for step in result.steps:
         print(f"- {step.name}: {step.status}")
         print(f"  {step.message}")

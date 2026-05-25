@@ -56,6 +56,7 @@ class TrackedFileSnapshot:
 def run_default_pipeline(
     root: HarnessPath,
     generated_at: datetime | None = None,
+    dry_run: bool = False,
 ) -> PipelineResult:
     timestamp = generated_at or datetime.now(timezone.utc)
     steps: list[PipelineStepResult] = []
@@ -95,6 +96,10 @@ def run_default_pipeline(
             message="passed",
         )
     )
+
+    if dry_run:
+        steps.extend(planned_pipeline_steps())
+        return build_pipeline_result("planned", steps, timestamp)
 
     risk = calculate_governance_risk(root)
     steps.append(
@@ -165,6 +170,41 @@ def run_default_pipeline(
     )
 
     return build_pipeline_result("passed", steps, timestamp)
+
+
+def planned_pipeline_steps() -> tuple[PipelineStepResult, ...]:
+    return (
+        PipelineStepResult(
+            name="pcae analytics risk",
+            status="planned",
+            message="would compute governance risk",
+        ),
+        PipelineStepResult(
+            name="pcae analytics trends",
+            status="planned",
+            message="would summarize governance trends",
+        ),
+        PipelineStepResult(
+            name="pcae architecture metrics",
+            status="planned",
+            message="would summarize architecture metrics",
+        ),
+        PipelineStepResult(
+            name="pcae export bundle",
+            status="planned",
+            message="would write governance export bundle",
+        ),
+        PipelineStepResult(
+            name="pcae fleet export",
+            status="planned",
+            message="would write fleet governance export bundle",
+        ),
+        PipelineStepResult(
+            name="pcae session end",
+            status="planned",
+            message="would write session snapshot and architecture history",
+        ),
+    )
 
 
 def build_pipeline_result(

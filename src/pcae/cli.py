@@ -155,6 +155,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON pipeline output.",
     )
+    pipeline_run_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview pipeline execution without writing operational artifacts.",
+    )
     pipeline_run_parser.set_defaults(handler=run_pipeline)
 
     fleet_parser = subparsers.add_parser(

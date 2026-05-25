@@ -106,6 +106,95 @@ def test_pipeline_run_default_json_works(
     assert data["overall_status"] == "passed"
 
 
+def test_pipeline_dry_run_human_output_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Pipeline: default" in output
+    assert "Mode: dry-run" in output
+    assert "- pcae health: passed" in output
+    assert "- pcae check: passed" in output
+    assert "- pcae export bundle: planned" in output
+    assert "- pcae session end: planned" in output
+    assert "Pipeline result: planned" in output
+
+
+def test_pipeline_default_dry_run_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "default", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Mode: dry-run" in output
+    assert "Pipeline result: planned" in output
+
+
+def test_pipeline_dry_run_json_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["pipeline_name"] == "default"
+    assert data["overall_status"] == "planned"
+    assert data["stopped_at"] is None
+    assert [step["status"] for step in data["steps"]] == [
+        "passed",
+        "passed",
+        "planned",
+        "planned",
+        "planned",
+        "planned",
+        "planned",
+        "planned",
+    ]
+    assert data["steps"][5]["artifacts"] == []
+
+
+def test_pipeline_dry_run_writes_no_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_pipeline_repo(tmp_path)
+    session_before = (tmp_path / ".pcae" / "session.json").read_text(
+        encoding="utf-8"
+    )
+    history_before = (tmp_path / ".pcae" / "architecture-history.json").read_text(
+        encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["pipeline", "run", "--dry-run"])
+    capsys.readouterr()
+
+    assert exit_code == 0
+    assert (tmp_path / ".pcae" / "session.json").read_text(
+        encoding="utf-8"
+    ) == session_before
+    assert (tmp_path / ".pcae" / "architecture-history.json").read_text(
+        encoding="utf-8"
+    ) == history_before
+    assert not list((tmp_path / ".pcae" / "exports").glob("governance-bundle-*.json"))
+    assert not list(
+        (tmp_path / ".pcae" / "fleet-exports").glob(
+            "fleet-governance-bundle-*.json"
+        )
+    )
+
+
 def test_pipeline_stops_on_failed_health(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add machine-readable pipeline output.
+Add pipeline dry-run.
 
 ## Allowed Files
 
