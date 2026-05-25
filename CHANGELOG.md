@@ -65,3 +65,4 @@
 - Added `pcae fleet apply --dry-run` and `pcae fleet apply --force` for fleet-wide governance onboarding orchestration.
 - Added `pcae fleet apply --dry-run --json` and `pcae fleet apply --force --json` for machine-readable fleet apply output.
 - Added `pcae analytics trends` and `pcae analytics trends --json` for governance trend summaries.
+- Added `pcae analytics risk` and `pcae analytics risk --json` for simple governance risk scoring.

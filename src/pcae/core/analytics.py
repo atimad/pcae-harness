@@ -8,6 +8,9 @@ from pcae.core.architecture import (
     integer_value,
     string_value,
 )
+from pcae.core.check import run_checks
+from pcae.core.fleet import build_fleet_drift
+from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 
 
@@ -22,6 +25,18 @@ class GovernanceTrends:
     enforcement_modes_seen: tuple[str, ...]
     session_continuity_states_seen: tuple[str, ...]
     most_frequently_touched_zone: str | None
+
+
+@dataclass(frozen=True)
+class GovernanceRisk:
+    risk_score: int
+    risk_level: str
+    contributing_factors: tuple[str, ...]
+    dependency_warnings: int
+    session_continuity_state: str
+    policy_validation_state: str
+    git_cleanliness: str
+    fleet_drift_state: str
 
 
 def calculate_governance_trends(root: HarnessPath) -> GovernanceTrends:
@@ -60,6 +75,66 @@ def calculate_governance_trends(root: HarnessPath) -> GovernanceTrends:
     )
 
 
+def calculate_governance_risk(root: HarnessPath) -> GovernanceRisk:
+    health = build_health_data(root)
+    check = run_checks(root)
+    factors: list[str] = []
+    score = 0
+
+    if health["policy_validation"] != "valid":
+        score += 40
+        factors.append("invalid policy")
+
+    if health["violations"]:
+        score += 40
+        factors.append("check violations")
+
+    session_state = string_value(health["session_continuity"])
+    if session_state in {"mismatch", "invalid"}:
+        score += 20
+        factors.append(f"session {session_state}")
+
+    history_dependency_warnings = health["latest_dependency_warnings"]
+    if not isinstance(history_dependency_warnings, int):
+        history_dependency_warnings = 0
+    dependency_warnings = max(
+        history_dependency_warnings,
+        len(check.architecture_dependency_warnings),
+    )
+    if dependency_warnings > 0:
+        score += 15
+        factors.append("dependency warnings")
+
+    git_cleanliness = "clean" if health["git_status"] == "clean" else "dirty"
+    if git_cleanliness == "dirty":
+        score += 10
+        factors.append("dirty git status")
+
+    try:
+        read_analytics_history(root)
+    except ValueError:
+        score += 5
+        factors.append("missing architecture history")
+
+    fleet_drift = build_fleet_drift(root)
+    fleet_drift_state = "detected" if fleet_drift["drift_detected"] else "none"
+    if fleet_drift_state == "detected":
+        score += 15
+        factors.append("fleet drift detected")
+
+    capped_score = min(score, 100)
+    return GovernanceRisk(
+        risk_score=capped_score,
+        risk_level=risk_level_for_score(capped_score),
+        contributing_factors=tuple(factors),
+        dependency_warnings=dependency_warnings,
+        session_continuity_state=session_state,
+        policy_validation_state=string_value(health["policy_validation"]),
+        git_cleanliness=git_cleanliness,
+        fleet_drift_state=fleet_drift_state,
+    )
+
+
 def read_analytics_history(root: HarnessPath) -> tuple[dict, ...]:
     target = root.join(ARCHITECTURE_HISTORY_RELATIVE_PATH)
     if not target.is_file():
@@ -73,6 +148,14 @@ def read_analytics_history(root: HarnessPath) -> tuple[dict, ...]:
     if not isinstance(data, list):
         raise ValueError("Invalid architecture history: expected a list of entries.")
     return tuple(entry for entry in data if isinstance(entry, dict))
+
+
+def risk_level_for_score(score: int) -> str:
+    if score >= 60:
+        return "high"
+    if score >= 25:
+        return "medium"
+    return "low"
 
 
 def dependency_warning_trend(warning_counts: tuple[int, ...]) -> str:

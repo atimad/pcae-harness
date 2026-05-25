@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 
-from pcae.commands.analytics import run_analytics_trends
+from pcae.commands.analytics import run_analytics_risk, run_analytics_trends
 from pcae.commands.architecture import (
     run_architecture_history,
     run_architecture_metrics,
@@ -120,6 +120,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON analytics trends output.",
     )
     analytics_trends_parser.set_defaults(handler=run_analytics_trends)
+    analytics_risk_parser = analytics_subparsers.add_parser(
+        "risk",
+        help="Compute a simple governance risk score.",
+    )
+    analytics_risk_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON analytics risk output.",
+    )
+    analytics_risk_parser.set_defaults(handler=run_analytics_risk)
 
     fleet_parser = subparsers.add_parser(
         "fleet",

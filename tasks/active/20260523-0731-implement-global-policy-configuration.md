@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add governance trend analytics.
+Add governance risk scoring.
 
 ## Allowed Files
 
