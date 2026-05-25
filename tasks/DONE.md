@@ -61,3 +61,4 @@
 - Added `pcae import bundle <path> --dry-run` for safe governance bundle import previews.
 - Added guarded `pcae import bundle <path>` restore for session and architecture history state.
 - Added `pcae import bundle <path> --merge-history` to merge architecture history by timestamp.
+- Added `pcae repo trial <path> --dry-run` for safe external repo adoption previews.

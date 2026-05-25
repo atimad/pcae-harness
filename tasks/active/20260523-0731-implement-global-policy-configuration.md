@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add merge-safe architecture history restore for governance bundle imports.
+Add dry-run repo trial reporting for external Git repositories.
 
 ## Allowed Files
 

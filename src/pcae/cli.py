@@ -15,6 +15,7 @@ from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
+from pcae.commands.repo import run_repo_trial
 from pcae.commands.session import (
     run_session_end,
     run_session_read,
@@ -130,6 +131,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Merge architecture history instead of replacing it.",
     )
     import_bundle_parser.set_defaults(handler=run_import_bundle)
+
+    repo_parser = subparsers.add_parser(
+        "repo",
+        help="Evaluate PCAE behavior against another repository.",
+    )
+    repo_subparsers = repo_parser.add_subparsers(
+        dest="repo_command",
+        required=True,
+    )
+
+    repo_trial_parser = repo_subparsers.add_parser(
+        "trial",
+        help="Preview PCAE adoption behavior for a target repo.",
+    )
+    repo_trial_parser.add_argument("path")
+    repo_trial_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview trial results without modifying the target repo.",
+    )
+    repo_trial_parser.set_defaults(handler=run_repo_trial)
 
     architecture_parser = subparsers.add_parser(
         "architecture",
