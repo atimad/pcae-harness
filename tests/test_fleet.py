@@ -386,6 +386,144 @@ def test_fleet_inspect_reports_non_git_repo_without_crashing(
     assert data["repos"][0]["details"] == f"Target path is not a Git repo: {repo}"
 
 
+def test_fleet_drift_reports_no_drift_for_matching_repos(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    alpha = tmp_path / "alpha"
+    beta = tmp_path / "beta"
+    init_healthy_repo(alpha)
+    init_healthy_repo(beta)
+    write_fleet_registry(
+        tmp_path,
+        [alpha.resolve().as_posix(), beta.resolve().as_posix()],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Fleet drift" in output
+    assert "Overall status: no_drift" in output
+    assert "Repos: 2" in output
+    assert "No governance drift detected." in output
+
+
+def test_fleet_drift_json_reports_no_drift(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = tmp_path / "repo"
+    init_healthy_repo(repo)
+    write_fleet_registry(tmp_path, [repo.resolve().as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "drift_detected": False,
+        "drift_findings": [],
+        "overall_status": "no_drift",
+        "repo_count": 1,
+    }
+
+
+def test_fleet_drift_reports_policy_existence_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    alpha = tmp_path / "alpha"
+    beta = tmp_path / "beta"
+    init_healthy_repo(alpha)
+    init_healthy_repo(beta)
+    beta.joinpath(".pcae", "policy.toml").unlink()
+    write_fleet_registry(
+        tmp_path,
+        [alpha.resolve().as_posix(), beta.resolve().as_posix()],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["overall_status"] == "drift"
+    assert data["drift_detected"] is True
+    finding_types = {finding["type"] for finding in data["drift_findings"]}
+    assert "policy_existence_mismatch" in finding_types
+
+
+def test_fleet_drift_reports_hook_existence_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    alpha = tmp_path / "alpha"
+    beta = tmp_path / "beta"
+    init_healthy_repo(alpha)
+    init_healthy_repo(beta)
+    beta.joinpath(".githooks", "pre-commit").unlink()
+    write_fleet_registry(
+        tmp_path,
+        [alpha.resolve().as_posix(), beta.resolve().as_posix()],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    finding_types = {finding["type"] for finding in data["drift_findings"]}
+    assert exit_code == 1
+    assert "hook_existence_mismatch" in finding_types
+    assert "missing_pcae_files" in finding_types
+
+
+def test_fleet_drift_reports_enforcement_mode_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    alpha = tmp_path / "alpha"
+    beta = tmp_path / "beta"
+    init_healthy_repo(alpha)
+    init_healthy_repo(beta)
+    policy = beta / ".pcae" / "policy.toml"
+    policy.write_text(
+        policy.read_text(encoding="utf-8").replace(
+            'mode = "advisory"',
+            'mode = "strict"',
+        ),
+        encoding="utf-8",
+    )
+    write_fleet_registry(
+        tmp_path,
+        [alpha.resolve().as_posix(), beta.resolve().as_posix()],
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    finding_types = {finding["type"] for finding in data["drift_findings"]}
+    assert exit_code == 1
+    assert "enforcement_mode_mismatch" in finding_types
+
+
+def test_fleet_drift_reports_missing_and_non_git_repos(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    missing = tmp_path / "missing"
+    non_git = tmp_path / "non-git"
+    non_git.mkdir()
+    write_fleet_registry(tmp_path, [missing.as_posix(), non_git.as_posix()])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["fleet", "drift"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Overall status: drift" in output
+    assert "repo_unavailable" in output
+    assert f"Target repo path does not exist: {missing}" in output
+    assert f"Target path is not a Git repo: {non_git}" in output
+
+
 def test_fleet_export_writes_portable_bundle(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

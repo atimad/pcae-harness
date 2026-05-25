@@ -98,6 +98,94 @@ def build_fleet_inspection(root: HarnessPath) -> dict:
     }
 
 
+def build_fleet_drift(root: HarnessPath) -> dict:
+    repos = read_fleet_repos(root)
+    inspections = [fleet_repo_inspection(repo) for repo in repos]
+    health = [fleet_repo_health(repo) for repo in repos]
+    findings = fleet_drift_findings(inspections, health)
+    drift_detected = bool(findings)
+    return {
+        "drift_detected": drift_detected,
+        "drift_findings": findings,
+        "overall_status": "drift" if drift_detected else "no_drift",
+        "repo_count": len(repos),
+    }
+
+
+def fleet_drift_findings(inspections: list[dict], health: list[dict]) -> list[dict]:
+    findings: list[dict] = []
+    for repo in inspections:
+        if repo["pcae_files_missing"] is None:
+            findings.append(
+                {
+                    "path": repo["path"],
+                    "type": "repo_unavailable",
+                    "message": repo["details"],
+                }
+            )
+        elif repo["pcae_files_missing"] > 0:
+            findings.append(
+                {
+                    "path": repo["path"],
+                    "type": "missing_pcae_files",
+                    "message": (
+                        f"{repo['pcae_files_missing']} required PCAE files missing"
+                    ),
+                }
+            )
+
+    valid_inspections = [
+        repo for repo in inspections if repo["pcae_files_missing"] is not None
+    ]
+    valid_paths = {repo["path"] for repo in valid_inspections}
+    valid_health = [repo for repo in health if repo["path"] in valid_paths]
+    findings.extend(
+        mismatch_findings(
+            valid_inspections,
+            "policy_exists",
+            "policy_existence_mismatch",
+            "Policy existence differs across fleet repos.",
+        )
+    )
+    findings.extend(
+        mismatch_findings(
+            valid_inspections,
+            "hooks_exist",
+            "hook_existence_mismatch",
+            "Hook existence differs across fleet repos.",
+        )
+    )
+    findings.extend(
+        mismatch_findings(
+            valid_health,
+            "latest_enforcement_mode",
+            "enforcement_mode_mismatch",
+            "Architecture enforcement mode differs across fleet repos.",
+        )
+    )
+    return findings
+
+
+def mismatch_findings(
+    repos: list[dict],
+    key: str,
+    finding_type: str,
+    message: str,
+) -> list[dict]:
+    values = {repo[key] for repo in repos}
+    if len(values) <= 1:
+        return []
+    return [
+        {
+            "path": repo["path"],
+            "type": finding_type,
+            "value": repo[key],
+            "message": message,
+        }
+        for repo in repos
+    ]
+
+
 def write_fleet_export(
     root: HarnessPath,
     generated_at: datetime | None = None,

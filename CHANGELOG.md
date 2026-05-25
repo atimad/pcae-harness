@@ -61,3 +61,4 @@
 - Added `pcae fleet export` for portable fleet governance snapshots.
 - Added `pcae fleet inspect` and `pcae fleet inspect --json` for fleet readiness reporting.
 - Added `pcae fleet remove` with optional missing-only cleanup for fleet registry entries.
+- Added `pcae fleet drift` and `pcae fleet drift --json` for fleet governance drift detection.

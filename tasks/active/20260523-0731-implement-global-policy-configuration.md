@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add fleet registry removal.
+Detect governance drift across registered fleet repos.
 
 ## Allowed Files
 

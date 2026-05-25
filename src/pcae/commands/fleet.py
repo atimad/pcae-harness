@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pcae.core.fleet import (
     add_fleet_repo,
+    build_fleet_drift,
     build_fleet_health,
     build_fleet_inspection,
     read_fleet_repos,
@@ -76,6 +77,15 @@ def run_fleet_inspect(args: argparse.Namespace) -> int:
     return 0 if data["overall_status"] == "ready" else 1
 
 
+def run_fleet_drift(args: argparse.Namespace) -> int:
+    data = build_fleet_drift(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print_fleet_drift(data)
+    return 0 if not data["drift_detected"] else 1
+
+
 def run_fleet_export(args: argparse.Namespace) -> int:
     export = write_fleet_export(HarnessPath.cwd())
     print(f"Wrote fleet governance bundle: {export.relative_path.as_posix()}")
@@ -130,6 +140,22 @@ def print_fleet_inspection(data: dict) -> None:
         print(f"  Active tasks exist: {yes_no(repo['active_tasks_exist'])}")
         if repo["details"] != "ok":
             print(f"  Details: {repo['details']}")
+
+
+def print_fleet_drift(data: dict) -> None:
+    print("Fleet drift")
+    print(f"Overall status: {data['overall_status']}")
+    print(f"Repos: {data['repo_count']}")
+    if not data["drift_detected"]:
+        print("No governance drift detected.")
+        return
+
+    print("Drift findings:")
+    for finding in data["drift_findings"]:
+        print(f"  {finding['type']}: {finding['path']}")
+        if "value" in finding:
+            print(f"    Value: {finding['value']}")
+        print(f"    {finding['message']}")
 
 
 def yes_no(value: bool) -> str:

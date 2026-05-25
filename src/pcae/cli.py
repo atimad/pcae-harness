@@ -12,6 +12,7 @@ from pcae.commands.check import run_check
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
+    run_fleet_drift,
     run_fleet_export,
     run_fleet_health,
     run_fleet_inspect,
@@ -154,6 +155,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON fleet inspection output.",
     )
     fleet_inspect_parser.set_defaults(handler=run_fleet_inspect)
+
+    fleet_drift_parser = fleet_subparsers.add_parser(
+        "drift",
+        help="Detect governance drift across registered repositories.",
+    )
+    fleet_drift_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON fleet drift output.",
+    )
+    fleet_drift_parser.set_defaults(handler=run_fleet_drift)
 
     fleet_export_parser = fleet_subparsers.add_parser(
         "export",
