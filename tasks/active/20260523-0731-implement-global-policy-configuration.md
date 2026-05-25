@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add force release for stale agent locks.
+Add configurable agent stale threshold.
 
 ## Allowed Files
 

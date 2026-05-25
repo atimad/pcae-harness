@@ -59,6 +59,7 @@ DEFAULT_ARCHITECTURE_RULES = {
     "policy": ("policy",),
     "config": ("config",),
 }
+DEFAULT_AGENT_STALE_AFTER_SECONDS = 14400
 
 ARCHITECTURE_ENFORCEMENT_ADVISORY = "advisory"
 ARCHITECTURE_ENFORCEMENT_STRICT = "strict"
@@ -74,6 +75,7 @@ class Policy:
     architecture_zones: dict[str, tuple[str, ...]]
     architecture_rules: dict[str, tuple[str, ...]]
     architecture_enforcement_mode: str
+    agent_stale_after_seconds: int
     source: str
     path: Path
     file_exists: bool
@@ -89,6 +91,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_zones={},
             architecture_rules={},
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
+            agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -103,6 +106,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_zones={},
             architecture_rules={},
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
+            agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -115,6 +119,7 @@ def load_policy(root: HarnessPath) -> Policy:
         architecture_zones=parsed.architecture_zones,
         architecture_rules=parsed.architecture_rules,
         architecture_enforcement_mode=parsed.architecture_enforcement_mode,
+        agent_stale_after_seconds=parsed.agent_stale_after_seconds,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -128,6 +133,7 @@ class ParsedPolicy:
     architecture_zones: dict[str, tuple[str, ...]]
     architecture_rules: dict[str, tuple[str, ...]]
     architecture_enforcement_mode: str
+    agent_stale_after_seconds: int
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -137,6 +143,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         architecture_zones=architecture_zones,
         architecture_rules=parse_architecture_rules(content, architecture_zones),
         architecture_enforcement_mode=parse_architecture_enforcement_mode(content),
+        agent_stale_after_seconds=parse_agent_stale_after_seconds(content),
     )
 
 
@@ -391,6 +398,45 @@ def parse_architecture_enforcement_mode(content: str) -> str:
     return mode
 
 
+def parse_agent_stale_after_seconds(content: str) -> int:
+    lines = content.splitlines()
+    in_agent_section = False
+    stale_after_seconds: int | None = None
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_agent_section = stripped == "[agent]"
+            continue
+
+        if not in_agent_section:
+            continue
+
+        if not stripped.startswith("stale_after_seconds"):
+            continue
+        if "=" not in stripped:
+            raise ValueError("Invalid policy: agent.stale_after_seconds must be assigned.")
+        value = stripped.split("=", 1)[1].strip()
+        if not value.isdigit():
+            raise ValueError(
+                "Invalid policy: agent.stale_after_seconds must be a positive integer."
+            )
+        stale_after_seconds = int(value)
+
+    if stale_after_seconds is None:
+        return DEFAULT_AGENT_STALE_AFTER_SECONDS
+    if stale_after_seconds <= 0:
+        raise ValueError(
+            "Invalid policy: agent.stale_after_seconds must be a positive integer."
+        )
+    return stale_after_seconds
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -488,6 +534,9 @@ patterns = [
 
 [architecture.enforcement]
 mode = "{ARCHITECTURE_ENFORCEMENT_ADVISORY}"
+
+[agent]
+stale_after_seconds = {DEFAULT_AGENT_STALE_AFTER_SECONDS}
 """
 
 

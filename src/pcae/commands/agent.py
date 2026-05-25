@@ -29,17 +29,25 @@ def run_agent_acquire(args: argparse.Namespace) -> int:
 
 
 def run_agent_release(args: argparse.Namespace) -> int:
-    result = release_agent_lock(
-        HarnessPath.cwd(),
-        args.agent_id,
-        force_stale=args.force_stale,
-    )
+    try:
+        result = release_agent_lock(
+            HarnessPath.cwd(),
+            args.agent_id,
+            force_stale=args.force_stale,
+        )
+    except ValueError as error:
+        print(str(error))
+        return 1
     print(result.message)
     return 0 if result.released else 1
 
 
 def run_agent_status(args: argparse.Namespace) -> int:
-    status = build_agent_status(HarnessPath.cwd())
+    try:
+        status = build_agent_status(HarnessPath.cwd())
+    except ValueError as error:
+        print(str(error))
+        return 1
     if args.json:
         print(json.dumps(status, indent=2, sort_keys=True))
     else:

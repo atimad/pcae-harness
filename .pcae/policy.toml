@@ -50,3 +50,6 @@ config = ["config"]
 
 [architecture.enforcement]
 mode = "advisory"
+
+[agent]
+stale_after_seconds = 14400

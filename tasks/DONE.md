@@ -84,3 +84,4 @@
 - Added local agent session leasing with acquire, release, and status commands.
 - Added stale agent lock detection to `pcae agent status` and JSON status output.
 - Added `pcae agent release --force-stale` for explicit cleanup of stale agent locks.
+- Added policy-configured agent stale thresholds under `[agent].stale_after_seconds`.

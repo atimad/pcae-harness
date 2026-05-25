@@ -249,6 +249,63 @@ def test_agent_old_lock_is_stale(tmp_path: Path) -> None:
     assert status["age_seconds"] == 14401
 
 
+def test_agent_policy_threshold_overrides_default(tmp_path: Path) -> None:
+    init_agent_repo(tmp_path)
+    write_agent_policy_threshold(tmp_path, 60)
+    acquired_at = datetime(2026, 5, 25, 8, 0, tzinfo=timezone.utc)
+    acquire_agent_lock(HarnessPath(tmp_path), "agent-a", acquired_at=acquired_at)
+
+    status = build_agent_status(
+        HarnessPath(tmp_path),
+        now=acquired_at + timedelta(seconds=61),
+    )
+
+    assert status["stale"] is True
+    assert status["stale_after_seconds"] == 60
+
+
+def test_agent_status_json_reports_policy_threshold(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    write_agent_policy_threshold(tmp_path, 60)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agent", "status", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["stale_after_seconds"] == 60
+
+
+def test_agent_status_fails_on_invalid_policy_threshold(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    init_agent_repo(tmp_path)
+    policy_file = tmp_path / ".pcae" / "policy.toml"
+    policy_file.write_text(
+        policy_file.read_text(encoding="utf-8").replace(
+            "stale_after_seconds = 14400",
+            'stale_after_seconds = "soon"',
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agent", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert (
+        "Invalid policy: agent.stale_after_seconds must be a positive integer."
+        in output
+    )
+
+
 def test_agent_status_reports_stale_lock(
     tmp_path: Path,
     monkeypatch,
@@ -326,5 +383,16 @@ def write_pcae_runtime_ignore(root: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
         "session.json\narchitecture-history.json\nagent-lock.json\n",
+        encoding="utf-8",
+    )
+
+
+def write_agent_policy_threshold(root: Path, threshold: int) -> None:
+    policy_file = root / ".pcae" / "policy.toml"
+    policy_file.write_text(
+        policy_file.read_text(encoding="utf-8").replace(
+            "stale_after_seconds = 14400",
+            f"stale_after_seconds = {threshold}",
+        ),
         encoding="utf-8",
     )

@@ -7,11 +7,12 @@ from pathlib import Path
 
 from pcae.core.git_status import read_git_branch
 from pcae.core.paths import HarnessPath
+from pcae.core.policy import DEFAULT_AGENT_STALE_AFTER_SECONDS, load_policy
 from pcae.core.tasks import find_latest_active_task
 
 
 AGENT_LOCK_RELATIVE_PATH = Path(".pcae") / "agent-lock.json"
-AGENT_LOCK_STALE_AFTER_SECONDS = 4 * 60 * 60
+AGENT_LOCK_STALE_AFTER_SECONDS = DEFAULT_AGENT_STALE_AFTER_SECONDS
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,7 @@ def build_agent_status(
     root: HarnessPath,
     now: datetime | None = None,
 ) -> dict[str, object]:
+    stale_after_seconds = read_agent_stale_after_seconds(root)
     lock = read_agent_lock(root)
     if lock is None:
         return {
@@ -110,7 +112,7 @@ def build_agent_status(
             "lock": None,
             "locked": False,
             "stale": False,
-            "stale_after_seconds": AGENT_LOCK_STALE_AFTER_SECONDS,
+            "stale_after_seconds": stale_after_seconds,
         }
 
     age_seconds = calculate_lock_age_seconds(
@@ -122,8 +124,8 @@ def build_agent_status(
         "lock": lock.data,
         "locked": True,
         "stale": age_seconds is not None
-        and age_seconds > AGENT_LOCK_STALE_AFTER_SECONDS,
-        "stale_after_seconds": AGENT_LOCK_STALE_AFTER_SECONDS,
+        and age_seconds > stale_after_seconds,
+        "stale_after_seconds": stale_after_seconds,
     }
 
 
@@ -164,3 +166,10 @@ def calculate_lock_age_seconds(
         now = now.replace(tzinfo=timezone.utc)
 
     return max(0, int((now - acquired).total_seconds()))
+
+
+def read_agent_stale_after_seconds(root: HarnessPath) -> int:
+    policy = load_policy(root)
+    if not policy.valid:
+        raise ValueError(policy.error or "Invalid policy.")
+    return policy.agent_stale_after_seconds
