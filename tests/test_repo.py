@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
 
@@ -57,6 +58,30 @@ def test_repo_trial_reports_existing_pcae_files(
     assert "Hooks exist: yes" in output
     assert "pcae init would create:" in output
     assert "  none" in output
+
+
+def test_repo_trial_json_reports_target_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    init_git_repo(target)
+    (target / "AGENTS.md").write_text("custom\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["repo", "trial", str(target), "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["target_repo"] == target.as_posix()
+    assert data["is_git_repo"] is True
+    assert data["pcae_files_present"] == 1
+    assert data["pcae_files_missing"] == 8
+    assert data["policy_exists"] is False
+    assert data["active_tasks_exist"] is False
+    assert data["hooks_exist"] is False
+    assert "PROJECT_STATUS.md" in data["init_would_create"]
+    assert "AGENTS.md" in data["init_would_skip"]
 
 
 def test_repo_trial_missing_path_fails_clearly(

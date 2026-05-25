@@ -151,6 +151,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview trial results without modifying the target repo.",
     )
+    repo_trial_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON trial output.",
+    )
     repo_trial_parser.set_defaults(handler=run_repo_trial)
 
     architecture_parser = subparsers.add_parser(

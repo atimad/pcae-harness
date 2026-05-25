@@ -12,6 +12,7 @@ from pcae.core.writer import WritePlan, plan_missing_files
 @dataclass(frozen=True)
 class RepoTrial:
     target_path: Path
+    is_git_repo: bool
     pcae_files_present: int
     pcae_files_missing: int
     init_plans: tuple[WritePlan, ...]
@@ -33,6 +34,7 @@ def build_repo_trial(target_path: Path) -> RepoTrial:
     active_tasks = target_path / "tasks" / "active"
     return RepoTrial(
         target_path=target_path,
+        is_git_repo=True,
         pcae_files_present=len(inspection.present_paths),
         pcae_files_missing=len(inspection.missing_paths),
         init_plans=tuple(plan_missing_files(root, INIT_TEMPLATES)),

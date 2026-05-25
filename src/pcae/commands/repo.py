@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from pcae.core.repo import RepoTrial, build_repo_trial
@@ -17,7 +18,10 @@ def run_repo_trial(args: argparse.Namespace) -> int:
         print(error)
         return 1
 
-    print_repo_trial(trial)
+    if args.json:
+        print(json.dumps(repo_trial_json_data(trial), indent=2, sort_keys=True))
+    else:
+        print_repo_trial(trial)
     return 0
 
 
@@ -56,3 +60,25 @@ def print_plan_paths(plans) -> None:
 
 def yes_no(value: bool) -> str:
     return "yes" if value else "no"
+
+
+def repo_trial_json_data(trial: RepoTrial) -> dict[str, object]:
+    return {
+        "active_tasks_exist": trial.active_tasks_exist,
+        "hooks_exist": trial.hooks_exist,
+        "init_would_create": [
+            plan.relative_path.as_posix()
+            for plan in trial.init_plans
+            if plan.would_create
+        ],
+        "init_would_skip": [
+            plan.relative_path.as_posix()
+            for plan in trial.init_plans
+            if not plan.would_create
+        ],
+        "is_git_repo": trial.is_git_repo,
+        "pcae_files_missing": trial.pcae_files_missing,
+        "pcae_files_present": trial.pcae_files_present,
+        "policy_exists": trial.policy_exists,
+        "target_repo": trial.target_path.as_posix(),
+    }
