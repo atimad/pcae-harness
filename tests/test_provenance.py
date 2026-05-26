@@ -198,3 +198,111 @@ def test_read_provenance_status_absent(tmp_path: Path, monkeypatch) -> None:
     assert status.event_count == 0
     assert status.latest_summary is None
     assert status.relative_path == PROVENANCE_HISTORY_RELATIVE_PATH
+
+
+# ---------------------------------------------------------------------------
+# provenance record command
+# ---------------------------------------------------------------------------
+
+
+def test_provenance_record_creates_file_and_appends(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["provenance", "record", "--event-type", "phase_completed", "--summary", "Phase 31B done"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "phase_completed" in output
+    assert "Phase 31B done" in output
+    assert (tmp_path / ".pcae" / "provenance-history.json").is_file()
+
+
+def test_provenance_record_event_visible_in_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["provenance", "record", "--event-type", "session.start", "--summary", "session opened"])
+    capsys.readouterr()
+
+    exit_code = main(["provenance", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "File: present" in output
+    assert "Event count: 1" in output
+    assert "Latest event: session opened" in output
+
+
+def test_provenance_record_event_visible_in_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["provenance", "record", "--event-type", "check.passed", "--summary", "all checks ok"])
+    capsys.readouterr()
+
+    exit_code = main(["provenance", "history"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "check.passed" in output
+    assert "all checks ok" in output
+
+
+def test_provenance_record_event_visible_in_history_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["provenance", "record", "--event-type", "docs.generated", "--summary", "glossary written"])
+    capsys.readouterr()
+
+    exit_code = main(["provenance", "history", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert len(parsed) == 1
+    assert parsed[0]["event_type"] == "docs.generated"
+    assert parsed[0]["summary"] == "glossary written"
+
+
+def test_provenance_record_accumulates_multiple_events(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["provenance", "record", "--event-type", "a", "--summary", "first"])
+    main(["provenance", "record", "--event-type", "b", "--summary", "second"])
+    main(["provenance", "record", "--event-type", "c", "--summary", "third"])
+    capsys.readouterr()
+
+    exit_code = main(["provenance", "history", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert len(parsed) == 3
+    assert parsed[0]["event_type"] == "a"
+    assert parsed[2]["event_type"] == "c"
+
+
+def test_provenance_record_requires_event_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pytest
+    with pytest.raises(SystemExit) as exc_info:
+        main(["provenance", "record", "--summary", "missing event type"])
+    assert exc_info.value.code != 0
+
+
+def test_provenance_record_requires_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pytest
+    with pytest.raises(SystemExit) as exc_info:
+        main(["provenance", "record", "--event-type", "test"])
+    assert exc_info.value.code != 0

@@ -6,6 +6,7 @@ import json
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     PROVENANCE_HISTORY_RELATIVE_PATH,
+    append_provenance_event,
     read_provenance_history,
     read_provenance_status,
 )
@@ -27,6 +28,13 @@ def run_provenance_status(args: argparse.Namespace) -> int:
         print("File: absent")
         print("Event count: 0")
         print("Latest event: none")
+    return 0
+
+
+def run_provenance_record(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    event = append_provenance_event(root, args.event_type, args.summary)
+    print(f"Recorded: [{event.timestamp}] {event.event_type}: {event.summary}")
     return 0
 
 

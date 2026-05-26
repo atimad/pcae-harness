@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31A: Governance provenance event logging.
+Phase 31B: Manual provenance event recording.
 
 ## Current State
 

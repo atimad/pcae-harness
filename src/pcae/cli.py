@@ -28,7 +28,11 @@ from pcae.commands.daemon import (
     run_daemon_watch,
 )
 from pcae.commands.docs import run_docs_architecture, run_docs_commands, run_docs_glossary
-from pcae.commands.provenance import run_provenance_history, run_provenance_status
+from pcae.commands.provenance import (
+    run_provenance_history,
+    run_provenance_record,
+    run_provenance_status,
+)
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -779,6 +783,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON provenance history output.",
     )
     provenance_history_parser.set_defaults(handler=run_provenance_history)
+
+    provenance_record_parser = provenance_subparsers.add_parser(
+        "record",
+        help="Append a manual provenance event.",
+    )
+    provenance_record_parser.add_argument(
+        "--event-type",
+        required=True,
+        help="Event type label (e.g. phase_completed, session.start).",
+    )
+    provenance_record_parser.add_argument(
+        "--summary",
+        required=True,
+        help="Human-readable summary of the event.",
+    )
+    provenance_record_parser.set_defaults(handler=run_provenance_record)
 
     return parser
 
