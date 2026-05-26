@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add CI workflow introspection.
+Add CI governance drift detection.
 
 ## Allowed Files
 

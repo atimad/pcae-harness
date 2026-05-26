@@ -176,5 +176,92 @@ def test_ci_status_json_reports_configured_workflow(
     }
 
 
+def test_ci_drift_reports_no_drift_for_configured_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "generate", "github"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["ci", "drift"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE CI drift" in output
+    assert "Drift detected: false" in output
+    assert "Overall status: no_drift" in output
+    assert "No CI governance drift detected." in output
+
+
+def test_ci_drift_reports_drift_for_incomplete_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "name: partial\njobs:\n  governance:\n    steps:\n"
+        "      - run: pcae health --json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "drift"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Drift detected: true" in output
+    assert "Overall status: drift" in output
+    assert "missing check step" in output
+    assert "missing analytics risk step" in output
+
+
+def test_ci_drift_reports_missing_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "drift"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Drift detected: true" in output
+    assert "Overall status: missing" in output
+    assert "workflow file missing" in output
+
+
+def test_ci_drift_json_reports_drift(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "name: partial\njobs:\n  governance:\n    steps:\n"
+        "      - run: pcae check --json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "drift_detected": True,
+        "drift_findings": [
+            "missing health step",
+            "missing analytics risk step",
+        ],
+        "overall_status": "drift",
+    }
+
+
 def workflow_path(root: Path) -> Path:
     return root / ".github" / "workflows" / "pcae-governance.yml"

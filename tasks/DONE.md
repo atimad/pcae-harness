@@ -92,3 +92,4 @@
 - Added policy-driven daemon watch intervals under `[daemon].watch_interval_seconds`.
 - Added `pcae ci generate github` for GitHub Actions PCAE governance workflow generation.
 - Added `pcae ci status` and JSON output for GitHub Actions governance workflow introspection.
+- Added `pcae ci drift` and JSON output for GitHub Actions governance workflow drift detection.

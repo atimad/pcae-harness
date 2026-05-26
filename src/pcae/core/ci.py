@@ -26,6 +26,13 @@ class CiStatus:
     overall_status: str
 
 
+@dataclass(frozen=True)
+class CiDrift:
+    drift_detected: bool
+    drift_findings: tuple[str, ...]
+    overall_status: str
+
+
 def render_github_actions_workflow() -> str:
     return """name: PCAE Governance
 
@@ -108,4 +115,28 @@ def inspect_github_actions_workflow(root: HarnessPath) -> CiStatus:
         has_check_step=has_check_step,
         has_risk_step=has_risk_step,
         overall_status="configured" if configured else "incomplete",
+    )
+
+
+def detect_github_actions_drift(root: HarnessPath) -> CiDrift:
+    status = inspect_github_actions_workflow(root)
+    if not status.workflow_exists:
+        return CiDrift(
+            drift_detected=True,
+            drift_findings=("workflow file missing",),
+            overall_status="missing",
+        )
+
+    findings: list[str] = []
+    if not status.has_health_step:
+        findings.append("missing health step")
+    if not status.has_check_step:
+        findings.append("missing check step")
+    if not status.has_risk_step:
+        findings.append("missing analytics risk step")
+
+    return CiDrift(
+        drift_detected=bool(findings),
+        drift_findings=tuple(findings),
+        overall_status="drift" if findings else "no_drift",
     )

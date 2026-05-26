@@ -15,7 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.ci import run_ci_generate_github, run_ci_status
+from pcae.commands.ci import run_ci_drift, run_ci_generate_github, run_ci_status
 from pcae.commands.daemon import (
     default_watch_interval_seconds,
     run_daemon,
@@ -146,6 +146,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON CI status output.",
     )
     ci_status_parser.set_defaults(handler=run_ci_status)
+
+    ci_drift_parser = ci_subparsers.add_parser(
+        "drift",
+        help="Detect PCAE governance drift in the generated CI workflow.",
+    )
+    ci_drift_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON CI drift output.",
+    )
+    ci_drift_parser.set_defaults(handler=run_ci_drift)
 
     health_parser = subparsers.add_parser(
         "health",

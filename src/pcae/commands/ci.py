@@ -4,8 +4,10 @@ import argparse
 import json
 
 from pcae.core.ci import (
+    CiDrift,
     CiStatus,
     GITHUB_WORKFLOW_RELATIVE_PATH,
+    detect_github_actions_drift,
     generate_github_actions_workflow,
     inspect_github_actions_workflow,
     render_github_actions_workflow,
@@ -45,6 +47,15 @@ def run_ci_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_ci_drift(args: argparse.Namespace) -> int:
+    drift = detect_github_actions_drift(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(ci_drift_json_data(drift), indent=2, sort_keys=True))
+    else:
+        print_ci_drift(drift)
+    return 0
+
+
 def print_ci_status(status: CiStatus) -> None:
     print("PCAE CI status")
     print(f"Workflow exists: {format_bool(status.workflow_exists)}")
@@ -55,6 +66,18 @@ def print_ci_status(status: CiStatus) -> None:
     print(f"Overall status: {status.overall_status}")
 
 
+def print_ci_drift(drift: CiDrift) -> None:
+    print("PCAE CI drift")
+    print(f"Drift detected: {format_bool(drift.drift_detected)}")
+    print(f"Overall status: {drift.overall_status}")
+    if drift.drift_findings:
+        print("Drift findings:")
+        for finding in drift.drift_findings:
+            print(f"  - {finding}")
+    else:
+        print("No CI governance drift detected.")
+
+
 def ci_status_json_data(status: CiStatus) -> dict[str, object]:
     return {
         "has_check_step": status.has_check_step,
@@ -63,6 +86,14 @@ def ci_status_json_data(status: CiStatus) -> dict[str, object]:
         "overall_status": status.overall_status,
         "workflow_exists": status.workflow_exists,
         "workflow_path": status.workflow_path.as_posix(),
+    }
+
+
+def ci_drift_json_data(drift: CiDrift) -> dict[str, object]:
+    return {
+        "drift_detected": drift.drift_detected,
+        "drift_findings": list(drift.drift_findings),
+        "overall_status": drift.overall_status,
     }
 
 
