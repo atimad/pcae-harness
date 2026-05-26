@@ -9,6 +9,7 @@ from pcae.cli import main
 from pcae.core.orchestration import (
     build_agent_registry_data,
     build_orchestration_data,
+    build_workflow_plan,
     load_agent_registry,
     load_orchestration_policy,
     recommend_agent,
@@ -489,6 +490,287 @@ def test_cli_orchestration_recommend_fails_on_invalid_policy(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert output.strip()
+
+
+# ---------------------------------------------------------------------------
+# core: build_workflow_plan
+# ---------------------------------------------------------------------------
+
+
+def test_build_workflow_plan_documentation_steps(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
+    assert result["workflow"] == "documentation"
+    steps = result["steps"]
+    assert len(steps) == 3
+    assert steps[0]["assigned_agent"] == "claude-local"
+    assert steps[1]["assigned_agent"] == "claude-local"
+    assert steps[2]["assigned_agent"] == "pcae-native"
+
+
+def test_build_workflow_plan_documentation_work_types(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
+    labels = [s["work_type"] for s in result["steps"]]
+    assert labels == ["architecture review", "documentation", "governance validation"]
+
+
+def test_build_workflow_plan_implementation_steps(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "implementation")
+    assert result["workflow"] == "implementation"
+    steps = result["steps"]
+    assert len(steps) == 3
+    assert steps[0]["assigned_agent"] == "codex-local"
+    assert steps[1]["assigned_agent"] == "codex-local"
+    assert steps[2]["assigned_agent"] == "pcae-native"
+
+
+def test_build_workflow_plan_implementation_work_types(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "implementation")
+    labels = [s["work_type"] for s in result["steps"]]
+    assert labels == ["implementation", "tests", "governance validation"]
+
+
+def test_build_workflow_plan_validation_steps(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "validation")
+    assert result["workflow"] == "validation"
+    steps = result["steps"]
+    assert len(steps) == 3
+    assert steps[0]["assigned_agent"] == "pcae-native"
+    assert steps[1]["assigned_agent"] == "pcae-native"
+    assert steps[2]["assigned_agent"] == "claude-local"
+
+
+def test_build_workflow_plan_release_steps(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "release")
+    assert result["workflow"] == "release"
+    steps = result["steps"]
+    assert len(steps) == 3
+    assert steps[0]["assigned_agent"] == "pcae-native"
+    assert steps[1]["assigned_agent"] == "pcae-native"
+    assert steps[2]["assigned_agent"] == "claude-local"
+
+
+def test_build_workflow_plan_release_work_types(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "release")
+    labels = [s["work_type"] for s in result["steps"]]
+    assert labels == [
+        "governance validation",
+        "provenance verification",
+        "release notes/documentation",
+    ]
+
+
+def test_build_workflow_plan_steps_are_ordered(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "implementation")
+    step_numbers = [s["step"] for s in result["steps"]]
+    assert step_numbers == list(range(1, len(step_numbers) + 1))
+
+
+def test_build_workflow_plan_step_keys(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
+    for step in result["steps"]:
+        assert set(step.keys()) == {"step", "work_type", "assigned_agent", "reason"}
+
+
+def test_build_workflow_plan_steps_include_reasons(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
+    for step in result["steps"]:
+        assert step["reason"]
+
+
+def test_build_workflow_plan_unknown_workflow_fallback(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "no-such-workflow")
+    assert result["workflow"] == "no-such-workflow"
+    steps = result["steps"]
+    assert len(steps) == 1
+    assert steps[0]["assigned_agent"] == "claude-local"
+    assert "no-such-workflow" in steps[0]["reason"]
+    assert steps[0]["work_type"] == "no-such-workflow"
+
+
+def test_build_workflow_plan_unknown_uses_default_agent_from_policy(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy() + '\n[orchestration]\ndefault_agent = "my-default"\n',
+    )
+    result = build_workflow_plan(HarnessPath(tmp_path), "unknown")
+    assert result["steps"][0]["assigned_agent"] == "my-default"
+
+
+def test_build_workflow_plan_result_top_level_keys(tmp_path: Path) -> None:
+    result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
+    assert set(result.keys()) == {"workflow", "steps"}
+
+
+def test_build_workflow_plan_raises_on_invalid_policy(tmp_path: Path) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    with pytest.raises(ValueError):
+        build_workflow_plan(HarnessPath(tmp_path), "documentation")
+
+
+def test_build_workflow_plan_respects_custom_agent_registry(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.custom-impl]\nkind = "custom"\nroles = ["implementation", "tests", "governance"]\n',
+    )
+    result = build_workflow_plan(HarnessPath(tmp_path), "implementation")
+    for step in result["steps"]:
+        assert step["assigned_agent"] == "custom-impl"
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration plan
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_plan_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow plan: documentation" in output
+    assert "claude-local" in output
+    assert "pcae-native" in output
+    assert "architecture review" in output
+    assert "governance validation" in output
+
+
+def test_cli_orchestration_plan_human_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow plan: implementation" in output
+    assert "codex-local" in output
+    assert "implementation" in output
+    assert "tests" in output
+
+
+def test_cli_orchestration_plan_human_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "validation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow plan: validation" in output
+    assert "pcae-native" in output
+    assert "claude-local" in output
+
+
+def test_cli_orchestration_plan_human_release(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "release"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow plan: release" in output
+    assert "pcae-native" in output
+    assert "claude-local" in output
+    assert "governance validation" in output
+    assert "release notes/documentation" in output
+
+
+def test_cli_orchestration_plan_human_unknown_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "no-such-wf"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow plan: no-such-wf" in output
+    assert "claude-local" in output
+    assert "no-such-wf" in output
+
+
+def test_cli_orchestration_plan_human_shows_reasons(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["orchestration", "plan", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert "Reason:" in output
+
+
+def test_cli_orchestration_plan_human_shows_step_numbers(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["orchestration", "plan", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert "1." in output
+    assert "2." in output
+    assert "3." in output
+
+
+def test_cli_orchestration_plan_json_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["workflow"] == "documentation"
+    assert isinstance(data["steps"], list)
+    assert len(data["steps"]) == 3
+    assert data["steps"][0]["assigned_agent"] == "claude-local"
+    assert data["steps"][2]["assigned_agent"] == "pcae-native"
+
+
+def test_cli_orchestration_plan_json_step_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "implementation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {"workflow", "steps"}
+    for step in data["steps"]:
+        assert set(step.keys()) == {"step", "work_type", "assigned_agent", "reason"}
+
+
+def test_cli_orchestration_plan_json_unknown_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "unknown-wf", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["workflow"] == "unknown-wf"
+    assert len(data["steps"]) == 1
+    assert data["steps"][0]["assigned_agent"] == "claude-local"
+
+
+def test_cli_orchestration_plan_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
+
+
+def test_cli_orchestration_plan_no_file_uses_defaults(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "plan", "--workflow", "release"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "pcae-native" in output
+    assert "claude-local" in output
 
 
 # ---------------------------------------------------------------------------

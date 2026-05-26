@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 33D: Orchestration-aware handoff recommendation.
+Phase 33E: Orchestration workflow plans.
 
 ## Governance Coherence Note
 
@@ -69,7 +69,11 @@ a work type with `pcae orchestration recommend --work-type TEXT` and
 against declared agent roles with deterministic fallback to `default_agent`,
 and extended `pcae phase handoff` with `--work-type TEXT` to resolve the next
 agent from orchestration policy when `--next-agent` is omitted, with
-recommendation metadata in both human and JSON output.
+recommendation metadata in both human and JSON output, and generate
+governance-aware workflow plans with `pcae orchestration plan --workflow TEXT`
+and `pcae orchestration plan --workflow TEXT --json` for the built-in workflows
+`documentation`, `implementation`, `validation`, and `release`, with
+deterministic fallback for unknown workflows.
 
 ## Next
 

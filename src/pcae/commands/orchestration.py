@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from pcae.core.orchestration import build_agent_registry_data, build_orchestration_data, recommend_agent
+from pcae.core.orchestration import build_agent_registry_data, build_orchestration_data, build_workflow_plan, recommend_agent
 from pcae.core.paths import HarnessPath
 
 
@@ -58,4 +58,22 @@ def run_orchestration_recommend(args: argparse.Namespace) -> int:
         print(f"Work type: {data['work_type']}")
         print(f"Recommended agent: {data['recommended_agent']}")
         print(f"Reason: {data['reason']}")
+    return 0
+
+
+def run_orchestration_plan(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = build_workflow_plan(root, args.workflow)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Workflow plan: {data['workflow']}")
+        for step in data["steps"]:
+            print(f"  {step['step']}. {step['assigned_agent']} -> {step['work_type']}")
+            print(f"     Reason: {step['reason']}")
     return 0

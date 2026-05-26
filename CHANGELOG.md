@@ -135,3 +135,7 @@
 - When `--work-type` is provided without `--next-agent`, the recommended agent is used as the next agent and the recommendation reason is shown.
 - When both `--work-type` and `--next-agent` are provided, the explicit agent is authoritative; human output shows the recommendation and whether it matches or was overridden.
 - Added recommendation metadata to `pcae phase handoff --json`: `work_type`, `recommended_agent`, `recommendation_reason`, `recommendation_used`, `explicit_next_agent`.
+- Added `_WORKFLOW_STEPS` built-in templates for `documentation`, `implementation`, `validation`, and `release` workflows in `src/pcae/core/orchestration.py`.
+- Added `_resolve_agent` private helper to share role-to-agent resolution between `recommend_agent` and `build_workflow_plan` without double-loading the policy.
+- Added `build_workflow_plan` in `src/pcae/core/orchestration.py` to produce ordered workflow steps using orchestration policy and agent registry, with deterministic fallback to `default_agent` for unknown workflows.
+- Added `pcae orchestration plan --workflow TEXT` and `pcae orchestration plan --workflow TEXT --json` to generate governance-aware workflow plans with assigned agents and reasons per step.

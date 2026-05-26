@@ -3,6 +3,62 @@ from __future__ import annotations
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import AgentRegistryEntry, OrchestrationPolicy, load_policy
 
+# Each workflow is a sequence of (role, label) pairs.
+# role  – the agent registry role used for agent assignment
+# label – the human-friendly work_type shown in output
+_WORKFLOW_STEPS: dict[str, tuple[tuple[str, str], ...]] = {
+    "documentation": (
+        ("architecture", "architecture review"),
+        ("documentation", "documentation"),
+        ("governance", "governance validation"),
+    ),
+    "implementation": (
+        ("implementation", "implementation"),
+        ("tests", "tests"),
+        ("governance", "governance validation"),
+    ),
+    "validation": (
+        ("governance", "governance validation"),
+        ("validation", "validation"),
+        ("analysis", "analysis review"),
+    ),
+    "release": (
+        ("governance", "governance validation"),
+        ("validation", "provenance verification"),
+        ("documentation", "release notes/documentation"),
+    ),
+}
+
+
+def _resolve_agent(
+    registry: tuple[AgentRegistryEntry, ...],
+    orchestration: OrchestrationPolicy,
+    role: str,
+) -> dict:
+    matches = [entry for entry in registry if role in entry.roles]
+
+    if not matches:
+        return {
+            "recommended_agent": orchestration.default_agent,
+            "reason": f"No agent declares role '{role}'; using orchestration default.",
+            "matched_role": None,
+            "fallback_used": True,
+        }
+
+    chosen = matches[0]
+    if len(matches) > 1:
+        for entry in matches:
+            if entry.agent_id == orchestration.default_agent:
+                chosen = entry
+                break
+
+    return {
+        "recommended_agent": chosen.agent_id,
+        "reason": f"Agent '{chosen.agent_id}' declares role '{role}'.",
+        "matched_role": role,
+        "fallback_used": False,
+    }
+
 
 def load_orchestration_policy(root: HarnessPath) -> OrchestrationPolicy:
     policy = load_policy(root)
@@ -32,31 +88,50 @@ def recommend_agent(root: HarnessPath, work_type: str) -> dict:
     policy = load_policy(root)
     if not policy.valid:
         raise ValueError(policy.error or "Invalid policy.")
-    registry = policy.agent_registry
-    orchestration = policy.orchestration
-
-    matches = [entry for entry in registry if work_type in entry.roles]
-
-    if not matches:
-        return {
-            "work_type": work_type,
-            "recommended_agent": orchestration.default_agent,
-            "reason": f"No agent declares role '{work_type}'; using orchestration default.",
-            "matched_role": None,
-            "fallback_used": True,
-        }
-
-    chosen = matches[0]
-    if len(matches) > 1:
-        for entry in matches:
-            if entry.agent_id == orchestration.default_agent:
-                chosen = entry
-                break
-
+    rec = _resolve_agent(policy.agent_registry, policy.orchestration, work_type)
     return {
         "work_type": work_type,
-        "recommended_agent": chosen.agent_id,
-        "reason": f"Agent '{chosen.agent_id}' declares role '{work_type}'.",
-        "matched_role": work_type,
-        "fallback_used": False,
+        "recommended_agent": rec["recommended_agent"],
+        "reason": rec["reason"],
+        "matched_role": rec["matched_role"],
+        "fallback_used": rec["fallback_used"],
     }
+
+
+def build_workflow_plan(root: HarnessPath, workflow: str) -> dict:
+    policy = load_policy(root)
+    if not policy.valid:
+        raise ValueError(policy.error or "Invalid policy.")
+
+    registry = policy.agent_registry
+    orchestration = policy.orchestration
+    steps_template = _WORKFLOW_STEPS.get(workflow)
+
+    if steps_template is None:
+        return {
+            "workflow": workflow,
+            "steps": [
+                {
+                    "step": 1,
+                    "work_type": workflow,
+                    "assigned_agent": orchestration.default_agent,
+                    "reason": (
+                        f"Unknown workflow '{workflow}'; using orchestration default."
+                    ),
+                }
+            ],
+        }
+
+    steps = []
+    for i, (role, label) in enumerate(steps_template, 1):
+        rec = _resolve_agent(registry, orchestration, role)
+        steps.append(
+            {
+                "step": i,
+                "work_type": label,
+                "assigned_agent": rec["recommended_agent"],
+                "reason": rec["reason"],
+            }
+        )
+
+    return {"workflow": workflow, "steps": steps}
