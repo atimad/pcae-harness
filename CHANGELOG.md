@@ -96,3 +96,5 @@
 - Added `pcae provenance timeline` and `--json` for chronological governance execution summaries with agent, event-type, and latest-event aggregation.
 - Added `pcae provenance sessions` and `--json` to list governance execution sessions grouped by agent_acquired/agent_released boundaries.
 - Added `pcae provenance session current` and `--json` to show the active governance session or report none.
+- Added `pcae phase complete --summary TEXT` to record a `phase_completed` provenance event and release the current agent lock.
+- Added `pcae phase start --agent-id TEXT` to validate governance state, acquire the agent lock, and report active task and provenance timeline.

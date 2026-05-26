@@ -62,6 +62,7 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
+from pcae.commands.phase import run_phase_complete, run_phase_start
 from pcae.commands.task import (
     run_task_close,
     run_task_complete,
@@ -865,6 +866,37 @@ def build_parser() -> argparse.ArgumentParser:
         help="Human-readable summary of the event.",
     )
     provenance_record_parser.set_defaults(handler=run_provenance_record)
+
+    phase_parser = subparsers.add_parser(
+        "phase",
+        help="Manage governed phase lifecycle.",
+    )
+    phase_subparsers = phase_parser.add_subparsers(
+        dest="phase_command",
+        required=True,
+    )
+
+    phase_complete_parser = phase_subparsers.add_parser(
+        "complete",
+        help="Record phase completion and release agent lock.",
+    )
+    phase_complete_parser.add_argument(
+        "--summary",
+        required=True,
+        help="Summary of the completed phase.",
+    )
+    phase_complete_parser.set_defaults(handler=run_phase_complete)
+
+    phase_start_parser = phase_subparsers.add_parser(
+        "start",
+        help="Acquire agent lock and begin a new governed phase.",
+    )
+    phase_start_parser.add_argument(
+        "--agent-id",
+        required=True,
+        help="Agent identifier for the new phase session.",
+    )
+    phase_start_parser.set_defaults(handler=run_phase_start)
 
     return parser
 
