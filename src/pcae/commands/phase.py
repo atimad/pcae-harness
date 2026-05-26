@@ -4,7 +4,7 @@ import argparse
 import json
 
 from pcae.core.check import run_checks
-from pcae.core.orchestration import recommend_agent
+from pcae.core.orchestration import build_workflow_simulation, recommend_agent
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
 
@@ -31,9 +31,11 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
 
     # Compute recommendation when work_type is provided.
     rec: dict | None = None
+    suggested_workflow: dict | None = None
     if work_type:
         try:
             rec = recommend_agent(root, work_type)
+            suggested_workflow = build_workflow_simulation(root, work_type)
         except ValueError as error:
             if not explicit_next_agent:
                 print(str(error))
@@ -67,12 +69,16 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                     "manual_steps": manual_steps,
                     "next_agent": result.next_agent,
                     "provenance_event_count": result.provenance_event_count,
+                    "recommendation_note": (
+                        "Recommendations are advisory; the user may override them."
+                    ),
                     "recommendation_reason": rec["reason"] if rec else None,
                     "recommendation_used": recommendation_used,
                     "recommended_agent": rec["recommended_agent"] if rec else None,
                     "released_agent": result.released_agent,
                     "restart_workflows": restart_workflows,
                     "summary": result.summary,
+                    "suggested_workflow": _workflow_json_summary(suggested_workflow),
                     "work_type": work_type,
                 },
                 indent=2,
@@ -84,14 +90,22 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     print("Phase handoff.")
     print(f"Summary: {result.summary}")
     if rec is not None:
+        print("Recommendations are advisory; the user may override them.")
         print(f"Recommended agent: {rec['recommended_agent']} (work type: {work_type})")
         print(f"Reason: {rec['reason']}")
+        if suggested_workflow is not None:
+            step_count = len(suggested_workflow["steps"])
+            print(
+                f"Suggested next workflow: {suggested_workflow['workflow']} "
+                f"({step_count} planned steps)"
+            )
         if explicit_next_agent:
             if explicit_next_agent == rec["recommended_agent"]:
-                print("Recommendation: matches explicit --next-agent")
+                print("User override: explicit --next-agent matches recommendation.")
             else:
                 print(
-                    f"Recommendation: overridden by explicit --next-agent ({explicit_next_agent})"
+                    "User override: explicit --next-agent is being used "
+                    f"({explicit_next_agent}) instead of the recommendation."
                 )
     print(f"Health: {result.health_status}")
     print(f"Check: {'passed' if result.check_passed else 'failed'}")
@@ -197,6 +211,17 @@ def _build_restart_workflows_data() -> list[dict]:
             ],
         },
     ]
+
+
+def _workflow_json_summary(workflow: dict | None) -> dict | None:
+    if workflow is None:
+        return None
+    return {
+        "workflow": workflow["workflow"],
+        "status": workflow["status"],
+        "execution_mode": workflow["execution_mode"],
+        "step_count": len(workflow["steps"]),
+    }
 
 
 def run_phase_start(args: argparse.Namespace) -> int:

@@ -110,11 +110,15 @@ def build_workflow_plan(root: HarnessPath, workflow: str) -> dict:
     if steps_template is None:
         return {
             "workflow": workflow,
+            "recommendation_note": (
+                "Recommendations are advisory; the user may override them."
+            ),
             "steps": [
                 {
                     "step": 1,
                     "work_type": workflow,
                     "assigned_agent": orchestration.default_agent,
+                    "recommended_agent": orchestration.default_agent,
                     "reason": (
                         f"Unknown workflow '{workflow}'; using orchestration default."
                     ),
@@ -130,11 +134,18 @@ def build_workflow_plan(root: HarnessPath, workflow: str) -> dict:
                 "step": i,
                 "work_type": label,
                 "assigned_agent": rec["recommended_agent"],
+                "recommended_agent": rec["recommended_agent"],
                 "reason": rec["reason"],
             }
         )
 
-    return {"workflow": workflow, "steps": steps}
+    return {
+        "workflow": workflow,
+        "recommendation_note": (
+            "Recommendations are advisory; the user may override them."
+        ),
+        "steps": steps,
+    }
 
 
 def _governance_checkpoint_for(work_type: str) -> str | None:
@@ -153,6 +164,7 @@ def build_workflow_simulation(root: HarnessPath, workflow: str) -> dict:
             {
                 "step": step["step"],
                 "assigned_agent": step["assigned_agent"],
+                "recommended_agent": step["recommended_agent"],
                 "work_type": step["work_type"],
                 "reason": step["reason"],
                 "governance_checkpoint": _governance_checkpoint_for(step["work_type"]),
@@ -163,5 +175,6 @@ def build_workflow_simulation(root: HarnessPath, workflow: str) -> dict:
         "workflow": plan["workflow"],
         "status": "planned",
         "execution_mode": "simulation",
+        "recommendation_note": plan["recommendation_note"],
         "steps": steps,
     }

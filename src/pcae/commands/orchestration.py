@@ -78,9 +78,13 @@ def run_orchestration_plan(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
-        print(f"Workflow plan: {data['workflow']}")
+        print(f"Suggested workflow plan: {data['workflow']}")
+        print(data["recommendation_note"])
         for step in data["steps"]:
-            print(f"  {step['step']}. {step['assigned_agent']} -> {step['work_type']}")
+            print(
+                f"  {step['step']}. Recommended agent: "
+                f"{step['recommended_agent']} -> {step['work_type']}"
+            )
             print(f"     Reason: {step['reason']}")
     return 0
 
@@ -96,11 +100,15 @@ def run_orchestration_simulate(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
-        print(f"Workflow simulation: {data['workflow']}")
+        print(f"Suggested workflow simulation: {data['workflow']}")
         print(f"Simulation mode: {data['execution_mode']}")
+        print(data["recommendation_note"])
         print("Ordered steps:")
         for step in data["steps"]:
-            print(f"  {step['step']}. {step['assigned_agent']} -> {step['work_type']}")
+            print(
+                f"  {step['step']}. Recommended agent: "
+                f"{step['recommended_agent']} -> {step['work_type']}"
+            )
             print(f"     Reason: {step['reason']}")
             checkpoint = step["governance_checkpoint"]
             if checkpoint:

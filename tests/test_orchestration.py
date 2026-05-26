@@ -569,7 +569,13 @@ def test_build_workflow_plan_steps_are_ordered(tmp_path: Path) -> None:
 def test_build_workflow_plan_step_keys(tmp_path: Path) -> None:
     result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
     for step in result["steps"]:
-        assert set(step.keys()) == {"step", "work_type", "assigned_agent", "reason"}
+        assert set(step.keys()) == {
+            "step",
+            "work_type",
+            "assigned_agent",
+            "recommended_agent",
+            "reason",
+        }
 
 
 def test_build_workflow_plan_steps_include_reasons(tmp_path: Path) -> None:
@@ -601,7 +607,7 @@ def test_build_workflow_plan_unknown_uses_default_agent_from_policy(
 
 def test_build_workflow_plan_result_top_level_keys(tmp_path: Path) -> None:
     result = build_workflow_plan(HarnessPath(tmp_path), "documentation")
-    assert set(result.keys()) == {"workflow", "steps"}
+    assert set(result.keys()) == {"workflow", "recommendation_note", "steps"}
 
 
 def test_build_workflow_plan_raises_on_invalid_policy(tmp_path: Path) -> None:
@@ -631,6 +637,7 @@ def test_build_workflow_simulation_documentation(tmp_path: Path) -> None:
     assert result["workflow"] == "documentation"
     assert result["status"] == "planned"
     assert result["execution_mode"] == "simulation"
+    assert "advisory" in result["recommendation_note"]
     assert len(result["steps"]) == 3
     assert result["steps"][2]["governance_checkpoint"] == "pcae check"
 
@@ -670,6 +677,7 @@ def test_build_workflow_simulation_step_keys(tmp_path: Path) -> None:
         assert set(step.keys()) == {
             "step",
             "assigned_agent",
+            "recommended_agent",
             "work_type",
             "reason",
             "governance_checkpoint",
@@ -688,7 +696,9 @@ def test_cli_orchestration_plan_human_documentation(
     exit_code = main(["orchestration", "plan", "--workflow", "documentation"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow plan: documentation" in output
+    assert "Suggested workflow plan: documentation" in output
+    assert "Recommendations are advisory; the user may override them." in output
+    assert "Recommended agent:" in output
     assert "claude-local" in output
     assert "pcae-native" in output
     assert "architecture review" in output
@@ -702,7 +712,7 @@ def test_cli_orchestration_plan_human_implementation(
     exit_code = main(["orchestration", "plan", "--workflow", "implementation"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow plan: implementation" in output
+    assert "Suggested workflow plan: implementation" in output
     assert "codex-local" in output
     assert "implementation" in output
     assert "tests" in output
@@ -715,7 +725,7 @@ def test_cli_orchestration_plan_human_validation(
     exit_code = main(["orchestration", "plan", "--workflow", "validation"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow plan: validation" in output
+    assert "Suggested workflow plan: validation" in output
     assert "pcae-native" in output
     assert "claude-local" in output
 
@@ -727,7 +737,7 @@ def test_cli_orchestration_plan_human_release(
     exit_code = main(["orchestration", "plan", "--workflow", "release"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow plan: release" in output
+    assert "Suggested workflow plan: release" in output
     assert "pcae-native" in output
     assert "claude-local" in output
     assert "governance validation" in output
@@ -741,7 +751,7 @@ def test_cli_orchestration_plan_human_unknown_fallback(
     exit_code = main(["orchestration", "plan", "--workflow", "no-such-wf"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow plan: no-such-wf" in output
+    assert "Suggested workflow plan: no-such-wf" in output
     assert "claude-local" in output
     assert "no-such-wf" in output
 
@@ -775,6 +785,7 @@ def test_cli_orchestration_plan_json_documentation(
     assert exit_code == 0
     data = json.loads(output)
     assert data["workflow"] == "documentation"
+    assert "recommendation_note" in data
     assert isinstance(data["steps"], list)
     assert len(data["steps"]) == 3
     assert data["steps"][0]["assigned_agent"] == "claude-local"
@@ -789,9 +800,15 @@ def test_cli_orchestration_plan_json_step_keys(
     output = capsys.readouterr().out
     assert exit_code == 0
     data = json.loads(output)
-    assert set(data.keys()) == {"workflow", "steps"}
+    assert set(data.keys()) == {"workflow", "recommendation_note", "steps"}
     for step in data["steps"]:
-        assert set(step.keys()) == {"step", "work_type", "assigned_agent", "reason"}
+        assert set(step.keys()) == {
+            "step",
+            "work_type",
+            "assigned_agent",
+            "recommended_agent",
+            "reason",
+        }
 
 
 def test_cli_orchestration_plan_json_unknown_fallback(
@@ -841,8 +858,10 @@ def test_cli_orchestration_simulate_human_documentation(
     exit_code = main(["orchestration", "simulate", "--workflow", "documentation"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow simulation: documentation" in output
+    assert "Suggested workflow simulation: documentation" in output
     assert "Simulation mode: simulation" in output
+    assert "Recommendations are advisory; the user may override them." in output
+    assert "Recommended agent:" in output
     assert "Ordered steps:" in output
     assert "Final result: planned" in output
     assert "Governance checkpoint: pcae check" in output
@@ -855,7 +874,7 @@ def test_cli_orchestration_simulate_human_implementation(
     exit_code = main(["orchestration", "simulate", "--workflow", "implementation"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow simulation: implementation" in output
+    assert "Suggested workflow simulation: implementation" in output
     assert "codex-local -> implementation" in output
     assert "codex-local -> tests" in output
 
@@ -867,7 +886,7 @@ def test_cli_orchestration_simulate_human_release(
     exit_code = main(["orchestration", "simulate", "--workflow", "release"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow simulation: release" in output
+    assert "Suggested workflow simulation: release" in output
     assert "Governance checkpoint: pcae provenance session current" in output
 
 
@@ -878,7 +897,7 @@ def test_cli_orchestration_simulate_human_unknown_fallback(
     exit_code = main(["orchestration", "simulate", "--workflow", "unknown-wf"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Workflow simulation: unknown-wf" in output
+    assert "Suggested workflow simulation: unknown-wf" in output
     assert "claude-local" in output
     assert "Final result: planned" in output
 
@@ -889,7 +908,13 @@ def test_cli_orchestration_simulate_json(tmp_path: Path, monkeypatch, capsys) ->
     output = capsys.readouterr().out
     assert exit_code == 0
     data = json.loads(output)
-    assert set(data.keys()) == {"workflow", "status", "execution_mode", "steps"}
+    assert set(data.keys()) == {
+        "workflow",
+        "status",
+        "execution_mode",
+        "recommendation_note",
+        "steps",
+    }
     assert data["workflow"] == "documentation"
     assert data["status"] == "planned"
     assert data["execution_mode"] == "simulation"

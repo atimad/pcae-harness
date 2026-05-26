@@ -448,12 +448,14 @@ def test_phase_handoff_json_output(
         "manual_steps",
         "next_agent",
         "provenance_event_count",
+        "recommendation_note",
         "recommendation_reason",
         "recommendation_used",
         "recommended_agent",
         "released_agent",
         "restart_workflows",
         "summary",
+        "suggested_workflow",
         "work_type",
     }
     # no --work-type: recommendation fields are null/false
@@ -461,6 +463,8 @@ def test_phase_handoff_json_output(
     assert data["recommended_agent"] is None
     assert data["recommendation_reason"] is None
     assert data["recommendation_used"] is False
+    assert "advisory" in data["recommendation_note"]
+    assert data["suggested_workflow"] is None
     assert data["explicit_next_agent"] == "claude-next"
 
 
@@ -825,6 +829,8 @@ def test_phase_handoff_work_type_documentation_uses_claude_local(
     assert exit_code == 0
     assert "Next agent: claude-local" in output
     assert "Recommended agent: claude-local" in output
+    assert "Recommendations are advisory; the user may override them." in output
+    assert "Suggested next workflow: documentation" in output
 
 
 def test_phase_handoff_work_type_implementation_uses_codex_local(
@@ -919,7 +925,7 @@ def test_phase_handoff_both_flags_shows_recommendation_and_override_note(
 
     output = capsys.readouterr().out
     assert "Recommended agent: claude-local" in output
-    assert "overridden by explicit --next-agent" in output
+    assert "User override: explicit --next-agent is being used" in output
     assert "Next agent: codex-local" in output
 
 
@@ -946,7 +952,7 @@ def test_phase_handoff_both_flags_matching_shows_matches_note(
 
     output = capsys.readouterr().out
     assert "Recommended agent: claude-local" in output
-    assert "matches explicit --next-agent" in output
+    assert "User override: explicit --next-agent matches recommendation." in output
 
 
 def test_phase_handoff_work_type_json_includes_recommendation_fields(
@@ -980,6 +986,8 @@ def test_phase_handoff_work_type_json_includes_recommendation_fields(
     assert data["recommendation_reason"] is not None
     assert "documentation" in data["recommendation_reason"]
     assert data["recommendation_used"] is True
+    assert data["suggested_workflow"]["workflow"] == "documentation"
+    assert data["suggested_workflow"]["execution_mode"] == "simulation"
     assert data["explicit_next_agent"] is None
     assert data["next_agent"] == "claude-local"
 

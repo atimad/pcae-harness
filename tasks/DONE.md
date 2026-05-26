@@ -110,3 +110,4 @@
 - Added `AgentRegistryEntry`, `DEFAULT_AGENT_REGISTRY`, and `parse_agent_registry` to `src/pcae/core/policy.py`.
 - Added `pcae orchestration agents` and `pcae orchestration agents --json`.
 - Added `pcae orchestration simulate --workflow TEXT` and JSON output to preview ordered workflow execution without launching agents or changing locks.
+- Updated orchestration plan, simulation, and phase handoff output to frame agent choices as advisory recommendations that users may override.

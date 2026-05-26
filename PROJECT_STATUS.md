@@ -75,9 +75,13 @@ and `pcae orchestration plan --workflow TEXT --json` for the built-in workflows
 `documentation`, `implementation`, `validation`, and `release`, with
 deterministic fallback for unknown workflows, and preview executable
 orchestration workflow steps with `pcae orchestration simulate --workflow TEXT`
-and `pcae orchestration simulate --workflow TEXT --json`, showing assigned
+and `pcae orchestration simulate --workflow TEXT --json`, showing recommended
 agents, work types, reasons, and governance checkpoints without executing work
-or changing locks.
+or changing locks. Orchestration recommendations are advisory and
+user-controlled: PCAE remains vendor-neutral and policy-guided, users may
+override recommendations or prefer one agent for all work, and future agent
+registries may include Claude, Codex, Kimi, DeepSeek, Perplexity, or other
+models as capabilities evolve.
 
 ## Next
 
