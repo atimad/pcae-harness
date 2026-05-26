@@ -86,3 +86,4 @@
 - Added `pcae ci repair --force` to create or overwrite the generated governance workflow when drift exists.
 - Added `pcae docs commands` for generating `docs/COMMANDS.md`.
 - Added `pcae docs architecture` for generating `docs/ARCHITECTURE.md`.
+- Added `pcae docs glossary` for generating `docs/GLOSSARY.md` with definitions of all key PCAE governance concepts.

@@ -164,9 +164,107 @@ def test_docs_architecture_force_overwrites_existing(
     assert "## Operational Artifact Hygiene" in content
 
 
+def test_docs_glossary_dry_run_prints_glossary(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["docs", "glossary", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Would write docs/GLOSSARY.md:" in output
+    assert "# PCAE Governance Glossary" in output
+    assert "## governance runtime" in output
+    assert "## task contract" in output
+    assert "## agent lock" in output
+    assert "## CI drift" in output
+    assert not glossary_path(tmp_path).exists()
+
+
+def test_docs_glossary_writes_glossary_when_missing(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["docs", "glossary"])
+
+    output = capsys.readouterr().out
+    content = glossary_path(tmp_path).read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert "Created: docs/GLOSSARY.md" in output
+    assert "# PCAE Governance Glossary" in content
+    assert "## active task" in content
+    assert "## allowed files" in content
+    assert "## forbidden files" in content
+    assert "## allowed zones" in content
+    assert "## forbidden zones" in content
+    assert "## architecture zones" in content
+    assert "## architecture rules" in content
+    assert "## enforcement mode" in content
+    assert "## session continuity" in content
+    assert "## architecture history" in content
+    assert "## governance health" in content
+    assert "## governance risk" in content
+    assert "## fleet registry" in content
+    assert "## fleet drift" in content
+    assert "## governance bundle" in content
+    assert "## agent lock" in content
+    assert "## daemon dry-run" in content
+    assert "## pipeline dry-run" in content
+    assert "## CI drift" in content
+    assert "## CI repair" in content
+
+
+def test_docs_glossary_does_not_overwrite_without_force(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = glossary_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("custom glossary\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["docs", "glossary"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "docs/GLOSSARY.md already exists. Use --force to overwrite." in output
+    assert target.read_text(encoding="utf-8") == "custom glossary\n"
+
+
+def test_docs_glossary_force_overwrites_existing(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = glossary_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("custom glossary\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["docs", "glossary", "--force"])
+
+    output = capsys.readouterr().out
+    content = target.read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert "Overwritten: docs/GLOSSARY.md" in output
+    assert "custom glossary" not in content
+    assert "## governance runtime" in content
+
+
 def commands_path(root: Path) -> Path:
     return root / "docs" / "COMMANDS.md"
 
 
 def architecture_path(root: Path) -> Path:
     return root / "docs" / "ARCHITECTURE.md"
+
+
+def glossary_path(root: Path) -> Path:
+    return root / "docs" / "GLOSSARY.md"

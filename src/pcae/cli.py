@@ -27,7 +27,7 @@ from pcae.commands.daemon import (
     run_daemon_status,
     run_daemon_watch,
 )
-from pcae.commands.docs import run_docs_architecture, run_docs_commands
+from pcae.commands.docs import run_docs_architecture, run_docs_commands, run_docs_glossary
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -224,6 +224,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overwrite an existing architecture overview.",
     )
     docs_architecture_parser.set_defaults(handler=run_docs_architecture)
+
+    docs_glossary_parser = docs_subparsers.add_parser(
+        "glossary",
+        help="Generate the PCAE governance glossary.",
+    )
+    docs_glossary_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the glossary without writing it.",
+    )
+    docs_glossary_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing glossary.",
+    )
+    docs_glossary_parser.set_defaults(handler=run_docs_glossary)
 
     health_parser = subparsers.add_parser(
         "health",
