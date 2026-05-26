@@ -147,6 +147,19 @@ def read_provenance_history(root: HarnessPath) -> ProvenanceHistory:
     )
 
 
+def filter_events(
+    events: tuple[ProvenanceEvent, ...],
+    event_type: str | None = None,
+    agent_id: str | None = None,
+) -> tuple[ProvenanceEvent, ...]:
+    result = events
+    if event_type is not None:
+        result = tuple(e for e in result if e.event_type == event_type)
+    if agent_id is not None:
+        result = tuple(e for e in result if e.agent_id == agent_id)
+    return result
+
+
 def write_provenance_export(
     root: HarnessPath,
     exported_at: datetime | None = None,

@@ -7,6 +7,7 @@ from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     PROVENANCE_HISTORY_RELATIVE_PATH,
     append_provenance_event,
+    filter_events,
     read_provenance_history,
     read_provenance_status,
     write_provenance_export,
@@ -67,11 +68,14 @@ def run_provenance_record(args: argparse.Namespace) -> int:
 def run_provenance_history(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     history = read_provenance_history(root)
+    event_type_filter: str | None = getattr(args, "event_type", None) or None
+    agent_id_filter: str | None = getattr(args, "agent_id", None) or None
+    events = filter_events(history.events, event_type=event_type_filter, agent_id=agent_id_filter)
 
     if args.json:
         print(
             json.dumps(
-                [event.to_dict() for event in history.events],
+                [event.to_dict() for event in events],
                 indent=2,
                 sort_keys=True,
             )
@@ -79,13 +83,16 @@ def run_provenance_history(args: argparse.Namespace) -> int:
         return 0
 
     print(f"Provenance history: {PROVENANCE_HISTORY_RELATIVE_PATH.as_posix()}")
-    print(f"Event count: {len(history.events)}")
-    if not history.events:
-        print("No provenance events recorded.")
+    print(f"Event count: {len(events)}")
+    if not events:
+        if event_type_filter is not None or agent_id_filter is not None:
+            print("No matching events.")
+        else:
+            print("No provenance events recorded.")
         return 0
 
     print("")
-    for event in history.events:
+    for event in events:
         print(f"  [{event.timestamp}] {event.event_type}: {event.summary}")
         if event.agent_id is not None:
             print(f"    agent: {event.agent_id}")

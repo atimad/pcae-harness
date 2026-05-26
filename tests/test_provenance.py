@@ -313,6 +313,156 @@ def test_provenance_record_requires_summary(
 
 
 # ---------------------------------------------------------------------------
+# provenance history filtering
+# ---------------------------------------------------------------------------
+
+
+def test_history_filter_by_event_type(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired")
+    append_provenance_event(root, "phase_completed", "phase done")
+    append_provenance_event(root, "agent_acquired", "lock acquired again")
+
+    exit_code = main(["provenance", "history", "--event-type", "agent_acquired"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 2" in output
+    assert "agent_acquired" in output
+    assert "phase_completed" not in output
+
+
+def test_history_filter_by_agent_id(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "from alice", agent_id="alice")
+    append_provenance_event(root, "b", "from bob", agent_id="bob")
+    append_provenance_event(root, "c", "from alice again", agent_id="alice")
+
+    exit_code = main(["provenance", "history", "--agent-id", "alice"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 2" in output
+    assert "from alice" in output
+    assert "from bob" not in output
+
+
+def test_history_filter_combined_and_semantics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "deploy", "deploy by alice", agent_id="alice")
+    append_provenance_event(root, "deploy", "deploy by bob", agent_id="bob")
+    append_provenance_event(root, "check", "check by alice", agent_id="alice")
+
+    exit_code = main(
+        ["provenance", "history", "--event-type", "deploy", "--agent-id", "alice"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 1" in output
+    assert "deploy by alice" in output
+    assert "deploy by bob" not in output
+    assert "check by alice" not in output
+
+
+def test_history_filter_json_event_type(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired")
+    append_provenance_event(root, "phase_completed", "phase done")
+
+    exit_code = main(
+        ["provenance", "history", "--json", "--event-type", "phase_completed"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert len(parsed) == 1
+    assert parsed[0]["event_type"] == "phase_completed"
+
+
+def test_history_filter_json_agent_id(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "from alice", agent_id="alice")
+    append_provenance_event(root, "b", "from bob", agent_id="bob")
+
+    exit_code = main(["provenance", "history", "--json", "--agent-id", "bob"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert len(parsed) == 1
+    assert parsed[0]["agent_id"] == "bob"
+
+
+def test_history_filter_no_matching_events(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired")
+
+    exit_code = main(["provenance", "history", "--event-type", "nonexistent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 0" in output
+    assert "No matching events." in output
+
+
+def test_history_filter_json_combined_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "event", agent_id="alice")
+
+    exit_code = main(
+        ["provenance", "history", "--json", "--event-type", "a", "--agent-id", "bob"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert json.loads(output) == []
+
+
+def test_history_unfiltered_unchanged(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "x", "first")
+    append_provenance_event(root, "y", "second")
+
+    exit_code = main(["provenance", "history"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 2" in output
+    assert "first" in output
+    assert "second" in output
+
+
+def test_filter_events_core_function(tmp_path: Path, monkeypatch) -> None:
+    from pcae.core.provenance import filter_events, ProvenanceEvent
+    events = (
+        ProvenanceEvent("t1", "a", "alice", None, None, "s1"),
+        ProvenanceEvent("t2", "b", "bob", None, None, "s2"),
+        ProvenanceEvent("t3", "a", "bob", None, None, "s3"),
+    )
+    assert len(filter_events(events)) == 3
+    assert len(filter_events(events, event_type="a")) == 2
+    assert len(filter_events(events, agent_id="bob")) == 2
+    assert len(filter_events(events, event_type="a", agent_id="bob")) == 1
+    assert len(filter_events(events, event_type="z")) == 0
+
+
+# ---------------------------------------------------------------------------
 # provenance export command
 # ---------------------------------------------------------------------------
 

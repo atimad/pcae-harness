@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31D: Provenance export.
+Phase 31E: Provenance history filtering.
 
 ## Current State
 

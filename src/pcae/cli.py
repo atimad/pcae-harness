@@ -783,6 +783,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON provenance history output.",
     )
+    provenance_history_parser.add_argument(
+        "--event-type",
+        default=None,
+        help="Filter events by event_type.",
+    )
+    provenance_history_parser.add_argument(
+        "--agent-id",
+        default=None,
+        help="Filter events by agent_id.",
+    )
     provenance_history_parser.set_defaults(handler=run_provenance_history)
 
     provenance_export_parser = provenance_subparsers.add_parser(
