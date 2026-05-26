@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.check import run_checks
+from pcae.core.orchestration import recommend_agent
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
 
@@ -23,16 +24,37 @@ def run_phase_complete(args: argparse.Namespace) -> int:
 
 
 def run_phase_handoff(args: argparse.Namespace) -> int:
-    if not args.next_agent:
+    work_type: str | None = getattr(args, "work_type", None)
+    explicit_next_agent: str | None = args.next_agent
+
+    root = HarnessPath.cwd()
+
+    # Compute recommendation when work_type is provided.
+    rec: dict | None = None
+    if work_type:
+        try:
+            rec = recommend_agent(root, work_type)
+        except ValueError as error:
+            if not explicit_next_agent:
+                print(str(error))
+                return 1
+            # explicit --next-agent present: proceed without recommendation data
+
+    # Resolve next agent.
+    if explicit_next_agent:
+        next_agent = explicit_next_agent
+        recommendation_used = False
+    elif rec is not None:
+        next_agent = rec["recommended_agent"]
+        recommendation_used = True
+    else:
         print("Please specify the next agent with --next-agent <agent-id>.")
         return 1
 
-    root = HarnessPath.cwd()
-    result = handoff_phase(root, args.summary, args.next_agent)
+    result = handoff_phase(root, args.summary, next_agent)
 
-    manual_steps = _build_manual_steps(result.next_agent)
-    bootstrap_prompt = _build_bootstrap_prompt(result.next_agent)
-
+    manual_steps = _build_manual_steps(next_agent)
+    bootstrap_prompt = _build_bootstrap_prompt(next_agent)
     restart_workflows = _build_restart_workflows_data()
 
     if args.json:
@@ -40,13 +62,18 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
             json.dumps(
                 {
                     "check_status": "passed" if result.check_passed else "failed",
+                    "explicit_next_agent": explicit_next_agent,
                     "health_status": result.health_status,
                     "manual_steps": manual_steps,
                     "next_agent": result.next_agent,
                     "provenance_event_count": result.provenance_event_count,
+                    "recommendation_reason": rec["reason"] if rec else None,
+                    "recommendation_used": recommendation_used,
+                    "recommended_agent": rec["recommended_agent"] if rec else None,
                     "released_agent": result.released_agent,
                     "restart_workflows": restart_workflows,
                     "summary": result.summary,
+                    "work_type": work_type,
                 },
                 indent=2,
                 sort_keys=True,
@@ -56,6 +83,16 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
 
     print("Phase handoff.")
     print(f"Summary: {result.summary}")
+    if rec is not None:
+        print(f"Recommended agent: {rec['recommended_agent']} (work type: {work_type})")
+        print(f"Reason: {rec['reason']}")
+        if explicit_next_agent:
+            if explicit_next_agent == rec["recommended_agent"]:
+                print("Recommendation: matches explicit --next-agent")
+            else:
+                print(
+                    f"Recommendation: overridden by explicit --next-agent ({explicit_next_agent})"
+                )
     print(f"Health: {result.health_status}")
     print(f"Check: {'passed' if result.check_passed else 'failed'}")
     for v in result.violations:

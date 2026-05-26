@@ -995,6 +995,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Agent identifier that will own the next phase session.",
     )
     phase_handoff_parser.add_argument(
+        "--work-type",
+        default=None,
+        metavar="TEXT",
+        help="Work type to recommend next agent via orchestration policy.",
+    )
+    phase_handoff_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON handoff result.",

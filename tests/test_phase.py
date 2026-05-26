@@ -443,14 +443,25 @@ def test_phase_handoff_json_output(
     assert len(data["restart_workflows"]) == 3
     assert set(data.keys()) == {
         "check_status",
+        "explicit_next_agent",
         "health_status",
         "manual_steps",
         "next_agent",
         "provenance_event_count",
+        "recommendation_reason",
+        "recommendation_used",
+        "recommended_agent",
         "released_agent",
         "restart_workflows",
         "summary",
+        "work_type",
     }
+    # no --work-type: recommendation fields are null/false
+    assert data["work_type"] is None
+    assert data["recommended_agent"] is None
+    assert data["recommendation_reason"] is None
+    assert data["recommendation_used"] is False
+    assert data["explicit_next_agent"] == "claude-next"
 
 
 def test_phase_handoff_without_current_lock(
@@ -787,6 +798,262 @@ def test_phase_handoff_missing_next_agent_does_not_mutate_state(
     assert read_agent_lock(root) is not None
     history = read_provenance_history(root)
     assert len(history.events) == 0
+
+
+# ---------------------------------------------------------------------------
+# pcae phase handoff --work-type (Phase 33D)
+# ---------------------------------------------------------------------------
+
+
+def test_phase_handoff_work_type_documentation_uses_claude_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D doc task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "doc handoff", "--work-type", "documentation"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: claude-local" in output
+    assert "Recommended agent: claude-local" in output
+
+
+def test_phase_handoff_work_type_implementation_uses_codex_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D impl task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "impl handoff", "--work-type", "implementation"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: codex-local" in output
+    assert "Recommended agent: codex-local" in output
+    assert "Agent lock: acquired by codex-local" in output
+
+
+def test_phase_handoff_work_type_shows_reason_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D reason task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--summary", "reason test", "--work-type", "documentation"])
+
+    output = capsys.readouterr().out
+    assert "Reason:" in output
+    assert "documentation" in output
+
+
+def test_phase_handoff_explicit_next_agent_overrides_work_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D override task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "override",
+            "--work-type", "documentation",
+            "--next-agent", "codex-local",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: codex-local" in output
+    assert "Agent lock: acquired by codex-local" in output
+
+
+def test_phase_handoff_both_flags_shows_recommendation_and_override_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D both flags task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(
+        [
+            "phase", "handoff",
+            "--summary", "both flags",
+            "--work-type", "documentation",
+            "--next-agent", "codex-local",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert "Recommended agent: claude-local" in output
+    assert "overridden by explicit --next-agent" in output
+    assert "Next agent: codex-local" in output
+
+
+def test_phase_handoff_both_flags_matching_shows_matches_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D match task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(
+        [
+            "phase", "handoff",
+            "--summary", "match",
+            "--work-type", "documentation",
+            "--next-agent", "claude-local",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert "Recommended agent: claude-local" in output
+    assert "matches explicit --next-agent" in output
+
+
+def test_phase_handoff_work_type_json_includes_recommendation_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "JSON rec",
+            "--work-type", "documentation",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["work_type"] == "documentation"
+    assert data["recommended_agent"] == "claude-local"
+    assert data["recommendation_reason"] is not None
+    assert "documentation" in data["recommendation_reason"]
+    assert data["recommendation_used"] is True
+    assert data["explicit_next_agent"] is None
+    assert data["next_agent"] == "claude-local"
+
+
+def test_phase_handoff_work_type_json_override_sets_recommendation_used_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D JSON override task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "JSON override",
+            "--work-type", "documentation",
+            "--next-agent", "codex-local",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["work_type"] == "documentation"
+    assert data["recommended_agent"] == "claude-local"
+    assert data["recommendation_used"] is False
+    assert data["explicit_next_agent"] == "codex-local"
+    assert data["next_agent"] == "codex-local"
+
+
+def test_phase_handoff_work_type_acquires_recommended_agent_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import read_agent_lock
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33D lock task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(
+        ["phase", "handoff", "--summary", "lock check", "--work-type", "implementation"]
+    )
+    capsys.readouterr()
+
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "codex-local"
+
+
+def test_phase_handoff_work_type_missing_both_still_shows_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--summary", "no agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Please specify the next agent with --next-agent <agent-id>." in output
 
 
 # ---------------------------------------------------------------------------

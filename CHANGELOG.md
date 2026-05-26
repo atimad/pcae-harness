@@ -131,3 +131,7 @@
 - Added `pcae orchestration recommend --work-type TEXT` to recommend an agent for a given work type, with role-based matching and deterministic fallback to `default_agent`.
 - Added `pcae orchestration recommend --work-type TEXT --json` for machine-readable recommendation output including `work_type`, `recommended_agent`, `reason`, `matched_role`, and `fallback_used`.
 - Added standard Python bytecode patterns (`__pycache__/`, `*.py[cod]`) to `.gitignore` to prevent governance false positives from installed package artifacts.
+- Extended `pcae phase handoff` with `--work-type TEXT` to recommend the next agent via orchestration policy when `--next-agent` is omitted.
+- When `--work-type` is provided without `--next-agent`, the recommended agent is used as the next agent and the recommendation reason is shown.
+- When both `--work-type` and `--next-agent` are provided, the explicit agent is authoritative; human output shows the recommendation and whether it matches or was overridden.
+- Added recommendation metadata to `pcae phase handoff --json`: `work_type`, `recommended_agent`, `recommendation_reason`, `recommendation_used`, `explicit_next_agent`.

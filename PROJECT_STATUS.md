@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 33C: Orchestration agent recommendation.
+Phase 33D: Orchestration-aware handoff recommendation.
 
 ## Governance Coherence Note
 
@@ -66,7 +66,10 @@ configurable `[agents.<id>]` sections in `.pcae/policy.toml` with `kind` and
 when no agent sections are configured, and recommend the best governed agent for
 a work type with `pcae orchestration recommend --work-type TEXT` and
 `pcae orchestration recommend --work-type TEXT --json`, matching the work type
-against declared agent roles with deterministic fallback to `default_agent`.
+against declared agent roles with deterministic fallback to `default_agent`,
+and extended `pcae phase handoff` with `--work-type TEXT` to resolve the next
+agent from orchestration policy when `--next-agent` is omitted, with
+recommendation metadata in both human and JSON output.
 
 ## Next
 
