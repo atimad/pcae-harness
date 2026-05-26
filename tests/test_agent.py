@@ -9,6 +9,7 @@ from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.agent import acquire_agent_lock, build_agent_status
 from pcae.core.paths import HarnessPath
+from pcae.core.provenance import read_provenance_history
 from pcae.core.tasks import create_task_contract
 
 
@@ -347,6 +348,92 @@ def test_agent_lock_is_ignored_by_git(
     )
     assert exit_code == 0
     assert ignored.returncode == 0
+
+
+# ---------------------------------------------------------------------------
+# provenance recording for agent lifecycle
+# ---------------------------------------------------------------------------
+
+
+def test_agent_acquire_records_provenance_event(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["agent", "acquire", "--agent-id", "test-agent"])
+    capsys.readouterr()
+
+    history = read_provenance_history(HarnessPath(tmp_path))
+    assert len(history.events) == 1
+    event = history.events[0]
+    assert event.event_type == "agent_acquired"
+    assert "test-agent" in event.summary
+    assert event.agent_id == "test-agent"
+    assert event.git_branch is not None
+
+
+def test_agent_acquire_failure_does_not_record_provenance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "first-agent")
+    monkeypatch.chdir(tmp_path)
+
+    main(["agent", "acquire", "--agent-id", "second-agent"])
+    capsys.readouterr()
+
+    history = read_provenance_history(HarnessPath(tmp_path))
+    assert not any(e.event_type == "agent_acquired" for e in history.events)
+
+
+def test_agent_release_records_provenance_event(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["agent", "acquire", "--agent-id", "test-agent"])
+    capsys.readouterr()
+
+    main(["agent", "release", "--agent-id", "test-agent"])
+    capsys.readouterr()
+
+    history = read_provenance_history(HarnessPath(tmp_path))
+    release_events = [e for e in history.events if e.event_type == "agent_released"]
+    assert len(release_events) == 1
+    event = release_events[0]
+    assert "test-agent" in event.summary
+    assert event.agent_id == "test-agent"
+
+
+def test_agent_release_failure_does_not_record_provenance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "other-agent")
+    monkeypatch.chdir(tmp_path)
+
+    main(["agent", "release", "--agent-id", "wrong-agent"])
+    capsys.readouterr()
+
+    history = read_provenance_history(HarnessPath(tmp_path))
+    assert not any(e.event_type == "agent_released" for e in history.events)
+
+
+def test_agent_acquire_and_release_both_recorded(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["agent", "acquire", "--agent-id", "lifecycle-agent"])
+    main(["agent", "release", "--agent-id", "lifecycle-agent"])
+    capsys.readouterr()
+
+    history = read_provenance_history(HarnessPath(tmp_path))
+    assert len(history.events) == 2
+    assert history.events[0].event_type == "agent_acquired"
+    assert history.events[1].event_type == "agent_released"
 
 
 def init_agent_repo(root: Path) -> None:

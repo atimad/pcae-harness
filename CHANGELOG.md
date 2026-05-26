@@ -90,3 +90,4 @@
 - Added `pcae provenance status` and `pcae provenance history` for reading `.pcae/provenance-history.json` governance attribution events.
 - Added `append_provenance_event` helper for durable provenance event writes.
 - Added `pcae provenance record --event-type TEXT --summary TEXT` for manual provenance event appending.
+- Automatic provenance events recorded on successful `pcae agent acquire` (agent_acquired) and `pcae agent release` (agent_released).

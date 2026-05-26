@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31B: Manual provenance event recording.
+Phase 31C: Automatic provenance logging for agent lifecycle.
 
 ## Current State
 

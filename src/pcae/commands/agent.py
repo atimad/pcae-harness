@@ -9,15 +9,23 @@ from pcae.core.agent import (
     release_agent_lock,
 )
 from pcae.core.paths import HarnessPath
+from pcae.core.provenance import append_provenance_event
 
 
 def run_agent_acquire(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
     try:
-        lock = acquire_agent_lock(HarnessPath.cwd(), args.agent_id)
+        lock = acquire_agent_lock(root, args.agent_id)
     except ValueError as error:
         print(str(error))
         return 1
 
+    append_provenance_event(
+        root,
+        "agent_acquired",
+        f"Agent lock acquired by {lock.agent_id}",
+        agent_id=lock.agent_id,
+    )
     print(f"Agent lock acquired by {lock.agent_id}.")
     print(f"Git branch: {lock.data['git_branch']}")
     active_task = lock.data.get("active_task")
@@ -29,15 +37,23 @@ def run_agent_acquire(args: argparse.Namespace) -> int:
 
 
 def run_agent_release(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
     try:
         result = release_agent_lock(
-            HarnessPath.cwd(),
+            root,
             args.agent_id,
             force_stale=args.force_stale,
         )
     except ValueError as error:
         print(str(error))
         return 1
+    if result.released:
+        append_provenance_event(
+            root,
+            "agent_released",
+            f"Agent lock released by {args.agent_id}",
+            agent_id=args.agent_id,
+        )
     print(result.message)
     return 0 if result.released else 1
 

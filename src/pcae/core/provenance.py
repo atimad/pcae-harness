@@ -66,10 +66,12 @@ def build_provenance_event(
     event_type: str,
     summary: str,
     created_at: datetime | None = None,
+    agent_id: str | None = None,
 ) -> ProvenanceEvent:
     timestamp = created_at or datetime.now(timezone.utc)
-    lock = read_agent_lock(root)
-    agent_id = lock.agent_id if lock is not None else None
+    if agent_id is None:
+        lock = read_agent_lock(root)
+        agent_id = lock.agent_id if lock is not None else None
     active_task_obj = find_latest_active_task(root)
     active_task = (
         {"id": active_task_obj.task_id, "title": active_task_obj.title}
@@ -91,8 +93,9 @@ def append_provenance_event(
     event_type: str,
     summary: str,
     created_at: datetime | None = None,
+    agent_id: str | None = None,
 ) -> ProvenanceEvent:
-    event = build_provenance_event(root, event_type, summary, created_at)
+    event = build_provenance_event(root, event_type, summary, created_at, agent_id)
     existing = _read_raw_events(root)
     entries = list(existing) + [event.to_dict()]
     target = root.join(PROVENANCE_HISTORY_RELATIVE_PATH)
