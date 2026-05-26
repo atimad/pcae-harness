@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from pcae.cli import main
@@ -85,6 +86,94 @@ def test_ci_generate_github_force_overwrites_existing(
     assert "Overwritten: .github/workflows/pcae-governance.yml" in output
     assert "custom workflow" not in content
     assert "pcae analytics risk --json" in content
+
+
+def test_ci_status_reports_missing_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE CI status" in output
+    assert "Workflow exists: false" in output
+    assert "Workflow path: .github/workflows/pcae-governance.yml" in output
+    assert "Health step: false" in output
+    assert "Check step: false" in output
+    assert "Risk step: false" in output
+    assert "Overall status: missing" in output
+
+
+def test_ci_status_reports_incomplete_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "name: partial\njobs:\n  governance:\n    steps:\n"
+        "      - run: pcae health --json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow exists: true" in output
+    assert "Health step: true" in output
+    assert "Check step: false" in output
+    assert "Risk step: false" in output
+    assert "Overall status: incomplete" in output
+
+
+def test_ci_status_reports_configured_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "generate", "github"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["ci", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow exists: true" in output
+    assert "Health step: true" in output
+    assert "Check step: true" in output
+    assert "Risk step: true" in output
+    assert "Overall status: configured" in output
+
+
+def test_ci_status_json_reports_configured_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "generate", "github"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["ci", "status", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "has_check_step": True,
+        "has_health_step": True,
+        "has_risk_step": True,
+        "overall_status": "configured",
+        "workflow_exists": True,
+        "workflow_path": ".github/workflows/pcae-governance.yml",
+    }
 
 
 def workflow_path(root: Path) -> Path:

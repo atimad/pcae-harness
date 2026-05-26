@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add GitHub Actions CI template generation.
+Add CI workflow introspection.
 
 ## Allowed Files
 

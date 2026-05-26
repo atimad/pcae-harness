@@ -16,6 +16,16 @@ class CiGenerateResult:
     overwritten: bool
 
 
+@dataclass(frozen=True)
+class CiStatus:
+    workflow_exists: bool
+    workflow_path: Path
+    has_health_step: bool
+    has_check_step: bool
+    has_risk_step: bool
+    overall_status: str
+
+
 def render_github_actions_workflow() -> str:
     return """name: PCAE Governance
 
@@ -70,4 +80,32 @@ def generate_github_actions_workflow(
         relative_path=GITHUB_WORKFLOW_RELATIVE_PATH,
         created=not existed,
         overwritten=existed,
+    )
+
+
+def inspect_github_actions_workflow(root: HarnessPath) -> CiStatus:
+    target = root.join(GITHUB_WORKFLOW_RELATIVE_PATH)
+    if not target.is_file():
+        return CiStatus(
+            workflow_exists=False,
+            workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
+            has_health_step=False,
+            has_check_step=False,
+            has_risk_step=False,
+            overall_status="missing",
+        )
+
+    content = target.read_text(encoding="utf-8")
+    has_health_step = "pcae health --json" in content
+    has_check_step = "pcae check --json" in content
+    has_risk_step = "pcae analytics risk --json" in content
+    configured = has_health_step and has_check_step and has_risk_step
+
+    return CiStatus(
+        workflow_exists=True,
+        workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
+        has_health_step=has_health_step,
+        has_check_step=has_check_step,
+        has_risk_step=has_risk_step,
+        overall_status="configured" if configured else "incomplete",
     )

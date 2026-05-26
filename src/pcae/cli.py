@@ -15,7 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.ci import run_ci_generate_github
+from pcae.commands.ci import run_ci_generate_github, run_ci_status
 from pcae.commands.daemon import (
     default_watch_interval_seconds,
     run_daemon,
@@ -135,6 +135,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overwrite an existing GitHub Actions workflow.",
     )
     ci_generate_github_parser.set_defaults(handler=run_ci_generate_github)
+
+    ci_status_parser = ci_subparsers.add_parser(
+        "status",
+        help="Inspect generated PCAE CI workflow configuration.",
+    )
+    ci_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON CI status output.",
+    )
+    ci_status_parser.set_defaults(handler=run_ci_status)
 
     health_parser = subparsers.add_parser(
         "health",
