@@ -13,6 +13,7 @@ from pcae.core.tasks import find_latest_active_task
 
 
 PROVENANCE_HISTORY_RELATIVE_PATH = Path(".pcae") / "provenance-history.json"
+PROVENANCE_EXPORTS_RELATIVE_PATH = Path(".pcae") / "provenance-exports"
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,12 @@ class ProvenanceEvent:
             git_branch=_optional_str(data.get("git_branch")),
             summary=_str(data.get("summary")),
         )
+
+
+@dataclass(frozen=True)
+class ProvenanceExportBundle:
+    relative_path: Path
+    data: dict
 
 
 @dataclass(frozen=True)
@@ -138,6 +145,40 @@ def read_provenance_history(root: HarnessPath) -> ProvenanceHistory:
         relative_path=PROVENANCE_HISTORY_RELATIVE_PATH,
         events=events,
     )
+
+
+def write_provenance_export(
+    root: HarnessPath,
+    exported_at: datetime | None = None,
+) -> ProvenanceExportBundle:
+    timestamp = exported_at or datetime.now(timezone.utc)
+    data = build_provenance_export_data(root, timestamp)
+    relative_path = PROVENANCE_EXPORTS_RELATIVE_PATH / (
+        f"provenance-export-{timestamp.strftime('%Y%m%d-%H%M%S')}.json"
+    )
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as file:
+        json.dump(data, file, indent=2, sort_keys=True)
+        file.write("\n")
+    return ProvenanceExportBundle(relative_path=relative_path, data=data)
+
+
+def build_provenance_export_data(root: HarnessPath, timestamp: datetime) -> dict:
+    events = _read_raw_events(root)
+    active_task_obj = find_latest_active_task(root)
+    active_task = (
+        {"id": active_task_obj.task_id, "title": active_task_obj.title}
+        if active_task_obj is not None
+        else None
+    )
+    return {
+        "active_task": active_task,
+        "event_count": len(events),
+        "events": list(events),
+        "exported_at": timestamp.isoformat(),
+        "git_branch": _safe_git_branch(root),
+    }
 
 
 def _read_raw_events(root: HarnessPath) -> tuple[dict, ...]:

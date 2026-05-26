@@ -9,6 +9,7 @@ from pcae.core.provenance import (
     append_provenance_event,
     read_provenance_history,
     read_provenance_status,
+    write_provenance_export,
 )
 
 
@@ -28,6 +29,31 @@ def run_provenance_status(args: argparse.Namespace) -> int:
         print("File: absent")
         print("Event count: 0")
         print("Latest event: none")
+    return 0
+
+
+def run_provenance_export(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    bundle = write_provenance_export(root)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "active_task": bundle.data["active_task"],
+                    "event_count": bundle.data["event_count"],
+                    "exported_at": bundle.data["exported_at"],
+                    "git_branch": bundle.data["git_branch"],
+                    "path": bundle.relative_path.as_posix(),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    print(f"Wrote provenance export: {bundle.relative_path.as_posix()}")
+    print(f"Event count: {bundle.data['event_count']}")
     return 0
 
 

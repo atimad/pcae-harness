@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 
 from pcae.cli import main
 from pcae.core.provenance import (
+    PROVENANCE_EXPORTS_RELATIVE_PATH,
     PROVENANCE_HISTORY_RELATIVE_PATH,
     append_provenance_event,
     read_provenance_history,
     read_provenance_status,
+    write_provenance_export,
 )
 from pcae.core.paths import HarnessPath
 
@@ -306,3 +310,127 @@ def test_provenance_record_requires_summary(
     with pytest.raises(SystemExit) as exc_info:
         main(["provenance", "record", "--event-type", "test"])
     assert exc_info.value.code != 0
+
+
+# ---------------------------------------------------------------------------
+# provenance export command
+# ---------------------------------------------------------------------------
+
+
+def test_provenance_export_command_creates_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    append_provenance_event(HarnessPath(tmp_path), "test", "an event")
+
+    exit_code = main(["provenance", "export"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Wrote provenance export: .pcae/provenance-exports/provenance-export-" in output
+    assert "Event count: 1" in output
+    exports = list((tmp_path / ".pcae" / "provenance-exports").glob("*.json"))
+    assert len(exports) == 1
+
+
+def test_provenance_export_with_no_history_exports_empty_events(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "export"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Event count: 0" in output
+    exports = list((tmp_path / ".pcae" / "provenance-exports").glob("*.json"))
+    assert len(exports) == 1
+    data = json.loads(exports[0].read_text(encoding="utf-8"))
+    assert data["events"] == []
+    assert data["event_count"] == 0
+
+
+def test_provenance_export_json_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    append_provenance_event(HarnessPath(tmp_path), "phase_completed", "done")
+
+    exit_code = main(["provenance", "export", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["event_count"] == 1
+    assert "exported_at" in parsed
+    assert "path" in parsed
+    assert parsed["path"].startswith(".pcae/provenance-exports/provenance-export-")
+    assert "active_task" in parsed
+    assert "git_branch" in parsed
+
+
+def test_provenance_export_bundle_contains_required_keys(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "first")
+    append_provenance_event(root, "b", "second")
+
+    bundle = write_provenance_export(root)
+
+    assert set(bundle.data) == {"active_task", "event_count", "events", "exported_at", "git_branch"}
+    assert bundle.data["event_count"] == 2
+    assert len(bundle.data["events"]) == 2
+    assert isinstance(bundle.data["exported_at"], str)
+
+
+def test_provenance_export_deterministic_filename(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    fixed_time = datetime(2026, 5, 26, 14, 30, 45, tzinfo=timezone.utc)
+
+    bundle = write_provenance_export(root, exported_at=fixed_time)
+
+    assert bundle.relative_path.as_posix() == (
+        ".pcae/provenance-exports/provenance-export-20260526-143045.json"
+    )
+    assert bundle.data["exported_at"] == "2026-05-26T14:30:45+00:00"
+    assert (tmp_path / bundle.relative_path).is_file()
+
+
+def test_provenance_export_artifact_is_gitignored(
+    tmp_path: Path, monkeypatch
+) -> None:
+    init_git_repo(tmp_path)
+    pcae_gitignore = tmp_path / ".pcae" / ".gitignore"
+    pcae_gitignore.parent.mkdir(parents=True, exist_ok=True)
+    pcae_gitignore.write_text(
+        "session.json\narchitecture-history.json\nagent-lock.json\n"
+        "provenance-history.json\nprovenance-exports/\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    bundle = write_provenance_export(root)
+
+    ignored = subprocess.run(
+        ["git", "check-ignore", bundle.relative_path.as_posix()],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert ignored.returncode == 0
+
+
+def init_git_repo(root: Path) -> None:
+    subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root, check=True, capture_output=True, text=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=root, check=True, capture_output=True, text=True,
+    )

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31C: Automatic provenance logging for agent lifecycle.
+Phase 31D: Provenance export.
 
 ## Current State
 

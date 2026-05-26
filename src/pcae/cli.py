@@ -29,6 +29,7 @@ from pcae.commands.daemon import (
 )
 from pcae.commands.docs import run_docs_architecture, run_docs_commands, run_docs_glossary
 from pcae.commands.provenance import (
+    run_provenance_export,
     run_provenance_history,
     run_provenance_record,
     run_provenance_status,
@@ -783,6 +784,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON provenance history output.",
     )
     provenance_history_parser.set_defaults(handler=run_provenance_history)
+
+    provenance_export_parser = provenance_subparsers.add_parser(
+        "export",
+        help="Export provenance history to a portable JSON bundle.",
+    )
+    provenance_export_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON export result.",
+    )
+    provenance_export_parser.set_defaults(handler=run_provenance_export)
 
     provenance_record_parser = provenance_subparsers.add_parser(
         "record",

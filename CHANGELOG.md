@@ -91,3 +91,4 @@
 - Added `append_provenance_event` helper for durable provenance event writes.
 - Added `pcae provenance record --event-type TEXT --summary TEXT` for manual provenance event appending.
 - Automatic provenance events recorded on successful `pcae agent acquire` (agent_acquired) and `pcae agent release` (agent_released).
+- Added `pcae provenance export` and `pcae provenance export --json` for portable provenance history bundles written to `.pcae/provenance-exports/`.
