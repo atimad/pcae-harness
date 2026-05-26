@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add CI repair apply.
+Add command reference generation.
 
 ## Allowed Files
 
@@ -27,6 +27,8 @@ Add CI repair apply.
 - src/pcae/core/**
 - src/pcae/commands/**
 - tests/**
+- docs
+- docs/**
 - PROJECT_STATUS.md
 - tasks/**
 - CHANGELOG.md

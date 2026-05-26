@@ -27,6 +27,7 @@ from pcae.commands.daemon import (
     run_daemon_status,
     run_daemon_watch,
 )
+from pcae.commands.docs import run_docs_commands
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -183,6 +184,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Apply CI repair actions by writing the generated workflow.",
     )
     ci_repair_parser.set_defaults(handler=run_ci_repair)
+
+    docs_parser = subparsers.add_parser(
+        "docs",
+        help="Generate PCAE documentation artifacts.",
+    )
+    docs_subparsers = docs_parser.add_subparsers(
+        dest="docs_command",
+        required=True,
+    )
+    docs_commands_parser = docs_subparsers.add_parser(
+        "commands",
+        help="Generate the PCAE command reference.",
+    )
+    docs_commands_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the command reference without writing it.",
+    )
+    docs_commands_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing command reference.",
+    )
+    docs_commands_parser.set_defaults(handler=run_docs_commands)
 
     health_parser = subparsers.add_parser(
         "health",
