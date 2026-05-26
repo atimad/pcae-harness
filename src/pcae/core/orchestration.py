@@ -26,3 +26,37 @@ def load_agent_registry(root: HarnessPath) -> tuple[AgentRegistryEntry, ...]:
 def build_agent_registry_data(root: HarnessPath) -> list[dict]:
     registry = load_agent_registry(root)
     return [entry.to_dict() for entry in registry]
+
+
+def recommend_agent(root: HarnessPath, work_type: str) -> dict:
+    policy = load_policy(root)
+    if not policy.valid:
+        raise ValueError(policy.error or "Invalid policy.")
+    registry = policy.agent_registry
+    orchestration = policy.orchestration
+
+    matches = [entry for entry in registry if work_type in entry.roles]
+
+    if not matches:
+        return {
+            "work_type": work_type,
+            "recommended_agent": orchestration.default_agent,
+            "reason": f"No agent declares role '{work_type}'; using orchestration default.",
+            "matched_role": None,
+            "fallback_used": True,
+        }
+
+    chosen = matches[0]
+    if len(matches) > 1:
+        for entry in matches:
+            if entry.agent_id == orchestration.default_agent:
+                chosen = entry
+                break
+
+    return {
+        "work_type": work_type,
+        "recommended_agent": chosen.agent_id,
+        "reason": f"Agent '{chosen.agent_id}' declares role '{work_type}'.",
+        "matched_role": work_type,
+        "fallback_used": False,
+    }

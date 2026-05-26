@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 33B: Agent capability registry.
+Phase 33C: Orchestration agent recommendation.
 
 ## Governance Coherence Note
 
@@ -63,7 +63,10 @@ for `default_agent`, `documentation_agent`, `runtime_agent`, and
 `pcae orchestration agents` and `pcae orchestration agents --json`, including
 configurable `[agents.<id>]` sections in `.pcae/policy.toml` with `kind` and
 `roles` fields, defaulting to `claude-local`, `codex-local`, and `pcae-native`
-when no agent sections are configured.
+when no agent sections are configured, and recommend the best governed agent for
+a work type with `pcae orchestration recommend --work-type TEXT` and
+`pcae orchestration recommend --work-type TEXT --json`, matching the work type
+against declared agent roles with deterministic fallback to `default_agent`.
 
 ## Next
 

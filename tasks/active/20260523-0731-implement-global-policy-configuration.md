@@ -37,6 +37,7 @@ Add architecture overview generation.
 - .githooks/pre-commit
 - .github
 - .github/workflows/**
+- .gitignore
 
 ## Forbidden Files
 

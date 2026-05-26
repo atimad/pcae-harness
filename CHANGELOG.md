@@ -127,3 +127,7 @@
 - Added `load_agent_registry` and `build_agent_registry_data` helpers in `src/pcae/core/orchestration.py`.
 - Added `pcae orchestration agents` and `pcae orchestration agents --json` to list registered agents with kind and roles.
 - Added `[agents.*]` sections to `.pcae/policy.toml` for the three default agents.
+- Added `recommend_agent` helper in `src/pcae/core/orchestration.py` to match a work type against agent roles and return the best governed agent.
+- Added `pcae orchestration recommend --work-type TEXT` to recommend an agent for a given work type, with role-based matching and deterministic fallback to `default_agent`.
+- Added `pcae orchestration recommend --work-type TEXT --json` for machine-readable recommendation output including `work_type`, `recommended_agent`, `reason`, `matched_role`, and `fallback_used`.
+- Added standard Python bytecode patterns (`__pycache__/`, `*.py[cod]`) to `.gitignore` to prevent governance false positives from installed package artifacts.

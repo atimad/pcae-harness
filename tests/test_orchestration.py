@@ -11,6 +11,7 @@ from pcae.core.orchestration import (
     build_orchestration_data,
     load_agent_registry,
     load_orchestration_policy,
+    recommend_agent,
 )
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import (
@@ -319,6 +320,175 @@ def test_cli_orchestration_agents_no_file_uses_defaults(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "claude-local" in output
+
+
+# ---------------------------------------------------------------------------
+# core: recommend_agent
+# ---------------------------------------------------------------------------
+
+
+def test_recommend_agent_documentation_returns_claude_local(tmp_path: Path) -> None:
+    result = recommend_agent(HarnessPath(tmp_path), "documentation")
+    assert result["recommended_agent"] == "claude-local"
+    assert result["work_type"] == "documentation"
+    assert result["matched_role"] == "documentation"
+    assert result["fallback_used"] is False
+
+
+def test_recommend_agent_implementation_returns_codex_local(tmp_path: Path) -> None:
+    result = recommend_agent(HarnessPath(tmp_path), "implementation")
+    assert result["recommended_agent"] == "codex-local"
+    assert result["matched_role"] == "implementation"
+    assert result["fallback_used"] is False
+
+
+def test_recommend_agent_validation_returns_pcae_native(tmp_path: Path) -> None:
+    result = recommend_agent(HarnessPath(tmp_path), "validation")
+    assert result["recommended_agent"] == "pcae-native"
+    assert result["matched_role"] == "validation"
+    assert result["fallback_used"] is False
+
+
+def test_recommend_agent_unknown_falls_back_to_default(tmp_path: Path) -> None:
+    result = recommend_agent(HarnessPath(tmp_path), "unknown-work-type")
+    assert result["recommended_agent"] == "claude-local"
+    assert result["matched_role"] is None
+    assert result["fallback_used"] is True
+    assert "unknown-work-type" in result["reason"]
+
+
+def test_recommend_agent_result_keys(tmp_path: Path) -> None:
+    result = recommend_agent(HarnessPath(tmp_path), "architecture")
+    assert set(result.keys()) == {
+        "work_type",
+        "recommended_agent",
+        "reason",
+        "matched_role",
+        "fallback_used",
+    }
+
+
+def test_recommend_agent_multiple_matches_prefers_default_agent(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[orchestration]\ndefault_agent = "agent-b"\n'
+        + '\n[agents.agent-a]\nkind = "ka"\nroles = ["shared-role"]\n'
+        + '\n[agents.agent-b]\nkind = "kb"\nroles = ["shared-role"]\n',
+    )
+    result = recommend_agent(HarnessPath(tmp_path), "shared-role")
+    assert result["recommended_agent"] == "agent-b"
+    assert result["fallback_used"] is False
+
+
+def test_recommend_agent_multiple_matches_first_when_default_not_matching(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[orchestration]\ndefault_agent = "agent-c"\n'
+        + '\n[agents.agent-a]\nkind = "ka"\nroles = ["shared-role"]\n'
+        + '\n[agents.agent-b]\nkind = "kb"\nroles = ["shared-role"]\n',
+    )
+    result = recommend_agent(HarnessPath(tmp_path), "shared-role")
+    assert result["recommended_agent"] == "agent-a"
+    assert result["fallback_used"] is False
+
+
+def test_recommend_agent_raises_on_invalid_policy(tmp_path: Path) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    with pytest.raises(ValueError):
+        recommend_agent(HarnessPath(tmp_path), "documentation")
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration recommend
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_recommend_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Work type: documentation" in output
+    assert "claude-local" in output
+    assert "Reason:" in output
+
+
+def test_cli_orchestration_recommend_human_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "codex-local" in output
+
+
+def test_cli_orchestration_recommend_human_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "validation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "pcae-native" in output
+
+
+def test_cli_orchestration_recommend_human_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "no-such-role"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "claude-local" in output
+
+
+def test_cli_orchestration_recommend_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {
+        "work_type",
+        "recommended_agent",
+        "reason",
+        "matched_role",
+        "fallback_used",
+    }
+    assert data["recommended_agent"] == "claude-local"
+    assert data["matched_role"] == "documentation"
+    assert data["fallback_used"] is False
+
+
+def test_cli_orchestration_recommend_json_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "unknown", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["fallback_used"] is True
+    assert data["matched_role"] is None
+    assert data["recommended_agent"] == "claude-local"
+
+
+def test_cli_orchestration_recommend_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "recommend", "--work-type", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
 
 
 # ---------------------------------------------------------------------------
