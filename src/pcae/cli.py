@@ -15,6 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
+from pcae.commands.ci import run_ci_generate_github
 from pcae.commands.daemon import (
     default_watch_interval_seconds,
     run_daemon,
@@ -102,6 +103,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON check output.",
     )
     check_parser.set_defaults(handler=run_check)
+
+    ci_parser = subparsers.add_parser(
+        "ci",
+        help="Generate CI governance templates.",
+    )
+    ci_subparsers = ci_parser.add_subparsers(
+        dest="ci_command",
+        required=True,
+    )
+    ci_generate_parser = ci_subparsers.add_parser(
+        "generate",
+        help="Generate CI governance workflow files.",
+    )
+    ci_generate_subparsers = ci_generate_parser.add_subparsers(
+        dest="ci_generate_target",
+        required=True,
+    )
+    ci_generate_github_parser = ci_generate_subparsers.add_parser(
+        "github",
+        help="Generate a GitHub Actions PCAE governance workflow.",
+    )
+    ci_generate_github_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the GitHub Actions workflow without writing it.",
+    )
+    ci_generate_github_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing GitHub Actions workflow.",
+    )
+    ci_generate_github_parser.set_defaults(handler=run_ci_generate_github)
 
     health_parser = subparsers.add_parser(
         "health",

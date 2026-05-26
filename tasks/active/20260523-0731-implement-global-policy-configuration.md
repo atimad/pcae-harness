@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add policy-driven daemon watch interval.
+Add GitHub Actions CI template generation.
 
 ## Allowed Files
 
@@ -33,6 +33,8 @@ Add policy-driven daemon watch interval.
 - *.md
 - .pcae/**
 - .githooks/pre-commit
+- .github
+- .github/workflows/**
 
 ## Forbidden Files
 

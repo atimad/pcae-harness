@@ -90,3 +90,4 @@
 - Added `pcae daemon status` and `pcae daemon status --json` for daemon capability introspection.
 - Added `pcae daemon watch --dry-run` and JSON output for future watch mode planning.
 - Added policy-driven daemon watch intervals under `[daemon].watch_interval_seconds`.
+- Added `pcae ci generate github` for GitHub Actions PCAE governance workflow generation.
