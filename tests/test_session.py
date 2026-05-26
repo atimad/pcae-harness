@@ -541,6 +541,253 @@ def test_session_start_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None
     assert after == before
 
 
+# ---------------------------------------------------------------------------
+# pcae session bootstrap
+# ---------------------------------------------------------------------------
+
+
+def test_session_bootstrap_acquires_agent_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import read_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Bootstrap task",
+    )
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    lock = read_agent_lock(HarnessPath(tmp_path))
+    assert lock is not None
+    assert lock.agent_id == "claude-local"
+
+
+def test_session_bootstrap_records_agent_acquired_provenance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.provenance import read_provenance_history
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap provenance task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    capsys.readouterr()
+    history = read_provenance_history(HarnessPath(tmp_path))
+    assert any(e.event_type == "agent_acquired" for e in history.events)
+    acquired = next(e for e in history.events if e.event_type == "agent_acquired")
+    assert acquired.agent_id == "claude-local"
+
+
+def test_session_bootstrap_runs_governance_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap validation task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Health: healthy" in output
+    assert "Check: passed" in output
+
+
+def test_session_bootstrap_shows_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap active task test")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Active task:" in output
+    assert "Title: Bootstrap active task test" in output
+
+
+def test_session_bootstrap_shows_current_session(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap session task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Current session:" in output
+    assert "(active)" in output
+
+
+def test_session_bootstrap_shows_provenance_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap provenance summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Provenance events: 1" in output
+    assert "Latest event: Agent lock acquired by claude-local" in output
+
+
+def test_session_bootstrap_prints_ready_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap ready task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Ready: yes" in output
+
+
+def test_session_bootstrap_fails_when_lock_already_held(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "other-agent")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Agent lock already held by other-agent." in output
+
+
+def test_session_bootstrap_ready_false_when_check_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    # No active task contract → check fails
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Health: unhealthy" in output
+    assert "Check: failed" in output
+    assert "Ready: no" in output
+
+
+def test_session_bootstrap_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["agent_id"] == "claude-local"
+    assert data["health_status"] in {"healthy", "unhealthy"}
+    assert data["check_status"] in {"passed", "failed"}
+    assert data["ready"] is True
+    assert isinstance(data["provenance_event_count"], int)
+    assert data["current_session"] is not None
+    assert data["current_session"]["active"] is True
+    assert data["latest_event"] is not None
+    assert data["latest_event"]["event_type"] == "agent_acquired"
+    assert set(data.keys()) == {
+        "active_task",
+        "agent_id",
+        "check_status",
+        "current_session",
+        "health_status",
+        "latest_event",
+        "provenance_event_count",
+        "ready",
+    }
+
+
+def test_session_bootstrap_json_ready_false_when_check_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    # No task → check fails
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    data = json.loads(output)
+    assert data["ready"] is False
+    assert data["check_status"] == "failed"
+    assert data["health_status"] == "unhealthy"
+
+
+# ---------------------------------------------------------------------------
+# bootstrap helpers
+# ---------------------------------------------------------------------------
+
+
+def patch_task_allowed_files(root: Path) -> None:
+    task_dir = root / "tasks" / "active"
+    for task_file in task_dir.glob("*.md"):
+        content = task_file.read_text(encoding="utf-8")
+        task_file.write_text(
+            content.replace(
+                "## Allowed Files\n\n- TBD",
+                "## Allowed Files\n\n- .pcae/**",
+            ),
+            encoding="utf-8",
+        )
+
+
 def init_git_repo(root: Path) -> None:
     run_git(root, "init")
     run_git(root, "config", "user.email", "test@example.com")

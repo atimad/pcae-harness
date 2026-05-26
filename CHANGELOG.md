@@ -100,3 +100,5 @@
 - Added `pcae phase start --agent-id TEXT` to validate governance state, acquire the agent lock, and report active task and provenance timeline.
 - Added `pcae phase handoff --summary TEXT --next-agent TEXT` to record phase completion, run governance validation (health and check), release the current agent lock, acquire the next agent's lock, and print a governed handoff summary with restart commands.
 - Added `pcae phase handoff --json` for machine-readable handoff output including summary, released_agent, next_agent, health_status, check_status, and provenance_event_count.
+- Added `pcae session bootstrap --agent-id TEXT` to acquire the agent lock, run governance validation, and display active task, current provenance session, timeline summary, and ready status for fresh governed session initialization.
+- Added `pcae session bootstrap --json` for machine-readable bootstrap output including agent_id, health_status, check_status, active_task, current_session, provenance_event_count, latest_event, and ready.

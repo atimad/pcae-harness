@@ -56,6 +56,7 @@ from pcae.commands.inspect import run_inspect
 from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.session import (
+    run_session_bootstrap,
     run_session_end,
     run_session_read,
     run_session_start,
@@ -762,6 +763,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Finalize the current engineering session.",
     )
     session_end_parser.set_defaults(handler=run_session_end)
+
+    session_bootstrap_parser = session_subparsers.add_parser(
+        "bootstrap",
+        help="Acquire agent lock and initialize a fresh governed session.",
+    )
+    session_bootstrap_parser.add_argument(
+        "--agent-id",
+        required=True,
+        help="Agent identifier to acquire the lock for.",
+    )
+    session_bootstrap_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON bootstrap result.",
+    )
+    session_bootstrap_parser.set_defaults(handler=run_session_bootstrap)
 
     provenance_parser = subparsers.add_parser(
         "provenance",

@@ -1,14 +1,25 @@
 from __future__ import annotations
 
 import argparse
+import json
 from typing import Any
 
+from pcae.core.agent import acquire_agent_lock
 from pcae.core.architecture import (
     read_architecture_history_summary,
     write_architecture_history_snapshot,
 )
 from pcae.core.check import run_checks
+from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.provenance import (
+    ProvenanceEvent,
+    ProvenanceSession,
+    append_provenance_event,
+    build_provenance_sessions,
+    build_provenance_timeline,
+    find_active_session,
+)
 from pcae.core.session import (
     SessionUpdate,
     read_session_snapshot,
@@ -69,6 +80,104 @@ def run_session_end(args: argparse.Namespace) -> int:
     print("Session end complete.")
     print_session_end_summary(session_snapshot.data, len(architecture_snapshot.entries))
     return 0
+
+
+def run_session_bootstrap(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+
+    try:
+        lock = acquire_agent_lock(root, args.agent_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    append_provenance_event(
+        root,
+        "agent_acquired",
+        f"Agent lock acquired by {args.agent_id}",
+        agent_id=args.agent_id,
+    )
+
+    health_data = build_health_data(root)
+    health_status: str = health_data["overall_status"]
+    check_passed = health_status == "healthy"
+
+    active_task = lock.data.get("active_task")
+    if not isinstance(active_task, dict):
+        active_task = None
+
+    sessions = build_provenance_sessions(root)
+    current_session = find_active_session(sessions)
+    timeline = build_provenance_timeline(root)
+    latest_event = timeline.latest_event
+    ready = check_passed
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "active_task": active_task,
+                    "agent_id": args.agent_id,
+                    "check_status": "passed" if check_passed else "failed",
+                    "current_session": _session_summary(current_session),
+                    "health_status": health_status,
+                    "latest_event": _event_summary(latest_event),
+                    "provenance_event_count": timeline.event_count,
+                    "ready": ready,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0 if ready else 1
+
+    print("Session bootstrap.")
+    print(f"Agent: {args.agent_id}")
+    print(f"Health: {health_status}")
+    print(f"Check: {'passed' if check_passed else 'failed'}")
+    for v in health_data["violations"]:
+        print(f"  - {v}")
+    if active_task is None:
+        print("Active task: none")
+    else:
+        print(f"Active task: {active_task.get('id', 'unknown')}")
+        print(f"Title: {active_task.get('title', 'Untitled task')}")
+    if current_session is None:
+        print("Current session: none")
+    else:
+        status = "active" if current_session.active else "closed"
+        print(f"Current session: {current_session.session_id} ({status})")
+    print(f"Provenance events: {timeline.event_count}")
+    if latest_event is not None:
+        print(f"Latest event: {latest_event.summary}")
+    else:
+        print("Latest event: none")
+    print(f"Ready: {'yes' if ready else 'no'}")
+    return 0 if ready else 1
+
+
+def _session_summary(session: ProvenanceSession | None) -> dict | None:
+    if session is None:
+        return None
+    return {
+        "active": session.active,
+        "agent_id": session.agent_id,
+        "ended_at": session.ended_at,
+        "event_count": session.event_count,
+        "session_id": session.session_id,
+        "started_at": session.started_at,
+    }
+
+
+def _event_summary(event: ProvenanceEvent | None) -> dict | None:
+    if event is None:
+        return None
+    return {
+        "agent_id": event.agent_id,
+        "event_type": event.event_type,
+        "summary": event.summary,
+        "timestamp": event.timestamp,
+    }
 
 
 def run_session_start(args: argparse.Namespace) -> int:
