@@ -397,10 +397,11 @@ def test_phase_handoff_prints_human_readable_output(
     assert "Released agent: claude-local" in output
     assert "Next agent: claude-next" in output
     assert "Agent lock: acquired by claude-next" in output
-    assert "Restart commands:" in output
-    assert "pcae health" in output
-    assert "pcae check" in output
-    assert "pcae provenance timeline" in output
+    assert "Manual handoff steps:" in output
+    assert "Close or reset the current AI session if needed." in output
+    assert "pcae session bootstrap --agent-id claude-next" in output
+    assert "Bootstrap prompt (copy-ready):" in output
+    assert "pcae session bootstrap --agent-id claude-next" in output
 
 
 def test_phase_handoff_json_output(
@@ -435,9 +436,13 @@ def test_phase_handoff_json_output(
     assert data["health_status"] in {"healthy", "unhealthy"}
     assert data["check_status"] in {"passed", "failed"}
     assert isinstance(data["provenance_event_count"], int)
+    assert isinstance(data["manual_steps"], list)
+    assert len(data["manual_steps"]) == 4
+    assert any("pcae session bootstrap --agent-id claude-next" in s for s in data["manual_steps"])
     assert set(data.keys()) == {
         "check_status",
         "health_status",
+        "manual_steps",
         "next_agent",
         "provenance_event_count",
         "released_agent",
@@ -520,6 +525,130 @@ def test_phase_handoff_check_failure_still_completes_handoff(
     lock = read_agent_lock(root)
     assert lock is not None
     assert lock.agent_id == "claude-next"
+
+
+# ---------------------------------------------------------------------------
+# Phase 32E: user-friendly handoff guidance
+# ---------------------------------------------------------------------------
+
+
+def test_phase_handoff_missing_next_agent_prints_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--summary", "Missing next agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Please specify the next agent with --next-agent <agent-id>." in output
+
+
+def test_phase_handoff_human_output_includes_manual_steps(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff steps task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Steps test", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Manual handoff steps:" in output
+    assert "1. Close or reset the current AI session if needed." in output
+    assert "2." in output
+    assert "pcae session bootstrap --agent-id claude-next" in output
+    assert "3." in output
+    assert "4." in output
+
+
+def test_phase_handoff_human_output_includes_bootstrap_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff prompt task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Prompt test", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Bootstrap prompt (copy-ready):" in output
+    assert "pcae session bootstrap --agent-id claude-next" in output
+    assert "governed engineering session" in output
+    assert "─" in output
+
+
+def test_phase_handoff_json_includes_manual_steps_with_correct_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff manual steps JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "Manual steps JSON",
+            "--next-agent", "claude-next",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    steps = data["manual_steps"]
+    assert isinstance(steps, list)
+    assert len(steps) == 4
+    assert steps[0] == "Close or reset the current AI session if needed."
+    assert "pcae session bootstrap --agent-id claude-next" in steps[1]
+    assert "bootstrap prompt" in steps[2].lower()
+    assert "phase prompt" in steps[3].lower()
+
+
+def test_phase_handoff_missing_next_agent_does_not_mutate_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.provenance import read_provenance_history
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--summary", "No mutation"])
+
+    capsys.readouterr()
+    # Lock still held, no provenance events recorded
+    from pcae.core.agent import read_agent_lock
+    assert read_agent_lock(root) is not None
+    history = read_provenance_history(root)
+    assert len(history.events) == 0
 
 
 # ---------------------------------------------------------------------------

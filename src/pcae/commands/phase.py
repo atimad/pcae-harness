@@ -23,8 +23,15 @@ def run_phase_complete(args: argparse.Namespace) -> int:
 
 
 def run_phase_handoff(args: argparse.Namespace) -> int:
+    if not args.next_agent:
+        print("Please specify the next agent with --next-agent <agent-id>.")
+        return 1
+
     root = HarnessPath.cwd()
     result = handoff_phase(root, args.summary, args.next_agent)
+
+    manual_steps = _build_manual_steps(result.next_agent)
+    bootstrap_prompt = _build_bootstrap_prompt(result.next_agent)
 
     if args.json:
         print(
@@ -32,6 +39,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                 {
                     "check_status": "passed" if result.check_passed else "failed",
                     "health_status": result.health_status,
+                    "manual_steps": manual_steps,
                     "next_agent": result.next_agent,
                     "provenance_event_count": result.provenance_event_count,
                     "released_agent": result.released_agent,
@@ -58,14 +66,37 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
         print("Agent lock: not acquired (lock already held)")
 
     print()
-    print("Restart commands:")
-    if not result.next_lock_acquired:
-        print(f"  pcae agent acquire --agent-id {result.next_agent}")
-    print("  pcae health")
-    print("  pcae check")
-    print("  pcae provenance timeline")
+    print("Manual handoff steps:")
+    for i, step in enumerate(manual_steps, 1):
+        print(f"  {i}. {step}")
+
+    print()
+    print("Bootstrap prompt (copy-ready):")
+    print("─" * 64)
+    print(bootstrap_prompt)
+    print("─" * 64)
 
     return 0 if result.next_lock_acquired else 1
+
+
+def _build_manual_steps(next_agent: str) -> list[str]:
+    return [
+        "Close or reset the current AI session if needed.",
+        f"In the control terminal, run: pcae session bootstrap --agent-id {next_agent}",
+        "In the new agent terminal, paste the governed bootstrap prompt below.",
+        "Paste the next phase prompt to continue work.",
+    ]
+
+
+def _build_bootstrap_prompt(next_agent: str) -> str:
+    return (
+        "You are resuming a governed engineering session in the PCAE harness.\n\n"
+        "To initialize your session, run:\n\n"
+        f"  pcae session bootstrap --agent-id {next_agent}\n\n"
+        "This will acquire the agent lock, validate governance state (health and\n"
+        "check), display the active task, current session, and provenance timeline,\n"
+        "and confirm the environment is ready for governed work."
+    )
 
 
 def run_phase_start(args: argparse.Namespace) -> int:

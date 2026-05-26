@@ -926,7 +926,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_handoff_parser.add_argument(
         "--next-agent",
-        required=True,
+        default=None,
         help="Agent identifier that will own the next phase session.",
     )
     phase_handoff_parser.add_argument(

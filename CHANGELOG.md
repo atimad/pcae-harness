@@ -102,3 +102,6 @@
 - Added `pcae phase handoff --json` for machine-readable handoff output including summary, released_agent, next_agent, health_status, check_status, and provenance_event_count.
 - Added `pcae session bootstrap --agent-id TEXT` to acquire the agent lock, run governance validation, and display active task, current provenance session, timeline summary, and ready status for fresh governed session initialization.
 - Added `pcae session bootstrap --json` for machine-readable bootstrap output including agent_id, health_status, check_status, active_task, current_session, provenance_event_count, latest_event, and ready.
+- Improved `pcae phase handoff` human-readable output: replaced generic restart commands with numbered manual handoff steps and a copy-ready bootstrap prompt for the next agent.
+- Added clear guidance when `--next-agent` is omitted from `pcae phase handoff`: "Please specify the next agent with --next-agent <agent-id>."
+- Added `manual_steps` list to `pcae phase handoff --json` output.
