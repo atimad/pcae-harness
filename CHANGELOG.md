@@ -116,3 +116,8 @@
 - Made `pcae session bootstrap --agent-id <id>` idempotent: if the same agent already holds the lock, bootstrap continues without re-acquiring and without duplicating provenance events.
 - Added `lock_acquired` field to `pcae session bootstrap --json` output (`true` on fresh acquire, `false` when already held).
 - Added `acquire_agent_lock_idempotent` helper in `src/pcae/core/agent.py`; raises `ValueError` if a different agent holds the lock.
+- Added `[orchestration]` section to `.pcae/policy.toml` with `default_agent`, `documentation_agent`, `runtime_agent`, and `validation_agent` fields.
+- Added `OrchestrationPolicy` dataclass and `parse_orchestration_policy` to `src/pcae/core/policy.py`; defaults apply when the section is absent.
+- Extended `Policy` and `ParsedPolicy` with an `orchestration` field; `render_default_policy` includes the `[orchestration]` section.
+- Added `pcae orchestration policy` and `pcae orchestration policy --json` to inspect the effective orchestration agent configuration.
+- Invalid empty agent values in `[orchestration]` are rejected clearly at policy load time.

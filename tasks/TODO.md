@@ -2,7 +2,7 @@
 
 ## Pending
 
-- Update `pcae docs commands` to include the `phase` and `status` command groups.
+- Update `pcae docs commands` to include the `phase`, `status`, and `orchestration` command groups.
 
 ## Future Explorations (from Phase 32C/32D/32E/32F/32G)
 

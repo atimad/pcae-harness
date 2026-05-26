@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 32H: Idempotent governed session bootstrap.
+Phase 33A: Orchestration policy engine foundation.
 
 ## Governance Coherence Note
 
@@ -55,11 +55,15 @@ PROJECT_STATUS.md for stale roadmap references with `pcae status coherence`
 and `pcae status coherence --json`, and resume a governed session idempotently
 with `pcae session bootstrap --agent-id <id>` when the same agent already
 holds the lock, showing the full governance summary without duplicating
-provenance events.
+provenance events, and inspect the effective orchestration agent policy with
+`pcae orchestration policy` and `pcae orchestration policy --json`, including
+configurable `[orchestration]` section in `.pcae/policy.toml` with defaults
+for `default_agent`, `documentation_agent`, `runtime_agent`, and
+`validation_agent`.
 
 ## Next
 
-- Update `pcae docs commands` to include the `phase` and `status` command groups.
+- Update `pcae docs commands` to include the `phase`, `status`, and `orchestration` command groups.
 
 ## Future Explorations
 

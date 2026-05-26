@@ -56,3 +56,9 @@ stale_after_seconds = 14400
 
 [daemon]
 watch_interval_seconds = 300
+
+[orchestration]
+default_agent = "claude-local"
+documentation_agent = "claude-local"
+runtime_agent = "codex-local"
+validation_agent = "pcae-native"

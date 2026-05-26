@@ -61,6 +61,33 @@ DEFAULT_ARCHITECTURE_RULES = {
 }
 DEFAULT_AGENT_STALE_AFTER_SECONDS = 14400
 DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS = 300
+DEFAULT_ORCHESTRATION_DEFAULT_AGENT = "claude-local"
+DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT = "claude-local"
+DEFAULT_ORCHESTRATION_RUNTIME_AGENT = "codex-local"
+DEFAULT_ORCHESTRATION_VALIDATION_AGENT = "pcae-native"
+
+@dataclass(frozen=True)
+class OrchestrationPolicy:
+    default_agent: str
+    documentation_agent: str
+    runtime_agent: str
+    validation_agent: str
+
+    def to_dict(self) -> dict:
+        return {
+            "default_agent": self.default_agent,
+            "documentation_agent": self.documentation_agent,
+            "runtime_agent": self.runtime_agent,
+            "validation_agent": self.validation_agent,
+        }
+
+
+DEFAULT_ORCHESTRATION_POLICY = OrchestrationPolicy(
+    default_agent=DEFAULT_ORCHESTRATION_DEFAULT_AGENT,
+    documentation_agent=DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT,
+    runtime_agent=DEFAULT_ORCHESTRATION_RUNTIME_AGENT,
+    validation_agent=DEFAULT_ORCHESTRATION_VALIDATION_AGENT,
+)
 
 ARCHITECTURE_ENFORCEMENT_ADVISORY = "advisory"
 ARCHITECTURE_ENFORCEMENT_STRICT = "strict"
@@ -78,6 +105,7 @@ class Policy:
     architecture_enforcement_mode: str
     agent_stale_after_seconds: int
     daemon_watch_interval_seconds: int
+    orchestration: OrchestrationPolicy
     source: str
     path: Path
     file_exists: bool
@@ -95,6 +123,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
+            orchestration=DEFAULT_ORCHESTRATION_POLICY,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -111,6 +140,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
+            orchestration=DEFAULT_ORCHESTRATION_POLICY,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -125,6 +155,7 @@ def load_policy(root: HarnessPath) -> Policy:
         architecture_enforcement_mode=parsed.architecture_enforcement_mode,
         agent_stale_after_seconds=parsed.agent_stale_after_seconds,
         daemon_watch_interval_seconds=parsed.daemon_watch_interval_seconds,
+        orchestration=parsed.orchestration,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -140,6 +171,7 @@ class ParsedPolicy:
     architecture_enforcement_mode: str
     agent_stale_after_seconds: int
     daemon_watch_interval_seconds: int
+    orchestration: OrchestrationPolicy
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -151,6 +183,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         architecture_enforcement_mode=parse_architecture_enforcement_mode(content),
         agent_stale_after_seconds=parse_agent_stale_after_seconds(content),
         daemon_watch_interval_seconds=parse_daemon_watch_interval_seconds(content),
+        orchestration=parse_orchestration_policy(content),
     )
 
 
@@ -485,6 +518,55 @@ def parse_daemon_watch_interval_seconds(content: str) -> int:
     return watch_interval_seconds
 
 
+_ORCHESTRATION_KEYS = frozenset(
+    {"default_agent", "documentation_agent", "runtime_agent", "validation_agent"}
+)
+
+
+def parse_orchestration_policy(content: str) -> OrchestrationPolicy:
+    lines = content.splitlines()
+    in_orchestration_section = False
+    values: dict[str, str] = {}
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_orchestration_section = stripped == "[orchestration]"
+            continue
+
+        if not in_orchestration_section:
+            continue
+
+        if "=" not in stripped:
+            continue
+
+        key, raw_value = stripped.split("=", 1)
+        key = key.strip()
+        if key not in _ORCHESTRATION_KEYS:
+            continue
+
+        values[key] = parse_string_value(
+            raw_value.strip(),
+            f"Invalid policy: orchestration.{key} must be a non-empty string.",
+        )
+
+    return OrchestrationPolicy(
+        default_agent=values.get("default_agent", DEFAULT_ORCHESTRATION_DEFAULT_AGENT),
+        documentation_agent=values.get(
+            "documentation_agent", DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT
+        ),
+        runtime_agent=values.get("runtime_agent", DEFAULT_ORCHESTRATION_RUNTIME_AGENT),
+        validation_agent=values.get(
+            "validation_agent", DEFAULT_ORCHESTRATION_VALIDATION_AGENT
+        ),
+    )
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -588,6 +670,12 @@ stale_after_seconds = {DEFAULT_AGENT_STALE_AFTER_SECONDS}
 
 [daemon]
 watch_interval_seconds = {DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS}
+
+[orchestration]
+default_agent = "{DEFAULT_ORCHESTRATION_DEFAULT_AGENT}"
+documentation_agent = "{DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT}"
+runtime_agent = "{DEFAULT_ORCHESTRATION_RUNTIME_AGENT}"
+validation_agent = "{DEFAULT_ORCHESTRATION_VALIDATION_AGENT}"
 """
 
 

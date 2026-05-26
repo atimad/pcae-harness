@@ -104,3 +104,6 @@
 - Made `pcae session bootstrap` idempotent: same agent already holding the lock continues bootstrap showing full governance summary.
 - Added `lock_acquired` field to bootstrap JSON output.
 - Added `acquire_agent_lock_idempotent` in `src/pcae/core/agent.py`.
+- Added `[orchestration]` section to `.pcae/policy.toml` with agent role fields.
+- Added `OrchestrationPolicy` and `parse_orchestration_policy` to `src/pcae/core/policy.py`.
+- Added `pcae orchestration policy` and `pcae orchestration policy --json`.

@@ -665,6 +665,81 @@ def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> 
     assert policy.daemon_watch_interval_seconds == DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
 
 
+# ---------------------------------------------------------------------------
+# orchestration policy parsing
+# ---------------------------------------------------------------------------
+
+
+def test_policy_orchestration_defaults_when_section_missing(tmp_path: Path) -> None:
+    from pcae.core.policy import (
+        DEFAULT_ORCHESTRATION_DEFAULT_AGENT,
+        DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT,
+        DEFAULT_ORCHESTRATION_RUNTIME_AGENT,
+        DEFAULT_ORCHESTRATION_VALIDATION_AGENT,
+    )
+
+    write_policy(tmp_path, '[protected]\npatterns = [".env"]\n')
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.orchestration.default_agent == DEFAULT_ORCHESTRATION_DEFAULT_AGENT
+    assert policy.orchestration.documentation_agent == DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT
+    assert policy.orchestration.runtime_agent == DEFAULT_ORCHESTRATION_RUNTIME_AGENT
+    assert policy.orchestration.validation_agent == DEFAULT_ORCHESTRATION_VALIDATION_AGENT
+
+
+def test_policy_orchestration_reads_overrides(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[orchestration]\ndefault_agent = "opus"\nruntime_agent = "codex-turbo"\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.orchestration.default_agent == "opus"
+    assert policy.orchestration.runtime_agent == "codex-turbo"
+
+
+def test_policy_orchestration_rejects_empty_agent_string(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[orchestration]\ndefault_agent = ""\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error is not None
+    assert "orchestration.default_agent" in policy.error
+
+
+def test_policy_orchestration_rejects_non_string_agent(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[orchestration]\ndefault_agent = 42\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+
+
+def test_rendered_default_policy_includes_orchestration_section(tmp_path: Path) -> None:
+    from pcae.core.policy import (
+        DEFAULT_ORCHESTRATION_DEFAULT_AGENT,
+        DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT,
+        DEFAULT_ORCHESTRATION_RUNTIME_AGENT,
+        DEFAULT_ORCHESTRATION_VALIDATION_AGENT,
+    )
+
+    write_policy(tmp_path, render_default_policy())
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.orchestration.default_agent == DEFAULT_ORCHESTRATION_DEFAULT_AGENT
+    assert policy.orchestration.documentation_agent == DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT
+    assert policy.orchestration.runtime_agent == DEFAULT_ORCHESTRATION_RUNTIME_AGENT
+    assert policy.orchestration.validation_agent == DEFAULT_ORCHESTRATION_VALIDATION_AGENT
+
+
 def write_policy(root: Path, content: str) -> None:
     policy_file = root / ".pcae" / "policy.toml"
     policy_file.parent.mkdir(parents=True, exist_ok=True)
