@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add daemon status introspection.
+Add daemon watch dry-run plan.
 
 ## Allowed Files
 

@@ -4,8 +4,11 @@ import argparse
 import json
 
 from pcae.core.daemon import (
+    DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
     DaemonDryRunResult,
     DaemonStatus,
+    DaemonWatchPlan,
+    build_daemon_watch_plan,
     daemon_status,
     run_daemon_dry_run_cycle,
 )
@@ -33,6 +36,24 @@ def run_daemon_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_daemon_watch(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("Daemon watch is only available with --dry-run in this phase.")
+        return 1
+
+    try:
+        plan = build_daemon_watch_plan(args.interval_seconds)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(daemon_watch_json_data(plan), indent=2, sort_keys=True))
+    else:
+        print_daemon_watch_plan(plan)
+    return 0
+
+
 def print_daemon_dry_run(result: DaemonDryRunResult) -> None:
     print("PCAE daemon")
     print("Mode: dry-run")
@@ -56,6 +77,16 @@ def print_daemon_status(status: DaemonStatus) -> None:
         print(f"  {index}. {check}")
 
 
+def print_daemon_watch_plan(plan: DaemonWatchPlan) -> None:
+    print("PCAE daemon watch")
+    print("Mode: dry-run")
+    print(f"Interval seconds: {plan.interval_seconds}")
+    print(f"Would repeat continuously: {format_bool(plan.would_repeat_continuously)}")
+    print(f"Planned checks: {len(plan.planned_checks)}")
+    for index, check in enumerate(plan.planned_checks, start=1):
+        print(f"  {index}. {check}")
+
+
 def daemon_json_data(result: DaemonDryRunResult) -> dict[str, object]:
     return {
         "cycle_count": result.cycle_count,
@@ -69,6 +100,16 @@ def daemon_json_data(result: DaemonDryRunResult) -> dict[str, object]:
             }
             for step in result.steps
         ],
+    }
+
+
+def daemon_watch_json_data(plan: DaemonWatchPlan) -> dict[str, object]:
+    return {
+        "interval_seconds": plan.interval_seconds,
+        "mode": plan.mode,
+        "planned_checks": list(plan.planned_checks),
+        "planned_checks_count": len(plan.planned_checks),
+        "would_repeat_continuously": plan.would_repeat_continuously,
     }
 
 
@@ -86,3 +127,7 @@ def daemon_status_json_data(status: DaemonStatus) -> dict[str, object]:
 
 def format_bool(value: bool) -> str:
     return "true" if value else "false"
+
+
+def default_watch_interval_seconds() -> int:
+    return DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS

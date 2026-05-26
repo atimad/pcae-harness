@@ -15,7 +15,12 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.daemon import run_daemon, run_daemon_status
+from pcae.commands.daemon import (
+    default_watch_interval_seconds,
+    run_daemon,
+    run_daemon_status,
+    run_daemon_watch,
+)
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -143,6 +148,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON daemon status output.",
     )
     daemon_status_parser.set_defaults(handler=run_daemon_status)
+
+    daemon_watch_parser = daemon_subparsers.add_parser(
+        "watch",
+        help="Preview future daemon watch behavior.",
+    )
+    daemon_watch_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview daemon watch behavior without looping or writing files.",
+    )
+    daemon_watch_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON daemon watch dry-run output.",
+    )
+    daemon_watch_parser.add_argument(
+        "--interval-seconds",
+        type=int,
+        default=default_watch_interval_seconds(),
+        help="Preview watch interval in seconds.",
+    )
+    daemon_watch_parser.set_defaults(handler=run_daemon_watch)
 
     agent_parser = subparsers.add_parser(
         "agent",
