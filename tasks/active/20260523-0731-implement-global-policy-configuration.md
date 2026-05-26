@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add CI repair dry-run.
+Add CI repair apply.
 
 ## Allowed Files
 

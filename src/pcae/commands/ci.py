@@ -8,6 +8,7 @@ from pcae.core.ci import (
     CiRepairPlan,
     CiStatus,
     GITHUB_WORKFLOW_RELATIVE_PATH,
+    apply_github_actions_repair,
     detect_github_actions_drift,
     generate_github_actions_workflow,
     inspect_github_actions_workflow,
@@ -59,15 +60,25 @@ def run_ci_drift(args: argparse.Namespace) -> int:
 
 
 def run_ci_repair(args: argparse.Namespace) -> int:
-    if not args.dry_run:
-        print("CI repair is only available with --dry-run in this phase.")
+    if args.dry_run and args.force:
+        print("Use either --dry-run or --force, not both.")
+        return 1
+    if not args.dry_run and not args.force:
+        print("CI repair requires --dry-run or --force.")
         return 1
 
-    plan = plan_github_actions_repair(HarnessPath.cwd())
+    plan = (
+        plan_github_actions_repair(HarnessPath.cwd())
+        if args.dry_run
+        else apply_github_actions_repair(HarnessPath.cwd())
+    )
     if args.json:
         print(json.dumps(ci_repair_json_data(plan), indent=2, sort_keys=True))
     else:
-        print_ci_repair_plan(plan)
+        if args.dry_run:
+            print_ci_repair_plan(plan)
+        else:
+            print_ci_repair_result(plan)
     return 0
 
 
@@ -99,6 +110,22 @@ def print_ci_repair_plan(plan: CiRepairPlan) -> None:
     print(f"Repair needed: {format_bool(plan.repair_needed)}")
     print(f"Action: {plan.action}")
     print(f"Reason: {plan.reason}")
+
+
+def print_ci_repair_result(plan: CiRepairPlan) -> None:
+    print("PCAE CI repair")
+    print(f"Workflow path: {plan.workflow_path.as_posix()}")
+    if not plan.repair_needed:
+        print("No repair needed.")
+        return
+    if plan.action == "create":
+        print("Created workflow.")
+        return
+    if plan.action == "overwrite":
+        print("Overwritten workflow.")
+        print(f"Reason: {plan.reason}")
+        return
+    print(f"Action: {plan.action}")
 
 
 def ci_status_json_data(status: CiStatus) -> dict[str, object]:

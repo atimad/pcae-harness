@@ -268,7 +268,7 @@ def test_ci_repair_without_dry_run_fails(capsys) -> None:
 
     output = capsys.readouterr().out
     assert exit_code == 1
-    assert "CI repair is only available with --dry-run in this phase." in output
+    assert "CI repair requires --dry-run or --force." in output
 
 
 def test_ci_repair_dry_run_reports_no_repair_needed(
@@ -345,6 +345,86 @@ def test_ci_repair_dry_run_json_reports_create_for_missing_workflow(
         "reason": "workflow file missing",
         "repair_needed": True,
         "workflow_path": ".github/workflows/pcae-governance.yml",
+    }
+
+
+def test_ci_repair_force_creates_missing_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "repair", "--force"])
+
+    output = capsys.readouterr().out
+    content = workflow_path(tmp_path).read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert "Created workflow." in output
+    assert "pcae health --json" in content
+    assert "pcae check --json" in content
+    assert "pcae analytics risk --json" in content
+
+
+def test_ci_repair_force_overwrites_incomplete_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("run: pcae health --json\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "repair", "--force"])
+
+    output = capsys.readouterr().out
+    content = target.read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert "Overwritten workflow." in output
+    assert "pcae health --json" in content
+    assert "pcae check --json" in content
+    assert "pcae analytics risk --json" in content
+
+
+def test_ci_repair_force_noops_when_no_repair_needed(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "generate", "github"]) == 0
+    capsys.readouterr()
+    before = workflow_path(tmp_path).read_text(encoding="utf-8")
+
+    exit_code = main(["ci", "repair", "--force"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No repair needed." in output
+    assert workflow_path(tmp_path).read_text(encoding="utf-8") == before
+
+
+def test_ci_drift_reports_no_drift_after_repair_force(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("run: pcae health --json\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "repair", "--force"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["ci", "drift", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "drift_detected": False,
+        "drift_findings": [],
+        "overall_status": "no_drift",
     }
 
 

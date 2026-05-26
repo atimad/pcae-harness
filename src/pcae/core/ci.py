@@ -172,3 +172,12 @@ def plan_github_actions_repair(root: HarnessPath) -> CiRepairPlan:
         workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
         reason="no repair needed",
     )
+
+
+def apply_github_actions_repair(root: HarnessPath) -> CiRepairPlan:
+    plan = plan_github_actions_repair(root)
+    if not plan.repair_needed:
+        return plan
+
+    generate_github_actions_workflow(root, force=True)
+    return plan

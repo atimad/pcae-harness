@@ -177,6 +177,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON CI repair dry-run output.",
     )
+    ci_repair_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Apply CI repair actions by writing the generated workflow.",
+    )
     ci_repair_parser.set_defaults(handler=run_ci_repair)
 
     health_parser = subparsers.add_parser(
