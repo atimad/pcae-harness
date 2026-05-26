@@ -121,3 +121,9 @@
 - Extended `Policy` and `ParsedPolicy` with an `orchestration` field; `render_default_policy` includes the `[orchestration]` section.
 - Added `pcae orchestration policy` and `pcae orchestration policy --json` to inspect the effective orchestration agent configuration.
 - Invalid empty agent values in `[orchestration]` are rejected clearly at policy load time.
+- Added `AgentRegistryEntry` dataclass and `DEFAULT_AGENT_REGISTRY` to `src/pcae/core/policy.py`; defaults to `claude-local` (claude), `codex-local` (codex), `pcae-native` (pcae) when no `[agents.*]` sections are configured.
+- Added `parse_agent_registry` to read `[agents.<id>]` sections from `.pcae/policy.toml`, validating non-empty `kind` and non-empty `roles` list.
+- Extended `Policy` and `ParsedPolicy` with `agent_registry` field; `render_default_policy` includes the three default agent sections.
+- Added `load_agent_registry` and `build_agent_registry_data` helpers in `src/pcae/core/orchestration.py`.
+- Added `pcae orchestration agents` and `pcae orchestration agents --json` to list registered agents with kind and roles.
+- Added `[agents.*]` sections to `.pcae/policy.toml` for the three default agents.

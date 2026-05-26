@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 33A: Orchestration policy engine foundation.
+Phase 33B: Agent capability registry.
 
 ## Governance Coherence Note
 
@@ -59,7 +59,11 @@ provenance events, and inspect the effective orchestration agent policy with
 `pcae orchestration policy` and `pcae orchestration policy --json`, including
 configurable `[orchestration]` section in `.pcae/policy.toml` with defaults
 for `default_agent`, `documentation_agent`, `runtime_agent`, and
-`validation_agent`.
+`validation_agent`, and list registered agents and their capabilities with
+`pcae orchestration agents` and `pcae orchestration agents --json`, including
+configurable `[agents.<id>]` sections in `.pcae/policy.toml` with `kind` and
+`roles` fields, defaulting to `claude-local`, `codex-local`, and `pcae-native`
+when no agent sections are configured.
 
 ## Next
 

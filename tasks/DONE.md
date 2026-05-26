@@ -107,3 +107,5 @@
 - Added `[orchestration]` section to `.pcae/policy.toml` with agent role fields.
 - Added `OrchestrationPolicy` and `parse_orchestration_policy` to `src/pcae/core/policy.py`.
 - Added `pcae orchestration policy` and `pcae orchestration policy --json`.
+- Added `AgentRegistryEntry`, `DEFAULT_AGENT_REGISTRY`, and `parse_agent_registry` to `src/pcae/core/policy.py`.
+- Added `pcae orchestration agents` and `pcae orchestration agents --json`.

@@ -66,6 +66,40 @@ DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT = "claude-local"
 DEFAULT_ORCHESTRATION_RUNTIME_AGENT = "codex-local"
 DEFAULT_ORCHESTRATION_VALIDATION_AGENT = "pcae-native"
 
+
+@dataclass(frozen=True)
+class AgentRegistryEntry:
+    agent_id: str
+    kind: str
+    roles: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "agent_id": self.agent_id,
+            "kind": self.kind,
+            "roles": list(self.roles),
+        }
+
+
+DEFAULT_AGENT_REGISTRY: tuple[AgentRegistryEntry, ...] = (
+    AgentRegistryEntry(
+        agent_id="claude-local",
+        kind="claude",
+        roles=("documentation", "architecture", "analysis"),
+    ),
+    AgentRegistryEntry(
+        agent_id="codex-local",
+        kind="codex",
+        roles=("runtime", "implementation", "tests"),
+    ),
+    AgentRegistryEntry(
+        agent_id="pcae-native",
+        kind="pcae",
+        roles=("validation", "governance"),
+    ),
+)
+
+
 @dataclass(frozen=True)
 class OrchestrationPolicy:
     default_agent: str
@@ -106,6 +140,7 @@ class Policy:
     agent_stale_after_seconds: int
     daemon_watch_interval_seconds: int
     orchestration: OrchestrationPolicy
+    agent_registry: tuple[AgentRegistryEntry, ...]
     source: str
     path: Path
     file_exists: bool
@@ -124,6 +159,7 @@ def load_policy(root: HarnessPath) -> Policy:
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             orchestration=DEFAULT_ORCHESTRATION_POLICY,
+            agent_registry=DEFAULT_AGENT_REGISTRY,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -141,6 +177,7 @@ def load_policy(root: HarnessPath) -> Policy:
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             orchestration=DEFAULT_ORCHESTRATION_POLICY,
+            agent_registry=DEFAULT_AGENT_REGISTRY,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -156,6 +193,7 @@ def load_policy(root: HarnessPath) -> Policy:
         agent_stale_after_seconds=parsed.agent_stale_after_seconds,
         daemon_watch_interval_seconds=parsed.daemon_watch_interval_seconds,
         orchestration=parsed.orchestration,
+        agent_registry=parsed.agent_registry,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -172,6 +210,7 @@ class ParsedPolicy:
     agent_stale_after_seconds: int
     daemon_watch_interval_seconds: int
     orchestration: OrchestrationPolicy
+    agent_registry: tuple[AgentRegistryEntry, ...]
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -184,6 +223,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         agent_stale_after_seconds=parse_agent_stale_after_seconds(content),
         daemon_watch_interval_seconds=parse_daemon_watch_interval_seconds(content),
         orchestration=parse_orchestration_policy(content),
+        agent_registry=parse_agent_registry(content),
     )
 
 
@@ -567,6 +607,122 @@ def parse_orchestration_policy(content: str) -> OrchestrationPolicy:
     )
 
 
+def parse_agent_registry(content: str) -> tuple[AgentRegistryEntry, ...]:
+    lines = content.splitlines()
+    entries: list[AgentRegistryEntry] = []
+    current_agent_id: str | None = None
+    current_kind: str | None = None
+    current_roles: list[str] | None = None
+    in_roles_list = False
+    pending_roles: list[str] = []
+
+    def _finalize_agent() -> None:
+        if current_agent_id is None:
+            return
+        if in_roles_list:
+            raise ValueError(
+                f"Invalid TOML: unterminated roles list for agent '{current_agent_id}'."
+            )
+        if current_kind is None:
+            raise ValueError(
+                f"Invalid policy: agent '{current_agent_id}' is missing 'kind'."
+            )
+        if current_roles is None:
+            raise ValueError(
+                f"Invalid policy: agent '{current_agent_id}' is missing 'roles'."
+            )
+        entries.append(
+            AgentRegistryEntry(
+                agent_id=current_agent_id,
+                kind=current_kind,
+                roles=tuple(current_roles),
+            )
+        )
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            _finalize_agent()
+            current_agent_id = None
+            current_kind = None
+            current_roles = None
+            in_roles_list = False
+            pending_roles = []
+            if stripped.startswith("[agents."):
+                agent_id = stripped[len("[agents."):-1].strip()
+                if not agent_id:
+                    raise ValueError(
+                        "Invalid policy: agent registry entry ID must be non-empty."
+                    )
+                current_agent_id = agent_id
+            continue
+
+        if current_agent_id is None:
+            continue
+
+        if in_roles_list:
+            if stripped.startswith("]"):
+                if not pending_roles:
+                    raise ValueError(
+                        f"Invalid policy: agent '{current_agent_id}' roles must be non-empty."
+                    )
+                current_roles = list(pending_roles)
+                in_roles_list = False
+                pending_roles = []
+            else:
+                pending_roles.extend(parse_agent_role_values(stripped))
+            continue
+
+        if "=" not in stripped:
+            continue
+
+        key, raw_value = stripped.split("=", 1)
+        key = key.strip()
+        raw_value = raw_value.strip()
+
+        if key == "kind":
+            current_kind = parse_string_value(
+                raw_value,
+                f"Invalid policy: agent '{current_agent_id}' kind must be a non-empty string.",
+            )
+        elif key == "roles":
+            if not raw_value.startswith("["):
+                raise ValueError(
+                    f"Invalid policy: agent '{current_agent_id}' roles must be a list."
+                )
+            if "]" in raw_value:
+                roles = parse_agent_role_values(raw_value)
+                if not roles:
+                    raise ValueError(
+                        f"Invalid policy: agent '{current_agent_id}' roles must be non-empty."
+                    )
+                current_roles = list(roles)
+            else:
+                in_roles_list = True
+                pending_roles = []
+
+    _finalize_agent()
+
+    return tuple(entries) if entries else DEFAULT_AGENT_REGISTRY
+
+
+def parse_agent_role_values(line: str) -> tuple[str, ...]:
+    try:
+        return parse_pattern_values(line)
+    except ValueError as error:
+        message = str(error)
+        if "every protected pattern" in message:
+            raise ValueError(
+                "Invalid policy: agent role values must be non-empty strings."
+            ) from error
+        raise
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -676,6 +832,18 @@ default_agent = "{DEFAULT_ORCHESTRATION_DEFAULT_AGENT}"
 documentation_agent = "{DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT}"
 runtime_agent = "{DEFAULT_ORCHESTRATION_RUNTIME_AGENT}"
 validation_agent = "{DEFAULT_ORCHESTRATION_VALIDATION_AGENT}"
+
+[agents.claude-local]
+kind = "claude"
+roles = ["documentation", "architecture", "analysis"]
+
+[agents.codex-local]
+kind = "codex"
+roles = ["runtime", "implementation", "tests"]
+
+[agents.pcae-native]
+kind = "pcae"
+roles = ["validation", "governance"]
 """
 
 

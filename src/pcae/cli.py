@@ -49,7 +49,7 @@ from pcae.commands.fleet import (
     run_fleet_remove,
 )
 from pcae.commands.health import run_health
-from pcae.commands.orchestration import run_orchestration_policy
+from pcae.commands.orchestration import run_orchestration_agents, run_orchestration_policy
 from pcae.commands.status import run_status_coherence
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
@@ -299,6 +299,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON orchestration policy output.",
     )
     orchestration_policy_parser.set_defaults(handler=run_orchestration_policy)
+
+    orchestration_agents_parser = orchestration_subparsers.add_parser(
+        "agents",
+        help="List registered agents and their capabilities.",
+    )
+    orchestration_agents_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON agent registry output.",
+    )
+    orchestration_agents_parser.set_defaults(handler=run_orchestration_agents)
 
     daemon_parser = subparsers.add_parser(
         "daemon",

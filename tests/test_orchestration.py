@@ -6,9 +6,15 @@ from pathlib import Path
 import pytest
 
 from pcae.cli import main
-from pcae.core.orchestration import build_orchestration_data, load_orchestration_policy
+from pcae.core.orchestration import (
+    build_agent_registry_data,
+    build_orchestration_data,
+    load_agent_registry,
+    load_orchestration_policy,
+)
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import (
+    DEFAULT_AGENT_REGISTRY,
     DEFAULT_ORCHESTRATION_DEFAULT_AGENT,
     DEFAULT_ORCHESTRATION_DOCUMENTATION_AGENT,
     DEFAULT_ORCHESTRATION_RUNTIME_AGENT,
@@ -160,6 +166,159 @@ def test_cli_orchestration_policy_no_file_uses_defaults(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert f"Default agent: {DEFAULT_ORCHESTRATION_DEFAULT_AGENT}" in output
+
+
+# ---------------------------------------------------------------------------
+# core helpers: agent registry
+# ---------------------------------------------------------------------------
+
+
+def test_load_agent_registry_defaults_when_no_policy_file(tmp_path: Path) -> None:
+    registry = load_agent_registry(HarnessPath(tmp_path))
+    assert registry == DEFAULT_AGENT_REGISTRY
+
+
+def test_load_agent_registry_defaults_when_section_missing(tmp_path: Path) -> None:
+    write_policy(tmp_path, minimal_policy())
+    registry = load_agent_registry(HarnessPath(tmp_path))
+    assert registry == DEFAULT_AGENT_REGISTRY
+
+
+def test_load_agent_registry_reads_configured_agents(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.my-agent]\nkind = "custom"\nroles = ["analysis"]\n',
+    )
+    registry = load_agent_registry(HarnessPath(tmp_path))
+    assert len(registry) == 1
+    assert registry[0].agent_id == "my-agent"
+    assert registry[0].kind == "custom"
+    assert registry[0].roles == ("analysis",)
+
+
+def test_load_agent_registry_multiple_agents(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.a]\nkind = "ka"\nroles = ["r1"]\n\n[agents.b]\nkind = "kb"\nroles = ["r2", "r3"]\n',
+    )
+    registry = load_agent_registry(HarnessPath(tmp_path))
+    assert len(registry) == 2
+    assert registry[0].agent_id == "a"
+    assert registry[1].agent_id == "b"
+    assert registry[1].roles == ("r2", "r3")
+
+
+def test_load_agent_registry_raises_on_invalid_policy(tmp_path: Path) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    with pytest.raises(ValueError):
+        load_agent_registry(HarnessPath(tmp_path))
+
+
+def test_build_agent_registry_data_returns_list_of_dicts(tmp_path: Path) -> None:
+    write_policy(tmp_path, minimal_policy())
+    data = build_agent_registry_data(HarnessPath(tmp_path))
+    assert isinstance(data, list)
+    assert len(data) == len(DEFAULT_AGENT_REGISTRY)
+    for entry in data:
+        assert set(entry.keys()) == {"agent_id", "kind", "roles"}
+        assert isinstance(entry["roles"], list)
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration agents
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_agents_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    write_policy(tmp_path, minimal_policy())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["orchestration", "agents"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent registry" in output
+    assert "claude-local" in output
+    assert "codex-local" in output
+    assert "pcae-native" in output
+
+
+def test_cli_orchestration_agents_shows_kind_and_roles(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, minimal_policy())
+    monkeypatch.chdir(tmp_path)
+
+    main(["orchestration", "agents"])
+
+    output = capsys.readouterr().out
+    assert "claude" in output
+    assert "documentation" in output
+    assert "codex" in output
+    assert "runtime" in output
+
+
+def test_cli_orchestration_agents_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    write_policy(tmp_path, minimal_policy())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["orchestration", "agents", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert isinstance(data, list)
+    assert len(data) == len(DEFAULT_AGENT_REGISTRY)
+    for entry in data:
+        assert set(entry.keys()) == {"agent_id", "kind", "roles"}
+
+
+def test_cli_orchestration_agents_json_configured(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.custom]\nkind = "mymodel"\nroles = ["analysis", "tests"]\n',
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["orchestration", "agents", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert len(data) == 1
+    assert data[0]["agent_id"] == "custom"
+    assert data[0]["kind"] == "mymodel"
+    assert data[0]["roles"] == ["analysis", "tests"]
+
+
+def test_cli_orchestration_agents_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["orchestration", "agents"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
+
+
+def test_cli_orchestration_agents_no_file_uses_defaults(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["orchestration", "agents"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "claude-local" in output
 
 
 # ---------------------------------------------------------------------------

@@ -740,6 +740,112 @@ def test_rendered_default_policy_includes_orchestration_section(tmp_path: Path) 
     assert policy.orchestration.validation_agent == DEFAULT_ORCHESTRATION_VALIDATION_AGENT
 
 
+# ---------------------------------------------------------------------------
+# agent registry parsing
+# ---------------------------------------------------------------------------
+
+
+def test_policy_agent_registry_defaults_when_section_missing(tmp_path: Path) -> None:
+    from pcae.core.policy import DEFAULT_AGENT_REGISTRY
+
+    write_policy(tmp_path, '[protected]\npatterns = [".env"]\n')
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert policy.agent_registry == DEFAULT_AGENT_REGISTRY
+
+
+def test_policy_agent_registry_reads_single_agent(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[agents.my-agent]\nkind = "claude"\nroles = ["analysis"]\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert len(policy.agent_registry) == 1
+    entry = policy.agent_registry[0]
+    assert entry.agent_id == "my-agent"
+    assert entry.kind == "claude"
+    assert entry.roles == ("analysis",)
+
+
+def test_policy_agent_registry_reads_multiple_agents(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n'
+        '[agents.a]\nkind = "ka"\nroles = ["r1"]\n\n'
+        '[agents.b]\nkind = "kb"\nroles = ["r2", "r3"]\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    assert len(policy.agent_registry) == 2
+    assert policy.agent_registry[0].agent_id == "a"
+    assert policy.agent_registry[1].agent_id == "b"
+    assert policy.agent_registry[1].roles == ("r2", "r3")
+
+
+def test_policy_agent_registry_rejects_empty_kind(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[agents.x]\nkind = ""\nroles = ["r"]\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error is not None
+    assert "kind" in policy.error
+
+
+def test_policy_agent_registry_rejects_empty_roles_list(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[agents.x]\nkind = "k"\nroles = []\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+
+
+def test_policy_agent_registry_rejects_missing_kind(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[agents.x]\nroles = ["r"]\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error is not None
+    assert "kind" in policy.error
+
+
+def test_policy_agent_registry_rejects_missing_roles(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        '[protected]\npatterns = [".env"]\n\n[agents.x]\nkind = "k"\n',
+    )
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error is not None
+    assert "roles" in policy.error
+
+
+def test_rendered_default_policy_includes_agent_registry(tmp_path: Path) -> None:
+    from pcae.core.policy import DEFAULT_AGENT_REGISTRY
+
+    write_policy(tmp_path, render_default_policy())
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert policy.valid
+    ids = {e.agent_id for e in policy.agent_registry}
+    assert "claude-local" in ids
+    assert "codex-local" in ids
+    assert "pcae-native" in ids
+    assert len(policy.agent_registry) == len(DEFAULT_AGENT_REGISTRY)
+
+
 def write_policy(root: Path, content: str) -> None:
     policy_file = root / ".pcae" / "policy.toml"
     policy_file.parent.mkdir(parents=True, exist_ok=True)

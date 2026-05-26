@@ -62,3 +62,15 @@ default_agent = "claude-local"
 documentation_agent = "claude-local"
 runtime_agent = "codex-local"
 validation_agent = "pcae-native"
+
+[agents.claude-local]
+kind = "claude"
+roles = ["documentation", "architecture", "analysis"]
+
+[agents.codex-local]
+kind = "codex"
+roles = ["runtime", "implementation", "tests"]
+
+[agents.pcae-native]
+kind = "pcae"
+roles = ["validation", "governance"]
