@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add command reference generation.
+Add architecture overview generation.
 
 ## Allowed Files
 

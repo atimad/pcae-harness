@@ -96,3 +96,4 @@
 - Added `pcae ci repair --dry-run` and JSON output for CI governance repair previews.
 - Added `pcae ci repair --force` to create or overwrite the generated governance workflow when drift exists.
 - Added `pcae docs commands` for generating `docs/COMMANDS.md`.
+- Added `pcae docs architecture` for generating `docs/ARCHITECTURE.md`.
