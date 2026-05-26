@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add daemon watch dry-run plan.
+Add policy-driven daemon watch interval.
 
 ## Allowed Files
 

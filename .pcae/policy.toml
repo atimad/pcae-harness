@@ -53,3 +53,6 @@ mode = "advisory"
 
 [agent]
 stale_after_seconds = 14400
+
+[daemon]
+watch_interval_seconds = 300

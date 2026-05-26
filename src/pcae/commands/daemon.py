@@ -4,7 +4,6 @@ import argparse
 import json
 
 from pcae.core.daemon import (
-    DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
     DaemonDryRunResult,
     DaemonStatus,
     DaemonWatchPlan,
@@ -12,6 +11,7 @@ from pcae.core.daemon import (
     daemon_status,
     run_daemon_dry_run_cycle,
 )
+from pcae.core.paths import HarnessPath
 
 
 def run_daemon(args: argparse.Namespace) -> int:
@@ -28,7 +28,11 @@ def run_daemon(args: argparse.Namespace) -> int:
 
 
 def run_daemon_status(args: argparse.Namespace) -> int:
-    status = daemon_status()
+    try:
+        status = daemon_status(HarnessPath.cwd())
+    except ValueError as error:
+        print(str(error))
+        return 1
     if args.json:
         print(json.dumps(daemon_status_json_data(status), indent=2, sort_keys=True))
     else:
@@ -42,7 +46,10 @@ def run_daemon_watch(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        plan = build_daemon_watch_plan(args.interval_seconds)
+        plan = build_daemon_watch_plan(
+            HarnessPath.cwd(),
+            interval_seconds=args.interval_seconds,
+        )
     except ValueError as error:
         print(str(error))
         return 1
@@ -72,6 +79,7 @@ def print_daemon_status(status: DaemonStatus) -> None:
     print(f"Mode: {status.mode}")
     print(f"Watch supported: {format_bool(status.watch_supported)}")
     print(f"Dry-run supported: {format_bool(status.dry_run_supported)}")
+    print(f"Default interval seconds: {status.default_interval_seconds}")
     print(f"Planned checks: {len(status.planned_checks)}")
     for index, check in enumerate(status.planned_checks, start=1):
         print(f"  {index}. {check}")
@@ -116,6 +124,7 @@ def daemon_watch_json_data(plan: DaemonWatchPlan) -> dict[str, object]:
 def daemon_status_json_data(status: DaemonStatus) -> dict[str, object]:
     return {
         "dry_run_supported": status.dry_run_supported,
+        "default_interval_seconds": status.default_interval_seconds,
         "mode": status.mode,
         "planned_checks": list(status.planned_checks),
         "planned_checks_count": len(status.planned_checks),
@@ -129,5 +138,5 @@ def format_bool(value: bool) -> str:
     return "true" if value else "false"
 
 
-def default_watch_interval_seconds() -> int:
-    return DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
+def default_watch_interval_seconds() -> None:
+    return None

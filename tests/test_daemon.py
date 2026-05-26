@@ -100,6 +100,7 @@ def test_daemon_status_human_output_works(capsys) -> None:
     assert "Mode: dry-run-only" in output
     assert "Watch supported: false" in output
     assert "Dry-run supported: true" in output
+    assert "Default interval seconds: 300" in output
     assert "Planned checks: 5" in output
     assert "1. pcae health" in output
     assert "5. pcae pipeline run --dry-run" in output
@@ -111,6 +112,7 @@ def test_daemon_status_json_output_works(capsys) -> None:
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     assert data == {
+        "default_interval_seconds": 300,
         "dry_run_supported": True,
         "mode": "dry-run-only",
         "planned_checks": [
@@ -149,7 +151,54 @@ def test_daemon_watch_dry_run_human_output_works(capsys) -> None:
     assert "5. pcae pipeline run --dry-run" in output
 
 
+def test_daemon_watch_uses_policy_default_interval(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    write_policy(tmp_path, 120)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["daemon", "watch", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Interval seconds: 120" in output
+
+
+def test_daemon_status_reports_policy_default_interval(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    write_policy(tmp_path, 120)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["daemon", "status", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["default_interval_seconds"] == 120
+
+
 def test_daemon_watch_dry_run_custom_interval(capsys) -> None:
+    exit_code = main(
+        ["daemon", "watch", "--dry-run", "--interval-seconds", "60"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Interval seconds: 60" in output
+
+
+def test_daemon_watch_cli_interval_overrides_policy_interval(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    write_policy(tmp_path, 120)
+    monkeypatch.chdir(tmp_path)
+
     exit_code = main(
         ["daemon", "watch", "--dry-run", "--interval-seconds", "60"]
     )
@@ -189,6 +238,34 @@ def test_daemon_watch_invalid_interval_fails(capsys) -> None:
     assert "Interval seconds must be a positive integer." in output
 
 
+def test_daemon_watch_invalid_policy_interval_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    policy_file = tmp_path / ".pcae" / "policy.toml"
+    policy_file.parent.mkdir(parents=True, exist_ok=True)
+    policy_file.write_text(
+        """[protected]
+patterns = [".env"]
+
+[daemon]
+watch_interval_seconds = 0
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["daemon", "watch", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert (
+        "Invalid policy: daemon.watch_interval_seconds must be a positive integer."
+        in output
+    )
+
+
 def test_daemon_watch_dry_run_writes_no_files(
     tmp_path: Path,
     monkeypatch,
@@ -220,3 +297,15 @@ def text_file_snapshot(root: Path) -> dict[str, str]:
         for path in root.rglob("*")
         if path.is_file()
     }
+
+
+def write_policy(root: Path, watch_interval_seconds: int) -> None:
+    write_file(
+        root / ".pcae" / "policy.toml",
+        f"""[protected]
+patterns = [".env"]
+
+[daemon]
+watch_interval_seconds = {watch_interval_seconds}
+""",
+    )

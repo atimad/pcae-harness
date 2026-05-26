@@ -60,6 +60,7 @@ DEFAULT_ARCHITECTURE_RULES = {
     "config": ("config",),
 }
 DEFAULT_AGENT_STALE_AFTER_SECONDS = 14400
+DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS = 300
 
 ARCHITECTURE_ENFORCEMENT_ADVISORY = "advisory"
 ARCHITECTURE_ENFORCEMENT_STRICT = "strict"
@@ -76,6 +77,7 @@ class Policy:
     architecture_rules: dict[str, tuple[str, ...]]
     architecture_enforcement_mode: str
     agent_stale_after_seconds: int
+    daemon_watch_interval_seconds: int
     source: str
     path: Path
     file_exists: bool
@@ -92,6 +94,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_rules={},
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
+            daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -107,6 +110,7 @@ def load_policy(root: HarnessPath) -> Policy:
             architecture_rules={},
             architecture_enforcement_mode=ARCHITECTURE_ENFORCEMENT_ADVISORY,
             agent_stale_after_seconds=DEFAULT_AGENT_STALE_AFTER_SECONDS,
+            daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -120,6 +124,7 @@ def load_policy(root: HarnessPath) -> Policy:
         architecture_rules=parsed.architecture_rules,
         architecture_enforcement_mode=parsed.architecture_enforcement_mode,
         agent_stale_after_seconds=parsed.agent_stale_after_seconds,
+        daemon_watch_interval_seconds=parsed.daemon_watch_interval_seconds,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -134,6 +139,7 @@ class ParsedPolicy:
     architecture_rules: dict[str, tuple[str, ...]]
     architecture_enforcement_mode: str
     agent_stale_after_seconds: int
+    daemon_watch_interval_seconds: int
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -144,6 +150,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         architecture_rules=parse_architecture_rules(content, architecture_zones),
         architecture_enforcement_mode=parse_architecture_enforcement_mode(content),
         agent_stale_after_seconds=parse_agent_stale_after_seconds(content),
+        daemon_watch_interval_seconds=parse_daemon_watch_interval_seconds(content),
     )
 
 
@@ -437,6 +444,47 @@ def parse_agent_stale_after_seconds(content: str) -> int:
     return stale_after_seconds
 
 
+def parse_daemon_watch_interval_seconds(content: str) -> int:
+    lines = content.splitlines()
+    in_daemon_section = False
+    watch_interval_seconds: int | None = None
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_daemon_section = stripped == "[daemon]"
+            continue
+
+        if not in_daemon_section:
+            continue
+
+        if not stripped.startswith("watch_interval_seconds"):
+            continue
+        if "=" not in stripped:
+            raise ValueError(
+                "Invalid policy: daemon.watch_interval_seconds must be assigned."
+            )
+        value = stripped.split("=", 1)[1].strip()
+        if not value.isdigit():
+            raise ValueError(
+                "Invalid policy: daemon.watch_interval_seconds must be a positive integer."
+            )
+        watch_interval_seconds = int(value)
+
+    if watch_interval_seconds is None:
+        return DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
+    if watch_interval_seconds <= 0:
+        raise ValueError(
+            "Invalid policy: daemon.watch_interval_seconds must be a positive integer."
+        )
+    return watch_interval_seconds
+
+
 def parse_architecture_zone_name(raw_name: str) -> str:
     zone_name = raw_name.strip()
     if zone_name.startswith('"') and zone_name.endswith('"'):
@@ -537,6 +585,9 @@ mode = "{ARCHITECTURE_ENFORCEMENT_ADVISORY}"
 
 [agent]
 stale_after_seconds = {DEFAULT_AGENT_STALE_AFTER_SECONDS}
+
+[daemon]
+watch_interval_seconds = {DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS}
 """
 
 

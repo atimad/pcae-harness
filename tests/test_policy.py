@@ -9,6 +9,7 @@ from pcae.core.policy import (
     DEFAULT_AGENT_STALE_AFTER_SECONDS,
     DEFAULT_ARCHITECTURE_RULES,
     DEFAULT_ARCHITECTURE_ZONES,
+    DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
     DEFAULT_PROTECTED_PATTERNS,
     POLICY_SOURCE_DEFAULTS,
     POLICY_SOURCE_REPO,
@@ -115,6 +116,21 @@ stale_after_seconds = 7200
     assert policy.agent_stale_after_seconds == 7200
 
 
+def test_parse_policy_reads_daemon_watch_interval_seconds() -> None:
+    content = """[protected]
+patterns = [
+  ".env",
+]
+
+[daemon]
+watch_interval_seconds = 120
+"""
+
+    policy = parse_policy(content)
+
+    assert policy.daemon_watch_interval_seconds == 120
+
+
 def test_load_policy_reads_repo_policy_file(tmp_path: Path) -> None:
     policy_file = tmp_path / ".pcae" / "policy.toml"
     policy_file.parent.mkdir(parents=True, exist_ok=True)
@@ -134,6 +150,7 @@ patterns = [
     assert policy.architecture_rules == {}
     assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
     assert policy.agent_stale_after_seconds == DEFAULT_AGENT_STALE_AFTER_SECONDS
+    assert policy.daemon_watch_interval_seconds == DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
     assert policy.source == POLICY_SOURCE_REPO
     assert policy.file_exists
     assert policy.valid
@@ -165,6 +182,7 @@ commands = ["src/pcae/commands/**"]
     assert policy.architecture_rules == {}
     assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
     assert policy.agent_stale_after_seconds == DEFAULT_AGENT_STALE_AFTER_SECONDS
+    assert policy.daemon_watch_interval_seconds == DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
 
 
 def test_load_policy_reads_architecture_rules_from_repo_policy_file(
@@ -233,6 +251,7 @@ def test_load_policy_falls_back_to_defaults_when_missing(tmp_path: Path) -> None
     assert not policy.file_exists
     assert policy.valid
     assert policy.agent_stale_after_seconds == DEFAULT_AGENT_STALE_AFTER_SECONDS
+    assert policy.daemon_watch_interval_seconds == DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
 
 
 def test_load_policy_reports_invalid_toml(tmp_path: Path) -> None:
@@ -593,6 +612,46 @@ stale_after_seconds = 0
     )
 
 
+def test_load_policy_rejects_non_integer_daemon_watch_interval(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[daemon]
+watch_interval_seconds = "soon"
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: daemon.watch_interval_seconds must be a positive integer."
+    )
+
+
+def test_load_policy_rejects_zero_daemon_watch_interval(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        """[protected]
+patterns = [".env"]
+
+[daemon]
+watch_interval_seconds = 0
+""",
+    )
+
+    policy = load_policy(HarnessPath(tmp_path))
+
+    assert not policy.valid
+    assert policy.error == (
+        "Invalid policy: daemon.watch_interval_seconds must be a positive integer."
+    )
+
+
 def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> None:
     write_policy(tmp_path, render_default_policy())
 
@@ -603,6 +662,7 @@ def test_rendered_default_policy_includes_architecture_zones(tmp_path: Path) -> 
     assert policy.architecture_rules == DEFAULT_ARCHITECTURE_RULES
     assert policy.architecture_enforcement_mode == ARCHITECTURE_ENFORCEMENT_ADVISORY
     assert policy.agent_stale_after_seconds == DEFAULT_AGENT_STALE_AFTER_SECONDS
+    assert policy.daemon_watch_interval_seconds == DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS
 
 
 def write_policy(root: Path, content: str) -> None:
