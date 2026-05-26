@@ -97,3 +97,7 @@
 - Added `pcae ci repair --force` to create or overwrite the generated governance workflow when drift exists.
 - Added `pcae docs commands` for generating `docs/COMMANDS.md`.
 - Added `pcae docs architecture` for generating `docs/ARCHITECTURE.md`.
+- Synchronized PROJECT_STATUS.md with actual runtime state; removed stale "Implement `pcae end`" roadmap entry.
+- Added `pcae status coherence` and `pcae status coherence --json` for lightweight stale roadmap reference detection.
+- Added `check_project_status_coherence` in `src/pcae/core/status.py` with deterministic `KNOWN_STALE_PHRASES` detection.
+- Documented future governance coherence explorations in PROJECT_STATUS.md, tasks/TODO.md, and CHANGELOG.md.

@@ -2,10 +2,9 @@
 
 ## Pending
 
-- Implement `pcae end`.
-- Implement `pcae docs commands` update for `phase` command group.
+- Update `pcae docs commands` to include the `phase` and `status` command groups.
 
-## Future Explorations (from Phase 32C/32D/32E/32F)
+## Future Explorations (from Phase 32C/32D/32E/32F/32G)
 
 - Automatic low-context detection triggering handoff.
 - Compact-risk handoff triggering.
@@ -17,3 +16,9 @@
 - Auto-detect available agents from lock history or policy configuration.
 - Orchestration-aware agent routing based on task type or governance context.
 - Heterogeneous agent governance policies (per-agent policy overrides).
+- Full governance audit: `pcae governance audit` command.
+- Roadmap/provenance coherence validation: detect completed features still in roadmap.
+- Stale roadmap detection: automated scan of governance docs against CHANGELOG/DONE history.
+- Governance artifact synchronization: keep PROJECT_STATUS.md, TODO.md, CHANGELOG.md coherent.
+- Orchestration narrative validation: verify agent-facing guidance matches runtime capabilities.
+- Governance drift detection for documentation artifacts beyond PROJECT_STATUS.md.

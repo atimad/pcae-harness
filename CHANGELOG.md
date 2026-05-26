@@ -107,3 +107,9 @@
 - Added `manual_steps` list to `pcae phase handoff --json` output.
 - Added multi-agent restart workflow examples to `pcae phase handoff` human-readable output: Claude CLI, Codex Desktop, and Generic governed agent.
 - Added `restart_workflows` structured list to `pcae phase handoff --json` output with per-agent step arrays.
+- Synchronized PROJECT_STATUS.md with actual runtime capabilities and removed stale roadmap reference ("Implement `pcae end`").
+- Added governance coherence note to PROJECT_STATUS.md: governance documents are operational artifacts; stale references create orchestration risk.
+- Added `pcae status coherence` to detect stale roadmap references in PROJECT_STATUS.md.
+- Added `pcae status coherence --json` for machine-readable coherence output.
+- Added `check_project_status_coherence` helper in `src/pcae/core/status.py` with deterministic stale-phrase detection.
+- Documented future explorations for full governance audit, roadmap/provenance coherence validation, stale roadmap detection, governance artifact synchronization, orchestration narrative validation, and governance drift detection for documentation artifacts.

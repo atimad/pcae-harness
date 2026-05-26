@@ -49,6 +49,7 @@ from pcae.commands.fleet import (
     run_fleet_remove,
 )
 from pcae.commands.health import run_health
+from pcae.commands.status import run_status_coherence
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -262,6 +263,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON health output.",
     )
     health_parser.set_defaults(handler=run_health)
+
+    status_parser = subparsers.add_parser(
+        "status",
+        help="Check governance status coherence.",
+    )
+    status_subparsers = status_parser.add_subparsers(dest="status_command", required=True)
+    status_coherence_parser = status_subparsers.add_parser(
+        "coherence",
+        help="Check PROJECT_STATUS.md for stale roadmap references.",
+    )
+    status_coherence_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON coherence output.",
+    )
+    status_coherence_parser.set_defaults(handler=run_status_coherence)
 
     daemon_parser = subparsers.add_parser(
         "daemon",
