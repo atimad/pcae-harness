@@ -89,6 +89,44 @@ def test_daemon_dry_run_writes_no_files(
     assert not (tmp_path / ".pcae" / "fleet-exports").exists()
 
 
+def test_daemon_status_human_output_works(capsys) -> None:
+    exit_code = main(["daemon", "status"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE daemon status" in output
+    assert "Supported: true" in output
+    assert "Running: false" in output
+    assert "Mode: dry-run-only" in output
+    assert "Watch supported: false" in output
+    assert "Dry-run supported: true" in output
+    assert "Planned checks: 5" in output
+    assert "1. pcae health" in output
+    assert "5. pcae pipeline run --dry-run" in output
+
+
+def test_daemon_status_json_output_works(capsys) -> None:
+    exit_code = main(["daemon", "status", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "dry_run_supported": True,
+        "mode": "dry-run-only",
+        "planned_checks": [
+            "pcae health",
+            "pcae check",
+            "pcae fleet drift",
+            "pcae analytics risk",
+            "pcae pipeline run --dry-run",
+        ],
+        "planned_checks_count": 5,
+        "running": False,
+        "supported": True,
+        "watch_supported": False,
+    }
+
+
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")

@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add governance daemon dry-run.
+Add daemon status introspection.
 
 ## Allowed Files
 

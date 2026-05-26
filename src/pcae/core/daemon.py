@@ -27,6 +27,16 @@ class DaemonDryRunResult:
     steps: tuple[DaemonDryRunStep, ...]
 
 
+@dataclass(frozen=True)
+class DaemonStatus:
+    supported: bool
+    running: bool
+    mode: str
+    watch_supported: bool
+    dry_run_supported: bool
+    planned_checks: tuple[str, ...]
+
+
 def run_daemon_dry_run_cycle() -> DaemonDryRunResult:
     return DaemonDryRunResult(
         mode="dry-run",
@@ -40,4 +50,15 @@ def run_daemon_dry_run_cycle() -> DaemonDryRunResult:
             )
             for step in DAEMON_DRY_RUN_STEPS
         ),
+    )
+
+
+def daemon_status() -> DaemonStatus:
+    return DaemonStatus(
+        supported=True,
+        running=False,
+        mode="dry-run-only",
+        watch_supported=False,
+        dry_run_supported=True,
+        planned_checks=DAEMON_DRY_RUN_STEPS,
     )

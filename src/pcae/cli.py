@@ -15,7 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.daemon import run_daemon
+from pcae.commands.daemon import run_daemon, run_daemon_status
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -132,6 +132,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON daemon dry-run output.",
     )
     daemon_run_parser.set_defaults(handler=run_daemon)
+
+    daemon_status_parser = daemon_subparsers.add_parser(
+        "status",
+        help="Show PCAE daemon capability status.",
+    )
+    daemon_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON daemon status output.",
+    )
+    daemon_status_parser.set_defaults(handler=run_daemon_status)
 
     agent_parser = subparsers.add_parser(
         "agent",
