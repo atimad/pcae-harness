@@ -113,3 +113,6 @@
 - Added `pcae status coherence --json` for machine-readable coherence output.
 - Added `check_project_status_coherence` helper in `src/pcae/core/status.py` with deterministic stale-phrase detection.
 - Documented future explorations for full governance audit, roadmap/provenance coherence validation, stale roadmap detection, governance artifact synchronization, orchestration narrative validation, and governance drift detection for documentation artifacts.
+- Made `pcae session bootstrap --agent-id <id>` idempotent: if the same agent already holds the lock, bootstrap continues without re-acquiring and without duplicating provenance events.
+- Added `lock_acquired` field to `pcae session bootstrap --json` output (`true` on fresh acquire, `false` when already held).
+- Added `acquire_agent_lock_idempotent` helper in `src/pcae/core/agent.py`; raises `ValueError` if a different agent holds the lock.

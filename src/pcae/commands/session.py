@@ -4,7 +4,7 @@ import argparse
 import json
 from typing import Any
 
-from pcae.core.agent import acquire_agent_lock
+from pcae.core.agent import acquire_agent_lock_idempotent
 from pcae.core.architecture import (
     read_architecture_history_summary,
     write_architecture_history_snapshot,
@@ -86,17 +86,21 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
 
     try:
-        lock = acquire_agent_lock(root, args.agent_id)
+        acquire_result = acquire_agent_lock_idempotent(root, args.agent_id)
     except ValueError as error:
         print(str(error))
         return 1
 
-    append_provenance_event(
-        root,
-        "agent_acquired",
-        f"Agent lock acquired by {args.agent_id}",
-        agent_id=args.agent_id,
-    )
+    lock = acquire_result.lock
+    already_held = acquire_result.already_held
+
+    if not already_held:
+        append_provenance_event(
+            root,
+            "agent_acquired",
+            f"Agent lock acquired by {args.agent_id}",
+            agent_id=args.agent_id,
+        )
 
     health_data = build_health_data(root)
     health_status: str = health_data["overall_status"]
@@ -122,6 +126,7 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
                     "current_session": _session_summary(current_session),
                     "health_status": health_status,
                     "latest_event": _event_summary(latest_event),
+                    "lock_acquired": not already_held,
                     "provenance_event_count": timeline.event_count,
                     "ready": ready,
                 },
@@ -132,7 +137,10 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         return 0 if ready else 1
 
     print("Session bootstrap.")
-    print(f"Agent: {args.agent_id}")
+    if already_held:
+        print(f"Agent: {args.agent_id} (lock already held)")
+    else:
+        print(f"Agent: {args.agent_id}")
     print(f"Health: {health_status}")
     print(f"Check: {'passed' if check_passed else 'failed'}")
     for v in health_data["violations"]:

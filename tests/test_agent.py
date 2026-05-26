@@ -5,6 +5,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.agent import acquire_agent_lock, build_agent_status
@@ -434,6 +436,39 @@ def test_agent_acquire_and_release_both_recorded(
     assert len(history.events) == 2
     assert history.events[0].event_type == "agent_acquired"
     assert history.events[1].event_type == "agent_released"
+
+
+# ---------------------------------------------------------------------------
+# acquire_agent_lock_idempotent
+# ---------------------------------------------------------------------------
+
+
+def test_acquire_idempotent_fresh_acquires_lock(tmp_path: Path) -> None:
+    from pcae.core.agent import acquire_agent_lock_idempotent
+
+    init_agent_repo(tmp_path)
+    result = acquire_agent_lock_idempotent(HarnessPath(tmp_path), "claude-local")
+    assert result.lock.agent_id == "claude-local"
+    assert result.already_held is False
+
+
+def test_acquire_idempotent_same_agent_returns_already_held(tmp_path: Path) -> None:
+    from pcae.core.agent import acquire_agent_lock_idempotent
+
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    result = acquire_agent_lock_idempotent(HarnessPath(tmp_path), "claude-local")
+    assert result.lock.agent_id == "claude-local"
+    assert result.already_held is True
+
+
+def test_acquire_idempotent_different_agent_raises(tmp_path: Path) -> None:
+    from pcae.core.agent import acquire_agent_lock_idempotent
+
+    init_agent_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "other-agent")
+    with pytest.raises(ValueError, match="Agent lock already held by other-agent"):
+        acquire_agent_lock_idempotent(HarnessPath(tmp_path), "claude-local")
 
 
 def init_agent_repo(root: Path) -> None:

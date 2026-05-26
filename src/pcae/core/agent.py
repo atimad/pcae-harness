@@ -27,6 +27,12 @@ class AgentLock:
 
 
 @dataclass(frozen=True)
+class AgentAcquireResult:
+    lock: "AgentLock"
+    already_held: bool
+
+
+@dataclass(frozen=True)
 class AgentReleaseResult:
     released: bool
     message: str
@@ -51,6 +57,20 @@ def acquire_agent_lock(
         file.write("\n")
 
     return AgentLock(relative_path=AGENT_LOCK_RELATIVE_PATH, data=data)
+
+
+def acquire_agent_lock_idempotent(
+    root: HarnessPath,
+    agent_id: str,
+    acquired_at: datetime | None = None,
+) -> AgentAcquireResult:
+    existing = read_agent_lock(root)
+    if existing is not None:
+        if existing.agent_id == agent_id:
+            return AgentAcquireResult(lock=existing, already_held=True)
+        raise ValueError(f"Agent lock already held by {existing.agent_id}.")
+    lock = acquire_agent_lock(root, agent_id, acquired_at)
+    return AgentAcquireResult(lock=lock, already_held=False)
 
 
 def release_agent_lock(

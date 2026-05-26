@@ -739,6 +739,7 @@ def test_session_bootstrap_json_output(
     assert data["current_session"]["active"] is True
     assert data["latest_event"] is not None
     assert data["latest_event"]["event_type"] == "agent_acquired"
+    assert data["lock_acquired"] is True
     assert set(data.keys()) == {
         "active_task",
         "agent_id",
@@ -746,6 +747,7 @@ def test_session_bootstrap_json_output(
         "current_session",
         "health_status",
         "latest_event",
+        "lock_acquired",
         "provenance_event_count",
         "ready",
     }
@@ -768,6 +770,144 @@ def test_session_bootstrap_json_ready_false_when_check_fails(
     assert data["ready"] is False
     assert data["check_status"] == "failed"
     assert data["health_status"] == "unhealthy"
+
+
+# same-agent idempotent bootstrap
+# ---------------------------------------------------------------------------
+
+
+def test_session_bootstrap_same_agent_already_held_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Idempotent bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Ready: yes" in output
+
+
+def test_session_bootstrap_same_agent_shows_already_held_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Already held note task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert "lock already held" in output
+
+
+def test_session_bootstrap_same_agent_shows_full_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Full summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert "Health:" in output
+    assert "Check:" in output
+    assert "Active task:" in output
+    assert "Ready:" in output
+
+
+def test_session_bootstrap_same_agent_does_not_append_provenance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+    from pcae.core.provenance import read_provenance_history
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No duplicate provenance task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    before = read_provenance_history(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    capsys.readouterr()
+    after = read_provenance_history(HarnessPath(tmp_path))
+    assert len(after.events) == len(before.events)
+
+
+def test_session_bootstrap_same_agent_json_lock_acquired_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Idempotent JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["lock_acquired"] is False
+    assert data["agent_id"] == "claude-local"
+    assert data["ready"] is True
+    assert set(data.keys()) == {
+        "active_task",
+        "agent_id",
+        "check_status",
+        "current_session",
+        "health_status",
+        "latest_event",
+        "lock_acquired",
+        "provenance_event_count",
+        "ready",
+    }
+
+
+def test_session_bootstrap_different_agent_still_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "other-agent")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Agent lock already held by other-agent." in output
 
 
 # ---------------------------------------------------------------------------

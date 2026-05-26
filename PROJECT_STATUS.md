@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 32G: Governance status synchronization.
+Phase 32H: Idempotent governed session bootstrap.
 
 ## Governance Coherence Note
 
@@ -50,9 +50,12 @@ provenance session, timeline summary, ready status, and JSON output, print
 clear manual handoff steps and a copy-ready bootstrap prompt from `pcae phase
 handoff` with clear guidance when `--next-agent` is omitted, display
 multi-agent restart workflow examples (Claude CLI, Codex Desktop, Generic
-governed agent) with a `restart_workflows` field in JSON output, and check
+governed agent) with a `restart_workflows` field in JSON output, check
 PROJECT_STATUS.md for stale roadmap references with `pcae status coherence`
-and `pcae status coherence --json`.
+and `pcae status coherence --json`, and resume a governed session idempotently
+with `pcae session bootstrap --agent-id <id>` when the same agent already
+holds the lock, showing the full governance summary without duplicating
+provenance events.
 
 ## Next
 

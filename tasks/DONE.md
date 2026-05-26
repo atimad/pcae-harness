@@ -101,3 +101,6 @@
 - Added `pcae status coherence` and `pcae status coherence --json` for lightweight stale roadmap reference detection.
 - Added `check_project_status_coherence` in `src/pcae/core/status.py` with deterministic `KNOWN_STALE_PHRASES` detection.
 - Documented future governance coherence explorations in PROJECT_STATUS.md, tasks/TODO.md, and CHANGELOG.md.
+- Made `pcae session bootstrap` idempotent: same agent already holding the lock continues bootstrap showing full governance summary.
+- Added `lock_acquired` field to bootstrap JSON output.
+- Added `acquire_agent_lock_idempotent` in `src/pcae/core/agent.py`.
