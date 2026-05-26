@@ -313,6 +313,165 @@ def test_provenance_record_requires_summary(
 
 
 # ---------------------------------------------------------------------------
+# provenance timeline command
+# ---------------------------------------------------------------------------
+
+
+def test_provenance_timeline_empty(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "timeline"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Total events: 0" in output
+    assert "No provenance events recorded." in output
+
+
+def test_provenance_timeline_shows_summary_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired", agent_id="alice")
+    append_provenance_event(root, "phase_completed", "phase done", agent_id="bob")
+
+    exit_code = main(["provenance", "timeline"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Total events: 2" in output
+    assert "alice" in output
+    assert "bob" in output
+    assert "agent_acquired" in output
+    assert "phase_completed" in output
+    assert "Latest event:" in output
+    assert "Timeline:" in output
+
+
+def test_provenance_timeline_chronological_order(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "first", "event one")
+    append_provenance_event(root, "second", "event two")
+    append_provenance_event(root, "third", "event three")
+
+    exit_code = main(["provenance", "timeline"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    # Slice to the Timeline: section so "Latest event:" repetition doesn't confuse order
+    timeline_section = output[output.index("Timeline:"):]
+    first_pos = timeline_section.index("event one")
+    second_pos = timeline_section.index("event two")
+    third_pos = timeline_section.index("event three")
+    assert first_pos < second_pos < third_pos
+
+
+def test_provenance_timeline_latest_event_is_last(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "first event")
+    append_provenance_event(root, "b", "last event")
+
+    exit_code = main(["provenance", "timeline"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest event:" in output
+    latest_line = next(l for l in output.splitlines() if "Latest event:" in l)
+    assert "last event" in latest_line
+
+
+def test_provenance_timeline_agents_sorted(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "x", "from charlie", agent_id="charlie")
+    append_provenance_event(root, "x", "from alice", agent_id="alice")
+    append_provenance_event(root, "x", "from bob", agent_id="bob")
+
+    exit_code = main(["provenance", "timeline"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    agents_line = next(l for l in output.splitlines() if l.startswith("Agents:"))
+    assert agents_line == "Agents: alice, bob, charlie"
+
+
+def test_provenance_timeline_json_empty(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "timeline", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["event_count"] == 0
+    assert parsed["agent_ids"] == []
+    assert parsed["event_types"] == []
+    assert parsed["latest_event"] is None
+    assert parsed["timeline"] == []
+
+
+def test_provenance_timeline_json_with_events(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired", agent_id="ci-bot")
+    append_provenance_event(root, "phase_completed", "phase done", agent_id="ci-bot")
+
+    exit_code = main(["provenance", "timeline", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["event_count"] == 2
+    assert parsed["agent_ids"] == ["ci-bot"]
+    assert sorted(parsed["event_types"]) == ["agent_acquired", "phase_completed"]
+    assert parsed["latest_event"]["event_type"] == "phase_completed"
+    assert len(parsed["timeline"]) == 2
+    assert parsed["timeline"][0]["event_type"] == "agent_acquired"
+    assert parsed["timeline"][1]["event_type"] == "phase_completed"
+
+
+def test_provenance_timeline_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    main(["provenance", "timeline", "--json"])
+
+    output = capsys.readouterr().out
+    parsed = json.loads(output)
+    assert set(parsed) == {"agent_ids", "event_count", "event_types", "latest_event", "timeline"}
+
+
+def test_build_provenance_timeline_core(tmp_path: Path, monkeypatch) -> None:
+    from pcae.core.provenance import build_provenance_timeline
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "a", "first", agent_id="x")
+    append_provenance_event(root, "b", "second", agent_id="y")
+    append_provenance_event(root, "a", "third", agent_id="x")
+
+    tl = build_provenance_timeline(root)
+
+    assert tl.event_count == 3
+    assert tl.agent_ids == ("x", "y")
+    assert tl.event_types == ("a", "b")
+    assert tl.latest_event is not None
+    assert tl.latest_event.summary == "third"
+    assert len(tl.timeline) == 3
+
+
+# ---------------------------------------------------------------------------
 # provenance history filtering
 # ---------------------------------------------------------------------------
 

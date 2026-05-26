@@ -49,6 +49,15 @@ class ProvenanceEvent:
 
 
 @dataclass(frozen=True)
+class ProvenanceTimeline:
+    event_count: int
+    agent_ids: tuple[str, ...]
+    event_types: tuple[str, ...]
+    latest_event: ProvenanceEvent | None
+    timeline: tuple[ProvenanceEvent, ...]
+
+
+@dataclass(frozen=True)
 class ProvenanceExportBundle:
     relative_path: Path
     data: dict
@@ -158,6 +167,20 @@ def filter_events(
     if agent_id is not None:
         result = tuple(e for e in result if e.agent_id == agent_id)
     return result
+
+
+def build_provenance_timeline(root: HarnessPath) -> ProvenanceTimeline:
+    history = read_provenance_history(root)
+    events = history.events
+    agent_ids = tuple(sorted({e.agent_id for e in events if e.agent_id is not None}))
+    event_types = tuple(sorted({e.event_type for e in events}))
+    return ProvenanceTimeline(
+        event_count=len(events),
+        agent_ids=agent_ids,
+        event_types=event_types,
+        latest_event=events[-1] if events else None,
+        timeline=events,
+    )
 
 
 def write_provenance_export(

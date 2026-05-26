@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31E: Provenance history filtering.
+Phase 31F: Provenance timeline summary.
 
 ## Current State
 

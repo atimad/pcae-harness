@@ -7,11 +7,57 @@ from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     PROVENANCE_HISTORY_RELATIVE_PATH,
     append_provenance_event,
+    build_provenance_timeline,
     filter_events,
     read_provenance_history,
     read_provenance_status,
     write_provenance_export,
 )
+
+
+def run_provenance_timeline(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    tl = build_provenance_timeline(root)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "agent_ids": list(tl.agent_ids),
+                    "event_count": tl.event_count,
+                    "event_types": list(tl.event_types),
+                    "latest_event": tl.latest_event.to_dict() if tl.latest_event else None,
+                    "timeline": [e.to_dict() for e in tl.timeline],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    print(f"Provenance timeline: {PROVENANCE_HISTORY_RELATIVE_PATH.as_posix()}")
+    print(f"Total events: {tl.event_count}")
+    if not tl.timeline:
+        print("No provenance events recorded.")
+        return 0
+
+    print(f"Agents: {', '.join(tl.agent_ids) if tl.agent_ids else 'none'}")
+    print(f"Event types: {', '.join(tl.event_types)}")
+    latest = tl.latest_event
+    if latest is not None:
+        print(f"Latest event: [{latest.timestamp}] {latest.event_type}: {latest.summary}")
+    print("")
+    print("Timeline:")
+    for event in tl.timeline:
+        print(f"  [{event.timestamp}] {event.event_type}: {event.summary}")
+        if event.agent_id is not None:
+            print(f"    agent: {event.agent_id}")
+        if event.active_task is not None:
+            task_id = event.active_task.get("id", "unknown")
+            print(f"    task: {task_id}")
+        if event.git_branch is not None:
+            print(f"    branch: {event.git_branch}")
+    return 0
 
 
 def run_provenance_status(args: argparse.Namespace) -> int:

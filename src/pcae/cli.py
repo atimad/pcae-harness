@@ -33,6 +33,7 @@ from pcae.commands.provenance import (
     run_provenance_history,
     run_provenance_record,
     run_provenance_status,
+    run_provenance_timeline,
 )
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
@@ -773,6 +774,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show provenance history file status and event count.",
     )
     provenance_status_parser.set_defaults(handler=run_provenance_status)
+
+    provenance_timeline_parser = provenance_subparsers.add_parser(
+        "timeline",
+        help="Show a chronological governance provenance timeline.",
+    )
+    provenance_timeline_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON timeline output.",
+    )
+    provenance_timeline_parser.set_defaults(handler=run_provenance_timeline)
 
     provenance_history_parser = provenance_subparsers.add_parser(
         "history",
