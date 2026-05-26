@@ -275,6 +275,254 @@ def test_phase_start_then_complete_round_trip(
 
 
 # ---------------------------------------------------------------------------
+# pcae phase handoff
+# ---------------------------------------------------------------------------
+
+
+def test_phase_handoff_records_phase_completed_provenance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Phase done", "--next-agent", "claude-next"]
+    )
+
+    capsys.readouterr()
+    assert exit_code == 0
+    history = read_provenance_history(root)
+    phase_events = [e for e in history.events if e.event_type == "phase_completed"]
+    assert len(phase_events) == 1
+    assert phase_events[0].summary == "Phase done"
+    assert phase_events[0].agent_id == "claude-local"
+
+
+def test_phase_handoff_runs_governance_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff validation task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Validate governance", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Health: healthy" in output
+    assert "Check: passed" in output
+
+
+def test_phase_handoff_releases_current_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff release task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--summary", "Release", "--next-agent", "claude-next"])
+
+    capsys.readouterr()
+    history = read_provenance_history(root)
+    event_types = [e.event_type for e in history.events]
+    assert "agent_released" in event_types
+    released = next(e for e in history.events if e.event_type == "agent_released")
+    assert released.agent_id == "claude-local"
+
+
+def test_phase_handoff_acquires_next_agent_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff acquire task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--summary", "Acquire next", "--next-agent", "claude-next"])
+
+    capsys.readouterr()
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "claude-next"
+    history = read_provenance_history(root)
+    acquired = [e for e in history.events if e.event_type == "agent_acquired"]
+    assert any(e.agent_id == "claude-next" for e in acquired)
+
+
+def test_phase_handoff_prints_human_readable_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff output task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "32C complete", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase handoff." in output
+    assert "Summary: 32C complete" in output
+    assert "Health:" in output
+    assert "Check:" in output
+    assert "Provenance events:" in output
+    assert "Released agent: claude-local" in output
+    assert "Next agent: claude-next" in output
+    assert "Agent lock: acquired by claude-next" in output
+    assert "Restart commands:" in output
+    assert "pcae health" in output
+    assert "pcae check" in output
+    assert "pcae provenance timeline" in output
+
+
+def test_phase_handoff_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "JSON handoff",
+            "--next-agent", "claude-next",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["summary"] == "JSON handoff"
+    assert data["released_agent"] == "claude-local"
+    assert data["next_agent"] == "claude-next"
+    assert data["health_status"] in {"healthy", "unhealthy"}
+    assert data["check_status"] in {"passed", "failed"}
+    assert isinstance(data["provenance_event_count"], int)
+    assert set(data.keys()) == {
+        "check_status",
+        "health_status",
+        "next_agent",
+        "provenance_event_count",
+        "released_agent",
+        "summary",
+    }
+
+
+def test_phase_handoff_without_current_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff no lock task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "No lock", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Released agent: none" in output
+    assert "Agent lock: acquired by claude-next" in output
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "claude-next"
+
+
+def test_phase_handoff_full_event_sequence(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff sequence task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(
+        ["phase", "handoff", "--summary", "Full sequence", "--next-agent", "claude-next"]
+    )
+
+    capsys.readouterr()
+    history = read_provenance_history(root)
+    event_types = [e.event_type for e in history.events]
+    assert event_types == [
+        "phase_completed",
+        "agent_released",
+        "agent_acquired",
+    ]
+
+
+def test_phase_handoff_check_failure_still_completes_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    # No task contract → check will fail
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Bad state handoff", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    # Handoff still completes (lock acquired, provenance recorded) despite check failure
+    assert exit_code == 0
+    assert "Check: failed" in output
+    assert "Health: unhealthy" in output
+    history = read_provenance_history(root)
+    assert any(e.event_type == "phase_completed" for e in history.events)
+    assert any(e.event_type == "agent_acquired" for e in history.events)
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "claude-next"
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 

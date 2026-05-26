@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from pcae.core.check import run_checks
 from pcae.core.paths import HarnessPath
-from pcae.core.phase import complete_phase, start_phase
+from pcae.core.phase import complete_phase, handoff_phase, start_phase
 
 
 def run_phase_complete(args: argparse.Namespace) -> int:
@@ -19,6 +20,52 @@ def run_phase_complete(args: argparse.Namespace) -> int:
     else:
         print("Agent lock: none")
     return 0
+
+
+def run_phase_handoff(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = handoff_phase(root, args.summary, args.next_agent)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "check_status": "passed" if result.check_passed else "failed",
+                    "health_status": result.health_status,
+                    "next_agent": result.next_agent,
+                    "provenance_event_count": result.provenance_event_count,
+                    "released_agent": result.released_agent,
+                    "summary": result.summary,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0 if result.next_lock_acquired else 1
+
+    print("Phase handoff.")
+    print(f"Summary: {result.summary}")
+    print(f"Health: {result.health_status}")
+    print(f"Check: {'passed' if result.check_passed else 'failed'}")
+    for v in result.violations:
+        print(f"  - {v}")
+    print(f"Provenance events: {result.provenance_event_count}")
+    print(f"Released agent: {result.released_agent or 'none'}")
+    print(f"Next agent: {result.next_agent}")
+    if result.next_lock_acquired:
+        print(f"Agent lock: acquired by {result.next_agent}")
+    else:
+        print("Agent lock: not acquired (lock already held)")
+
+    print()
+    print("Restart commands:")
+    if not result.next_lock_acquired:
+        print(f"  pcae agent acquire --agent-id {result.next_agent}")
+    print("  pcae health")
+    print("  pcae check")
+    print("  pcae provenance timeline")
+
+    return 0 if result.next_lock_acquired else 1
 
 
 def run_phase_start(args: argparse.Namespace) -> int:

@@ -62,7 +62,7 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
-from pcae.commands.phase import run_phase_complete, run_phase_start
+from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_start
 from pcae.commands.task import (
     run_task_close,
     run_task_complete,
@@ -897,6 +897,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Agent identifier for the new phase session.",
     )
     phase_start_parser.set_defaults(handler=run_phase_start)
+
+    phase_handoff_parser = phase_subparsers.add_parser(
+        "handoff",
+        help="Record phase completion, validate governance, and transfer agent lock.",
+    )
+    phase_handoff_parser.add_argument(
+        "--summary",
+        required=True,
+        help="Summary of the completed phase.",
+    )
+    phase_handoff_parser.add_argument(
+        "--next-agent",
+        required=True,
+        help="Agent identifier that will own the next phase session.",
+    )
+    phase_handoff_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON handoff result.",
+    )
+    phase_handoff_parser.set_defaults(handler=run_phase_handoff)
 
     return parser
 
