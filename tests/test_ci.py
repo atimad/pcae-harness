@@ -263,5 +263,90 @@ def test_ci_drift_json_reports_drift(
     }
 
 
+def test_ci_repair_without_dry_run_fails(capsys) -> None:
+    exit_code = main(["ci", "repair"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "CI repair is only available with --dry-run in this phase." in output
+
+
+def test_ci_repair_dry_run_reports_no_repair_needed(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["ci", "generate", "github"]) == 0
+    capsys.readouterr()
+
+    exit_code = main(["ci", "repair", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "PCAE CI repair dry run" in output
+    assert "Repair needed: false" in output
+    assert "Action: none" in output
+    assert "Reason: no repair needed" in output
+
+
+def test_ci_repair_dry_run_reports_create_for_missing_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "repair", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Repair needed: true" in output
+    assert "Action: create" in output
+    assert "Reason: workflow file missing" in output
+    assert not workflow_path(tmp_path).exists()
+
+
+def test_ci_repair_dry_run_reports_overwrite_for_incomplete_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    target = workflow_path(tmp_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("run: pcae health --json\n", encoding="utf-8")
+    before = target.read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "repair", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Repair needed: true" in output
+    assert "Action: overwrite" in output
+    assert "missing check step" in output
+    assert "missing analytics risk step" in output
+    assert target.read_text(encoding="utf-8") == before
+
+
+def test_ci_repair_dry_run_json_reports_create_for_missing_workflow(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["ci", "repair", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data == {
+        "action": "create",
+        "reason": "workflow file missing",
+        "repair_needed": True,
+        "workflow_path": ".github/workflows/pcae-governance.yml",
+    }
+
+
 def workflow_path(root: Path) -> Path:
     return root / ".github" / "workflows" / "pcae-governance.yml"

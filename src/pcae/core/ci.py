@@ -33,6 +33,14 @@ class CiDrift:
     overall_status: str
 
 
+@dataclass(frozen=True)
+class CiRepairPlan:
+    repair_needed: bool
+    action: str
+    workflow_path: Path
+    reason: str
+
+
 def render_github_actions_workflow() -> str:
     return """name: PCAE Governance
 
@@ -139,4 +147,28 @@ def detect_github_actions_drift(root: HarnessPath) -> CiDrift:
         drift_detected=bool(findings),
         drift_findings=tuple(findings),
         overall_status="drift" if findings else "no_drift",
+    )
+
+
+def plan_github_actions_repair(root: HarnessPath) -> CiRepairPlan:
+    drift = detect_github_actions_drift(root)
+    if drift.overall_status == "missing":
+        return CiRepairPlan(
+            repair_needed=True,
+            action="create",
+            workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
+            reason="workflow file missing",
+        )
+    if drift.drift_detected:
+        return CiRepairPlan(
+            repair_needed=True,
+            action="overwrite",
+            workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
+            reason=", ".join(drift.drift_findings),
+        )
+    return CiRepairPlan(
+        repair_needed=False,
+        action="none",
+        workflow_path=GITHUB_WORKFLOW_RELATIVE_PATH,
+        reason="no repair needed",
     )

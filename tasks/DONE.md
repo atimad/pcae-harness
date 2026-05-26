@@ -93,3 +93,4 @@
 - Added `pcae ci generate github` for GitHub Actions PCAE governance workflow generation.
 - Added `pcae ci status` and JSON output for GitHub Actions governance workflow introspection.
 - Added `pcae ci drift` and JSON output for GitHub Actions governance workflow drift detection.
+- Added `pcae ci repair --dry-run` and JSON output for CI governance repair previews.

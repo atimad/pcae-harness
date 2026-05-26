@@ -15,7 +15,12 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.ci import run_ci_drift, run_ci_generate_github, run_ci_status
+from pcae.commands.ci import (
+    run_ci_drift,
+    run_ci_generate_github,
+    run_ci_repair,
+    run_ci_status,
+)
 from pcae.commands.daemon import (
     default_watch_interval_seconds,
     run_daemon,
@@ -157,6 +162,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON CI drift output.",
     )
     ci_drift_parser.set_defaults(handler=run_ci_drift)
+
+    ci_repair_parser = ci_subparsers.add_parser(
+        "repair",
+        help="Preview repairing PCAE governance CI drift.",
+    )
+    ci_repair_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview CI repair actions without writing files.",
+    )
+    ci_repair_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON CI repair dry-run output.",
+    )
+    ci_repair_parser.set_defaults(handler=run_ci_repair)
 
     health_parser = subparsers.add_parser(
         "health",

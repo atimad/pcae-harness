@@ -5,11 +5,13 @@ import json
 
 from pcae.core.ci import (
     CiDrift,
+    CiRepairPlan,
     CiStatus,
     GITHUB_WORKFLOW_RELATIVE_PATH,
     detect_github_actions_drift,
     generate_github_actions_workflow,
     inspect_github_actions_workflow,
+    plan_github_actions_repair,
     render_github_actions_workflow,
 )
 from pcae.core.paths import HarnessPath
@@ -56,6 +58,19 @@ def run_ci_drift(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_ci_repair(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("CI repair is only available with --dry-run in this phase.")
+        return 1
+
+    plan = plan_github_actions_repair(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(ci_repair_json_data(plan), indent=2, sort_keys=True))
+    else:
+        print_ci_repair_plan(plan)
+    return 0
+
+
 def print_ci_status(status: CiStatus) -> None:
     print("PCAE CI status")
     print(f"Workflow exists: {format_bool(status.workflow_exists)}")
@@ -78,6 +93,14 @@ def print_ci_drift(drift: CiDrift) -> None:
         print("No CI governance drift detected.")
 
 
+def print_ci_repair_plan(plan: CiRepairPlan) -> None:
+    print("PCAE CI repair dry run")
+    print(f"Workflow path: {plan.workflow_path.as_posix()}")
+    print(f"Repair needed: {format_bool(plan.repair_needed)}")
+    print(f"Action: {plan.action}")
+    print(f"Reason: {plan.reason}")
+
+
 def ci_status_json_data(status: CiStatus) -> dict[str, object]:
     return {
         "has_check_step": status.has_check_step,
@@ -94,6 +117,15 @@ def ci_drift_json_data(drift: CiDrift) -> dict[str, object]:
         "drift_detected": drift.drift_detected,
         "drift_findings": list(drift.drift_findings),
         "overall_status": drift.overall_status,
+    }
+
+
+def ci_repair_json_data(plan: CiRepairPlan) -> dict[str, object]:
+    return {
+        "action": plan.action,
+        "reason": plan.reason,
+        "repair_needed": plan.repair_needed,
+        "workflow_path": plan.workflow_path.as_posix(),
     }
 
 

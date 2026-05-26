@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add CI governance drift detection.
+Add CI repair dry-run.
 
 ## Allowed Files
 
