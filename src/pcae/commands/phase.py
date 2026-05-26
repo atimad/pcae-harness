@@ -33,6 +33,8 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     manual_steps = _build_manual_steps(result.next_agent)
     bootstrap_prompt = _build_bootstrap_prompt(result.next_agent)
 
+    restart_workflows = _build_restart_workflows_data()
+
     if args.json:
         print(
             json.dumps(
@@ -43,6 +45,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                     "next_agent": result.next_agent,
                     "provenance_event_count": result.provenance_event_count,
                     "released_agent": result.released_agent,
+                    "restart_workflows": restart_workflows,
                     "summary": result.summary,
                 },
                 indent=2,
@@ -76,6 +79,9 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     print(bootstrap_prompt)
     print("─" * 64)
 
+    print()
+    print(_build_restart_workflows_text())
+
     return 0 if result.next_lock_acquired else 1
 
 
@@ -97,6 +103,63 @@ def _build_bootstrap_prompt(next_agent: str) -> str:
         "check), display the active task, current session, and provenance timeline,\n"
         "and confirm the environment is ready for governed work."
     )
+
+
+def _build_restart_workflows_text() -> str:
+    return (
+        "Example restart workflows:\n"
+        "\n"
+        "Claude CLI:\n"
+        "  1. Start a fresh Claude session:\n"
+        "       claude\n"
+        "  2. Paste the governed bootstrap prompt.\n"
+        "  3. Paste the next phase prompt.\n"
+        "\n"
+        "Codex Desktop:\n"
+        "  1. Open a fresh Codex Desktop session/chat.\n"
+        "  2. In the control terminal, run:\n"
+        "       pcae session bootstrap --agent-id codex-local\n"
+        "  3. Paste the governed bootstrap prompt.\n"
+        "  4. Paste the next phase prompt.\n"
+        "\n"
+        "Generic governed agent:\n"
+        "  1. Start a fresh agent session.\n"
+        "  2. Run:\n"
+        "       pcae session bootstrap --agent-id <agent-id>\n"
+        "  3. Paste the governed bootstrap prompt.\n"
+        "  4. Continue with the next governed phase."
+    )
+
+
+def _build_restart_workflows_data() -> list[dict]:
+    return [
+        {
+            "agent": "Claude CLI",
+            "steps": [
+                "Start a fresh Claude session: claude",
+                "Paste the governed bootstrap prompt.",
+                "Paste the next phase prompt.",
+            ],
+        },
+        {
+            "agent": "Codex Desktop",
+            "steps": [
+                "Open a fresh Codex Desktop session/chat.",
+                "In the control terminal, run: pcae session bootstrap --agent-id codex-local",
+                "Paste the governed bootstrap prompt.",
+                "Paste the next phase prompt.",
+            ],
+        },
+        {
+            "agent": "Generic governed agent",
+            "steps": [
+                "Start a fresh agent session.",
+                "Run: pcae session bootstrap --agent-id <agent-id>",
+                "Paste the governed bootstrap prompt.",
+                "Continue with the next governed phase.",
+            ],
+        },
+    ]
 
 
 def run_phase_start(args: argparse.Namespace) -> int:

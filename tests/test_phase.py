@@ -439,6 +439,8 @@ def test_phase_handoff_json_output(
     assert isinstance(data["manual_steps"], list)
     assert len(data["manual_steps"]) == 4
     assert any("pcae session bootstrap --agent-id claude-next" in s for s in data["manual_steps"])
+    assert isinstance(data["restart_workflows"], list)
+    assert len(data["restart_workflows"]) == 3
     assert set(data.keys()) == {
         "check_status",
         "health_status",
@@ -446,6 +448,7 @@ def test_phase_handoff_json_output(
         "next_agent",
         "provenance_event_count",
         "released_agent",
+        "restart_workflows",
         "summary",
     }
 
@@ -628,6 +631,141 @@ def test_phase_handoff_json_includes_manual_steps_with_correct_agent(
     assert "pcae session bootstrap --agent-id claude-next" in steps[1]
     assert "bootstrap prompt" in steps[2].lower()
     assert "phase prompt" in steps[3].lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 32F: multi-agent governed bootstrap guidance
+# ---------------------------------------------------------------------------
+
+
+def test_phase_handoff_output_includes_claude_cli_example(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Restart workflows task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "32F test", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Example restart workflows:" in output
+    assert "Claude CLI:" in output
+    assert "claude" in output
+
+
+def test_phase_handoff_output_includes_codex_desktop_example(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Codex restart task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Codex test", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Codex Desktop:" in output
+    assert "pcae session bootstrap --agent-id codex-local" in output
+
+
+def test_phase_handoff_output_includes_generic_agent_example(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Generic agent task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Generic test", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Generic governed agent:" in output
+    assert "pcae session bootstrap --agent-id <agent-id>" in output
+
+
+def test_phase_handoff_bootstrap_prompt_remains_generic(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Generic prompt task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Prompt generic", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Bootstrap prompt (copy-ready):" in output
+    assert "governed engineering session" in output
+    assert "governed engineering session in the PCAE harness" in output
+
+
+def test_phase_handoff_json_restart_workflows_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Restart workflows JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "Workflows JSON",
+            "--next-agent", "claude-next",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    workflows = data["restart_workflows"]
+    assert len(workflows) == 3
+    agent_names = [w["agent"] for w in workflows]
+    assert "Claude CLI" in agent_names
+    assert "Codex Desktop" in agent_names
+    assert "Generic governed agent" in agent_names
+    for w in workflows:
+        assert isinstance(w["steps"], list)
+        assert len(w["steps"]) >= 2
+    codex = next(w for w in workflows if w["agent"] == "Codex Desktop")
+    assert any("codex-local" in s for s in codex["steps"])
+    generic = next(w for w in workflows if w["agent"] == "Generic governed agent")
+    assert any("<agent-id>" in s for s in generic["steps"])
 
 
 def test_phase_handoff_missing_next_agent_does_not_mutate_state(

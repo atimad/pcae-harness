@@ -105,3 +105,5 @@
 - Improved `pcae phase handoff` human-readable output: replaced generic restart commands with numbered manual handoff steps and a copy-ready bootstrap prompt for the next agent.
 - Added clear guidance when `--next-agent` is omitted from `pcae phase handoff`: "Please specify the next agent with --next-agent <agent-id>."
 - Added `manual_steps` list to `pcae phase handoff --json` output.
+- Added multi-agent restart workflow examples to `pcae phase handoff` human-readable output: Claude CLI, Codex Desktop, and Generic governed agent.
+- Added `restart_workflows` structured list to `pcae phase handoff --json` output with per-agent step arrays.
