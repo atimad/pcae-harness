@@ -73,7 +73,11 @@ recommendation metadata in both human and JSON output, and generate
 governance-aware workflow plans with `pcae orchestration plan --workflow TEXT`
 and `pcae orchestration plan --workflow TEXT --json` for the built-in workflows
 `documentation`, `implementation`, `validation`, and `release`, with
-deterministic fallback for unknown workflows.
+deterministic fallback for unknown workflows, and preview executable
+orchestration workflow steps with `pcae orchestration simulate --workflow TEXT`
+and `pcae orchestration simulate --workflow TEXT --json`, showing assigned
+agents, work types, reasons, and governance checkpoints without executing work
+or changing locks.
 
 ## Next
 

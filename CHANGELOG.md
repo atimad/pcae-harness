@@ -139,3 +139,4 @@
 - Added `_resolve_agent` private helper to share role-to-agent resolution between `recommend_agent` and `build_workflow_plan` without double-loading the policy.
 - Added `build_workflow_plan` in `src/pcae/core/orchestration.py` to produce ordered workflow steps using orchestration policy and agent registry, with deterministic fallback to `default_agent` for unknown workflows.
 - Added `pcae orchestration plan --workflow TEXT` and `pcae orchestration plan --workflow TEXT --json` to generate governance-aware workflow plans with assigned agents and reasons per step.
+- Added `pcae orchestration simulate --workflow TEXT` and `pcae orchestration simulate --workflow TEXT --json` to preview ordered execution steps, assigned agents, reasons, and governance checkpoints without executing work or changing locks.

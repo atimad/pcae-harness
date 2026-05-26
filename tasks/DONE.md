@@ -109,3 +109,4 @@
 - Added `pcae orchestration policy` and `pcae orchestration policy --json`.
 - Added `AgentRegistryEntry`, `DEFAULT_AGENT_REGISTRY`, and `parse_agent_registry` to `src/pcae/core/policy.py`.
 - Added `pcae orchestration agents` and `pcae orchestration agents --json`.
+- Added `pcae orchestration simulate --workflow TEXT` and JSON output to preview ordered workflow execution without launching agents or changing locks.

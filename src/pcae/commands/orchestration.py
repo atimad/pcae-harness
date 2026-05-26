@@ -3,7 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 
-from pcae.core.orchestration import build_agent_registry_data, build_orchestration_data, build_workflow_plan, recommend_agent
+from pcae.core.orchestration import (
+    build_agent_registry_data,
+    build_orchestration_data,
+    build_workflow_plan,
+    build_workflow_simulation,
+    recommend_agent,
+)
 from pcae.core.paths import HarnessPath
 
 
@@ -76,4 +82,28 @@ def run_orchestration_plan(args: argparse.Namespace) -> int:
         for step in data["steps"]:
             print(f"  {step['step']}. {step['assigned_agent']} -> {step['work_type']}")
             print(f"     Reason: {step['reason']}")
+    return 0
+
+
+def run_orchestration_simulate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = build_workflow_simulation(root, args.workflow)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Workflow simulation: {data['workflow']}")
+        print(f"Simulation mode: {data['execution_mode']}")
+        print("Ordered steps:")
+        for step in data["steps"]:
+            print(f"  {step['step']}. {step['assigned_agent']} -> {step['work_type']}")
+            print(f"     Reason: {step['reason']}")
+            checkpoint = step["governance_checkpoint"]
+            if checkpoint:
+                print(f"     Governance checkpoint: {checkpoint}")
+        print(f"Final result: {data['status']}")
     return 0

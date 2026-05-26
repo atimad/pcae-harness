@@ -10,6 +10,7 @@ from pcae.core.orchestration import (
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
+    build_workflow_simulation,
     load_agent_registry,
     load_orchestration_policy,
     recommend_agent,
@@ -621,6 +622,61 @@ def test_build_workflow_plan_respects_custom_agent_registry(tmp_path: Path) -> N
 
 
 # ---------------------------------------------------------------------------
+# core: build_workflow_simulation
+# ---------------------------------------------------------------------------
+
+
+def test_build_workflow_simulation_documentation(tmp_path: Path) -> None:
+    result = build_workflow_simulation(HarnessPath(tmp_path), "documentation")
+    assert result["workflow"] == "documentation"
+    assert result["status"] == "planned"
+    assert result["execution_mode"] == "simulation"
+    assert len(result["steps"]) == 3
+    assert result["steps"][2]["governance_checkpoint"] == "pcae check"
+
+
+def test_build_workflow_simulation_implementation(tmp_path: Path) -> None:
+    result = build_workflow_simulation(HarnessPath(tmp_path), "implementation")
+    assert result["workflow"] == "implementation"
+    assert [step["work_type"] for step in result["steps"]] == [
+        "implementation",
+        "tests",
+        "governance validation",
+    ]
+
+
+def test_build_workflow_simulation_release(tmp_path: Path) -> None:
+    result = build_workflow_simulation(HarnessPath(tmp_path), "release")
+    assert result["workflow"] == "release"
+    assert result["steps"][0]["governance_checkpoint"] == "pcae check"
+    assert (
+        result["steps"][1]["governance_checkpoint"]
+        == "pcae provenance session current"
+    )
+
+
+def test_build_workflow_simulation_unknown_fallback(tmp_path: Path) -> None:
+    result = build_workflow_simulation(HarnessPath(tmp_path), "unknown-workflow")
+    assert result["workflow"] == "unknown-workflow"
+    assert result["status"] == "planned"
+    assert len(result["steps"]) == 1
+    assert result["steps"][0]["assigned_agent"] == "claude-local"
+    assert result["steps"][0]["governance_checkpoint"] is None
+
+
+def test_build_workflow_simulation_step_keys(tmp_path: Path) -> None:
+    result = build_workflow_simulation(HarnessPath(tmp_path), "documentation")
+    for step in result["steps"]:
+        assert set(step.keys()) == {
+            "step",
+            "assigned_agent",
+            "work_type",
+            "reason",
+            "governance_checkpoint",
+        }
+
+
+# ---------------------------------------------------------------------------
 # CLI: pcae orchestration plan
 # ---------------------------------------------------------------------------
 
@@ -771,6 +827,84 @@ def test_cli_orchestration_plan_no_file_uses_defaults(
     assert exit_code == 0
     assert "pcae-native" in output
     assert "claude-local" in output
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration simulate
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_simulate_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow simulation: documentation" in output
+    assert "Simulation mode: simulation" in output
+    assert "Ordered steps:" in output
+    assert "Final result: planned" in output
+    assert "Governance checkpoint: pcae check" in output
+
+
+def test_cli_orchestration_simulate_human_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow simulation: implementation" in output
+    assert "codex-local -> implementation" in output
+    assert "codex-local -> tests" in output
+
+
+def test_cli_orchestration_simulate_human_release(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "release"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow simulation: release" in output
+    assert "Governance checkpoint: pcae provenance session current" in output
+
+
+def test_cli_orchestration_simulate_human_unknown_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "unknown-wf"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow simulation: unknown-wf" in output
+    assert "claude-local" in output
+    assert "Final result: planned" in output
+
+
+def test_cli_orchestration_simulate_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {"workflow", "status", "execution_mode", "steps"}
+    assert data["workflow"] == "documentation"
+    assert data["status"] == "planned"
+    assert data["execution_mode"] == "simulation"
+    assert data["steps"][2]["governance_checkpoint"] == "pcae check"
+
+
+def test_cli_orchestration_simulate_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "simulate", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
 
 
 # ---------------------------------------------------------------------------

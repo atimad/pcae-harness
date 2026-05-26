@@ -135,3 +135,33 @@ def build_workflow_plan(root: HarnessPath, workflow: str) -> dict:
         )
 
     return {"workflow": workflow, "steps": steps}
+
+
+def _governance_checkpoint_for(work_type: str) -> str | None:
+    if "governance" in work_type:
+        return "pcae check"
+    if "provenance" in work_type:
+        return "pcae provenance session current"
+    return None
+
+
+def build_workflow_simulation(root: HarnessPath, workflow: str) -> dict:
+    plan = build_workflow_plan(root, workflow)
+    steps = []
+    for step in plan["steps"]:
+        steps.append(
+            {
+                "step": step["step"],
+                "assigned_agent": step["assigned_agent"],
+                "work_type": step["work_type"],
+                "reason": step["reason"],
+                "governance_checkpoint": _governance_checkpoint_for(step["work_type"]),
+            }
+        )
+
+    return {
+        "workflow": plan["workflow"],
+        "status": "planned",
+        "execution_mode": "simulation",
+        "steps": steps,
+    }
