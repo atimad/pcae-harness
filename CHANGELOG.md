@@ -94,3 +94,5 @@
 - Added `pcae provenance export` and `pcae provenance export --json` for portable provenance history bundles written to `.pcae/provenance-exports/`.
 - Added `--event-type` and `--agent-id` filters to `pcae provenance history`; filters combine with AND semantics and apply to both human-readable and JSON output.
 - Added `pcae provenance timeline` and `--json` for chronological governance execution summaries with agent, event-type, and latest-event aggregation.
+- Added `pcae provenance sessions` and `--json` to list governance execution sessions grouped by agent_acquired/agent_released boundaries.
+- Added `pcae provenance session current` and `--json` to show the active governance session or report none.

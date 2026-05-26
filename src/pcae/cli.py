@@ -32,6 +32,8 @@ from pcae.commands.provenance import (
     run_provenance_export,
     run_provenance_history,
     run_provenance_record,
+    run_provenance_session_current,
+    run_provenance_sessions,
     run_provenance_status,
     run_provenance_timeline,
 )
@@ -817,6 +819,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON export result.",
     )
     provenance_export_parser.set_defaults(handler=run_provenance_export)
+
+    provenance_sessions_parser = provenance_subparsers.add_parser(
+        "sessions",
+        help="List governance execution sessions derived from provenance history.",
+    )
+    provenance_sessions_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON sessions output.",
+    )
+    provenance_sessions_parser.set_defaults(handler=run_provenance_sessions)
+
+    provenance_session_parser = provenance_subparsers.add_parser(
+        "session",
+        help="Inspect a specific governance execution session.",
+    )
+    provenance_session_subparsers = provenance_session_parser.add_subparsers(
+        dest="provenance_session_command",
+        required=True,
+    )
+    provenance_session_current_parser = provenance_session_subparsers.add_parser(
+        "current",
+        help="Show the current active governance session.",
+    )
+    provenance_session_current_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON current session output.",
+    )
+    provenance_session_current_parser.set_defaults(handler=run_provenance_session_current)
 
     provenance_record_parser = provenance_subparsers.add_parser(
         "record",

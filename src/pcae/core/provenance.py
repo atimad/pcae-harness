@@ -49,6 +49,28 @@ class ProvenanceEvent:
 
 
 @dataclass(frozen=True)
+class ProvenanceSession:
+    session_id: str
+    active: bool
+    agent_id: str | None
+    event_count: int
+    started_at: str
+    ended_at: str | None
+    events: tuple[ProvenanceEvent, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "active": self.active,
+            "agent_id": self.agent_id,
+            "ended_at": self.ended_at,
+            "event_count": self.event_count,
+            "events": [e.to_dict() for e in self.events],
+            "session_id": self.session_id,
+            "started_at": self.started_at,
+        }
+
+
+@dataclass(frozen=True)
 class ProvenanceTimeline:
     event_count: int
     agent_ids: tuple[str, ...]
@@ -215,6 +237,60 @@ def build_provenance_export_data(root: HarnessPath, timestamp: datetime) -> dict
         "exported_at": timestamp.isoformat(),
         "git_branch": _safe_git_branch(root),
     }
+
+
+def build_provenance_sessions(root: HarnessPath) -> tuple[ProvenanceSession, ...]:
+    history = read_provenance_history(root)
+    sessions: list[ProvenanceSession] = []
+    current: list[ProvenanceEvent] = []
+    in_session = False
+
+    for event in history.events:
+        if event.event_type == "agent_acquired":
+            current = [event]
+            in_session = True
+        elif in_session:
+            current.append(event)
+            if event.event_type == "agent_released":
+                sessions.append(_make_session(current, active=False))
+                current = []
+                in_session = False
+
+    if in_session and current:
+        sessions.append(_make_session(current, active=True))
+
+    return tuple(sessions)
+
+
+def find_active_session(
+    sessions: tuple[ProvenanceSession, ...],
+) -> ProvenanceSession | None:
+    for session in sessions:
+        if session.active:
+            return session
+    return None
+
+
+def _make_session(events: list[ProvenanceEvent], active: bool) -> ProvenanceSession:
+    start = events[0]
+    agent_id = start.agent_id
+    ended_at = events[-1].timestamp if not active else None
+    return ProvenanceSession(
+        session_id=_session_id_from_timestamp(start.timestamp),
+        active=active,
+        agent_id=agent_id,
+        event_count=len(events),
+        started_at=start.timestamp,
+        ended_at=ended_at,
+        events=tuple(events),
+    )
+
+
+def _session_id_from_timestamp(ts: str) -> str:
+    date_time = ts[:19]
+    date_part = date_time[:10].replace("-", "")
+    time_part = date_time[11:].replace(":", "")
+    return f"session-{date_part}-{time_part}"
 
 
 def _read_raw_events(root: HarnessPath) -> tuple[dict, ...]:

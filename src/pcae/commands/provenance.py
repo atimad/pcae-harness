@@ -7,12 +7,64 @@ from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     PROVENANCE_HISTORY_RELATIVE_PATH,
     append_provenance_event,
+    build_provenance_sessions,
     build_provenance_timeline,
     filter_events,
+    find_active_session,
     read_provenance_history,
     read_provenance_status,
     write_provenance_export,
 )
+
+
+def run_provenance_sessions(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    sessions = build_provenance_sessions(root)
+
+    if args.json:
+        print(json.dumps([s.to_dict() for s in sessions], indent=2, sort_keys=True))
+        return 0
+
+    print(f"Provenance sessions: {PROVENANCE_HISTORY_RELATIVE_PATH.as_posix()}")
+    print(f"Session count: {len(sessions)}")
+    if not sessions:
+        print("No governance sessions found.")
+        return 0
+
+    for session in sessions:
+        status = "active" if session.active else "inactive"
+        print(f"\n  {session.session_id} [{status}]")
+        print(f"    Agent: {session.agent_id or 'none'}")
+        print(f"    Events: {session.event_count}")
+        print(f"    Started: {session.started_at}")
+        print(f"    Ended: {session.ended_at or '-'}")
+    return 0
+
+
+def run_provenance_session_current(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    sessions = build_provenance_sessions(root)
+    session = find_active_session(sessions)
+
+    if args.json:
+        print(
+            json.dumps(
+                session.to_dict() if session is not None else None,
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    if session is None:
+        print("No active governance session.")
+        return 0
+
+    print(f"Active session: {session.session_id}")
+    print(f"Agent: {session.agent_id or 'none'}")
+    print(f"Events: {session.event_count}")
+    print(f"Started: {session.started_at}")
+    return 0
 
 
 def run_provenance_timeline(args: argparse.Namespace) -> int:

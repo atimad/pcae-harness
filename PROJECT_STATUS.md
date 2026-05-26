@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 31F: Provenance timeline summary.
+Phase 32A: Governance execution sessions.
 
 ## Current State
 

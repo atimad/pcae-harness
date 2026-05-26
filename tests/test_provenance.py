@@ -313,6 +313,237 @@ def test_provenance_record_requires_summary(
 
 
 # ---------------------------------------------------------------------------
+# provenance sessions command
+# ---------------------------------------------------------------------------
+
+
+def test_provenance_sessions_empty(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "sessions"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session count: 0" in output
+    assert "No governance sessions found." in output
+
+
+def test_provenance_sessions_single_complete(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired", agent_id="alice")
+    append_provenance_event(root, "phase_completed", "work done", agent_id="alice")
+    append_provenance_event(root, "agent_released", "lock released", agent_id="alice")
+
+    exit_code = main(["provenance", "sessions"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session count: 1" in output
+    assert "inactive" in output
+    assert "alice" in output
+    assert "Events: 3" in output
+
+
+def test_provenance_sessions_active_session(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "lock acquired", agent_id="ci-bot")
+
+    exit_code = main(["provenance", "sessions"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session count: 1" in output
+    assert "active" in output
+    assert "ci-bot" in output
+    assert "Events: 1" in output
+
+
+def test_provenance_sessions_multiple(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    # Complete session
+    append_provenance_event(root, "agent_acquired", "acquire 1", agent_id="alice")
+    append_provenance_event(root, "agent_released", "release 1", agent_id="alice")
+    # Active session
+    append_provenance_event(root, "agent_acquired", "acquire 2", agent_id="bob")
+    append_provenance_event(root, "phase_completed", "mid-work", agent_id="bob")
+
+    exit_code = main(["provenance", "sessions"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Session count: 2" in output
+    assert "inactive" in output
+    assert "active" in output
+
+
+def test_provenance_sessions_events_outside_boundary_ignored(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from pcae.core.provenance import build_provenance_sessions
+    root = HarnessPath(tmp_path)
+    # Event before any session — should be ignored
+    append_provenance_event(root, "phase_completed", "orphan event")
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="x")
+    append_provenance_event(root, "agent_released", "release", agent_id="x")
+
+    sessions = build_provenance_sessions(root)
+
+    assert len(sessions) == 1
+    assert sessions[0].event_count == 2  # only acquire + release
+
+
+def test_provenance_sessions_ended_at_is_release_timestamp(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from pcae.core.provenance import build_provenance_sessions
+    from datetime import datetime, timezone
+    root = HarnessPath(tmp_path)
+    t1 = datetime(2026, 5, 26, 10, 0, 0, tzinfo=timezone.utc)
+    t2 = datetime(2026, 5, 26, 10, 5, 0, tzinfo=timezone.utc)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="x", created_at=t1)
+    append_provenance_event(root, "agent_released", "release", agent_id="x", created_at=t2)
+
+    sessions = build_provenance_sessions(root)
+
+    assert sessions[0].started_at == t1.isoformat()
+    assert sessions[0].ended_at == t2.isoformat()
+    assert not sessions[0].active
+    assert sessions[0].session_id == "session-20260526-100000"
+
+
+def test_provenance_sessions_active_has_no_ended_at(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from pcae.core.provenance import build_provenance_sessions
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="x")
+
+    sessions = build_provenance_sessions(root)
+
+    assert sessions[0].active
+    assert sessions[0].ended_at is None
+
+
+def test_provenance_sessions_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="alice")
+    append_provenance_event(root, "agent_released", "release", agent_id="alice")
+
+    exit_code = main(["provenance", "sessions", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert isinstance(parsed, list)
+    assert len(parsed) == 1
+    session = parsed[0]
+    assert set(session) == {
+        "session_id", "active", "agent_id", "event_count",
+        "started_at", "ended_at", "events",
+    }
+    assert session["active"] is False
+    assert session["agent_id"] == "alice"
+    assert session["event_count"] == 2
+
+
+def test_provenance_sessions_json_empty(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    main(["provenance", "sessions", "--json"])
+
+    output = capsys.readouterr().out
+    assert json.loads(output) == []
+
+
+# ---------------------------------------------------------------------------
+# provenance session current command
+# ---------------------------------------------------------------------------
+
+
+def test_provenance_session_current_no_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "session", "current"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No active governance session." in output
+
+
+def test_provenance_session_current_with_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="ci-bot")
+    append_provenance_event(root, "phase_completed", "work", agent_id="ci-bot")
+
+    exit_code = main(["provenance", "session", "current"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Active session:" in output
+    assert "ci-bot" in output
+    assert "Events: 2" in output
+    assert "Started:" in output
+
+
+def test_provenance_session_current_completed_not_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="x")
+    append_provenance_event(root, "agent_released", "release", agent_id="x")
+
+    exit_code = main(["provenance", "session", "current"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No active governance session." in output
+
+
+def test_provenance_session_current_json_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    append_provenance_event(root, "agent_acquired", "acquire", agent_id="bot")
+
+    exit_code = main(["provenance", "session", "current", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed is not None
+    assert parsed["active"] is True
+    assert parsed["agent_id"] == "bot"
+    assert parsed["ended_at"] is None
+
+
+def test_provenance_session_current_json_no_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["provenance", "session", "current", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert json.loads(output) is None
+
+
+# ---------------------------------------------------------------------------
 # provenance timeline command
 # ---------------------------------------------------------------------------
 
