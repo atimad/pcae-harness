@@ -28,6 +28,7 @@ from pcae.commands.daemon import (
     run_daemon_watch,
 )
 from pcae.commands.docs import run_docs_architecture, run_docs_commands, run_docs_glossary
+from pcae.commands.provenance import run_provenance_history, run_provenance_status
 from pcae.commands.export import run_export_bundle
 from pcae.commands.fleet import (
     run_fleet_add,
@@ -752,6 +753,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Finalize the current engineering session.",
     )
     session_end_parser.set_defaults(handler=run_session_end)
+
+    provenance_parser = subparsers.add_parser(
+        "provenance",
+        help="Inspect PCAE governance provenance history.",
+    )
+    provenance_subparsers = provenance_parser.add_subparsers(
+        dest="provenance_command",
+        required=True,
+    )
+
+    provenance_status_parser = provenance_subparsers.add_parser(
+        "status",
+        help="Show provenance history file status and event count.",
+    )
+    provenance_status_parser.set_defaults(handler=run_provenance_status)
+
+    provenance_history_parser = provenance_subparsers.add_parser(
+        "history",
+        help="Show recorded provenance events.",
+    )
+    provenance_history_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON provenance history output.",
+    )
+    provenance_history_parser.set_defaults(handler=run_provenance_history)
 
     return parser
 

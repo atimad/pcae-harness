@@ -87,3 +87,5 @@
 - Added `pcae docs commands` for generating `docs/COMMANDS.md`.
 - Added `pcae docs architecture` for generating `docs/ARCHITECTURE.md`.
 - Added `pcae docs glossary` for generating `docs/GLOSSARY.md` with definitions of all key PCAE governance concepts.
+- Added `pcae provenance status` and `pcae provenance history` for reading `.pcae/provenance-history.json` governance attribution events.
+- Added `append_provenance_event` helper for durable provenance event writes.
