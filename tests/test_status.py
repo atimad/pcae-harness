@@ -12,6 +12,7 @@ from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
+    RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
@@ -30,6 +31,7 @@ from pcae.core.status import (
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
+    validate_runtime_snapshot_restore_safety,
 )
 
 
@@ -1284,6 +1286,327 @@ def test_cli_runtime_snapshot_lineage_json_with_break(
     assert data["lineage_chains"][0]["entries"][0]["filename"] == before.export_path.name
     assert data["lineage_chains"][1]["entries"][0]["filename"] == after.export_path.name
     assert data["latest_head"]["filename"] == after.export_path.name
+
+
+# ── Phase 34L: restore safety validation ────────────────────────────────────
+
+PCAE_GITIGNORE_CONTENT = (
+    "agent-lock.json\n"
+    "architecture-history.json\n"
+    "provenance-exports/\n"
+    "provenance-history.json\n"
+    "runtime-snapshots/\n"
+    "session.json\n"
+)
+
+
+def commit_governance_baseline(tmp_path: Path) -> None:
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "baseline"], cwd=tmp_path, check=True, capture_output=True)
+
+
+def setup_clean_governed_snapshot(tmp_path: Path):
+    """Return export for a clean committed repo with one compatible snapshot.
+
+    Uses init_harness to create all required PCAE files so run_checks passes,
+    then writes session.json with matching task title for continuity verification.
+    A .pcae/.gitignore excludes runtime files so the repo stays clean after
+    writing agent locks or exporting snapshots.
+    """
+    from pcae.commands.init import init_harness
+
+    initialize_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    # Write task and matching session
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260527-1200-test.md").write_text(
+        "# Task Contract\n\n"
+        "## Task ID\n\n20260527-1200-test\n\n"
+        "## Title\n\nTest task\n\n"
+        "## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    pcae_dir = tmp_path / ".pcae"
+    (pcae_dir / "session.json").write_text(
+        json.dumps({
+            "active_task": {"id": "20260527-1200-test", "title": "Test task"},
+            "current_objective": "Validate restore safety.",
+            "next_recommended_step": "Run governance checks.",
+        }),
+        encoding="utf-8",
+    )
+    (pcae_dir / "provenance-history.json").write_text(json.dumps([]), encoding="utf-8")
+    (pcae_dir / ".gitignore").write_text(PCAE_GITIGNORE_CONTENT, encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+    return export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+
+
+def test_validate_restore_safe_on_clean_committed_repo(tmp_path: Path) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    assert result.safe_to_restore is True
+    assert result.blocking_issues == ()
+    assert result.advisory == RESTORE_SAFETY_VALIDATION_ADVISORY
+    names = [c.name for c in result.validation_checks]
+    for expected in (
+        "snapshot_compatibility",
+        "snapshot_support_level",
+        "repo_cleanliness",
+        "session_continuity",
+        "active_task_presence",
+        "policy_configuration",
+        "agent_lock_safety",
+        "lineage_continuity",
+        "governance_health",
+    ):
+        assert expected in names
+    assert all(c.passed for c in result.validation_checks)
+
+
+def test_validate_restore_blocked_by_missing_file(tmp_path: Path) -> None:
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path),
+        Path("nonexistent-snapshot.json"),
+    )
+    assert result.safe_to_restore is False
+    assert len(result.validation_checks) == 1
+    assert result.validation_checks[0].name == "snapshot_compatibility"
+    assert result.validation_checks[0].blocking is True
+    assert any("not found" in issue for issue in result.blocking_issues)
+
+
+def test_validate_restore_blocked_by_incompatible_snapshot(tmp_path: Path) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_schema_version"] = 999
+    target.write_text(json.dumps(data), encoding="utf-8")
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    assert result.safe_to_restore is False
+    compat = next(c for c in result.validation_checks if c.name == "snapshot_compatibility")
+    assert not compat.passed and compat.blocking
+    support = next(c for c in result.validation_checks if c.name == "snapshot_support_level")
+    assert not support.passed and support.blocking
+    assert len(result.blocking_issues) >= 1
+
+
+def test_validate_restore_blocked_by_dirty_repo(tmp_path: Path) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    # Add an uncommitted tracked file after the baseline commit
+    (tmp_path / "dirty.txt").write_text("uncommitted\n", encoding="utf-8")
+    subprocess.run(["git", "add", "dirty.txt"], cwd=tmp_path, check=True, capture_output=True)
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    assert result.safe_to_restore is False
+    check = next(c for c in result.validation_checks if c.name == "repo_cleanliness")
+    assert not check.passed and check.blocking
+    assert any("uncommitted" in issue for issue in result.blocking_issues)
+
+
+def test_validate_restore_warns_on_session_continuity_mismatch(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n## Next\n\n- Next.\n",
+        encoding="utf-8",
+    )
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True)
+    (active_dir / "20260527-1200-test.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260527-1200-test\n\n## Title\n\nTest task\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir()
+    # Session references a different task {id+title} — triggers mismatch violation
+    (pcae_dir / "session.json").write_text(
+        json.dumps({"active_task": {"id": "different-task", "title": "Different task"}}),
+        encoding="utf-8",
+    )
+    (pcae_dir / "provenance-history.json").write_text(json.dumps([]), encoding="utf-8")
+    (pcae_dir / ".gitignore").write_text(PCAE_GITIGNORE_CONTENT, encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+    export = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    check = next(c for c in result.validation_checks if c.name == "session_continuity")
+    assert not check.passed
+    assert not check.blocking
+    assert any("continuity" in w.lower() or "session" in w.lower() for w in result.warnings)
+
+
+def test_validate_restore_warns_on_no_active_task(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n## Next\n\n- Next.\n",
+        encoding="utf-8",
+    )
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir()
+    (pcae_dir / "session.json").write_text(json.dumps({}), encoding="utf-8")
+    (pcae_dir / "provenance-history.json").write_text(json.dumps([]), encoding="utf-8")
+    (pcae_dir / ".gitignore").write_text(PCAE_GITIGNORE_CONTENT, encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+    export = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    check = next(c for c in result.validation_checks if c.name == "active_task_presence")
+    assert not check.passed
+    assert not check.blocking
+    assert any("active task" in w.lower() for w in result.warnings)
+
+
+def test_validate_restore_warns_on_active_agent_lock(tmp_path: Path) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    # Write a fresh (non-stale) agent lock — gitignored, repo stays clean
+    (tmp_path / ".pcae" / "agent-lock.json").write_text(
+        json.dumps({
+            "agent_id": "other-agent",
+            "acquired_at": datetime.now(timezone.utc).isoformat(),
+            "active_task": None,
+            "git_branch": "main",
+        }),
+        encoding="utf-8",
+    )
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    check = next(c for c in result.validation_checks if c.name == "agent_lock_safety")
+    assert not check.passed
+    assert not check.blocking
+    assert any("other-agent" in w for w in result.warnings)
+
+
+def test_validate_restore_warns_on_lineage_break(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    (tmp_path / ".pcae" / ".gitignore").write_text(PCAE_GITIGNORE_CONTENT, encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+    write_incompatible_snapshot(
+        tmp_path,
+        "runtime-snapshot-20260527-100000.json",
+        "2026-05-27T10:00:00+00:00",
+    )
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path),
+        tmp_path / ".pcae" / "runtime-snapshots" / "runtime-snapshot-20260527-100000.json",
+    )
+    check = next(c for c in result.validation_checks if c.name == "lineage_continuity")
+    assert not check.passed
+    assert not check.blocking
+    assert result.lineage_status == "lineage_break"
+    assert any("lineage" in w.lower() for w in result.warnings)
+
+
+def test_validate_restore_warns_on_unknown_lineage(tmp_path: Path) -> None:
+    """Snapshot file outside the manifest dir has unknown lineage status."""
+    export = setup_clean_governed_snapshot(tmp_path)
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    # Remove from standard dir; write to non-standard location
+    target.unlink()
+    orphan = tmp_path / "orphan-snapshot.json"
+    orphan.write_text(json.dumps(data), encoding="utf-8")
+
+    result = validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), orphan
+    )
+    check = next(c for c in result.validation_checks if c.name == "lineage_continuity")
+    assert not check.passed
+    assert not check.blocking
+    assert result.lineage_status == "unknown"
+    assert any("lineage" in w.lower() for w in result.warnings)
+
+
+def test_validate_restore_is_read_only(tmp_path: Path) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    target = tmp_path / export.export_path
+    before = target.read_text(encoding="utf-8")
+    validate_runtime_snapshot_restore_safety(
+        HarnessPath(tmp_path), tmp_path / export.export_path
+    )
+    assert target.read_text(encoding="utf-8") == before
+    snapshots = sorted(p.name for p in (tmp_path / ".pcae" / "runtime-snapshots").glob("*.json"))
+    assert snapshots == [export.export_path.name]
+
+
+def test_cli_validate_restore_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        ["runtime", "snapshot", "validate-restore", str(tmp_path / export.export_path)]
+    )
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot restore safety validation" in output
+    assert "Restore safety status: safe" in output
+    assert "Validation checks:" in output
+    assert "snapshot_compatibility: pass" in output
+    assert "repo_cleanliness: pass" in output
+    assert "Blocking issues:" in output
+    assert "  - none" in output
+    assert "Lineage continuity status:" in output
+    assert RESTORE_SAFETY_VALIDATION_ADVISORY in output
+
+
+def test_cli_validate_restore_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    export = setup_clean_governed_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        ["runtime", "snapshot", "validate-restore",
+         str(tmp_path / export.export_path), "--json"]
+    )
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["safe_to_restore"] is True
+    assert data["blocking_issues"] == []
+    assert data["warnings"] == []
+    names = [c["name"] for c in data["validation_checks"]]
+    assert names == [
+        "snapshot_compatibility",
+        "snapshot_support_level",
+        "repo_cleanliness",
+        "session_continuity",
+        "active_task_presence",
+        "policy_configuration",
+        "agent_lock_safety",
+        "lineage_continuity",
+        "governance_health",
+    ]
+    assert all(c["passed"] for c in data["validation_checks"])
+    assert all(not c["blocking"] for c in data["validation_checks"])
+    assert data["advisory"] == RESTORE_SAFETY_VALIDATION_ADVISORY
 
 
 def write_incompatible_snapshot(

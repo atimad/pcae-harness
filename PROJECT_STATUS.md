@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34K: Governance runtime snapshot lineage tracking.
+Phase 34L: Governance runtime restore safety validation.
 
 ## Governance Coherence Note
 
@@ -149,7 +149,15 @@ with `pcae runtime snapshot lineage` and
 by exported_at, grouping compatible snapshots into continuity chains with
 previous-snapshot references, recording incompatible snapshots as lineage
 breaks, and reporting the latest lineage head without modifying any snapshot
-or manifest.
+or manifest, and restore safety can be validated read-only with
+`pcae runtime snapshot validate-restore PATH` and
+`pcae runtime snapshot validate-restore PATH --json`, running nine checks
+(compatibility, support level, repo cleanliness, session continuity, active
+task presence, policy validity, agent lock safety, lineage continuity, and
+governance health) to determine whether a snapshot is safe to restore,
+reporting blocking issues that prevent restore, non-blocking warnings, and
+the lineage continuity status without restoring runtime state, modifying
+agent locks, or mutating provenance, session, or governance artifacts.
 
 ## Next
 

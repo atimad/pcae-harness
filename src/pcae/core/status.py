@@ -5,9 +5,11 @@ from datetime import datetime, timezone
 from importlib import metadata
 import json
 from pathlib import Path
+import subprocess
 
 from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import run_checks
+from pcae.core.git_status import read_git_changes
 from pcae.core.health import build_health_data, session_continuity_status
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
@@ -93,6 +95,9 @@ RUNTIME_SNAPSHOT_RETENTION_ADVISORY = (
 )
 RUNTIME_SNAPSHOT_LINEAGE_ADVISORY = (
     "Lineage analysis is advisory; no snapshots are modified."
+)
+RESTORE_SAFETY_VALIDATION_ADVISORY = (
+    "Restore safety validation is advisory; no runtime state is changed."
 )
 DEFAULT_RUNTIME_SNAPSHOT_RETENTION_KEEP_COUNT = 5
 
@@ -452,6 +457,42 @@ class RuntimeSnapshotLineage:
             "lineage_chains": [chain.to_dict() for chain in self.lineage_chains],
             "lineage_breaks": [brk.to_dict() for brk in self.lineage_breaks],
             "latest_head": self.latest_head.to_dict() if self.latest_head is not None else None,
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RestoreSafetyCheck:
+    name: str
+    passed: bool
+    blocking: bool
+    message: str
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "passed": self.passed,
+            "blocking": self.blocking,
+            "message": self.message,
+        }
+
+
+@dataclass(frozen=True)
+class RestoreSafetyValidation:
+    safe_to_restore: bool
+    validation_checks: tuple[RestoreSafetyCheck, ...]
+    blocking_issues: tuple[str, ...]
+    warnings: tuple[str, ...]
+    lineage_status: str
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "safe_to_restore": self.safe_to_restore,
+            "validation_checks": [check.to_dict() for check in self.validation_checks],
+            "blocking_issues": list(self.blocking_issues),
+            "warnings": list(self.warnings),
+            "lineage_status": self.lineage_status,
             "advisory": self.advisory,
         }
 
@@ -1073,6 +1114,297 @@ def build_runtime_snapshot_lineage(root: HarnessPath) -> RuntimeSnapshotLineage:
         latest_head=latest_head,
         advisory=RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     )
+
+
+def validate_runtime_snapshot_restore_safety(
+    root: HarnessPath,
+    snapshot_path: Path,
+) -> RestoreSafetyValidation:
+    """Return deterministic read-only restore safety validation for a runtime snapshot."""
+    checks: list[RestoreSafetyCheck] = []
+    blocking_issues: list[str] = []
+    warnings_list: list[str] = []
+    lineage_status = "unknown"
+
+    # 1. Snapshot compatibility status
+    try:
+        compat_report = analyze_runtime_snapshot_compatibility(root, snapshot_path)
+    except ValueError as error:
+        message = str(error)
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_compatibility",
+            passed=False,
+            blocking=True,
+            message=message,
+        ))
+        blocking_issues.append(message)
+        return RestoreSafetyValidation(
+            safe_to_restore=False,
+            validation_checks=tuple(checks),
+            blocking_issues=tuple(blocking_issues),
+            warnings=(),
+            lineage_status=lineage_status,
+            advisory=RESTORE_SAFETY_VALIDATION_ADVISORY,
+        )
+
+    if compat_report.compatible:
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_compatibility",
+            passed=True,
+            blocking=False,
+            message="Snapshot is compatible.",
+        ))
+    else:
+        message = "Snapshot is not compatible; restore is not safe."
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_compatibility",
+            passed=False,
+            blocking=True,
+            message=message,
+        ))
+        blocking_issues.append(message)
+
+    # 2. Snapshot support level
+    support_level = compat_report.support_level
+    if support_level == "supported":
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_support_level",
+            passed=True,
+            blocking=False,
+            message=f"Snapshot support level is '{support_level}'.",
+        ))
+    elif support_level == "partially-supported":
+        message = (
+            f"Snapshot support level is '{support_level}';"
+            " restore may not cover all runtime sections."
+        )
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_support_level",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+    else:
+        message = f"Snapshot support level is '{support_level}'; restore is blocked."
+        checks.append(RestoreSafetyCheck(
+            name="snapshot_support_level",
+            passed=False,
+            blocking=True,
+            message=message,
+        ))
+        blocking_issues.append(message)
+
+    # 3. Repo cleanliness
+    try:
+        changes = read_git_changes(root)
+        if not changes:
+            checks.append(RestoreSafetyCheck(
+                name="repo_cleanliness",
+                passed=True,
+                blocking=False,
+                message="Repository working tree is clean.",
+            ))
+        else:
+            message = (
+                f"Repository has {len(changes)} uncommitted change(s);"
+                " restore may overwrite in-progress work."
+            )
+            checks.append(RestoreSafetyCheck(
+                name="repo_cleanliness",
+                passed=False,
+                blocking=True,
+                message=message,
+            ))
+            blocking_issues.append(message)
+    except (OSError, subprocess.CalledProcessError):
+        message = "Repository cleanliness could not be determined."
+        checks.append(RestoreSafetyCheck(
+            name="repo_cleanliness",
+            passed=False,
+            blocking=True,
+            message=message,
+        ))
+        blocking_issues.append(message)
+
+    # 4. Session continuity state
+    check_result = run_checks(root)
+    continuity = session_continuity_status(check_result)
+    if continuity == "verified":
+        checks.append(RestoreSafetyCheck(
+            name="session_continuity",
+            passed=True,
+            blocking=False,
+            message="Session continuity is verified.",
+        ))
+    else:
+        message = (
+            f"Session continuity is '{continuity}';"
+            " snapshot may not match current session state."
+        )
+        checks.append(RestoreSafetyCheck(
+            name="session_continuity",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+
+    # 5. Active task presence
+    active_task = find_latest_active_task(root)
+    if active_task is not None:
+        checks.append(RestoreSafetyCheck(
+            name="active_task_presence",
+            passed=True,
+            blocking=False,
+            message=f"Active task present: {active_task.task_id}.",
+        ))
+    else:
+        message = "No active task found; restore may not correspond to an active governance context."
+        checks.append(RestoreSafetyCheck(
+            name="active_task_presence",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+
+    # 6. Policy configuration validity
+    policy = load_policy(root)
+    if policy.valid:
+        checks.append(RestoreSafetyCheck(
+            name="policy_configuration",
+            passed=True,
+            blocking=False,
+            message=f"Policy configuration is valid ({policy.source}).",
+        ))
+    else:
+        message = policy.error or "Policy configuration is invalid."
+        checks.append(RestoreSafetyCheck(
+            name="policy_configuration",
+            passed=False,
+            blocking=True,
+            message=message,
+        ))
+        blocking_issues.append(message)
+
+    # 7. Agent lock safety
+    lock_state = build_agent_lock_state(root)
+    locked = bool(lock_state.get("locked"))
+    is_stale = bool(lock_state.get("stale"))
+    holding_agent = lock_state.get("agent_id")
+    if locked and not is_stale:
+        message = (
+            f"Agent lock is held by '{holding_agent}' and is not stale;"
+            " restore may conflict with active agent work."
+        )
+        checks.append(RestoreSafetyCheck(
+            name="agent_lock_safety",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+    elif locked and is_stale:
+        checks.append(RestoreSafetyCheck(
+            name="agent_lock_safety",
+            passed=True,
+            blocking=False,
+            message=(
+                f"Agent lock is held by '{holding_agent}' but is stale;"
+                " restore is unlikely to conflict."
+            ),
+        ))
+    else:
+        checks.append(RestoreSafetyCheck(
+            name="agent_lock_safety",
+            passed=True,
+            blocking=False,
+            message="No active agent lock held; restore would not conflict with agent work.",
+        ))
+
+    # 8. Lineage continuity
+    lineage = build_runtime_snapshot_lineage(root)
+    snapshot_filename = Path(snapshot_path).name
+    lineage_status = _snapshot_lineage_status(snapshot_filename, lineage)
+    if lineage_status in ("head_of_chain", "chain_start", "in_chain"):
+        checks.append(RestoreSafetyCheck(
+            name="lineage_continuity",
+            passed=True,
+            blocking=False,
+            message=(
+                f"Snapshot is part of a compatible lineage chain"
+                f" (position: {lineage_status})."
+            ),
+        ))
+    elif lineage_status == "lineage_break":
+        message = (
+            "Snapshot is a lineage break; restoring it would skip governance continuity."
+        )
+        checks.append(RestoreSafetyCheck(
+            name="lineage_continuity",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+    else:
+        message = (
+            "Snapshot lineage status could not be determined;"
+            " it may not be indexed in the current manifest."
+        )
+        checks.append(RestoreSafetyCheck(
+            name="lineage_continuity",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+
+    # 9. Governance health/check status
+    if check_result.passed:
+        checks.append(RestoreSafetyCheck(
+            name="governance_health",
+            passed=True,
+            blocking=False,
+            message="Governance check passed.",
+        ))
+    else:
+        message = "Governance check did not pass; restore may not be safe."
+        checks.append(RestoreSafetyCheck(
+            name="governance_health",
+            passed=False,
+            blocking=False,
+            message=message,
+        ))
+        warnings_list.append(message)
+
+    return RestoreSafetyValidation(
+        safe_to_restore=len(blocking_issues) == 0,
+        validation_checks=tuple(checks),
+        blocking_issues=tuple(blocking_issues),
+        warnings=tuple(warnings_list),
+        lineage_status=lineage_status,
+        advisory=RESTORE_SAFETY_VALIDATION_ADVISORY,
+    )
+
+
+def _snapshot_lineage_status(
+    filename: str,
+    lineage: RuntimeSnapshotLineage,
+) -> str:
+    for chain in lineage.lineage_chains:
+        for entry in chain.entries:
+            if entry.filename == filename:
+                if entry is chain.head:
+                    return "head_of_chain"
+                if entry.previous_filename is None:
+                    return "chain_start"
+                return "in_chain"
+    for brk in lineage.lineage_breaks:
+        if brk.filename == filename:
+            return "lineage_break"
+    return "unknown"
 
 
 @dataclass(frozen=True)

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
+    RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
@@ -21,6 +22,7 @@ from pcae.core.status import (
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
+    validate_runtime_snapshot_restore_safety,
 )
 
 
@@ -251,6 +253,40 @@ def run_runtime_snapshot_manifest(args: argparse.Namespace) -> int:
         ):
             print(f"  - {key}: {result.compatibility_summary[key]}")
         print(RUNTIME_SNAPSHOT_MANIFEST_ADVISORY)
+    return 0
+
+
+def run_runtime_snapshot_validate_restore(args: argparse.Namespace) -> int:
+    result = validate_runtime_snapshot_restore_safety(HarnessPath.cwd(), Path(args.path))
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        safe_label = "safe" if result.safe_to_restore else "unsafe"
+        print("Governance runtime snapshot restore safety validation")
+        print(f"Restore safety status: {safe_label}")
+        print("Validation checks:")
+        for check in result.validation_checks:
+            if check.blocking and not check.passed:
+                status = "blocked"
+            elif not check.passed:
+                status = "warn"
+            else:
+                status = "pass"
+            print(f"  - {check.name}: {status} ({check.message})")
+        print("Blocking issues:")
+        if result.blocking_issues:
+            for issue in result.blocking_issues:
+                print(f"  - {issue}")
+        else:
+            print("  - none")
+        print("Warnings:")
+        if result.warnings:
+            for warning in result.warnings:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        print(f"Lineage continuity status: {result.lineage_status}")
+        print(RESTORE_SAFETY_VALIDATION_ADVISORY)
     return 0
 
 
