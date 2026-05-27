@@ -9,7 +9,9 @@ import pytest
 from pcae.cli import main
 from pcae.core.context import (
     CONTEXT_PACK_ADVISORY,
+    CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
     CONTEXT_PACK_OPERATIONAL_RULES,
+    CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
     CONTEXT_PACK_VALIDATION_COMMANDS,
     build_context_pack,
 )
@@ -49,7 +51,8 @@ def write_minimal_context_artifacts(
             "# Task Contract\n\n"
             "## Task ID\n\n20260527-1200-test\n\n"
             "## Title\n\nTest task\n\n"
-            "## Status\n\nactive\n",
+            "## Status\n\nactive\n\n"
+            "## Allowed Files\n\n- src/pcae/**\n- tests/**\n",
             encoding="utf-8",
         )
     pcae_dir = tmp_path / ".pcae"
@@ -215,7 +218,7 @@ def test_build_context_pack_advisory(tmp_path: Path) -> None:
     result = build_context_pack(HarnessPath(tmp_path))
     assert result.advisory == CONTEXT_PACK_ADVISORY
     assert "reduces context size" in result.advisory
-    assert "does not relax governance constraints" in result.advisory
+    assert "relaxing governance constraints" in result.advisory
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +238,8 @@ def test_to_dict_has_all_required_keys(tmp_path: Path) -> None:
     assert "operational_rules" in d
     assert "validation_commands" in d
     assert "advisory" in d
+    assert "scope_boundaries" in d
+    assert "bootstrap_handoff_notes" in d
 
 
 def test_to_dict_operational_rules_is_list(tmp_path: Path) -> None:
@@ -257,6 +262,8 @@ def test_to_dict_is_json_serializable(tmp_path: Path) -> None:
     serialized = json.dumps(d)
     parsed = json.loads(serialized)
     assert parsed["advisory"] == CONTEXT_PACK_ADVISORY
+    assert isinstance(parsed["scope_boundaries"], dict)
+    assert isinstance(parsed["bootstrap_handoff_notes"], list)
 
 
 # ---------------------------------------------------------------------------
@@ -377,7 +384,7 @@ def test_cli_context_pack_preview_quality_preservation_note(
     main(["context", "pack", "--preview"])
     output = capsys.readouterr().out
     assert "Quality preservation note:" in output
-    assert "does not relax governance constraints" in output
+    assert "relaxing governance constraints" in output
 
 
 def test_cli_context_pack_preview_token_optimization_note(
@@ -430,6 +437,8 @@ def test_cli_context_pack_json_top_level_keys(
     assert "operational_rules" in data
     assert "validation_commands" in data
     assert "advisory" in data
+    assert "scope_boundaries" in data
+    assert "bootstrap_handoff_notes" in data
 
 
 def test_cli_context_pack_json_active_task_fields(
@@ -514,7 +523,180 @@ def test_cli_context_pack_json_advisory(
     monkeypatch.chdir(tmp_path)
     main(["context", "pack", "--preview", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert "does not relax governance constraints" in data["advisory"]
+    assert "relaxing governance constraints" in data["advisory"]
+
+
+# ---------------------------------------------------------------------------
+# Core: scope_boundaries
+# ---------------------------------------------------------------------------
+
+
+def test_build_context_pack_scope_boundaries_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_context_pack(HarnessPath(tmp_path))
+    sb = result.scope_boundaries
+    assert "allowed_files" in sb
+    assert "forbidden_files" in sb
+
+
+def test_build_context_pack_scope_boundaries_with_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_context_pack(HarnessPath(tmp_path))
+    assert isinstance(result.scope_boundaries["allowed_files"], list)
+    assert isinstance(result.scope_boundaries["forbidden_files"], list)
+
+
+def test_build_context_pack_scope_boundaries_no_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path, include_task=False)
+    result = build_context_pack(HarnessPath(tmp_path))
+    assert result.scope_boundaries["allowed_files"] == []
+    assert result.scope_boundaries["forbidden_files"] == []
+
+
+# ---------------------------------------------------------------------------
+# Core: bootstrap_handoff_notes
+# ---------------------------------------------------------------------------
+
+
+def test_build_context_pack_bootstrap_handoff_notes(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_context_pack(HarnessPath(tmp_path))
+    assert result.bootstrap_handoff_notes == CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES
+    assert any("session bootstrap" in note for note in result.bootstrap_handoff_notes)
+    assert any("phase handoff" in note for note in result.bootstrap_handoff_notes)
+
+
+def test_to_dict_scope_boundaries_is_dict(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    d = build_context_pack(HarnessPath(tmp_path)).to_dict()
+    assert isinstance(d["scope_boundaries"], dict)
+    assert "allowed_files" in d["scope_boundaries"]
+    assert "forbidden_files" in d["scope_boundaries"]
+
+
+def test_to_dict_bootstrap_handoff_notes_is_list(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    d = build_context_pack(HarnessPath(tmp_path)).to_dict()
+    notes = d["bootstrap_handoff_notes"]
+    assert isinstance(notes, list)
+    assert len(notes) > 0
+
+
+# ---------------------------------------------------------------------------
+# Core: orchestration advisory semantics
+# ---------------------------------------------------------------------------
+
+
+def test_build_context_pack_orchestration_advisory_semantics(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_context_pack(HarnessPath(tmp_path))
+    os_ = result.orchestration_state
+    assert "advisory_recommendation_semantics" in os_
+    assert "user" in os_["advisory_recommendation_semantics"].lower()
+    assert "authoritative" in os_["advisory_recommendation_semantics"].lower()
+
+
+# ---------------------------------------------------------------------------
+# CLI: human-readable — new sections
+# ---------------------------------------------------------------------------
+
+
+def test_cli_context_pack_preview_universal_agent_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Universal agent note:" in output
+    assert CONTEXT_PACK_UNIVERSAL_AGENT_NOTE in output
+
+
+def test_cli_context_pack_preview_bootstrap_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Bootstrap/handoff:" in output
+    assert "session bootstrap" in output
+    assert "phase handoff" in output
+
+
+def test_cli_context_pack_preview_scope_boundaries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Scope boundaries:" in output
+    assert "Allowed files:" in output
+
+
+def test_cli_context_pack_preview_orchestration_policy_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Policy summary:" in output
+
+
+def test_cli_context_pack_preview_orchestration_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Advisory:" in output
+    assert "authoritative" in output
+
+
+# ---------------------------------------------------------------------------
+# CLI: JSON — new fields
+# ---------------------------------------------------------------------------
+
+
+def test_cli_context_pack_json_scope_boundaries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sb = data["scope_boundaries"]
+    assert isinstance(sb, dict)
+    assert "allowed_files" in sb
+    assert "forbidden_files" in sb
+
+
+def test_cli_context_pack_json_bootstrap_handoff_notes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    notes = data["bootstrap_handoff_notes"]
+    assert isinstance(notes, list)
+    assert any("session bootstrap" in n for n in notes)
+    assert any("phase handoff" in n for n in notes)
+
+
+def test_cli_context_pack_json_orchestration_advisory_semantics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    os_ = data["orchestration_state"]
+    assert "advisory_recommendation_semantics" in os_
+    assert "authoritative" in os_["advisory_recommendation_semantics"].lower()
 
 
 # ---------------------------------------------------------------------------

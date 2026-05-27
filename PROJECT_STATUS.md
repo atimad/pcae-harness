@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35B: Docs command coverage refresh.
+Phase 35C: Universal compact context quality.
 
 ## Governance Coherence Note
 
@@ -160,16 +160,20 @@ the lineage continuity status without restoring runtime state, modifying
 agent locks, or mutating provenance, session, or governance artifacts, and
 a compact governed context pack for AI agents can be previewed with
 `pcae context pack --preview` and `pcae context pack --preview --json`,
-reporting active task, governance state (health, check, session continuity,
-agent lock), orchestration state (policy summary, registered agents, default
-agent), provenance summary (event count, latest event), roadmap summary
+reporting active task, scope boundaries (allowed and forbidden files from
+the active task contract), governance state (health, check, session
+continuity, agent lock), orchestration state (policy summary, registered
+agents, default agent, advisory recommendation semantics confirming user
+authority), provenance summary (event count, latest event), roadmap summary
 (current phase and next items from PROJECT_STATUS.md), fixed operational
-rules including phase prompt authority, and validation commands, without
-writing files, modifying runtime state, or weakening governance constraints,
-and `pcae docs commands` now covers all current CLI command groups including
-phase, status, governance, runtime snapshot, orchestration, context,
-provenance, session bootstrap, and docs, with `docs/COMMANDS.md` refreshed
-to match using `--force`.
+rules including phase prompt authority and stale-context suppression,
+validation commands, bootstrap and handoff notes, and a universal agent note
+confirming the context pack is vendor-neutral and not tailored to any
+specific AI agent or provider, without writing files, modifying runtime
+state, or weakening governance constraints, and `pcae docs commands` now
+covers all current CLI command groups including phase, status, governance,
+runtime snapshot, orchestration, context, provenance, session bootstrap,
+and docs, with `docs/COMMANDS.md` refreshed to match using `--force`.
 
 ## Next
 

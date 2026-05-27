@@ -3,7 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 
-from pcae.core.context import build_context_pack
+from pcae.core.context import (
+    CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
+    build_context_pack,
+)
 from pcae.core.paths import HarnessPath
 
 
@@ -20,6 +23,19 @@ def run_context_pack(args: argparse.Namespace) -> int:
             )
         else:
             print("Active task: none")
+        sb = result.scope_boundaries
+        allowed = sb.get("allowed_files", [])
+        forbidden = sb.get("forbidden_files", [])
+        if allowed or forbidden:
+            print("Scope boundaries:")
+            if allowed:
+                print("  Allowed files:")
+                for f in allowed:
+                    print(f"    {f}")
+            if forbidden:
+                print("  Forbidden files:")
+                for f in forbidden:
+                    print(f"    {f}")
         gs = result.governance_state
         print("Governance state:")
         print(f"  Health: {gs['health_status']}")
@@ -39,6 +55,12 @@ def run_context_pack(args: argparse.Namespace) -> int:
             print(f"  Registered agents: {ids}")
         else:
             print("  Registered agents: none")
+        policy_summary = os_.get("orchestration_policy_summary")
+        if policy_summary:
+            print("  Policy summary:")
+            for k, v in policy_summary.items():
+                print(f"    {k}: {v}")
+        print(f"  Advisory: {os_['advisory_recommendation_semantics']}")
         ps = result.provenance_summary
         print("Provenance summary:")
         print(f"  Event count: {ps['event_count']}")
@@ -60,6 +82,10 @@ def run_context_pack(args: argparse.Namespace) -> int:
         print("Validation commands:")
         for cmd in result.validation_commands:
             print(f"  - {cmd}")
+        print("Bootstrap/handoff:")
+        for note in result.bootstrap_handoff_notes:
+            print(f"  - {note}")
+        print(f"Universal agent note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
         print("Token optimization note: context pack is compact by design.")
         print(f"Quality preservation note: {result.advisory}")
     return 0

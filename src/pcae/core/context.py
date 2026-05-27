@@ -8,10 +8,25 @@ from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.provenance import build_provenance_timeline
+from pcae.core.tasks import find_latest_active_task
 
 
 CONTEXT_PACK_ADVISORY = (
-    "This pack reduces context size but does not relax governance constraints."
+    "Optimization reduces context size without relaxing governance constraints."
+)
+
+CONTEXT_PACK_UNIVERSAL_AGENT_NOTE = (
+    "This context pack is vendor-neutral and universal. "
+    "It is not tailored to any specific AI agent or provider."
+)
+
+CONTEXT_PACK_ORCHESTRATION_USER_AUTHORITY = (
+    "Advisory recommendations are non-binding. The human user remains authoritative."
+)
+
+CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES: tuple[str, ...] = (
+    "Use `pcae session bootstrap --agent-id <id>` to initialize a fresh agent session.",
+    "Use `pcae phase handoff` to transfer work between agents.",
 )
 
 CONTEXT_PACK_OPERATIONAL_RULES: tuple[str, ...] = (
@@ -35,23 +50,27 @@ _PROJECT_STATUS_RELATIVE_PATH = Path("PROJECT_STATUS.md")
 @dataclass(frozen=True)
 class ContextPack:
     active_task: dict | None
+    scope_boundaries: dict
     governance_state: dict
     orchestration_state: dict
     provenance_summary: dict
     roadmap_summary: dict
     operational_rules: tuple[str, ...]
     validation_commands: tuple[str, ...]
+    bootstrap_handoff_notes: tuple[str, ...]
     advisory: str
 
     def to_dict(self) -> dict:
         return {
             "active_task": self.active_task,
             "advisory": self.advisory,
+            "bootstrap_handoff_notes": list(self.bootstrap_handoff_notes),
             "governance_state": self.governance_state,
             "operational_rules": list(self.operational_rules),
             "orchestration_state": self.orchestration_state,
             "provenance_summary": self.provenance_summary,
             "roadmap_summary": self.roadmap_summary,
+            "scope_boundaries": self.scope_boundaries,
             "validation_commands": list(self.validation_commands),
         }
 
@@ -99,6 +118,7 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
     }
 
     orchestration_state = {
+        "advisory_recommendation_semantics": CONTEXT_PACK_ORCHESTRATION_USER_AUTHORITY,
         "default_agent": policy.orchestration.default_agent if policy.valid else None,
         "orchestration_policy_summary": policy.orchestration.to_dict() if policy.valid else None,
         "registered_agents": [entry.to_dict() for entry in policy.agent_registry],
@@ -123,13 +143,24 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         "next": next_items,
     }
 
+    active_task_obj = find_latest_active_task(root)
+    if active_task_obj is not None:
+        scope_boundaries = {
+            "allowed_files": list(active_task_obj.allowed_files),
+            "forbidden_files": list(active_task_obj.forbidden_files),
+        }
+    else:
+        scope_boundaries = {"allowed_files": [], "forbidden_files": []}
+
     return ContextPack(
         active_task=health["active_task"],
+        scope_boundaries=scope_boundaries,
         governance_state=governance_state,
         orchestration_state=orchestration_state,
         provenance_summary=provenance_summary,
         roadmap_summary=roadmap_summary,
         operational_rules=CONTEXT_PACK_OPERATIONAL_RULES,
         validation_commands=CONTEXT_PACK_VALIDATION_COMMANDS,
+        bootstrap_handoff_notes=CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
         advisory=CONTEXT_PACK_ADVISORY,
     )
