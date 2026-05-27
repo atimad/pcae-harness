@@ -54,6 +54,89 @@ def render_commands_reference() -> str:
 - `pcae session write`
 - `pcae session update`
 - `pcae session end`
+- `pcae session bootstrap --agent-id <id>`
+- `pcae session bootstrap --agent-id <id> --json`
+
+## phase
+
+- `pcae phase start --agent-id <id>`
+- `pcae phase complete --summary "<text>"`
+- `pcae phase handoff --summary "<text>" --next-agent <id>`
+- `pcae phase handoff --summary "<text>" --work-type <type>`
+- `pcae phase handoff --summary "<text>" --workflow <name>`
+- `pcae phase handoff --json`
+
+## status
+
+- `pcae status coherence`
+- `pcae status coherence --json`
+
+## governance
+
+- `pcae governance audit`
+- `pcae governance audit --json`
+- `pcae governance repair --dry-run`
+- `pcae governance repair --dry-run --json`
+
+## runtime
+
+- `pcae runtime snapshot --preview`
+- `pcae runtime snapshot --preview --json`
+- `pcae runtime snapshot export`
+- `pcae runtime snapshot export --json`
+- `pcae runtime snapshot inspect <path>`
+- `pcae runtime snapshot inspect <path> --json`
+- `pcae runtime snapshot restore <path> --dry-run`
+- `pcae runtime snapshot restore <path> --dry-run --json`
+- `pcae runtime snapshot compatibility <path>`
+- `pcae runtime snapshot compatibility <path> --json`
+- `pcae runtime snapshot manifest`
+- `pcae runtime snapshot manifest --json`
+- `pcae runtime snapshot retention --dry-run`
+- `pcae runtime snapshot retention --dry-run --json`
+- `pcae runtime snapshot lineage`
+- `pcae runtime snapshot lineage --json`
+- `pcae runtime snapshot validate-restore <path>`
+- `pcae runtime snapshot validate-restore <path> --json`
+
+## orchestration
+
+- `pcae orchestration policy`
+- `pcae orchestration policy --json`
+- `pcae orchestration agents`
+- `pcae orchestration agents --json`
+- `pcae orchestration recommend --work-type <type>`
+- `pcae orchestration recommend --work-type <type> --json`
+- `pcae orchestration plan --workflow <name>`
+- `pcae orchestration plan --workflow <name> --json`
+- `pcae orchestration simulate --workflow <name>`
+- `pcae orchestration simulate --workflow <name> --json`
+- `pcae orchestration validate --workflow <name>`
+- `pcae orchestration validate --workflow <name> --json`
+- `pcae orchestration readiness --workflow <name>`
+- `pcae orchestration readiness --workflow <name> --json`
+
+## context
+
+- `pcae context pack --preview`
+- `pcae context pack --preview --json`
+
+## provenance
+
+- `pcae provenance status`
+- `pcae provenance history`
+- `pcae provenance history --json`
+- `pcae provenance history --event-type <type>`
+- `pcae provenance history --agent-id <id>`
+- `pcae provenance timeline`
+- `pcae provenance timeline --json`
+- `pcae provenance sessions`
+- `pcae provenance sessions --json`
+- `pcae provenance session current`
+- `pcae provenance session current --json`
+- `pcae provenance record --event-type <type> --summary "<text>"`
+- `pcae provenance export`
+- `pcae provenance export --json`
 
 ## architecture
 
@@ -135,6 +218,15 @@ def render_commands_reference() -> str:
 - `pcae ci drift --json`
 - `pcae ci repair --dry-run`
 - `pcae ci repair --force`
+
+## docs
+
+- `pcae docs commands --dry-run`
+- `pcae docs commands --force`
+- `pcae docs architecture --dry-run`
+- `pcae docs architecture --force`
+- `pcae docs glossary --dry-run`
+- `pcae docs glossary --force`
 """
 
 

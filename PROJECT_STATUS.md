@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35A: Governed context pack preview.
+Phase 35B: Docs command coverage refresh.
 
 ## Governance Coherence Note
 
@@ -165,11 +165,15 @@ agent lock), orchestration state (policy summary, registered agents, default
 agent), provenance summary (event count, latest event), roadmap summary
 (current phase and next items from PROJECT_STATUS.md), fixed operational
 rules including phase prompt authority, and validation commands, without
-writing files, modifying runtime state, or weakening governance constraints.
+writing files, modifying runtime state, or weakening governance constraints,
+and `pcae docs commands` now covers all current CLI command groups including
+phase, status, governance, runtime snapshot, orchestration, context,
+provenance, session bootstrap, and docs, with `docs/COMMANDS.md` refreshed
+to match using `--force`.
 
 ## Next
 
-- Update `pcae docs commands` to include the `phase`, `status`, and `orchestration` command groups.
+- No pending governed phases.
 
 ## Future Explorations
 
