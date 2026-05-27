@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34A: Governance coherence audit foundation.
+Phase 34B: Governance repair planning preview.
 
 ## Governance Coherence Note
 
@@ -97,7 +97,12 @@ governance coherence auditing is available with `pcae governance audit` and
 `pcae governance audit --json`, checking phase and next-step status, stale
 roadmap references, active task readability, session continuity availability,
 provenance history presence, policy parsing, and agent registry presence
-without mutating governance artifacts or rewriting roadmap files.
+without mutating governance artifacts or rewriting roadmap files, and
+deterministic advisory repair planning can be previewed with
+`pcae governance repair --dry-run` and
+`pcae governance repair --dry-run --json`, using audit results to report
+detected issues, proposed repairs, safety notes, and the advisory reminder
+that the user remains authoritative without modifying files.
 
 ## Next
 

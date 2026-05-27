@@ -145,3 +145,4 @@
 - Added `pcae phase handoff --workflow TEXT` to include advisory workflow validation, warnings, and governance checkpoints in human-readable and JSON handoff guidance.
 - Added `pcae orchestration readiness --workflow TEXT` and `pcae orchestration readiness --workflow TEXT --json` to preview whether an advisory workflow is ready based on validation, governance checkpoints, registry membership, health/check state, and session continuity.
 - Added `pcae governance audit` and `pcae governance audit --json` for lightweight read-only governance coherence auditing across project status, roadmap references, active task state, session continuity, provenance history, policy parsing, and agent registry presence.
+- Added `pcae governance repair --dry-run` and `pcae governance repair --dry-run --json` for deterministic advisory governance repair planning previews without modifying files.

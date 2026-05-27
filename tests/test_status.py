@@ -8,9 +8,11 @@ import pytest
 from pcae.cli import main
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
+    GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
     audit_governance_coherence,
     check_project_status_coherence,
+    plan_governance_repairs,
 )
 
 
@@ -161,6 +163,72 @@ def test_cli_governance_audit_json(tmp_path: Path, monkeypatch, capsys) -> None:
     assert data["summary"]["status"] == "valid"
     assert data["warnings"] == []
     assert all("name" in check and "passed" in check for check in data["checks"])
+
+
+def test_governance_repair_plan_clean_repo_has_no_repairs(tmp_path: Path) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = plan_governance_repairs(HarnessPath(tmp_path))
+    assert result.repairable
+    assert result.detected_issues == ()
+    assert result.proposed_repairs == ()
+    assert result.advisory == GOVERNANCE_REPAIR_ADVISORY
+    assert any("Dry-run only" in note for note in result.safety_notes)
+
+
+def test_governance_repair_plan_recommends_repairs_for_stale_roadmap(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(
+        tmp_path,
+        next_item="Full governance audit: `pcae governance audit` command.",
+    )
+    result = plan_governance_repairs(HarnessPath(tmp_path))
+    assert result.repairable
+    assert len(result.detected_issues) == 1
+    assert "synchronize PROJECT_STATUS.md roadmap guidance" in result.proposed_repairs
+    assert 'refresh stale "Next" references' in result.proposed_repairs
+    assert "refresh governance summaries" in result.proposed_repairs
+
+
+def test_governance_repair_plan_recommends_repairs_for_failed_checks(
+    tmp_path: Path,
+) -> None:
+    result = plan_governance_repairs(HarnessPath(tmp_path))
+    assert result.repairable
+    assert any("project_status_current_phase" in issue for issue in result.detected_issues)
+    assert "synchronize PROJECT_STATUS.md roadmap guidance" in result.proposed_repairs
+    assert "refresh governance summaries" in result.proposed_repairs
+
+
+def test_cli_governance_repair_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    write_minimal_governance_artifacts(
+        tmp_path,
+        next_item="Full governance audit: `pcae governance audit` command.",
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance repair planning preview" in output
+    assert "Overall repairability status: repairable" in output
+    assert "Detected issues:" in output
+    assert "Proposed repairs:" in output
+    assert "Repair safety notes:" in output
+    assert GOVERNANCE_REPAIR_ADVISORY in output
+
+
+def test_cli_governance_repair_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "repair", "--dry-run", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["repairable"] is True
+    assert data["detected_issues"] == []
+    assert data["proposed_repairs"] == []
+    assert data["safety_notes"]
+    assert data["advisory"] == GOVERNANCE_REPAIR_ADVISORY
 
 
 def write_minimal_governance_artifacts(

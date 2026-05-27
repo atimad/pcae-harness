@@ -24,6 +24,11 @@ KNOWN_STALE_PHRASES: tuple[str, ...] = (
     "Implement `pcae end`",
     "Implement `pcae session end`",
     "Full governance audit: `pcae governance audit` command",
+    "Governance repair planning preview: `pcae governance repair --dry-run` command",
+)
+
+GOVERNANCE_REPAIR_ADVISORY = (
+    "Repair planning is advisory; the user remains authoritative."
 )
 
 
@@ -103,6 +108,24 @@ class GovernanceAuditResult:
         }
 
 
+@dataclass(frozen=True)
+class GovernanceRepairPlan:
+    repairable: bool
+    detected_issues: tuple[str, ...]
+    proposed_repairs: tuple[str, ...]
+    safety_notes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "repairable": self.repairable,
+            "detected_issues": list(self.detected_issues),
+            "proposed_repairs": list(self.proposed_repairs),
+            "safety_notes": list(self.safety_notes),
+            "advisory": self.advisory,
+        }
+
+
 def check_project_status_coherence(root: HarnessPath) -> CoherenceResult:
     """Return coherence warnings for PROJECT_STATUS.md stale roadmap references."""
     path = root.join(PROJECT_STATUS_RELATIVE_PATH)
@@ -156,6 +179,100 @@ def audit_governance_coherence(root: HarnessPath) -> GovernanceAuditResult:
             status=status,
         ),
     )
+
+
+def plan_governance_repairs(root: HarnessPath) -> GovernanceRepairPlan:
+    """Return deterministic read-only repair recommendations for audit issues."""
+    audit = audit_governance_coherence(root)
+    detected_issues = tuple(audit_issue_messages(audit))
+    proposed_repairs = tuple(audit_repair_recommendations(audit))
+    return GovernanceRepairPlan(
+        repairable=True,
+        detected_issues=detected_issues,
+        proposed_repairs=proposed_repairs,
+        safety_notes=(
+            "Dry-run only; no governance artifacts will be modified.",
+            "No roadmap content is rewritten automatically.",
+            "No semantic AI analysis, remote sync, dashboards, or database writes are used.",
+        ),
+        advisory=GOVERNANCE_REPAIR_ADVISORY,
+    )
+
+
+def audit_issue_messages(audit: GovernanceAuditResult) -> list[str]:
+    issues: list[str] = []
+    for check in audit.checks:
+        if not check.passed:
+            issues.append(f"{check.name}: {check.message}")
+    for warning in audit.warnings:
+        issues.append(f"{warning.document}: {warning.message}")
+    return issues
+
+
+def audit_repair_recommendations(audit: GovernanceAuditResult) -> list[str]:
+    repairs: list[str] = []
+    for check in audit.checks:
+        if check.passed:
+            continue
+        repairs.extend(repairs_for_failed_check(check.name))
+    for warning in audit.warnings:
+        repairs.extend(repairs_for_warning(warning))
+    return unique_preserving_order(repairs)
+
+
+def repairs_for_failed_check(check_name: str) -> tuple[str, ...]:
+    if check_name == "project_status_current_phase":
+        return (
+            "synchronize PROJECT_STATUS.md roadmap guidance",
+            "refresh governance summaries",
+        )
+    if check_name == "project_status_next":
+        return (
+            "synchronize PROJECT_STATUS.md roadmap guidance",
+            "refresh stale \"Next\" references",
+        )
+    if check_name == "active_task":
+        return ("refresh governance summaries",)
+    if check_name == "session_continuity":
+        return ("refresh governance summaries",)
+    if check_name == "provenance_history":
+        return ("refresh governance summaries",)
+    if check_name == "policy_configuration":
+        return (
+            "refresh governance summaries",
+            "refresh orchestration guidance",
+        )
+    if check_name == "agent_registry":
+        return (
+            "refresh orchestration guidance",
+            "refresh governance summaries",
+        )
+    return ("refresh governance summaries",)
+
+
+def repairs_for_warning(warning: CoherenceWarning) -> tuple[str, ...]:
+    repairs = [
+        "synchronize PROJECT_STATUS.md roadmap guidance",
+        "refresh governance summaries",
+    ]
+    if warning.document == PROJECT_STATUS_RELATIVE_PATH.as_posix():
+        repairs.append('refresh stale "Next" references')
+    if "orchestration" in warning.message.lower():
+        repairs.append("refresh orchestration guidance")
+    if "docs commands" in warning.message.lower():
+        repairs.append("refresh docs command coverage references")
+    return tuple(repairs)
+
+
+def unique_preserving_order(values: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
 
 
 def check_project_status_current_phase(root: HarnessPath) -> GovernanceAuditCheck:

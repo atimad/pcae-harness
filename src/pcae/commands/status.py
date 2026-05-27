@@ -4,7 +4,11 @@ import argparse
 import json
 
 from pcae.core.paths import HarnessPath
-from pcae.core.status import audit_governance_coherence, check_project_status_coherence
+from pcae.core.status import (
+    audit_governance_coherence,
+    check_project_status_coherence,
+    plan_governance_repairs,
+)
 
 
 def run_status_coherence(args: argparse.Namespace) -> int:
@@ -44,3 +48,29 @@ def run_governance_audit(args: argparse.Namespace) -> int:
         print(f"  Failed checks: {result.summary.failed_count}")
         print(f"  Warnings: {result.summary.warning_count}")
     return 0 if result.valid else 1
+
+
+def run_governance_repair(args: argparse.Namespace) -> int:
+    result = plan_governance_repairs(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance repair planning preview")
+        print(f"Overall repairability status: {'repairable' if result.repairable else 'not repairable'}")
+        print("Detected issues:")
+        if result.detected_issues:
+            for issue in result.detected_issues:
+                print(f"  - {issue}")
+        else:
+            print("  - none")
+        print("Proposed repairs:")
+        if result.proposed_repairs:
+            for repair in result.proposed_repairs:
+                print(f"  - {repair}")
+        else:
+            print("  - none")
+        print("Repair safety notes:")
+        for note in result.safety_notes:
+            print(f"  - {note}")
+        print(result.advisory)
+    return 0
