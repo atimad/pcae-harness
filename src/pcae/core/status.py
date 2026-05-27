@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from importlib import metadata
 import json
 from pathlib import Path
 
@@ -48,7 +49,16 @@ RUNTIME_SNAPSHOT_RESTORE_ADVISORY = (
     "Restore preview is advisory; no runtime state is changed."
 )
 RUNTIME_SNAPSHOTS_RELATIVE_PATH = Path(".pcae") / "runtime-snapshots"
+CURRENT_RUNTIME_SNAPSHOT_SCHEMA_VERSION = 1
+RUNTIME_SNAPSHOT_KIND = "pcae-runtime-snapshot"
+SUPPORTED_RUNTIME_SNAPSHOT_KINDS: tuple[str, ...] = (RUNTIME_SNAPSHOT_KIND,)
+SUPPORTED_RUNTIME_SNAPSHOT_SCHEMA_VERSIONS: tuple[int, ...] = (
+    CURRENT_RUNTIME_SNAPSHOT_SCHEMA_VERSION,
+)
 RUNTIME_SNAPSHOT_REQUIRED_KEYS: tuple[str, ...] = (
+    "snapshot_schema_version",
+    "snapshot_kind",
+    "exported_by_version",
     "exported_at",
     "active_task",
     "agent_lock_state",
@@ -188,6 +198,9 @@ class RuntimeSnapshotExport:
         return {
             "export_path": self.export_path.as_posix(),
             "exported_at": self.exported_at,
+            "snapshot_schema_version": self.snapshot["snapshot_schema_version"],
+            "snapshot_kind": self.snapshot["snapshot_kind"],
+            "exported_by_version": self.snapshot["exported_by_version"],
             "snapshot_ready": self.snapshot_ready,
             "snapshot": self.snapshot,
         }
@@ -197,6 +210,10 @@ class RuntimeSnapshotExport:
 class RuntimeSnapshotInspection:
     valid: bool
     exported_at: str
+    snapshot_schema_version: int
+    snapshot_kind: str
+    compatibility_status: str
+    compatibility_notes: tuple[str, ...]
     included_sections: tuple[str, ...]
     runtime_summary: dict
     portability_notes: tuple[str, ...]
@@ -207,6 +224,10 @@ class RuntimeSnapshotInspection:
         return {
             "valid": self.valid,
             "exported_at": self.exported_at,
+            "snapshot_schema_version": self.snapshot_schema_version,
+            "snapshot_kind": self.snapshot_kind,
+            "compatibility_status": self.compatibility_status,
+            "compatibility_notes": list(self.compatibility_notes),
             "included_sections": list(self.included_sections),
             "runtime_summary": self.runtime_summary,
             "portability_notes": list(self.portability_notes),
@@ -219,6 +240,10 @@ class RuntimeSnapshotInspection:
 class RuntimeSnapshotRestorePreview:
     valid: bool
     restore_preview: dict
+    snapshot_schema_version: int
+    snapshot_kind: str
+    compatibility_status: str
+    compatibility_notes: tuple[str, ...]
     would_restore: tuple[str, ...]
     would_not_restore: tuple[str, ...]
     safety_notes: tuple[str, ...]
@@ -228,6 +253,10 @@ class RuntimeSnapshotRestorePreview:
         return {
             "valid": self.valid,
             "restore_preview": self.restore_preview,
+            "snapshot_schema_version": self.snapshot_schema_version,
+            "snapshot_kind": self.snapshot_kind,
+            "compatibility_status": self.compatibility_status,
+            "compatibility_notes": list(self.compatibility_notes),
             "would_restore": list(self.would_restore),
             "would_not_restore": list(self.would_not_restore),
             "safety_notes": list(self.safety_notes),
@@ -379,6 +408,9 @@ def export_runtime_snapshot(
     exported_at_text = timestamp.isoformat()
     preview = preview_runtime_snapshot(root)
     snapshot = {
+        "snapshot_schema_version": CURRENT_RUNTIME_SNAPSHOT_SCHEMA_VERSION,
+        "snapshot_kind": RUNTIME_SNAPSHOT_KIND,
+        "exported_by_version": exported_by_version(),
         "exported_at": exported_at_text,
         **preview.runtime_summary,
     }
@@ -417,13 +449,27 @@ def inspect_runtime_snapshot(root: HarnessPath, snapshot_path: Path) -> RuntimeS
     exported_at = data.get("exported_at")
     if not isinstance(exported_at, str) or not exported_at:
         raise ValueError("Invalid runtime snapshot: exported_at must be a non-empty string.")
+    snapshot_schema_version = data.get("snapshot_schema_version")
+    if not isinstance(snapshot_schema_version, int):
+        raise ValueError(
+            "Invalid runtime snapshot: snapshot_schema_version must be an integer."
+        )
+    snapshot_kind = data.get("snapshot_kind")
+    if not isinstance(snapshot_kind, str) or not snapshot_kind:
+        raise ValueError("Invalid runtime snapshot: snapshot_kind must be a non-empty string.")
+    compatibility = validate_runtime_snapshot_compatibility(
+        snapshot_schema_version,
+        snapshot_kind,
+    )
 
     runtime_summary = {key: data.get(key) for key in RUNTIME_SNAPSHOT_REQUIRED_KEYS if key != "exported_at"}
-    runtime_summary["schema_version"] = data.get("schema_version")
-    runtime_summary["snapshot_schema_version"] = data.get("snapshot_schema_version")
     return RuntimeSnapshotInspection(
         valid=True,
         exported_at=exported_at,
+        snapshot_schema_version=snapshot_schema_version,
+        snapshot_kind=snapshot_kind,
+        compatibility_status=compatibility.status,
+        compatibility_notes=compatibility.notes,
         included_sections=runtime_snapshot_included_sections(data),
         runtime_summary=runtime_summary,
         portability_notes=(
@@ -446,8 +492,12 @@ def preview_runtime_snapshot_restore(
 ) -> RuntimeSnapshotRestorePreview:
     inspection = inspect_runtime_snapshot(root, snapshot_path)
     summary = inspection.runtime_summary
+    incompatible = inspection.compatibility_status != "compatible"
     restore_preview = {
         "exported_at": inspection.exported_at,
+        "snapshot_schema_version": inspection.snapshot_schema_version,
+        "snapshot_kind": inspection.snapshot_kind,
+        "compatibility_status": inspection.compatibility_status,
         "active_task": summary["active_task"],
         "agent_lock_state": summary["agent_lock_state"],
         "session_continuity_status": summary["session_continuity_status"],
@@ -462,9 +512,15 @@ def preview_runtime_snapshot_restore(
         "workflow_orchestration_metadata": summary["workflow_orchestration_metadata"],
     }
     return RuntimeSnapshotRestorePreview(
-        valid=True,
+        valid=not incompatible,
         restore_preview=restore_preview,
-        would_restore=(
+        snapshot_schema_version=inspection.snapshot_schema_version,
+        snapshot_kind=inspection.snapshot_kind,
+        compatibility_status=inspection.compatibility_status,
+        compatibility_notes=inspection.compatibility_notes,
+        would_restore=()
+        if incompatible
+        else (
             "active task metadata",
             "agent lock state",
             "session continuity state",
@@ -475,6 +531,10 @@ def preview_runtime_snapshot_restore(
             "workflow/orchestration metadata",
         ),
         would_not_restore=(
+            "all runtime state because the snapshot is not compatible",
+        )
+        if incompatible
+        else (
             "active task files",
             "agent lock file",
             "session snapshot",
@@ -489,6 +549,49 @@ def preview_runtime_snapshot_restore(
         ),
         advisory=RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     )
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotCompatibility:
+    status: str
+    notes: tuple[str, ...]
+
+
+def validate_runtime_snapshot_compatibility(
+    snapshot_schema_version: int,
+    snapshot_kind: str,
+) -> RuntimeSnapshotCompatibility:
+    notes: list[str] = []
+    if snapshot_kind not in SUPPORTED_RUNTIME_SNAPSHOT_KINDS:
+        notes.append(
+            f"Unknown snapshot kind: {snapshot_kind!r}; expected {RUNTIME_SNAPSHOT_KIND!r}."
+        )
+    if snapshot_schema_version not in SUPPORTED_RUNTIME_SNAPSHOT_SCHEMA_VERSIONS:
+        notes.append(
+            "Unsupported runtime snapshot schema version: "
+            f"{snapshot_schema_version}; supported versions: "
+            f"{', '.join(str(v) for v in SUPPORTED_RUNTIME_SNAPSHOT_SCHEMA_VERSIONS)}."
+        )
+    if notes:
+        notes.append("No migration or automatic conversion is available.")
+        return RuntimeSnapshotCompatibility(
+            status="incompatible",
+            notes=tuple(notes),
+        )
+    return RuntimeSnapshotCompatibility(
+        status="compatible",
+        notes=(
+            "Snapshot kind is supported.",
+            f"Runtime snapshot schema version {snapshot_schema_version} is supported.",
+        ),
+    )
+
+
+def exported_by_version() -> str:
+    try:
+        return metadata.version("pcae-harness")
+    except metadata.PackageNotFoundError:
+        return "0.1.0"
 
 
 def runtime_snapshot_included_sections(data: dict) -> tuple[str, ...]:
@@ -508,7 +611,7 @@ def runtime_snapshot_included_sections(data: dict) -> tuple[str, ...]:
     for key, label in labels.items():
         if key in data:
             sections.append(label)
-    if "schema_version" in data or "snapshot_schema_version" in data:
+    if "snapshot_schema_version" in data or "snapshot_kind" in data:
         sections.append("snapshot schema/version metadata")
     return tuple(sections)
 

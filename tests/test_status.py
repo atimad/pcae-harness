@@ -312,6 +312,9 @@ def test_runtime_snapshot_export_writes_portable_json(tmp_path: Path) -> None:
     assert target.is_file()
     data = json.loads(target.read_text(encoding="utf-8"))
     assert data["exported_at"] == "2026-05-27T12:30:45+00:00"
+    assert data["snapshot_schema_version"] == 1
+    assert data["snapshot_kind"] == "pcae-runtime-snapshot"
+    assert data["exported_by_version"].startswith("0.")
     assert data["active_task"]["id"] == "20260527-1200-test"
     assert data["provenance_event_count"] == 1
     assert data["latest_provenance_event"]["event_type"] == "test_event"
@@ -328,6 +331,9 @@ def test_cli_runtime_snapshot_export_human(tmp_path: Path, monkeypatch, capsys) 
     assert "Governance runtime snapshot export" in output
     assert "Export path: .pcae/runtime-snapshots/runtime-snapshot-" in output
     assert "Snapshot readiness:" in output
+    assert "Schema version: 1" in output
+    assert "Snapshot kind: pcae-runtime-snapshot" in output
+    assert "Compatibility status: compatible" in output
     assert list((tmp_path / ".pcae" / "runtime-snapshots").glob("runtime-snapshot-*.json"))
 
 
@@ -341,6 +347,9 @@ def test_cli_runtime_snapshot_export_json(tmp_path: Path, monkeypatch, capsys) -
     assert exit_code == 0
     assert data["export_path"].startswith(".pcae/runtime-snapshots/runtime-snapshot-")
     assert "exported_at" in data
+    assert data["snapshot_schema_version"] == 1
+    assert data["snapshot_kind"] == "pcae-runtime-snapshot"
+    assert data["exported_by_version"].startswith("0.")
     assert "snapshot_ready" in data
     assert data["snapshot"]["active_task"]["id"] == "20260527-1200-test"
     assert (tmp_path / data["export_path"]).is_file()
@@ -374,6 +383,9 @@ def test_runtime_snapshot_inspect_reads_exported_snapshot(tmp_path: Path) -> Non
     result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
     assert result.valid
     assert result.exported_at == "2026-05-27T13:15:00+00:00"
+    assert result.snapshot_schema_version == 1
+    assert result.snapshot_kind == "pcae-runtime-snapshot"
+    assert result.compatibility_status == "compatible"
     assert "active task" in result.included_sections
     assert "latest provenance event" in result.included_sections
     assert result.runtime_summary["active_task"]["id"] == "20260527-1200-test"
@@ -387,13 +399,10 @@ def test_runtime_snapshot_inspect_reports_schema_metadata_when_available(
     initialize_git_repo(tmp_path)
     write_minimal_governance_artifacts(tmp_path)
     export = export_runtime_snapshot(HarnessPath(tmp_path))
-    target = tmp_path / export.export_path
-    data = json.loads(target.read_text(encoding="utf-8"))
-    data["schema_version"] = "runtime-snapshot.v1"
-    target.write_text(json.dumps(data), encoding="utf-8")
     result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
     assert "snapshot schema/version metadata" in result.included_sections
-    assert result.runtime_summary["schema_version"] == "runtime-snapshot.v1"
+    assert result.runtime_summary["snapshot_schema_version"] == 1
+    assert result.runtime_summary["snapshot_kind"] == "pcae-runtime-snapshot"
 
 
 def test_runtime_snapshot_inspect_is_read_only(tmp_path: Path) -> None:
@@ -418,6 +427,10 @@ def test_cli_runtime_snapshot_inspect_human(tmp_path: Path, monkeypatch, capsys)
     assert "Governance runtime snapshot inspection" in output
     assert "Snapshot validity: valid" in output
     assert "Exported timestamp:" in output
+    assert "Schema version: 1" in output
+    assert "Snapshot kind: pcae-runtime-snapshot" in output
+    assert "Compatibility status: compatible" in output
+    assert "Compatibility notes:" in output
     assert "Included sections:" in output
     assert "Portability notes:" in output
     assert "Safety notes:" in output
@@ -437,6 +450,10 @@ def test_cli_runtime_snapshot_inspect_json(tmp_path: Path, monkeypatch, capsys) 
     assert exit_code == 0
     assert data["valid"] is True
     assert data["exported_at"] == export.exported_at
+    assert data["snapshot_schema_version"] == 1
+    assert data["snapshot_kind"] == "pcae-runtime-snapshot"
+    assert data["compatibility_status"] == "compatible"
+    assert data["compatibility_notes"]
     assert data["included_sections"]
     assert data["runtime_summary"]["active_task"]["id"] == "20260527-1200-test"
     assert data["portability_notes"]
@@ -483,6 +500,10 @@ def test_runtime_snapshot_restore_preview_summarizes_would_restore(
     result = preview_runtime_snapshot_restore(HarnessPath(tmp_path), export.export_path)
     assert result.valid
     assert result.restore_preview["active_task"]["id"] == "20260527-1200-test"
+    assert result.snapshot_schema_version == 1
+    assert result.snapshot_kind == "pcae-runtime-snapshot"
+    assert result.compatibility_status == "compatible"
+    assert result.compatibility_notes
     assert result.restore_preview["provenance_summary"]["event_count"] == 1
     assert "active task metadata" in result.would_restore
     assert "agent lock file" in result.would_not_restore
@@ -513,6 +534,10 @@ def test_cli_runtime_snapshot_restore_human(tmp_path: Path, monkeypatch, capsys)
     assert "Governance runtime snapshot restore preview" in output
     assert "Restore preview status: ready" in output
     assert "Snapshot validity: valid" in output
+    assert "Schema version: 1" in output
+    assert "Snapshot kind: pcae-runtime-snapshot" in output
+    assert "Compatibility status: compatible" in output
+    assert "Compatibility notes:" in output
     assert "Sections that would be restored:" in output
     assert "Sections that would NOT be restored yet:" in output
     assert "Safety notes:" in output
@@ -539,6 +564,10 @@ def test_cli_runtime_snapshot_restore_json(tmp_path: Path, monkeypatch, capsys) 
     assert exit_code == 0
     assert data["valid"] is True
     assert data["restore_preview"]["active_task"]["id"] == "20260527-1200-test"
+    assert data["snapshot_schema_version"] == 1
+    assert data["snapshot_kind"] == "pcae-runtime-snapshot"
+    assert data["compatibility_status"] == "compatible"
+    assert data["compatibility_notes"]
     assert "active task metadata" in data["would_restore"]
     assert "agent lock file" in data["would_not_restore"]
     assert data["safety_notes"]
@@ -558,6 +587,52 @@ def test_cli_runtime_snapshot_restore_invalid_snapshot_fails(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "Invalid runtime snapshot" in output
+
+
+def test_runtime_snapshot_inspect_unsupported_schema_warns_clearly(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_schema_version"] = 999
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
+    assert result.valid
+    assert result.compatibility_status == "incompatible"
+    assert any("Unsupported runtime snapshot schema version" in note for note in result.compatibility_notes)
+
+
+def test_runtime_snapshot_restore_preview_blocks_incompatible_schema(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_schema_version"] = 999
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = preview_runtime_snapshot_restore(HarnessPath(tmp_path), export.export_path)
+    assert not result.valid
+    assert result.compatibility_status == "incompatible"
+    assert result.would_restore == ()
+    assert "all runtime state because the snapshot is not compatible" in result.would_not_restore
+
+
+def test_runtime_snapshot_inspect_unknown_kind_warns_clearly(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_kind"] = "unknown-kind"
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
+    assert result.compatibility_status == "incompatible"
+    assert any("Unknown snapshot kind" in note for note in result.compatibility_notes)
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

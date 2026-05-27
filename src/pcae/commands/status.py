@@ -109,6 +109,9 @@ def run_runtime_snapshot_export(args: argparse.Namespace) -> int:
         print("Governance runtime snapshot export")
         print(f"Export path: {result.export_path.as_posix()}")
         print(f"Snapshot readiness: {'ready' if result.snapshot_ready else 'not ready'}")
+        print(f"Schema version: {result.snapshot['snapshot_schema_version']}")
+        print(f"Snapshot kind: {result.snapshot['snapshot_kind']}")
+        print("Compatibility status: compatible")
     return 0
 
 
@@ -125,6 +128,12 @@ def run_runtime_snapshot_inspect(args: argparse.Namespace) -> int:
         print("Governance runtime snapshot inspection")
         print(f"Snapshot validity: {'valid' if result.valid else 'invalid'}")
         print(f"Exported timestamp: {result.exported_at}")
+        print(f"Schema version: {result.snapshot_schema_version}")
+        print(f"Snapshot kind: {result.snapshot_kind}")
+        print(f"Compatibility status: {result.compatibility_status}")
+        print("Compatibility notes:")
+        for note in result.compatibility_notes:
+            print(f"  - {note}")
         print("Included sections:")
         for section in result.included_sections:
             print(f"  - {section}")
@@ -149,8 +158,14 @@ def run_runtime_snapshot_restore(args: argparse.Namespace) -> int:
         print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
     else:
         print("Governance runtime snapshot restore preview")
-        print("Restore preview status: ready")
+        print(f"Restore preview status: {'ready' if result.valid else 'blocked'}")
         print(f"Snapshot validity: {'valid' if result.valid else 'invalid'}")
+        print(f"Schema version: {result.snapshot_schema_version}")
+        print(f"Snapshot kind: {result.snapshot_kind}")
+        print(f"Compatibility status: {result.compatibility_status}")
+        print("Compatibility notes:")
+        for note in result.compatibility_notes:
+            print(f"  - {note}")
         print("Sections that would be restored:")
         for section in result.would_restore:
             print(f"  - {section}")

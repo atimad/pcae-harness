@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34F: Governance runtime snapshot restore preview.
+Phase 34G: Governance runtime snapshot schema/version governance.
 
 ## Governance Coherence Note
 
@@ -120,7 +120,12 @@ snapshot restore effects can be previewed with
 `pcae runtime snapshot restore PATH --dry-run` and
 `pcae runtime snapshot restore PATH --dry-run --json`, showing what runtime
 sections would and would not be restored while leaving agent locks,
-provenance, sessions, history, and files unchanged.
+provenance, sessions, history, and files unchanged. Runtime snapshots now
+include explicit schema/version governance with `snapshot_schema_version`,
+`snapshot_kind`, and `exported_by_version`; inspection and restore preview
+report compatibility status and notes, warning clearly for unsupported schema
+versions or unknown snapshot kinds without migrations, conversion, or snapshot
+mutation.
 
 ## Next
 
