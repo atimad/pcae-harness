@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34L: Governance runtime restore safety validation.
+Phase 35A: Governed context pack preview.
 
 ## Governance Coherence Note
 
@@ -157,7 +157,15 @@ task presence, policy validity, agent lock safety, lineage continuity, and
 governance health) to determine whether a snapshot is safe to restore,
 reporting blocking issues that prevent restore, non-blocking warnings, and
 the lineage continuity status without restoring runtime state, modifying
-agent locks, or mutating provenance, session, or governance artifacts.
+agent locks, or mutating provenance, session, or governance artifacts, and
+a compact governed context pack for AI agents can be previewed with
+`pcae context pack --preview` and `pcae context pack --preview --json`,
+reporting active task, governance state (health, check, session continuity,
+agent lock), orchestration state (policy summary, registered agents, default
+agent), provenance summary (event count, latest event), roadmap summary
+(current phase and next items from PROJECT_STATUS.md), fixed operational
+rules including phase prompt authority, and validation commands, without
+writing files, modifying runtime state, or weakening governance constraints.
 
 ## Next
 

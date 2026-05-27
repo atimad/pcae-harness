@@ -15,6 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
+from pcae.commands.context import run_context_pack
 from pcae.commands.ci import (
     run_ci_drift,
     run_ci_generate_github,
@@ -143,6 +144,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON check output.",
     )
     check_parser.set_defaults(handler=run_check)
+
+    context_parser = subparsers.add_parser(
+        "context",
+        help="Inspect PCAE governed context for AI agents.",
+    )
+    context_subparsers = context_parser.add_subparsers(
+        dest="context_command",
+        required=True,
+    )
+    context_pack_parser = context_subparsers.add_parser(
+        "pack",
+        help="Preview a compact governed context pack for AI agents.",
+    )
+    context_pack_parser.add_argument(
+        "--preview",
+        action="store_true",
+        required=True,
+        help="Preview context pack contents without writing files.",
+    )
+    context_pack_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON context pack output.",
+    )
+    context_pack_parser.set_defaults(handler=run_context_pack)
 
     ci_parser = subparsers.add_parser(
         "ci",
