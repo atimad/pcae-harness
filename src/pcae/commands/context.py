@@ -6,15 +6,33 @@ import json
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
     build_context_pack,
+    resolve_profile,
 )
 from pcae.core.paths import HarnessPath
 
 
 def run_context_pack(args: argparse.Namespace) -> int:
     result = build_context_pack(HarnessPath.cwd())
+    profile_name: str | None = getattr(args, "profile", None)
+    profile, is_unknown = resolve_profile(profile_name)
+
     if args.json:
-        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        d = result.to_dict()
+        d["profile_type"] = profile.profile_type
+        d["emphasized_sections"] = list(profile.emphasized_sections)
+        if is_unknown:
+            d["profile_warning"] = (
+                f"Unknown profile '{profile_name}'; using universal profile."
+            )
+        print(json.dumps(d, indent=2, sort_keys=True))
     else:
+        if is_unknown:
+            print(
+                f"Warning: unknown profile '{profile_name}';"
+                " using universal profile."
+            )
+        print(f"Profile: {profile.profile_type}")
+        print(f"Emphasized sections: {', '.join(profile.emphasized_sections)}")
         print("Governance context pack")
         if result.active_task is not None:
             print(

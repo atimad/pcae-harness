@@ -13,7 +13,15 @@ from pcae.core.context import (
     CONTEXT_PACK_OPERATIONAL_RULES,
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
     CONTEXT_PACK_VALIDATION_COMMANDS,
+    PROFILE_DOCUMENTATION,
+    PROFILE_HANDOFF,
+    PROFILE_IMPLEMENTATION,
+    PROFILE_UNIVERSAL,
+    PROFILE_VALIDATION,
+    WORK_MODE_PROFILES,
+    WorkModeProfile,
     build_context_pack,
+    resolve_profile,
 )
 from pcae.core.paths import HarnessPath
 
@@ -697,6 +705,288 @@ def test_cli_context_pack_json_orchestration_advisory_semantics(
     os_ = data["orchestration_state"]
     assert "advisory_recommendation_semantics" in os_
     assert "authoritative" in os_["advisory_recommendation_semantics"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Work-mode profiles: resolve_profile
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_profile_none_returns_universal() -> None:
+    profile, is_unknown = resolve_profile(None)
+    assert profile.profile_type == PROFILE_UNIVERSAL
+    assert is_unknown is False
+
+
+def test_resolve_profile_universal_explicit() -> None:
+    profile, is_unknown = resolve_profile(PROFILE_UNIVERSAL)
+    assert profile.profile_type == PROFILE_UNIVERSAL
+    assert is_unknown is False
+
+
+def test_resolve_profile_implementation() -> None:
+    profile, is_unknown = resolve_profile(PROFILE_IMPLEMENTATION)
+    assert profile.profile_type == PROFILE_IMPLEMENTATION
+    assert is_unknown is False
+    assert "active_task" in profile.emphasized_sections
+    assert "scope_boundaries" in profile.emphasized_sections
+    assert "validation_commands" in profile.emphasized_sections
+
+
+def test_resolve_profile_documentation() -> None:
+    profile, is_unknown = resolve_profile(PROFILE_DOCUMENTATION)
+    assert profile.profile_type == PROFILE_DOCUMENTATION
+    assert is_unknown is False
+    assert "roadmap_summary" in profile.emphasized_sections
+    assert "operational_rules" in profile.emphasized_sections
+
+
+def test_resolve_profile_validation() -> None:
+    profile, is_unknown = resolve_profile(PROFILE_VALIDATION)
+    assert profile.profile_type == PROFILE_VALIDATION
+    assert is_unknown is False
+    assert "governance_state" in profile.emphasized_sections
+    assert "validation_commands" in profile.emphasized_sections
+
+
+def test_resolve_profile_handoff() -> None:
+    profile, is_unknown = resolve_profile(PROFILE_HANDOFF)
+    assert profile.profile_type == PROFILE_HANDOFF
+    assert is_unknown is False
+    assert "governance_state" in profile.emphasized_sections
+    assert "provenance_summary" in profile.emphasized_sections
+    assert "bootstrap_handoff_notes" in profile.emphasized_sections
+    assert "orchestration_state" in profile.emphasized_sections
+
+
+def test_resolve_profile_unknown_falls_back_to_universal() -> None:
+    profile, is_unknown = resolve_profile("nonexistent-profile")
+    assert profile.profile_type == PROFILE_UNIVERSAL
+    assert is_unknown is True
+
+
+def test_work_mode_profiles_has_all_known_profiles() -> None:
+    assert PROFILE_UNIVERSAL in WORK_MODE_PROFILES
+    assert PROFILE_IMPLEMENTATION in WORK_MODE_PROFILES
+    assert PROFILE_DOCUMENTATION in WORK_MODE_PROFILES
+    assert PROFILE_VALIDATION in WORK_MODE_PROFILES
+    assert PROFILE_HANDOFF in WORK_MODE_PROFILES
+
+
+def test_all_profiles_have_non_empty_emphasized_sections() -> None:
+    for name, profile in WORK_MODE_PROFILES.items():
+        assert isinstance(profile, WorkModeProfile), name
+        assert len(profile.emphasized_sections) > 0, name
+
+
+# ---------------------------------------------------------------------------
+# CLI: profile human-readable output
+# ---------------------------------------------------------------------------
+
+
+def test_cli_context_pack_no_profile_shows_universal(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Profile: universal" in output
+    assert "Emphasized sections:" in output
+
+
+def test_cli_context_pack_profile_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "implementation"])
+    output = capsys.readouterr().out
+    assert "Profile: implementation" in output
+    assert "scope_boundaries" in output
+    assert "validation_commands" in output
+
+
+def test_cli_context_pack_profile_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "documentation"])
+    output = capsys.readouterr().out
+    assert "Profile: documentation" in output
+    assert "roadmap_summary" in output
+    assert "operational_rules" in output
+
+
+def test_cli_context_pack_profile_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "validation"])
+    output = capsys.readouterr().out
+    assert "Profile: validation" in output
+    assert "governance_state" in output
+    assert "validation_commands" in output
+
+
+def test_cli_context_pack_profile_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "handoff"])
+    output = capsys.readouterr().out
+    assert "Profile: handoff" in output
+    assert "provenance_summary" in output
+    assert "bootstrap_handoff_notes" in output
+
+
+def test_cli_context_pack_unknown_profile_warns_and_falls_back(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "no-such-profile"])
+    output = capsys.readouterr().out
+    assert "Warning:" in output
+    assert "no-such-profile" in output
+    assert "universal" in output
+    assert "Profile: universal" in output
+
+
+def test_cli_context_pack_profiles_preserve_governance_rules(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for profile in (
+        PROFILE_IMPLEMENTATION,
+        PROFILE_DOCUMENTATION,
+        PROFILE_VALIDATION,
+        PROFILE_HANDOFF,
+    ):
+        main(["context", "pack", "--preview", "--profile", profile])
+        output = capsys.readouterr().out
+        assert "Phase prompt is authoritative" in output, profile
+        assert "Governance context pack" in output, profile
+        assert "Quality preservation note:" in output, profile
+
+
+def test_cli_context_pack_profiles_preserve_vendor_neutral_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for profile in (
+        PROFILE_IMPLEMENTATION,
+        PROFILE_DOCUMENTATION,
+        PROFILE_VALIDATION,
+        PROFILE_HANDOFF,
+    ):
+        main(["context", "pack", "--preview", "--profile", profile])
+        output = capsys.readouterr().out
+        assert CONTEXT_PACK_UNIVERSAL_AGENT_NOTE in output, profile
+
+
+# ---------------------------------------------------------------------------
+# CLI: profile JSON output
+# ---------------------------------------------------------------------------
+
+
+def test_cli_context_pack_json_profile_type_universal(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_UNIVERSAL
+    assert isinstance(data["emphasized_sections"], list)
+    assert len(data["emphasized_sections"]) > 0
+
+
+def test_cli_context_pack_json_profile_type_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "implementation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_IMPLEMENTATION
+    assert "scope_boundaries" in data["emphasized_sections"]
+    assert "validation_commands" in data["emphasized_sections"]
+
+
+def test_cli_context_pack_json_profile_type_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "documentation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_DOCUMENTATION
+    assert "roadmap_summary" in data["emphasized_sections"]
+
+
+def test_cli_context_pack_json_profile_type_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_VALIDATION
+    assert "governance_state" in data["emphasized_sections"]
+
+
+def test_cli_context_pack_json_profile_type_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "handoff", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_HANDOFF
+    assert "bootstrap_handoff_notes" in data["emphasized_sections"]
+    assert "orchestration_state" in data["emphasized_sections"]
+
+
+def test_cli_context_pack_json_unknown_profile_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "bad-profile", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == PROFILE_UNIVERSAL
+    assert "profile_warning" in data
+    assert "bad-profile" in data["profile_warning"]
+
+
+def test_cli_context_pack_json_profile_preserves_all_governance_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--profile", "implementation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "active_task",
+        "governance_state",
+        "orchestration_state",
+        "provenance_summary",
+        "roadmap_summary",
+        "operational_rules",
+        "validation_commands",
+        "bootstrap_handoff_notes",
+        "advisory",
+        "scope_boundaries",
+        "profile_type",
+        "emphasized_sections",
+    ):
+        assert key in data, key
 
 
 # ---------------------------------------------------------------------------

@@ -15,6 +15,84 @@ CONTEXT_PACK_ADVISORY = (
     "Optimization reduces context size without relaxing governance constraints."
 )
 
+# ---------------------------------------------------------------------------
+# Work-mode profiles
+# ---------------------------------------------------------------------------
+
+PROFILE_UNIVERSAL = "universal"
+PROFILE_IMPLEMENTATION = "implementation"
+PROFILE_DOCUMENTATION = "documentation"
+PROFILE_VALIDATION = "validation"
+PROFILE_HANDOFF = "handoff"
+
+
+@dataclass(frozen=True)
+class WorkModeProfile:
+    profile_type: str
+    emphasized_sections: tuple[str, ...]
+
+
+WORK_MODE_PROFILES: dict[str, WorkModeProfile] = {
+    PROFILE_UNIVERSAL: WorkModeProfile(
+        profile_type=PROFILE_UNIVERSAL,
+        emphasized_sections=(
+            "active_task",
+            "governance_state",
+            "orchestration_state",
+            "provenance_summary",
+            "roadmap_summary",
+        ),
+    ),
+    PROFILE_IMPLEMENTATION: WorkModeProfile(
+        profile_type=PROFILE_IMPLEMENTATION,
+        emphasized_sections=(
+            "active_task",
+            "scope_boundaries",
+            "validation_commands",
+            "roadmap_summary",
+            "operational_rules",
+        ),
+    ),
+    PROFILE_DOCUMENTATION: WorkModeProfile(
+        profile_type=PROFILE_DOCUMENTATION,
+        emphasized_sections=(
+            "roadmap_summary",
+            "operational_rules",
+            "orchestration_state",
+        ),
+    ),
+    PROFILE_VALIDATION: WorkModeProfile(
+        profile_type=PROFILE_VALIDATION,
+        emphasized_sections=(
+            "governance_state",
+            "validation_commands",
+            "provenance_summary",
+        ),
+    ),
+    PROFILE_HANDOFF: WorkModeProfile(
+        profile_type=PROFILE_HANDOFF,
+        emphasized_sections=(
+            "governance_state",
+            "provenance_summary",
+            "bootstrap_handoff_notes",
+            "orchestration_state",
+        ),
+    ),
+}
+
+
+def resolve_profile(name: str | None) -> tuple[WorkModeProfile, bool]:
+    """Return (profile, is_unknown_fallback).
+
+    Falls back to the universal profile for None or unknown names.
+    The boolean is True only when an unrecognised name triggered fallback.
+    """
+    if name is None or name == PROFILE_UNIVERSAL:
+        return WORK_MODE_PROFILES[PROFILE_UNIVERSAL], False
+    if name in WORK_MODE_PROFILES:
+        return WORK_MODE_PROFILES[name], False
+    return WORK_MODE_PROFILES[PROFILE_UNIVERSAL], True
+
 CONTEXT_PACK_UNIVERSAL_AGENT_NOTE = (
     "This context pack is vendor-neutral and universal. "
     "It is not tailored to any specific AI agent or provider."

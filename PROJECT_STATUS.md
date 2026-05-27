@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35C: Universal compact context quality.
+Phase 35D: Work-mode governed context profiles.
 
 ## Governance Coherence Note
 
@@ -170,10 +170,16 @@ rules including phase prompt authority and stale-context suppression,
 validation commands, bootstrap and handoff notes, and a universal agent note
 confirming the context pack is vendor-neutral and not tailored to any
 specific AI agent or provider, without writing files, modifying runtime
-state, or weakening governance constraints, and `pcae docs commands` now
-covers all current CLI command groups including phase, status, governance,
-runtime snapshot, orchestration, context, provenance, session bootstrap,
-and docs, with `docs/COMMANDS.md` refreshed to match using `--force`.
+state, or weakening governance constraints, and an optional `--profile`
+flag selects a work-mode governed context profile (`implementation`,
+`documentation`, `validation`, or `handoff`) that adjusts emphasis without
+weakening governance constraints; unknown profiles fall back to the balanced
+universal profile with a clear warning; JSON output includes `profile_type`
+and `emphasized_sections`; profiles optimize by work mode, not by vendor or
+model, and `pcae docs commands` now covers all current CLI command groups
+including phase, status, governance, runtime snapshot, orchestration,
+context, provenance, session bootstrap, and docs, with `docs/COMMANDS.md`
+refreshed to match using `--force`.
 
 ## Next
 

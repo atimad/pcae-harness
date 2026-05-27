@@ -168,6 +168,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON context pack output.",
     )
+    context_pack_parser.add_argument(
+        "--profile",
+        default=None,
+        metavar="PROFILE",
+        help=(
+            "Work-mode context profile: implementation, documentation, "
+            "validation, handoff. Omit for balanced universal profile."
+        ),
+    )
     context_pack_parser.set_defaults(handler=run_context_pack)
 
     ci_parser = subparsers.add_parser(
