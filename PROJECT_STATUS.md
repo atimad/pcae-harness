@@ -88,7 +88,11 @@ membership, role coverage, deterministic ordering, fallback behavior, and
 governance checkpoints without making recommendations mandatory. Phase handoff
 guidance can include the same workflow validation with
 `pcae phase handoff --workflow TEXT`, including JSON fields for workflow
-validity, warnings, and governance checkpoints.
+validity, warnings, and governance checkpoints. Execution readiness can be
+previewed with `pcae orchestration readiness --workflow TEXT` and
+`pcae orchestration readiness --workflow TEXT --json`, combining workflow
+validation, governance checkpoints, registry membership, health/check state,
+and session continuity while remaining advisory and non-executing.
 
 ## Next
 

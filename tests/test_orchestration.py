@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
 from pcae.cli import main
+from pcae.commands.init import init_harness
 from pcae.core.orchestration import (
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
+    build_workflow_readiness,
     build_workflow_simulation,
     build_workflow_validation,
     load_agent_registry,
@@ -24,6 +27,8 @@ from pcae.core.policy import (
     DEFAULT_ORCHESTRATION_RUNTIME_AGENT,
     DEFAULT_ORCHESTRATION_VALIDATION_AGENT,
 )
+from pcae.core.session import write_session_snapshot
+from pcae.core.tasks import create_task_contract
 
 
 # ---------------------------------------------------------------------------
@@ -1127,6 +1132,147 @@ def test_cli_orchestration_validate_returns_nonzero_on_incoherent_registry(
 
 
 # ---------------------------------------------------------------------------
+# core: build_workflow_readiness
+# ---------------------------------------------------------------------------
+
+
+def test_build_workflow_readiness_documentation_ready(tmp_path: Path) -> None:
+    prepare_ready_repo(tmp_path)
+    result = build_workflow_readiness(HarnessPath(tmp_path), "documentation")
+    assert result["workflow"] == "documentation"
+    assert result["ready"] is True
+    assert result["fallback_used"] is False
+    assert "advisory" in result["advisory"]
+    assert all(check["passed"] for check in result["readiness_checks"])
+    assert result["governance_checkpoints"][0]["checkpoint"] == "pcae check"
+
+
+def test_build_workflow_readiness_implementation_ready(tmp_path: Path) -> None:
+    prepare_ready_repo(tmp_path)
+    result = build_workflow_readiness(HarnessPath(tmp_path), "implementation")
+    assert result["ready"] is True
+    names = [check["name"] for check in result["readiness_checks"]]
+    assert names == [
+        "workflow_validation",
+        "governance_checkpoints",
+        "recommended_agents",
+        "health",
+        "check",
+        "session_continuity",
+    ]
+
+
+def test_build_workflow_readiness_release_ready(tmp_path: Path) -> None:
+    prepare_ready_repo(tmp_path)
+    result = build_workflow_readiness(HarnessPath(tmp_path), "release")
+    assert result["ready"] is True
+    checkpoints = [entry["checkpoint"] for entry in result["governance_checkpoints"]]
+    assert "pcae provenance session current" in checkpoints
+
+
+def test_build_workflow_readiness_not_ready_when_check_fails(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    result = build_workflow_readiness(HarnessPath(tmp_path), "documentation")
+    assert result["ready"] is False
+    check = next(item for item in result["readiness_checks"] if item["name"] == "check")
+    assert check["passed"] is False
+
+
+def test_build_workflow_readiness_result_keys(tmp_path: Path) -> None:
+    prepare_ready_repo(tmp_path)
+    result = build_workflow_readiness(HarnessPath(tmp_path), "documentation")
+    assert set(result.keys()) == {
+        "workflow",
+        "ready",
+        "readiness_checks",
+        "governance_checkpoints",
+        "warnings",
+        "advisory",
+        "fallback_used",
+    }
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration readiness
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_readiness_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prepare_ready_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "readiness", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration execution readiness: documentation" in output
+    assert "Readiness is advisory; the user remains authoritative." in output
+    assert "Readiness status: ready" in output
+    assert "Readiness checks:" in output
+    assert "Governance checkpoints:" in output
+
+
+def test_cli_orchestration_readiness_human_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prepare_ready_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "readiness", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration execution readiness: implementation" in output
+    assert "recommended_agents: passed" in output
+
+
+def test_cli_orchestration_readiness_human_release(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prepare_ready_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "readiness", "--workflow", "release"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration execution readiness: release" in output
+    assert "pcae provenance session current" in output
+
+
+def test_cli_orchestration_readiness_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    prepare_ready_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "readiness", "--workflow", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {
+        "workflow",
+        "ready",
+        "readiness_checks",
+        "governance_checkpoints",
+        "warnings",
+        "advisory",
+        "fallback_used",
+    }
+    assert data["workflow"] == "documentation"
+    assert data["ready"] is True
+    assert data["fallback_used"] is False
+
+
+def test_cli_orchestration_readiness_returns_nonzero_when_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "readiness", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Readiness status: not ready" in output
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 
@@ -1139,3 +1285,47 @@ def write_policy(root: Path, content: str) -> None:
     policy_file = root / ".pcae" / "policy.toml"
     policy_file.parent.mkdir(parents=True, exist_ok=True)
     policy_file.write_text(content, encoding="utf-8")
+
+
+def prepare_ready_repo(root: Path) -> None:
+    harness_root = HarnessPath(root)
+    init_harness(harness_root)
+    init_git_repo(root)
+    create_task_contract(harness_root, "Ready orchestration task")
+    patch_task_allowed_files(root)
+    write_session_snapshot(harness_root)
+    commit_baseline(root)
+
+
+def patch_task_allowed_files(root: Path) -> None:
+    task_dir = root / "tasks" / "active"
+    for task_file in task_dir.glob("*.md"):
+        content = task_file.read_text(encoding="utf-8")
+        task_file.write_text(
+            content.replace(
+                "## Allowed Files\n\n- TBD",
+                "## Allowed Files\n\n- .pcae/**",
+            ),
+            encoding="utf-8",
+        )
+
+
+def init_git_repo(root: Path) -> None:
+    run_git(root, "init")
+    run_git(root, "config", "user.email", "test@example.com")
+    run_git(root, "config", "user.name", "Test User")
+
+
+def commit_baseline(root: Path) -> None:
+    run_git(root, "add", ".")
+    run_git(root, "commit", "-m", "baseline")
+
+
+def run_git(root: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )

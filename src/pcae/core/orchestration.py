@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import AgentRegistryEntry, OrchestrationPolicy, load_policy
 
@@ -265,4 +266,72 @@ def build_workflow_validation(root: HarnessPath, workflow: str) -> dict:
         "validated_steps": validated_steps,
         "governance_checkpoints": governance_checkpoints,
         "fallback_used": fallback_used,
+    }
+
+
+def build_workflow_readiness(root: HarnessPath, workflow: str) -> dict:
+    validation = build_workflow_validation(root, workflow)
+    health = build_health_data(root)
+
+    warnings = list(validation["warnings"])
+    health_warnings = health.get("warnings", [])
+    warnings.extend(str(warning) for warning in health_warnings)
+
+    recommended_agents_exist = all(
+        step["agent_exists"] for step in validation["validated_steps"]
+    )
+    governance_checkpoints_exist = bool(validation["governance_checkpoints"])
+    health_is_healthy = health["overall_status"] == "healthy"
+    check_passes = not health["violations"]
+    session_continuity = health.get("session_continuity", "unknown")
+    agent_lock = health.get("agent_lock") or {}
+    lock_exists = bool(agent_lock.get("locked"))
+    session_continuity_ok = not lock_exists or session_continuity == "verified"
+
+    readiness_checks = [
+        {
+            "name": "workflow_validation",
+            "passed": validation["valid"],
+            "detail": "Workflow validates successfully.",
+        },
+        {
+            "name": "governance_checkpoints",
+            "passed": governance_checkpoints_exist,
+            "detail": "Governance checkpoints exist where expected.",
+        },
+        {
+            "name": "recommended_agents",
+            "passed": recommended_agents_exist,
+            "detail": "Recommended agents exist in the registry.",
+        },
+        {
+            "name": "health",
+            "passed": health_is_healthy,
+            "detail": f"PCAE health is {health['overall_status']}.",
+        },
+        {
+            "name": "check",
+            "passed": check_passes,
+            "detail": "PCAE check passes." if check_passes else "PCAE check has violations.",
+        },
+        {
+            "name": "session_continuity",
+            "passed": session_continuity_ok,
+            "detail": (
+                f"Session continuity is {session_continuity}."
+                if lock_exists
+                else "No agent lock is held; session continuity is not required."
+            ),
+        },
+    ]
+
+    ready = all(check["passed"] for check in readiness_checks)
+    return {
+        "workflow": workflow,
+        "ready": ready,
+        "readiness_checks": readiness_checks,
+        "governance_checkpoints": validation["governance_checkpoints"],
+        "warnings": warnings,
+        "advisory": "Readiness is advisory; the user remains authoritative.",
+        "fallback_used": validation["fallback_used"],
     }

@@ -113,3 +113,4 @@
 - Updated orchestration plan, simulation, and phase handoff output to frame agent choices as advisory recommendations that users may override.
 - Added `pcae orchestration validate --workflow TEXT` and JSON output to validate advisory workflow coherence, registry consistency, deterministic ordering, fallback behavior, and governance checkpoints.
 - Extended `pcae phase handoff` with `--workflow TEXT` to show advisory workflow validation results and governance checkpoints during handoff guidance.
+- Added `pcae orchestration readiness --workflow TEXT` and JSON output to preview advisory execution readiness using workflow validation, governance checkpoints, health/check state, registry membership, and session continuity.

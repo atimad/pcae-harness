@@ -7,6 +7,7 @@ from pcae.core.orchestration import (
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
+    build_workflow_readiness,
     build_workflow_simulation,
     build_workflow_validation,
     recommend_agent,
@@ -156,3 +157,39 @@ def run_orchestration_validate(args: argparse.Namespace) -> int:
         else:
             print("  - none")
     return 0 if data["valid"] else 1
+
+
+def run_orchestration_readiness(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = build_workflow_readiness(root, args.workflow)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Orchestration execution readiness: {data['workflow']}")
+        print(data["advisory"])
+        print(f"Readiness status: {'ready' if data['ready'] else 'not ready'}")
+        print("Readiness checks:")
+        for check in data["readiness_checks"]:
+            status = "passed" if check["passed"] else "failed"
+            print(f"  - {check['name']}: {status} ({check['detail']})")
+        print("Governance checkpoints:")
+        if data["governance_checkpoints"]:
+            for checkpoint in data["governance_checkpoints"]:
+                print(
+                    f"  {checkpoint['step']}. {checkpoint['work_type']}: "
+                    f"{checkpoint['checkpoint']}"
+                )
+        else:
+            print("  - none")
+        print("Warnings:")
+        if data["warnings"]:
+            for warning in data["warnings"]:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+    return 0 if data["ready"] else 1
