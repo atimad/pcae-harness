@@ -41,7 +41,23 @@ GOVERNANCE_REPAIR_ADVISORY = (
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
 )
+RUNTIME_SNAPSHOT_INSPECTION_ADVISORY = (
+    "Snapshot inspection is advisory; the user remains authoritative."
+)
 RUNTIME_SNAPSHOTS_RELATIVE_PATH = Path(".pcae") / "runtime-snapshots"
+RUNTIME_SNAPSHOT_REQUIRED_KEYS: tuple[str, ...] = (
+    "exported_at",
+    "active_task",
+    "agent_lock_state",
+    "session_continuity_status",
+    "provenance_event_count",
+    "latest_provenance_event",
+    "orchestration_policy_summary",
+    "registered_agents",
+    "governance_health_status",
+    "governance_check_status",
+    "workflow_orchestration_metadata",
+)
 
 
 @dataclass(frozen=True)
@@ -171,6 +187,28 @@ class RuntimeSnapshotExport:
             "exported_at": self.exported_at,
             "snapshot_ready": self.snapshot_ready,
             "snapshot": self.snapshot,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotInspection:
+    valid: bool
+    exported_at: str
+    included_sections: tuple[str, ...]
+    runtime_summary: dict
+    portability_notes: tuple[str, ...]
+    safety_notes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "valid": self.valid,
+            "exported_at": self.exported_at,
+            "included_sections": list(self.included_sections),
+            "runtime_summary": self.runtime_summary,
+            "portability_notes": list(self.portability_notes),
+            "safety_notes": list(self.safety_notes),
+            "advisory": self.advisory,
         }
 
 
@@ -335,6 +373,70 @@ def export_runtime_snapshot(
         snapshot_ready=preview.snapshot_ready,
         snapshot=snapshot,
     )
+
+
+def inspect_runtime_snapshot(root: HarnessPath, snapshot_path: Path) -> RuntimeSnapshotInspection:
+    path = snapshot_path if snapshot_path.is_absolute() else root.join(snapshot_path)
+    if not path.is_file():
+        raise ValueError(f"Invalid runtime snapshot: file not found: {snapshot_path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid runtime snapshot JSON: {error.msg}") from error
+    if not isinstance(data, dict):
+        raise ValueError("Invalid runtime snapshot: top-level JSON value must be an object.")
+
+    missing = [key for key in RUNTIME_SNAPSHOT_REQUIRED_KEYS if key not in data]
+    if missing:
+        missing_text = ", ".join(missing)
+        raise ValueError(f"Invalid runtime snapshot: missing required field(s): {missing_text}.")
+
+    exported_at = data.get("exported_at")
+    if not isinstance(exported_at, str) or not exported_at:
+        raise ValueError("Invalid runtime snapshot: exported_at must be a non-empty string.")
+
+    runtime_summary = {key: data.get(key) for key in RUNTIME_SNAPSHOT_REQUIRED_KEYS if key != "exported_at"}
+    runtime_summary["schema_version"] = data.get("schema_version")
+    runtime_summary["snapshot_schema_version"] = data.get("snapshot_schema_version")
+    return RuntimeSnapshotInspection(
+        valid=True,
+        exported_at=exported_at,
+        included_sections=runtime_snapshot_included_sections(data),
+        runtime_summary=runtime_summary,
+        portability_notes=(
+            "Snapshot was read for inspection only; runtime state was not restored.",
+            "Local paths and agent identifiers are portable metadata, not authority.",
+            "Schema/version metadata is reported when present.",
+        ),
+        safety_notes=(
+            "Inspection only; no files are modified.",
+            "Governance artifacts are not mutated.",
+            "Snapshot contents are not rewritten.",
+        ),
+        advisory=RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
+    )
+
+
+def runtime_snapshot_included_sections(data: dict) -> tuple[str, ...]:
+    sections = []
+    labels = {
+        "active_task": "active task",
+        "agent_lock_state": "agent lock state",
+        "session_continuity_status": "session continuity status",
+        "provenance_event_count": "provenance event count",
+        "latest_provenance_event": "latest provenance event",
+        "orchestration_policy_summary": "orchestration policy summary",
+        "registered_agents": "registered agents",
+        "governance_health_status": "governance health status",
+        "governance_check_status": "governance check status",
+        "workflow_orchestration_metadata": "workflow/orchestration metadata",
+    }
+    for key, label in labels.items():
+        if key in data:
+            sections.append(label)
+    if "schema_version" in data or "snapshot_schema_version" in data:
+        sections.append("snapshot schema/version metadata")
+    return tuple(sections)
 
 
 def workflow_orchestration_metadata(active_task: object, session_data: dict | None) -> dict:

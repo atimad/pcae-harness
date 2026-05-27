@@ -13,9 +13,11 @@ from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
     RUNTIME_SNAPSHOT_ADVISORY,
+    RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
     audit_governance_coherence,
     check_project_status_coherence,
     export_runtime_snapshot,
+    inspect_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
 )
@@ -358,6 +360,116 @@ def test_runtime_snapshot_exports_are_git_ignored(tmp_path: Path) -> None:
         text=True,
     )
     assert completed.stdout.strip() == result.export_path.as_posix()
+
+
+def test_runtime_snapshot_inspect_reads_exported_snapshot(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 13, 15, 0, tzinfo=timezone.utc),
+    )
+    result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
+    assert result.valid
+    assert result.exported_at == "2026-05-27T13:15:00+00:00"
+    assert "active task" in result.included_sections
+    assert "latest provenance event" in result.included_sections
+    assert result.runtime_summary["active_task"]["id"] == "20260527-1200-test"
+    assert result.runtime_summary["provenance_event_count"] == 1
+    assert result.advisory == RUNTIME_SNAPSHOT_INSPECTION_ADVISORY
+
+
+def test_runtime_snapshot_inspect_reports_schema_metadata_when_available(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["schema_version"] = "runtime-snapshot.v1"
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
+    assert "snapshot schema/version metadata" in result.included_sections
+    assert result.runtime_summary["schema_version"] == "runtime-snapshot.v1"
+
+
+def test_runtime_snapshot_inspect_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    before = target.read_text(encoding="utf-8")
+    inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
+    after = target.read_text(encoding="utf-8")
+    assert after == before
+
+
+def test_cli_runtime_snapshot_inspect_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "inspect", export.export_path.as_posix()])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot inspection" in output
+    assert "Snapshot validity: valid" in output
+    assert "Exported timestamp:" in output
+    assert "Included sections:" in output
+    assert "Portability notes:" in output
+    assert "Safety notes:" in output
+    assert RUNTIME_SNAPSHOT_INSPECTION_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_inspect_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        ["runtime", "snapshot", "inspect", export.export_path.as_posix(), "--json"]
+    )
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["exported_at"] == export.exported_at
+    assert data["included_sections"]
+    assert data["runtime_summary"]["active_task"]["id"] == "20260527-1200-test"
+    assert data["portability_notes"]
+    assert data["safety_notes"]
+    assert data["advisory"] == RUNTIME_SNAPSHOT_INSPECTION_ADVISORY
+
+
+def test_cli_runtime_snapshot_inspect_invalid_json_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("{not-json", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "inspect", "invalid.json"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid runtime snapshot JSON" in output
+
+
+def test_cli_runtime_snapshot_inspect_missing_fields_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text(json.dumps({"exported_at": "2026-05-27T00:00:00+00:00"}), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "inspect", "invalid.json"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "missing required field" in output
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

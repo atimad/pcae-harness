@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     audit_governance_coherence,
     check_project_status_coherence,
     export_runtime_snapshot,
+    inspect_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
 )
@@ -106,4 +108,30 @@ def run_runtime_snapshot_export(args: argparse.Namespace) -> int:
         print("Governance runtime snapshot export")
         print(f"Export path: {result.export_path.as_posix()}")
         print(f"Snapshot readiness: {'ready' if result.snapshot_ready else 'not ready'}")
+    return 0
+
+
+def run_runtime_snapshot_inspect(args: argparse.Namespace) -> int:
+    try:
+        result = inspect_runtime_snapshot(HarnessPath.cwd(), Path(args.path))
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot inspection")
+        print(f"Snapshot validity: {'valid' if result.valid else 'invalid'}")
+        print(f"Exported timestamp: {result.exported_at}")
+        print("Included sections:")
+        for section in result.included_sections:
+            print(f"  - {section}")
+        print("Portability notes:")
+        for note in result.portability_notes:
+            print(f"  - {note}")
+        print("Safety notes:")
+        for note in result.safety_notes:
+            print(f"  - {note}")
+        print(result.advisory)
     return 0

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34D: Governance runtime snapshot export.
+Phase 34E: Governance runtime snapshot inspection.
 
 ## Governance Coherence Note
 
@@ -111,7 +111,11 @@ health/check status, and workflow metadata without exporting files, restoring
 state, or mutating governance artifacts, and the same governed runtime
 snapshot can be exported as portable ignored JSON with
 `pcae runtime snapshot export` and `pcae runtime snapshot export --json` under
-`.pcae/runtime-snapshots/`.
+`.pcae/runtime-snapshots/`, and exported runtime snapshots can be inspected
+read-only with `pcae runtime snapshot inspect PATH` and
+`pcae runtime snapshot inspect PATH --json`, reporting snapshot validity,
+included sections, runtime summary, portability notes, safety notes, and
+advisory status without restoring runtime state or mutating files.
 
 ## Next
 
