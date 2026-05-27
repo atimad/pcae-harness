@@ -11,6 +11,7 @@ from pcae.core.orchestration import (
     build_orchestration_data,
     build_workflow_plan,
     build_workflow_simulation,
+    build_workflow_validation,
     load_agent_registry,
     load_orchestration_policy,
     recommend_agent,
@@ -685,6 +686,86 @@ def test_build_workflow_simulation_step_keys(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# core: build_workflow_validation
+# ---------------------------------------------------------------------------
+
+
+def test_build_workflow_validation_documentation(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "documentation")
+    assert result["workflow"] == "documentation"
+    assert result["valid"] is True
+    assert result["fallback_used"] is False
+    assert result["warnings"] == []
+    assert len(result["validated_steps"]) == 3
+    assert result["governance_checkpoints"][0]["checkpoint"] == "pcae check"
+
+
+def test_build_workflow_validation_implementation(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "implementation")
+    assert result["valid"] is True
+    assert [step["recommended_agent"] for step in result["validated_steps"]] == [
+        "codex-local",
+        "codex-local",
+        "pcae-native",
+    ]
+
+
+def test_build_workflow_validation_release(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "release")
+    assert result["valid"] is True
+    checkpoints = [entry["checkpoint"] for entry in result["governance_checkpoints"]]
+    assert "pcae check" in checkpoints
+    assert "pcae provenance session current" in checkpoints
+
+
+def test_build_workflow_validation_unknown_fallback(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "unknown-workflow")
+    assert result["workflow"] == "unknown-workflow"
+    assert result["valid"] is True
+    assert result["fallback_used"] is True
+    assert result["warnings"] == [
+        "Unknown workflow 'unknown-workflow' uses deterministic default-agent fallback."
+    ]
+    assert result["validated_steps"][0]["recommended_role"] is None
+
+
+def test_build_workflow_validation_result_keys(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "documentation")
+    assert set(result.keys()) == {
+        "workflow",
+        "valid",
+        "warnings",
+        "validated_steps",
+        "governance_checkpoints",
+        "fallback_used",
+    }
+
+
+def test_build_workflow_validation_step_keys(tmp_path: Path) -> None:
+    result = build_workflow_validation(HarnessPath(tmp_path), "documentation")
+    for step in result["validated_steps"]:
+        assert set(step.keys()) == {
+            "step",
+            "work_type",
+            "recommended_agent",
+            "agent_exists",
+            "recommended_role",
+            "role_matched",
+        }
+
+
+def test_build_workflow_validation_flags_missing_role(tmp_path: Path) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.custom]\nkind = "custom"\nroles = ["implementation"]\n',
+    )
+    result = build_workflow_validation(HarnessPath(tmp_path), "implementation")
+    assert result["valid"] is False
+    assert any("no registered agent role 'tests'" in w for w in result["warnings"])
+
+
+# ---------------------------------------------------------------------------
 # CLI: pcae orchestration plan
 # ---------------------------------------------------------------------------
 
@@ -930,6 +1011,119 @@ def test_cli_orchestration_simulate_fails_on_invalid_policy(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert output.strip()
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration validate
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_validate_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration workflow validation: documentation" in output
+    assert "Recommendations remain advisory" in output
+    assert "Validation result: valid" in output
+    assert "Warnings:" in output
+    assert "Validated steps:" in output
+    assert "Governance checkpoints:" in output
+
+
+def test_cli_orchestration_validate_human_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration workflow validation: implementation" in output
+    assert "codex-local" in output
+    assert "governance validation" in output
+
+
+def test_cli_orchestration_validate_human_release(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "release"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration workflow validation: release" in output
+    assert "pcae provenance session current" in output
+
+
+def test_cli_orchestration_validate_human_unknown_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "unknown-wf"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Orchestration workflow validation: unknown-wf" in output
+    assert "deterministic default-agent fallback" in output
+    assert "Validation result: valid" in output
+
+
+def test_cli_orchestration_validate_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {
+        "workflow",
+        "valid",
+        "warnings",
+        "validated_steps",
+        "governance_checkpoints",
+        "fallback_used",
+    }
+    assert data["workflow"] == "documentation"
+    assert data["valid"] is True
+    assert data["fallback_used"] is False
+    assert data["governance_checkpoints"][0]["checkpoint"] == "pcae check"
+
+
+def test_cli_orchestration_validate_json_unknown_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "unknown-wf", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["fallback_used"] is True
+    assert data["warnings"]
+
+
+def test_cli_orchestration_validate_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
+
+
+def test_cli_orchestration_validate_returns_nonzero_on_incoherent_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[agents.custom]\nkind = "custom"\nroles = ["implementation"]\n',
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "validate", "--workflow", "implementation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Validation result: invalid" in output
 
 
 # ---------------------------------------------------------------------------

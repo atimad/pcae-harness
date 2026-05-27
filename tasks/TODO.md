@@ -18,6 +18,7 @@
 - Orchestration-aware agent routing based on task type or governance context.
 - Heterogeneous agent governance policies (per-agent policy overrides).
 - Vendor-neutral agent flexibility: users may prefer one agent for all work, and future policy may list Claude, Codex, Kimi, DeepSeek, Perplexity, or other agents without implying fixed work-type ownership.
+- Future orchestration validation may compare generated docs, policy, and runtime commands for drift while preserving advisory user control.
 - Full governance audit: `pcae governance audit` command.
 - Roadmap/provenance coherence validation: detect completed features still in roadmap.
 - Stale roadmap detection: automated scan of governance docs against CHANGELOG/DONE history.

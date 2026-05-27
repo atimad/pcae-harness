@@ -178,3 +178,91 @@ def build_workflow_simulation(root: HarnessPath, workflow: str) -> dict:
         "recommendation_note": plan["recommendation_note"],
         "steps": steps,
     }
+
+
+def build_workflow_validation(root: HarnessPath, workflow: str) -> dict:
+    policy = load_policy(root)
+    if not policy.valid:
+        raise ValueError(policy.error or "Invalid policy.")
+
+    plan = build_workflow_plan(root, workflow)
+    simulation = build_workflow_simulation(root, workflow)
+    registry = policy.agent_registry
+    registry_ids = {entry.agent_id for entry in registry}
+    registry_roles = {role for entry in registry for role in entry.roles}
+    steps_template = _WORKFLOW_STEPS.get(workflow)
+    fallback_used = steps_template is None
+
+    warnings: list[str] = []
+    valid = True
+
+    if not plan["steps"]:
+        valid = False
+        warnings.append("Workflow contains no steps.")
+
+    expected_numbers = list(range(1, len(plan["steps"]) + 1))
+    actual_numbers = [step["step"] for step in plan["steps"]]
+    if actual_numbers != expected_numbers:
+        valid = False
+        warnings.append("Workflow step ordering is not deterministic.")
+
+    if fallback_used:
+        warnings.append(
+            f"Unknown workflow '{workflow}' uses deterministic default-agent fallback."
+        )
+        role_by_step: dict[int, str | None] = {1: None}
+    else:
+        role_by_step = {
+            i: role for i, (role, _label) in enumerate(steps_template or (), 1)
+        }
+        if not any(label == "governance validation" for _role, label in steps_template):
+            valid = False
+            warnings.append("Expected governance validation step is missing.")
+
+    validated_steps = []
+    for step in plan["steps"]:
+        recommended_agent = step["recommended_agent"]
+        role = role_by_step.get(step["step"])
+        agent_exists = recommended_agent in registry_ids
+        role_matched = role is None or role in registry_roles
+
+        if not agent_exists:
+            valid = False
+            warnings.append(
+                f"Recommended agent '{recommended_agent}' is not in the registry."
+            )
+        if role is not None and not role_matched:
+            valid = False
+            warnings.append(
+                f"Work type '{step['work_type']}' has no registered agent role '{role}'."
+            )
+
+        validated_steps.append(
+            {
+                "step": step["step"],
+                "work_type": step["work_type"],
+                "recommended_agent": recommended_agent,
+                "agent_exists": agent_exists,
+                "recommended_role": role,
+                "role_matched": role_matched,
+            }
+        )
+
+    governance_checkpoints = [
+        {
+            "step": step["step"],
+            "work_type": step["work_type"],
+            "checkpoint": step["governance_checkpoint"],
+        }
+        for step in simulation["steps"]
+        if step["governance_checkpoint"] is not None
+    ]
+
+    return {
+        "workflow": workflow,
+        "valid": valid,
+        "warnings": warnings,
+        "validated_steps": validated_steps,
+        "governance_checkpoints": governance_checkpoints,
+        "fallback_used": fallback_used,
+    }

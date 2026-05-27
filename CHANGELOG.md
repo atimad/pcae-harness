@@ -141,3 +141,4 @@
 - Added `pcae orchestration plan --workflow TEXT` and `pcae orchestration plan --workflow TEXT --json` to generate governance-aware workflow plans with assigned agents and reasons per step.
 - Added `pcae orchestration simulate --workflow TEXT` and `pcae orchestration simulate --workflow TEXT --json` to preview ordered execution steps, assigned agents, reasons, and governance checkpoints without executing work or changing locks.
 - Revised orchestration and handoff language so policy-guided agent choices are clearly advisory; explicit `--next-agent` values are shown as user overrides.
+- Added `pcae orchestration validate --workflow TEXT` and `pcae orchestration validate --workflow TEXT --json` for advisory workflow coherence validation across registry membership, role coverage, deterministic ordering, fallback behavior, and governance checkpoints.

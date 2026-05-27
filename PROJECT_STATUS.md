@@ -81,7 +81,11 @@ or changing locks. Orchestration recommendations are advisory and
 user-controlled: PCAE remains vendor-neutral and policy-guided, users may
 override recommendations or prefer one agent for all work, and future agent
 registries may include Claude, Codex, Kimi, DeepSeek, Perplexity, or other
-models as capabilities evolve.
+models as capabilities evolve. Workflow coherence can be validated with
+`pcae orchestration validate --workflow TEXT` and
+`pcae orchestration validate --workflow TEXT --json`, which checks registry
+membership, role coverage, deterministic ordering, fallback behavior, and
+governance checkpoints without making recommendations mandatory.
 
 ## Next
 

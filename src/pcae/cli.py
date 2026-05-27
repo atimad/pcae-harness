@@ -55,6 +55,7 @@ from pcae.commands.orchestration import (
     run_orchestration_policy,
     run_orchestration_recommend,
     run_orchestration_simulate,
+    run_orchestration_validate,
 )
 from pcae.commands.status import run_status_coherence
 from pcae.commands.hooks import run_hooks_install
@@ -367,6 +368,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON workflow simulation output.",
     )
     orchestration_simulate_parser.set_defaults(handler=run_orchestration_simulate)
+
+    orchestration_validate_parser = orchestration_subparsers.add_parser(
+        "validate",
+        help="Validate advisory orchestration workflow coherence.",
+    )
+    orchestration_validate_parser.add_argument(
+        "--workflow",
+        required=True,
+        metavar="TEXT",
+        help="Workflow name (documentation, implementation, validation, release).",
+    )
+    orchestration_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON workflow validation output.",
+    )
+    orchestration_validate_parser.set_defaults(handler=run_orchestration_validate)
 
     daemon_parser = subparsers.add_parser(
         "daemon",

@@ -8,6 +8,7 @@ from pcae.core.orchestration import (
     build_orchestration_data,
     build_workflow_plan,
     build_workflow_simulation,
+    build_workflow_validation,
     recommend_agent,
 )
 from pcae.core.paths import HarnessPath
@@ -115,3 +116,43 @@ def run_orchestration_simulate(args: argparse.Namespace) -> int:
                 print(f"     Governance checkpoint: {checkpoint}")
         print(f"Final result: {data['status']}")
     return 0
+
+
+def run_orchestration_validate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = build_workflow_validation(root, args.workflow)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Orchestration workflow validation: {data['workflow']}")
+        print("Recommendations remain advisory; validation checks coherence, not mandatory routing.")
+        print(f"Validation result: {'valid' if data['valid'] else 'invalid'}")
+        print("Warnings:")
+        if data["warnings"]:
+            for warning in data["warnings"]:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        print("Validated steps:")
+        for step in data["validated_steps"]:
+            role = step["recommended_role"] or "fallback"
+            print(
+                f"  {step['step']}. Recommended agent: "
+                f"{step['recommended_agent']} -> {step['work_type']} "
+                f"(role: {role})"
+            )
+        print("Governance checkpoints:")
+        if data["governance_checkpoints"]:
+            for checkpoint in data["governance_checkpoints"]:
+                print(
+                    f"  {checkpoint['step']}. {checkpoint['work_type']}: "
+                    f"{checkpoint['checkpoint']}"
+                )
+        else:
+            print("  - none")
+    return 0 if data["valid"] else 1
