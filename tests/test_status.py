@@ -16,6 +16,7 @@ from pcae.core.status import (
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
+    RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     analyze_runtime_snapshot_compatibility,
     audit_governance_coherence,
@@ -24,6 +25,7 @@ from pcae.core.status import (
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
+    plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
 )
@@ -905,6 +907,127 @@ def test_runtime_snapshot_manifest_is_read_only(tmp_path: Path) -> None:
     build_runtime_snapshot_manifest(HarnessPath(tmp_path))
     after = target.read_text(encoding="utf-8")
     assert after == before
+
+
+def test_runtime_snapshot_retention_keeps_latest_five_by_default(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    exports = [
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+        for hour in range(1, 8)
+    ]
+    result = plan_runtime_snapshot_retention(HarnessPath(tmp_path))
+    assert result.snapshot_count == 7
+    assert result.keep_count == 5
+    assert result.prune_candidate_count == 2
+    assert [entry.filename for entry in result.keep] == [
+        export.export_path.name for export in reversed(exports[2:])
+    ]
+    assert [entry.filename for entry in result.prune_candidates] == [
+        exports[1].export_path.name,
+        exports[0].export_path.name,
+    ]
+    assert result.advisory == RUNTIME_SNAPSHOT_RETENTION_ADVISORY
+
+
+def test_runtime_snapshot_retention_with_fewer_than_five_has_no_candidates(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    for hour in range(1, 4):
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+    result = plan_runtime_snapshot_retention(HarnessPath(tmp_path))
+    assert result.snapshot_count == 3
+    assert result.keep_count == 3
+    assert result.prune_candidate_count == 0
+    assert len(result.keep) == 3
+    assert result.prune_candidates == ()
+
+
+def test_cli_runtime_snapshot_retention_human(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    for hour in range(1, 7):
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "retention", "--dry-run"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot retention preview" in output
+    assert "Snapshot count: 6" in output
+    assert "Keep count: 5" in output
+    assert "Prune candidate count: 1" in output
+    assert "Snapshots to keep:" in output
+    assert "Prune candidates:" in output
+    assert RUNTIME_SNAPSHOT_RETENTION_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_retention_json(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    exports = [
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+        for hour in range(1, 7)
+    ]
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "retention", "--dry-run", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["snapshot_count"] == 6
+    assert data["keep_count"] == 5
+    assert data["prune_candidate_count"] == 1
+    assert [entry["filename"] for entry in data["keep"]] == [
+        export.export_path.name for export in reversed(exports[1:])
+    ]
+    assert data["prune_candidates"][0]["filename"] == exports[0].export_path.name
+    assert data["advisory"] == RUNTIME_SNAPSHOT_RETENTION_ADVISORY
+
+
+def test_runtime_snapshot_retention_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    exports = [
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+        for hour in range(1, 7)
+    ]
+    before = {
+        export.export_path.name: (tmp_path / export.export_path).read_text(encoding="utf-8")
+        for export in exports
+    }
+    plan_runtime_snapshot_retention(HarnessPath(tmp_path))
+    after = {
+        export.export_path.name: (tmp_path / export.export_path).read_text(encoding="utf-8")
+        for export in exports
+    }
+    assert after == before
+    assert sorted(path.name for path in (tmp_path / ".pcae" / "runtime-snapshots").glob("*.json")) == sorted(before)
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

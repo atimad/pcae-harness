@@ -153,3 +153,4 @@
 - Added explicit runtime snapshot schema/version governance with snapshot kind, exporter version, compatibility status, and compatibility notes across export, inspect, and restore preview.
 - Added `pcae runtime snapshot compatibility PATH` and `pcae runtime snapshot compatibility PATH --json` for deterministic read-only compatibility analysis, including support level, required runtime section checks, future exporter warnings, and unknown kind handling.
 - Added `pcae runtime snapshot manifest` and `pcae runtime snapshot manifest --json` for deterministic read-only indexing of exported runtime snapshots with latest snapshot, compatibility metadata, support levels, and manifest summary counts.
+- Added `pcae runtime snapshot retention --dry-run` and `pcae runtime snapshot retention --dry-run --json` for read-only retention planning that keeps the latest five snapshots and marks older snapshots as prune candidates without deleting anything.

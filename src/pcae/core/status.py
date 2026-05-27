@@ -88,6 +88,10 @@ RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY = (
 RUNTIME_SNAPSHOT_MANIFEST_ADVISORY = (
     "Snapshot manifests are advisory; the user remains authoritative."
 )
+RUNTIME_SNAPSHOT_RETENTION_ADVISORY = (
+    "Retention planning is advisory; no snapshots are deleted."
+)
+DEFAULT_RUNTIME_SNAPSHOT_RETENTION_KEEP_COUNT = 5
 
 
 @dataclass(frozen=True)
@@ -359,6 +363,28 @@ class RuntimeSnapshotManifest:
                 entry.to_dict() for entry in self.manifest_entries
             ],
             "compatibility_summary": self.compatibility_summary,
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotRetentionPlan:
+    snapshot_count: int
+    keep_count: int
+    prune_candidate_count: int
+    keep: tuple[RuntimeSnapshotManifestEntry, ...]
+    prune_candidates: tuple[RuntimeSnapshotManifestEntry, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "snapshot_count": self.snapshot_count,
+            "keep_count": self.keep_count,
+            "prune_candidate_count": self.prune_candidate_count,
+            "keep": [entry.to_dict() for entry in self.keep],
+            "prune_candidates": [
+                entry.to_dict() for entry in self.prune_candidates
+            ],
             "advisory": self.advisory,
         }
 
@@ -906,6 +932,24 @@ def runtime_snapshot_manifest_summary(
         if entry.support_level in summary:
             summary[entry.support_level] += 1
     return summary
+
+
+def plan_runtime_snapshot_retention(
+    root: HarnessPath,
+    keep_latest: int = DEFAULT_RUNTIME_SNAPSHOT_RETENTION_KEEP_COUNT,
+) -> RuntimeSnapshotRetentionPlan:
+    """Return a read-only retention preview for exported runtime snapshots."""
+    manifest = build_runtime_snapshot_manifest(root)
+    keep = manifest.manifest_entries[:keep_latest]
+    prune_candidates = manifest.manifest_entries[keep_latest:]
+    return RuntimeSnapshotRetentionPlan(
+        snapshot_count=manifest.snapshot_count,
+        keep_count=len(keep),
+        prune_candidate_count=len(prune_candidates),
+        keep=keep,
+        prune_candidates=prune_candidates,
+        advisory=RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
+    )
 
 
 @dataclass(frozen=True)

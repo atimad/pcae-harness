@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34I: Governance runtime snapshot manifest indexing.
+Phase 34J: Governance runtime snapshot retention planning preview.
 
 ## Governance Coherence Note
 
@@ -138,7 +138,12 @@ exported runtime snapshots can be indexed read-only with
 to report snapshot count, latest snapshot, deterministic manifest entries,
 compatibility status, support level, compatibility summary counts, and the
 advisory note that the user remains authoritative without pruning snapshots,
-restoring runtime state, or writing a database.
+restoring runtime state, or writing a database, and retention actions can be
+previewed with `pcae runtime snapshot retention --dry-run` and
+`pcae runtime snapshot retention --dry-run --json`, using the manifest to keep
+the latest five snapshots by default and mark older snapshots as prune
+candidates while deleting nothing, mutating no manifest, and restoring no
+runtime state.
 
 ## Next
 

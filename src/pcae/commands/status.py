@@ -8,6 +8,7 @@ from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
+    RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     audit_governance_coherence,
     analyze_runtime_snapshot_compatibility,
     build_runtime_snapshot_manifest,
@@ -15,6 +16,7 @@ from pcae.core.status import (
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
+    plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
 )
@@ -247,4 +249,29 @@ def run_runtime_snapshot_manifest(args: argparse.Namespace) -> int:
         ):
             print(f"  - {key}: {result.compatibility_summary[key]}")
         print(RUNTIME_SNAPSHOT_MANIFEST_ADVISORY)
+    return 0
+
+
+def run_runtime_snapshot_retention(args: argparse.Namespace) -> int:
+    result = plan_runtime_snapshot_retention(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot retention preview")
+        print(f"Snapshot count: {result.snapshot_count}")
+        print(f"Keep count: {result.keep_count}")
+        print(f"Prune candidate count: {result.prune_candidate_count}")
+        print("Snapshots to keep:")
+        if result.keep:
+            for entry in result.keep:
+                print(f"  - {entry.filename}")
+        else:
+            print("  - none")
+        print("Prune candidates:")
+        if result.prune_candidates:
+            for entry in result.prune_candidates:
+                print(f"  - {entry.filename}")
+        else:
+            print("  - none")
+        print(RUNTIME_SNAPSHOT_RETENTION_ADVISORY)
     return 0
