@@ -85,6 +85,9 @@ RUNTIME_SNAPSHOT_REQUIRED_RUNTIME_SECTIONS: tuple[str, ...] = tuple(
 RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY = (
     "Compatibility analysis is advisory; the user remains authoritative."
 )
+RUNTIME_SNAPSHOT_MANIFEST_ADVISORY = (
+    "Snapshot manifests are advisory; the user remains authoritative."
+)
 
 
 @dataclass(frozen=True)
@@ -314,6 +317,48 @@ class RuntimeSnapshotCompatibilityReport:
                 check.to_dict() for check in self.compatibility_checks
             ],
             "compatibility_warnings": list(self.compatibility_warnings),
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotManifestEntry:
+    filename: str
+    exported_at: object
+    snapshot_kind: object
+    snapshot_schema_version: object
+    exported_by_version: object
+    compatibility_status: str
+    support_level: str
+
+    def to_dict(self) -> dict:
+        return {
+            "filename": self.filename,
+            "exported_at": self.exported_at,
+            "snapshot_kind": self.snapshot_kind,
+            "snapshot_schema_version": self.snapshot_schema_version,
+            "exported_by_version": self.exported_by_version,
+            "compatibility_status": self.compatibility_status,
+            "support_level": self.support_level,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotManifest:
+    snapshot_count: int
+    latest_snapshot: dict | None
+    manifest_entries: tuple[RuntimeSnapshotManifestEntry, ...]
+    compatibility_summary: dict
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "snapshot_count": self.snapshot_count,
+            "latest_snapshot": self.latest_snapshot,
+            "manifest_entries": [
+                entry.to_dict() for entry in self.manifest_entries
+            ],
+            "compatibility_summary": self.compatibility_summary,
             "advisory": self.advisory,
         }
 
@@ -764,6 +809,103 @@ def analyze_runtime_snapshot_compatibility(
         compatibility_warnings=tuple(unique_preserving_order(warnings)),
         advisory=RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     )
+
+
+def build_runtime_snapshot_manifest(root: HarnessPath) -> RuntimeSnapshotManifest:
+    """Return a deterministic read-only index of exported runtime snapshots."""
+    snapshot_dir = root.join(RUNTIME_SNAPSHOTS_RELATIVE_PATH)
+    if not snapshot_dir.is_dir():
+        entries: tuple[RuntimeSnapshotManifestEntry, ...] = ()
+        return RuntimeSnapshotManifest(
+            snapshot_count=0,
+            latest_snapshot=None,
+            manifest_entries=entries,
+            compatibility_summary=runtime_snapshot_manifest_summary(entries),
+            advisory=RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
+        )
+
+    entries = tuple(
+        sorted(
+            (
+                runtime_snapshot_manifest_entry(root, path)
+                for path in snapshot_dir.iterdir()
+                if path.is_file() and path.suffix == ".json"
+            ),
+            key=runtime_snapshot_manifest_sort_key,
+        )
+    )
+    latest = entries[0].to_dict() if entries else None
+    return RuntimeSnapshotManifest(
+        snapshot_count=len(entries),
+        latest_snapshot=latest,
+        manifest_entries=entries,
+        compatibility_summary=runtime_snapshot_manifest_summary(entries),
+        advisory=RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
+    )
+
+
+def runtime_snapshot_manifest_entry(
+    root: HarnessPath,
+    path: Path,
+) -> RuntimeSnapshotManifestEntry:
+    filename = path.name
+    relative_path = RUNTIME_SNAPSHOTS_RELATIVE_PATH / filename
+    try:
+        compatibility = analyze_runtime_snapshot_compatibility(root, relative_path)
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError):
+        return RuntimeSnapshotManifestEntry(
+            filename=filename,
+            exported_at=None,
+            snapshot_kind=None,
+            snapshot_schema_version=None,
+            exported_by_version=None,
+            compatibility_status="incompatible",
+            support_level="unsupported",
+        )
+    return RuntimeSnapshotManifestEntry(
+        filename=filename,
+        exported_at=data.get("exported_at"),
+        snapshot_kind=compatibility.snapshot_kind,
+        snapshot_schema_version=compatibility.snapshot_schema_version,
+        exported_by_version=compatibility.exported_by_version,
+        compatibility_status="compatible"
+        if compatibility.compatible
+        else "incompatible",
+        support_level=compatibility.support_level,
+    )
+
+
+def runtime_snapshot_manifest_sort_key(
+    entry: RuntimeSnapshotManifestEntry,
+) -> tuple[int, str, str]:
+    exported_at = entry.exported_at if isinstance(entry.exported_at, str) else ""
+    missing_exported_at = 0 if exported_at else 1
+    return (missing_exported_at, reverse_text_sort_key(exported_at), entry.filename)
+
+
+def reverse_text_sort_key(value: str) -> str:
+    return "".join(chr(0x10FFFF - ord(character)) for character in value)
+
+
+def runtime_snapshot_manifest_summary(
+    entries: tuple[RuntimeSnapshotManifestEntry, ...],
+) -> dict:
+    summary = {
+        "compatible": 0,
+        "incompatible": 0,
+        "supported": 0,
+        "partially-supported": 0,
+        "unsupported": 0,
+    }
+    for entry in entries:
+        if entry.compatibility_status == "compatible":
+            summary["compatible"] += 1
+        else:
+            summary["incompatible"] += 1
+        if entry.support_level in summary:
+            summary[entry.support_level] += 1
+    return summary
 
 
 @dataclass(frozen=True)

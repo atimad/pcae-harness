@@ -15,9 +15,11 @@ from pcae.core.status import (
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
+    RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
     RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     analyze_runtime_snapshot_compatibility,
     audit_governance_coherence,
+    build_runtime_snapshot_manifest,
     check_project_status_coherence,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
@@ -780,6 +782,127 @@ def test_runtime_snapshot_compatibility_is_read_only(tmp_path: Path) -> None:
     target = tmp_path / export.export_path
     before = target.read_text(encoding="utf-8")
     analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    after = target.read_text(encoding="utf-8")
+    assert after == before
+
+
+def test_runtime_snapshot_manifest_empty_directory_reports_zero(tmp_path: Path) -> None:
+    result = build_runtime_snapshot_manifest(HarnessPath(tmp_path))
+    assert result.snapshot_count == 0
+    assert result.latest_snapshot is None
+    assert result.manifest_entries == ()
+    assert result.compatibility_summary == {
+        "compatible": 0,
+        "incompatible": 0,
+        "supported": 0,
+        "partially-supported": 0,
+        "unsupported": 0,
+    }
+    assert result.advisory == RUNTIME_SNAPSHOT_MANIFEST_ADVISORY
+
+
+def test_runtime_snapshot_manifest_indexes_snapshots_deterministically(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    older = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 8, 0, 0, tzinfo=timezone.utc),
+    )
+    newer = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 9, 0, 0, tzinfo=timezone.utc),
+    )
+    result = build_runtime_snapshot_manifest(HarnessPath(tmp_path))
+    assert result.snapshot_count == 2
+    assert [entry.filename for entry in result.manifest_entries] == [
+        newer.export_path.name,
+        older.export_path.name,
+    ]
+    assert result.latest_snapshot is not None
+    assert result.latest_snapshot["filename"] == newer.export_path.name
+    assert all(entry.compatibility_status == "compatible" for entry in result.manifest_entries)
+    assert all(entry.support_level == "supported" for entry in result.manifest_entries)
+    assert result.compatibility_summary["compatible"] == 2
+    assert result.compatibility_summary["supported"] == 2
+
+
+def test_runtime_snapshot_manifest_includes_compatibility_metadata(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_schema_version"] = 999
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = build_runtime_snapshot_manifest(HarnessPath(tmp_path))
+    assert result.snapshot_count == 1
+    entry = result.manifest_entries[0]
+    assert entry.filename == export.export_path.name
+    assert entry.exported_at == export.exported_at
+    assert entry.snapshot_kind == "pcae-runtime-snapshot"
+    assert entry.snapshot_schema_version == 999
+    assert entry.exported_by_version.startswith("0.")
+    assert entry.compatibility_status == "incompatible"
+    assert entry.support_level == "unsupported"
+    assert result.compatibility_summary["incompatible"] == 1
+    assert result.compatibility_summary["unsupported"] == 1
+
+
+def test_cli_runtime_snapshot_manifest_human(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "manifest"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot manifest" in output
+    assert "Snapshot count: 1" in output
+    assert "Latest snapshot: runtime-snapshot-" in output
+    assert "Manifest entries:" in output
+    assert "Compatibility summary:" in output
+    assert "supported: 1" in output
+    assert RUNTIME_SNAPSHOT_MANIFEST_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_manifest_json(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "manifest", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["snapshot_count"] == 1
+    assert data["latest_snapshot"]["filename"] == export.export_path.name
+    assert data["manifest_entries"][0]["filename"] == export.export_path.name
+    assert data["manifest_entries"][0]["compatibility_status"] == "compatible"
+    assert data["manifest_entries"][0]["support_level"] == "supported"
+    assert data["compatibility_summary"]["compatible"] == 1
+    assert data["compatibility_summary"]["supported"] == 1
+    assert data["advisory"] == RUNTIME_SNAPSHOT_MANIFEST_ADVISORY
+
+
+def test_runtime_snapshot_manifest_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    before = target.read_text(encoding="utf-8")
+    build_runtime_snapshot_manifest(HarnessPath(tmp_path))
     after = target.read_text(encoding="utf-8")
     assert after == before
 

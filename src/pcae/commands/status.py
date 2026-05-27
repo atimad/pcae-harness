@@ -7,8 +7,10 @@ from pathlib import Path
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
+    RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
     audit_governance_coherence,
     analyze_runtime_snapshot_compatibility,
+    build_runtime_snapshot_manifest,
     check_project_status_coherence,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
@@ -208,4 +210,41 @@ def run_runtime_snapshot_compatibility(args: argparse.Namespace) -> int:
             print("  - none")
         print(f"Support level: {result.support_level}")
         print(RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY)
+    return 0
+
+
+def run_runtime_snapshot_manifest(args: argparse.Namespace) -> int:
+    result = build_runtime_snapshot_manifest(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot manifest")
+        print(f"Snapshot count: {result.snapshot_count}")
+        latest = result.latest_snapshot
+        latest_text = "none" if latest is None else latest["filename"]
+        print(f"Latest snapshot: {latest_text}")
+        print("Manifest entries:")
+        if result.manifest_entries:
+            for entry in result.manifest_entries:
+                print(
+                    "  - "
+                    f"{entry.filename}: exported_at={entry.exported_at}, "
+                    f"kind={entry.snapshot_kind}, "
+                    f"schema={entry.snapshot_schema_version}, "
+                    f"exported_by={entry.exported_by_version}, "
+                    f"compatibility={entry.compatibility_status}, "
+                    f"support={entry.support_level}"
+                )
+        else:
+            print("  - none")
+        print("Compatibility summary:")
+        for key in (
+            "compatible",
+            "incompatible",
+            "supported",
+            "partially-supported",
+            "unsupported",
+        ):
+            print(f"  - {key}: {result.compatibility_summary[key]}")
+        print(RUNTIME_SNAPSHOT_MANIFEST_ADVISORY)
     return 0

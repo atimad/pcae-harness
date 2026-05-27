@@ -65,6 +65,7 @@ from pcae.commands.status import (
     run_runtime_snapshot_compatibility,
     run_runtime_snapshot_export,
     run_runtime_snapshot_inspect,
+    run_runtime_snapshot_manifest,
     run_runtime_snapshot_restore,
     run_status_coherence,
 )
@@ -402,6 +403,16 @@ def build_parser() -> argparse.ArgumentParser:
     runtime_snapshot_compatibility_parser.set_defaults(
         handler=run_runtime_snapshot_compatibility
     )
+    runtime_snapshot_manifest_parser = runtime_snapshot_subparsers.add_parser(
+        "manifest",
+        help="Index exported governed runtime snapshots.",
+    )
+    runtime_snapshot_manifest_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime snapshot manifest output.",
+    )
+    runtime_snapshot_manifest_parser.set_defaults(handler=run_runtime_snapshot_manifest)
     runtime_snapshot_restore_parser = runtime_snapshot_subparsers.add_parser(
         "restore",
         help="Preview restoring a governed runtime snapshot.",

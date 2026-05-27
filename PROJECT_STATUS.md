@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34H: Governance runtime snapshot compatibility matrix.
+Phase 34I: Governance runtime snapshot manifest indexing.
 
 ## Governance Coherence Note
 
@@ -131,7 +131,14 @@ mutation. Runtime snapshot compatibility can be analyzed deterministically with
 snapshot kind, schema version, exporter version visibility, compatibility
 checks, compatibility warnings, future-version warnings, required runtime
 section presence, and the advisory note that the user remains authoritative
-without modifying snapshots, migrating state, or restoring runtime state.
+without modifying snapshots, migrating state, or restoring runtime state, and
+exported runtime snapshots can be indexed read-only with
+`pcae runtime snapshot manifest` and
+`pcae runtime snapshot manifest --json`, scanning `.pcae/runtime-snapshots/`
+to report snapshot count, latest snapshot, deterministic manifest entries,
+compatibility status, support level, compatibility summary counts, and the
+advisory note that the user remains authoritative without pruning snapshots,
+restoring runtime state, or writing a database.
 
 ## Next
 
