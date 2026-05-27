@@ -5,8 +5,12 @@ import json
 
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
+    CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE,
+    CONTINUITY_PACK_INCLUDED_SECTIONS,
     build_context_pack,
+    build_continuity_pack,
     export_context_pack,
+    export_continuity_pack,
     resolve_profile,
 )
 from pcae.core.paths import HarnessPath
@@ -133,4 +137,44 @@ def run_context_pack(args: argparse.Namespace) -> int:
         print(f"Universal agent note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
         print("Token optimization note: context pack is compact by design.")
         print(f"Quality preservation note: {result.advisory}")
+    return 0
+
+
+def run_continuity_export(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    profile_name: str | None = getattr(args, "profile", None)
+    profile, _ = resolve_profile(profile_name)
+    continuity_pack = build_continuity_pack(root, profile)
+    relative_path, exported_at = export_continuity_pack(root, continuity_pack)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "continuity_summary": {
+                        "active_task": continuity_pack.active_task_summary,
+                        "governance_check": continuity_pack.governance_state.get(
+                            "check_status"
+                        ),
+                        "governance_health": continuity_pack.governance_state.get(
+                            "health_status"
+                        ),
+                    },
+                    "exported_at": exported_at,
+                    "included_sections": list(CONTINUITY_PACK_INCLUDED_SECTIONS),
+                    "path": relative_path.as_posix(),
+                    "profile_type": profile.profile_type,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print(f"Export path: {relative_path.as_posix()}")
+        print(f"Profile: {profile.profile_type}")
+        print("Included continuity sections:")
+        for section in CONTINUITY_PACK_INCLUDED_SECTIONS:
+            print(f"  - {section}")
+        print("Token optimization note: continuity pack is compact by design.")
+        print(f"Governance continuity note: {CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE}")
     return 0

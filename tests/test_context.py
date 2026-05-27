@@ -1431,3 +1431,524 @@ def test_cli_context_pack_requires_preview_flag(
     with pytest.raises(SystemExit) as exc_info:
         main(["context", "pack"])
     assert exc_info.value.code != 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 35G: Continuity restore packs
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE,
+    CONTINUITY_PACK_INCLUDED_SECTIONS,
+    CONTINUITY_PACK_RELATIVE_DIR,
+    CONTINUITY_PACK_STALE_CONTEXT_SUPPRESSION_RULES,
+    CONTINUITY_PACK_VENDOR_NEUTRAL_NOTE,
+    ContinuityPack,
+    build_continuity_pack,
+    export_continuity_pack,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: build_continuity_pack
+# ---------------------------------------------------------------------------
+
+
+def test_build_continuity_pack_returns_continuity_pack(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert isinstance(result, ContinuityPack)
+
+
+def test_build_continuity_pack_exported_at_is_iso(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile, exported_at=ts)
+    assert result.exported_at == ts.isoformat()
+
+
+def test_build_continuity_pack_profile_type(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(PROFILE_IMPLEMENTATION)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.profile_type == PROFILE_IMPLEMENTATION
+
+
+def test_build_continuity_pack_active_task_summary(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.active_task_summary is not None
+    assert result.active_task_summary["id"] == "20260527-1200-test"
+    assert result.active_task_summary["title"] == "Test task"
+
+
+def test_build_continuity_pack_active_task_summary_none_when_no_task(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path, include_task=False)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.active_task_summary is None
+
+
+def test_build_continuity_pack_governance_state_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    gs = result.governance_state
+    assert "health_status" in gs
+    assert "check_status" in gs
+    assert "session_continuity" in gs
+
+
+def test_build_continuity_pack_orchestration_state_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    os_ = result.orchestration_state
+    assert "registered_agents" in os_
+    assert "default_agent" in os_
+
+
+def test_build_continuity_pack_provenance_summary_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    ps = result.provenance_summary
+    assert "event_count" in ps
+    assert "latest_event" in ps
+
+
+def test_build_continuity_pack_runtime_snapshot_metadata_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    meta = result.runtime_snapshot_metadata
+    assert "governance_health_status" in meta
+    assert "governance_check_status" in meta
+    assert "active_task" in meta
+
+
+def test_build_continuity_pack_compact_context_pack_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    cp = result.compact_context_pack
+    assert "governance_state" in cp
+    assert "orchestration_state" in cp
+    assert "operational_rules" in cp
+    assert "validation_commands" in cp
+
+
+def test_build_continuity_pack_compact_bootstrap_prompt_is_string(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert isinstance(result.compact_bootstrap_prompt, str)
+    assert len(result.compact_bootstrap_prompt) > 0
+
+
+def test_build_continuity_pack_bootstrap_prompt_contains_profile(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(PROFILE_HANDOFF)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert PROFILE_HANDOFF in result.compact_bootstrap_prompt
+
+
+def test_build_continuity_pack_operational_rules(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.operational_rules == CONTEXT_PACK_OPERATIONAL_RULES
+
+
+def test_build_continuity_pack_validation_commands(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.validation_commands == CONTEXT_PACK_VALIDATION_COMMANDS
+
+
+def test_build_continuity_pack_stale_context_suppression_rules(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.stale_context_suppression_rules == CONTINUITY_PACK_STALE_CONTEXT_SUPPRESSION_RULES
+    assert len(result.stale_context_suppression_rules) > 0
+
+
+def test_build_continuity_pack_vendor_neutral_note(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.vendor_neutral_note == CONTINUITY_PACK_VENDOR_NEUTRAL_NOTE
+    assert "vendor-neutral" in result.vendor_neutral_note
+
+
+def test_build_continuity_pack_bootstrap_continuity(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert result.bootstrap_continuity == CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES
+    assert len(result.bootstrap_continuity) > 0
+
+
+def test_build_continuity_pack_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    d = result.to_dict()
+    expected_keys = {
+        "active_task_summary",
+        "bootstrap_continuity",
+        "compact_bootstrap_prompt",
+        "compact_context_pack",
+        "exported_at",
+        "governance_state",
+        "operational_rules",
+        "orchestration_state",
+        "profile_type",
+        "provenance_summary",
+        "runtime_snapshot_metadata",
+        "stale_context_suppression_rules",
+        "validation_commands",
+        "vendor_neutral_note",
+    }
+    assert set(d.keys()) == expected_keys
+
+
+# ---------------------------------------------------------------------------
+# Core: export_continuity_pack
+# ---------------------------------------------------------------------------
+
+
+def test_export_continuity_pack_relative_dir_constant() -> None:
+    assert CONTINUITY_PACK_RELATIVE_DIR == Path(".pcae") / "continuity-packs"
+
+
+def test_export_continuity_pack_creates_file(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    assert (tmp_path / relative_path).is_file()
+
+
+def test_export_continuity_pack_filename_uses_timestamp(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 30, 45, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    assert "continuity-pack-20260527-123045" in relative_path.name
+
+
+def test_export_continuity_pack_path_under_continuity_packs_dir(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    assert relative_path.parts[0] == ".pcae"
+    assert relative_path.parts[1] == "continuity-packs"
+
+
+def test_export_continuity_pack_returns_iso_timestamp(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    _, exported_at = export_continuity_pack(root, pack)
+    assert exported_at == ts.isoformat()
+
+
+def test_export_continuity_pack_file_is_valid_json(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    data = json.loads((tmp_path / relative_path).read_text(encoding="utf-8"))
+    assert isinstance(data, dict)
+
+
+def test_export_continuity_pack_json_has_required_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    data = json.loads((tmp_path / relative_path).read_text(encoding="utf-8"))
+    assert "exported_at" in data
+    assert "governance_state" in data
+    assert "compact_bootstrap_prompt" in data
+    assert "stale_context_suppression_rules" in data
+    assert "vendor_neutral_note" in data
+    assert "bootstrap_continuity" in data
+
+
+def test_export_continuity_pack_json_stale_context_rules(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    data = json.loads((tmp_path / relative_path).read_text(encoding="utf-8"))
+    assert len(data["stale_context_suppression_rules"]) > 0
+
+
+def test_export_continuity_pack_json_vendor_neutral(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    data = json.loads((tmp_path / relative_path).read_text(encoding="utf-8"))
+    assert "vendor-neutral" in data["vendor_neutral_note"]
+
+
+def test_export_continuity_pack_is_read_only_no_side_effects(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    export_continuity_pack(root, pack)
+    # No runtime-snapshots directory should be created as a side effect
+    runtime_snapshots_dir = tmp_path / ".pcae" / "runtime-snapshots"
+    assert not runtime_snapshots_dir.exists()
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity export
+# ---------------------------------------------------------------------------
+
+
+def test_cli_continuity_export_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "export"])
+    assert result == 0
+
+
+def test_cli_continuity_export_prints_export_path(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    captured = capsys.readouterr()
+    assert "Export path:" in captured.out
+    assert ".pcae/continuity-packs/" in captured.out
+
+
+def test_cli_continuity_export_prints_profile(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    captured = capsys.readouterr()
+    assert "Profile:" in captured.out
+    assert PROFILE_UNIVERSAL in captured.out
+
+
+def test_cli_continuity_export_prints_included_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    captured = capsys.readouterr()
+    assert "Included continuity sections:" in captured.out
+    assert "active task summary" in captured.out
+    assert "stale-context suppression rules" in captured.out
+    assert "bootstrap continuity" in captured.out
+
+
+def test_cli_continuity_export_prints_token_optimization_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    captured = capsys.readouterr()
+    assert "Token optimization note" in captured.out
+
+
+def test_cli_continuity_export_prints_governance_continuity_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    captured = capsys.readouterr()
+    assert "Governance continuity note" in captured.out
+
+
+def test_cli_continuity_export_creates_file_on_disk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    files = list(packs_dir.glob("continuity-pack-*.json"))
+    assert len(files) == 1
+
+
+def test_cli_continuity_export_profile_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--profile", "implementation"])
+    captured = capsys.readouterr()
+    assert PROFILE_IMPLEMENTATION in captured.out
+
+
+def test_cli_continuity_export_profile_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--profile", "handoff"])
+    captured = capsys.readouterr()
+    assert PROFILE_HANDOFF in captured.out
+
+
+def test_cli_continuity_export_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "export", "--json"])
+    assert result == 0
+
+
+def test_cli_continuity_export_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_continuity_export_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "path" in data
+    assert "profile_type" in data
+    assert "exported_at" in data
+    assert "included_sections" in data
+    assert "continuity_summary" in data
+
+
+def test_cli_continuity_export_json_path_under_continuity_packs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert ".pcae/continuity-packs/" in data["path"]
+
+
+def test_cli_continuity_export_json_profile_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["profile_type"] == PROFILE_UNIVERSAL
+
+
+def test_cli_continuity_export_json_exported_at_is_iso(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    datetime.fromisoformat(data["exported_at"])
+
+
+def test_cli_continuity_export_json_included_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    sections = data["included_sections"]
+    assert "active task summary" in sections
+    assert "compact bootstrap prompt" in sections
+    assert "stale-context suppression rules" in sections
+    assert "bootstrap continuity" in sections
+    assert "vendor-neutral note" in sections
+
+
+def test_cli_continuity_export_json_continuity_summary_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    summary = data["continuity_summary"]
+    assert "active_task" in summary
+    assert "governance_health" in summary
+    assert "governance_check" in summary
+
+
+def test_cli_continuity_export_file_content_is_valid_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_file = next(packs_dir.glob("continuity-pack-*.json"))
+    content = json.loads(pack_file.read_text(encoding="utf-8"))
+    assert isinstance(content, dict)
+    assert "compact_bootstrap_prompt" in content
+    assert "stale_context_suppression_rules" in content
+    assert "vendor_neutral_note" in content
+    assert "bootstrap_continuity" in content
+
+
+def test_continuity_export_gitignore_contains_continuity_packs() -> None:
+    gitignore = Path(__file__).parent.parent / ".pcae" / ".gitignore"
+    assert gitignore.is_file()
+    content = gitignore.read_text(encoding="utf-8")
+    assert "continuity-packs/" in content

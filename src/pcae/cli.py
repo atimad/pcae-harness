@@ -15,7 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.context import run_context_export, run_context_pack
+from pcae.commands.context import run_context_export, run_context_pack, run_continuity_export
 from pcae.commands.ci import (
     run_ci_drift,
     run_ci_generate_github,
@@ -198,6 +198,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON export result.",
     )
     context_export_parser.set_defaults(handler=run_context_export)
+
+    continuity_parser = subparsers.add_parser(
+        "continuity",
+        help="Export governed continuity restore packs.",
+    )
+    continuity_subparsers = continuity_parser.add_subparsers(
+        dest="continuity_command",
+        required=True,
+    )
+    continuity_export_parser = continuity_subparsers.add_parser(
+        "export",
+        help="Export a governed continuity restore pack to .pcae/continuity-packs/.",
+    )
+    continuity_export_parser.add_argument(
+        "--profile",
+        default=None,
+        metavar="PROFILE",
+        help=(
+            "Work-mode context profile: implementation, documentation, "
+            "validation, handoff. Omit for balanced universal profile."
+        ),
+    )
+    continuity_export_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON export result.",
+    )
+    continuity_export_parser.set_defaults(handler=run_continuity_export)
 
     ci_parser = subparsers.add_parser(
         "ci",

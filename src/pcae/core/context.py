@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import json
 from pathlib import Path
 
 from pcae.core.check import run_checks
@@ -335,3 +336,134 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         bootstrap_handoff_notes=CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
         advisory=CONTEXT_PACK_ADVISORY,
     )
+
+
+# ---------------------------------------------------------------------------
+# Continuity restore packs
+# ---------------------------------------------------------------------------
+
+CONTINUITY_PACK_RELATIVE_DIR = Path(".pcae") / "continuity-packs"
+
+CONTINUITY_PACK_VENDOR_NEUTRAL_NOTE = (
+    "This continuity pack is vendor-neutral and universal. "
+    "It is not tailored to any specific AI agent or provider."
+)
+
+CONTINUITY_PACK_STALE_CONTEXT_SUPPRESSION_RULES: tuple[str, ...] = (
+    "Phase prompt is authoritative. PROJECT_STATUS.md is background.",
+    "Do not infer stale tasks from older governance documents.",
+    "Do not modify files outside the active task scope.",
+)
+
+CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE = (
+    "Continuity pack is governance-complete and vendor-neutral."
+)
+
+CONTINUITY_PACK_INCLUDED_SECTIONS: tuple[str, ...] = (
+    "active task summary",
+    "governance state",
+    "orchestration state",
+    "provenance summary",
+    "runtime snapshot metadata",
+    "compact context pack",
+    "compact bootstrap prompt",
+    "operational rules",
+    "validation commands",
+    "stale-context suppression rules",
+    "bootstrap continuity",
+    "vendor-neutral note",
+)
+
+
+@dataclass(frozen=True)
+class ContinuityPack:
+    exported_at: str
+    profile_type: str
+    active_task_summary: dict | None
+    governance_state: dict
+    orchestration_state: dict
+    provenance_summary: dict
+    runtime_snapshot_metadata: dict
+    compact_context_pack: dict
+    compact_bootstrap_prompt: str
+    operational_rules: tuple[str, ...]
+    validation_commands: tuple[str, ...]
+    stale_context_suppression_rules: tuple[str, ...]
+    vendor_neutral_note: str
+    bootstrap_continuity: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "active_task_summary": self.active_task_summary,
+            "bootstrap_continuity": list(self.bootstrap_continuity),
+            "compact_bootstrap_prompt": self.compact_bootstrap_prompt,
+            "compact_context_pack": self.compact_context_pack,
+            "exported_at": self.exported_at,
+            "governance_state": self.governance_state,
+            "operational_rules": list(self.operational_rules),
+            "orchestration_state": self.orchestration_state,
+            "profile_type": self.profile_type,
+            "provenance_summary": self.provenance_summary,
+            "runtime_snapshot_metadata": self.runtime_snapshot_metadata,
+            "stale_context_suppression_rules": list(self.stale_context_suppression_rules),
+            "validation_commands": list(self.validation_commands),
+            "vendor_neutral_note": self.vendor_neutral_note,
+        }
+
+
+def build_continuity_pack(
+    root: HarnessPath,
+    profile: WorkModeProfile,
+    exported_at: datetime | None = None,
+) -> ContinuityPack:
+    """Build a portable governed continuity restore pack."""
+    from pcae.core.status import preview_runtime_snapshot
+
+    timestamp = exported_at or datetime.now(timezone.utc)
+    pack = build_context_pack(root)
+    snapshot_preview = preview_runtime_snapshot(root)
+    bootstrap_prompt = build_bootstrap_prompt(pack, profile)
+
+    active_task_summary = None
+    if pack.active_task is not None:
+        active_task_summary = {
+            "id": pack.active_task.get("id"),
+            "status": pack.active_task.get("status"),
+            "title": pack.active_task.get("title"),
+        }
+
+    return ContinuityPack(
+        exported_at=timestamp.isoformat(),
+        profile_type=profile.profile_type,
+        active_task_summary=active_task_summary,
+        governance_state=pack.governance_state,
+        orchestration_state=pack.orchestration_state,
+        provenance_summary=pack.provenance_summary,
+        runtime_snapshot_metadata=snapshot_preview.runtime_summary,
+        compact_context_pack=pack.to_dict(),
+        compact_bootstrap_prompt=bootstrap_prompt,
+        operational_rules=pack.operational_rules,
+        validation_commands=pack.validation_commands,
+        stale_context_suppression_rules=CONTINUITY_PACK_STALE_CONTEXT_SUPPRESSION_RULES,
+        vendor_neutral_note=CONTINUITY_PACK_VENDOR_NEUTRAL_NOTE,
+        bootstrap_continuity=pack.bootstrap_handoff_notes,
+    )
+
+
+def export_continuity_pack(
+    root: HarnessPath,
+    continuity_pack: ContinuityPack,
+) -> tuple[Path, str]:
+    """Write a continuity restore pack to .pcae/continuity-packs/.
+
+    Returns (relative_path, exported_at_iso).
+    """
+    ts = datetime.fromisoformat(continuity_pack.exported_at)
+    filename = f"continuity-pack-{ts.strftime('%Y%m%d-%H%M%S')}.json"
+    relative_path = CONTINUITY_PACK_RELATIVE_DIR / filename
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(continuity_pack.to_dict(), fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    return relative_path, continuity_pack.exported_at

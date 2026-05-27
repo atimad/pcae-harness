@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35F: Compact context export.
+Phase 35G: Governed continuity restore packs.
 
 ## Governance Coherence Note
 
@@ -194,7 +194,19 @@ work-mode emphasis and `--json` output (fields: `path`, `profile_type`,
 `.pcae/.gitignore` and `pcae docs commands` now covers all current CLI command groups
 including phase, status, governance, runtime snapshot, orchestration,
 context, provenance, session bootstrap, and docs, with `docs/COMMANDS.md`
-refreshed to match using `--force`.
+refreshed to match using `--force`, and `pcae continuity export` exports a
+portable governed continuity restore pack as an ignored JSON artifact under
+`.pcae/continuity-packs/` (filename `continuity-pack-YYYYMMDD-HHMMSS.json`)
+combining runtime snapshot metadata, compact context pack, compact bootstrap
+prompt, active task summary, governance state, orchestration state, provenance
+summary, operational rules, validation commands, stale-context suppression
+rules, bootstrap continuity notes, and a vendor-neutral note; supports
+`--profile` for work-mode emphasis and `--json` output (fields: `path`,
+`profile_type`, `exported_at`, `included_sections`, `continuity_summary`);
+exported packs are Git-ignored via `continuity-packs/` in `.pcae/.gitignore`;
+continuity packs are governance-complete, vendor-neutral, portable, and
+read-only exports — no automatic restore, prompt injection, remote sync,
+telemetry, or runtime mutation.
 
 ## Next
 
