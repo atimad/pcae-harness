@@ -8,6 +8,7 @@ from pcae.core.status import (
     audit_governance_coherence,
     check_project_status_coherence,
     plan_governance_repairs,
+    preview_runtime_snapshot,
 )
 
 
@@ -70,6 +71,26 @@ def run_governance_repair(args: argparse.Namespace) -> int:
         else:
             print("  - none")
         print("Repair safety notes:")
+        for note in result.safety_notes:
+            print(f"  - {note}")
+        print(result.advisory)
+    return 0
+
+
+def run_runtime_snapshot(args: argparse.Namespace) -> int:
+    result = preview_runtime_snapshot(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot preview")
+        print(f"Snapshot readiness: {'ready' if result.snapshot_ready else 'not ready'}")
+        print("Included runtime sections:")
+        for section in result.included_sections:
+            print(f"  - {section}")
+        print("Portability notes:")
+        for note in result.portability_notes:
+            print(f"  - {note}")
+        print("Safety notes:")
         for note in result.safety_notes:
             print(f"  - {note}")
         print(result.advisory)

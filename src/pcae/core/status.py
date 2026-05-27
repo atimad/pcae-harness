@@ -3,9 +3,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from pcae.core.agent import build_agent_lock_state
+from pcae.core.check import run_checks
+from pcae.core.health import build_health_data, session_continuity_status
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
-from pcae.core.provenance import PROVENANCE_HISTORY_RELATIVE_PATH
+from pcae.core.provenance import (
+    PROVENANCE_HISTORY_RELATIVE_PATH,
+    build_provenance_timeline,
+)
 from pcae.core.session import read_session_snapshot
 from pcae.core.tasks import find_latest_active_task
 
@@ -29,6 +35,9 @@ KNOWN_STALE_PHRASES: tuple[str, ...] = (
 
 GOVERNANCE_REPAIR_ADVISORY = (
     "Repair planning is advisory; the user remains authoritative."
+)
+RUNTIME_SNAPSHOT_ADVISORY = (
+    "Snapshot previews are advisory; the user remains authoritative."
 )
 
 
@@ -126,6 +135,26 @@ class GovernanceRepairPlan:
         }
 
 
+@dataclass(frozen=True)
+class RuntimeSnapshotPreview:
+    snapshot_ready: bool
+    included_sections: tuple[str, ...]
+    portability_notes: tuple[str, ...]
+    safety_notes: tuple[str, ...]
+    advisory: str
+    runtime_summary: dict
+
+    def to_dict(self) -> dict:
+        return {
+            "snapshot_ready": self.snapshot_ready,
+            "included_sections": list(self.included_sections),
+            "portability_notes": list(self.portability_notes),
+            "safety_notes": list(self.safety_notes),
+            "advisory": self.advisory,
+            "runtime_summary": self.runtime_summary,
+        }
+
+
 def check_project_status_coherence(root: HarnessPath) -> CoherenceResult:
     """Return coherence warnings for PROJECT_STATUS.md stale roadmap references."""
     path = root.join(PROJECT_STATUS_RELATIVE_PATH)
@@ -197,6 +226,97 @@ def plan_governance_repairs(root: HarnessPath) -> GovernanceRepairPlan:
         ),
         advisory=GOVERNANCE_REPAIR_ADVISORY,
     )
+
+
+def preview_runtime_snapshot(root: HarnessPath) -> RuntimeSnapshotPreview:
+    """Return a read-only preview of portable governed runtime snapshot contents."""
+    health = build_health_data(root)
+    check_result = run_checks(root)
+    policy = load_policy(root)
+    active_task = find_latest_active_task(root)
+    session = read_session_snapshot(root)
+    provenance = build_provenance_timeline(root)
+
+    runtime_summary = {
+        "active_task": None
+        if active_task is None
+        else {
+            "id": active_task.task_id,
+            "title": active_task.title,
+            "status": active_task.status,
+            "mode": active_task.mode,
+            "goal": active_task.goal,
+        },
+        "agent_lock_state": build_agent_lock_state(root),
+        "session_continuity_status": session_continuity_status(check_result),
+        "provenance_event_count": provenance.event_count,
+        "latest_provenance_event": None
+        if provenance.latest_event is None
+        else provenance.latest_event.to_dict(),
+        "orchestration_policy_summary": policy.orchestration.to_dict(),
+        "registered_agents": [entry.to_dict() for entry in policy.agent_registry],
+        "governance_health_status": health["overall_status"],
+        "governance_check_status": "passed" if check_result.passed else "failed",
+        "workflow_orchestration_metadata": workflow_orchestration_metadata(
+            active_task,
+            session.data if session is not None else None,
+        ),
+    }
+    return RuntimeSnapshotPreview(
+        snapshot_ready=health["overall_status"] == "healthy" and check_result.passed,
+        included_sections=(
+            "active task",
+            "agent lock state",
+            "session continuity status",
+            "provenance event count",
+            "latest provenance event",
+            "orchestration policy summary",
+            "registered agents",
+            "governance health status",
+            "governance check status",
+            "workflow/orchestration metadata",
+        ),
+        portability_notes=(
+            "Preview describes portable runtime sections only; no archive is written.",
+            "Local paths and agent identifiers remain advisory runtime metadata.",
+            "Restoration is intentionally out of scope for this preview.",
+        ),
+        safety_notes=(
+            "Preview only; no files are exported.",
+            "Runtime state is not restored or modified.",
+            "Governance artifacts are not mutated.",
+        ),
+        advisory=RUNTIME_SNAPSHOT_ADVISORY,
+        runtime_summary=runtime_summary,
+    )
+
+
+def workflow_orchestration_metadata(active_task: object, session_data: dict | None) -> dict:
+    metadata: dict[str, object] = {
+        "available": False,
+        "active_task_mode": None,
+        "active_task_goal": None,
+        "session_current_objective": None,
+        "session_next_recommended_step": None,
+    }
+    if active_task is not None:
+        metadata["active_task_mode"] = getattr(active_task, "mode", None)
+        metadata["active_task_goal"] = getattr(active_task, "goal", None)
+    if session_data is not None:
+        metadata["session_current_objective"] = session_data.get("current_objective")
+        metadata["session_next_recommended_step"] = session_data.get(
+            "next_recommended_step"
+        )
+    metadata["available"] = any(
+        metadata[key]
+        for key in (
+            "active_task_mode",
+            "active_task_goal",
+            "session_current_objective",
+            "session_next_recommended_step",
+        )
+    )
+    return metadata
 
 
 def audit_issue_messages(audit: GovernanceAuditResult) -> list[str]:

@@ -61,6 +61,7 @@ from pcae.commands.orchestration import (
 from pcae.commands.status import (
     run_governance_audit,
     run_governance_repair,
+    run_runtime_snapshot,
     run_status_coherence,
 )
 from pcae.commands.hooks import run_hooks_install
@@ -328,6 +329,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance repair output.",
     )
     governance_repair_parser.set_defaults(handler=run_governance_repair)
+
+    runtime_parser = subparsers.add_parser(
+        "runtime",
+        help="Preview PCAE governed runtime state.",
+    )
+    runtime_subparsers = runtime_parser.add_subparsers(
+        dest="runtime_command",
+        required=True,
+    )
+    runtime_snapshot_parser = runtime_subparsers.add_parser(
+        "snapshot",
+        help="Preview a portable governed runtime snapshot.",
+    )
+    runtime_snapshot_parser.add_argument(
+        "--preview",
+        action="store_true",
+        required=True,
+        help="Preview snapshot contents without exporting files.",
+    )
+    runtime_snapshot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime snapshot preview output.",
+    )
+    runtime_snapshot_parser.set_defaults(handler=run_runtime_snapshot)
 
     orchestration_parser = subparsers.add_parser(
         "orchestration",

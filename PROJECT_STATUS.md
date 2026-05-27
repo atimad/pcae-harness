@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34B: Governance repair planning preview.
+Phase 34C: Governance runtime snapshot preview.
 
 ## Governance Coherence Note
 
@@ -102,7 +102,13 @@ deterministic advisory repair planning can be previewed with
 `pcae governance repair --dry-run` and
 `pcae governance repair --dry-run --json`, using audit results to report
 detected issues, proposed repairs, safety notes, and the advisory reminder
-that the user remains authoritative without modifying files.
+that the user remains authoritative without modifying files, and portable
+governed runtime snapshot contents can be previewed with
+`pcae runtime snapshot --preview` and
+`pcae runtime snapshot --preview --json`, showing active task, agent lock,
+session continuity, provenance, orchestration policy, registered agents,
+health/check status, and workflow metadata without exporting files, restoring
+state, or mutating governance artifacts.
 
 ## Next
 

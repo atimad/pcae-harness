@@ -116,3 +116,4 @@
 - Added `pcae orchestration readiness --workflow TEXT` and JSON output to preview advisory execution readiness using workflow validation, governance checkpoints, health/check state, registry membership, and session continuity.
 - Added `pcae governance audit` and `pcae governance audit --json` for lightweight read-only governance coherence auditing across project status, roadmap references, active task state, session continuity, provenance history, policy parsing, and agent registry presence.
 - Added `pcae governance repair --dry-run` and `pcae governance repair --dry-run --json` for deterministic advisory governance repair planning previews without modifying files.
+- Added `pcae runtime snapshot --preview` and `pcae runtime snapshot --preview --json` for read-only previews of portable governed runtime snapshot contents.
