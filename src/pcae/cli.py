@@ -64,6 +64,7 @@ from pcae.commands.status import (
     run_runtime_snapshot,
     run_runtime_snapshot_export,
     run_runtime_snapshot_inspect,
+    run_runtime_snapshot_restore,
     run_status_coherence,
 )
 from pcae.commands.hooks import run_hooks_install
@@ -383,6 +384,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON runtime snapshot inspection output.",
     )
     runtime_snapshot_inspect_parser.set_defaults(handler=run_runtime_snapshot_inspect)
+    runtime_snapshot_restore_parser = runtime_snapshot_subparsers.add_parser(
+        "restore",
+        help="Preview restoring a governed runtime snapshot.",
+    )
+    runtime_snapshot_restore_parser.add_argument(
+        "path",
+        metavar="PATH",
+        help="Path to an exported runtime snapshot JSON file.",
+    )
+    runtime_snapshot_restore_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="Preview restore effects without modifying runtime state.",
+    )
+    runtime_snapshot_restore_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime snapshot restore preview output.",
+    )
+    runtime_snapshot_restore_parser.set_defaults(handler=run_runtime_snapshot_restore)
 
     orchestration_parser = subparsers.add_parser(
         "orchestration",

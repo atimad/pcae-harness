@@ -44,6 +44,9 @@ RUNTIME_SNAPSHOT_ADVISORY = (
 RUNTIME_SNAPSHOT_INSPECTION_ADVISORY = (
     "Snapshot inspection is advisory; the user remains authoritative."
 )
+RUNTIME_SNAPSHOT_RESTORE_ADVISORY = (
+    "Restore preview is advisory; no runtime state is changed."
+)
 RUNTIME_SNAPSHOTS_RELATIVE_PATH = Path(".pcae") / "runtime-snapshots"
 RUNTIME_SNAPSHOT_REQUIRED_KEYS: tuple[str, ...] = (
     "exported_at",
@@ -207,6 +210,26 @@ class RuntimeSnapshotInspection:
             "included_sections": list(self.included_sections),
             "runtime_summary": self.runtime_summary,
             "portability_notes": list(self.portability_notes),
+            "safety_notes": list(self.safety_notes),
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotRestorePreview:
+    valid: bool
+    restore_preview: dict
+    would_restore: tuple[str, ...]
+    would_not_restore: tuple[str, ...]
+    safety_notes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "valid": self.valid,
+            "restore_preview": self.restore_preview,
+            "would_restore": list(self.would_restore),
+            "would_not_restore": list(self.would_not_restore),
             "safety_notes": list(self.safety_notes),
             "advisory": self.advisory,
         }
@@ -414,6 +437,57 @@ def inspect_runtime_snapshot(root: HarnessPath, snapshot_path: Path) -> RuntimeS
             "Snapshot contents are not rewritten.",
         ),
         advisory=RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
+    )
+
+
+def preview_runtime_snapshot_restore(
+    root: HarnessPath,
+    snapshot_path: Path,
+) -> RuntimeSnapshotRestorePreview:
+    inspection = inspect_runtime_snapshot(root, snapshot_path)
+    summary = inspection.runtime_summary
+    restore_preview = {
+        "exported_at": inspection.exported_at,
+        "active_task": summary["active_task"],
+        "agent_lock_state": summary["agent_lock_state"],
+        "session_continuity_status": summary["session_continuity_status"],
+        "provenance_summary": {
+            "event_count": summary["provenance_event_count"],
+            "latest_event": summary["latest_provenance_event"],
+        },
+        "orchestration_policy_summary": summary["orchestration_policy_summary"],
+        "registered_agents": summary["registered_agents"],
+        "governance_health_status": summary["governance_health_status"],
+        "governance_check_status": summary["governance_check_status"],
+        "workflow_orchestration_metadata": summary["workflow_orchestration_metadata"],
+    }
+    return RuntimeSnapshotRestorePreview(
+        valid=True,
+        restore_preview=restore_preview,
+        would_restore=(
+            "active task metadata",
+            "agent lock state",
+            "session continuity state",
+            "provenance summary",
+            "orchestration policy summary",
+            "registered agents",
+            "governance health/check status",
+            "workflow/orchestration metadata",
+        ),
+        would_not_restore=(
+            "active task files",
+            "agent lock file",
+            "session snapshot",
+            "provenance history",
+            "orchestration policy file",
+            "runtime snapshot file",
+        ),
+        safety_notes=(
+            "Dry-run only; no runtime state is restored.",
+            "No files are written.",
+            "Agent locks, provenance, session state, and history are not modified.",
+        ),
+        advisory=RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     )
 
 

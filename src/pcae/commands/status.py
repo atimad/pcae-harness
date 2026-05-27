@@ -12,6 +12,7 @@ from pcae.core.status import (
     inspect_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
+    preview_runtime_snapshot_restore,
 )
 
 
@@ -130,6 +131,32 @@ def run_runtime_snapshot_inspect(args: argparse.Namespace) -> int:
         print("Portability notes:")
         for note in result.portability_notes:
             print(f"  - {note}")
+        print("Safety notes:")
+        for note in result.safety_notes:
+            print(f"  - {note}")
+        print(result.advisory)
+    return 0
+
+
+def run_runtime_snapshot_restore(args: argparse.Namespace) -> int:
+    try:
+        result = preview_runtime_snapshot_restore(HarnessPath.cwd(), Path(args.path))
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot restore preview")
+        print("Restore preview status: ready")
+        print(f"Snapshot validity: {'valid' if result.valid else 'invalid'}")
+        print("Sections that would be restored:")
+        for section in result.would_restore:
+            print(f"  - {section}")
+        print("Sections that would NOT be restored yet:")
+        for section in result.would_not_restore:
+            print(f"  - {section}")
         print("Safety notes:")
         for note in result.safety_notes:
             print(f"  - {note}")

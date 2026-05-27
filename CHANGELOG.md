@@ -149,3 +149,4 @@
 - Added `pcae runtime snapshot --preview` and `pcae runtime snapshot --preview --json` for read-only previews of portable governed runtime snapshot contents.
 - Added `pcae runtime snapshot export` and `pcae runtime snapshot export --json` to write portable governed runtime snapshot JSON files under ignored `.pcae/runtime-snapshots/`.
 - Added `pcae runtime snapshot inspect PATH` and `pcae runtime snapshot inspect PATH --json` for read-only inspection of exported governed runtime snapshots with clear invalid-file failures.
+- Added `pcae runtime snapshot restore PATH --dry-run` and `pcae runtime snapshot restore PATH --dry-run --json` for advisory restore previews without changing runtime state.

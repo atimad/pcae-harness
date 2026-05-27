@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34E: Governance runtime snapshot inspection.
+Phase 34F: Governance runtime snapshot restore preview.
 
 ## Governance Coherence Note
 
@@ -115,7 +115,12 @@ snapshot can be exported as portable ignored JSON with
 read-only with `pcae runtime snapshot inspect PATH` and
 `pcae runtime snapshot inspect PATH --json`, reporting snapshot validity,
 included sections, runtime summary, portability notes, safety notes, and
-advisory status without restoring runtime state or mutating files.
+advisory status without restoring runtime state or mutating files, and
+snapshot restore effects can be previewed with
+`pcae runtime snapshot restore PATH --dry-run` and
+`pcae runtime snapshot restore PATH --dry-run --json`, showing what runtime
+sections would and would not be restored while leaving agent locks,
+provenance, sessions, history, and files unchanged.
 
 ## Next
 

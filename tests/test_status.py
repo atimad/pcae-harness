@@ -14,12 +14,14 @@ from pcae.core.status import (
     KNOWN_STALE_PHRASES,
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
+    RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     audit_governance_coherence,
     check_project_status_coherence,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
+    preview_runtime_snapshot_restore,
 )
 
 
@@ -470,6 +472,92 @@ def test_cli_runtime_snapshot_inspect_missing_fields_fails(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "missing required field" in output
+
+
+def test_runtime_snapshot_restore_preview_summarizes_would_restore(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    result = preview_runtime_snapshot_restore(HarnessPath(tmp_path), export.export_path)
+    assert result.valid
+    assert result.restore_preview["active_task"]["id"] == "20260527-1200-test"
+    assert result.restore_preview["provenance_summary"]["event_count"] == 1
+    assert "active task metadata" in result.would_restore
+    assert "agent lock file" in result.would_not_restore
+    assert result.advisory == RUNTIME_SNAPSHOT_RESTORE_ADVISORY
+
+
+def test_runtime_snapshot_restore_preview_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    before = target.read_text(encoding="utf-8")
+    preview_runtime_snapshot_restore(HarnessPath(tmp_path), export.export_path)
+    after = target.read_text(encoding="utf-8")
+    assert after == before
+
+
+def test_cli_runtime_snapshot_restore_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        ["runtime", "snapshot", "restore", export.export_path.as_posix(), "--dry-run"]
+    )
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot restore preview" in output
+    assert "Restore preview status: ready" in output
+    assert "Snapshot validity: valid" in output
+    assert "Sections that would be restored:" in output
+    assert "Sections that would NOT be restored yet:" in output
+    assert "Safety notes:" in output
+    assert RUNTIME_SNAPSHOT_RESTORE_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_restore_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        [
+            "runtime",
+            "snapshot",
+            "restore",
+            export.export_path.as_posix(),
+            "--dry-run",
+            "--json",
+        ]
+    )
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["restore_preview"]["active_task"]["id"] == "20260527-1200-test"
+    assert "active task metadata" in data["would_restore"]
+    assert "agent lock file" in data["would_not_restore"]
+    assert data["safety_notes"]
+    assert data["advisory"] == RUNTIME_SNAPSHOT_RESTORE_ADVISORY
+
+
+def test_cli_runtime_snapshot_restore_invalid_snapshot_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("{}", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "restore", "invalid.json", "--dry-run"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid runtime snapshot" in output
 
 
 def initialize_git_repo(tmp_path: Path) -> None:
