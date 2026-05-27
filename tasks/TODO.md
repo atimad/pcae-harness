@@ -21,7 +21,6 @@
 - Future orchestration validation may compare generated docs, policy, and runtime commands for drift while preserving advisory user control.
 - Future handoff guidance may suggest workflow names from task metadata while keeping user agent choice authoritative.
 - Future readiness previews may explain remediation steps for failed checks without automatically mutating workflow, lock, or task state.
-- Full governance audit: `pcae governance audit` command.
 - Roadmap/provenance coherence validation: detect completed features still in roadmap.
 - Stale roadmap detection: automated scan of governance docs against CHANGELOG/DONE history.
 - Governance artifact synchronization: keep PROJECT_STATUS.md, TODO.md, CHANGELOG.md coherent.

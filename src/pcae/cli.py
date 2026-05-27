@@ -58,7 +58,7 @@ from pcae.commands.orchestration import (
     run_orchestration_simulate,
     run_orchestration_validate,
 )
-from pcae.commands.status import run_status_coherence
+from pcae.commands.status import run_governance_audit, run_status_coherence
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -288,6 +288,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON coherence output.",
     )
     status_coherence_parser.set_defaults(handler=run_status_coherence)
+
+    governance_parser = subparsers.add_parser(
+        "governance",
+        help="Audit PCAE governance coherence.",
+    )
+    governance_subparsers = governance_parser.add_subparsers(
+        dest="governance_command",
+        required=True,
+    )
+    governance_audit_parser = governance_subparsers.add_parser(
+        "audit",
+        help="Run a lightweight read-only governance coherence audit.",
+    )
+    governance_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance audit output.",
+    )
+    governance_audit_parser.set_defaults(handler=run_governance_audit)
 
     orchestration_parser = subparsers.add_parser(
         "orchestration",

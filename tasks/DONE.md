@@ -114,3 +114,4 @@
 - Added `pcae orchestration validate --workflow TEXT` and JSON output to validate advisory workflow coherence, registry consistency, deterministic ordering, fallback behavior, and governance checkpoints.
 - Extended `pcae phase handoff` with `--workflow TEXT` to show advisory workflow validation results and governance checkpoints during handoff guidance.
 - Added `pcae orchestration readiness --workflow TEXT` and JSON output to preview advisory execution readiness using workflow validation, governance checkpoints, health/check state, registry membership, and session continuity.
+- Added `pcae governance audit` and `pcae governance audit --json` for lightweight read-only governance coherence auditing across project status, roadmap references, active task state, session continuity, provenance history, policy parsing, and agent registry presence.

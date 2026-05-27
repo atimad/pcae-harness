@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 33E: Orchestration workflow plans.
+Phase 34A: Governance coherence audit foundation.
 
 ## Governance Coherence Note
 
@@ -92,7 +92,12 @@ validity, warnings, and governance checkpoints. Execution readiness can be
 previewed with `pcae orchestration readiness --workflow TEXT` and
 `pcae orchestration readiness --workflow TEXT --json`, combining workflow
 validation, governance checkpoints, registry membership, health/check state,
-and session continuity while remaining advisory and non-executing.
+and session continuity while remaining advisory and non-executing. Lightweight
+governance coherence auditing is available with `pcae governance audit` and
+`pcae governance audit --json`, checking phase and next-step status, stale
+roadmap references, active task readability, session continuity availability,
+provenance history presence, policy parsing, and agent registry presence
+without mutating governance artifacts or rewriting roadmap files.
 
 ## Next
 
@@ -110,7 +115,6 @@ and session continuity while remaining advisory and non-executing.
 - Auto-detect available agents from lock history or policy configuration.
 - Orchestration-aware agent routing based on task type or governance context.
 - Heterogeneous agent governance policies (per-agent policy overrides).
-- Full governance audit: `pcae governance audit` command.
 - Roadmap/provenance coherence validation: detect when completed features remain in the roadmap.
 - Stale roadmap detection: automated scan of governance docs against CHANGELOG/DONE history.
 - Governance artifact synchronization: keep PROJECT_STATUS.md, TODO.md, CHANGELOG.md coherent.
