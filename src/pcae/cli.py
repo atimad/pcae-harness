@@ -15,7 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
-from pcae.commands.context import run_context_pack
+from pcae.commands.context import run_context_export, run_context_pack
 from pcae.commands.ci import (
     run_ci_drift,
     run_ci_generate_github,
@@ -178,6 +178,26 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     context_pack_parser.set_defaults(handler=run_context_pack)
+
+    context_export_parser = context_subparsers.add_parser(
+        "export",
+        help="Export a compact governed context pack to .pcae/context-packs/.",
+    )
+    context_export_parser.add_argument(
+        "--profile",
+        default=None,
+        metavar="PROFILE",
+        help=(
+            "Work-mode context profile for the export: "
+            "implementation, documentation, validation, handoff."
+        ),
+    )
+    context_export_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON export result.",
+    )
+    context_export_parser.set_defaults(handler=run_context_export)
 
     ci_parser = subparsers.add_parser(
         "ci",

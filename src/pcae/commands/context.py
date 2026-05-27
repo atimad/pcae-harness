@@ -6,9 +6,36 @@ import json
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
     build_context_pack,
+    export_context_pack,
     resolve_profile,
 )
 from pcae.core.paths import HarnessPath
+
+
+def run_context_export(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    pack = build_context_pack(root)
+    profile_name: str | None = getattr(args, "profile", None)
+    profile, _ = resolve_profile(profile_name)
+    relative_path, exported_at = export_context_pack(root, pack, profile)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "exported_at": exported_at,
+                    "path": relative_path.as_posix(),
+                    "profile_type": profile.profile_type,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print(f"Exported: {relative_path.as_posix()}")
+        print(f"Profile: {profile.profile_type}")
+        print(f"Exported at: {exported_at}")
+    return 0
 
 
 def run_context_pack(args: argparse.Namespace) -> int:

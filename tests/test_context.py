@@ -7,10 +7,13 @@ import subprocess
 import pytest
 
 from pcae.cli import main
+from datetime import datetime, timezone
+
 from pcae.core.context import (
     BOOTSTRAP_COMPACT_ADVISORY,
     CONTEXT_PACK_ADVISORY,
     CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
+    CONTEXT_PACK_EXPORT_RELATIVE_DIR,
     CONTEXT_PACK_OPERATIONAL_RULES,
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
     CONTEXT_PACK_VALIDATION_COMMANDS,
@@ -23,6 +26,7 @@ from pcae.core.context import (
     WorkModeProfile,
     build_bootstrap_prompt,
     build_context_pack,
+    export_context_pack,
     resolve_profile,
 )
 from pcae.core.paths import HarnessPath
@@ -1139,6 +1143,280 @@ def test_build_bootstrap_prompt_handoff_emphasizes_handoff_sections(tmp_path: Pa
 def test_bootstrap_compact_advisory_content() -> None:
     assert "Bootstrap compression" in BOOTSTRAP_COMPACT_ADVISORY
     assert "relaxing governance constraints" in BOOTSTRAP_COMPACT_ADVISORY
+
+
+# ---------------------------------------------------------------------------
+# Core: export_context_pack
+# ---------------------------------------------------------------------------
+
+
+def test_export_context_pack_relative_dir_constant() -> None:
+    from pathlib import Path as _Path
+    assert CONTEXT_PACK_EXPORT_RELATIVE_DIR == _Path(".pcae") / "context-packs"
+
+
+def test_export_context_pack_creates_file(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile, exported_at=ts)
+
+    assert (tmp_path / relative_path).is_file()
+
+
+def test_export_context_pack_filename_uses_timestamp(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    ts = datetime(2026, 5, 27, 14, 30, 59, tzinfo=timezone.utc)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile, exported_at=ts)
+
+    assert relative_path.name == "context-pack-20260527-143059.txt"
+
+
+def test_export_context_pack_path_under_context_packs_dir(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile)
+
+    assert relative_path.as_posix().startswith(".pcae/context-packs/")
+    assert relative_path.suffix == ".txt"
+
+
+def test_export_context_pack_returns_iso_timestamp(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    ts = datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc)
+
+    _, exported_at = export_context_pack(HarnessPath(tmp_path), pack, profile, exported_at=ts)
+
+    assert exported_at == "2026-05-27T12:00:00+00:00"
+
+
+def test_export_context_pack_content_contains_bootstrap_prompt(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile)
+
+    content = (tmp_path / relative_path).read_text(encoding="utf-8")
+    assert "[PCAE Bootstrap" in content
+    assert "Governance:" in content
+    assert "Rules:" in content
+
+
+def test_export_context_pack_content_contains_stale_context_suppression(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile)
+
+    content = (tmp_path / relative_path).read_text(encoding="utf-8")
+    assert "Stale-context:" in content
+    assert "PROJECT_STATUS.md is background" in content
+
+
+def test_export_context_pack_with_implementation_profile(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_IMPLEMENTATION)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile)
+
+    content = (tmp_path / relative_path).read_text(encoding="utf-8")
+    assert "implementation profile" in content
+    assert "scope_boundaries" in content
+
+
+def test_export_context_pack_with_handoff_profile(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_HANDOFF)
+
+    relative_path, _ = export_context_pack(HarnessPath(tmp_path), pack, profile)
+
+    content = (tmp_path / relative_path).read_text(encoding="utf-8")
+    assert "handoff profile" in content
+    assert "bootstrap_handoff_notes" in content
+
+
+# ---------------------------------------------------------------------------
+# CLI: context export
+# ---------------------------------------------------------------------------
+
+
+def test_cli_context_export_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["context", "export"])
+    capsys.readouterr()
+    assert exit_code == 0
+
+
+def test_cli_context_export_prints_exported_path(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export"])
+    output = capsys.readouterr().out
+    assert "Exported:" in output
+    assert ".pcae/context-packs/" in output
+    assert ".txt" in output
+
+
+def test_cli_context_export_prints_profile(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export"])
+    output = capsys.readouterr().out
+    assert "Profile: universal" in output
+
+
+def test_cli_context_export_creates_file_on_disk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export"])
+    capsys.readouterr()
+    export_dir = tmp_path / ".pcae" / "context-packs"
+    assert export_dir.is_dir()
+    files = list(export_dir.glob("context-pack-*.txt"))
+    assert len(files) == 1
+
+
+def test_cli_context_export_file_content(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export"])
+    capsys.readouterr()
+    export_dir = tmp_path / ".pcae" / "context-packs"
+    content = next(export_dir.glob("context-pack-*.txt")).read_text(encoding="utf-8")
+    assert "[PCAE Bootstrap" in content
+    assert "Phase prompt is authoritative" in content
+
+
+def test_cli_context_export_profile_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--profile", "implementation"])
+    output = capsys.readouterr().out
+    assert "Profile: implementation" in output
+    export_dir = tmp_path / ".pcae" / "context-packs"
+    content = next(export_dir.glob("context-pack-*.txt")).read_text(encoding="utf-8")
+    assert "implementation profile" in content
+
+
+def test_cli_context_export_profile_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--profile", "handoff"])
+    output = capsys.readouterr().out
+    assert "Profile: handoff" in output
+
+
+def test_cli_context_export_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["context", "export", "--json"])
+    capsys.readouterr()
+    assert exit_code == 0
+
+
+def test_cli_context_export_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data, dict)
+
+
+def test_cli_context_export_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "path" in data
+    assert "profile_type" in data
+    assert "exported_at" in data
+
+
+def test_cli_context_export_json_path_under_context_packs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["path"].startswith(".pcae/context-packs/")
+    assert data["path"].endswith(".txt")
+
+
+def test_cli_context_export_json_profile_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--profile", "implementation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == "implementation"
+
+
+def test_cli_context_export_json_exported_at_is_iso(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    # Must be parseable as an ISO datetime
+    from datetime import datetime as _dt
+    parsed = _dt.fromisoformat(data["exported_at"])
+    assert parsed is not None
+
+
+def test_cli_context_pack_preview_unchanged_by_export(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Governance context pack" in output
+    assert "Profile: universal" in output
+    assert "Operational rules:" in output
+
+
+def test_context_export_gitignore_contains_context_packs() -> None:
+    gitignore = Path(__file__).parent.parent / ".pcae" / ".gitignore"
+    assert gitignore.is_file()
+    content = gitignore.read_text(encoding="utf-8")
+    assert "context-packs/" in content
 
 
 # ---------------------------------------------------------------------------

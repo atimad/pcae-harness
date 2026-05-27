@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pcae.core.check import run_checks
@@ -156,6 +157,34 @@ def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
     lines.append("Vendor-neutral: not tailored to any specific AI agent or provider.")
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Context pack export
+# ---------------------------------------------------------------------------
+
+CONTEXT_PACK_EXPORT_RELATIVE_DIR = Path(".pcae") / "context-packs"
+
+
+def export_context_pack(
+    root: HarnessPath,
+    pack: ContextPack,
+    profile: WorkModeProfile,
+    exported_at: datetime | None = None,
+) -> tuple[Path, str]:
+    """Write a compact context pack to .pcae/context-packs/.
+
+    Returns (relative_path, exported_at_iso).
+    """
+    timestamp = exported_at or datetime.now(timezone.utc)
+    filename = f"context-pack-{timestamp.strftime('%Y%m%d-%H%M%S')}.txt"
+    relative_path = CONTEXT_PACK_EXPORT_RELATIVE_DIR / filename
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    content = build_bootstrap_prompt(pack, profile)
+    target.write_text(content + "\n", encoding="utf-8")
+    return relative_path, timestamp.isoformat()
+
 
 CONTEXT_PACK_UNIVERSAL_AGENT_NOTE = (
     "This context pack is vendor-neutral and universal. "

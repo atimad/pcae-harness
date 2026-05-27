@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35E: Compact bootstrap prompt generation.
+Phase 35F: Compact context export.
 
 ## Governance Coherence Note
 
@@ -185,7 +185,13 @@ vendor-neutral note, with `--profile` for work-mode emphasis and `--json`
 for machine-readable output including `bootstrap_prompt`, `profile_type`,
 `governance_state`, `operational_rules`, `validation_commands`, and
 `advisory` — advisory: "Bootstrap compression reduces token usage without
-relaxing governance constraints." and `pcae docs commands` now covers all current CLI command groups
+relaxing governance constraints." and `pcae context export` exports a
+compact governed context pack as an ignored local artifact under
+`.pcae/context-packs/` (filename `context-pack-YYYYMMDD-HHMMSS.txt`)
+reusing the compact bootstrap prompt content, with `--profile` for
+work-mode emphasis and `--json` output (fields: `path`, `profile_type`,
+`exported_at`); exported files are Git-ignored via `context-packs/` in
+`.pcae/.gitignore` and `pcae docs commands` now covers all current CLI command groups
 including phase, status, governance, runtime snapshot, orchestration,
 context, provenance, session bootstrap, and docs, with `docs/COMMANDS.md`
 refreshed to match using `--force`.
