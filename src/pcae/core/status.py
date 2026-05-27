@@ -71,6 +71,20 @@ RUNTIME_SNAPSHOT_REQUIRED_KEYS: tuple[str, ...] = (
     "governance_check_status",
     "workflow_orchestration_metadata",
 )
+RUNTIME_SNAPSHOT_REQUIRED_RUNTIME_SECTIONS: tuple[str, ...] = tuple(
+    key
+    for key in RUNTIME_SNAPSHOT_REQUIRED_KEYS
+    if key
+    not in {
+        "snapshot_schema_version",
+        "snapshot_kind",
+        "exported_by_version",
+        "exported_at",
+    }
+)
+RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY = (
+    "Compatibility analysis is advisory; the user remains authoritative."
+)
 
 
 @dataclass(frozen=True)
@@ -260,6 +274,46 @@ class RuntimeSnapshotRestorePreview:
             "would_restore": list(self.would_restore),
             "would_not_restore": list(self.would_not_restore),
             "safety_notes": list(self.safety_notes),
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotCompatibilityCheck:
+    name: str
+    passed: bool
+    message: str
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "passed": self.passed,
+            "message": self.message,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotCompatibilityReport:
+    compatible: bool
+    support_level: str
+    snapshot_kind: object
+    snapshot_schema_version: object
+    exported_by_version: object
+    compatibility_checks: tuple[RuntimeSnapshotCompatibilityCheck, ...]
+    compatibility_warnings: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "compatible": self.compatible,
+            "support_level": self.support_level,
+            "snapshot_kind": self.snapshot_kind,
+            "snapshot_schema_version": self.snapshot_schema_version,
+            "exported_by_version": self.exported_by_version,
+            "compatibility_checks": [
+                check.to_dict() for check in self.compatibility_checks
+            ],
+            "compatibility_warnings": list(self.compatibility_warnings),
             "advisory": self.advisory,
         }
 
@@ -551,6 +605,167 @@ def preview_runtime_snapshot_restore(
     )
 
 
+def analyze_runtime_snapshot_compatibility(
+    root: HarnessPath,
+    snapshot_path: Path,
+) -> RuntimeSnapshotCompatibilityReport:
+    """Return deterministic read-only compatibility analysis for a snapshot."""
+    path = snapshot_path if snapshot_path.is_absolute() else root.join(snapshot_path)
+    if not path.is_file():
+        raise ValueError(f"Invalid runtime snapshot: file not found: {snapshot_path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid runtime snapshot JSON: {error.msg}") from error
+    if not isinstance(data, dict):
+        raise ValueError("Invalid runtime snapshot: top-level JSON value must be an object.")
+
+    snapshot_kind = data.get("snapshot_kind")
+    snapshot_schema_version = data.get("snapshot_schema_version")
+    exported_version = data.get("exported_by_version")
+
+    checks: list[RuntimeSnapshotCompatibilityCheck] = []
+    warnings: list[str] = []
+
+    kind_supported = (
+        isinstance(snapshot_kind, str)
+        and snapshot_kind in SUPPORTED_RUNTIME_SNAPSHOT_KINDS
+    )
+    if kind_supported:
+        kind_message = f"Snapshot kind {snapshot_kind!r} is supported."
+    elif isinstance(snapshot_kind, str) and snapshot_kind:
+        kind_message = (
+            f"Unknown snapshot kind: {snapshot_kind!r}; expected {RUNTIME_SNAPSHOT_KIND!r}."
+        )
+        warnings.append(kind_message)
+    else:
+        kind_message = "Snapshot kind is missing or not a non-empty string."
+        warnings.append(kind_message)
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="snapshot_kind_compatibility",
+            passed=kind_supported,
+            message=kind_message,
+        )
+    )
+
+    schema_supported = (
+        isinstance(snapshot_schema_version, int)
+        and snapshot_schema_version in SUPPORTED_RUNTIME_SNAPSHOT_SCHEMA_VERSIONS
+    )
+    if schema_supported:
+        schema_message = (
+            f"Runtime snapshot schema version {snapshot_schema_version} is supported."
+        )
+    elif isinstance(snapshot_schema_version, int):
+        schema_message = (
+            "Unsupported runtime snapshot schema version: "
+            f"{snapshot_schema_version}; supported versions: "
+            f"{', '.join(str(v) for v in SUPPORTED_RUNTIME_SNAPSHOT_SCHEMA_VERSIONS)}."
+        )
+        warnings.append(schema_message)
+    else:
+        schema_message = "Snapshot schema version is missing or not an integer."
+        warnings.append(schema_message)
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="schema_version_compatibility",
+            passed=schema_supported,
+            message=schema_message,
+        )
+    )
+
+    exported_visible = isinstance(exported_version, str) and bool(exported_version)
+    exported_message = (
+        f"Snapshot exporter version is visible: {exported_version}."
+        if exported_visible
+        else "Snapshot exporter version is missing or not a non-empty string."
+    )
+    if not exported_visible:
+        warnings.append(exported_message)
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="exported_by_version_visibility",
+            passed=exported_visible,
+            message=exported_message,
+        )
+    )
+
+    missing_sections = [
+        key for key in RUNTIME_SNAPSHOT_REQUIRED_RUNTIME_SECTIONS if key not in data
+    ]
+    sections_present = not missing_sections
+    sections_message = (
+        "All required runtime sections are present."
+        if sections_present
+        else "Missing required runtime section(s): " + ", ".join(missing_sections) + "."
+    )
+    if missing_sections:
+        warnings.append(sections_message)
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="required_runtime_sections_presence",
+            passed=sections_present,
+            message=sections_message,
+        )
+    )
+
+    future_exporter = False
+    if exported_visible:
+        current_version = exported_by_version()
+        future_exporter = version_tuple(exported_version) > version_tuple(current_version)
+        future_message = (
+            f"Snapshot exporter version {exported_version} is newer than current PCAE runtime {current_version}."
+            if future_exporter
+            else f"Snapshot exporter version is not newer than current PCAE runtime {current_version}."
+        )
+        if future_exporter:
+            warnings.append(future_message)
+    else:
+        future_message = "Future-version warning could not compare because exporter version is not visible."
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="future_version_warning_support",
+            passed=not future_exporter,
+            message=future_message,
+        )
+    )
+
+    unknown_kind_handled = kind_supported
+    unknown_kind_message = (
+        "Snapshot kind is recognized; unknown-kind handling was not needed."
+        if kind_supported
+        else "Unknown snapshot kind is handled as unsupported; no migration or conversion is available."
+    )
+    checks.append(
+        RuntimeSnapshotCompatibilityCheck(
+            name="unknown_snapshot_kind_handling",
+            passed=unknown_kind_handled,
+            message=unknown_kind_message,
+        )
+    )
+
+    if not kind_supported or not schema_supported:
+        support_level = "unsupported"
+        if "No migration or automatic conversion is available." not in warnings:
+            warnings.append("No migration or automatic conversion is available.")
+    elif warnings:
+        support_level = "partially-supported"
+    else:
+        support_level = "supported"
+
+    return RuntimeSnapshotCompatibilityReport(
+        compatible=support_level == "supported",
+        support_level=support_level,
+        snapshot_kind=snapshot_kind,
+        snapshot_schema_version=snapshot_schema_version,
+        exported_by_version=exported_version,
+        compatibility_checks=tuple(checks),
+        compatibility_warnings=tuple(unique_preserving_order(warnings)),
+        advisory=RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
+    )
+
+
 @dataclass(frozen=True)
 class RuntimeSnapshotCompatibility:
     status: str
@@ -592,6 +807,20 @@ def exported_by_version() -> str:
         return metadata.version("pcae-harness")
     except metadata.PackageNotFoundError:
         return "0.1.0"
+
+
+def version_tuple(version: str) -> tuple[int, ...]:
+    parts: list[int] = []
+    for value in version.split("."):
+        digits = ""
+        for character in value:
+            if not character.isdigit():
+                break
+            digits += character
+        if digits == "":
+            break
+        parts.append(int(digits))
+    return tuple(parts)
 
 
 def runtime_snapshot_included_sections(data: dict) -> tuple[str, ...]:

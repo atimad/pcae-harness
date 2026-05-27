@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34G: Governance runtime snapshot schema/version governance.
+Phase 34H: Governance runtime snapshot compatibility matrix.
 
 ## Governance Coherence Note
 
@@ -125,7 +125,13 @@ include explicit schema/version governance with `snapshot_schema_version`,
 `snapshot_kind`, and `exported_by_version`; inspection and restore preview
 report compatibility status and notes, warning clearly for unsupported schema
 versions or unknown snapshot kinds without migrations, conversion, or snapshot
-mutation.
+mutation. Runtime snapshot compatibility can be analyzed deterministically with
+`pcae runtime snapshot compatibility PATH` and
+`pcae runtime snapshot compatibility PATH --json`, reporting support level,
+snapshot kind, schema version, exporter version visibility, compatibility
+checks, compatibility warnings, future-version warnings, required runtime
+section presence, and the advisory note that the user remains authoritative
+without modifying snapshots, migrating state, or restoring runtime state.
 
 ## Next
 

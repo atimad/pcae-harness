@@ -13,8 +13,10 @@ from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
     RUNTIME_SNAPSHOT_ADVISORY,
+    RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
     RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
+    analyze_runtime_snapshot_compatibility,
     audit_governance_coherence,
     check_project_status_coherence,
     export_runtime_snapshot,
@@ -633,6 +635,153 @@ def test_runtime_snapshot_inspect_unknown_kind_warns_clearly(tmp_path: Path) -> 
     result = inspect_runtime_snapshot(HarnessPath(tmp_path), export.export_path)
     assert result.compatibility_status == "incompatible"
     assert any("Unknown snapshot kind" in note for note in result.compatibility_notes)
+
+
+def test_runtime_snapshot_compatibility_reports_supported_matrix(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    result = analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    assert result.compatible
+    assert result.support_level == "supported"
+    assert result.snapshot_kind == "pcae-runtime-snapshot"
+    assert result.snapshot_schema_version == 1
+    assert result.exported_by_version.startswith("0.")
+    assert {check.name for check in result.compatibility_checks} == {
+        "exported_by_version_visibility",
+        "future_version_warning_support",
+        "required_runtime_sections_presence",
+        "schema_version_compatibility",
+        "snapshot_kind_compatibility",
+        "unknown_snapshot_kind_handling",
+    }
+    assert result.compatibility_warnings == ()
+    assert result.advisory == RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY
+
+
+def test_cli_runtime_snapshot_compatibility_human(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "compatibility", export.export_path.as_posix()])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot compatibility" in output
+    assert "Compatibility status: compatible" in output
+    assert "Snapshot kind: pcae-runtime-snapshot" in output
+    assert "Schema version: 1" in output
+    assert "Exported by version:" in output
+    assert "Compatibility checks:" in output
+    assert "Compatibility warnings:" in output
+    assert "Support level: supported" in output
+    assert RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_compatibility_json(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(
+        ["runtime", "snapshot", "compatibility", export.export_path.as_posix(), "--json"]
+    )
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["compatible"] is True
+    assert data["support_level"] == "supported"
+    assert data["snapshot_kind"] == "pcae-runtime-snapshot"
+    assert data["snapshot_schema_version"] == 1
+    assert data["exported_by_version"].startswith("0.")
+    assert data["compatibility_checks"]
+    assert data["compatibility_warnings"] == []
+    assert data["advisory"] == RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY
+
+
+def test_runtime_snapshot_compatibility_warns_on_future_exporter(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["exported_by_version"] = "999.0.0"
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    assert not result.compatible
+    assert result.support_level == "partially-supported"
+    assert any("newer than current PCAE runtime" in warning for warning in result.compatibility_warnings)
+
+
+def test_runtime_snapshot_compatibility_unsupported_schema_is_deterministic(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_schema_version"] = 999
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    assert not result.compatible
+    assert result.support_level == "unsupported"
+    assert any("Unsupported runtime snapshot schema version" in warning for warning in result.compatibility_warnings)
+
+
+def test_runtime_snapshot_compatibility_unknown_kind_is_unsupported(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    data["snapshot_kind"] = "unknown-kind"
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    assert not result.compatible
+    assert result.support_level == "unsupported"
+    assert any("Unknown snapshot kind" in warning for warning in result.compatibility_warnings)
+
+
+def test_runtime_snapshot_compatibility_missing_sections_is_partial(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    del data["active_task"]
+    target.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    assert not result.compatible
+    assert result.support_level == "partially-supported"
+    assert any("Missing required runtime section" in warning for warning in result.compatibility_warnings)
+
+
+def test_runtime_snapshot_compatibility_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(HarnessPath(tmp_path))
+    target = tmp_path / export.export_path
+    before = target.read_text(encoding="utf-8")
+    analyze_runtime_snapshot_compatibility(HarnessPath(tmp_path), export.export_path)
+    after = target.read_text(encoding="utf-8")
+    assert after == before
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

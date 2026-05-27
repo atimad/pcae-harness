@@ -151,3 +151,4 @@
 - Added `pcae runtime snapshot inspect PATH` and `pcae runtime snapshot inspect PATH --json` for read-only inspection of exported governed runtime snapshots with clear invalid-file failures.
 - Added `pcae runtime snapshot restore PATH --dry-run` and `pcae runtime snapshot restore PATH --dry-run --json` for advisory restore previews without changing runtime state.
 - Added explicit runtime snapshot schema/version governance with snapshot kind, exporter version, compatibility status, and compatibility notes across export, inspect, and restore preview.
+- Added `pcae runtime snapshot compatibility PATH` and `pcae runtime snapshot compatibility PATH --json` for deterministic read-only compatibility analysis, including support level, required runtime section checks, future exporter warnings, and unknown kind handling.

@@ -6,7 +6,9 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
+    RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     audit_governance_coherence,
+    analyze_runtime_snapshot_compatibility,
     check_project_status_coherence,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
@@ -176,4 +178,34 @@ def run_runtime_snapshot_restore(args: argparse.Namespace) -> int:
         for note in result.safety_notes:
             print(f"  - {note}")
         print(result.advisory)
+    return 0
+
+
+def run_runtime_snapshot_compatibility(args: argparse.Namespace) -> int:
+    try:
+        result = analyze_runtime_snapshot_compatibility(HarnessPath.cwd(), Path(args.path))
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot compatibility")
+        print(f"Compatibility status: {'compatible' if result.compatible else 'incompatible'}")
+        print(f"Snapshot kind: {result.snapshot_kind}")
+        print(f"Schema version: {result.snapshot_schema_version}")
+        print(f"Exported by version: {result.exported_by_version}")
+        print("Compatibility checks:")
+        for check in result.compatibility_checks:
+            status = "pass" if check.passed else "warn"
+            print(f"  - {check.name}: {status} ({check.message})")
+        print("Compatibility warnings:")
+        if result.compatibility_warnings:
+            for warning in result.compatibility_warnings:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        print(f"Support level: {result.support_level}")
+        print(RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY)
     return 0
