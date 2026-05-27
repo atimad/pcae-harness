@@ -7,6 +7,7 @@ from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     audit_governance_coherence,
     check_project_status_coherence,
+    export_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
 )
@@ -94,4 +95,15 @@ def run_runtime_snapshot(args: argparse.Namespace) -> int:
         for note in result.safety_notes:
             print(f"  - {note}")
         print(result.advisory)
+    return 0
+
+
+def run_runtime_snapshot_export(args: argparse.Namespace) -> int:
+    result = export_runtime_snapshot(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot export")
+        print(f"Export path: {result.export_path.as_posix()}")
+        print(f"Snapshot readiness: {'ready' if result.snapshot_ready else 'not ready'}")
     return 0

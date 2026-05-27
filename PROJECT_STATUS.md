@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34C: Governance runtime snapshot preview.
+Phase 34D: Governance runtime snapshot export.
 
 ## Governance Coherence Note
 
@@ -108,7 +108,10 @@ governed runtime snapshot contents can be previewed with
 `pcae runtime snapshot --preview --json`, showing active task, agent lock,
 session continuity, provenance, orchestration policy, registered agents,
 health/check status, and workflow metadata without exporting files, restoring
-state, or mutating governance artifacts.
+state, or mutating governance artifacts, and the same governed runtime
+snapshot can be exported as portable ignored JSON with
+`pcae runtime snapshot export` and `pcae runtime snapshot export --json` under
+`.pcae/runtime-snapshots/`.
 
 ## Next
 

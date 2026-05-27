@@ -3,3 +3,4 @@ architecture-history.json
 agent-lock.json
 provenance-history.json
 provenance-exports/
+runtime-snapshots/

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 
@@ -14,6 +15,7 @@ from pcae.core.status import (
     RUNTIME_SNAPSHOT_ADVISORY,
     audit_governance_coherence,
     check_project_status_coherence,
+    export_runtime_snapshot,
     plan_governance_repairs,
     preview_runtime_snapshot,
 )
@@ -292,6 +294,70 @@ def test_cli_runtime_snapshot_json(tmp_path: Path, monkeypatch, capsys) -> None:
     assert data["safety_notes"]
     assert data["advisory"] == RUNTIME_SNAPSHOT_ADVISORY
     assert data["runtime_summary"]["provenance_event_count"] == 1
+
+
+def test_runtime_snapshot_export_writes_portable_json(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    result = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 12, 30, 45, tzinfo=timezone.utc),
+    )
+    assert result.export_path == Path(".pcae/runtime-snapshots/runtime-snapshot-20260527-123045.json")
+    target = tmp_path / result.export_path
+    assert target.is_file()
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert data["exported_at"] == "2026-05-27T12:30:45+00:00"
+    assert data["active_task"]["id"] == "20260527-1200-test"
+    assert data["provenance_event_count"] == 1
+    assert data["latest_provenance_event"]["event_type"] == "test_event"
+    assert data["governance_check_status"] in {"passed", "failed"}
+
+
+def test_cli_runtime_snapshot_export_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "export"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot export" in output
+    assert "Export path: .pcae/runtime-snapshots/runtime-snapshot-" in output
+    assert "Snapshot readiness:" in output
+    assert list((tmp_path / ".pcae" / "runtime-snapshots").glob("runtime-snapshot-*.json"))
+
+
+def test_cli_runtime_snapshot_export_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "export", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert data["export_path"].startswith(".pcae/runtime-snapshots/runtime-snapshot-")
+    assert "exported_at" in data
+    assert "snapshot_ready" in data
+    assert data["snapshot"]["active_task"]["id"] == "20260527-1200-test"
+    assert (tmp_path / data["export_path"]).is_file()
+
+
+def test_runtime_snapshot_exports_are_git_ignored(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    (tmp_path / ".pcae" / ".gitignore").write_text(
+        "runtime-snapshots/\n",
+        encoding="utf-8",
+    )
+    result = export_runtime_snapshot(HarnessPath(tmp_path))
+    completed = subprocess.run(
+        ["git", "check-ignore", result.export_path.as_posix()],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.stdout.strip() == result.export_path.as_posix()
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

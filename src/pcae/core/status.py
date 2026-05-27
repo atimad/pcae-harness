@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
+import json
 from pathlib import Path
 
 from pcae.core.agent import build_agent_lock_state
@@ -39,6 +41,7 @@ GOVERNANCE_REPAIR_ADVISORY = (
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
 )
+RUNTIME_SNAPSHOTS_RELATIVE_PATH = Path(".pcae") / "runtime-snapshots"
 
 
 @dataclass(frozen=True)
@@ -152,6 +155,22 @@ class RuntimeSnapshotPreview:
             "safety_notes": list(self.safety_notes),
             "advisory": self.advisory,
             "runtime_summary": self.runtime_summary,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotExport:
+    export_path: Path
+    exported_at: str
+    snapshot_ready: bool
+    snapshot: dict
+
+    def to_dict(self) -> dict:
+        return {
+            "export_path": self.export_path.as_posix(),
+            "exported_at": self.exported_at,
+            "snapshot_ready": self.snapshot_ready,
+            "snapshot": self.snapshot,
         }
 
 
@@ -288,6 +307,33 @@ def preview_runtime_snapshot(root: HarnessPath) -> RuntimeSnapshotPreview:
         ),
         advisory=RUNTIME_SNAPSHOT_ADVISORY,
         runtime_summary=runtime_summary,
+    )
+
+
+def export_runtime_snapshot(
+    root: HarnessPath,
+    exported_at: datetime | None = None,
+) -> RuntimeSnapshotExport:
+    timestamp = exported_at or datetime.now(timezone.utc)
+    exported_at_text = timestamp.isoformat()
+    preview = preview_runtime_snapshot(root)
+    snapshot = {
+        "exported_at": exported_at_text,
+        **preview.runtime_summary,
+    }
+    relative_path = RUNTIME_SNAPSHOTS_RELATIVE_PATH / (
+        f"runtime-snapshot-{timestamp.strftime('%Y%m%d-%H%M%S')}.json"
+    )
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as file:
+        json.dump(snapshot, file, indent=2, sort_keys=True)
+        file.write("\n")
+    return RuntimeSnapshotExport(
+        export_path=relative_path,
+        exported_at=exported_at_text,
+        snapshot_ready=preview.snapshot_ready,
+        snapshot=snapshot,
     )
 
 
