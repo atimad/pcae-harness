@@ -8,6 +8,7 @@ import pytest
 
 from pcae.cli import main
 from pcae.core.context import (
+    BOOTSTRAP_COMPACT_ADVISORY,
     CONTEXT_PACK_ADVISORY,
     CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
     CONTEXT_PACK_OPERATIONAL_RULES,
@@ -20,6 +21,7 @@ from pcae.core.context import (
     PROFILE_VALIDATION,
     WORK_MODE_PROFILES,
     WorkModeProfile,
+    build_bootstrap_prompt,
     build_context_pack,
     resolve_profile,
 )
@@ -987,6 +989,156 @@ def test_cli_context_pack_json_profile_preserves_all_governance_keys(
         "emphasized_sections",
     ):
         assert key in data, key
+
+
+# ---------------------------------------------------------------------------
+# Core: build_bootstrap_prompt
+# ---------------------------------------------------------------------------
+
+
+def test_build_bootstrap_prompt_returns_string(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert isinstance(result, str)
+    assert len(result) > 0
+
+
+def test_build_bootstrap_prompt_contains_profile_header(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_IMPLEMENTATION)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "[PCAE Bootstrap | implementation profile]" in result
+
+
+def test_build_bootstrap_prompt_contains_active_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "20260527-1200-test" in result
+    assert "Test task" in result
+
+
+def test_build_bootstrap_prompt_active_task_none(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path, include_task=False)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Active task: none" in result
+
+
+def test_build_bootstrap_prompt_contains_governance_state(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "health=" in result
+    assert "check=" in result
+    assert "session=" in result
+    assert "lock=" in result
+
+
+def test_build_bootstrap_prompt_contains_phase(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path, current_phase="Phase 35E: Compact bootstrap.")
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Phase 35E: Compact bootstrap." in result
+
+
+def test_build_bootstrap_prompt_contains_emphasized_sections(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_HANDOFF)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Emphasized:" in result
+    assert "bootstrap_handoff_notes" in result
+
+
+def test_build_bootstrap_prompt_contains_operational_rules(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Rules:" in result
+    assert "Phase prompt is authoritative" in result
+    assert "active task scope" in result
+
+
+def test_build_bootstrap_prompt_contains_validation_commands(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Validate:" in result
+    assert "pcae check" in result
+    assert "python -m pytest" in result
+
+
+def test_build_bootstrap_prompt_contains_stale_context_suppression(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Stale-context:" in result
+    assert "Phase prompt is authoritative" in result
+    assert "PROJECT_STATUS.md is background" in result
+    assert "stale work" in result
+
+
+def test_build_bootstrap_prompt_contains_bootstrap_and_handoff(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Bootstrap: pcae session bootstrap" in result
+    assert "Handoff: pcae phase handoff" in result
+
+
+def test_build_bootstrap_prompt_contains_vendor_neutral_note(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Vendor-neutral:" in result
+    assert "not tailored to any specific AI agent" in result
+
+
+def test_build_bootstrap_prompt_contains_orchestration_advisory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_UNIVERSAL)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "Orchestration:" in result
+    assert "authoritative" in result
+
+
+def test_build_bootstrap_prompt_implementation_emphasizes_scope(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_IMPLEMENTATION)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "implementation profile" in result
+    assert "scope_boundaries" in result
+    assert "validation_commands" in result
+
+
+def test_build_bootstrap_prompt_handoff_emphasizes_handoff_sections(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(PROFILE_HANDOFF)
+    result = build_bootstrap_prompt(pack, profile)
+    assert "handoff profile" in result
+    assert "bootstrap_handoff_notes" in result
+    assert "orchestration_state" in result
+
+
+def test_bootstrap_compact_advisory_content() -> None:
+    assert "Bootstrap compression" in BOOTSTRAP_COMPACT_ADVISORY
+    assert "relaxing governance constraints" in BOOTSTRAP_COMPACT_ADVISORY
 
 
 # ---------------------------------------------------------------------------

@@ -1138,8 +1138,28 @@ def build_parser() -> argparse.ArgumentParser:
     )
     session_bootstrap_parser.add_argument(
         "--agent-id",
-        required=True,
-        help="Agent identifier to acquire the lock for.",
+        default=None,
+        help=(
+            "Agent identifier to acquire the lock for. "
+            "Required unless --compact is specified."
+        ),
+    )
+    session_bootstrap_parser.add_argument(
+        "--compact",
+        action="store_true",
+        help=(
+            "Generate a compact governed bootstrap prompt without acquiring a lock. "
+            "Read-only; does not mutate governance state."
+        ),
+    )
+    session_bootstrap_parser.add_argument(
+        "--profile",
+        default=None,
+        metavar="PROFILE",
+        help=(
+            "Work-mode profile for compact bootstrap: "
+            "implementation, documentation, validation, handoff."
+        ),
     )
     session_bootstrap_parser.add_argument(
         "--json",

@@ -10,6 +10,13 @@ from pcae.core.architecture import (
     write_architecture_history_snapshot,
 )
 from pcae.core.check import run_checks
+from pcae.core.context import (
+    BOOTSTRAP_COMPACT_ADVISORY,
+    CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
+    build_bootstrap_prompt,
+    build_context_pack,
+    resolve_profile,
+)
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
@@ -83,6 +90,13 @@ def run_session_end(args: argparse.Namespace) -> int:
 
 
 def run_session_bootstrap(args: argparse.Namespace) -> int:
+    if getattr(args, "compact", False):
+        return _run_compact_bootstrap(args)
+
+    if not args.agent_id:
+        print("Error: --agent-id is required when not using --compact.")
+        return 1
+
     root = HarnessPath.cwd()
 
     try:
@@ -162,6 +176,46 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print("Latest event: none")
     print(f"Ready: {'yes' if ready else 'no'}")
     return 0 if ready else 1
+
+
+def _run_compact_bootstrap(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    pack = build_context_pack(root)
+    profile_name: str | None = getattr(args, "profile", None)
+    profile, is_unknown = resolve_profile(profile_name)
+    prompt = build_bootstrap_prompt(pack, profile)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "advisory": BOOTSTRAP_COMPACT_ADVISORY,
+                    "bootstrap_prompt": prompt,
+                    "governance_state": pack.governance_state,
+                    "operational_rules": list(pack.operational_rules),
+                    "orchestration_state": pack.orchestration_state,
+                    "profile_type": profile.profile_type,
+                    "validation_commands": list(pack.validation_commands),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+
+    if is_unknown:
+        print(
+            f"Warning: unknown profile '{profile_name}';"
+            " using universal profile."
+        )
+    print(f"Profile: {profile.profile_type}")
+    print()
+    print(prompt)
+    print()
+    print("Token optimization note: bootstrap prompt is compact by design.")
+    print(f"Vendor-neutral note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
+    print(f"Quality preservation note: {BOOTSTRAP_COMPACT_ADVISORY}")
+    return 0
 
 
 def _session_summary(session: ProvenanceSession | None) -> dict | None:

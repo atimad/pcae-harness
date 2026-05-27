@@ -93,6 +93,70 @@ def resolve_profile(name: str | None) -> tuple[WorkModeProfile, bool]:
         return WORK_MODE_PROFILES[name], False
     return WORK_MODE_PROFILES[PROFILE_UNIVERSAL], True
 
+
+# ---------------------------------------------------------------------------
+# Compact bootstrap prompt
+# ---------------------------------------------------------------------------
+
+BOOTSTRAP_COMPACT_ADVISORY = (
+    "Bootstrap compression reduces token usage without relaxing governance constraints."
+)
+
+_STALE_CONTEXT_RULE = (
+    "Phase prompt is authoritative. "
+    "PROJECT_STATUS.md is background. "
+    "Do not infer stale work from older docs."
+)
+
+
+def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
+    """Return a compact governed bootstrap prompt string."""
+    lines: list[str] = []
+
+    lines.append(f"[PCAE Bootstrap | {profile.profile_type} profile]")
+
+    if pack.active_task is not None:
+        task_id = pack.active_task.get("id", "unknown")
+        task_title = pack.active_task.get("title", "Untitled")
+        lines.append(f"Active task: {task_id} — {task_title}")
+    else:
+        lines.append("Active task: none")
+
+    gs = pack.governance_state
+    lock = gs.get("agent_lock_state") or {}
+    lock_str = (
+        f"held by {lock.get('agent_id', 'unknown')}"
+        if lock and lock.get("locked")
+        else "free"
+    )
+    lines.append(
+        f"Governance: health={gs['health_status']}, "
+        f"check={gs['check_status']}, "
+        f"session={gs['session_continuity']}, "
+        f"lock={lock_str}"
+    )
+
+    rs = pack.roadmap_summary
+    lines.append(f"Phase: {rs['current_phase']}")
+    lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
+
+    lines.append("Rules:")
+    for rule in pack.operational_rules:
+        lines.append(f"  - {rule}")
+
+    lines.append(f"Validate: {' | '.join(pack.validation_commands)}")
+    lines.append(f"Stale-context: {_STALE_CONTEXT_RULE}")
+    lines.append("Bootstrap: pcae session bootstrap --agent-id <id>")
+    lines.append("Handoff: pcae phase handoff")
+
+    os_ = pack.orchestration_state
+    lines.append(
+        f"Orchestration: {os_.get('advisory_recommendation_semantics', 'User remains authoritative.')}"
+    )
+    lines.append("Vendor-neutral: not tailored to any specific AI agent or provider.")
+
+    return "\n".join(lines)
+
 CONTEXT_PACK_UNIVERSAL_AGENT_NOTE = (
     "This context pack is vendor-neutral and universal. "
     "It is not tailored to any specific AI agent or provider."

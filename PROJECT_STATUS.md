@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35D: Work-mode governed context profiles.
+Phase 35E: Compact bootstrap prompt generation.
 
 ## Governance Coherence Note
 
@@ -176,7 +176,16 @@ flag selects a work-mode governed context profile (`implementation`,
 weakening governance constraints; unknown profiles fall back to the balanced
 universal profile with a clear warning; JSON output includes `profile_type`
 and `emphasized_sections`; profiles optimize by work mode, not by vendor or
-model, and `pcae docs commands` now covers all current CLI command groups
+model, and `pcae session bootstrap --compact` generates a read-only compact
+governed bootstrap prompt suitable for fresh AI sessions, post-auto-compact
+recovery, cross-agent handoff, and token-efficient continuity restoration,
+embedding active task, governance state, operational rules, validation
+commands, stale-context suppression, bootstrap/handoff guidance, and a
+vendor-neutral note, with `--profile` for work-mode emphasis and `--json`
+for machine-readable output including `bootstrap_prompt`, `profile_type`,
+`governance_state`, `operational_rules`, `validation_commands`, and
+`advisory` — advisory: "Bootstrap compression reduces token usage without
+relaxing governance constraints." and `pcae docs commands` now covers all current CLI command groups
 including phase, status, governance, runtime snapshot, orchestration,
 context, provenance, session bootstrap, and docs, with `docs/COMMANDS.md`
 refreshed to match using `--force`.

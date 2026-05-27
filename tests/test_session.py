@@ -911,6 +911,330 @@ def test_session_bootstrap_different_agent_still_fails(
 
 
 # ---------------------------------------------------------------------------
+# pcae session bootstrap --compact
+# ---------------------------------------------------------------------------
+
+
+def test_session_bootstrap_compact_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+
+
+def test_session_bootstrap_compact_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.provenance import read_provenance_history
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Read-only compact task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    before_files = text_file_snapshot(tmp_path)
+    before_events = len(read_provenance_history(HarnessPath(tmp_path)).events)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    capsys.readouterr()
+    assert text_file_snapshot(tmp_path) == before_files
+    assert len(read_provenance_history(HarnessPath(tmp_path)).events) == before_events
+
+
+def test_session_bootstrap_compact_shows_profile(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact profile task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Profile: universal" in output
+
+
+def test_session_bootstrap_compact_shows_bootstrap_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact prompt task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "[PCAE Bootstrap" in output
+    assert "Governance:" in output
+    assert "Rules:" in output
+    assert "Validate:" in output
+
+
+def test_session_bootstrap_compact_shows_stale_context_suppression(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Stale-context task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Stale-context:" in output
+    assert "PROJECT_STATUS.md is background" in output
+    assert "stale work" in output
+
+
+def test_session_bootstrap_compact_shows_token_optimization_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Token note task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Token optimization note:" in output
+
+
+def test_session_bootstrap_compact_shows_vendor_neutral_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Vendor-neutral task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Vendor-neutral note:" in output
+    assert "not tailored to any specific AI agent" in output
+
+
+def test_session_bootstrap_compact_shows_quality_preservation_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Quality note task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Quality preservation note:" in output
+    assert "Bootstrap compression" in output
+    assert "relaxing governance constraints" in output
+
+
+def test_session_bootstrap_compact_preserves_operational_rules(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Rules preservation task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert "Phase prompt is authoritative" in output
+    assert "active task scope" in output
+
+
+def test_session_bootstrap_compact_profile_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Implementation profile task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--profile", "implementation"])
+
+    output = capsys.readouterr().out
+    assert "Profile: implementation" in output
+    assert "implementation profile" in output
+    assert "scope_boundaries" in output
+
+
+def test_session_bootstrap_compact_profile_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Handoff profile task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--profile", "handoff"])
+
+    output = capsys.readouterr().out
+    assert "Profile: handoff" in output
+    assert "handoff profile" in output
+    assert "bootstrap_handoff_notes" in output
+
+
+def test_session_bootstrap_compact_unknown_profile_falls_back(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Unknown profile task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--profile", "no-such-profile"])
+
+    output = capsys.readouterr().out
+    assert "Warning:" in output
+    assert "no-such-profile" in output
+    assert "Profile: universal" in output
+
+
+def test_session_bootstrap_compact_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact", "--json"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+
+
+def test_session_bootstrap_compact_json_is_valid_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON valid task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data, dict)
+
+
+def test_session_bootstrap_compact_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON keys task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "advisory",
+        "bootstrap_prompt",
+        "governance_state",
+        "operational_rules",
+        "orchestration_state",
+        "profile_type",
+        "validation_commands",
+    ):
+        assert key in data, key
+
+
+def test_session_bootstrap_compact_json_profile_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON profile task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--profile", "implementation", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile_type"] == "implementation"
+
+
+def test_session_bootstrap_compact_json_bootstrap_prompt_is_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON prompt string task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data["bootstrap_prompt"], str)
+    assert "[PCAE Bootstrap" in data["bootstrap_prompt"]
+
+
+def test_session_bootstrap_compact_json_advisory_is_governance_note(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact JSON advisory task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--compact", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert "Bootstrap compression" in data["advisory"]
+    assert "relaxing governance constraints" in data["advisory"]
+
+
+# ---------------------------------------------------------------------------
 # bootstrap helpers
 # ---------------------------------------------------------------------------
 
