@@ -85,7 +85,10 @@ models as capabilities evolve. Workflow coherence can be validated with
 `pcae orchestration validate --workflow TEXT` and
 `pcae orchestration validate --workflow TEXT --json`, which checks registry
 membership, role coverage, deterministic ordering, fallback behavior, and
-governance checkpoints without making recommendations mandatory.
+governance checkpoints without making recommendations mandatory. Phase handoff
+guidance can include the same workflow validation with
+`pcae phase handoff --workflow TEXT`, including JSON fields for workflow
+validity, warnings, and governance checkpoints.
 
 ## Next
 

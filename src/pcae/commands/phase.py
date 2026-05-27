@@ -4,7 +4,11 @@ import argparse
 import json
 
 from pcae.core.check import run_checks
-from pcae.core.orchestration import build_workflow_simulation, recommend_agent
+from pcae.core.orchestration import (
+    build_workflow_simulation,
+    build_workflow_validation,
+    recommend_agent,
+)
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
 
@@ -25,6 +29,7 @@ def run_phase_complete(args: argparse.Namespace) -> int:
 
 def run_phase_handoff(args: argparse.Namespace) -> int:
     work_type: str | None = getattr(args, "work_type", None)
+    workflow: str | None = getattr(args, "workflow", None)
     explicit_next_agent: str | None = args.next_agent
 
     root = HarnessPath.cwd()
@@ -41,6 +46,14 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                 print(str(error))
                 return 1
             # explicit --next-agent present: proceed without recommendation data
+
+    workflow_validation: dict | None = None
+    if workflow:
+        try:
+            workflow_validation = build_workflow_validation(root, workflow)
+        except ValueError as error:
+            print(str(error))
+            return 1
 
     # Resolve next agent.
     if explicit_next_agent:
@@ -79,6 +92,22 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                     "restart_workflows": restart_workflows,
                     "summary": result.summary,
                     "suggested_workflow": _workflow_json_summary(suggested_workflow),
+                    "workflow": workflow,
+                    "workflow_valid": (
+                        workflow_validation["valid"]
+                        if workflow_validation is not None
+                        else None
+                    ),
+                    "workflow_warnings": (
+                        workflow_validation["warnings"]
+                        if workflow_validation is not None
+                        else []
+                    ),
+                    "governance_checkpoints": (
+                        workflow_validation["governance_checkpoints"]
+                        if workflow_validation is not None
+                        else []
+                    ),
                     "work_type": work_type,
                 },
                 indent=2,
@@ -107,6 +136,28 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                     "User override: explicit --next-agent is being used "
                     f"({explicit_next_agent}) instead of the recommendation."
                 )
+    if workflow_validation is not None:
+        print("Workflow validation:")
+        print(f"  Workflow: {workflow_validation['workflow']}")
+        print(
+            "  Result: "
+            f"{'valid' if workflow_validation['valid'] else 'invalid'}"
+        )
+        print("  Recommendations remain advisory; validation checks coherence, not mandatory routing.")
+        if workflow_validation["warnings"]:
+            print("  Warnings:")
+            for warning in workflow_validation["warnings"]:
+                print(f"    - {warning}")
+        checkpoints = workflow_validation["governance_checkpoints"]
+        print("  Governance checkpoints:")
+        if checkpoints:
+            for checkpoint in checkpoints:
+                print(
+                    f"    {checkpoint['step']}. {checkpoint['work_type']}: "
+                    f"{checkpoint['checkpoint']}"
+                )
+        else:
+            print("    - none")
     print(f"Health: {result.health_status}")
     print(f"Check: {'passed' if result.check_passed else 'failed'}")
     for v in result.violations:

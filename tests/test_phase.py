@@ -456,6 +456,10 @@ def test_phase_handoff_json_output(
         "restart_workflows",
         "summary",
         "suggested_workflow",
+        "workflow",
+        "workflow_valid",
+        "workflow_warnings",
+        "governance_checkpoints",
         "work_type",
     }
     # no --work-type: recommendation fields are null/false
@@ -465,6 +469,10 @@ def test_phase_handoff_json_output(
     assert data["recommendation_used"] is False
     assert "advisory" in data["recommendation_note"]
     assert data["suggested_workflow"] is None
+    assert data["workflow"] is None
+    assert data["workflow_valid"] is None
+    assert data["workflow_warnings"] == []
+    assert data["governance_checkpoints"] == []
     assert data["explicit_next_agent"] == "claude-next"
 
 
@@ -1062,6 +1070,137 @@ def test_phase_handoff_work_type_missing_both_still_shows_guidance(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "Please specify the next agent with --next-agent <agent-id>." in output
+
+
+# ---------------------------------------------------------------------------
+# pcae phase handoff --workflow (Phase 33I)
+# ---------------------------------------------------------------------------
+
+
+def test_phase_handoff_workflow_implementation_shows_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33I workflow task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "workflow validation",
+            "--workflow", "implementation",
+            "--next-agent", "codex-local",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Workflow validation:" in output
+    assert "Workflow: implementation" in output
+    assert "Result: valid" in output
+    assert "Governance checkpoints:" in output
+    assert "pcae check" in output
+    assert "Recommendations remain advisory" in output
+
+
+def test_phase_handoff_workflow_release_json_includes_validation_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33I release JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "release workflow json",
+            "--workflow", "release",
+            "--next-agent", "pcae-native",
+            "--json",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["workflow"] == "release"
+    assert data["workflow_valid"] is True
+    assert data["workflow_warnings"] == []
+    assert any(
+        entry["checkpoint"] == "pcae provenance session current"
+        for entry in data["governance_checkpoints"]
+    )
+
+
+def test_phase_handoff_work_type_and_workflow_both_work(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33I combined task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "combined",
+            "--work-type", "implementation",
+            "--workflow", "implementation",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Recommended agent: codex-local" in output
+    assert "Workflow validation:" in output
+    assert "Workflow: implementation" in output
+    assert "Agent lock: acquired by codex-local" in output
+
+
+def test_phase_handoff_workflow_with_explicit_override_remains_authoritative(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "33I override task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        [
+            "phase", "handoff",
+            "--summary", "override workflow",
+            "--work-type", "documentation",
+            "--workflow", "documentation",
+            "--next-agent", "codex-local",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Recommended agent: claude-local" in output
+    assert "User override: explicit --next-agent is being used" in output
+    assert "Next agent: codex-local" in output
+    assert "Workflow validation:" in output
 
 
 # ---------------------------------------------------------------------------

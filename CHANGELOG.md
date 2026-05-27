@@ -142,3 +142,4 @@
 - Added `pcae orchestration simulate --workflow TEXT` and `pcae orchestration simulate --workflow TEXT --json` to preview ordered execution steps, assigned agents, reasons, and governance checkpoints without executing work or changing locks.
 - Revised orchestration and handoff language so policy-guided agent choices are clearly advisory; explicit `--next-agent` values are shown as user overrides.
 - Added `pcae orchestration validate --workflow TEXT` and `pcae orchestration validate --workflow TEXT --json` for advisory workflow coherence validation across registry membership, role coverage, deterministic ordering, fallback behavior, and governance checkpoints.
+- Added `pcae phase handoff --workflow TEXT` to include advisory workflow validation, warnings, and governance checkpoints in human-readable and JSON handoff guidance.

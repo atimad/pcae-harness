@@ -1059,6 +1059,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Work type to recommend next agent via orchestration policy.",
     )
     phase_handoff_parser.add_argument(
+        "--workflow",
+        default=None,
+        metavar="TEXT",
+        help="Workflow name to validate for handoff guidance.",
+    )
+    phase_handoff_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON handoff result.",
