@@ -15,11 +15,13 @@ from pcae.core.status import (
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_INSPECTION_ADVISORY,
+    RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
     RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     RUNTIME_SNAPSHOT_RESTORE_ADVISORY,
     analyze_runtime_snapshot_compatibility,
     audit_governance_coherence,
+    build_runtime_snapshot_lineage,
     build_runtime_snapshot_manifest,
     check_project_status_coherence,
     export_runtime_snapshot,
@@ -1028,6 +1030,288 @@ def test_runtime_snapshot_retention_is_read_only(tmp_path: Path) -> None:
     }
     assert after == before
     assert sorted(path.name for path in (tmp_path / ".pcae" / "runtime-snapshots").glob("*.json")) == sorted(before)
+
+
+# ── Phase 34K: runtime snapshot lineage ──────────────────────────────────────
+
+
+def test_runtime_snapshot_lineage_empty_returns_no_chains(tmp_path: Path) -> None:
+    result = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    assert result.lineage_chains == ()
+    assert result.lineage_breaks == ()
+    assert result.latest_head is None
+    assert result.advisory == RUNTIME_SNAPSHOT_LINEAGE_ADVISORY
+
+
+def test_runtime_snapshot_lineage_single_compatible_snapshot(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    result = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    assert len(result.lineage_chains) == 1
+    assert result.lineage_breaks == ()
+    chain = result.lineage_chains[0]
+    assert chain.chain_index == 0
+    assert len(chain.entries) == 1
+    assert chain.entries[0].filename == export.export_path.name
+    assert chain.entries[0].previous_filename is None
+    assert chain.entries[0].compatibility_status == "compatible"
+    assert result.latest_head is not None
+    assert result.latest_head.filename == export.export_path.name
+
+
+def test_runtime_snapshot_lineage_two_compatible_form_one_chain(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    first = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    second = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 11, 0, 0, tzinfo=timezone.utc),
+    )
+    result = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    assert len(result.lineage_chains) == 1
+    assert result.lineage_breaks == ()
+    chain = result.lineage_chains[0]
+    assert len(chain.entries) == 2
+    assert chain.entries[0].filename == first.export_path.name
+    assert chain.entries[0].previous_filename is None
+    assert chain.entries[1].filename == second.export_path.name
+    assert chain.entries[1].previous_filename == first.export_path.name
+    assert result.latest_head.filename == second.export_path.name
+
+
+def test_runtime_snapshot_lineage_incompatible_breaks_chain(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    before = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    write_incompatible_snapshot(
+        tmp_path,
+        "runtime-snapshot-20260527-110000.json",
+        "2026-05-27T11:00:00+00:00",
+    )
+    after = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc),
+    )
+    result = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    assert len(result.lineage_chains) == 2
+    assert len(result.lineage_breaks) == 1
+    assert result.lineage_breaks[0].filename == "runtime-snapshot-20260527-110000.json"
+    assert result.lineage_breaks[0].reason == "incompatible snapshot breaks lineage continuity"
+    chain0 = result.lineage_chains[0]
+    assert chain0.chain_index == 0
+    assert chain0.entries[0].filename == before.export_path.name
+    chain1 = result.lineage_chains[1]
+    assert chain1.chain_index == 1
+    assert chain1.entries[0].filename == after.export_path.name
+    assert chain1.entries[0].previous_filename is None
+    assert result.latest_head.filename == after.export_path.name
+
+
+def test_runtime_snapshot_lineage_ordering_is_deterministic(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    exports = [
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+        for hour in range(1, 4)
+    ]
+    result1 = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    result2 = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    filenames1 = [e.filename for e in result1.lineage_chains[0].entries]
+    filenames2 = [e.filename for e in result2.lineage_chains[0].entries]
+    assert filenames1 == filenames2
+    assert filenames1 == [export.export_path.name for export in exports]
+
+
+def test_runtime_snapshot_lineage_latest_head_is_most_recent_compatible(
+    tmp_path: Path,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    write_incompatible_snapshot(
+        tmp_path,
+        "runtime-snapshot-20260527-090000.json",
+        "2026-05-27T09:00:00+00:00",
+    )
+    last = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc),
+    )
+    result = build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    assert result.latest_head is not None
+    assert result.latest_head.filename == last.export_path.name
+
+
+def test_runtime_snapshot_lineage_is_read_only(tmp_path: Path) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    exports = [
+        export_runtime_snapshot(
+            HarnessPath(tmp_path),
+            exported_at=datetime(2026, 5, 27, hour, 0, 0, tzinfo=timezone.utc),
+        )
+        for hour in range(1, 3)
+    ]
+    before = {
+        export.export_path.name: (tmp_path / export.export_path).read_text(encoding="utf-8")
+        for export in exports
+    }
+    build_runtime_snapshot_lineage(HarnessPath(tmp_path))
+    after = {
+        export.export_path.name: (tmp_path / export.export_path).read_text(encoding="utf-8")
+        for export in exports
+    }
+    assert after == before
+
+
+def test_cli_runtime_snapshot_lineage_human(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "lineage"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance runtime snapshot lineage" in output
+    assert "Lineage chains: 1" in output
+    assert "Lineage breaks: 0" in output
+    assert "Chain 1 (1 snapshot):" in output
+    assert "[head]" in output
+    assert "Latest lineage head: runtime-snapshot-" in output
+    assert RUNTIME_SNAPSHOT_LINEAGE_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_lineage_human_empty(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "lineage"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Lineage chains: 0" in output
+    assert "Lineage breaks: 0" in output
+    assert "Latest lineage head: none" in output
+    assert RUNTIME_SNAPSHOT_LINEAGE_ADVISORY in output
+
+
+def test_cli_runtime_snapshot_lineage_json(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    first = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    second = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 11, 0, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "lineage", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert len(data["lineage_chains"]) == 1
+    assert data["lineage_breaks"] == []
+    assert data["lineage_chains"][0]["chain_index"] == 0
+    assert data["lineage_chains"][0]["length"] == 2
+    entries = data["lineage_chains"][0]["entries"]
+    assert entries[0]["filename"] == first.export_path.name
+    assert entries[0]["previous_filename"] is None
+    assert entries[1]["filename"] == second.export_path.name
+    assert entries[1]["previous_filename"] == first.export_path.name
+    assert data["latest_head"]["filename"] == second.export_path.name
+    assert data["advisory"] == RUNTIME_SNAPSHOT_LINEAGE_ADVISORY
+
+
+def test_cli_runtime_snapshot_lineage_json_with_break(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    initialize_git_repo(tmp_path)
+    write_minimal_governance_artifacts(tmp_path)
+    before = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    write_incompatible_snapshot(
+        tmp_path,
+        "runtime-snapshot-20260527-110000.json",
+        "2026-05-27T11:00:00+00:00",
+    )
+    after = export_runtime_snapshot(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 27, 12, 0, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["runtime", "snapshot", "lineage", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    assert exit_code == 0
+    assert len(data["lineage_chains"]) == 2
+    assert len(data["lineage_breaks"]) == 1
+    assert data["lineage_breaks"][0]["filename"] == "runtime-snapshot-20260527-110000.json"
+    assert data["lineage_breaks"][0]["reason"] == "incompatible snapshot breaks lineage continuity"
+    assert data["lineage_chains"][0]["entries"][0]["filename"] == before.export_path.name
+    assert data["lineage_chains"][1]["entries"][0]["filename"] == after.export_path.name
+    assert data["latest_head"]["filename"] == after.export_path.name
+
+
+def write_incompatible_snapshot(
+    tmp_path: Path,
+    filename: str,
+    exported_at: str,
+) -> None:
+    snapshot_dir = tmp_path / ".pcae" / "runtime-snapshots"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    (snapshot_dir / filename).write_text(
+        json.dumps({
+            "snapshot_schema_version": 999,
+            "snapshot_kind": "pcae-runtime-snapshot",
+            "exported_by_version": "0.1.0",
+            "exported_at": exported_at,
+            "active_task": None,
+            "agent_lock_state": None,
+            "session_continuity_status": "unknown",
+            "provenance_event_count": 0,
+            "latest_provenance_event": None,
+            "orchestration_policy_summary": {},
+            "registered_agents": [],
+            "governance_health_status": "unknown",
+            "governance_check_status": "unknown",
+            "workflow_orchestration_metadata": {},
+        }),
+        encoding="utf-8",
+    )
 
 
 def initialize_git_repo(tmp_path: Path) -> None:

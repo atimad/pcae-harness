@@ -7,10 +7,12 @@ from pathlib import Path
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
+    RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
     RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     audit_governance_coherence,
     analyze_runtime_snapshot_compatibility,
+    build_runtime_snapshot_lineage,
     build_runtime_snapshot_manifest,
     check_project_status_coherence,
     export_runtime_snapshot,
@@ -249,6 +251,44 @@ def run_runtime_snapshot_manifest(args: argparse.Namespace) -> int:
         ):
             print(f"  - {key}: {result.compatibility_summary[key]}")
         print(RUNTIME_SNAPSHOT_MANIFEST_ADVISORY)
+    return 0
+
+
+def run_runtime_snapshot_lineage(args: argparse.Namespace) -> int:
+    result = build_runtime_snapshot_lineage(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance runtime snapshot lineage")
+        print(f"Lineage chains: {len(result.lineage_chains)}")
+        print(f"Lineage breaks: {len(result.lineage_breaks)}")
+        if result.lineage_chains:
+            for chain in result.lineage_chains:
+                count = len(chain.entries)
+                label = "snapshot" if count == 1 else "snapshots"
+                print(f"Chain {chain.chain_index + 1} ({count} {label}):")
+                for entry in chain.entries:
+                    head_marker = " [head]" if entry is chain.head else ""
+                    print(
+                        f"  - {entry.filename}"
+                        f" (exported_at={entry.exported_at},"
+                        f" {entry.compatibility_status}){head_marker}"
+                    )
+        if result.lineage_breaks:
+            print("Lineage breaks:")
+            for brk in result.lineage_breaks:
+                print(
+                    f"  - {brk.filename}"
+                    f" (exported_at={brk.exported_at},"
+                    f" reason: {brk.reason})"
+                )
+        latest_text = (
+            result.latest_head.filename
+            if result.latest_head is not None
+            else "none"
+        )
+        print(f"Latest lineage head: {latest_text}")
+        print(RUNTIME_SNAPSHOT_LINEAGE_ADVISORY)
     return 0
 
 

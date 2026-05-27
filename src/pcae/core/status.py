@@ -91,6 +91,9 @@ RUNTIME_SNAPSHOT_MANIFEST_ADVISORY = (
 RUNTIME_SNAPSHOT_RETENTION_ADVISORY = (
     "Retention planning is advisory; no snapshots are deleted."
 )
+RUNTIME_SNAPSHOT_LINEAGE_ADVISORY = (
+    "Lineage analysis is advisory; no snapshots are modified."
+)
 DEFAULT_RUNTIME_SNAPSHOT_RETENTION_KEEP_COUNT = 5
 
 
@@ -385,6 +388,70 @@ class RuntimeSnapshotRetentionPlan:
             "prune_candidates": [
                 entry.to_dict() for entry in self.prune_candidates
             ],
+            "advisory": self.advisory,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotLineageEntry:
+    filename: str
+    exported_at: object
+    compatibility_status: str
+    previous_filename: str | None
+
+    def to_dict(self) -> dict:
+        return {
+            "filename": self.filename,
+            "exported_at": self.exported_at,
+            "compatibility_status": self.compatibility_status,
+            "previous_filename": self.previous_filename,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotLineageChain:
+    chain_index: int
+    entries: tuple[RuntimeSnapshotLineageEntry, ...]
+
+    @property
+    def head(self) -> RuntimeSnapshotLineageEntry:
+        return self.entries[-1]
+
+    def to_dict(self) -> dict:
+        return {
+            "chain_index": self.chain_index,
+            "length": len(self.entries),
+            "entries": [entry.to_dict() for entry in self.entries],
+            "head": self.head.to_dict(),
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotLineageBreak:
+    filename: str
+    exported_at: object
+    reason: str
+
+    def to_dict(self) -> dict:
+        return {
+            "filename": self.filename,
+            "exported_at": self.exported_at,
+            "reason": self.reason,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeSnapshotLineage:
+    lineage_chains: tuple[RuntimeSnapshotLineageChain, ...]
+    lineage_breaks: tuple[RuntimeSnapshotLineageBreak, ...]
+    latest_head: RuntimeSnapshotLineageEntry | None
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "lineage_chains": [chain.to_dict() for chain in self.lineage_chains],
+            "lineage_breaks": [brk.to_dict() for brk in self.lineage_breaks],
+            "latest_head": self.latest_head.to_dict() if self.latest_head is not None else None,
             "advisory": self.advisory,
         }
 
@@ -949,6 +1016,62 @@ def plan_runtime_snapshot_retention(
         keep=keep,
         prune_candidates=prune_candidates,
         advisory=RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
+    )
+
+
+def build_runtime_snapshot_lineage(root: HarnessPath) -> RuntimeSnapshotLineage:
+    """Return a deterministic read-only lineage analysis of exported runtime snapshots."""
+    manifest = build_runtime_snapshot_manifest(root)
+    # manifest entries are newest-first; reverse for oldest-first chronological order
+    chronological = list(reversed(manifest.manifest_entries))
+
+    chains: list[list[RuntimeSnapshotManifestEntry]] = []
+    breaks: list[RuntimeSnapshotManifestEntry] = []
+    current: list[RuntimeSnapshotManifestEntry] = []
+
+    for entry in chronological:
+        if entry.compatibility_status == "compatible":
+            current.append(entry)
+        else:
+            if current:
+                chains.append(current)
+                current = []
+            breaks.append(entry)
+
+    if current:
+        chains.append(current)
+
+    lineage_chains_list: list[RuntimeSnapshotLineageChain] = []
+    for i, chain in enumerate(chains):
+        entries = tuple(
+            RuntimeSnapshotLineageEntry(
+                filename=e.filename,
+                exported_at=e.exported_at,
+                compatibility_status=e.compatibility_status,
+                previous_filename=chain[j - 1].filename if j > 0 else None,
+            )
+            for j, e in enumerate(chain)
+        )
+        lineage_chains_list.append(
+            RuntimeSnapshotLineageChain(chain_index=i, entries=entries)
+        )
+
+    lineage_chains = tuple(lineage_chains_list)
+    lineage_breaks = tuple(
+        RuntimeSnapshotLineageBreak(
+            filename=entry.filename,
+            exported_at=entry.exported_at,
+            reason="incompatible snapshot breaks lineage continuity",
+        )
+        for entry in breaks
+    )
+    latest_head = lineage_chains[-1].head if lineage_chains else None
+
+    return RuntimeSnapshotLineage(
+        lineage_chains=lineage_chains,
+        lineage_breaks=lineage_breaks,
+        latest_head=latest_head,
+        advisory=RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     )
 
 

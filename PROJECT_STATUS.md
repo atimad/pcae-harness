@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 34J: Governance runtime snapshot retention planning preview.
+Phase 34K: Governance runtime snapshot lineage tracking.
 
 ## Governance Coherence Note
 
@@ -143,7 +143,13 @@ previewed with `pcae runtime snapshot retention --dry-run` and
 `pcae runtime snapshot retention --dry-run --json`, using the manifest to keep
 the latest five snapshots by default and mark older snapshots as prune
 candidates while deleting nothing, mutating no manifest, and restoring no
-runtime state.
+runtime state, and snapshot lineage relationships can be analyzed read-only
+with `pcae runtime snapshot lineage` and
+`pcae runtime snapshot lineage --json`, ordering snapshots chronologically
+by exported_at, grouping compatible snapshots into continuity chains with
+previous-snapshot references, recording incompatible snapshots as lineage
+breaks, and reporting the latest lineage head without modifying any snapshot
+or manifest.
 
 ## Next
 
