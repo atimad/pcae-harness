@@ -12,7 +12,9 @@ from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
+    PREDICTED_PHASES_OPTION_B,
     ROADMAP_RECOMMENDATION_ADVISORY,
+    ROADMAP_SEQUENCE,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
@@ -329,10 +331,117 @@ def test_roadmap_next_recommendation_to_dict_shape(tmp_path: Path) -> None:
         "rationale",
         "readiness_factors",
         "blockers",
+        "roadmap_sequence",
+        "predicted_phases",
         "advisory",
     }
     assert isinstance(data["readiness_factors"], list)
     assert isinstance(data["blockers"], list)
+    assert isinstance(data["roadmap_sequence"], list)
+    assert isinstance(data["predicted_phases"], list)
+
+
+def test_roadmap_next_always_includes_roadmap_sequence(tmp_path: Path) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
+    assert result.roadmap_sequence == ROADMAP_SEQUENCE
+    assert "Option B — Architecture Memory" in result.roadmap_sequence
+    assert "Option C — Multi-Agent Collaboration" in result.roadmap_sequence
+    assert "Remote Coding" in result.roadmap_sequence
+
+
+def _setup_roadmap_no_todos_repo(tmp_path: Path) -> None:
+    from pcae.commands.init import init_harness
+
+    initialize_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        "Phase 36E: Roadmap awareness for predicted phases.\n\n"
+        "## Current State\n\n"
+        "PCAE is aware of the agreed high-level roadmap.\n\n"
+        "## Next\n\n"
+        "- Continue governed roadmap work.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n## Pending\n\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# DONE\n\n- Added previous governed roadmap work.\n",
+        encoding="utf-8",
+    )
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260527-1200-test.md").write_text(
+        "# Task Contract\n\n"
+        "## Task ID\n\n20260527-1200-test\n\n"
+        "## Title\n\nTest task\n\n"
+        "## Status\n\nactive\n\n"
+        "## Mode\n\nimplementation\n\n"
+        "## Goal\n\nImplement roadmap awareness.\n",
+        encoding="utf-8",
+    )
+    pcae_dir = tmp_path / ".pcae"
+    (pcae_dir / "session.json").write_text(
+        json.dumps(
+            {
+                "active_task": {"id": "20260527-1200-test", "title": "Test task"},
+                "current_objective": "Implement roadmap awareness.",
+                "next_recommended_step": "Run validation.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (pcae_dir / "provenance-history.json").write_text("[]\n", encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+
+
+def test_roadmap_next_no_todos_references_option_b(tmp_path: Path) -> None:
+    _setup_roadmap_no_todos_repo(tmp_path)
+    result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
+    assert result.recommendation_status == "ready"
+    assert result.recommended_phase == PREDICTED_PHASES_OPTION_B[0]
+    assert result.predicted_phases == PREDICTED_PHASES_OPTION_B
+    assert "Option B" in result.rationale
+
+
+def test_roadmap_next_with_todos_has_empty_predicted_phases(tmp_path: Path) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
+    assert result.recommendation_status == "ready"
+    assert result.predicted_phases == ()
+
+
+def test_cli_roadmap_next_no_todos_json_includes_roadmap_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _setup_roadmap_no_todos_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["roadmap", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["recommendation_status"] == "ready"
+    assert data["recommended_phase"] == PREDICTED_PHASES_OPTION_B[0]
+    assert data["roadmap_sequence"] == list(ROADMAP_SEQUENCE)
+    assert data["predicted_phases"] == list(PREDICTED_PHASES_OPTION_B)
+    assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
+
+
+def test_cli_roadmap_next_no_todos_human_output_includes_sequence(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _setup_roadmap_no_todos_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["roadmap", "next"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Strategic roadmap sequence:" in output
+    assert "Option B — Architecture Memory" in output
+    assert "Predicted phases (Option B — Architecture Memory):" in output
+    assert PREDICTED_PHASES_OPTION_B[0] in output
 
 
 def test_cli_roadmap_next_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -358,6 +467,8 @@ def test_cli_roadmap_next_json_output(tmp_path: Path, monkeypatch, capsys) -> No
     assert data["recommendation_status"] == "ready"
     assert data["recommended_phase"].startswith("Implement `pcae orchestration select`")
     assert data["blockers"] == []
+    assert data["roadmap_sequence"] == list(ROADMAP_SEQUENCE)
+    assert data["predicted_phases"] == []
     assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
 
 

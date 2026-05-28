@@ -154,6 +154,13 @@ def run_roadmap_next(args: argparse.Namespace) -> int:
         print(f"Recommendation status: {result.recommendation_status}")
         print(f"Top recommended next phase: {result.recommended_phase}")
         print(f"Rationale: {result.rationale}")
+        print("Strategic roadmap sequence:")
+        for item in result.roadmap_sequence:
+            print(f"  - {item}")
+        if result.predicted_phases:
+            print("Predicted phases (Option B — Architecture Memory):")
+            for phase in result.predicted_phases:
+                print(f"  - {phase}")
         print("Readiness factors:")
         for factor in result.readiness_factors:
             print(f"  - {factor}")

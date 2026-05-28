@@ -46,6 +46,27 @@ GOVERNANCE_REPAIR_ADVISORY = (
 ROADMAP_RECOMMENDATION_ADVISORY = (
     "Recommendations are non-binding. The human user remains authoritative."
 )
+
+# ---------------------------------------------------------------------------
+# Strategic roadmap sequence (Phase 36E)
+# ---------------------------------------------------------------------------
+
+ROADMAP_SEQUENCE: tuple[str, ...] = (
+    "Option B — Architecture Memory",
+    "Option C — Multi-Agent Collaboration",
+    "Remote Coding",
+)
+
+PREDICTED_PHASES_OPTION_B: tuple[str, ...] = (
+    "36F Architecture Decision Record model",
+    "36G Architecture decision inspection",
+    "36H Architecture decision creation",
+    "36I Architecture decision export",
+    "36J Architecture decision status validation",
+    "36K Architecture provenance linkage",
+    "36L Architecture memory continuity integration",
+    "36M Architecture governance audit integration",
+)
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
 )
@@ -585,6 +606,8 @@ class RoadmapRecommendation:
     rationale: str
     readiness_factors: tuple[str, ...]
     blockers: tuple[str, ...]
+    roadmap_sequence: tuple[str, ...]
+    predicted_phases: tuple[str, ...]
     advisory: str
 
     def to_dict(self) -> dict:
@@ -594,6 +617,8 @@ class RoadmapRecommendation:
             "rationale": self.rationale,
             "readiness_factors": list(self.readiness_factors),
             "blockers": list(self.blockers),
+            "roadmap_sequence": list(self.roadmap_sequence),
+            "predicted_phases": list(self.predicted_phases),
             "advisory": self.advisory,
         }
 
@@ -658,6 +683,8 @@ def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
             ),
             readiness_factors=tuple(readiness_factors),
             blockers=tuple(blockers),
+            roadmap_sequence=ROADMAP_SEQUENCE,
+            predicted_phases=(),
             advisory=ROADMAP_RECOMMENDATION_ADVISORY,
         )
 
@@ -667,12 +694,15 @@ def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
             "Governance is ready; recommending the first pending TODO item "
             "from the tracked roadmap."
         )
+        predicted_phases: tuple[str, ...] = ()
     else:
-        recommended = "Define the next human-authored roadmap phase"
+        recommended = PREDICTED_PHASES_OPTION_B[0]
         rationale = (
-            "Governance is ready and no pending TODO item was found; the next "
-            "phase should be selected by the human user."
+            "Governance is ready and no pending TODO item was found; "
+            "recommending the next predicted phase from the agreed roadmap sequence "
+            "(Option B — Architecture Memory)."
         )
+        predicted_phases = PREDICTED_PHASES_OPTION_B
 
     return RoadmapRecommendation(
         recommendation_status="ready",
@@ -680,6 +710,8 @@ def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
         rationale=rationale,
         readiness_factors=tuple(readiness_factors),
         blockers=(),
+        roadmap_sequence=ROADMAP_SEQUENCE,
+        predicted_phases=predicted_phases,
         advisory=ROADMAP_RECOMMENDATION_ADVISORY,
     )
 

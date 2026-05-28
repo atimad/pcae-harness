@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36D: Orchestration capability matrix.
+Phase 36E: Roadmap awareness for predicted phases.
 
 ## Governance Coherence Note
 
@@ -318,11 +318,20 @@ all 10 known governance artifacts with path, artifact_class, governance_role,
 repair_policy, and source_control_role grouped by class; JSON output includes
 `artifacts`, `classes`, and `advisory`; the registry reuses
 `classify_governance_artifact` from Phase 35R and does not mutate artifacts
-or change sync-check/sync-repair behavior.
+or change sync-check/sync-repair behavior, and PCAE is now aware of the
+agreed high-level roadmap sequence (Option B — Architecture Memory, Option C
+— Multi-Agent Collaboration, Remote Coding) and predicted phases for Option B
+(36F–36M); `pcae roadmap next` and `pcae roadmap next --json` reference this
+planned sequence when no pending TODO items exist, recommending the first
+predicted phase (36F Architecture Decision Record model) and surfacing the
+full `roadmap_sequence` and `predicted_phases` in output; when TODO items
+exist, `predicted_phases` is empty and the first TODO item is recommended as
+before; recommendations remain advisory, no tasks are created automatically,
+and no runtime state is mutated.
 
 ## Next
 
-- No pending governed phases.
+- Phase 36F: Architecture Decision Record model (Option B — Architecture Memory).
 
 ## Future Explorations
 
