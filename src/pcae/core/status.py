@@ -1818,7 +1818,8 @@ _GOVERNANCE_AUDIT_GAP_CHECKS: tuple[str, ...] = (
 @dataclass(frozen=True)
 class GovernanceSyncCheckResult:
     synchronized: bool
-    stale_references: tuple[str, ...]
+    operational_stale_references: tuple[str, ...]
+    preserved_historical_references: tuple[str, ...]
     completed_todo_entries: tuple[str, ...]
     inconsistent_entries: tuple[str, ...]
     governance_drift_warnings: tuple[str, ...]
@@ -1830,7 +1831,8 @@ class GovernanceSyncCheckResult:
             "completed_todo_entries": list(self.completed_todo_entries),
             "governance_drift_warnings": list(self.governance_drift_warnings),
             "inconsistent_entries": list(self.inconsistent_entries),
-            "stale_references": list(self.stale_references),
+            "operational_stale_references": list(self.operational_stale_references),
+            "preserved_historical_references": list(self.preserved_historical_references),
             "synchronized": self.synchronized,
         }
 
@@ -2015,7 +2017,7 @@ def plan_governance_sync_repairs(root: HarnessPath) -> GovernanceSyncRepairPrevi
             ),
         ))
 
-    for ref in sync.stale_references:
+    for ref in (*sync.operational_stale_references, *sync.preserved_historical_references):
         artifact_part, sep, stale_phrase = ref.partition(": stale reference: ")
         artifact = artifact_part if sep else "governance artifact"
         stale_entry = stale_phrase if sep else ref
@@ -2070,6 +2072,44 @@ def plan_governance_sync_repairs(root: HarnessPath) -> GovernanceSyncRepairPrevi
     )
 
 
+@dataclass(frozen=True)
+class AppliedSyncRepairResult:
+    applied_repairs: tuple[SyncRepairEntry, ...]
+    no_op: bool
+
+    def to_dict(self) -> dict:
+        return {
+            "applied_repairs": [r.to_dict() for r in self.applied_repairs],
+            "no_op": self.no_op,
+        }
+
+
+def apply_governance_sync_repairs(root: HarnessPath) -> AppliedSyncRepairResult:
+    """Remove completed entries from tasks/TODO.md; skip all historical artifacts."""
+    preview = plan_governance_sync_repairs(root)
+    applicable = [
+        r for r in preview.proposed_repairs
+        if r.artifact_type == "operational"
+        and r.artifact == "tasks/TODO.md"
+        and r.proposed_action == "remove"
+    ]
+    if not applicable:
+        return AppliedSyncRepairResult(applied_repairs=(), no_op=True)
+
+    todo_path = root.join(_SYNC_ARTIFACT_TODO)
+    if not todo_path.is_file():
+        return AppliedSyncRepairResult(applied_repairs=(), no_op=True)
+
+    entries_to_remove = {f"- {r.stale_entry}" for r in applicable}
+    original = todo_path.read_text(encoding="utf-8")
+    filtered = [
+        line for line in original.splitlines(keepends=True)
+        if line.strip() not in entries_to_remove
+    ]
+    todo_path.write_text("".join(filtered), encoding="utf-8")
+    return AppliedSyncRepairResult(applied_repairs=tuple(applicable), no_op=False)
+
+
 def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
     """Return read-only governance artifact synchronization analysis.
 
@@ -2082,7 +2122,16 @@ def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
     project_status_text = _read_sync_artifact(root, PROJECT_STATUS_RELATIVE_PATH)
 
     # 1. Stale references: known stale phrases in any of the four artifacts.
-    stale_references = _stale_references_across_artifacts(root, KNOWN_STALE_PHRASES)
+    #    Split into operational (actionable drift) and historical (preserved records).
+    all_stale = _stale_references_across_artifacts(root, KNOWN_STALE_PHRASES)
+    operational_stale_references = [
+        ref for ref in all_stale
+        if _artifact_type_for(ref.partition(": stale reference: ")[0]) == "operational"
+    ]
+    preserved_historical_references = [
+        ref for ref in all_stale
+        if _artifact_type_for(ref.partition(": stale reference: ")[0]) == "historical"
+    ]
 
     # 2. Completed TODO entries: Pending items whose pcae commands appear in
     #    DONE.md or CHANGELOG.md, indicating the work is already done.
@@ -2111,15 +2160,19 @@ def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
         if gap not in _GOVERNANCE_AUDIT_KNOWN_CHECKS
     ]
 
+    # Historical preserved references are not actionable drift; only
+    # operational stale references, completed TODO entries, and inconsistent
+    # roadmap entries make the repo out of sync.
     synchronized = (
-        len(stale_references) == 0
+        len(operational_stale_references) == 0
         and len(completed_todo_entries) == 0
         and len(inconsistent_entries) == 0
     )
 
     return GovernanceSyncCheckResult(
         synchronized=synchronized,
-        stale_references=tuple(stale_references),
+        operational_stale_references=tuple(operational_stale_references),
+        preserved_historical_references=tuple(preserved_historical_references),
         completed_todo_entries=tuple(completed_todo_entries),
         inconsistent_entries=tuple(inconsistent_entries),
         governance_drift_warnings=tuple(governance_drift_warnings),

@@ -1817,7 +1817,8 @@ def test_check_governance_sync_not_synchronized_on_inconsistent_entry(
 def test_stale_references_empty_when_no_stale_phrases(tmp_path: Path) -> None:
     _write_sync_artifacts(tmp_path)
     result = check_governance_sync(HarnessPath(tmp_path))
-    assert result.stale_references == ()
+    assert result.operational_stale_references == ()
+    assert result.preserved_historical_references == ()
 
 
 def test_stale_references_detected_in_project_status(tmp_path: Path) -> None:
@@ -1832,8 +1833,8 @@ def test_stale_references_detected_in_project_status(tmp_path: Path) -> None:
     (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
     (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
     result = check_governance_sync(HarnessPath(tmp_path))
-    assert len(result.stale_references) >= 1
-    assert any("Implement `pcae end`" in ref for ref in result.stale_references)
+    assert len(result.operational_stale_references) >= 1
+    assert any("Implement `pcae end`" in ref for ref in result.operational_stale_references)
 
 
 def test_stale_references_detected_in_todo(tmp_path: Path) -> None:
@@ -1842,7 +1843,7 @@ def test_stale_references_detected_in_todo(tmp_path: Path) -> None:
         todo_pending=["Implement `pcae end` command."],
     )
     result = check_governance_sync(HarnessPath(tmp_path))
-    stale_in_todo = [r for r in result.stale_references if "tasks/TODO.md" in r]
+    stale_in_todo = [r for r in result.operational_stale_references if "tasks/TODO.md" in r]
     assert len(stale_in_todo) >= 1
 
 
@@ -1852,7 +1853,7 @@ def test_stale_references_detected_in_changelog(tmp_path: Path) -> None:
         changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
     )
     result = check_governance_sync(HarnessPath(tmp_path))
-    stale_in_changelog = [r for r in result.stale_references if "CHANGELOG.md" in r]
+    stale_in_changelog = [r for r in result.preserved_historical_references if "CHANGELOG.md" in r]
     assert len(stale_in_changelog) >= 1
 
 
@@ -1862,8 +1863,90 @@ def test_stale_references_detected_in_done(tmp_path: Path) -> None:
         done_entries=["Implement `pcae end` was added."],
     )
     result = check_governance_sync(HarnessPath(tmp_path))
-    stale_in_done = [r for r in result.stale_references if "tasks/DONE.md" in r]
+    stale_in_done = [r for r in result.preserved_historical_references if "tasks/DONE.md" in r]
     assert len(stale_in_done) >= 1
+
+
+# ---------------------------------------------------------------------------
+# Core: historical artifact awareness — synchronized semantics
+# ---------------------------------------------------------------------------
+
+
+def test_historical_stale_ref_does_not_make_out_of_sync(tmp_path: Path) -> None:
+    # CHANGELOG.md stale reference should NOT cause out-of-sync
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert result.synchronized is True
+
+
+def test_done_stale_ref_does_not_make_out_of_sync(tmp_path: Path) -> None:
+    # tasks/DONE.md stale reference should NOT cause out-of-sync
+    _write_sync_artifacts(
+        tmp_path,
+        done_entries=["Implement `pcae end` was added."],
+    )
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert result.synchronized is True
+
+
+def test_operational_stale_ref_makes_out_of_sync(tmp_path: Path) -> None:
+    # PROJECT_STATUS.md stale reference SHOULD cause out-of-sync
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert result.synchronized is False
+
+
+def test_historical_stale_ref_goes_to_preserved_field(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+        done_entries=["Implement `pcae end` was added."],
+    )
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert len(result.preserved_historical_references) >= 1
+    assert result.operational_stale_references == ()
+
+
+def test_operational_stale_ref_goes_to_operational_field(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Implement `pcae end` command."],
+    )
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert len(result.operational_stale_references) >= 1
+
+
+def test_mixed_stale_refs_split_correctly(tmp_path: Path) -> None:
+    # PROJECT_STATUS.md + CHANGELOG.md both have stale phrases
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text(
+        "# Changelog\n\n## Unreleased\n\n- Implement `pcae end` released.\n",
+        encoding="utf-8",
+    )
+    result = check_governance_sync(HarnessPath(tmp_path))
+    assert len(result.operational_stale_references) >= 1
+    assert len(result.preserved_historical_references) >= 1
+    assert result.synchronized is False  # operational ref present
 
 
 # ---------------------------------------------------------------------------
@@ -2019,7 +2102,8 @@ def test_check_governance_sync_to_dict_keys(tmp_path: Path) -> None:
     d = result.to_dict()
     for key in (
         "synchronized",
-        "stale_references",
+        "operational_stale_references",
+        "preserved_historical_references",
         "completed_todo_entries",
         "inconsistent_entries",
         "governance_drift_warnings",
@@ -2033,7 +2117,8 @@ def test_check_governance_sync_to_dict_types(tmp_path: Path) -> None:
     result = check_governance_sync(HarnessPath(tmp_path))
     d = result.to_dict()
     assert isinstance(d["synchronized"], bool)
-    assert isinstance(d["stale_references"], list)
+    assert isinstance(d["operational_stale_references"], list)
+    assert isinstance(d["preserved_historical_references"], list)
     assert isinstance(d["completed_todo_entries"], list)
     assert isinstance(d["inconsistent_entries"], list)
     assert isinstance(d["governance_drift_warnings"], list)
@@ -2052,7 +2137,8 @@ def test_check_governance_sync_missing_artifacts(tmp_path: Path) -> None:
     # Missing all four artifacts → should not raise, returns result with empty fields
     result = check_governance_sync(HarnessPath(tmp_path))
     assert isinstance(result, GovernanceSyncCheckResult)
-    assert result.stale_references == ()
+    assert result.operational_stale_references == ()
+    assert result.preserved_historical_references == ()
     assert result.completed_todo_entries == ()
     assert result.inconsistent_entries == ()
 
@@ -2088,7 +2174,8 @@ def test_cli_governance_sync_check_prints_stale_references(
     monkeypatch.chdir(tmp_path)
     main(["governance", "sync-check"])
     captured = capsys.readouterr()
-    assert "Stale references:" in captured.out
+    assert "Operational stale references:" in captured.out
+    assert "Preserved historical references:" in captured.out
 
 
 def test_cli_governance_sync_check_prints_completed_todo(
@@ -2183,7 +2270,8 @@ def test_cli_governance_sync_check_json_required_keys(
     data = json.loads(captured.out)
     for key in (
         "synchronized",
-        "stale_references",
+        "operational_stale_references",
+        "preserved_historical_references",
         "completed_todo_entries",
         "inconsistent_entries",
         "governance_drift_warnings",
@@ -2201,7 +2289,8 @@ def test_cli_governance_sync_check_json_synchronized_clean(
     captured = capsys.readouterr()
     data = json.loads(captured.out)
     assert data["synchronized"] is True
-    assert data["stale_references"] == []
+    assert data["operational_stale_references"] == []
+    assert data["preserved_historical_references"] == []
     assert data["completed_todo_entries"] == []
     assert data["inconsistent_entries"] == []
 
@@ -2241,7 +2330,7 @@ def test_cli_governance_sync_check_json_detects_stale_ref(
     captured = capsys.readouterr()
     data = json.loads(captured.out)
     assert data["synchronized"] is False
-    assert len(data["stale_references"]) >= 1
+    assert len(data["operational_stale_references"]) >= 1
 
 
 def test_cli_governance_sync_check_json_drift_warnings_empty_when_gap_closed(
@@ -2277,6 +2366,140 @@ def test_cli_governance_sync_check_json_is_read_only(
     monkeypatch.chdir(tmp_path)
     main(["governance", "sync-check", "--json"])
     assert todo_path.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# CLI: Phase 35Q — historical artifact awareness in sync-check output
+# ---------------------------------------------------------------------------
+
+
+def test_cli_sync_check_historical_ref_shows_synchronized(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check"])
+    captured = capsys.readouterr()
+    assert "synchronized" in captured.out.lower()
+    assert "out of sync" not in captured.out.lower()
+
+
+def test_cli_sync_check_historical_ref_appears_in_preserved_section(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check"])
+    captured = capsys.readouterr()
+    assert "Preserved historical references:" in captured.out
+    assert "Implement `pcae end`" in captured.out
+
+
+def test_cli_sync_check_historical_ref_not_in_operational_section(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check"])
+    captured = capsys.readouterr()
+    # Operational section should be empty
+    lines = captured.out.splitlines()
+    op_section_idx = next(
+        (i for i, l in enumerate(lines) if "Operational stale references:" in l), -1
+    )
+    assert op_section_idx >= 0
+    next_section_idx = next(
+        (i for i, l in enumerate(lines) if i > op_section_idx and l.startswith(("P", "C", "I", "G", "S"))),
+        len(lines),
+    )
+    op_content = lines[op_section_idx + 1 : next_section_idx]
+    assert any("none" in line.lower() for line in op_content)
+
+
+def test_cli_sync_check_json_historical_ref_synchronized(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["synchronized"] is True
+
+
+def test_cli_sync_check_json_historical_ref_in_preserved_field(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert len(data["preserved_historical_references"]) >= 1
+    assert any("Implement `pcae end`" in r for r in data["preserved_historical_references"])
+
+
+def test_cli_sync_check_json_historical_ref_not_in_operational_field(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["operational_stale_references"] == []
+
+
+def test_cli_sync_check_json_operational_ref_not_synchronized(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    # PROJECT_STATUS.md is operational — should still make out of sync
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["synchronized"] is False
+    assert len(data["operational_stale_references"]) >= 1
+
+
+def test_cli_sync_check_json_no_stale_refs_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    # Old key 'stale_references' must not appear in JSON output
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-check", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "stale_references" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -2970,12 +3193,13 @@ def test_cli_governance_sync_repair_shows_rationale(
     assert "Rationale:" in output
 
 
-def test_cli_governance_sync_repair_requires_dry_run_flag(
+def test_cli_governance_sync_repair_no_flags_fails(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
+    _write_sync_artifacts(tmp_path)
     monkeypatch.chdir(tmp_path)
-    with pytest.raises(SystemExit):
-        main(["governance", "sync-repair"])
+    result = main(["governance", "sync-repair"])
+    assert result != 0
 
 
 def test_cli_governance_sync_repair_is_read_only(
@@ -3586,3 +3810,328 @@ def test_cli_governance_sync_repair_json_uses_proposed_action_key(
     repair = data["proposed_repairs"][0]
     assert "proposed_action" in repair
     assert "action" not in repair
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — imports
+# ---------------------------------------------------------------------------
+
+from pcae.core.status import (
+    AppliedSyncRepairResult,
+    apply_governance_sync_repairs,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — return type
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_returns_result(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    assert isinstance(result, AppliedSyncRepairResult)
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — no-op when no applicable repairs
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_noop_when_no_repairs(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.no_op is True
+    assert result.applied_repairs == ()
+
+
+def test_apply_governance_sync_repairs_noop_when_only_historical(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Implement `pcae end`."],
+    )
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.no_op is True
+    assert result.applied_repairs == ()
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — removes completed TODO entry
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_removes_completed_todo(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae rm check` command.", "Add `pcae keep` command."],
+        done_entries=["Added `pcae rm check`."],
+    )
+    apply_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_text = (tmp_path / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    assert "pcae rm check" not in todo_text
+    assert "pcae keep" in todo_text
+
+
+def test_apply_governance_sync_repairs_applied_repairs_nonempty(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae rm check` command."],
+        done_entries=["Added `pcae rm check`."],
+    )
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.no_op is False
+    assert len(result.applied_repairs) == 1
+
+
+def test_apply_governance_sync_repairs_no_op_is_false_when_applied(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae noop flag` command."],
+        done_entries=["Added `pcae noop flag`."],
+    )
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.no_op is False
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — historical artifacts not modified
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_preserves_changelog(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae hist check` command."],
+        done_entries=["Added `pcae hist check`."],
+        changelog_entries=["Added `pcae hist check`."],
+    )
+    changelog_before = (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8")
+    apply_governance_sync_repairs(HarnessPath(tmp_path))
+    changelog_after = (tmp_path / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert changelog_before == changelog_after
+
+
+def test_apply_governance_sync_repairs_preserves_done(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae hist done` command."],
+        done_entries=["Added `pcae hist done`."],
+    )
+    done_before = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    apply_governance_sync_repairs(HarnessPath(tmp_path))
+    done_after = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert done_before == done_after
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — sync-check convergence
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_sync_check_no_longer_reports_entry(
+    tmp_path: Path,
+) -> None:
+    from pcae.core.status import check_governance_sync
+
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae conv check` command."],
+        done_entries=["Added `pcae conv check`."],
+    )
+    before = check_governance_sync(HarnessPath(tmp_path))
+    assert len(before.completed_todo_entries) == 1
+
+    apply_governance_sync_repairs(HarnessPath(tmp_path))
+
+    after = check_governance_sync(HarnessPath(tmp_path))
+    assert len(after.completed_todo_entries) == 0
+
+
+# ---------------------------------------------------------------------------
+# Core: apply_governance_sync_repairs — to_dict shape
+# ---------------------------------------------------------------------------
+
+
+def test_apply_governance_sync_repairs_to_dict_keys(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = apply_governance_sync_repairs(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert "applied_repairs" in d
+    assert "no_op" in d
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance sync-repair (no flags) — fails clearly
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_no_flags_exits_nonzero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "sync-repair"])
+    assert result != 0
+
+
+def test_cli_governance_sync_repair_no_flags_prints_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair"])
+    output = capsys.readouterr().out
+    assert "Error" in output or "error" in output.lower()
+
+
+def test_cli_governance_sync_repair_no_flags_mentions_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair"])
+    output = capsys.readouterr().out
+    assert "--dry-run" in output
+
+
+def test_cli_governance_sync_repair_no_flags_mentions_force(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair"])
+    output = capsys.readouterr().out
+    assert "--force" in output
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance sync-repair --force — applies repairs
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_force_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "sync-repair", "--force"])
+    assert result == 0
+
+
+def test_cli_governance_sync_repair_force_removes_stale_todo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae force cmd` command."],
+        done_entries=["Added `pcae force cmd`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force"])
+    todo_text = (tmp_path / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    assert "pcae force cmd" not in todo_text
+
+
+def test_cli_governance_sync_repair_force_prints_applied(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae force print` command."],
+        done_entries=["Added `pcae force print`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force"])
+    output = capsys.readouterr().out
+    assert "Applied" in output or "applied" in output.lower()
+
+
+def test_cli_governance_sync_repair_force_noop_message_when_no_repairs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force"])
+    output = capsys.readouterr().out
+    assert "no operational repairs" in output.lower() or "no-op" in output.lower() or "no op" in output.lower()
+
+
+def test_cli_governance_sync_repair_force_noop_preserves_historical_message(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force"])
+    output = capsys.readouterr().out
+    assert "historical" in output.lower()
+
+
+def test_cli_governance_sync_repair_force_json_has_applied_repairs_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae force json` command."],
+        done_entries=["Added `pcae force json`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "applied_repairs" in data
+    assert "no_op" in data
+
+
+def test_cli_governance_sync_repair_force_json_applied_repairs_nonempty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae force json2` command."],
+        done_entries=["Added `pcae force json2`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--force", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["applied_repairs"]
+    assert data["no_op"] is False
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance sync-repair --dry-run — unchanged behavior
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_dry_run_still_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "sync-repair", "--dry-run"])
+    assert result == 0
+
+
+def test_cli_governance_sync_repair_dry_run_still_shows_preview_header(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Governance synchronization repair preview" in output
+
+
+def test_cli_governance_sync_repair_dry_run_does_not_modify_todo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae dry check` command."],
+        done_entries=["Added `pcae dry check`."],
+    )
+    todo_path = tmp_path / "tasks" / "TODO.md"
+    mtime_before = todo_path.stat().st_mtime
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    assert todo_path.stat().st_mtime == mtime_before

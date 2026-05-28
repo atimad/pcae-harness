@@ -504,18 +504,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     governance_sync_repair_parser = governance_subparsers.add_parser(
         "sync-repair",
-        help="Preview deterministic repairs for stale governance artifacts without modifying files.",
+        help="Preview or apply deterministic repairs for stale governance artifacts.",
     )
     governance_sync_repair_parser.add_argument(
         "--dry-run",
         action="store_true",
-        required=True,
         help="Preview repair actions without modifying any governance artifacts.",
+    )
+    governance_sync_repair_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Apply safe operational repairs (removes completed TODO entries only).",
     )
     governance_sync_repair_parser.add_argument(
         "--json",
         action="store_true",
-        help="Print machine-readable JSON synchronization repair preview output.",
+        help="Print machine-readable JSON output.",
     )
     governance_sync_repair_parser.set_defaults(handler=run_governance_sync_repair)
 

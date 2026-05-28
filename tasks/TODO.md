@@ -2,7 +2,6 @@
 
 ## Pending
 
-- Update `pcae docs commands` to include the `phase`, `status`, and `orchestration` command groups.
 - Implement `pcae orchestration select`: given a task type, return the recommended agent from policy.
 
 ## Future Explorations (from Phase 32C/32D/32E/32F/32G)

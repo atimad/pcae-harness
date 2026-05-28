@@ -252,13 +252,17 @@ continuity packs, mutate continuity packs, restore runtime state, or modify
 governance artifacts, and governance artifact synchronization can be validated
 read-only with `pcae governance sync-check` and
 `pcae governance sync-check --json`, analyzing PROJECT_STATUS.md,
-tasks/TODO.md, CHANGELOG.md, and tasks/DONE.md to detect stale references
-(known completed features still referenced in governance documents), completed
-TODO entries (pending items whose `pcae` commands already appear in DONE.md
-or CHANGELOG.md), inconsistent roadmap entries (Next items whose commands
-already appear in DONE.md), and governance audit capability gaps (checks not
-represented in `pcae governance audit` — specifically `artifact_sync_drift`);
-JSON output includes `synchronized`, `stale_references`,
+tasks/TODO.md, CHANGELOG.md, and tasks/DONE.md; stale references are split by
+artifact type: operational artifacts (PROJECT_STATUS.md, tasks/TODO.md)
+produce `operational_stale_references` which contribute to out-of-sync status,
+while historical artifacts (CHANGELOG.md, tasks/DONE.md) produce
+`preserved_historical_references` which are displayed but do NOT affect
+synchronization status (historical records are preserved by design, not
+actionable drift); completed TODO entries (pending items whose `pcae` commands
+already appear in DONE.md or CHANGELOG.md), inconsistent roadmap entries (Next
+items whose commands already appear in DONE.md), and governance audit
+capability gaps are also reported; JSON output includes `synchronized`,
+`operational_stale_references`, `preserved_historical_references`,
 `completed_todo_entries`, `inconsistent_entries`, `governance_drift_warnings`,
 and `advisory`; the advisory "Synchronization analysis is advisory; no
 governance artifacts are modified." is included; the command does not mutate
@@ -274,7 +278,19 @@ the existing path without double-counting; adding `artifact_sync_drift` to
 `_GOVERNANCE_AUDIT_KNOWN_CHECKS` closes the gap that `pcae governance
 sync-check` previously reported; the audit remains read-only: no artifacts
 are mutated, no TODO entries are removed, and no governance files are
-rewritten.
+rewritten, and deterministic repair planning is available with
+`pcae governance sync-repair --dry-run` and
+`pcae governance sync-repair --dry-run --json` (preview, read-only) and safe
+repairs can be applied with `pcae governance sync-repair --force` and
+`pcae governance sync-repair --force --json`, which removes only completed
+entries from tasks/TODO.md (operational artifacts, proposed action: remove)
+while preserving all historical artifacts (CHANGELOG.md, tasks/DONE.md); if
+no applicable operational repairs exist, `--force` no-ops clearly and
+reports that historical references are preserved as-is; running
+`pcae governance sync-repair` without `--dry-run` or `--force` fails with a
+clear error directing the user to specify a flag; after `--force`, sync-check
+will no longer report the removed entry as a completed TODO entry and
+governance audit warnings reduce accordingly.
 
 ## Next
 

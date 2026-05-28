@@ -22,6 +22,7 @@ from pcae.core.status import (
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
+    apply_governance_sync_repairs,
     plan_governance_sync_repairs,
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
@@ -53,9 +54,15 @@ def run_governance_sync_check(args: argparse.Namespace) -> int:
         status = "synchronized" if result.synchronized else "out of sync"
         print("Governance artifact synchronization check")
         print(f"Synchronization status: {status}")
-        print("Stale references:")
-        if result.stale_references:
-            for ref in result.stale_references:
+        print("Operational stale references:")
+        if result.operational_stale_references:
+            for ref in result.operational_stale_references:
+                print(f"  - {ref}")
+        else:
+            print("  - none")
+        print("Preserved historical references:")
+        if result.preserved_historical_references:
+            for ref in result.preserved_historical_references:
                 print(f"  - {ref}")
         else:
             print("  - none")
@@ -369,6 +376,31 @@ def run_runtime_snapshot_lineage(args: argparse.Namespace) -> int:
 
 
 def run_governance_sync_repair(args: argparse.Namespace) -> int:
+    if not args.dry_run and not args.force:
+        print(
+            "Error: specify --dry-run to preview repairs or --force to apply them.",
+            flush=True,
+        )
+        return 1
+
+    if args.force:
+        result = apply_governance_sync_repairs(HarnessPath.cwd())
+        if args.json:
+            print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        else:
+            if result.no_op:
+                print("Governance sync repair: no operational repairs to apply.")
+                print("Historical references are preserved as-is.")
+            else:
+                print("Governance sync repair applied.")
+                for repair in result.applied_repairs:
+                    print(
+                        f"  Applied: {repair.artifact}"
+                        f" — removed stale entry: {repair.stale_entry!r}"
+                    )
+        return 0
+
+    # --dry-run
     result = plan_governance_sync_repairs(HarnessPath.cwd())
     if args.json:
         print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
