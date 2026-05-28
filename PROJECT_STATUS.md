@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35K: Governed continuity pack retention planning.
+Phase 35L: Governance artifact synchronization validation.
 
 ## Governance Coherence Note
 
@@ -249,7 +249,21 @@ candidate count, packs to keep, and prune candidates; JSON output includes
 and `advisory`; the advisory "Continuity retention planning is advisory; no
 continuity packs are deleted." is included; the command does not delete
 continuity packs, mutate continuity packs, restore runtime state, or modify
-governance artifacts.
+governance artifacts, and governance artifact synchronization can be validated
+read-only with `pcae governance sync-check` and
+`pcae governance sync-check --json`, analyzing PROJECT_STATUS.md,
+tasks/TODO.md, CHANGELOG.md, and tasks/DONE.md to detect stale references
+(known completed features still referenced in governance documents), completed
+TODO entries (pending items whose `pcae` commands already appear in DONE.md
+or CHANGELOG.md), inconsistent roadmap entries (Next items whose commands
+already appear in DONE.md), and governance audit capability gaps (checks not
+represented in `pcae governance audit` — specifically `artifact_sync_drift`);
+JSON output includes `synchronized`, `stale_references`,
+`completed_todo_entries`, `inconsistent_entries`, `governance_drift_warnings`,
+and `advisory`; the advisory "Synchronization analysis is advisory; no
+governance artifacts are modified." is included; the command does not mutate
+artifacts, auto-repair TODO.md, rewrite PROJECT_STATUS.md, or modify
+CHANGELOG.md.
 
 ## Next
 

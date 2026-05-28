@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
+    GOVERNANCE_SYNC_CHECK_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
@@ -15,6 +16,7 @@ from pcae.core.status import (
     analyze_runtime_snapshot_compatibility,
     build_runtime_snapshot_lineage,
     build_runtime_snapshot_manifest,
+    check_governance_sync,
     check_project_status_coherence,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
@@ -39,6 +41,42 @@ def run_status_coherence(args: argparse.Namespace) -> int:
             for warning in result.warnings:
                 print(f"  - warning [{warning.document}]: {warning.message}")
     return 0 if result.coherent else 1
+
+
+def run_governance_sync_check(args: argparse.Namespace) -> int:
+    result = check_governance_sync(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        status = "synchronized" if result.synchronized else "out of sync"
+        print("Governance artifact synchronization check")
+        print(f"Synchronization status: {status}")
+        print("Stale references:")
+        if result.stale_references:
+            for ref in result.stale_references:
+                print(f"  - {ref}")
+        else:
+            print("  - none")
+        print("Completed TODO entries:")
+        if result.completed_todo_entries:
+            for entry in result.completed_todo_entries:
+                print(f"  - {entry}")
+        else:
+            print("  - none")
+        print("Inconsistent roadmap entries:")
+        if result.inconsistent_entries:
+            for entry in result.inconsistent_entries:
+                print(f"  - {entry}")
+        else:
+            print("  - none")
+        print("Governance drift warnings:")
+        if result.governance_drift_warnings:
+            for warning in result.governance_drift_warnings:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        print(GOVERNANCE_SYNC_CHECK_ADVISORY)
+    return 0
 
 
 def run_governance_audit(args: argparse.Namespace) -> int:

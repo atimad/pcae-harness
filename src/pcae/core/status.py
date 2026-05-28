@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from importlib import metadata
 import json
 from pathlib import Path
+import re
 import subprocess
 
 from pcae.core.agent import build_agent_lock_state
@@ -1778,3 +1779,169 @@ def read_markdown_section_text(content: str, section_name: str) -> str | None:
 
 def first_line(text: str) -> str:
     return text.splitlines()[0]
+
+
+# ---------------------------------------------------------------------------
+# Governance artifact synchronization validation (Phase 35L)
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_SYNC_CHECK_ADVISORY = (
+    "Synchronization analysis is advisory; no governance artifacts are modified."
+)
+
+_SYNC_ARTIFACT_TODO = Path("tasks") / "TODO.md"
+_SYNC_ARTIFACT_DONE = Path("tasks") / "DONE.md"
+_SYNC_ARTIFACT_CHANGELOG = Path("CHANGELOG.md")
+
+# Checks that the current governance audit runs.  Any check name absent from
+# this set and listed in _GOVERNANCE_AUDIT_GAP_CHECKS is reported as a gap.
+_GOVERNANCE_AUDIT_KNOWN_CHECKS: frozenset[str] = frozenset({
+    "project_status_current_phase",
+    "project_status_next",
+    "active_task",
+    "session_continuity",
+    "provenance_history",
+    "policy_configuration",
+    "agent_registry",
+})
+
+# Capability checks that SHOULD exist in the audit but do not (yet).
+_GOVERNANCE_AUDIT_GAP_CHECKS: tuple[str, ...] = (
+    "artifact_sync_drift",
+)
+
+
+@dataclass(frozen=True)
+class GovernanceSyncCheckResult:
+    synchronized: bool
+    stale_references: tuple[str, ...]
+    completed_todo_entries: tuple[str, ...]
+    inconsistent_entries: tuple[str, ...]
+    governance_drift_warnings: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "completed_todo_entries": list(self.completed_todo_entries),
+            "governance_drift_warnings": list(self.governance_drift_warnings),
+            "inconsistent_entries": list(self.inconsistent_entries),
+            "stale_references": list(self.stale_references),
+            "synchronized": self.synchronized,
+        }
+
+
+def _read_sync_artifact(root: HarnessPath, rel_path: Path) -> str:
+    path = root.join(rel_path)
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
+def _parse_section_bullets(text: str, section_name: str) -> list[str]:
+    """Return bullet item bodies (without leading dash) from a ## section."""
+    items: list[str] = []
+    in_section = False
+    target = f"## {section_name}"
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if in_section:
+                break
+            in_section = stripped == target
+            continue
+        if in_section and stripped.startswith("-"):
+            items.append(stripped[1:].strip())
+    return items
+
+
+def _extract_pcae_commands(text: str) -> list[str]:
+    """Extract `pcae ...` command strings (without backticks) from text."""
+    return re.findall(r'`(pcae[^`]+)`', text)
+
+
+def _item_appears_completed(item: str, done_text: str, changelog_text: str) -> bool:
+    """Return True if any pcae command named in item appears in done or changelog."""
+    commands = _extract_pcae_commands(item)
+    if not commands:
+        return False
+    reference = done_text + "\n" + changelog_text
+    return any(f"`{cmd}`" in reference for cmd in commands)
+
+
+def _stale_references_across_artifacts(
+    root: HarnessPath,
+    phrases: tuple[str, ...],
+) -> list[str]:
+    artifact_paths = (
+        PROJECT_STATUS_RELATIVE_PATH,
+        _SYNC_ARTIFACT_TODO,
+        _SYNC_ARTIFACT_CHANGELOG,
+        _SYNC_ARTIFACT_DONE,
+    )
+    found: list[str] = []
+    for rel_path in artifact_paths:
+        text = _read_sync_artifact(root, rel_path)
+        for phrase in phrases:
+            if phrase in text:
+                found.append(
+                    f"{rel_path.as_posix()}: stale reference: {phrase!r}"
+                )
+    return found
+
+
+def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
+    """Return read-only governance artifact synchronization analysis.
+
+    Checks four deterministic conditions across PROJECT_STATUS.md,
+    tasks/TODO.md, CHANGELOG.md, and tasks/DONE.md.  Never mutates any file.
+    """
+    todo_text = _read_sync_artifact(root, _SYNC_ARTIFACT_TODO)
+    done_text = _read_sync_artifact(root, _SYNC_ARTIFACT_DONE)
+    changelog_text = _read_sync_artifact(root, _SYNC_ARTIFACT_CHANGELOG)
+    project_status_text = _read_sync_artifact(root, PROJECT_STATUS_RELATIVE_PATH)
+
+    # 1. Stale references: known stale phrases in any of the four artifacts.
+    stale_references = _stale_references_across_artifacts(root, KNOWN_STALE_PHRASES)
+
+    # 2. Completed TODO entries: Pending items whose pcae commands appear in
+    #    DONE.md or CHANGELOG.md, indicating the work is already done.
+    pending_items = _parse_section_bullets(todo_text, "Pending")
+    completed_todo_entries = [
+        item
+        for item in pending_items
+        if _item_appears_completed(item, done_text, changelog_text)
+    ]
+
+    # 3. Inconsistent "Next" roadmap entries: items in PROJECT_STATUS.md's
+    #    Next section whose pcae commands appear in DONE.md, meaning they
+    #    should have been removed from the roadmap.
+    next_items = _parse_section_bullets(project_status_text, "Next")
+    inconsistent_entries = [
+        f"Next roadmap item appears already completed: {item!r}"
+        for item in next_items
+        if _item_appears_completed(item, done_text, done_text)
+    ]
+
+    # 4. Governance drift warnings: capability gaps in the current audit.
+    governance_drift_warnings = [
+        f"Governance audit has no '{gap}' check;"
+        " artifact synchronization drift is not currently audited."
+        for gap in _GOVERNANCE_AUDIT_GAP_CHECKS
+        if gap not in _GOVERNANCE_AUDIT_KNOWN_CHECKS
+    ]
+
+    synchronized = (
+        len(stale_references) == 0
+        and len(completed_todo_entries) == 0
+        and len(inconsistent_entries) == 0
+    )
+
+    return GovernanceSyncCheckResult(
+        synchronized=synchronized,
+        stale_references=tuple(stale_references),
+        completed_todo_entries=tuple(completed_todo_entries),
+        inconsistent_entries=tuple(inconsistent_entries),
+        governance_drift_warnings=tuple(governance_drift_warnings),
+        advisory=GOVERNANCE_SYNC_CHECK_ADVISORY,
+    )
