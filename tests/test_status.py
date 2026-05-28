@@ -12,6 +12,7 @@ from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
+    ROADMAP_RECOMMENDATION_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
@@ -31,6 +32,7 @@ from pcae.core.status import (
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
+    recommend_next_roadmap_phase,
     validate_runtime_snapshot_restore_safety,
 )
 
@@ -249,6 +251,133 @@ def test_cli_governance_repair_json(tmp_path: Path, monkeypatch, capsys) -> None
     assert data["proposed_repairs"] == []
     assert data["safety_notes"]
     assert data["advisory"] == GOVERNANCE_REPAIR_ADVISORY
+
+
+def _setup_roadmap_recommendation_repo(tmp_path: Path) -> None:
+    from pcae.commands.init import init_harness
+
+    initialize_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        "Phase 36A: Governed roadmap recommendation.\n\n"
+        "## Current State\n\n"
+        "PCAE can recommend the next governed roadmap phase.\n\n"
+        "## Next\n\n"
+        "- Continue governed roadmap work.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n"
+        "## Pending\n\n"
+        "- Implement `pcae orchestration select`: given a task type, return the recommended agent from policy.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# DONE\n\n- Added previous governed roadmap work.\n",
+        encoding="utf-8",
+    )
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260527-1200-test.md").write_text(
+        "# Task Contract\n\n"
+        "## Task ID\n\n20260527-1200-test\n\n"
+        "## Title\n\nTest task\n\n"
+        "## Status\n\nactive\n\n"
+        "## Mode\n\nimplementation\n\n"
+        "## Goal\n\nImplement governed roadmap recommendations.\n",
+        encoding="utf-8",
+    )
+    pcae_dir = tmp_path / ".pcae"
+    (pcae_dir / "session.json").write_text(
+        json.dumps(
+            {
+                "active_task": {"id": "20260527-1200-test", "title": "Test task"},
+                "current_objective": "Implement governed roadmap recommendations.",
+                "next_recommended_step": "Run validation.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (pcae_dir / "provenance-history.json").write_text("[]\n", encoding="utf-8")
+    commit_governance_baseline(tmp_path)
+
+
+def test_roadmap_next_recommendation_ready_uses_first_pending_todo(
+    tmp_path: Path,
+) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
+    assert result.recommendation_status == "ready"
+    assert result.recommended_phase.startswith("Implement `pcae orchestration select`")
+    assert result.blockers == ()
+
+
+def test_roadmap_next_recommendation_advisory(tmp_path: Path) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
+    assert result.advisory == ROADMAP_RECOMMENDATION_ADVISORY
+
+
+def test_roadmap_next_recommendation_to_dict_shape(tmp_path: Path) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    data = recommend_next_roadmap_phase(HarnessPath(tmp_path)).to_dict()
+    assert set(data) == {
+        "recommendation_status",
+        "recommended_phase",
+        "rationale",
+        "readiness_factors",
+        "blockers",
+        "advisory",
+    }
+    assert isinstance(data["readiness_factors"], list)
+    assert isinstance(data["blockers"], list)
+
+
+def test_cli_roadmap_next_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["roadmap", "next"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governed roadmap recommendation" in output
+    assert "Recommendation status: ready" in output
+    assert "Top recommended next phase:" in output
+    assert "Readiness factors:" in output
+    assert "Blockers:" in output
+    assert ROADMAP_RECOMMENDATION_ADVISORY in output
+
+
+def test_cli_roadmap_next_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["roadmap", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["recommendation_status"] == "ready"
+    assert data["recommended_phase"].startswith("Implement `pcae orchestration select`")
+    assert data["blockers"] == []
+    assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
+
+
+def test_cli_roadmap_next_does_not_modify_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _setup_roadmap_recommendation_repo(tmp_path)
+    watched = [
+        tmp_path / "PROJECT_STATUS.md",
+        tmp_path / "tasks" / "TODO.md",
+        tmp_path / "tasks" / "DONE.md",
+        tmp_path / ".pcae" / "session.json",
+        tmp_path / ".pcae" / "provenance-history.json",
+    ]
+    before = {path: path.read_text(encoding="utf-8") for path in watched}
+    monkeypatch.chdir(tmp_path)
+    assert main(["roadmap", "next"]) == 0
+    capsys.readouterr()
+    after = {path: path.read_text(encoding="utf-8") for path in watched}
+    assert after == before
 
 
 def test_runtime_snapshot_preview_includes_governed_runtime_sections(

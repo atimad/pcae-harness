@@ -84,6 +84,7 @@ from pcae.commands.status import (
     run_runtime_snapshot_retention,
     run_runtime_snapshot_restore,
     run_runtime_snapshot_validate_restore,
+    run_roadmap_next,
     run_status_coherence,
 )
 from pcae.commands.hooks import run_hooks_install
@@ -457,6 +458,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON coherence output.",
     )
     status_coherence_parser.set_defaults(handler=run_status_coherence)
+
+    roadmap_parser = subparsers.add_parser(
+        "roadmap",
+        help="Preview governed roadmap recommendations.",
+    )
+    roadmap_subparsers = roadmap_parser.add_subparsers(
+        dest="roadmap_command",
+        required=True,
+    )
+    roadmap_next_parser = roadmap_subparsers.add_parser(
+        "next",
+        help="Recommend the next governed phase without modifying state.",
+    )
+    roadmap_next_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON roadmap recommendation output.",
+    )
+    roadmap_next_parser.set_defaults(handler=run_roadmap_next)
 
     governance_parser = subparsers.add_parser(
         "governance",

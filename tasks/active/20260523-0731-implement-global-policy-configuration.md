@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Add architecture overview generation.
+Implement governed roadmap recommendation.
 
 ## Allowed Files
 

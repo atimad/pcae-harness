@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35S: Governance artifact classification registry.
+Phase 36A: Governed roadmap recommendation.
 
 ## Governance Coherence Note
 
@@ -15,7 +15,11 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
-PCAE can preview and refresh adoption with init options, generate command,
+PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
+and `pcae roadmap next --json`, using governance audit, health, active task,
+TODO/DONE, project status, continuity, and orchestration readiness signals
+while keeping recommendations advisory and non-mutating, preview and refresh
+adoption with init options, generate command,
 architecture, and glossary documentation, generate, inspect, detect drift in,
 preview repair for, and repair GitHub Actions governance CI workflows, inspect
 repo readiness in human-readable or JSON form, report governance health and

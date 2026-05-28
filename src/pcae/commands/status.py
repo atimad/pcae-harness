@@ -11,6 +11,7 @@ from pcae.core.status import (
     GOVERNANCE_SYNC_REPAIR_ADVISORY,
     REGISTRY_AUDIT_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
+    ROADMAP_RECOMMENDATION_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
@@ -32,6 +33,7 @@ from pcae.core.status import (
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
+    recommend_next_roadmap_phase,
     validate_runtime_snapshot_restore_safety,
 )
 
@@ -140,6 +142,28 @@ def run_governance_repair(args: argparse.Namespace) -> int:
         for note in result.safety_notes:
             print(f"  - {note}")
         print(result.advisory)
+    return 0
+
+
+def run_roadmap_next(args: argparse.Namespace) -> int:
+    result = recommend_next_roadmap_phase(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governed roadmap recommendation")
+        print(f"Recommendation status: {result.recommendation_status}")
+        print(f"Top recommended next phase: {result.recommended_phase}")
+        print(f"Rationale: {result.rationale}")
+        print("Readiness factors:")
+        for factor in result.readiness_factors:
+            print(f"  - {factor}")
+        print("Blockers:")
+        if result.blockers:
+            for blocker in result.blockers:
+                print(f"  - {blocker}")
+        else:
+            print("  - none")
+        print(ROADMAP_RECOMMENDATION_ADVISORY)
     return 0
 
 

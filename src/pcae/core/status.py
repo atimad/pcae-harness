@@ -12,6 +12,7 @@ from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import run_checks
 from pcae.core.git_status import read_git_changes
 from pcae.core.health import build_health_data, session_continuity_status
+from pcae.core.orchestration import build_workflow_readiness
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.provenance import (
@@ -41,6 +42,9 @@ KNOWN_STALE_PHRASES: tuple[str, ...] = (
 
 GOVERNANCE_REPAIR_ADVISORY = (
     "Repair planning is advisory; the user remains authoritative."
+)
+ROADMAP_RECOMMENDATION_ADVISORY = (
+    "Recommendations are non-binding. The human user remains authoritative."
 )
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
@@ -571,6 +575,154 @@ def plan_governance_repairs(root: HarnessPath) -> GovernanceRepairPlan:
             "No semantic AI analysis, remote sync, dashboards, or database writes are used.",
         ),
         advisory=GOVERNANCE_REPAIR_ADVISORY,
+    )
+
+
+@dataclass(frozen=True)
+class RoadmapRecommendation:
+    recommendation_status: str
+    recommended_phase: str
+    rationale: str
+    readiness_factors: tuple[str, ...]
+    blockers: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "recommendation_status": self.recommendation_status,
+            "recommended_phase": self.recommended_phase,
+            "rationale": self.rationale,
+            "readiness_factors": list(self.readiness_factors),
+            "blockers": list(self.blockers),
+            "advisory": self.advisory,
+        }
+
+
+def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
+    """Return deterministic read-only advice for the next governed phase."""
+    audit = audit_governance_coherence(root)
+    health = build_health_data(root)
+    check_result = run_checks(root)
+    active_task = find_latest_active_task(root)
+    sync = check_governance_sync(root)
+    orchestration = build_workflow_readiness(root, "implementation")
+
+    current_phase = _read_current_project_phase(root)
+    current_phase_label = current_phase.rstrip(".") if current_phase else "unknown"
+    pending_todos = _read_pending_todo_items(root)
+    done_count = _read_done_entry_count(root)
+    continuity = session_continuity_status(check_result)
+
+    readiness_factors = [
+        f"Governance audit status: {audit.summary.status}.",
+        f"Health status: {health['overall_status']}.",
+        (
+            f"Active task: {active_task.task_id} ({active_task.status})."
+            if active_task is not None
+            else "Active task: none."
+        ),
+        f"Pending TODO items: {len(pending_todos)}.",
+        f"Recorded DONE entries: {done_count}.",
+        f"Project phase: {current_phase_label}.",
+        f"Session continuity: {continuity}.",
+        (
+            "Orchestration readiness for implementation workflow: ready."
+            if orchestration["ready"]
+            else "Orchestration readiness for implementation workflow: not ready."
+        ),
+    ]
+
+    blockers: list[str] = []
+    if audit.summary.failed_count:
+        blockers.append("Governance audit has failed checks.")
+    if health["overall_status"] != "healthy":
+        blockers.append(f"Health status is {health['overall_status']}.")
+    if not check_result.passed:
+        blockers.append("PCAE check does not pass.")
+    if active_task is None:
+        blockers.append("No active task is available.")
+    if continuity != "verified":
+        blockers.append(f"Session continuity is {continuity}.")
+    if not orchestration["ready"]:
+        blockers.append("Implementation workflow orchestration readiness is not ready.")
+    if not sync.synchronized:
+        blockers.append("Governance artifacts are out of sync.")
+
+    if blockers:
+        return RoadmapRecommendation(
+            recommendation_status="blocked",
+            recommended_phase="Resolve governance readiness blockers",
+            rationale=(
+                "One or more governance readiness factors must be resolved before "
+                "a next implementation phase is recommended."
+            ),
+            readiness_factors=tuple(readiness_factors),
+            blockers=tuple(blockers),
+            advisory=ROADMAP_RECOMMENDATION_ADVISORY,
+        )
+
+    if pending_todos:
+        recommended = pending_todos[0]
+        rationale = (
+            "Governance is ready; recommending the first pending TODO item "
+            "from the tracked roadmap."
+        )
+    else:
+        recommended = "Define the next human-authored roadmap phase"
+        rationale = (
+            "Governance is ready and no pending TODO item was found; the next "
+            "phase should be selected by the human user."
+        )
+
+    return RoadmapRecommendation(
+        recommendation_status="ready",
+        recommended_phase=recommended,
+        rationale=rationale,
+        readiness_factors=tuple(readiness_factors),
+        blockers=(),
+        advisory=ROADMAP_RECOMMENDATION_ADVISORY,
+    )
+
+
+def _read_current_project_phase(root: HarnessPath) -> str | None:
+    path = root.join(PROJECT_STATUS_RELATIVE_PATH)
+    if not path.is_file():
+        return None
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() != "## Current Phase":
+            continue
+        for candidate in lines[index + 1:]:
+            value = candidate.strip()
+            if value:
+                return value
+    return None
+
+
+def _read_pending_todo_items(root: HarnessPath) -> tuple[str, ...]:
+    path = root.join(Path("tasks") / "TODO.md")
+    if not path.is_file():
+        return ()
+    items: list[str] = []
+    in_pending = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            in_pending = stripped == "## Pending"
+            continue
+        if in_pending and stripped.startswith("- "):
+            items.append(stripped[2:].strip())
+    return tuple(items)
+
+
+def _read_done_entry_count(root: HarnessPath) -> int:
+    path = root.join(Path("tasks") / "DONE.md")
+    if not path.is_file():
+        return 0
+    return sum(
+        1
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip().startswith("- ")
     )
 
 
