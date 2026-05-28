@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35L: Governance artifact synchronization validation.
+Phase 35M: Governance audit includes artifact synchronization drift.
 
 ## Governance Coherence Note
 
@@ -263,7 +263,18 @@ JSON output includes `synchronized`, `stale_references`,
 and `advisory`; the advisory "Synchronization analysis is advisory; no
 governance artifacts are modified." is included; the command does not mutate
 artifacts, auto-repair TODO.md, rewrite PROJECT_STATUS.md, or modify
-CHANGELOG.md.
+CHANGELOG.md, and `pcae governance audit` and `pcae governance audit --json`
+now include an `artifact_sync_drift` check that runs sync-check analysis
+internally, passing with a success message when artifacts are synchronized and
+passing with an advisory message when drift issues are present (drift surfaces
+as audit warnings via `find_artifact_sync_drift_warnings`, not as failures),
+reporting completed TODO entries still listed as pending and inconsistent
+roadmap entries as non-blocking warnings while stale references continue on
+the existing path without double-counting; adding `artifact_sync_drift` to
+`_GOVERNANCE_AUDIT_KNOWN_CHECKS` closes the gap that `pcae governance
+sync-check` previously reported; the audit remains read-only: no artifacts
+are mutated, no TODO entries are removed, and no governance files are
+rewritten.
 
 ## Next
 

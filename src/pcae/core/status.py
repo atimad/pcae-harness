@@ -533,8 +533,11 @@ def audit_governance_coherence(root: HarnessPath) -> GovernanceAuditResult:
         check_provenance_history_exists(root),
         check_policy_parses(root),
         check_agent_registry_non_empty(root),
+        check_artifact_sync_drift(root),
     ]
-    warnings = find_stale_roadmap_references(root)
+    warnings = (
+        find_stale_roadmap_references(root) + find_artifact_sync_drift_warnings(root)
+    )
     passed_count = sum(1 for check in checks if check.passed)
     failed_count = len(checks) - passed_count
     status = "valid" if failed_count == 0 and len(warnings) == 0 else "warnings"
@@ -1803,6 +1806,7 @@ _GOVERNANCE_AUDIT_KNOWN_CHECKS: frozenset[str] = frozenset({
     "provenance_history",
     "policy_configuration",
     "agent_registry",
+    "artifact_sync_drift",  # added in Phase 35M
 })
 
 # Capability checks that SHOULD exist in the audit but do not (yet).
@@ -1888,6 +1892,54 @@ def _stale_references_across_artifacts(
                     f"{rel_path.as_posix()}: stale reference: {phrase!r}"
                 )
     return found
+
+
+def check_artifact_sync_drift(root: HarnessPath) -> GovernanceAuditCheck:
+    """Return an audit check for governance artifact synchronization drift.
+
+    Covers completed-TODO and inconsistent-roadmap issues only.  Stale
+    KNOWN_STALE_PHRASES are already surfaced by find_stale_roadmap_references
+    and are intentionally excluded here to avoid double-counting.
+    """
+    sync = check_governance_sync(root)
+    issue_count = len(sync.completed_todo_entries) + len(sync.inconsistent_entries)
+    if issue_count == 0:
+        return GovernanceAuditCheck(
+            name="artifact_sync_drift",
+            passed=True,
+            message="Governance artifacts are synchronized; no artifact drift detected.",
+        )
+    return GovernanceAuditCheck(
+        name="artifact_sync_drift",
+        passed=True,  # check ran successfully; issues are surfaced as warnings
+        message=(
+            f"Artifact sync drift detected: {issue_count} issue(s);"
+            " see audit warnings for details."
+        ),
+    )
+
+
+def find_artifact_sync_drift_warnings(
+    root: HarnessPath,
+) -> tuple[CoherenceWarning, ...]:
+    """Return CoherenceWarning items for completed-TODO and inconsistent-roadmap drift.
+
+    Stale KNOWN_STALE_PHRASES are excluded; they are already covered by
+    find_stale_roadmap_references.
+    """
+    sync = check_governance_sync(root)
+    warnings: list[CoherenceWarning] = []
+    for entry in sync.completed_todo_entries:
+        warnings.append(CoherenceWarning(
+            document="tasks/TODO.md",
+            message=f"Completed TODO entry still listed as pending: {entry!r}",
+        ))
+    for entry in sync.inconsistent_entries:
+        warnings.append(CoherenceWarning(
+            document="PROJECT_STATUS.md",
+            message=entry,
+        ))
+    return tuple(warnings)
 
 
 def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
