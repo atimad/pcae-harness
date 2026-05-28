@@ -6,11 +6,13 @@ from pathlib import Path
 
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
+    CONTINUITY_MANIFEST_ADVISORY,
     CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
     CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE,
     CONTINUITY_PACK_INCLUDED_SECTIONS,
     analyze_continuity_pack_compatibility,
     build_context_pack,
+    build_continuity_manifest,
     build_continuity_pack,
     export_context_pack,
     export_continuity_pack,
@@ -274,4 +276,44 @@ def run_continuity_compatibility(args: argparse.Namespace) -> int:
         print("  Continuity packs are portable, governance-complete, vendor-neutral exports.")
         print("  Compatibility analysis is read-only; no runtime state is changed.")
         print(CONTINUITY_PACK_COMPATIBILITY_ADVISORY)
+    return 0
+
+
+def run_continuity_manifest(args: argparse.Namespace) -> int:
+    result = build_continuity_manifest(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Continuity pack manifest")
+        print(f"Pack count: {result.pack_count}")
+        latest = result.latest_pack
+        latest_text = "none" if latest is None else latest["filename"]
+        print(f"Latest continuity pack: {latest_text}")
+        print("Manifest entries:")
+        if result.manifest_entries:
+            for entry in result.manifest_entries:
+                at_label = entry.active_task_id or "none"
+                print(
+                    f"  - {entry.filename}: "
+                    f"exported_at={entry.exported_at}, "
+                    f"profile={entry.profile_type}, "
+                    f"task={at_label}, "
+                    f"compatibility={entry.compatibility_status}, "
+                    f"support={entry.support_level}, "
+                    f"vendor_neutral={entry.vendor_neutral}, "
+                    f"stale_ctx={entry.stale_context_suppression_present}, "
+                    f"bootstrap={entry.compact_bootstrap_present}"
+                )
+        else:
+            print("  - none")
+        print("Compatibility summary:")
+        for key in (
+            "compatible",
+            "incompatible",
+            "supported",
+            "partially-supported",
+            "unsupported",
+        ):
+            print(f"  - {key}: {result.compatibility_summary[key]}")
+        print(CONTINUITY_MANIFEST_ADVISORY)
     return 0

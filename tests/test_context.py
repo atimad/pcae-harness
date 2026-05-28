@@ -2966,3 +2966,447 @@ def test_cli_continuity_compatibility_is_read_only(
     main(["continuity", "compatibility", str(pack_path)])
     assert pack_path.stat().st_mtime == mtime_before
     assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()
+
+
+# ---------------------------------------------------------------------------
+# Phase 35J: Continuity pack manifest indexing
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    CONTINUITY_MANIFEST_ADVISORY,
+    ContinuityManifest,
+    ContinuityManifestEntry,
+    build_continuity_manifest,
+)
+
+
+def _export_n_packs(
+    tmp_path: Path, n: int, profile_name: str | None = None
+) -> list[Path]:
+    """Export n continuity packs with distinct timestamps; return paths newest-first."""
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(profile_name)
+    paths: list[Path] = []
+    for i in range(n):
+        ts = datetime(2026, 5, 28, 10, i, 0, tzinfo=timezone.utc)
+        pack = build_continuity_pack(root, profile, exported_at=ts)
+        relative_path, _ = export_continuity_pack(root, pack)
+        paths.append(tmp_path / relative_path)
+    return list(reversed(paths))  # newest-first
+
+
+# ---------------------------------------------------------------------------
+# Core: build_continuity_manifest — empty directory
+# ---------------------------------------------------------------------------
+
+
+def test_build_continuity_manifest_empty_returns_manifest(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert isinstance(result, ContinuityManifest)
+
+
+def test_build_continuity_manifest_empty_no_packs_dir(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.pack_count == 0
+    assert result.latest_pack is None
+    assert result.manifest_entries == ()
+
+
+def test_build_continuity_manifest_empty_summary_zeros(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    for key in ("compatible", "incompatible", "supported", "partially-supported", "unsupported"):
+        assert result.compatibility_summary[key] == 0
+
+
+def test_build_continuity_manifest_empty_advisory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.advisory == CONTINUITY_MANIFEST_ADVISORY
+
+
+# ---------------------------------------------------------------------------
+# Core: build_continuity_manifest — with packs
+# ---------------------------------------------------------------------------
+
+
+def test_build_continuity_manifest_pack_count(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.pack_count == 3
+
+
+def test_build_continuity_manifest_returns_manifest_entries(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert len(result.manifest_entries) == 2
+    for entry in result.manifest_entries:
+        assert isinstance(entry, ContinuityManifestEntry)
+
+
+def test_build_continuity_manifest_entry_fields(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    entry = result.manifest_entries[0]
+    assert entry.filename.startswith("continuity-pack-")
+    assert entry.filename.endswith(".json")
+    assert isinstance(entry.exported_at, str)
+    assert entry.profile_type == PROFILE_UNIVERSAL
+    assert entry.compatibility_status == "compatible"
+    assert entry.support_level == "supported"
+    assert entry.vendor_neutral is True
+    assert entry.stale_context_suppression_present is True
+    assert entry.compact_bootstrap_present is True
+
+
+def test_build_continuity_manifest_entry_active_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.manifest_entries[0].active_task_id == "20260527-1200-test"
+
+
+def test_build_continuity_manifest_entry_no_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path, include_task=False)
+    _export_n_packs(tmp_path, 1)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.manifest_entries[0].active_task_id is None
+
+
+def test_build_continuity_manifest_latest_pack_is_newest(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.latest_pack is not None
+    latest_filename = result.latest_pack["filename"]
+    assert latest_filename == result.manifest_entries[0].filename
+
+
+def test_build_continuity_manifest_sorted_newest_first(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    exported_ats = [
+        e.exported_at for e in result.manifest_entries
+        if isinstance(e.exported_at, str)
+    ]
+    assert exported_ats == sorted(exported_ats, reverse=True)
+
+
+def test_build_continuity_manifest_ordering_is_deterministic(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result1 = build_continuity_manifest(HarnessPath(tmp_path))
+    result2 = build_continuity_manifest(HarnessPath(tmp_path))
+    assert [e.filename for e in result1.manifest_entries] == [
+        e.filename for e in result2.manifest_entries
+    ]
+
+
+def test_build_continuity_manifest_compatibility_summary_counts(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    cs = result.compatibility_summary
+    assert cs["compatible"] == 2
+    assert cs["incompatible"] == 0
+    assert cs["supported"] == 2
+    assert cs["partially-supported"] == 0
+    assert cs["unsupported"] == 0
+
+
+def test_build_continuity_manifest_incompatible_entry_counted(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    # inject a broken pack
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    broken = packs_dir / "continuity-pack-20260101-000000.json"
+    broken.write_text('{"only": "key"}', encoding="utf-8")
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.pack_count == 2
+    incompatible = [e for e in result.manifest_entries if e.compatibility_status == "incompatible"]
+    assert len(incompatible) == 1
+
+
+def test_build_continuity_manifest_profile_implementation(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1, profile_name=PROFILE_IMPLEMENTATION)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    assert result.manifest_entries[0].profile_type == PROFILE_IMPLEMENTATION
+
+
+def test_build_continuity_manifest_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert "pack_count" in d
+    assert "latest_pack" in d
+    assert "manifest_entries" in d
+    assert "compatibility_summary" in d
+    assert "advisory" in d
+
+
+def test_build_continuity_manifest_entry_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    result = build_continuity_manifest(HarnessPath(tmp_path))
+    d = result.manifest_entries[0].to_dict()
+    for key in (
+        "filename",
+        "exported_at",
+        "profile_type",
+        "governance_health",
+        "governance_check",
+        "active_task_id",
+        "compatibility_status",
+        "support_level",
+        "vendor_neutral",
+        "stale_context_suppression_present",
+        "compact_bootstrap_present",
+    ):
+        assert key in d, f"missing key: {key}"
+
+
+def test_build_continuity_manifest_is_read_only(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    paths = _export_n_packs(tmp_path, 2)
+    mtimes = {p: p.stat().st_mtime for p in paths}
+    build_continuity_manifest(HarnessPath(tmp_path))
+    for p, mtime in mtimes.items():
+        assert p.stat().st_mtime == mtime
+    assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity manifest
+# ---------------------------------------------------------------------------
+
+
+def test_cli_continuity_manifest_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "manifest"])
+    assert result == 0
+
+
+def test_cli_continuity_manifest_prints_pack_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert "Pack count:" in captured.out
+    assert "2" in captured.out
+
+
+def test_cli_continuity_manifest_prints_latest_pack(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert "Latest continuity pack:" in captured.out
+    assert "continuity-pack-" in captured.out
+
+
+def test_cli_continuity_manifest_no_packs_prints_none(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert "Pack count: 0" in captured.out
+    assert "none" in captured.out.lower()
+
+
+def test_cli_continuity_manifest_prints_manifest_entries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert "Manifest entries:" in captured.out
+    assert "compatibility=" in captured.out
+    assert "vendor_neutral=" in captured.out
+    assert "bootstrap=" in captured.out
+
+
+def test_cli_continuity_manifest_prints_compatibility_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert "Compatibility summary:" in captured.out
+    assert "compatible:" in captured.out
+    assert "supported:" in captured.out
+
+
+def test_cli_continuity_manifest_prints_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest"])
+    captured = capsys.readouterr()
+    assert CONTINUITY_MANIFEST_ADVISORY in captured.out
+
+
+def test_cli_continuity_manifest_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "manifest", "--json"])
+    assert result == 0
+
+
+def test_cli_continuity_manifest_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_continuity_manifest_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "pack_count" in data
+    assert "latest_pack" in data
+    assert "manifest_entries" in data
+    assert "compatibility_summary" in data
+    assert "advisory" in data
+
+
+def test_cli_continuity_manifest_json_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["pack_count"] == 0
+    assert data["latest_pack"] is None
+    assert data["manifest_entries"] == []
+
+
+def test_cli_continuity_manifest_json_with_packs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["pack_count"] == 2
+    assert data["latest_pack"] is not None
+    assert len(data["manifest_entries"]) == 2
+
+
+def test_cli_continuity_manifest_json_entry_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    entry = data["manifest_entries"][0]
+    for key in (
+        "filename",
+        "exported_at",
+        "profile_type",
+        "governance_health",
+        "governance_check",
+        "active_task_id",
+        "compatibility_status",
+        "support_level",
+        "vendor_neutral",
+        "stale_context_suppression_present",
+        "compact_bootstrap_present",
+    ):
+        assert key in entry, f"missing entry key: {key}"
+
+
+def test_cli_continuity_manifest_json_newest_first(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    exported_ats = [e["exported_at"] for e in data["manifest_entries"]]
+    assert exported_ats == sorted(exported_ats, reverse=True)
+
+
+def test_cli_continuity_manifest_json_compatibility_summary_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 1)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    cs = data["compatibility_summary"]
+    for key in ("compatible", "incompatible", "supported", "partially-supported", "unsupported"):
+        assert key in cs
+
+
+def test_cli_continuity_manifest_json_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "manifest", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["advisory"] == CONTINUITY_MANIFEST_ADVISORY
+
+
+def test_cli_continuity_manifest_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    paths = _export_n_packs(tmp_path, 2)
+    mtimes = {p: p.stat().st_mtime for p in paths}
+    main(["continuity", "manifest"])
+    for p, mtime in mtimes.items():
+        assert p.stat().st_mtime == mtime
+    assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()

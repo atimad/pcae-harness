@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35I: Governed continuity compatibility analysis.
+Phase 35J: Governed continuity pack manifest indexing.
 
 ## Governance Coherence Note
 
@@ -228,7 +228,17 @@ pack is compatible with the current PCAE runtime, reporting support level
 warnings, governance continuity summary, portability summary, and the advisory
 "Continuity compatibility analysis is advisory; no runtime state is changed."
 without mutating continuity packs, restoring runtime state, or modifying
-governance artifacts.
+governance artifacts, and exported continuity packs can be indexed
+deterministically with `pcae continuity manifest` and
+`pcae continuity manifest --json`, scanning `.pcae/continuity-packs/` to
+report pack count, latest pack, deterministic manifest entries (sorted
+newest-first by exported_at), and compatibility summary counts; each manifest
+entry includes filename, exported_at, profile_type, governance_health,
+governance_check, active_task_id, compatibility_status, support_level,
+vendor_neutral, stale_context_suppression_present, and compact_bootstrap_present;
+the advisory "Continuity manifests are advisory; the user remains authoritative."
+is included; the command does not mutate continuity packs, prune packs,
+restore runtime state, or modify governance artifacts.
 
 ## Next
 

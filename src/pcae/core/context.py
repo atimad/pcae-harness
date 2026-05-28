@@ -854,3 +854,162 @@ def analyze_continuity_pack_compatibility(path: Path) -> ContinuityCompatibility
         continuity_summary=continuity_summary,
         advisory=CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
     )
+
+
+# ---------------------------------------------------------------------------
+# Continuity pack manifest
+# ---------------------------------------------------------------------------
+
+CONTINUITY_MANIFEST_ADVISORY = (
+    "Continuity manifests are advisory; the user remains authoritative."
+)
+
+
+def _reverse_text_sort_key(value: str) -> str:
+    return "".join(chr(0x10FFFF - ord(ch)) for ch in value)
+
+
+@dataclass(frozen=True)
+class ContinuityManifestEntry:
+    filename: str
+    exported_at: object
+    profile_type: object
+    governance_health: object
+    governance_check: object
+    active_task_id: object
+    compatibility_status: str
+    support_level: str
+    vendor_neutral: bool
+    stale_context_suppression_present: bool
+    compact_bootstrap_present: bool
+
+    def to_dict(self) -> dict:
+        return {
+            "active_task_id": self.active_task_id,
+            "compact_bootstrap_present": self.compact_bootstrap_present,
+            "compatibility_status": self.compatibility_status,
+            "exported_at": self.exported_at,
+            "filename": self.filename,
+            "governance_check": self.governance_check,
+            "governance_health": self.governance_health,
+            "profile_type": self.profile_type,
+            "stale_context_suppression_present": self.stale_context_suppression_present,
+            "support_level": self.support_level,
+            "vendor_neutral": self.vendor_neutral,
+        }
+
+
+@dataclass(frozen=True)
+class ContinuityManifest:
+    pack_count: int
+    latest_pack: dict | None
+    manifest_entries: tuple[ContinuityManifestEntry, ...]
+    compatibility_summary: dict
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "compatibility_summary": self.compatibility_summary,
+            "latest_pack": self.latest_pack,
+            "manifest_entries": [e.to_dict() for e in self.manifest_entries],
+            "pack_count": self.pack_count,
+        }
+
+
+def _continuity_manifest_entry_sort_key(
+    entry: ContinuityManifestEntry,
+) -> tuple[int, str, str]:
+    exported_at = entry.exported_at if isinstance(entry.exported_at, str) else ""
+    missing = 0 if exported_at else 1
+    return (missing, _reverse_text_sort_key(exported_at), entry.filename)
+
+
+def _continuity_manifest_entry(path: Path) -> ContinuityManifestEntry:
+    filename = path.name
+    try:
+        compat = analyze_continuity_pack_compatibility(path)
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError):
+        return ContinuityManifestEntry(
+            filename=filename,
+            exported_at=None,
+            profile_type=None,
+            governance_health=None,
+            governance_check=None,
+            active_task_id=None,
+            compatibility_status="incompatible",
+            support_level="unsupported",
+            vendor_neutral=False,
+            stale_context_suppression_present=False,
+            compact_bootstrap_present=False,
+        )
+    gs = data.get("governance_state") or {}
+    at = data.get("active_task_summary")
+    return ContinuityManifestEntry(
+        filename=filename,
+        exported_at=data.get("exported_at"),
+        profile_type=data.get("profile_type"),
+        governance_health=gs.get("health_status") if isinstance(gs, dict) else None,
+        governance_check=gs.get("check_status") if isinstance(gs, dict) else None,
+        active_task_id=at.get("id") if isinstance(at, dict) else None,
+        compatibility_status="compatible" if compat.compatible else "incompatible",
+        support_level=compat.support_level,
+        vendor_neutral=bool(data.get("vendor_neutral_note")),
+        stale_context_suppression_present=bool(
+            data.get("stale_context_suppression_rules")
+        ),
+        compact_bootstrap_present=bool(data.get("compact_bootstrap_prompt")),
+    )
+
+
+def _continuity_manifest_summary(
+    entries: tuple[ContinuityManifestEntry, ...],
+) -> dict:
+    summary: dict[str, int] = {
+        "compatible": 0,
+        "incompatible": 0,
+        "partially-supported": 0,
+        "supported": 0,
+        "unsupported": 0,
+    }
+    for entry in entries:
+        if entry.compatibility_status == "compatible":
+            summary["compatible"] += 1
+        else:
+            summary["incompatible"] += 1
+        if entry.support_level in summary:
+            summary[entry.support_level] += 1
+    return summary
+
+
+def build_continuity_manifest(root: HarnessPath) -> ContinuityManifest:
+    """Return a deterministic read-only index of exported continuity packs."""
+    packs_dir = root.join(CONTINUITY_PACK_RELATIVE_DIR)
+    if not packs_dir.is_dir():
+        entries: tuple[ContinuityManifestEntry, ...] = ()
+        return ContinuityManifest(
+            pack_count=0,
+            latest_pack=None,
+            manifest_entries=entries,
+            compatibility_summary=_continuity_manifest_summary(entries),
+            advisory=CONTINUITY_MANIFEST_ADVISORY,
+        )
+    entries = tuple(
+        sorted(
+            (
+                _continuity_manifest_entry(path)
+                for path in packs_dir.iterdir()
+                if path.is_file() and path.suffix == ".json"
+            ),
+            key=_continuity_manifest_entry_sort_key,
+        )
+    )
+    latest = entries[0].to_dict() if entries else None
+    return ContinuityManifest(
+        pack_count=len(entries),
+        latest_pack=latest,
+        manifest_entries=entries,
+        compatibility_summary=_continuity_manifest_summary(entries),
+        advisory=CONTINUITY_MANIFEST_ADVISORY,
+    )
