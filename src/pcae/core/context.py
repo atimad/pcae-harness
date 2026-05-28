@@ -467,3 +467,138 @@ def export_continuity_pack(
         json.dump(continuity_pack.to_dict(), fh, indent=2, sort_keys=True)
         fh.write("\n")
     return relative_path, continuity_pack.exported_at
+
+
+# ---------------------------------------------------------------------------
+# Continuity pack inspection
+# ---------------------------------------------------------------------------
+
+CONTINUITY_PACK_INSPECTION_ADVISORY = (
+    "Continuity pack inspection is advisory; no runtime state is changed."
+)
+
+CONTINUITY_PACK_REQUIRED_KEYS: tuple[str, ...] = (
+    "exported_at",
+    "profile_type",
+    "active_task_summary",
+    "governance_state",
+    "orchestration_state",
+    "provenance_summary",
+    "runtime_snapshot_metadata",
+    "compact_context_pack",
+    "compact_bootstrap_prompt",
+    "operational_rules",
+    "validation_commands",
+    "stale_context_suppression_rules",
+    "vendor_neutral_note",
+    "bootstrap_continuity",
+)
+
+
+@dataclass(frozen=True)
+class ContinuityPackInspection:
+    valid: bool
+    exported_at: str
+    profile_type: str
+    included_sections: tuple[str, ...]
+    continuity_summary: dict
+    portability_notes: tuple[str, ...]
+    safety_notes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "continuity_summary": self.continuity_summary,
+            "exported_at": self.exported_at,
+            "included_sections": list(self.included_sections),
+            "portability_notes": list(self.portability_notes),
+            "profile_type": self.profile_type,
+            "safety_notes": list(self.safety_notes),
+            "valid": self.valid,
+        }
+
+
+def inspect_continuity_pack(path: Path) -> ContinuityPackInspection:
+    """Read and inspect a continuity pack file. Raises ValueError for invalid packs."""
+    if not path.is_file():
+        raise ValueError(f"Continuity pack not found: {path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid continuity pack JSON: {exc.msg}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("Invalid continuity pack: top-level JSON value must be an object.")
+
+    missing = [key for key in CONTINUITY_PACK_REQUIRED_KEYS if key not in data]
+    if missing:
+        raise ValueError(
+            f"Invalid continuity pack: missing required field(s): {', '.join(missing)}."
+        )
+
+    exported_at = data["exported_at"]
+    if not isinstance(exported_at, str) or not exported_at:
+        raise ValueError("Invalid continuity pack: exported_at must be a non-empty string.")
+    profile_type = data["profile_type"]
+    if not isinstance(profile_type, str) or not profile_type:
+        raise ValueError("Invalid continuity pack: profile_type must be a non-empty string.")
+
+    gs = data.get("governance_state") or {}
+    os_ = data.get("orchestration_state") or {}
+    ps = data.get("provenance_summary") or {}
+    at = data.get("active_task_summary")
+
+    included_sections = []
+    for section in CONTINUITY_PACK_INCLUDED_SECTIONS:
+        key = section.replace(" ", "_").replace("-", "_")
+        # map canonical section names to JSON keys
+        _section_key_map = {
+            "active task summary": "active_task_summary",
+            "governance state": "governance_state",
+            "orchestration state": "orchestration_state",
+            "provenance summary": "provenance_summary",
+            "runtime snapshot metadata": "runtime_snapshot_metadata",
+            "compact context pack": "compact_context_pack",
+            "compact bootstrap prompt": "compact_bootstrap_prompt",
+            "operational rules": "operational_rules",
+            "validation commands": "validation_commands",
+            "stale-context suppression rules": "stale_context_suppression_rules",
+            "bootstrap continuity": "bootstrap_continuity",
+            "vendor-neutral note": "vendor_neutral_note",
+        }
+        json_key = _section_key_map.get(section, key)
+        if json_key in data and data[json_key] is not None:
+            included_sections.append(section)
+
+    continuity_summary = {
+        "active_task": at,
+        "compact_bootstrap_prompt_present": bool(data.get("compact_bootstrap_prompt")),
+        "compact_context_pack_present": bool(data.get("compact_context_pack")),
+        "governance_check": gs.get("check_status"),
+        "governance_health": gs.get("health_status"),
+        "orchestration_default_agent": os_.get("default_agent"),
+        "provenance_event_count": ps.get("event_count"),
+        "stale_context_suppression_present": bool(
+            data.get("stale_context_suppression_rules")
+        ),
+        "vendor_neutral_note_present": bool(data.get("vendor_neutral_note")),
+    }
+
+    return ContinuityPackInspection(
+        valid=True,
+        exported_at=exported_at,
+        profile_type=profile_type,
+        included_sections=tuple(included_sections),
+        continuity_summary=continuity_summary,
+        portability_notes=(
+            "Continuity pack was read for inspection only; runtime state was not restored.",
+            "Continuity packs are portable, governance-complete, vendor-neutral exports.",
+            "No governance artifacts were modified during inspection.",
+        ),
+        safety_notes=(
+            "Inspection only; no files were written or mutated.",
+            "Runtime state is not restored or changed.",
+            "Continuity packs are read-only exports.",
+        ),
+        advisory=CONTINUITY_PACK_INSPECTION_ADVISORY,
+    )

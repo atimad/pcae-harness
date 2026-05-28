@@ -1952,3 +1952,493 @@ def test_continuity_export_gitignore_contains_continuity_packs() -> None:
     assert gitignore.is_file()
     content = gitignore.read_text(encoding="utf-8")
     assert "continuity-packs/" in content
+
+
+# ---------------------------------------------------------------------------
+# Phase 35H: Continuity pack inspection
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    CONTINUITY_PACK_INSPECTION_ADVISORY,
+    CONTINUITY_PACK_REQUIRED_KEYS,
+    ContinuityPackInspection,
+    inspect_continuity_pack,
+)
+
+
+def _export_pack_for_inspection(tmp_path: Path, profile_name: str | None = None) -> Path:
+    """Helper: export a continuity pack and return its absolute path."""
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(profile_name)
+    ts = datetime(2026, 5, 28, 9, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    return tmp_path / relative_path
+
+
+# ---------------------------------------------------------------------------
+# Core: inspect_continuity_pack — valid pack
+# ---------------------------------------------------------------------------
+
+
+def test_inspect_continuity_pack_returns_inspection(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert isinstance(result, ContinuityPackInspection)
+
+
+def test_inspect_continuity_pack_valid_true(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.valid is True
+
+
+def test_inspect_continuity_pack_exported_at(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.exported_at == datetime(2026, 5, 28, 9, 0, 0, tzinfo=timezone.utc).isoformat()
+
+
+def test_inspect_continuity_pack_profile_type(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path, profile_name=PROFILE_IMPLEMENTATION)
+    result = inspect_continuity_pack(pack_path)
+    assert result.profile_type == PROFILE_IMPLEMENTATION
+
+
+def test_inspect_continuity_pack_included_sections_complete(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    for section in CONTINUITY_PACK_INCLUDED_SECTIONS:
+        assert section in result.included_sections
+
+
+def test_inspect_continuity_pack_continuity_summary_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    cs = result.continuity_summary
+    assert "active_task" in cs
+    assert "governance_health" in cs
+    assert "governance_check" in cs
+    assert "provenance_event_count" in cs
+    assert "orchestration_default_agent" in cs
+    assert "compact_context_pack_present" in cs
+    assert "compact_bootstrap_prompt_present" in cs
+    assert "stale_context_suppression_present" in cs
+    assert "vendor_neutral_note_present" in cs
+
+
+def test_inspect_continuity_pack_active_task_present(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    at = result.continuity_summary["active_task"]
+    assert at is not None
+    assert at["id"] == "20260527-1200-test"
+    assert at["title"] == "Test task"
+
+
+def test_inspect_continuity_pack_active_task_none_when_no_task(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path, include_task=False)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.continuity_summary["active_task"] is None
+
+
+def test_inspect_continuity_pack_compact_presence_flags(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    cs = result.continuity_summary
+    assert cs["compact_context_pack_present"] is True
+    assert cs["compact_bootstrap_prompt_present"] is True
+
+
+def test_inspect_continuity_pack_stale_context_suppression_present(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.continuity_summary["stale_context_suppression_present"] is True
+
+
+def test_inspect_continuity_pack_vendor_neutral_note_present(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.continuity_summary["vendor_neutral_note_present"] is True
+
+
+def test_inspect_continuity_pack_portability_notes(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert len(result.portability_notes) > 0
+    combined = " ".join(result.portability_notes).lower()
+    assert "inspection only" in combined or "read for inspection" in combined
+
+
+def test_inspect_continuity_pack_safety_notes(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert len(result.safety_notes) > 0
+    combined = " ".join(result.safety_notes).lower()
+    assert "runtime state" in combined or "read-only" in combined
+
+
+def test_inspect_continuity_pack_advisory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert result.advisory == CONTINUITY_PACK_INSPECTION_ADVISORY
+
+
+def test_inspect_continuity_pack_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    d = result.to_dict()
+    assert "valid" in d
+    assert "exported_at" in d
+    assert "profile_type" in d
+    assert "included_sections" in d
+    assert "continuity_summary" in d
+    assert "portability_notes" in d
+    assert "safety_notes" in d
+    assert "advisory" in d
+
+
+def test_inspect_continuity_pack_is_read_only(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    mtime_before = pack_path.stat().st_mtime
+    inspect_continuity_pack(pack_path)
+    assert pack_path.stat().st_mtime == mtime_before
+    # No new files created at runtime
+    runtime_snapshots = tmp_path / ".pcae" / "runtime-snapshots"
+    assert not runtime_snapshots.exists()
+
+
+# ---------------------------------------------------------------------------
+# Core: inspect_continuity_pack — error cases
+# ---------------------------------------------------------------------------
+
+
+def test_inspect_continuity_pack_file_not_found_raises() -> None:
+    with pytest.raises(ValueError, match="not found"):
+        inspect_continuity_pack(Path("/nonexistent/continuity-pack.json"))
+
+
+def test_inspect_continuity_pack_invalid_json_raises(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not valid json", encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid continuity pack JSON"):
+        inspect_continuity_pack(bad)
+
+
+def test_inspect_continuity_pack_non_object_json_raises(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text('["a", "b"]', encoding="utf-8")
+    with pytest.raises(ValueError, match="top-level JSON value must be an object"):
+        inspect_continuity_pack(bad)
+
+
+def test_inspect_continuity_pack_missing_keys_raises(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"exported_at": "2026-05-28T00:00:00+00:00"}', encoding="utf-8")
+    with pytest.raises(ValueError, match="missing required field"):
+        inspect_continuity_pack(bad)
+
+
+def test_inspect_continuity_pack_empty_exported_at_raises(tmp_path: Path) -> None:
+    import json as _json
+    data = {k: "placeholder" for k in CONTINUITY_PACK_REQUIRED_KEYS}
+    data["exported_at"] = ""
+    bad = tmp_path / "bad.json"
+    bad.write_text(_json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="exported_at"):
+        inspect_continuity_pack(bad)
+
+
+def test_inspect_continuity_pack_required_keys_constant() -> None:
+    assert "exported_at" in CONTINUITY_PACK_REQUIRED_KEYS
+    assert "profile_type" in CONTINUITY_PACK_REQUIRED_KEYS
+    assert "governance_state" in CONTINUITY_PACK_REQUIRED_KEYS
+    assert "compact_bootstrap_prompt" in CONTINUITY_PACK_REQUIRED_KEYS
+    assert "stale_context_suppression_rules" in CONTINUITY_PACK_REQUIRED_KEYS
+    assert "vendor_neutral_note" in CONTINUITY_PACK_REQUIRED_KEYS
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity inspect
+# ---------------------------------------------------------------------------
+
+
+def test_cli_continuity_inspect_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    result = main(["continuity", "inspect", str(pack_path)])
+    assert result == 0
+
+
+def test_cli_continuity_inspect_prints_validity(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Pack validity:" in captured.out
+    assert "valid" in captured.out
+
+
+def test_cli_continuity_inspect_prints_exported_at(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Exported:" in captured.out
+
+
+def test_cli_continuity_inspect_prints_profile(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Profile:" in captured.out
+    assert PROFILE_UNIVERSAL in captured.out
+
+
+def test_cli_continuity_inspect_prints_included_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Included sections:" in captured.out
+    assert "active task summary" in captured.out
+
+
+def test_cli_continuity_inspect_prints_continuity_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Continuity summary:" in captured.out
+    assert "Governance health:" in captured.out
+    assert "Governance check:" in captured.out
+
+
+def test_cli_continuity_inspect_prints_portability_notes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Portability notes:" in captured.out
+
+
+def test_cli_continuity_inspect_prints_safety_notes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Safety notes:" in captured.out
+
+
+def test_cli_continuity_inspect_prints_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path)])
+    captured = capsys.readouterr()
+    assert CONTINUITY_PACK_INSPECTION_ADVISORY in captured.out
+
+
+def test_cli_continuity_inspect_invalid_path_exits_nonzero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "inspect", "/no/such/file.json"])
+    assert result != 0
+
+
+def test_cli_continuity_inspect_invalid_path_prints_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "inspect", "/no/such/file.json"])
+    captured = capsys.readouterr()
+    assert "not found" in captured.out.lower()
+
+
+def test_cli_continuity_inspect_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    result = main(["continuity", "inspect", str(pack_path), "--json"])
+    assert result == 0
+
+
+def test_cli_continuity_inspect_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_continuity_inspect_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "valid" in data
+    assert "exported_at" in data
+    assert "profile_type" in data
+    assert "included_sections" in data
+    assert "continuity_summary" in data
+    assert "portability_notes" in data
+    assert "safety_notes" in data
+    assert "advisory" in data
+
+
+def test_cli_continuity_inspect_json_valid_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["valid"] is True
+
+
+def test_cli_continuity_inspect_json_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["advisory"] == CONTINUITY_PACK_INSPECTION_ADVISORY
+
+
+def test_cli_continuity_inspect_json_continuity_summary_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    capsys.readouterr()
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    main(["continuity", "inspect", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    cs = data["continuity_summary"]
+    assert "active_task" in cs
+    assert "governance_health" in cs
+    assert "governance_check" in cs
+    assert "compact_bootstrap_prompt_present" in cs
+    assert "stale_context_suppression_present" in cs
+    assert "vendor_neutral_note_present" in cs
+
+
+def test_cli_continuity_inspect_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    mtime_before = pack_path.stat().st_mtime
+    main(["continuity", "inspect", str(pack_path)])
+    assert pack_path.stat().st_mtime == mtime_before
+    # inspect must not create runtime-snapshots as a side effect
+    assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()

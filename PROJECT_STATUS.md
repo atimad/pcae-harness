@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35G: Governed continuity restore packs.
+Phase 35H: Governed continuity pack inspection.
 
 ## Governance Coherence Note
 
@@ -206,7 +206,16 @@ rules, bootstrap continuity notes, and a vendor-neutral note; supports
 exported packs are Git-ignored via `continuity-packs/` in `.pcae/.gitignore`;
 continuity packs are governance-complete, vendor-neutral, portable, and
 read-only exports — no automatic restore, prompt injection, remote sync,
-telemetry, or runtime mutation.
+telemetry, or runtime mutation, and exported continuity packs can be
+inspected read-only with `pcae continuity inspect PATH` and
+`pcae continuity inspect PATH --json`, reporting pack validity, exported
+timestamp, profile type, included sections, continuity summary (active task,
+governance health/check, provenance event count, orchestration default agent,
+compact context pack presence, compact bootstrap prompt presence,
+stale-context suppression presence, vendor-neutral note presence), portability
+notes, safety notes, and the advisory "Continuity pack inspection is advisory;
+no runtime state is changed." without restoring runtime state, mutating
+continuity packs, or modifying governance artifacts.
 
 ## Next
 

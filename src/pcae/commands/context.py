@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
@@ -11,6 +12,7 @@ from pcae.core.context import (
     build_continuity_pack,
     export_context_pack,
     export_continuity_pack,
+    inspect_continuity_pack,
     resolve_profile,
 )
 from pcae.core.paths import HarnessPath
@@ -177,4 +179,54 @@ def run_continuity_export(args: argparse.Namespace) -> int:
             print(f"  - {section}")
         print("Token optimization note: continuity pack is compact by design.")
         print(f"Governance continuity note: {CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE}")
+    return 0
+
+
+def run_continuity_inspect(args: argparse.Namespace) -> int:
+    try:
+        result = inspect_continuity_pack(Path(args.path))
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Continuity pack inspection")
+        print(f"Pack validity: {'valid' if result.valid else 'invalid'}")
+        print(f"Exported: {result.exported_at}")
+        print(f"Profile: {result.profile_type}")
+        print("Included sections:")
+        for section in result.included_sections:
+            print(f"  - {section}")
+        cs = result.continuity_summary
+        print("Continuity summary:")
+        at = cs.get("active_task")
+        if at is not None:
+            print(f"  Active task: {at.get('id')} — {at.get('title')}")
+        else:
+            print("  Active task: none")
+        print(f"  Governance health: {cs.get('governance_health')}")
+        print(f"  Governance check: {cs.get('governance_check')}")
+        print(f"  Provenance event count: {cs.get('provenance_event_count')}")
+        print(f"  Orchestration default agent: {cs.get('orchestration_default_agent')}")
+        print(
+            f"  Compact context pack present: {cs.get('compact_context_pack_present')}"
+        )
+        print(
+            f"  Compact bootstrap prompt present: {cs.get('compact_bootstrap_prompt_present')}"
+        )
+        print(
+            f"  Stale-context suppression present: {cs.get('stale_context_suppression_present')}"
+        )
+        print(
+            f"  Vendor-neutral note present: {cs.get('vendor_neutral_note_present')}"
+        )
+        print("Portability notes:")
+        for note in result.portability_notes:
+            print(f"  - {note}")
+        print("Safety notes:")
+        for note in result.safety_notes:
+            print(f"  - {note}")
+        print(result.advisory)
     return 0
