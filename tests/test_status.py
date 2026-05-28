@@ -4736,3 +4736,128 @@ def test_cli_governance_artifacts_json_advisory_text(
     main(["governance", "artifacts", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert data["advisory"] == ARTIFACT_CLASSIFICATION_ADVISORY
+
+
+# ---------------------------------------------------------------------------
+# Phase 35T: Governance registry consumers audit
+# ---------------------------------------------------------------------------
+
+from pcae.core.status import REGISTRY_AUDIT_ADVISORY, audit_registry_consumers
+
+
+def test_registry_audit_returns_pass_status() -> None:
+    result = audit_registry_consumers()
+    assert result.registry_audit_status == "pass"
+
+
+def test_registry_audit_reports_four_consumers() -> None:
+    result = audit_registry_consumers()
+    assert len(result.consumers) == 4
+
+
+def test_registry_audit_all_consumers_are_registry_backed() -> None:
+    result = audit_registry_consumers()
+    for consumer in result.consumers:
+        assert consumer.registry_backed, f"{consumer.name} is not registry-backed"
+
+
+def test_registry_audit_reports_sync_check_consumer() -> None:
+    result = audit_registry_consumers()
+    names = {c.name for c in result.consumers}
+    assert "sync-check" in names
+
+
+def test_registry_audit_reports_sync_repair_consumer() -> None:
+    result = audit_registry_consumers()
+    names = {c.name for c in result.consumers}
+    assert "sync-repair" in names
+
+
+def test_registry_audit_reports_governance_audit_consumer() -> None:
+    result = audit_registry_consumers()
+    names = {c.name for c in result.consumers}
+    assert "governance audit" in names
+
+
+def test_registry_audit_reports_artifact_registry_consumer() -> None:
+    result = audit_registry_consumers()
+    names = {c.name for c in result.consumers}
+    assert "artifact registry" in names
+
+
+def test_registry_audit_no_warnings_when_all_backed() -> None:
+    result = audit_registry_consumers()
+    assert result.warnings == ()
+
+
+def test_registry_audit_advisory_text() -> None:
+    result = audit_registry_consumers()
+    assert result.advisory == REGISTRY_AUDIT_ADVISORY
+
+
+def test_registry_audit_to_dict_shape() -> None:
+    result = audit_registry_consumers()
+    d = result.to_dict()
+    assert "registry_audit_status" in d
+    assert "consumers" in d
+    assert "warnings" in d
+    assert "advisory" in d
+    assert isinstance(d["consumers"], list)
+    assert isinstance(d["warnings"], list)
+
+
+def test_registry_audit_consumer_to_dict_has_required_keys() -> None:
+    result = audit_registry_consumers()
+    for consumer in result.consumers:
+        d = consumer.to_dict()
+        assert "name" in d
+        assert "registry_backed" in d
+        assert "note" in d
+
+
+def test_registry_audit_is_read_only(tmp_path: Path) -> None:
+    before = list(tmp_path.iterdir())
+    audit_registry_consumers()
+    after = list(tmp_path.iterdir())
+    assert before == after
+
+
+def test_cli_governance_registry_audit_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "registry-audit"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance registry consumers audit" in output
+    assert "Registry audit status: pass" in output
+    assert "Consumers checked: 4" in output
+    assert "sync-check" in output
+    assert "sync-repair" in output
+    assert "governance audit" in output
+    assert "artifact registry" in output
+    assert "Warnings:" in output
+    assert "none" in output
+    assert REGISTRY_AUDIT_ADVISORY in output
+
+
+def test_cli_governance_registry_audit_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "registry-audit", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["registry_audit_status"] == "pass"
+    assert len(data["consumers"]) == 4
+    assert data["warnings"] == []
+    assert data["advisory"] == REGISTRY_AUDIT_ADVISORY
+    consumer_names = {c["name"] for c in data["consumers"]}
+    assert "sync-check" in consumer_names
+    assert "sync-repair" in consumer_names
+    assert "governance audit" in consumer_names
+    assert "artifact registry" in consumer_names
+    for consumer in data["consumers"]:
+        assert consumer["registry_backed"] is True
+        assert consumer["note"]

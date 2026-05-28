@@ -70,6 +70,7 @@ from pcae.commands.orchestration import (
 from pcae.commands.status import (
     run_governance_artifacts,
     run_governance_audit,
+    run_governance_registry_audit,
     run_governance_repair,
     run_governance_sync_check,
     run_governance_sync_repair,
@@ -534,6 +535,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance artifact registry output.",
     )
     governance_artifacts_parser.set_defaults(handler=run_governance_artifacts)
+
+    governance_registry_audit_parser = governance_subparsers.add_parser(
+        "registry-audit",
+        help="Audit whether key governance systems are registry-backed.",
+    )
+    governance_registry_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON registry audit output.",
+    )
+    governance_registry_audit_parser.set_defaults(handler=run_governance_registry_audit)
 
     runtime_parser = subparsers.add_parser(
         "runtime",

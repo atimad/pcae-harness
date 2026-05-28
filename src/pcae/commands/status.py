@@ -9,12 +9,14 @@ from pcae.core.status import (
     ARTIFACT_CLASSIFICATION_ADVISORY,
     GOVERNANCE_SYNC_CHECK_ADVISORY,
     GOVERNANCE_SYNC_REPAIR_ADVISORY,
+    REGISTRY_AUDIT_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
     RUNTIME_SNAPSHOT_MANIFEST_ADVISORY,
     RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     audit_governance_coherence,
+    audit_registry_consumers,
     analyze_runtime_snapshot_compatibility,
     build_governance_artifact_registry,
     build_runtime_snapshot_lineage,
@@ -450,6 +452,27 @@ def run_runtime_snapshot_retention(args: argparse.Namespace) -> int:
         else:
             print("  - none")
         print(RUNTIME_SNAPSHOT_RETENTION_ADVISORY)
+    return 0
+
+
+def run_governance_registry_audit(args: argparse.Namespace) -> int:
+    result = audit_registry_consumers()
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance registry consumers audit")
+        print(f"Registry audit status: {result.registry_audit_status}")
+        print(f"Consumers checked: {len(result.consumers)}")
+        for consumer in result.consumers:
+            backed = "registry-backed" if consumer.registry_backed else "not registry-backed"
+            print(f"  - {consumer.name}: {backed} ({consumer.note})")
+        print("Warnings:")
+        if result.warnings:
+            for warning in result.warnings:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        print(REGISTRY_AUDIT_ADVISORY)
     return 0
 
 

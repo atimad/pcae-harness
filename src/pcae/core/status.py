@@ -2310,6 +2310,87 @@ def apply_governance_sync_repairs(root: HarnessPath) -> AppliedSyncRepairResult:
     return AppliedSyncRepairResult(applied_repairs=tuple(applicable), no_op=False)
 
 
+# ---------------------------------------------------------------------------
+# Governance registry consumers audit (Phase 35T)
+# ---------------------------------------------------------------------------
+
+REGISTRY_AUDIT_ADVISORY = (
+    "Registry audit is advisory; no governance artifacts are modified."
+)
+
+_REGISTRY_CONSUMERS: tuple[tuple[str, bool, str], ...] = (
+    (
+        "sync-check",
+        True,
+        "uses classify_governance_artifact via _artifact_type_for",
+    ),
+    (
+        "sync-repair",
+        True,
+        "uses classify_governance_artifact via _artifact_type_for and _stale_ref_proposed_action",
+    ),
+    (
+        "governance audit",
+        True,
+        "uses classify_governance_artifact via artifact_sync_drift check",
+    ),
+    (
+        "artifact registry",
+        True,
+        "uses GOVERNANCE_ARTIFACT_REGISTRY directly",
+    ),
+)
+
+
+@dataclass(frozen=True)
+class RegistryConsumerAuditEntry:
+    name: str
+    registry_backed: bool
+    note: str
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "registry_backed": self.registry_backed,
+            "note": self.note,
+        }
+
+
+@dataclass(frozen=True)
+class RegistryAuditResult:
+    registry_audit_status: str
+    consumers: tuple[RegistryConsumerAuditEntry, ...]
+    warnings: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "registry_audit_status": self.registry_audit_status,
+            "consumers": [c.to_dict() for c in self.consumers],
+            "warnings": list(self.warnings),
+            "advisory": self.advisory,
+        }
+
+
+def audit_registry_consumers() -> RegistryAuditResult:
+    """Return read-only audit of governance registry consumer coverage."""
+    consumers = tuple(
+        RegistryConsumerAuditEntry(name=name, registry_backed=backed, note=note)
+        for name, backed, note in _REGISTRY_CONSUMERS
+    )
+    warnings = tuple(
+        f"{c.name}: not registry-backed"
+        for c in consumers
+        if not c.registry_backed
+    )
+    return RegistryAuditResult(
+        registry_audit_status="pass" if not warnings else "warn",
+        consumers=consumers,
+        warnings=warnings,
+        advisory=REGISTRY_AUDIT_ADVISORY,
+    )
+
+
 def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
     """Return read-only governance artifact synchronization analysis.
 
