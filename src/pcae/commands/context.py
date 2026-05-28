@@ -6,8 +6,10 @@ from pathlib import Path
 
 from pcae.core.context import (
     CONTEXT_PACK_UNIVERSAL_AGENT_NOTE,
+    CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
     CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE,
     CONTINUITY_PACK_INCLUDED_SECTIONS,
+    analyze_continuity_pack_compatibility,
     build_context_pack,
     build_continuity_pack,
     export_context_pack,
@@ -229,4 +231,47 @@ def run_continuity_inspect(args: argparse.Namespace) -> int:
         for note in result.safety_notes:
             print(f"  - {note}")
         print(result.advisory)
+    return 0
+
+
+def run_continuity_compatibility(args: argparse.Namespace) -> int:
+    try:
+        result = analyze_continuity_pack_compatibility(Path(args.path))
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Continuity compatibility analysis")
+        status = "compatible" if result.compatible else "incompatible"
+        print(f"Compatibility status: {status}")
+        print(f"Support level: {result.support_level}")
+        print("Compatibility checks:")
+        for check in result.compatibility_checks:
+            status_label = "pass" if check.passed else "warn"
+            print(f"  - {check.name}: {status_label} ({check.message})")
+        print("Warnings:")
+        if result.warnings:
+            for warning in result.warnings:
+                print(f"  - {warning}")
+        else:
+            print("  - none")
+        cs = result.continuity_summary
+        print("Governance continuity summary:")
+        at_id = cs.get("active_task_id")
+        at_title = cs.get("active_task_title")
+        if at_id:
+            print(f"  Active task: {at_id} — {at_title}")
+        else:
+            print("  Active task: none")
+        print(f"  Profile: {cs.get('profile_type')}")
+        print(f"  Governance health: {cs.get('governance_health')}")
+        print(f"  Governance check: {cs.get('governance_check')}")
+        print(f"  Exported at: {cs.get('exported_at')}")
+        print("Portability summary:")
+        print("  Continuity packs are portable, governance-complete, vendor-neutral exports.")
+        print("  Compatibility analysis is read-only; no runtime state is changed.")
+        print(CONTINUITY_PACK_COMPATIBILITY_ADVISORY)
     return 0

@@ -18,6 +18,7 @@ from pcae.commands.check import run_check
 from pcae.commands.context import (
     run_context_export,
     run_context_pack,
+    run_continuity_compatibility,
     run_continuity_export,
     run_continuity_inspect,
 )
@@ -206,7 +207,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     continuity_parser = subparsers.add_parser(
         "continuity",
-        help="Export and inspect governed continuity restore packs.",
+        help="Export, inspect, and analyze governed continuity restore packs.",
     )
     continuity_subparsers = continuity_parser.add_subparsers(
         dest="continuity_command",
@@ -247,6 +248,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON inspection result.",
     )
     continuity_inspect_parser.set_defaults(handler=run_continuity_inspect)
+
+    continuity_compatibility_parser = continuity_subparsers.add_parser(
+        "compatibility",
+        help="Analyze compatibility of a governed continuity pack against the current runtime.",
+    )
+    continuity_compatibility_parser.add_argument(
+        "path",
+        metavar="PATH",
+        help="Path to the continuity pack JSON file.",
+    )
+    continuity_compatibility_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON compatibility result.",
+    )
+    continuity_compatibility_parser.set_defaults(handler=run_continuity_compatibility)
 
     ci_parser = subparsers.add_parser(
         "ci",

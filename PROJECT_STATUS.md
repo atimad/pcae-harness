@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35H: Governed continuity pack inspection.
+Phase 35I: Governed continuity compatibility analysis.
 
 ## Governance Coherence Note
 
@@ -215,7 +215,20 @@ compact context pack presence, compact bootstrap prompt presence,
 stale-context suppression presence, vendor-neutral note presence), portability
 notes, safety notes, and the advisory "Continuity pack inspection is advisory;
 no runtime state is changed." without restoring runtime state, mutating
-continuity packs, or modifying governance artifacts.
+continuity packs, or modifying governance artifacts, and continuity pack
+compatibility can be analyzed deterministically with
+`pcae continuity compatibility PATH` and
+`pcae continuity compatibility PATH --json`, running nine checks
+(structure validity, required sections presence, governance state presence,
+compact bootstrap presence, operational rules presence, stale-context
+suppression presence, vendor-neutral note presence, runtime snapshot metadata
+compatibility, and future-version warning support) to determine whether a
+pack is compatible with the current PCAE runtime, reporting support level
+(`supported`, `partially-supported`, or `unsupported`), compatibility checks,
+warnings, governance continuity summary, portability summary, and the advisory
+"Continuity compatibility analysis is advisory; no runtime state is changed."
+without mutating continuity packs, restoring runtime state, or modifying
+governance artifacts.
 
 ## Next
 

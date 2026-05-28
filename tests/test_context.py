@@ -2442,3 +2442,527 @@ def test_cli_continuity_inspect_is_read_only(
     assert pack_path.stat().st_mtime == mtime_before
     # inspect must not create runtime-snapshots as a side effect
     assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()
+
+
+# ---------------------------------------------------------------------------
+# Phase 35I: Continuity pack compatibility analysis
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
+    CONTINUITY_PACK_REQUIRED_KEYS,
+    ContinuityCompatibilityCheck,
+    ContinuityCompatibilityReport,
+    analyze_continuity_pack_compatibility,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: analyze_continuity_pack_compatibility — valid pack
+# ---------------------------------------------------------------------------
+
+
+def test_analyze_continuity_compatibility_returns_report(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert isinstance(result, ContinuityCompatibilityReport)
+
+
+def test_analyze_continuity_compatibility_compatible_true(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert result.compatible is True
+
+
+def test_analyze_continuity_compatibility_support_level_supported(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert result.support_level == "supported"
+
+
+def test_analyze_continuity_compatibility_no_warnings_on_valid_pack(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert len(result.warnings) == 0
+
+
+def test_analyze_continuity_compatibility_nine_checks(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert len(result.compatibility_checks) == 9
+
+
+def test_analyze_continuity_compatibility_all_checks_pass(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    for check in result.compatibility_checks:
+        assert check.passed, f"Check failed: {check.name}: {check.message}"
+
+
+def test_analyze_continuity_compatibility_check_names(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    names = {c.name for c in result.compatibility_checks}
+    assert "continuity_pack_structure_validity" in names
+    assert "required_continuity_sections_presence" in names
+    assert "governance_state_presence" in names
+    assert "compact_bootstrap_presence" in names
+    assert "operational_rules_presence" in names
+    assert "stale_context_suppression_presence" in names
+    assert "vendor_neutral_note_presence" in names
+    assert "runtime_snapshot_metadata_compatibility" in names
+    assert "future_version_warning_support" in names
+
+
+def test_analyze_continuity_compatibility_advisory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert result.advisory == CONTINUITY_PACK_COMPATIBILITY_ADVISORY
+
+
+def test_analyze_continuity_compatibility_continuity_summary_keys(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    cs = result.continuity_summary
+    assert "active_task_id" in cs
+    assert "active_task_title" in cs
+    assert "exported_at" in cs
+    assert "governance_health" in cs
+    assert "governance_check" in cs
+    assert "profile_type" in cs
+
+
+def test_analyze_continuity_compatibility_continuity_summary_values(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    cs = result.continuity_summary
+    assert cs["active_task_id"] == "20260527-1200-test"
+    assert cs["active_task_title"] == "Test task"
+    assert cs["profile_type"] == PROFILE_UNIVERSAL
+
+
+def test_analyze_continuity_compatibility_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    d = result.to_dict()
+    assert "compatible" in d
+    assert "support_level" in d
+    assert "compatibility_checks" in d
+    assert "warnings" in d
+    assert "continuity_summary" in d
+    assert "advisory" in d
+
+
+def test_analyze_continuity_compatibility_check_to_dict(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    for check in result.compatibility_checks:
+        d = check.to_dict()
+        assert "name" in d
+        assert "passed" in d
+        assert "message" in d
+
+
+def test_analyze_continuity_compatibility_is_read_only(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    mtime_before = pack_path.stat().st_mtime
+    analyze_continuity_pack_compatibility(pack_path)
+    assert pack_path.stat().st_mtime == mtime_before
+    assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()
+
+
+# ---------------------------------------------------------------------------
+# Core: analyze_continuity_pack_compatibility — degraded packs
+# ---------------------------------------------------------------------------
+
+
+def test_analyze_continuity_compatibility_missing_required_key_unsupported(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    del data["compact_bootstrap_prompt"]
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    # missing required key → sections check fails → unsupported
+    assert result.support_level == "unsupported"
+    assert result.compatible is False
+
+
+def test_analyze_continuity_compatibility_missing_required_key_warns(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    del data["vendor_neutral_note"]
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert len(result.warnings) > 0
+
+
+def test_analyze_continuity_compatibility_empty_bootstrap_partially_supported(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    data["compact_bootstrap_prompt"] = ""
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert result.support_level in ("partially-supported", "unsupported")
+    assert result.compatible is False
+
+
+def test_analyze_continuity_compatibility_empty_stale_context_rules_warns(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    data["stale_context_suppression_rules"] = []
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    check = next(
+        c for c in result.compatibility_checks
+        if c.name == "stale_context_suppression_presence"
+    )
+    assert not check.passed
+    assert len(result.warnings) > 0
+
+
+def test_analyze_continuity_compatibility_missing_vendor_neutral_note_warns(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    data["vendor_neutral_note"] = ""
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    check = next(
+        c for c in result.compatibility_checks
+        if c.name == "vendor_neutral_note_presence"
+    )
+    assert not check.passed
+
+
+def test_analyze_continuity_compatibility_extra_key_warns_future_version(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    data["future_field"] = "from_newer_pcae"
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    check = next(
+        c for c in result.compatibility_checks
+        if c.name == "future_version_warning_support"
+    )
+    assert not check.passed
+    assert "future_field" in check.message
+    assert len(result.warnings) > 0
+
+
+def test_analyze_continuity_compatibility_missing_rsm_keys_warns(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    data = json.loads(pack_path.read_text(encoding="utf-8"))
+    data["runtime_snapshot_metadata"] = {"only_one_key": True}
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    check = next(
+        c for c in result.compatibility_checks
+        if c.name == "runtime_snapshot_metadata_compatibility"
+    )
+    assert not check.passed
+
+
+def test_analyze_continuity_compatibility_warnings_deduped(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert len(result.warnings) == len(set(result.warnings))
+
+
+# ---------------------------------------------------------------------------
+# Core: analyze_continuity_pack_compatibility — error cases
+# ---------------------------------------------------------------------------
+
+
+def test_analyze_continuity_compatibility_file_not_found_raises() -> None:
+    with pytest.raises(ValueError, match="not found"):
+        analyze_continuity_pack_compatibility(Path("/no/such/file.json"))
+
+
+def test_analyze_continuity_compatibility_invalid_json_raises(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text("{invalid", encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid continuity pack JSON"):
+        analyze_continuity_pack_compatibility(bad)
+
+
+def test_analyze_continuity_compatibility_non_object_raises(tmp_path: Path) -> None:
+    bad = tmp_path / "bad.json"
+    bad.write_text('["a"]', encoding="utf-8")
+    with pytest.raises(ValueError, match="top-level JSON value must be an object"):
+        analyze_continuity_pack_compatibility(bad)
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity compatibility
+# ---------------------------------------------------------------------------
+
+
+def _export_and_get_pack_path(tmp_path: Path) -> Path:
+    monkeypatch_chdir = tmp_path  # used inline; export via subprocess not needed
+    root = HarnessPath(tmp_path)
+    profile, _ = resolve_profile(None)
+    ts = datetime(2026, 5, 28, 10, 0, 0, tzinfo=timezone.utc)
+    pack = build_continuity_pack(root, profile, exported_at=ts)
+    relative_path, _ = export_continuity_pack(root, pack)
+    return tmp_path / relative_path
+
+
+def test_cli_continuity_compatibility_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    result = main(["continuity", "compatibility", str(pack_path)])
+    assert result == 0
+
+
+def test_cli_continuity_compatibility_prints_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Compatibility status:" in captured.out
+    assert "compatible" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_support_level(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Support level:" in captured.out
+    assert "supported" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Compatibility checks:" in captured.out
+    assert "continuity_pack_structure_validity" in captured.out
+    assert "stale_context_suppression_presence" in captured.out
+    assert "vendor_neutral_note_presence" in captured.out
+    assert "future_version_warning_support" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_warnings_none(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Warnings:" in captured.out
+    assert "none" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_governance_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Governance continuity summary:" in captured.out
+    assert "Active task:" in captured.out
+    assert "Profile:" in captured.out
+    assert "Governance health:" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_portability_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert "Portability summary:" in captured.out
+
+
+def test_cli_continuity_compatibility_prints_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path)])
+    captured = capsys.readouterr()
+    assert CONTINUITY_PACK_COMPATIBILITY_ADVISORY in captured.out
+
+
+def test_cli_continuity_compatibility_invalid_path_exits_nonzero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "compatibility", "/no/such/file.json"])
+    assert result != 0
+
+
+def test_cli_continuity_compatibility_invalid_path_prints_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "compatibility", "/no/such/file.json"])
+    captured = capsys.readouterr()
+    assert "not found" in captured.out.lower()
+
+
+def test_cli_continuity_compatibility_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    result = main(["continuity", "compatibility", str(pack_path), "--json"])
+    assert result == 0
+
+
+def test_cli_continuity_compatibility_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_continuity_compatibility_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert "compatible" in data
+    assert "support_level" in data
+    assert "compatibility_checks" in data
+    assert "warnings" in data
+    assert "continuity_summary" in data
+    assert "advisory" in data
+
+
+def test_cli_continuity_compatibility_json_compatible_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["compatible"] is True
+    assert data["support_level"] == "supported"
+
+
+def test_cli_continuity_compatibility_json_nine_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert len(data["compatibility_checks"]) == 9
+
+
+def test_cli_continuity_compatibility_json_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["advisory"] == CONTINUITY_PACK_COMPATIBILITY_ADVISORY
+
+
+def test_cli_continuity_compatibility_json_degraded_pack(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    pack_data = json.loads(pack_path.read_text(encoding="utf-8"))
+    del pack_data["compact_bootstrap_prompt"]
+    pack_path.write_text(json.dumps(pack_data), encoding="utf-8")
+    main(["continuity", "compatibility", str(pack_path), "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["compatible"] is False
+    assert data["support_level"] == "unsupported"
+    assert len(data["warnings"]) > 0
+
+
+def test_cli_continuity_compatibility_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    pack_path = _export_and_get_pack_path(tmp_path)
+    mtime_before = pack_path.stat().st_mtime
+    main(["continuity", "compatibility", str(pack_path)])
+    assert pack_path.stat().st_mtime == mtime_before
+    assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()

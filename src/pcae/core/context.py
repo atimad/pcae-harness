@@ -602,3 +602,255 @@ def inspect_continuity_pack(path: Path) -> ContinuityPackInspection:
         ),
         advisory=CONTINUITY_PACK_INSPECTION_ADVISORY,
     )
+
+
+# ---------------------------------------------------------------------------
+# Continuity pack compatibility analysis
+# ---------------------------------------------------------------------------
+
+CONTINUITY_PACK_COMPATIBILITY_ADVISORY = (
+    "Continuity compatibility analysis is advisory; no runtime state is changed."
+)
+
+_CONTINUITY_RUNTIME_METADATA_REQUIRED_KEYS: tuple[str, ...] = (
+    "governance_health_status",
+    "governance_check_status",
+    "active_task",
+    "agent_lock_state",
+    "session_continuity_status",
+    "provenance_event_count",
+)
+
+
+@dataclass(frozen=True)
+class ContinuityCompatibilityCheck:
+    name: str
+    passed: bool
+    message: str
+
+    def to_dict(self) -> dict:
+        return {"message": self.message, "name": self.name, "passed": self.passed}
+
+
+@dataclass(frozen=True)
+class ContinuityCompatibilityReport:
+    compatible: bool
+    support_level: str
+    compatibility_checks: tuple[ContinuityCompatibilityCheck, ...]
+    warnings: tuple[str, ...]
+    continuity_summary: dict
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "compatible": self.compatible,
+            "compatibility_checks": [c.to_dict() for c in self.compatibility_checks],
+            "continuity_summary": self.continuity_summary,
+            "support_level": self.support_level,
+            "warnings": list(self.warnings),
+        }
+
+
+def _dedup_preserving_order(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for v in values:
+        if v not in seen:
+            seen.add(v)
+            result.append(v)
+    return result
+
+
+def analyze_continuity_pack_compatibility(path: Path) -> ContinuityCompatibilityReport:
+    """Return deterministic read-only compatibility analysis for a continuity pack.
+
+    Raises ValueError for file-not-found, invalid JSON, or non-object JSON.
+    """
+    if not path.is_file():
+        raise ValueError(f"Continuity pack not found: {path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid continuity pack JSON: {exc.msg}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("Invalid continuity pack: top-level JSON value must be an object.")
+
+    checks: list[ContinuityCompatibilityCheck] = []
+    warnings: list[str] = []
+
+    # Check 1: structure validity (reaching this point confirms basic structure)
+    checks.append(ContinuityCompatibilityCheck(
+        name="continuity_pack_structure_validity",
+        passed=True,
+        message="Continuity pack is a valid JSON object.",
+    ))
+
+    # Check 2: required continuity sections presence
+    missing = [k for k in CONTINUITY_PACK_REQUIRED_KEYS if k not in data]
+    sections_ok = not missing
+    if sections_ok:
+        sections_msg = "All required continuity sections are present."
+    else:
+        sections_msg = (
+            "Missing required continuity section(s): " + ", ".join(missing) + "."
+        )
+        warnings.append(sections_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="required_continuity_sections_presence",
+        passed=sections_ok,
+        message=sections_msg,
+    ))
+
+    # Check 3: governance state presence
+    gs = data.get("governance_state") or {}
+    gov_ok = (
+        isinstance(gs, dict)
+        and "health_status" in gs
+        and "check_status" in gs
+    )
+    gov_msg = (
+        "Governance state is present with health and check status."
+        if gov_ok
+        else "Governance state is missing or incomplete (expected health_status and check_status)."
+    )
+    if not gov_ok:
+        warnings.append(gov_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="governance_state_presence",
+        passed=gov_ok,
+        message=gov_msg,
+    ))
+
+    # Check 4: compact bootstrap presence
+    bootstrap = data.get("compact_bootstrap_prompt")
+    bootstrap_ok = isinstance(bootstrap, str) and bool(bootstrap)
+    bootstrap_msg = (
+        "Compact bootstrap prompt is present."
+        if bootstrap_ok
+        else "Compact bootstrap prompt is missing or empty."
+    )
+    if not bootstrap_ok:
+        warnings.append(bootstrap_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="compact_bootstrap_presence",
+        passed=bootstrap_ok,
+        message=bootstrap_msg,
+    ))
+
+    # Check 5: operational rules presence
+    op_rules = data.get("operational_rules")
+    op_ok = isinstance(op_rules, list) and len(op_rules) > 0
+    op_msg = (
+        "Operational rules are present."
+        if op_ok
+        else "Operational rules are missing or empty."
+    )
+    if not op_ok:
+        warnings.append(op_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="operational_rules_presence",
+        passed=op_ok,
+        message=op_msg,
+    ))
+
+    # Check 6: stale-context suppression presence
+    stale = data.get("stale_context_suppression_rules")
+    stale_ok = isinstance(stale, list) and len(stale) > 0
+    stale_msg = (
+        "Stale-context suppression rules are present."
+        if stale_ok
+        else "Stale-context suppression rules are missing or empty."
+    )
+    if not stale_ok:
+        warnings.append(stale_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="stale_context_suppression_presence",
+        passed=stale_ok,
+        message=stale_msg,
+    ))
+
+    # Check 7: vendor-neutral note presence
+    vn_note = data.get("vendor_neutral_note")
+    vn_ok = isinstance(vn_note, str) and bool(vn_note)
+    vn_msg = (
+        "Vendor-neutral note is present."
+        if vn_ok
+        else "Vendor-neutral note is missing or empty."
+    )
+    if not vn_ok:
+        warnings.append(vn_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="vendor_neutral_note_presence",
+        passed=vn_ok,
+        message=vn_msg,
+    ))
+
+    # Check 8: runtime snapshot metadata compatibility
+    rsm = data.get("runtime_snapshot_metadata")
+    if isinstance(rsm, dict):
+        missing_rsm = [k for k in _CONTINUITY_RUNTIME_METADATA_REQUIRED_KEYS if k not in rsm]
+        rsm_ok = not missing_rsm
+        if rsm_ok:
+            rsm_msg = "Runtime snapshot metadata contains all expected governance fields."
+        else:
+            rsm_msg = (
+                "Runtime snapshot metadata is missing expected field(s): "
+                + ", ".join(missing_rsm) + "."
+            )
+            warnings.append(rsm_msg)
+    else:
+        rsm_ok = False
+        rsm_msg = "Runtime snapshot metadata is missing or not an object."
+        warnings.append(rsm_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="runtime_snapshot_metadata_compatibility",
+        passed=rsm_ok,
+        message=rsm_msg,
+    ))
+
+    # Check 9: future-version warning support (unexpected top-level keys)
+    extra_keys = [k for k in data if k not in CONTINUITY_PACK_REQUIRED_KEYS]
+    no_extra = not extra_keys
+    if no_extra:
+        future_msg = "No future-version indicators detected; pack conforms to known schema."
+    else:
+        future_msg = (
+            "Unexpected top-level key(s) detected: "
+            + ", ".join(sorted(extra_keys))
+            + ". Pack may have been exported by a newer PCAE version."
+        )
+        warnings.append(future_msg)
+    checks.append(ContinuityCompatibilityCheck(
+        name="future_version_warning_support",
+        passed=no_extra,
+        message=future_msg,
+    ))
+
+    # Determine support level
+    if not sections_ok:
+        support_level = "unsupported"
+        warnings.append("No migration or automatic conversion is available.")
+    elif warnings:
+        support_level = "partially-supported"
+    else:
+        support_level = "supported"
+
+    at = data.get("active_task_summary") or {}
+    continuity_summary = {
+        "active_task_id": at.get("id") if isinstance(at, dict) else None,
+        "active_task_title": at.get("title") if isinstance(at, dict) else None,
+        "exported_at": data.get("exported_at"),
+        "governance_check": gs.get("check_status") if isinstance(gs, dict) else None,
+        "governance_health": gs.get("health_status") if isinstance(gs, dict) else None,
+        "profile_type": data.get("profile_type"),
+    }
+
+    return ContinuityCompatibilityReport(
+        compatible=support_level == "supported",
+        support_level=support_level,
+        compatibility_checks=tuple(checks),
+        warnings=tuple(_dedup_preserving_order(warnings)),
+        continuity_summary=continuity_summary,
+        advisory=CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
+    )
