@@ -4338,3 +4338,401 @@ def test_cli_governance_sync_repair_dry_run_does_not_modify_todo(
     monkeypatch.chdir(tmp_path)
     main(["governance", "sync-repair", "--dry-run"])
     assert todo_path.stat().st_mtime == mtime_before
+
+
+# ---------------------------------------------------------------------------
+# Phase 35S: governance artifact classification registry
+# ---------------------------------------------------------------------------
+
+from pcae.core.status import (
+    ARTIFACT_CLASSIFICATION_ADVISORY,
+    GOVERNANCE_ARTIFACT_REGISTRY,
+    GovernanceArtifactEntry,
+    GovernanceArtifactReport,
+    build_governance_artifact_registry,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: build_governance_artifact_registry — return type and shape
+# ---------------------------------------------------------------------------
+
+
+def test_build_governance_artifact_registry_returns_report(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    assert isinstance(result, GovernanceArtifactReport)
+
+
+def test_build_governance_artifact_registry_advisory(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    assert result.advisory == ARTIFACT_CLASSIFICATION_ADVISORY
+
+
+def test_build_governance_artifact_registry_has_artifacts(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    assert len(result.artifacts) == 10
+
+
+def test_build_governance_artifact_registry_has_four_classes(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    assert set(result.classes) == {"operational", "historical", "runtime", "generated"}
+
+
+def test_build_governance_artifact_registry_classes_ordered_by_first_appearance(
+    tmp_path: Path,
+) -> None:
+    result = build_governance_artifact_registry()
+    assert list(result.classes) == ["operational", "historical", "runtime", "generated"]
+
+
+# ---------------------------------------------------------------------------
+# Core: GOVERNANCE_ARTIFACT_REGISTRY — all 10 entries present
+# ---------------------------------------------------------------------------
+
+
+def test_governance_registry_contains_project_status(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert "PROJECT_STATUS.md" in paths
+
+
+def test_governance_registry_contains_todo(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert "tasks/TODO.md" in paths
+
+
+def test_governance_registry_contains_changelog(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert "CHANGELOG.md" in paths
+
+
+def test_governance_registry_contains_done(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert "tasks/DONE.md" in paths
+
+
+def test_governance_registry_contains_provenance_history(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/provenance-history.json" in paths
+
+
+def test_governance_registry_contains_agent_lock(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/agent-lock.json" in paths
+
+
+def test_governance_registry_contains_session_json(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/session.json" in paths
+
+
+def test_governance_registry_contains_runtime_snapshots_pattern(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/runtime-snapshots/**" in paths
+
+
+def test_governance_registry_contains_context_packs_pattern(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/context-packs/**" in paths
+
+
+def test_governance_registry_contains_continuity_packs_pattern(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/continuity-packs/**" in paths
+
+
+# ---------------------------------------------------------------------------
+# Core: GovernanceArtifactEntry — field semantics
+# ---------------------------------------------------------------------------
+
+
+def test_governance_registry_entry_is_dataclass(tmp_path: Path) -> None:
+    entry = GOVERNANCE_ARTIFACT_REGISTRY[0]
+    assert isinstance(entry, GovernanceArtifactEntry)
+
+
+def test_governance_registry_operational_entries_have_actionable_repair(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "operational":
+            assert entry.repair_policy == "actionable"
+
+
+def test_governance_registry_historical_entries_have_preserve_repair(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "historical":
+            assert entry.repair_policy == "preserve"
+
+
+def test_governance_registry_runtime_entries_have_ignore_repair(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "runtime":
+            assert entry.repair_policy == "ignore"
+
+
+def test_governance_registry_generated_entries_have_ignore_repair(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "generated":
+            assert entry.repair_policy == "ignore"
+
+
+def test_governance_registry_operational_entries_are_tracked(tmp_path: Path) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "operational":
+            assert entry.source_control_role == "tracked"
+
+
+def test_governance_registry_historical_entries_are_tracked(tmp_path: Path) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "historical":
+            assert entry.source_control_role == "tracked"
+
+
+def test_governance_registry_runtime_entries_are_ignored(tmp_path: Path) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "runtime":
+            assert entry.source_control_role == "ignored"
+
+
+def test_governance_registry_generated_entries_are_generated_ignored(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        if entry.artifact_class == "generated":
+            assert entry.source_control_role == "generated_ignored"
+
+
+def test_governance_registry_all_entries_have_nonempty_governance_role(
+    tmp_path: Path,
+) -> None:
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        assert entry.governance_role, f"governance_role empty for {entry.path}"
+
+
+# ---------------------------------------------------------------------------
+# Core: GovernanceArtifactEntry.to_dict — shape
+# ---------------------------------------------------------------------------
+
+
+def test_governance_artifact_entry_to_dict_keys(tmp_path: Path) -> None:
+    entry = GOVERNANCE_ARTIFACT_REGISTRY[0]
+    d = entry.to_dict()
+    assert "path" in d
+    assert "artifact_class" in d
+    assert "governance_role" in d
+    assert "repair_policy" in d
+    assert "source_control_role" in d
+
+
+# ---------------------------------------------------------------------------
+# Core: GovernanceArtifactReport.to_dict — shape
+# ---------------------------------------------------------------------------
+
+
+def test_governance_artifact_report_to_dict_keys(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    d = result.to_dict()
+    assert "artifacts" in d
+    assert "classes" in d
+    assert "advisory" in d
+
+
+def test_governance_artifact_report_to_dict_artifacts_is_list(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    d = result.to_dict()
+    assert isinstance(d["artifacts"], list)
+    assert len(d["artifacts"]) == 10
+
+
+def test_governance_artifact_report_to_dict_classes_is_list(tmp_path: Path) -> None:
+    result = build_governance_artifact_registry()
+    d = result.to_dict()
+    assert isinstance(d["classes"], list)
+    assert set(d["classes"]) == {"operational", "historical", "runtime", "generated"}
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance artifacts — human output
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_artifacts_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "artifacts"])
+    assert result == 0
+
+
+def test_cli_governance_artifacts_shows_registry_header(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    assert "Governance artifact registry" in output
+
+
+def test_cli_governance_artifacts_shows_artifact_classes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    assert "operational" in output
+    assert "historical" in output
+    assert "runtime" in output
+    assert "generated" in output
+
+
+def test_cli_governance_artifacts_shows_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    assert ARTIFACT_CLASSIFICATION_ADVISORY in output
+
+
+def test_cli_governance_artifacts_shows_repair_semantics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    assert "actionable" in output
+    assert "preserve" in output
+    assert "ignore" in output
+
+
+def test_cli_governance_artifacts_shows_all_known_paths(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        assert entry.path in output
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance artifacts --json — JSON output
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_artifacts_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "artifacts", "--json"])
+    assert result == 0
+
+
+def test_cli_governance_artifacts_json_has_artifacts_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "artifacts" in data
+
+
+def test_cli_governance_artifacts_json_has_classes_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "classes" in data
+
+
+def test_cli_governance_artifacts_json_has_advisory_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data
+
+
+def test_cli_governance_artifacts_json_artifacts_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["artifacts"]) == 10
+
+
+def test_cli_governance_artifacts_json_each_artifact_has_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for artifact in data["artifacts"]:
+        assert "path" in artifact
+        assert "artifact_class" in artifact
+        assert "governance_role" in artifact
+        assert "repair_policy" in artifact
+        assert "source_control_role" in artifact
+
+
+def test_cli_governance_artifacts_json_classes_has_four_values(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data["classes"]) == {"operational", "historical", "runtime", "generated"}
+
+
+def test_cli_governance_artifacts_json_historical_artifacts_have_preserve_repair(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    historical = [a for a in data["artifacts"] if a["artifact_class"] == "historical"]
+    assert historical
+    for artifact in historical:
+        assert artifact["repair_policy"] == "preserve"
+
+
+def test_cli_governance_artifacts_json_runtime_artifacts_have_ignore_repair(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    runtime = [a for a in data["artifacts"] if a["artifact_class"] == "runtime"]
+    assert runtime
+    for artifact in runtime:
+        assert artifact["repair_policy"] == "ignore"
+
+
+def test_cli_governance_artifacts_json_generated_artifacts_have_generated_ignored_scr(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    generated = [a for a in data["artifacts"] if a["artifact_class"] == "generated"]
+    assert generated
+    for artifact in generated:
+        assert artifact["source_control_role"] == "generated_ignored"
+
+
+def test_cli_governance_artifacts_json_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["advisory"] == ARTIFACT_CLASSIFICATION_ADVISORY

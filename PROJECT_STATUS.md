@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35R: Governance artifact lifecycle classification.
+Phase 35S: Governance artifact classification registry.
 
 ## Governance Coherence Note
 
@@ -301,7 +301,14 @@ sync-check` and `pcae governance sync-repair` use the classifier for
 operational vs. historical vs. runtime vs. generated semantics; runtime and
 generated artifacts are explicitly ignored for source governance repair;
 `SyncRepairEntry.to_dict()` now exposes `artifact_class` and `governance_role`
-in JSON output; the classifier is deterministic and read-only.
+in JSON output; the classifier is deterministic and read-only, and the governance artifact
+classification registry is exposed as a reusable read-only command with
+`pcae governance artifacts` and `pcae governance artifacts --json`, listing
+all 10 known governance artifacts with path, artifact_class, governance_role,
+repair_policy, and source_control_role grouped by class; JSON output includes
+`artifacts`, `classes`, and `advisory`; the registry reuses
+`classify_governance_artifact` from Phase 35R and does not mutate artifacts
+or change sync-check/sync-repair behavior.
 
 ## Next
 

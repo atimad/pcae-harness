@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
+    ARTIFACT_CLASSIFICATION_ADVISORY,
     GOVERNANCE_SYNC_CHECK_ADVISORY,
     GOVERNANCE_SYNC_REPAIR_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
@@ -15,6 +16,7 @@ from pcae.core.status import (
     RUNTIME_SNAPSHOT_RETENTION_ADVISORY,
     audit_governance_coherence,
     analyze_runtime_snapshot_compatibility,
+    build_governance_artifact_registry,
     build_runtime_snapshot_lineage,
     build_runtime_snapshot_manifest,
     check_governance_sync,
@@ -448,4 +450,25 @@ def run_runtime_snapshot_retention(args: argparse.Namespace) -> int:
         else:
             print("  - none")
         print(RUNTIME_SNAPSHOT_RETENTION_ADVISORY)
+    return 0
+
+
+def run_governance_artifacts(args: argparse.Namespace) -> int:
+    result = build_governance_artifact_registry()
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance artifact registry")
+        print(f"Artifact classes: {', '.join(result.classes)}")
+        by_class: dict[str, list] = {}
+        for entry in result.artifacts:
+            by_class.setdefault(entry.artifact_class, []).append(entry)
+        for artifact_class, entries in by_class.items():
+            sample_repair = entries[0].repair_policy if entries else ""
+            print(f"\n{artifact_class.capitalize()} artifacts (repair: {sample_repair}):")
+            for entry in entries:
+                print(f"  - {entry.path} [{entry.source_control_role}]")
+                print(f"    Role: {entry.governance_role}")
+        print()
+        print(ARTIFACT_CLASSIFICATION_ADVISORY)
     return 0

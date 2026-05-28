@@ -68,6 +68,7 @@ from pcae.commands.orchestration import (
     run_orchestration_validate,
 )
 from pcae.commands.status import (
+    run_governance_artifacts,
     run_governance_audit,
     run_governance_repair,
     run_governance_sync_check,
@@ -522,6 +523,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_sync_repair_parser.set_defaults(handler=run_governance_sync_repair)
+
+    governance_artifacts_parser = governance_subparsers.add_parser(
+        "artifacts",
+        help="List known governance artifacts and their lifecycle semantics.",
+    )
+    governance_artifacts_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance artifact registry output.",
+    )
+    governance_artifacts_parser.set_defaults(handler=run_governance_artifacts)
 
     runtime_parser = subparsers.add_parser(
         "runtime",

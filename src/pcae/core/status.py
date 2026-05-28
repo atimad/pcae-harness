@@ -1863,6 +1863,129 @@ def classify_governance_artifact(artifact: str) -> ArtifactClassification:
     )
 
 
+ARTIFACT_CLASSIFICATION_ADVISORY = (
+    "Artifact classification is advisory; the user remains authoritative."
+)
+
+
+@dataclass(frozen=True)
+class GovernanceArtifactEntry:
+    path: str
+    artifact_class: str  # "operational" | "historical" | "runtime" | "generated"
+    governance_role: str
+    repair_policy: str   # "actionable" | "preserve" | "ignore"
+    source_control_role: str  # "tracked" | "ignored" | "generated_ignored"
+
+    def to_dict(self) -> dict:
+        return {
+            "path": self.path,
+            "artifact_class": self.artifact_class,
+            "governance_role": self.governance_role,
+            "repair_policy": self.repair_policy,
+            "source_control_role": self.source_control_role,
+        }
+
+
+GOVERNANCE_ARTIFACT_REGISTRY: tuple[GovernanceArtifactEntry, ...] = (
+    GovernanceArtifactEntry(
+        path="PROJECT_STATUS.md",
+        artifact_class="operational",
+        governance_role="live roadmap guidance; operational drift candidate",
+        repair_policy="actionable",
+        source_control_role="tracked",
+    ),
+    GovernanceArtifactEntry(
+        path="tasks/TODO.md",
+        artifact_class="operational",
+        governance_role="pending work tracking; operational drift candidate",
+        repair_policy="actionable",
+        source_control_role="tracked",
+    ),
+    GovernanceArtifactEntry(
+        path="CHANGELOG.md",
+        artifact_class="historical",
+        governance_role="historical change record; preserved by design",
+        repair_policy="preserve",
+        source_control_role="tracked",
+    ),
+    GovernanceArtifactEntry(
+        path="tasks/DONE.md",
+        artifact_class="historical",
+        governance_role="historical completion record; preserved by design",
+        repair_policy="preserve",
+        source_control_role="tracked",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/provenance-history.json",
+        artifact_class="runtime",
+        governance_role="runtime governance state; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="ignored",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/agent-lock.json",
+        artifact_class="runtime",
+        governance_role="runtime governance state; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="ignored",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/session.json",
+        artifact_class="runtime",
+        governance_role="runtime governance state; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="ignored",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/runtime-snapshots/**",
+        artifact_class="generated",
+        governance_role="generated artifact; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="generated_ignored",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/context-packs/**",
+        artifact_class="generated",
+        governance_role="generated artifact; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="generated_ignored",
+    ),
+    GovernanceArtifactEntry(
+        path=".pcae/continuity-packs/**",
+        artifact_class="generated",
+        governance_role="generated artifact; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="generated_ignored",
+    ),
+)
+
+
+@dataclass(frozen=True)
+class GovernanceArtifactReport:
+    artifacts: tuple[GovernanceArtifactEntry, ...]
+    classes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "artifacts": [a.to_dict() for a in self.artifacts],
+            "classes": list(self.classes),
+            "advisory": self.advisory,
+        }
+
+
+def build_governance_artifact_registry() -> GovernanceArtifactReport:
+    """Return the governance artifact registry grouped by class."""
+    seen: dict[str, None] = {}
+    for entry in GOVERNANCE_ARTIFACT_REGISTRY:
+        seen[entry.artifact_class] = None
+    return GovernanceArtifactReport(
+        artifacts=GOVERNANCE_ARTIFACT_REGISTRY,
+        classes=tuple(seen),
+        advisory=ARTIFACT_CLASSIFICATION_ADVISORY,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Governance artifact synchronization validation (Phase 35L)
 # ---------------------------------------------------------------------------
