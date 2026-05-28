@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.orchestration import (
+    ORCHESTRATION_EXPLANATION_ADVISORY,
     ORCHESTRATION_SELECTION_ADVISORY,
     build_agent_registry_data,
     build_orchestration_data,
@@ -11,6 +12,7 @@ from pcae.core.orchestration import (
     build_workflow_readiness,
     build_workflow_simulation,
     build_workflow_validation,
+    explain_agent_selection,
     recommend_agent,
     select_agent,
 )
@@ -89,6 +91,35 @@ def run_orchestration_select(args: argparse.Namespace) -> int:
         print(f"Fallback used: {'yes' if data['fallback_used'] else 'no'}")
         print(f"Reason: {data['reason']}")
         print(ORCHESTRATION_SELECTION_ADVISORY)
+    return 0
+
+
+def run_orchestration_explain(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = explain_agent_selection(root, args.task_type)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        matched_role = data["matched_role"] or "fallback"
+        print(f"Task type: {data['task_type']}")
+        print(f"Recommended agent: {data['recommended_agent']}")
+        print(f"Matched role: {matched_role}")
+        print(f"Fallback used: {'yes' if data['fallback_used'] else 'no'}")
+        print(f"Explanation: {data['explanation']}")
+        print("Alternatives:")
+        if data["alternatives"]:
+            for alternative in data["alternatives"]:
+                roles = ", ".join(alternative["roles"])
+                print(f"  - {alternative['agent_id']} ({roles})")
+                print(f"    Why not selected: {alternative['why_not_selected']}")
+        else:
+            print("  - none")
+        print(ORCHESTRATION_EXPLANATION_ADVISORY)
     return 0
 
 

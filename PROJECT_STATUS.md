@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36B: Orchestration select.
+Phase 36C: Orchestration explain.
 
 ## Governance Coherence Note
 
@@ -16,9 +16,11 @@ roadmap guidance must remain coherent. When they drift, run
 ## Current State
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
-and `pcae roadmap next --json`, and can select a recommended agent for a task
+and `pcae roadmap next --json`, can select a recommended agent for a task
 type with `pcae orchestration select TASK_TYPE` and
-`pcae orchestration select TASK_TYPE --json`, using current orchestration
+`pcae orchestration select TASK_TYPE --json`, and can explain that selection
+with `pcae orchestration explain TASK_TYPE` and
+`pcae orchestration explain TASK_TYPE --json`, using current orchestration
 policy and agent registry while keeping recommendations advisory and
 non-mutating, preview and refresh adoption with init options, generate command,
 architecture, and glossary documentation, generate, inspect, detect drift in,

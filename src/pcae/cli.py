@@ -60,6 +60,7 @@ from pcae.commands.fleet import (
 from pcae.commands.health import run_health
 from pcae.commands.orchestration import (
     run_orchestration_agents,
+    run_orchestration_explain,
     run_orchestration_plan,
     run_orchestration_policy,
     run_orchestration_readiness,
@@ -787,6 +788,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON selection output.",
     )
     orchestration_select_parser.set_defaults(handler=run_orchestration_select)
+
+    orchestration_explain_parser = orchestration_subparsers.add_parser(
+        "explain",
+        help="Explain why a governed agent recommendation was selected.",
+    )
+    orchestration_explain_parser.add_argument(
+        "task_type",
+        metavar="TASK_TYPE",
+        help="Task type to explain against agent roles.",
+    )
+    orchestration_explain_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON explanation output.",
+    )
+    orchestration_explain_parser.set_defaults(handler=run_orchestration_explain)
 
     orchestration_plan_parser = orchestration_subparsers.add_parser(
         "plan",

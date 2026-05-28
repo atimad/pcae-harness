@@ -7,6 +7,9 @@ from pcae.core.policy import AgentRegistryEntry, OrchestrationPolicy, load_polic
 ORCHESTRATION_SELECTION_ADVISORY = (
     "Selection is advisory; the user remains authoritative."
 )
+ORCHESTRATION_EXPLANATION_ADVISORY = (
+    "Explanation is advisory; the user remains authoritative."
+)
 
 # Each workflow is a sequence of (role, label) pairs.
 # role  – the agent registry role used for agent assignment
@@ -113,6 +116,73 @@ def select_agent(root: HarnessPath, task_type: str) -> dict:
         "reason": data["reason"],
         "advisory": ORCHESTRATION_SELECTION_ADVISORY,
     }
+
+
+def explain_agent_selection(root: HarnessPath, task_type: str) -> dict:
+    policy = load_policy(root)
+    if not policy.valid:
+        raise ValueError(policy.error or "Invalid policy.")
+
+    selection = select_agent(root, task_type)
+    registry = policy.agent_registry
+    alternatives = [
+        {
+            "agent_id": entry.agent_id,
+            "roles": list(entry.roles),
+            "why_not_selected": _why_agent_not_selected(
+                entry,
+                task_type,
+                selection["recommended_agent"],
+                selection["matched_role"],
+                selection["fallback_used"],
+                policy.orchestration.default_agent,
+                registry,
+            ),
+        }
+        for entry in registry
+        if entry.agent_id != selection["recommended_agent"]
+    ]
+
+    return {
+        "task_type": task_type,
+        "recommended_agent": selection["recommended_agent"],
+        "matched_role": selection["matched_role"],
+        "fallback_used": selection["fallback_used"],
+        "explanation": selection["reason"],
+        "alternatives": alternatives,
+        "advisory": ORCHESTRATION_EXPLANATION_ADVISORY,
+    }
+
+
+def _why_agent_not_selected(
+    entry: AgentRegistryEntry,
+    task_type: str,
+    recommended_agent: str,
+    matched_role: str | None,
+    fallback_used: bool,
+    default_agent: str,
+    registry: tuple[AgentRegistryEntry, ...],
+) -> str:
+    if fallback_used:
+        return (
+            f"Agent does not declare role '{task_type}'; deterministic fallback "
+            f"selected orchestration default '{recommended_agent}'."
+        )
+
+    if matched_role not in entry.roles:
+        return f"Agent does not declare role '{matched_role}'."
+
+    matching_agents = [candidate for candidate in registry if matched_role in candidate.roles]
+    if len(matching_agents) > 1 and recommended_agent == default_agent:
+        return (
+            f"Agent declares role '{matched_role}', but orchestration default "
+            f"'{default_agent}' is preferred when multiple agents match."
+        )
+
+    return (
+        f"Agent declares role '{matched_role}', but '{recommended_agent}' was chosen "
+        "first by deterministic registry order."
+    )
 
 
 def build_workflow_plan(root: HarnessPath, workflow: str) -> dict:

@@ -9,6 +9,7 @@ import pytest
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.orchestration import (
+    ORCHESTRATION_EXPLANATION_ADVISORY,
     ORCHESTRATION_SELECTION_ADVISORY,
     build_agent_registry_data,
     build_orchestration_data,
@@ -16,6 +17,7 @@ from pcae.core.orchestration import (
     build_workflow_readiness,
     build_workflow_simulation,
     build_workflow_validation,
+    explain_agent_selection,
     load_agent_registry,
     load_orchestration_policy,
     recommend_agent,
@@ -454,6 +456,69 @@ def test_select_agent_raises_on_invalid_policy(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# core: explain_agent_selection
+# ---------------------------------------------------------------------------
+
+
+def test_explain_agent_selection_documentation(tmp_path: Path) -> None:
+    result = explain_agent_selection(HarnessPath(tmp_path), "documentation")
+    assert result["task_type"] == "documentation"
+    assert result["recommended_agent"] == "claude-local"
+    assert result["matched_role"] == "documentation"
+    assert result["fallback_used"] is False
+    assert "claude-local" in result["explanation"]
+    assert result["advisory"] == ORCHESTRATION_EXPLANATION_ADVISORY
+
+
+def test_explain_agent_selection_includes_alternatives(tmp_path: Path) -> None:
+    result = explain_agent_selection(HarnessPath(tmp_path), "documentation")
+    assert result["alternatives"]
+    alternative_ids = {item["agent_id"] for item in result["alternatives"]}
+    assert "codex-local" in alternative_ids
+    assert "pcae-native" in alternative_ids
+    for alternative in result["alternatives"]:
+        assert "roles" in alternative
+        assert "why_not_selected" in alternative
+
+
+def test_explain_agent_selection_unknown_explains_fallback(tmp_path: Path) -> None:
+    result = explain_agent_selection(HarnessPath(tmp_path), "unknown-work-type")
+    assert result["recommended_agent"] == "claude-local"
+    assert result["matched_role"] is None
+    assert result["fallback_used"] is True
+    assert "using orchestration default" in result["explanation"]
+    assert result["alternatives"]
+    assert all(
+        "does not declare role 'unknown-work-type'" in item["why_not_selected"]
+        for item in result["alternatives"]
+    )
+
+
+def test_explain_agent_selection_multiple_matches_mentions_default_preference(
+    tmp_path: Path,
+) -> None:
+    write_policy(
+        tmp_path,
+        minimal_policy()
+        + '\n[orchestration]\ndefault_agent = "agent-b"\n'
+        + '\n[agents.agent-a]\nkind = "ka"\nroles = ["shared-role"]\n'
+        + '\n[agents.agent-b]\nkind = "kb"\nroles = ["shared-role"]\n',
+    )
+    result = explain_agent_selection(HarnessPath(tmp_path), "shared-role")
+    assert result["recommended_agent"] == "agent-b"
+    assert any(
+        "preferred when multiple agents match" in item["why_not_selected"]
+        for item in result["alternatives"]
+    )
+
+
+def test_explain_agent_selection_raises_on_invalid_policy(tmp_path: Path) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    with pytest.raises(ValueError):
+        explain_agent_selection(HarnessPath(tmp_path), "documentation")
+
+
+# ---------------------------------------------------------------------------
 # CLI: pcae orchestration recommend
 # ---------------------------------------------------------------------------
 
@@ -618,6 +683,94 @@ def test_cli_orchestration_select_fails_on_invalid_policy(
     write_policy(tmp_path, "[protected]\npatterns = []\n")
     monkeypatch.chdir(tmp_path)
     exit_code = main(["orchestration", "select", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae orchestration explain
+# ---------------------------------------------------------------------------
+
+
+def test_cli_orchestration_explain_human_documentation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "explain", "documentation"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Task type: documentation" in output
+    assert "Recommended agent: claude-local" in output
+    assert "Matched role: documentation" in output
+    assert "Fallback used: no" in output
+    assert "Explanation:" in output
+    assert "Alternatives:" in output
+    assert "codex-local" in output
+    assert ORCHESTRATION_EXPLANATION_ADVISORY in output
+
+
+def test_cli_orchestration_explain_human_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "explain", "no-such-role"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Task type: no-such-role" in output
+    assert "Recommended agent: claude-local" in output
+    assert "Matched role: fallback" in output
+    assert "Fallback used: yes" in output
+    assert "using orchestration default" in output
+    assert ORCHESTRATION_EXPLANATION_ADVISORY in output
+
+
+def test_cli_orchestration_explain_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "explain", "documentation", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {
+        "task_type",
+        "recommended_agent",
+        "matched_role",
+        "fallback_used",
+        "explanation",
+        "alternatives",
+        "advisory",
+    }
+    assert data["task_type"] == "documentation"
+    assert data["recommended_agent"] == "claude-local"
+    assert data["matched_role"] == "documentation"
+    assert data["fallback_used"] is False
+    assert isinstance(data["alternatives"], list)
+    assert data["advisory"] == ORCHESTRATION_EXPLANATION_ADVISORY
+
+
+def test_cli_orchestration_explain_json_fallback(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "explain", "unknown", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["task_type"] == "unknown"
+    assert data["fallback_used"] is True
+    assert data["matched_role"] is None
+    assert data["recommended_agent"] == "claude-local"
+    assert "using orchestration default" in data["explanation"]
+    assert data["alternatives"]
+    assert data["advisory"] == ORCHESTRATION_EXPLANATION_ADVISORY
+
+
+def test_cli_orchestration_explain_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "explain", "documentation"])
     output = capsys.readouterr().out
     assert exit_code == 1
     assert output.strip()
