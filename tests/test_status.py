@@ -4370,7 +4370,7 @@ def test_build_governance_artifact_registry_advisory(tmp_path: Path) -> None:
 
 def test_build_governance_artifact_registry_has_artifacts(tmp_path: Path) -> None:
     result = build_governance_artifact_registry()
-    assert len(result.artifacts) == 10
+    assert len(result.artifacts) == 11
 
 
 def test_build_governance_artifact_registry_has_four_classes(tmp_path: Path) -> None:
@@ -4386,7 +4386,7 @@ def test_build_governance_artifact_registry_classes_ordered_by_first_appearance(
 
 
 # ---------------------------------------------------------------------------
-# Core: GOVERNANCE_ARTIFACT_REGISTRY — all 10 entries present
+# Core: GOVERNANCE_ARTIFACT_REGISTRY — all 11 entries present
 # ---------------------------------------------------------------------------
 
 
@@ -4438,6 +4438,11 @@ def test_governance_registry_contains_context_packs_pattern(tmp_path: Path) -> N
 def test_governance_registry_contains_continuity_packs_pattern(tmp_path: Path) -> None:
     paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
     assert ".pcae/continuity-packs/**" in paths
+
+
+def test_governance_registry_contains_governance_exports_pattern(tmp_path: Path) -> None:
+    paths = {e.path for e in GOVERNANCE_ARTIFACT_REGISTRY}
+    assert ".pcae/governance-exports/**" in paths
 
 
 # ---------------------------------------------------------------------------
@@ -4547,7 +4552,7 @@ def test_governance_artifact_report_to_dict_artifacts_is_list(tmp_path: Path) ->
     result = build_governance_artifact_registry()
     d = result.to_dict()
     assert isinstance(d["artifacts"], list)
-    assert len(d["artifacts"]) == 10
+    assert len(d["artifacts"]) == 11
 
 
 def test_governance_artifact_report_to_dict_classes_is_list(tmp_path: Path) -> None:
@@ -4667,7 +4672,7 @@ def test_cli_governance_artifacts_json_artifacts_count(
     monkeypatch.chdir(tmp_path)
     main(["governance", "artifacts", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert len(data["artifacts"]) == 10
+    assert len(data["artifacts"]) == 11
 
 
 def test_cli_governance_artifacts_json_each_artifact_has_required_fields(
@@ -4861,3 +4866,177 @@ def test_cli_governance_registry_audit_json(
     for consumer in data["consumers"]:
         assert consumer["registry_backed"] is True
         assert consumer["note"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 35U: Governance artifact registry export
+# ---------------------------------------------------------------------------
+
+from pcae.core.status import (
+    GOVERNANCE_ARTIFACT_EXPORT_RELATIVE_PATH,
+    GovernanceArtifactExport,
+    export_governance_artifact_registry,
+)
+
+
+def test_export_governance_artifact_registry_writes_file(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    assert target.is_file()
+
+
+def test_export_governance_artifact_registry_path_format(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(
+        HarnessPath(tmp_path),
+        exported_at=datetime(2026, 5, 28, 10, 0, 0, tzinfo=timezone.utc),
+    )
+    assert result.export_path == Path(
+        ".pcae/governance-exports/artifact-registry-20260528-100000.json"
+    )
+
+
+def test_export_governance_artifact_registry_json_parses(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert "exported_at" in data
+    assert "artifact_count" in data
+    assert "classes" in data
+    assert "artifacts" in data
+    assert "advisory" in data
+    assert "exported_by_version" in data
+
+
+def test_export_governance_artifact_registry_artifact_count(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert data["artifact_count"] == 11
+    assert len(data["artifacts"]) == 11
+
+
+def test_export_governance_artifact_registry_classes(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    assert set(data["classes"]) == {"operational", "historical", "runtime", "generated"}
+
+
+def test_export_governance_artifact_registry_artifacts_have_required_fields(
+    tmp_path: Path,
+) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    for artifact in data["artifacts"]:
+        assert "path" in artifact
+        assert "artifact_class" in artifact
+        assert "governance_role" in artifact
+        assert "repair_policy" in artifact
+        assert "source_control_role" in artifact
+
+
+def test_export_governance_artifact_registry_repair_policies(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    repair_policies = {a["repair_policy"] for a in data["artifacts"]}
+    assert repair_policies == {"actionable", "preserve", "ignore"}
+
+
+def test_export_governance_artifact_registry_source_control_roles(
+    tmp_path: Path,
+) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    target = tmp_path / result.export_path
+    data = json.loads(target.read_text(encoding="utf-8"))
+    scr = {a["source_control_role"] for a in data["artifacts"]}
+    assert "tracked" in scr
+    assert "ignored" in scr
+    assert "generated_ignored" in scr
+
+
+def test_export_governance_artifact_registry_result_shape(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    assert isinstance(result, GovernanceArtifactExport)
+    assert result.artifact_count == 11
+    assert result.exported_at
+    assert result.classes
+
+
+def test_export_governance_artifact_registry_to_dict_shape(tmp_path: Path) -> None:
+    result = export_governance_artifact_registry(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert "export_path" in d
+    assert "exported_at" in d
+    assert "artifact_count" in d
+    assert "classes" in d
+    assert "advisory" in d
+
+
+def test_export_governance_artifact_registry_creates_export_dir(
+    tmp_path: Path,
+) -> None:
+    export_governance_artifact_registry(HarnessPath(tmp_path))
+    assert (tmp_path / ".pcae" / "governance-exports").is_dir()
+
+
+def test_export_governance_artifact_registry_does_not_modify_governance_artifacts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text("# Status\n")
+    before = (tmp_path / "PROJECT_STATUS.md").read_text()
+    export_governance_artifact_registry(HarnessPath(tmp_path))
+    after = (tmp_path / "PROJECT_STATUS.md").read_text()
+    assert before == after
+
+
+def test_cli_governance_artifacts_export_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "artifacts", "export"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance artifact registry export" in output
+    assert ".pcae/governance-exports/artifact-registry-" in output
+    assert "Artifact count: 11" in output
+    assert list((tmp_path / ".pcae" / "governance-exports").glob("artifact-registry-*.json"))
+
+
+def test_cli_governance_artifacts_export_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "artifacts", "export", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert "export_path" in data
+    assert "exported_at" in data
+    assert "artifact_count" in data
+    assert data["artifact_count"] == 11
+    assert data["export_path"].startswith(".pcae/governance-exports/artifact-registry-")
+
+
+def test_cli_governance_artifacts_export_json_file_parses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "artifacts", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    export_path = tmp_path / data["export_path"]
+    file_data = json.loads(export_path.read_text(encoding="utf-8"))
+    assert file_data["artifact_count"] == 11
+    assert len(file_data["artifacts"]) == 11
+    assert file_data["exported_by_version"]
+
+
+def test_cli_governance_artifacts_still_works_after_export_subparser(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "artifacts"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Governance artifact registry" in output

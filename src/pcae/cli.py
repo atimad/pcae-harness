@@ -69,6 +69,7 @@ from pcae.commands.orchestration import (
 )
 from pcae.commands.status import (
     run_governance_artifacts,
+    run_governance_artifacts_export,
     run_governance_audit,
     run_governance_registry_audit,
     run_governance_repair,
@@ -535,6 +536,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance artifact registry output.",
     )
     governance_artifacts_parser.set_defaults(handler=run_governance_artifacts)
+    governance_artifacts_subparsers = governance_artifacts_parser.add_subparsers(
+        dest="governance_artifacts_command",
+    )
+    governance_artifacts_export_parser = governance_artifacts_subparsers.add_parser(
+        "export",
+        help="Export the governance artifact classification registry to .pcae/governance-exports/.",
+    )
+    governance_artifacts_export_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance artifact registry export output.",
+    )
+    governance_artifacts_export_parser.set_defaults(handler=run_governance_artifacts_export)
 
     governance_registry_audit_parser = governance_subparsers.add_parser(
         "registry-audit",

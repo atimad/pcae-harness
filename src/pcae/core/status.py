@@ -1823,6 +1823,7 @@ _GENERATED_ARTIFACT_PREFIXES: tuple[str, ...] = (
     ".pcae/runtime-snapshots/",
     ".pcae/context-packs/",
     ".pcae/continuity-packs/",
+    ".pcae/governance-exports/",
 )
 
 
@@ -1957,6 +1958,13 @@ GOVERNANCE_ARTIFACT_REGISTRY: tuple[GovernanceArtifactEntry, ...] = (
         repair_policy="ignore",
         source_control_role="generated_ignored",
     ),
+    GovernanceArtifactEntry(
+        path=".pcae/governance-exports/**",
+        artifact_class="generated",
+        governance_role="generated artifact; not proposed for source repair",
+        repair_policy="ignore",
+        source_control_role="generated_ignored",
+    ),
 )
 
 
@@ -1983,6 +1991,60 @@ def build_governance_artifact_registry() -> GovernanceArtifactReport:
         artifacts=GOVERNANCE_ARTIFACT_REGISTRY,
         classes=tuple(seen),
         advisory=ARTIFACT_CLASSIFICATION_ADVISORY,
+    )
+
+
+GOVERNANCE_ARTIFACT_EXPORT_RELATIVE_PATH = Path(".pcae") / "governance-exports"
+
+
+@dataclass(frozen=True)
+class GovernanceArtifactExport:
+    export_path: Path
+    exported_at: str
+    artifact_count: int
+    classes: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "export_path": self.export_path.as_posix(),
+            "exported_at": self.exported_at,
+            "artifact_count": self.artifact_count,
+            "classes": list(self.classes),
+            "advisory": self.advisory,
+        }
+
+
+def export_governance_artifact_registry(
+    root: HarnessPath,
+    exported_at: datetime | None = None,
+) -> GovernanceArtifactExport:
+    """Export the governance artifact classification registry to .pcae/governance-exports/."""
+    timestamp = exported_at or datetime.now(timezone.utc)
+    exported_at_text = timestamp.isoformat()
+    report = build_governance_artifact_registry()
+    export_data = {
+        "exported_at": exported_at_text,
+        "exported_by_version": exported_by_version(),
+        "artifact_count": len(report.artifacts),
+        "classes": list(report.classes),
+        "artifacts": [a.to_dict() for a in report.artifacts],
+        "advisory": report.advisory,
+    }
+    relative_path = GOVERNANCE_ARTIFACT_EXPORT_RELATIVE_PATH / (
+        f"artifact-registry-{timestamp.strftime('%Y%m%d-%H%M%S')}.json"
+    )
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as file:
+        json.dump(export_data, file, indent=2, sort_keys=True)
+        file.write("\n")
+    return GovernanceArtifactExport(
+        export_path=relative_path,
+        exported_at=exported_at_text,
+        artifact_count=len(report.artifacts),
+        classes=report.classes,
+        advisory=report.advisory,
     )
 
 

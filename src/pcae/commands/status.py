@@ -23,6 +23,7 @@ from pcae.core.status import (
     build_runtime_snapshot_manifest,
     check_governance_sync,
     check_project_status_coherence,
+    export_governance_artifact_registry,
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
@@ -473,6 +474,19 @@ def run_governance_registry_audit(args: argparse.Namespace) -> int:
         else:
             print("  - none")
         print(REGISTRY_AUDIT_ADVISORY)
+    return 0
+
+
+def run_governance_artifacts_export(args: argparse.Namespace) -> int:
+    result = export_governance_artifact_registry(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance artifact registry export")
+        print(f"Export path: {result.export_path.as_posix()}")
+        print(f"Artifact count: {result.artifact_count}")
+        print(f"Classes: {', '.join(result.classes)}")
+        print(f"Exported at: {result.exported_at}")
     return 0
 
 
