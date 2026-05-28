@@ -375,17 +375,21 @@ def run_governance_sync_repair(args: argparse.Namespace) -> int:
     else:
         print("Governance synchronization repair preview")
         print(f"Repairable: {'yes' if result.repairable else 'no'}")
+        print("Repair semantics:")
+        print("  Operational artifacts (tasks/TODO.md, PROJECT_STATUS.md) may be updated.")
+        print("  Historical artifacts (CHANGELOG.md, tasks/DONE.md) are preserved by default.")
         print("Proposed repairs:")
         if result.proposed_repairs:
             for repair in result.proposed_repairs:
-                print(f"  Artifact: {repair.artifact}")
+                print(f"  Artifact: {repair.artifact} ({repair.artifact_type})")
                 print(f"  Stale entry: {repair.stale_entry}")
-                print(f"  Action: {repair.action}")
+                print(f"  Proposed action: {repair.proposed_action}")
                 print(f"  Rationale: {repair.rationale}")
                 print()
         else:
             print("  - none")
         print(GOVERNANCE_SYNC_REPAIR_ADVISORY)
+        print("User remains authoritative over all repair decisions.")
     return 0
 
 

@@ -2669,6 +2669,7 @@ from pcae.core.status import (
     GovernanceSyncRepairPreview,
     SyncRepairEntry,
     plan_governance_sync_repairs,
+    _HISTORICAL_ARTIFACTS,
 )
 
 
@@ -2724,7 +2725,7 @@ def test_plan_governance_sync_repairs_repair_for_completed_todo(
     assert len(todo_repairs) == 1
     repair = todo_repairs[0]
     assert "pcae repair todo" in repair.stale_entry
-    assert repair.action == "remove"
+    assert repair.proposed_action == "remove"
     assert repair.rationale
 
 
@@ -2760,14 +2761,16 @@ def test_plan_governance_sync_repairs_repair_for_stale_reference(
     (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
     (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
     result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    # PROJECT_STATUS.md is operational → proposed_action is "update" (not "remove")
     stale_repairs = [
-        r for r in result.proposed_repairs if r.action == "remove" and "PROJECT_STATUS.md" in r.artifact
+        r for r in result.proposed_repairs
+        if r.proposed_action == "update" and r.artifact == "PROJECT_STATUS.md"
     ]
     assert len(stale_repairs) >= 1
-    assert any("pcae end" in r.stale_entry or "pcae end" in r.stale_entry for r in stale_repairs)
+    assert any("pcae end" in r.stale_entry for r in stale_repairs)
 
 
-def test_plan_governance_sync_repairs_stale_reference_action_is_remove(
+def test_plan_governance_sync_repairs_proposed_actions_are_valid(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "PROJECT_STATUS.md").write_text(
@@ -2781,8 +2784,9 @@ def test_plan_governance_sync_repairs_stale_reference_action_is_remove(
     (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
     (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
     result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    valid_actions = {"remove", "update", "relocate", "preserve", "mark_superseded"}
     for repair in result.proposed_repairs:
-        assert repair.action in ("remove", "update", "relocate")
+        assert repair.proposed_action in valid_actions
 
 
 # ---------------------------------------------------------------------------
@@ -2804,7 +2808,7 @@ def test_plan_governance_sync_repairs_repair_for_inconsistent_roadmap(
     ]
     assert len(roadmap_repairs) >= 1
     repair = roadmap_repairs[0]
-    assert repair.action == "remove"
+    assert repair.proposed_action == "update"
     assert "pcae roadmap fix" in repair.stale_entry
 
 
@@ -2841,7 +2845,7 @@ def test_plan_governance_sync_repairs_repair_to_dict_keys(tmp_path: Path) -> Non
     d = result.to_dict()
     assert d["proposed_repairs"]
     repair_dict = d["proposed_repairs"][0]
-    for key in ("artifact", "stale_entry", "action", "rationale"):
+    for key in ("artifact", "artifact_type", "stale_entry", "proposed_action", "rationale"):
         assert key in repair_dict, f"missing key: {key}"
 
 
@@ -2949,7 +2953,7 @@ def test_cli_governance_sync_repair_shows_stale_reference_repair(
     main(["governance", "sync-repair", "--dry-run"])
     output = capsys.readouterr().out
     assert "PROJECT_STATUS.md" in output
-    assert "remove" in output
+    assert "update" in output
 
 
 def test_cli_governance_sync_repair_shows_rationale(
@@ -3055,7 +3059,8 @@ def test_cli_governance_sync_repair_json_detects_completed_todo(
     assert len(todo_repairs) == 1
     repair = todo_repairs[0]
     assert "pcae json todo" in repair["stale_entry"]
-    assert repair["action"] == "remove"
+    assert repair["proposed_action"] == "remove"
+    assert repair["artifact_type"] == "operational"
     assert repair["rationale"]
 
 
@@ -3077,8 +3082,11 @@ def test_cli_governance_sync_repair_json_detects_stale_reference(
     captured = capsys.readouterr()
     data = json.loads(captured.out)
     assert len(data["proposed_repairs"]) >= 1
-    actions = [r["action"] for r in data["proposed_repairs"]]
-    assert "remove" in actions
+    # PROJECT_STATUS.md is operational → action is "update", not "remove"
+    ps_repairs = [r for r in data["proposed_repairs"] if r["artifact"] == "PROJECT_STATUS.md"]
+    assert len(ps_repairs) >= 1
+    assert all(r["proposed_action"] == "update" for r in ps_repairs)
+    assert all(r["artifact_type"] == "operational" for r in ps_repairs)
 
 
 def test_cli_governance_sync_repair_json_repair_entry_shape(
@@ -3095,7 +3103,7 @@ def test_cli_governance_sync_repair_json_repair_entry_shape(
     data = json.loads(captured.out)
     assert data["proposed_repairs"]
     repair = data["proposed_repairs"][0]
-    for key in ("artifact", "stale_entry", "action", "rationale"):
+    for key in ("artifact", "artifact_type", "stale_entry", "proposed_action", "rationale"):
         assert key in repair, f"missing key: {key}"
 
 
@@ -3123,3 +3131,458 @@ def test_cli_governance_sync_repair_json_is_read_only(
     monkeypatch.chdir(tmp_path)
     main(["governance", "sync-repair", "--dry-run", "--json"])
     assert todo_path.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# Phase 35O: artifact-type-aware governance sync repair semantics
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Core: artifact type classification
+# ---------------------------------------------------------------------------
+
+
+def test_historical_artifacts_set_contains_changelog(tmp_path: Path) -> None:
+    assert "CHANGELOG.md" in _HISTORICAL_ARTIFACTS
+
+
+def test_historical_artifacts_set_contains_done(tmp_path: Path) -> None:
+    assert "tasks/DONE.md" in _HISTORICAL_ARTIFACTS
+
+
+def test_historical_artifacts_set_does_not_contain_todo(tmp_path: Path) -> None:
+    assert "tasks/TODO.md" not in _HISTORICAL_ARTIFACTS
+
+
+def test_historical_artifacts_set_does_not_contain_project_status(
+    tmp_path: Path,
+) -> None:
+    assert "PROJECT_STATUS.md" not in _HISTORICAL_ARTIFACTS
+
+
+# ---------------------------------------------------------------------------
+# Core: SyncRepairEntry has artifact_type field
+# ---------------------------------------------------------------------------
+
+
+def test_sync_repair_entry_has_artifact_type_field(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae field test` command."],
+        done_entries=["Added `pcae field test`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    for repair in result.proposed_repairs:
+        assert hasattr(repair, "artifact_type")
+
+
+def test_sync_repair_entry_artifact_type_is_string(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae type str` command."],
+        done_entries=["Added `pcae type str`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    for repair in result.proposed_repairs:
+        assert isinstance(repair.artifact_type, str)
+
+
+def test_sync_repair_entry_artifact_type_values_are_known(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae type val` command."],
+        done_entries=["Added `pcae type val`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    for repair in result.proposed_repairs:
+        assert repair.artifact_type in ("operational", "historical")
+
+
+# ---------------------------------------------------------------------------
+# Core: TODO entries — operational, action: remove
+# ---------------------------------------------------------------------------
+
+
+def test_plan_sync_repairs_todo_entry_is_operational(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae oper type` command."],
+        done_entries=["Added `pcae oper type`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/TODO.md"]
+    assert todo_repairs
+    for repair in todo_repairs:
+        assert repair.artifact_type == "operational"
+
+
+def test_plan_sync_repairs_todo_entry_action_is_remove(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae todo remove` command."],
+        done_entries=["Added `pcae todo remove`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/TODO.md"]
+    assert todo_repairs
+    for repair in todo_repairs:
+        assert repair.proposed_action == "remove"
+
+
+# ---------------------------------------------------------------------------
+# Core: PROJECT_STATUS.md — operational, stale refs action: update
+# ---------------------------------------------------------------------------
+
+
+def test_plan_sync_repairs_project_status_stale_ref_is_update(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    ps_stale = [
+        r for r in result.proposed_repairs
+        if r.artifact == "PROJECT_STATUS.md"
+    ]
+    assert ps_stale
+    for repair in ps_stale:
+        assert repair.proposed_action == "update"
+        assert repair.artifact_type == "operational"
+
+
+def test_plan_sync_repairs_inconsistent_roadmap_is_update(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        next_items=["Add `pcae roadmap update` feature."],
+        done_entries=["Added `pcae roadmap update`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    ps_repairs = [r for r in result.proposed_repairs if r.artifact == "PROJECT_STATUS.md"]
+    assert ps_repairs
+    for repair in ps_repairs:
+        assert repair.proposed_action == "update"
+        assert repair.artifact_type == "operational"
+
+
+# ---------------------------------------------------------------------------
+# Core: CHANGELOG.md — historical, action: preserve (never remove)
+# ---------------------------------------------------------------------------
+
+
+def test_plan_sync_repairs_changelog_stale_ref_is_preserve(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    changelog_repairs = [
+        r for r in result.proposed_repairs if r.artifact == "CHANGELOG.md"
+    ]
+    assert changelog_repairs
+    for repair in changelog_repairs:
+        assert repair.proposed_action == "preserve"
+        assert repair.artifact_type == "historical"
+
+
+def test_plan_sync_repairs_changelog_action_is_never_remove(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    changelog_repairs = [
+        r for r in result.proposed_repairs if r.artifact == "CHANGELOG.md"
+    ]
+    assert changelog_repairs
+    for repair in changelog_repairs:
+        assert repair.proposed_action != "remove"
+
+
+# ---------------------------------------------------------------------------
+# Core: tasks/DONE.md — historical, action: preserve (never remove)
+# ---------------------------------------------------------------------------
+
+
+def test_plan_sync_repairs_done_stale_ref_is_preserve(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        done_entries=["Implement `pcae end` was added."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    done_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/DONE.md"]
+    assert done_repairs
+    for repair in done_repairs:
+        assert repair.proposed_action == "preserve"
+        assert repair.artifact_type == "historical"
+
+
+def test_plan_sync_repairs_done_action_is_never_remove(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        done_entries=["Implement `pcae end` was added."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    done_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/DONE.md"]
+    assert done_repairs
+    for repair in done_repairs:
+        assert repair.proposed_action != "remove"
+
+
+# ---------------------------------------------------------------------------
+# Core: mixed scenario — correct types assigned per artifact
+# ---------------------------------------------------------------------------
+
+
+def test_plan_sync_repairs_mixed_scenario_types(tmp_path: Path) -> None:
+    """
+    Stale phrase in CHANGELOG.md → preserve/historical.
+    Completed TODO entry → remove/operational.
+    Stale phrase in PROJECT_STATUS.md → update/operational.
+    """
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text(
+        "# TODO\n\n## Pending\n\n- Add `pcae mixed cmd` command.\n",
+        encoding="utf-8",
+    )
+    (tasks_dir / "DONE.md").write_text(
+        "# DONE\n\n- Added `pcae mixed cmd`.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "CHANGELOG.md").write_text(
+        "# Changelog\n\n- Implement `pcae end` was done.\n",
+        encoding="utf-8",
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    by_artifact = {r.artifact: r for r in result.proposed_repairs}
+
+    assert "tasks/TODO.md" in by_artifact
+    assert by_artifact["tasks/TODO.md"].proposed_action == "remove"
+    assert by_artifact["tasks/TODO.md"].artifact_type == "operational"
+
+    assert "PROJECT_STATUS.md" in by_artifact
+    assert by_artifact["PROJECT_STATUS.md"].proposed_action == "update"
+    assert by_artifact["PROJECT_STATUS.md"].artifact_type == "operational"
+
+    assert "CHANGELOG.md" in by_artifact
+    assert by_artifact["CHANGELOG.md"].proposed_action == "preserve"
+    assert by_artifact["CHANGELOG.md"].artifact_type == "historical"
+
+
+# ---------------------------------------------------------------------------
+# CLI human: repair semantics section and user authority
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_human_shows_repair_semantics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Repair semantics:" in output
+
+
+def test_cli_governance_sync_repair_human_mentions_operational(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "operational" in output.lower()
+
+
+def test_cli_governance_sync_repair_human_mentions_historical(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "historical" in output.lower()
+
+
+def test_cli_governance_sync_repair_human_mentions_user_authority(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "authoritative" in output.lower()
+
+
+def test_cli_governance_sync_repair_human_shows_proposed_action_label(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae proposed label` command."],
+        done_entries=["Added `pcae proposed label`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Proposed action:" in output
+
+
+def test_cli_governance_sync_repair_human_shows_artifact_type_in_repair(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae type display` command."],
+        done_entries=["Added `pcae type display`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    # Artifact line shows artifact type in parentheses
+    assert "operational" in output
+
+
+def test_cli_governance_sync_repair_human_historical_shows_preserve(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "preserve" in output
+    assert "historical" in output
+
+
+# ---------------------------------------------------------------------------
+# CLI JSON: artifact_type field in each repair entry
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_json_includes_artifact_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json art` command."],
+        done_entries=["Added `pcae json art`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    for repair in data["proposed_repairs"]:
+        assert "artifact_type" in repair
+
+
+def test_cli_governance_sync_repair_json_todo_is_operational_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json oper` command."],
+        done_entries=["Added `pcae json oper`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    todo_repairs = [r for r in data["proposed_repairs"] if r["artifact"] == "tasks/TODO.md"]
+    assert todo_repairs
+    for repair in todo_repairs:
+        assert repair["artifact_type"] == "operational"
+
+
+def test_cli_governance_sync_repair_json_changelog_is_historical_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    changelog_repairs = [
+        r for r in data["proposed_repairs"] if r["artifact"] == "CHANGELOG.md"
+    ]
+    assert changelog_repairs
+    for repair in changelog_repairs:
+        assert repair["artifact_type"] == "historical"
+        assert repair["proposed_action"] == "preserve"
+
+
+def test_cli_governance_sync_repair_json_done_is_historical_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        done_entries=["Implement `pcae end` was added."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    done_repairs = [
+        r for r in data["proposed_repairs"] if r["artifact"] == "tasks/DONE.md"
+    ]
+    assert done_repairs
+    for repair in done_repairs:
+        assert repair["artifact_type"] == "historical"
+        assert repair["proposed_action"] == "preserve"
+
+
+def test_cli_governance_sync_repair_json_historical_artifacts_never_remove(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+        done_entries=["Implement `pcae end` was added."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    historical_repairs = [
+        r for r in data["proposed_repairs"] if r["artifact_type"] == "historical"
+    ]
+    assert historical_repairs
+    for repair in historical_repairs:
+        assert repair["proposed_action"] != "remove"
+
+
+def test_cli_governance_sync_repair_json_uses_proposed_action_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae key name` command."],
+        done_entries=["Added `pcae key name`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["proposed_repairs"]
+    repair = data["proposed_repairs"][0]
+    assert "proposed_action" in repair
+    assert "action" not in repair

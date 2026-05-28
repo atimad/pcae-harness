@@ -1946,19 +1946,40 @@ GOVERNANCE_SYNC_REPAIR_ADVISORY = (
     "Repair preview is advisory; no governance artifacts are modified."
 )
 
+# Historical artifacts record what happened; they are never proposed for removal.
+# Operational artifacts carry live guidance and may be proposed for update/removal.
+_HISTORICAL_ARTIFACTS: frozenset[str] = frozenset({
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+})
+
+
+def _artifact_type_for(artifact: str) -> str:
+    return "historical" if artifact in _HISTORICAL_ARTIFACTS else "operational"
+
+
+def _stale_ref_proposed_action(artifact: str) -> str:
+    if artifact in _HISTORICAL_ARTIFACTS:
+        return "preserve"
+    if artifact == "PROJECT_STATUS.md":
+        return "update"
+    return "remove"
+
 
 @dataclass(frozen=True)
 class SyncRepairEntry:
     artifact: str
+    artifact_type: str
     stale_entry: str
-    action: str
+    proposed_action: str
     rationale: str
 
     def to_dict(self) -> dict:
         return {
             "artifact": self.artifact,
+            "artifact_type": self.artifact_type,
             "stale_entry": self.stale_entry,
-            "action": self.action,
+            "proposed_action": self.proposed_action,
             "rationale": self.rationale,
         }
 
@@ -1985,8 +2006,9 @@ def plan_governance_sync_repairs(root: HarnessPath) -> GovernanceSyncRepairPrevi
     for entry in sync.completed_todo_entries:
         repairs.append(SyncRepairEntry(
             artifact="tasks/TODO.md",
+            artifact_type="operational",
             stale_entry=entry,
-            action="remove",
+            proposed_action="remove",
             rationale=(
                 "Entry is already completed; it appears in DONE.md or CHANGELOG.md "
                 "and should be removed from the Pending section."
@@ -1997,32 +2019,44 @@ def plan_governance_sync_repairs(root: HarnessPath) -> GovernanceSyncRepairPrevi
         artifact_part, sep, stale_phrase = ref.partition(": stale reference: ")
         artifact = artifact_part if sep else "governance artifact"
         stale_entry = stale_phrase if sep else ref
-        repairs.append(SyncRepairEntry(
-            artifact=artifact,
-            stale_entry=stale_entry,
-            action="remove",
-            rationale=(
+        artifact_type = _artifact_type_for(artifact)
+        proposed_action = _stale_ref_proposed_action(artifact)
+        if artifact_type == "historical":
+            rationale = (
+                "Historical record; stale reference is preserved as-is. "
+                "Historical artifacts are not proposed for modification."
+            )
+        else:
+            rationale = (
                 "Feature already implemented; stale reference creates orchestration risk "
                 "for agents reading roadmap guidance."
-            ),
+            )
+        repairs.append(SyncRepairEntry(
+            artifact=artifact,
+            artifact_type=artifact_type,
+            stale_entry=stale_entry,
+            proposed_action=proposed_action,
+            rationale=rationale,
         ))
 
     for entry in sync.inconsistent_entries:
         repairs.append(SyncRepairEntry(
             artifact="PROJECT_STATUS.md",
+            artifact_type="operational",
             stale_entry=entry,
-            action="remove",
+            proposed_action="update",
             rationale=(
                 "Roadmap item appears already completed in DONE.md; "
-                "it should be removed from the Next section."
+                "the Next section guidance should be updated."
             ),
         ))
 
     for warning in sync.governance_drift_warnings:
         repairs.append(SyncRepairEntry(
             artifact="governance audit",
+            artifact_type="operational",
             stale_entry=warning,
-            action="update",
+            proposed_action="update",
             rationale=(
                 "Governance audit has a capability gap; "
                 "update the audit to include this check."
