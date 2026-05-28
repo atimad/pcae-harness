@@ -4,6 +4,7 @@
 
 - Started PCAE Harness project.
 - Added `pcae roadmap next` and `pcae roadmap next --json` for deterministic, read-only governed roadmap recommendations based on governance audit, health, active task, TODO/DONE, project status, continuity, and orchestration readiness signals. Recommendations are advisory only and preserve human authority without creating tasks, modifying artifacts, or mutating runtime state.
+- Added `pcae orchestration select TASK_TYPE` and `pcae orchestration select TASK_TYPE --json` for deterministic, advisory agent selection using the current orchestration policy and agent registry. Selection reuses the existing recommendation logic, reports matched role and fallback status, and does not mutate locks or runtime state.
 - Added Phase 1 `pcae init` scaffold.
 - Added read-only `pcae inspect` with manifest-driven required path reporting.
 - Added `pcae task new` for creating active Markdown task contracts.

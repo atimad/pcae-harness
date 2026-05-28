@@ -4,6 +4,10 @@ from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import AgentRegistryEntry, OrchestrationPolicy, load_policy
 
+ORCHESTRATION_SELECTION_ADVISORY = (
+    "Selection is advisory; the user remains authoritative."
+)
+
 # Each workflow is a sequence of (role, label) pairs.
 # role  – the agent registry role used for agent assignment
 # label – the human-friendly work_type shown in output
@@ -96,6 +100,18 @@ def recommend_agent(root: HarnessPath, work_type: str) -> dict:
         "reason": rec["reason"],
         "matched_role": rec["matched_role"],
         "fallback_used": rec["fallback_used"],
+    }
+
+
+def select_agent(root: HarnessPath, task_type: str) -> dict:
+    data = recommend_agent(root, task_type)
+    return {
+        "task_type": task_type,
+        "recommended_agent": data["recommended_agent"],
+        "matched_role": data["matched_role"],
+        "fallback_used": data["fallback_used"],
+        "reason": data["reason"],
+        "advisory": ORCHESTRATION_SELECTION_ADVISORY,
     }
 
 

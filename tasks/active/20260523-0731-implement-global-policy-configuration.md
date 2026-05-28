@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement governed roadmap recommendation.
+Implement orchestration select.
 
 ## Allowed Files
 

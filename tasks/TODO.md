@@ -2,8 +2,6 @@
 
 ## Pending
 
-- Implement `pcae orchestration select`: given a task type, return the recommended agent from policy.
-
 ## Future Explorations (from Phase 32C/32D/32E/32F/32G)
 
 - Automatic low-context detection triggering handoff.

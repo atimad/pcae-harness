@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.orchestration import (
+    ORCHESTRATION_SELECTION_ADVISORY,
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
@@ -11,6 +12,7 @@ from pcae.core.orchestration import (
     build_workflow_simulation,
     build_workflow_validation,
     recommend_agent,
+    select_agent,
 )
 from pcae.core.paths import HarnessPath
 
@@ -66,6 +68,27 @@ def run_orchestration_recommend(args: argparse.Namespace) -> int:
         print(f"Work type: {data['work_type']}")
         print(f"Recommended agent: {data['recommended_agent']}")
         print(f"Reason: {data['reason']}")
+    return 0
+
+
+def run_orchestration_select(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = select_agent(root, args.task_type)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        matched_role = data["matched_role"] or "fallback"
+        print(f"Task type: {data['task_type']}")
+        print(f"Recommended agent: {data['recommended_agent']}")
+        print(f"Matched role: {matched_role}")
+        print(f"Fallback used: {'yes' if data['fallback_used'] else 'no'}")
+        print(f"Reason: {data['reason']}")
+        print(ORCHESTRATION_SELECTION_ADVISORY)
     return 0
 
 

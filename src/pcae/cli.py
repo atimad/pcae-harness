@@ -64,6 +64,7 @@ from pcae.commands.orchestration import (
     run_orchestration_policy,
     run_orchestration_readiness,
     run_orchestration_recommend,
+    run_orchestration_select,
     run_orchestration_simulate,
     run_orchestration_validate,
 )
@@ -770,6 +771,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON recommendation output.",
     )
     orchestration_recommend_parser.set_defaults(handler=run_orchestration_recommend)
+
+    orchestration_select_parser = orchestration_subparsers.add_parser(
+        "select",
+        help="Select a recommended governed agent for a task type.",
+    )
+    orchestration_select_parser.add_argument(
+        "task_type",
+        metavar="TASK_TYPE",
+        help="Task type to match against agent roles.",
+    )
+    orchestration_select_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON selection output.",
+    )
+    orchestration_select_parser.set_defaults(handler=run_orchestration_select)
 
     orchestration_plan_parser = orchestration_subparsers.add_parser(
         "plan",

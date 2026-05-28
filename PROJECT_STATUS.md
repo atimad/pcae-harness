@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36A: Governed roadmap recommendation.
+Phase 36B: Orchestration select.
 
 ## Governance Coherence Note
 
@@ -16,10 +16,11 @@ roadmap guidance must remain coherent. When they drift, run
 ## Current State
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
-and `pcae roadmap next --json`, using governance audit, health, active task,
-TODO/DONE, project status, continuity, and orchestration readiness signals
-while keeping recommendations advisory and non-mutating, preview and refresh
-adoption with init options, generate command,
+and `pcae roadmap next --json`, and can select a recommended agent for a task
+type with `pcae orchestration select TASK_TYPE` and
+`pcae orchestration select TASK_TYPE --json`, using current orchestration
+policy and agent registry while keeping recommendations advisory and
+non-mutating, preview and refresh adoption with init options, generate command,
 architecture, and glossary documentation, generate, inspect, detect drift in,
 preview repair for, and repair GitHub Actions governance CI workflows, inspect
 repo readiness in human-readable or JSON form, report governance health and
