@@ -2658,3 +2658,468 @@ def test_cli_audit_json_valid_false_on_drift(
     assert data["valid"] is False
     assert data["summary"]["status"] == "warnings"
     assert data["summary"]["failed_count"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 35N: governance synchronization repair preview
+# ---------------------------------------------------------------------------
+
+from pcae.core.status import (
+    GOVERNANCE_SYNC_REPAIR_ADVISORY,
+    GovernanceSyncRepairPreview,
+    SyncRepairEntry,
+    plan_governance_sync_repairs,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — return type and advisory
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_returns_preview(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    assert isinstance(result, GovernanceSyncRepairPreview)
+
+
+def test_plan_governance_sync_repairs_advisory(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.advisory == GOVERNANCE_SYNC_REPAIR_ADVISORY
+
+
+def test_plan_governance_sync_repairs_repairable_always_true(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.repairable is True
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — clean repo has no repairs
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_no_repairs_when_clean(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    assert result.proposed_repairs == ()
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — completed TODO entries
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_repair_for_completed_todo(
+    tmp_path: Path,
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae repair todo` command."],
+        done_entries=["Added `pcae repair todo` for governance."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/TODO.md"]
+    assert len(todo_repairs) == 1
+    repair = todo_repairs[0]
+    assert "pcae repair todo" in repair.stale_entry
+    assert repair.action == "remove"
+    assert repair.rationale
+
+
+def test_plan_governance_sync_repairs_repair_entry_is_sync_repair_entry(
+    tmp_path: Path,
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae entry type` command."],
+        done_entries=["Added `pcae entry type`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    for repair in result.proposed_repairs:
+        assert isinstance(repair, SyncRepairEntry)
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — stale roadmap/command references
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_repair_for_stale_reference(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    stale_repairs = [
+        r for r in result.proposed_repairs if r.action == "remove" and "PROJECT_STATUS.md" in r.artifact
+    ]
+    assert len(stale_repairs) >= 1
+    assert any("pcae end" in r.stale_entry or "pcae end" in r.stale_entry for r in stale_repairs)
+
+
+def test_plan_governance_sync_repairs_stale_reference_action_is_remove(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    for repair in result.proposed_repairs:
+        assert repair.action in ("remove", "update", "relocate")
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — inconsistent roadmap entries
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_repair_for_inconsistent_roadmap(
+    tmp_path: Path,
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        next_items=["Add `pcae roadmap fix` feature."],
+        done_entries=["Added `pcae roadmap fix` command."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    roadmap_repairs = [
+        r for r in result.proposed_repairs if r.artifact == "PROJECT_STATUS.md"
+    ]
+    assert len(roadmap_repairs) >= 1
+    repair = roadmap_repairs[0]
+    assert repair.action == "remove"
+    assert "pcae roadmap fix" in repair.stale_entry
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — to_dict shape
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_to_dict_keys(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert "repairable" in d
+    assert "proposed_repairs" in d
+    assert "advisory" in d
+
+
+def test_plan_governance_sync_repairs_to_dict_types(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert isinstance(d["repairable"], bool)
+    assert isinstance(d["proposed_repairs"], list)
+    assert isinstance(d["advisory"], str)
+
+
+def test_plan_governance_sync_repairs_repair_to_dict_keys(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae dict key` command."],
+        done_entries=["Added `pcae dict key`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert d["proposed_repairs"]
+    repair_dict = d["proposed_repairs"][0]
+    for key in ("artifact", "stale_entry", "action", "rationale"):
+        assert key in repair_dict, f"missing key: {key}"
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_governance_sync_repairs — read-only guarantee
+# ---------------------------------------------------------------------------
+
+
+def test_plan_governance_sync_repairs_is_read_only(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae ro check` command."],
+        done_entries=["Added `pcae ro check`."],
+    )
+    todo_path = tmp_path / "tasks" / "TODO.md"
+    mtime = todo_path.stat().st_mtime
+    plan_governance_sync_repairs(HarnessPath(tmp_path))
+    assert todo_path.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance sync-repair --dry-run (human-readable)
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "sync-repair", "--dry-run"])
+    assert result == 0
+
+
+def test_cli_governance_sync_repair_prints_header(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Governance synchronization repair preview" in output
+
+
+def test_cli_governance_sync_repair_prints_proposed_repairs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Proposed repairs:" in output
+
+
+def test_cli_governance_sync_repair_prints_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert GOVERNANCE_SYNC_REPAIR_ADVISORY in output
+
+
+def test_cli_governance_sync_repair_none_when_clean(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "none" in output.lower()
+
+
+def test_cli_governance_sync_repair_shows_todo_repair(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae cli show` command."],
+        done_entries=["Added `pcae cli show` for governance."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "tasks/TODO.md" in output
+    assert "pcae cli show" in output
+    assert "remove" in output
+
+
+def test_cli_governance_sync_repair_shows_stale_reference_repair(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "PROJECT_STATUS.md" in output
+    assert "remove" in output
+
+
+def test_cli_governance_sync_repair_shows_rationale(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae rationale test` command."],
+        done_entries=["Added `pcae rationale test`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "Rationale:" in output
+
+
+def test_cli_governance_sync_repair_requires_dry_run_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(SystemExit):
+        main(["governance", "sync-repair"])
+
+
+def test_cli_governance_sync_repair_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae cli ro` command."],
+        done_entries=["Added `pcae cli ro`."],
+    )
+    todo_path = tmp_path / "tasks" / "TODO.md"
+    mtime = todo_path.stat().st_mtime
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    assert todo_path.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae governance sync-repair --dry-run --json
+# ---------------------------------------------------------------------------
+
+
+def test_cli_governance_sync_repair_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["governance", "sync-repair", "--dry-run", "--json"])
+    assert result == 0
+
+
+def test_cli_governance_sync_repair_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_governance_sync_repair_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    for key in ("repairable", "proposed_repairs", "advisory"):
+        assert key in data, f"missing JSON key: {key}"
+
+
+def test_cli_governance_sync_repair_json_clean_has_no_repairs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["repairable"] is True
+    assert data["proposed_repairs"] == []
+    assert data["advisory"] == GOVERNANCE_SYNC_REPAIR_ADVISORY
+
+
+def test_cli_governance_sync_repair_json_detects_completed_todo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json todo` command."],
+        done_entries=["Added `pcae json todo` for governance."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    todo_repairs = [r for r in data["proposed_repairs"] if r["artifact"] == "tasks/TODO.md"]
+    assert len(todo_repairs) == 1
+    repair = todo_repairs[0]
+    assert "pcae json todo" in repair["stale_entry"]
+    assert repair["action"] == "remove"
+    assert repair["rationale"]
+
+
+def test_cli_governance_sync_repair_json_detects_stale_reference(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase Test.\n\n"
+        "## Next\n\n- Implement `pcae end`.\n",
+        encoding="utf-8",
+    )
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True)
+    (tasks_dir / "TODO.md").write_text("# TODO\n\n## Pending\n", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("# DONE\n\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert len(data["proposed_repairs"]) >= 1
+    actions = [r["action"] for r in data["proposed_repairs"]]
+    assert "remove" in actions
+
+
+def test_cli_governance_sync_repair_json_repair_entry_shape(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae shape check` command."],
+        done_entries=["Added `pcae shape check`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["proposed_repairs"]
+    repair = data["proposed_repairs"][0]
+    for key in ("artifact", "stale_entry", "action", "rationale"):
+        assert key in repair, f"missing key: {key}"
+
+
+def test_cli_governance_sync_repair_json_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["advisory"] == GOVERNANCE_SYNC_REPAIR_ADVISORY
+
+
+def test_cli_governance_sync_repair_json_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json ro` command."],
+        done_entries=["Added `pcae json ro`."],
+    )
+    todo_path = tmp_path / "tasks" / "TODO.md"
+    mtime = todo_path.stat().st_mtime
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    assert todo_path.stat().st_mtime == mtime

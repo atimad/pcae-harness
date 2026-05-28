@@ -1942,6 +1942,100 @@ def find_artifact_sync_drift_warnings(
     return tuple(warnings)
 
 
+GOVERNANCE_SYNC_REPAIR_ADVISORY = (
+    "Repair preview is advisory; no governance artifacts are modified."
+)
+
+
+@dataclass(frozen=True)
+class SyncRepairEntry:
+    artifact: str
+    stale_entry: str
+    action: str
+    rationale: str
+
+    def to_dict(self) -> dict:
+        return {
+            "artifact": self.artifact,
+            "stale_entry": self.stale_entry,
+            "action": self.action,
+            "rationale": self.rationale,
+        }
+
+
+@dataclass(frozen=True)
+class GovernanceSyncRepairPreview:
+    repairable: bool
+    proposed_repairs: tuple[SyncRepairEntry, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "repairable": self.repairable,
+            "proposed_repairs": [r.to_dict() for r in self.proposed_repairs],
+            "advisory": self.advisory,
+        }
+
+
+def plan_governance_sync_repairs(root: HarnessPath) -> GovernanceSyncRepairPreview:
+    """Return deterministic read-only repair previews for stale governance artifacts."""
+    sync = check_governance_sync(root)
+    repairs: list[SyncRepairEntry] = []
+
+    for entry in sync.completed_todo_entries:
+        repairs.append(SyncRepairEntry(
+            artifact="tasks/TODO.md",
+            stale_entry=entry,
+            action="remove",
+            rationale=(
+                "Entry is already completed; it appears in DONE.md or CHANGELOG.md "
+                "and should be removed from the Pending section."
+            ),
+        ))
+
+    for ref in sync.stale_references:
+        artifact_part, sep, stale_phrase = ref.partition(": stale reference: ")
+        artifact = artifact_part if sep else "governance artifact"
+        stale_entry = stale_phrase if sep else ref
+        repairs.append(SyncRepairEntry(
+            artifact=artifact,
+            stale_entry=stale_entry,
+            action="remove",
+            rationale=(
+                "Feature already implemented; stale reference creates orchestration risk "
+                "for agents reading roadmap guidance."
+            ),
+        ))
+
+    for entry in sync.inconsistent_entries:
+        repairs.append(SyncRepairEntry(
+            artifact="PROJECT_STATUS.md",
+            stale_entry=entry,
+            action="remove",
+            rationale=(
+                "Roadmap item appears already completed in DONE.md; "
+                "it should be removed from the Next section."
+            ),
+        ))
+
+    for warning in sync.governance_drift_warnings:
+        repairs.append(SyncRepairEntry(
+            artifact="governance audit",
+            stale_entry=warning,
+            action="update",
+            rationale=(
+                "Governance audit has a capability gap; "
+                "update the audit to include this check."
+            ),
+        ))
+
+    return GovernanceSyncRepairPreview(
+        repairable=True,
+        proposed_repairs=tuple(repairs),
+        advisory=GOVERNANCE_SYNC_REPAIR_ADVISORY,
+    )
+
+
 def check_governance_sync(root: HarnessPath) -> GovernanceSyncCheckResult:
     """Return read-only governance artifact synchronization analysis.
 

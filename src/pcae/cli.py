@@ -71,6 +71,7 @@ from pcae.commands.status import (
     run_governance_audit,
     run_governance_repair,
     run_governance_sync_check,
+    run_governance_sync_repair,
     run_runtime_snapshot,
     run_runtime_snapshot_compatibility,
     run_runtime_snapshot_export,
@@ -500,6 +501,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON synchronization check output.",
     )
     governance_sync_check_parser.set_defaults(handler=run_governance_sync_check)
+
+    governance_sync_repair_parser = governance_subparsers.add_parser(
+        "sync-repair",
+        help="Preview deterministic repairs for stale governance artifacts without modifying files.",
+    )
+    governance_sync_repair_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="Preview repair actions without modifying any governance artifacts.",
+    )
+    governance_sync_repair_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON synchronization repair preview output.",
+    )
+    governance_sync_repair_parser.set_defaults(handler=run_governance_sync_repair)
 
     runtime_parser = subparsers.add_parser(
         "runtime",

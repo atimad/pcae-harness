@@ -7,6 +7,7 @@ from pathlib import Path
 from pcae.core.paths import HarnessPath
 from pcae.core.status import (
     GOVERNANCE_SYNC_CHECK_ADVISORY,
+    GOVERNANCE_SYNC_REPAIR_ADVISORY,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
     RUNTIME_SNAPSHOT_COMPATIBILITY_ADVISORY,
     RUNTIME_SNAPSHOT_LINEAGE_ADVISORY,
@@ -21,6 +22,7 @@ from pcae.core.status import (
     export_runtime_snapshot,
     inspect_runtime_snapshot,
     plan_governance_repairs,
+    plan_governance_sync_repairs,
     plan_runtime_snapshot_retention,
     preview_runtime_snapshot,
     preview_runtime_snapshot_restore,
@@ -363,6 +365,27 @@ def run_runtime_snapshot_lineage(args: argparse.Namespace) -> int:
         )
         print(f"Latest lineage head: {latest_text}")
         print(RUNTIME_SNAPSHOT_LINEAGE_ADVISORY)
+    return 0
+
+
+def run_governance_sync_repair(args: argparse.Namespace) -> int:
+    result = plan_governance_sync_repairs(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Governance synchronization repair preview")
+        print(f"Repairable: {'yes' if result.repairable else 'no'}")
+        print("Proposed repairs:")
+        if result.proposed_repairs:
+            for repair in result.proposed_repairs:
+                print(f"  Artifact: {repair.artifact}")
+                print(f"  Stale entry: {repair.stale_entry}")
+                print(f"  Action: {repair.action}")
+                print(f"  Rationale: {repair.rationale}")
+                print()
+        else:
+            print("  - none")
+        print(GOVERNANCE_SYNC_REPAIR_ADVISORY)
     return 0
 
 
