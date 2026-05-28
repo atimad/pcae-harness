@@ -4,8 +4,10 @@ import argparse
 import json
 
 from pcae.core.orchestration import (
+    ORCHESTRATION_CAPABILITIES_ADVISORY,
     ORCHESTRATION_EXPLANATION_ADVISORY,
     ORCHESTRATION_SELECTION_ADVISORY,
+    build_capability_matrix,
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
@@ -53,6 +55,31 @@ def run_orchestration_agents(args: argparse.Namespace) -> int:
         for entry in data:
             roles = ", ".join(entry["roles"])
             print(f"{entry['agent_id']} ({entry['kind']}): {roles}")
+    return 0
+
+
+def run_orchestration_capabilities(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        data = build_capability_matrix(root)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Capability matrix")
+        print("Agents:")
+        for entry in data["agents"]:
+            roles = ", ".join(entry["roles"])
+            print(f"  - {entry['agent_id']} ({entry['kind']}): {roles}")
+        print("Roles:")
+        if data["roles"]:
+            print(f"  - {', '.join(data['roles'])}")
+        else:
+            print("  - none")
+        print(ORCHESTRATION_CAPABILITIES_ADVISORY)
     return 0
 
 

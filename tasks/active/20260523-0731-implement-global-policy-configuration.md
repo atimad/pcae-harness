@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement orchestration explain.
+Implement orchestration capability matrix.
 
 ## Allowed Files
 

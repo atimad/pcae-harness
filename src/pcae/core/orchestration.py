@@ -10,6 +10,9 @@ ORCHESTRATION_SELECTION_ADVISORY = (
 ORCHESTRATION_EXPLANATION_ADVISORY = (
     "Explanation is advisory; the user remains authoritative."
 )
+ORCHESTRATION_CAPABILITIES_ADVISORY = (
+    "Capabilities are policy-declared and advisory; the user remains authoritative."
+)
 
 # Each workflow is a sequence of (role, label) pairs.
 # role  – the agent registry role used for agent assignment
@@ -90,6 +93,19 @@ def load_agent_registry(root: HarnessPath) -> tuple[AgentRegistryEntry, ...]:
 def build_agent_registry_data(root: HarnessPath) -> list[dict]:
     registry = load_agent_registry(root)
     return [entry.to_dict() for entry in registry]
+
+
+def build_capability_matrix(root: HarnessPath) -> dict:
+    registry = load_agent_registry(root)
+    seen_roles: dict[str, None] = {}
+    for entry in registry:
+        for role in entry.roles:
+            seen_roles[role] = None
+    return {
+        "agents": [entry.to_dict() for entry in registry],
+        "roles": list(seen_roles),
+        "advisory": ORCHESTRATION_CAPABILITIES_ADVISORY,
+    }
 
 
 def recommend_agent(root: HarnessPath, work_type: str) -> dict:

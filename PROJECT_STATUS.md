@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36C: Orchestration explain.
+Phase 36D: Orchestration capability matrix.
 
 ## Governance Coherence Note
 
@@ -21,8 +21,11 @@ type with `pcae orchestration select TASK_TYPE` and
 `pcae orchestration select TASK_TYPE --json`, and can explain that selection
 with `pcae orchestration explain TASK_TYPE` and
 `pcae orchestration explain TASK_TYPE --json`, using current orchestration
-policy and agent registry while keeping recommendations advisory and
-non-mutating, preview and refresh adoption with init options, generate command,
+policy and agent registry, and can expose the current governed capability
+matrix with `pcae orchestration capabilities` and
+`pcae orchestration capabilities --json`, while keeping recommendations
+advisory and non-mutating, preview and refresh adoption with init options,
+generate command,
 architecture, and glossary documentation, generate, inspect, detect drift in,
 preview repair for, and repair GitHub Actions governance CI workflows, inspect
 repo readiness in human-readable or JSON form, report governance health and

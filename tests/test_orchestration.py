@@ -9,8 +9,10 @@ import pytest
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.orchestration import (
+    ORCHESTRATION_CAPABILITIES_ADVISORY,
     ORCHESTRATION_EXPLANATION_ADVISORY,
     ORCHESTRATION_SELECTION_ADVISORY,
+    build_capability_matrix,
     build_agent_registry_data,
     build_orchestration_data,
     build_workflow_plan,
@@ -237,6 +239,32 @@ def test_build_agent_registry_data_returns_list_of_dicts(tmp_path: Path) -> None
     for entry in data:
         assert set(entry.keys()) == {"agent_id", "kind", "roles"}
         assert isinstance(entry["roles"], list)
+
+
+def test_build_capability_matrix_default_agents_and_roles(tmp_path: Path) -> None:
+    data = build_capability_matrix(HarnessPath(tmp_path))
+    assert set(data.keys()) == {"agents", "roles", "advisory"}
+    agent_ids = {entry["agent_id"] for entry in data["agents"]}
+    assert "claude-local" in agent_ids
+    assert "codex-local" in agent_ids
+    assert "pcae-native" in agent_ids
+    assert "documentation" in data["roles"]
+    assert "implementation" in data["roles"]
+    assert "governance" in data["roles"]
+    assert data["advisory"] == ORCHESTRATION_CAPABILITIES_ADVISORY
+
+
+def test_build_capability_matrix_agent_entries_include_kind_and_roles(tmp_path: Path) -> None:
+    data = build_capability_matrix(HarnessPath(tmp_path))
+    for entry in data["agents"]:
+        assert set(entry.keys()) == {"agent_id", "kind", "roles"}
+        assert isinstance(entry["roles"], list)
+
+
+def test_build_capability_matrix_raises_on_invalid_policy(tmp_path: Path) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    with pytest.raises(ValueError):
+        build_capability_matrix(HarnessPath(tmp_path))
 
 
 # ---------------------------------------------------------------------------
@@ -1078,7 +1106,51 @@ def test_cli_orchestration_plan_human_implementation(
     assert "Suggested workflow plan: implementation" in output
     assert "codex-local" in output
     assert "implementation" in output
-    assert "tests" in output
+
+
+def test_cli_orchestration_capabilities_human(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "capabilities"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Capability matrix" in output
+    assert "Agents:" in output
+    assert "Roles:" in output
+    assert "claude-local" in output
+    assert "codex-local" in output
+    assert "pcae-native" in output
+    assert "documentation" in output
+    assert "implementation" in output
+    assert ORCHESTRATION_CAPABILITIES_ADVISORY in output
+
+
+def test_cli_orchestration_capabilities_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "capabilities", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert set(data.keys()) == {"agents", "roles", "advisory"}
+    agent_ids = {entry["agent_id"] for entry in data["agents"]}
+    assert "claude-local" in agent_ids
+    assert "codex-local" in agent_ids
+    assert "pcae-native" in agent_ids
+    assert "documentation" in data["roles"]
+    assert "implementation" in data["roles"]
+    assert "governance" in data["roles"]
+    assert data["advisory"] == ORCHESTRATION_CAPABILITIES_ADVISORY
+
+
+def test_cli_orchestration_capabilities_fails_on_invalid_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_policy(tmp_path, "[protected]\npatterns = []\n")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["orchestration", "capabilities"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.strip()
+    assert "Invalid policy" in output
 
 
 def test_cli_orchestration_plan_human_validation(

@@ -60,6 +60,7 @@ from pcae.commands.fleet import (
 from pcae.commands.health import run_health
 from pcae.commands.orchestration import (
     run_orchestration_agents,
+    run_orchestration_capabilities,
     run_orchestration_explain,
     run_orchestration_plan,
     run_orchestration_policy,
@@ -755,6 +756,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON agent registry output.",
     )
     orchestration_agents_parser.set_defaults(handler=run_orchestration_agents)
+
+    orchestration_capabilities_parser = orchestration_subparsers.add_parser(
+        "capabilities",
+        help="Show the governed agent capability matrix.",
+    )
+    orchestration_capabilities_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON capability matrix output.",
+    )
+    orchestration_capabilities_parser.set_defaults(handler=run_orchestration_capabilities)
 
     orchestration_recommend_parser = orchestration_subparsers.add_parser(
         "recommend",
