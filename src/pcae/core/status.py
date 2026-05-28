@@ -1785,6 +1785,85 @@ def first_line(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Governance artifact lifecycle classification (Phase 35R)
+# ---------------------------------------------------------------------------
+
+_ARTIFACT_CLASSIFICATION_REGISTRY: dict[str, tuple[str, str]] = {
+    "PROJECT_STATUS.md": (
+        "operational",
+        "live roadmap guidance; operational drift candidate",
+    ),
+    "tasks/TODO.md": (
+        "operational",
+        "pending work tracking; operational drift candidate",
+    ),
+    "CHANGELOG.md": (
+        "historical",
+        "historical change record; preserved by design",
+    ),
+    "tasks/DONE.md": (
+        "historical",
+        "historical completion record; preserved by design",
+    ),
+    ".pcae/provenance-history.json": (
+        "runtime",
+        "runtime governance state; not proposed for source repair",
+    ),
+    ".pcae/agent-lock.json": (
+        "runtime",
+        "runtime governance state; not proposed for source repair",
+    ),
+    ".pcae/session.json": (
+        "runtime",
+        "runtime governance state; not proposed for source repair",
+    ),
+}
+
+_GENERATED_ARTIFACT_PREFIXES: tuple[str, ...] = (
+    ".pcae/runtime-snapshots/",
+    ".pcae/context-packs/",
+    ".pcae/continuity-packs/",
+)
+
+
+@dataclass(frozen=True)
+class ArtifactClassification:
+    artifact_type: str  # canonical artifact path identifier
+    artifact_class: str  # "operational" | "historical" | "runtime" | "generated"
+    governance_role: str
+
+    def to_dict(self) -> dict:
+        return {
+            "artifact_type": self.artifact_type,
+            "artifact_class": self.artifact_class,
+            "governance_role": self.governance_role,
+        }
+
+
+def classify_governance_artifact(artifact: str) -> ArtifactClassification:
+    """Return deterministic classification for a governance artifact path."""
+    if artifact in _ARTIFACT_CLASSIFICATION_REGISTRY:
+        artifact_class, governance_role = _ARTIFACT_CLASSIFICATION_REGISTRY[artifact]
+        return ArtifactClassification(
+            artifact_type=artifact,
+            artifact_class=artifact_class,
+            governance_role=governance_role,
+        )
+    for prefix in _GENERATED_ARTIFACT_PREFIXES:
+        if artifact.startswith(prefix):
+            return ArtifactClassification(
+                artifact_type=artifact,
+                artifact_class="generated",
+                governance_role="generated artifact; not proposed for source repair",
+            )
+    return ArtifactClassification(
+        artifact_type=artifact,
+        artifact_class="operational",
+        governance_role="governance artifact; treated as operational by default",
+    )
+
+
+# ---------------------------------------------------------------------------
 # Governance artifact synchronization validation (Phase 35L)
 # ---------------------------------------------------------------------------
 
@@ -1948,21 +2027,16 @@ GOVERNANCE_SYNC_REPAIR_ADVISORY = (
     "Repair preview is advisory; no governance artifacts are modified."
 )
 
-# Historical artifacts record what happened; they are never proposed for removal.
-# Operational artifacts carry live guidance and may be proposed for update/removal.
-_HISTORICAL_ARTIFACTS: frozenset[str] = frozenset({
-    "CHANGELOG.md",
-    "tasks/DONE.md",
-})
-
-
 def _artifact_type_for(artifact: str) -> str:
-    return "historical" if artifact in _HISTORICAL_ARTIFACTS else "operational"
+    return classify_governance_artifact(artifact).artifact_class
 
 
 def _stale_ref_proposed_action(artifact: str) -> str:
-    if artifact in _HISTORICAL_ARTIFACTS:
+    artifact_class = classify_governance_artifact(artifact).artifact_class
+    if artifact_class == "historical":
         return "preserve"
+    if artifact_class in ("runtime", "generated"):
+        return "ignore"
     if artifact == "PROJECT_STATUS.md":
         return "update"
     return "remove"
@@ -1977,9 +2051,12 @@ class SyncRepairEntry:
     rationale: str
 
     def to_dict(self) -> dict:
+        classification = classify_governance_artifact(self.artifact)
         return {
             "artifact": self.artifact,
             "artifact_type": self.artifact_type,
+            "artifact_class": classification.artifact_class,
+            "governance_role": classification.governance_role,
             "stale_entry": self.stale_entry,
             "proposed_action": self.proposed_action,
             "rationale": self.rationale,

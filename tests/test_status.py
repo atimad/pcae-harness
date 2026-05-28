@@ -2889,10 +2889,11 @@ def test_cli_audit_json_valid_false_on_drift(
 
 from pcae.core.status import (
     GOVERNANCE_SYNC_REPAIR_ADVISORY,
+    ArtifactClassification,
     GovernanceSyncRepairPreview,
     SyncRepairEntry,
+    classify_governance_artifact,
     plan_governance_sync_repairs,
-    _HISTORICAL_ARTIFACTS,
 )
 
 
@@ -3367,22 +3368,224 @@ def test_cli_governance_sync_repair_json_is_read_only(
 # ---------------------------------------------------------------------------
 
 
-def test_historical_artifacts_set_contains_changelog(tmp_path: Path) -> None:
-    assert "CHANGELOG.md" in _HISTORICAL_ARTIFACTS
+def test_classify_changelog_is_historical(tmp_path: Path) -> None:
+    assert classify_governance_artifact("CHANGELOG.md").artifact_class == "historical"
 
 
-def test_historical_artifacts_set_contains_done(tmp_path: Path) -> None:
-    assert "tasks/DONE.md" in _HISTORICAL_ARTIFACTS
+def test_classify_done_is_historical(tmp_path: Path) -> None:
+    assert classify_governance_artifact("tasks/DONE.md").artifact_class == "historical"
 
 
-def test_historical_artifacts_set_does_not_contain_todo(tmp_path: Path) -> None:
-    assert "tasks/TODO.md" not in _HISTORICAL_ARTIFACTS
+def test_classify_todo_is_operational(tmp_path: Path) -> None:
+    assert classify_governance_artifact("tasks/TODO.md").artifact_class == "operational"
 
 
-def test_historical_artifacts_set_does_not_contain_project_status(
-    tmp_path: Path,
+def test_classify_project_status_is_operational(tmp_path: Path) -> None:
+    assert classify_governance_artifact("PROJECT_STATUS.md").artifact_class == "operational"
+
+
+# ---------------------------------------------------------------------------
+# Phase 35R: governance artifact lifecycle classification
+# ---------------------------------------------------------------------------
+
+
+def test_classify_returns_artifact_classification(tmp_path: Path) -> None:
+    result = classify_governance_artifact("PROJECT_STATUS.md")
+    assert isinstance(result, ArtifactClassification)
+
+
+def test_classify_provenance_history_is_runtime(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/provenance-history.json")
+    assert result.artifact_class == "runtime"
+
+
+def test_classify_agent_lock_is_runtime(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/agent-lock.json")
+    assert result.artifact_class == "runtime"
+
+
+def test_classify_session_json_is_runtime(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/session.json")
+    assert result.artifact_class == "runtime"
+
+
+def test_classify_runtime_snapshot_is_generated(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/runtime-snapshots/foo.json")
+    assert result.artifact_class == "generated"
+
+
+def test_classify_context_pack_is_generated(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/context-packs/bar.json")
+    assert result.artifact_class == "generated"
+
+
+def test_classify_continuity_pack_is_generated(tmp_path: Path) -> None:
+    result = classify_governance_artifact(".pcae/continuity-packs/baz.json")
+    assert result.artifact_class == "generated"
+
+
+def test_classify_unknown_artifact_defaults_to_operational(tmp_path: Path) -> None:
+    result = classify_governance_artifact("unknown/artifact.md")
+    assert result.artifact_class == "operational"
+
+
+def test_classify_preserves_artifact_type_path(tmp_path: Path) -> None:
+    result = classify_governance_artifact("tasks/TODO.md")
+    assert result.artifact_type == "tasks/TODO.md"
+
+
+def test_classify_all_known_artifacts_have_governance_role(tmp_path: Path) -> None:
+    known = [
+        "PROJECT_STATUS.md",
+        "tasks/TODO.md",
+        "CHANGELOG.md",
+        "tasks/DONE.md",
+        ".pcae/provenance-history.json",
+        ".pcae/agent-lock.json",
+        ".pcae/session.json",
+        ".pcae/runtime-snapshots/snap.json",
+        ".pcae/context-packs/ctx.json",
+        ".pcae/continuity-packs/cont.json",
+    ]
+    for artifact in known:
+        result = classify_governance_artifact(artifact)
+        assert result.governance_role, f"governance_role empty for {artifact}"
+
+
+def test_classify_to_dict_has_required_keys(tmp_path: Path) -> None:
+    result = classify_governance_artifact("CHANGELOG.md")
+    d = result.to_dict()
+    assert "artifact_type" in d
+    assert "artifact_class" in d
+    assert "governance_role" in d
+
+
+def test_classify_historical_governance_role_mentions_preserved(tmp_path: Path) -> None:
+    for artifact in ("CHANGELOG.md", "tasks/DONE.md"):
+        result = classify_governance_artifact(artifact)
+        assert "preserved" in result.governance_role
+
+
+def test_classify_runtime_governance_role_mentions_not_proposed(tmp_path: Path) -> None:
+    for artifact in (
+        ".pcae/provenance-history.json",
+        ".pcae/agent-lock.json",
+        ".pcae/session.json",
+    ):
+        result = classify_governance_artifact(artifact)
+        assert "not proposed" in result.governance_role
+
+
+def test_sync_repair_entry_to_dict_includes_artifact_class(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae class field` command."],
+        done_entries=["Added `pcae class field`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/TODO.md"]
+    assert todo_repairs
+    d = todo_repairs[0].to_dict()
+    assert "artifact_class" in d
+    assert d["artifact_class"] == "operational"
+
+
+def test_sync_repair_entry_to_dict_includes_governance_role(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae role field` command."],
+        done_entries=["Added `pcae role field`."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    todo_repairs = [r for r in result.proposed_repairs if r.artifact == "tasks/TODO.md"]
+    assert todo_repairs
+    d = todo_repairs[0].to_dict()
+    assert "governance_role" in d
+    assert d["governance_role"]
+
+
+def test_sync_repair_historical_artifact_class_is_historical(tmp_path: Path) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        changelog_entries=["Old entry mentioning Implement `pcae end` feature."],
+    )
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    changelog_repairs = [r for r in result.proposed_repairs if r.artifact == "CHANGELOG.md"]
+    assert changelog_repairs
+    d = changelog_repairs[0].to_dict()
+    assert d["artifact_class"] == "historical"
+    assert d["governance_role"]
+
+
+def test_sync_repair_runtime_artifacts_not_proposed_for_repair(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    runtime_repairs = [
+        r for r in result.proposed_repairs
+        if r.artifact in (
+            ".pcae/provenance-history.json",
+            ".pcae/agent-lock.json",
+            ".pcae/session.json",
+        )
+    ]
+    assert runtime_repairs == []
+
+
+def test_sync_repair_generated_artifacts_not_proposed_for_repair(tmp_path: Path) -> None:
+    _write_sync_artifacts(tmp_path)
+    result = plan_governance_sync_repairs(HarnessPath(tmp_path))
+    generated_repairs = [
+        r for r in result.proposed_repairs
+        if r.artifact.startswith(".pcae/runtime-snapshots/")
+        or r.artifact.startswith(".pcae/context-packs/")
+        or r.artifact.startswith(".pcae/continuity-packs/")
+    ]
+    assert generated_repairs == []
+
+
+def test_cli_governance_sync_repair_human_mentions_runtime_generated(
+    tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    assert "PROJECT_STATUS.md" not in _HISTORICAL_ARTIFACTS
+    _write_sync_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run"])
+    output = capsys.readouterr().out
+    assert "runtime" in output.lower() or "generated" in output.lower()
+
+
+def test_cli_governance_sync_repair_json_includes_artifact_class_in_repairs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json class` command."],
+        done_entries=["Added `pcae json class`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["proposed_repairs"]
+    for repair in data["proposed_repairs"]:
+        assert "artifact_class" in repair
+
+
+def test_cli_governance_sync_repair_json_includes_governance_role_in_repairs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_sync_artifacts(
+        tmp_path,
+        todo_pending=["Add `pcae json role` command."],
+        done_entries=["Added `pcae json role`."],
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "sync-repair", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["proposed_repairs"]
+    for repair in data["proposed_repairs"]:
+        assert "governance_role" in repair
+        assert repair["governance_role"]
 
 
 # ---------------------------------------------------------------------------

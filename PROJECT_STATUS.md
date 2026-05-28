@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35M: Governance audit includes artifact synchronization drift.
+Phase 35R: Governance artifact lifecycle classification.
 
 ## Governance Coherence Note
 
@@ -290,7 +290,18 @@ reports that historical references are preserved as-is; running
 `pcae governance sync-repair` without `--dry-run` or `--force` fails with a
 clear error directing the user to specify a flag; after `--force`, sync-check
 will no longer report the removed entry as a completed TODO entry and
-governance audit warnings reduce accordingly.
+governance audit warnings reduce accordingly, and governance artifact
+lifecycle classification is centralized in `classify_governance_artifact` and
+`ArtifactClassification` with four explicit classes: operational
+(PROJECT_STATUS.md, tasks/TODO.md), historical (CHANGELOG.md, tasks/DONE.md),
+runtime (.pcae/provenance-history.json, .pcae/agent-lock.json,
+.pcae/session.json), and generated (.pcae/runtime-snapshots/**,
+.pcae/context-packs/**, .pcae/continuity-packs/**); `pcae governance
+sync-check` and `pcae governance sync-repair` use the classifier for
+operational vs. historical vs. runtime vs. generated semantics; runtime and
+generated artifacts are explicitly ignored for source governance repair;
+`SyncRepairEntry.to_dict()` now exposes `artifact_class` and `governance_role`
+in JSON output; the classifier is deterministic and read-only.
 
 ## Next
 

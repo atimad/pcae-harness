@@ -410,6 +410,7 @@ def run_governance_sync_repair(args: argparse.Namespace) -> int:
         print("Repair semantics:")
         print("  Operational artifacts (tasks/TODO.md, PROJECT_STATUS.md) may be updated.")
         print("  Historical artifacts (CHANGELOG.md, tasks/DONE.md) are preserved by default.")
+        print("  Runtime and generated artifacts (.pcae/**) are ignored for source governance repair.")
         print("Proposed repairs:")
         if result.proposed_repairs:
             for repair in result.proposed_repairs:
