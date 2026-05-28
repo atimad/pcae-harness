@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 35J: Governed continuity pack manifest indexing.
+Phase 35K: Governed continuity pack retention planning.
 
 ## Governance Coherence Note
 
@@ -238,7 +238,18 @@ governance_check, active_task_id, compatibility_status, support_level,
 vendor_neutral, stale_context_suppression_present, and compact_bootstrap_present;
 the advisory "Continuity manifests are advisory; the user remains authoritative."
 is included; the command does not mutate continuity packs, prune packs,
-restore runtime state, or modify governance artifacts.
+restore runtime state, or modify governance artifacts, and retention actions
+for continuity packs can be previewed read-only with
+`pcae continuity retention --dry-run` and
+`pcae continuity retention --dry-run --json`, using the manifest to keep the
+latest five continuity packs and mark older packs as prune candidates while
+deleting nothing; human-readable output reports pack count, keep count, prune
+candidate count, packs to keep, and prune candidates; JSON output includes
+`pack_count`, `keep_count`, `prune_candidate_count`, `keep`, `prune_candidates`,
+and `advisory`; the advisory "Continuity retention planning is advisory; no
+continuity packs are deleted." is included; the command does not delete
+continuity packs, mutate continuity packs, restore runtime state, or modify
+governance artifacts.
 
 ## Next
 

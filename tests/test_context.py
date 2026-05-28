@@ -3410,3 +3410,335 @@ def test_cli_continuity_manifest_is_read_only(
     for p, mtime in mtimes.items():
         assert p.stat().st_mtime == mtime
     assert not (tmp_path / ".pcae" / "runtime-snapshots").exists()
+
+
+# ---------------------------------------------------------------------------
+# Phase 35K: Continuity pack retention planning
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    CONTINUITY_RETENTION_ADVISORY,
+    ContinuityRetentionPlan,
+    plan_continuity_retention,
+)
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_continuity_retention — empty
+# ---------------------------------------------------------------------------
+
+
+def test_plan_continuity_retention_returns_plan(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert isinstance(result, ContinuityRetentionPlan)
+
+
+def test_plan_continuity_retention_empty_zero_counts(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.pack_count == 0
+    assert result.keep_count == 0
+    assert result.prune_candidate_count == 0
+    assert result.keep == ()
+    assert result.prune_candidates == ()
+
+
+def test_plan_continuity_retention_empty_advisory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.advisory == CONTINUITY_RETENTION_ADVISORY
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_continuity_retention — fewer than 5 packs
+# ---------------------------------------------------------------------------
+
+
+def test_plan_continuity_retention_three_packs_all_kept(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.pack_count == 3
+    assert result.keep_count == 3
+    assert result.prune_candidate_count == 0
+    assert len(result.keep) == 3
+    assert result.prune_candidates == ()
+
+
+def test_plan_continuity_retention_five_packs_all_kept(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 5)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.keep_count == 5
+    assert result.prune_candidate_count == 0
+
+
+# ---------------------------------------------------------------------------
+# Core: plan_continuity_retention — more than 5 packs
+# ---------------------------------------------------------------------------
+
+
+def test_plan_continuity_retention_seven_packs_two_pruned(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 7)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.pack_count == 7
+    assert result.keep_count == 5
+    assert result.prune_candidate_count == 2
+    assert len(result.keep) == 5
+    assert len(result.prune_candidates) == 2
+
+
+def test_plan_continuity_retention_keep_newest_five(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    paths = _export_n_packs(tmp_path, 7)  # newest-first
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    newest_five = [p.name for p in paths[:5]]
+    oldest_two = [p.name for p in paths[5:]]
+    assert list(result.keep) == newest_five
+    assert list(result.prune_candidates) == oldest_two
+
+
+def test_plan_continuity_retention_counts_consistent(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 8)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    assert result.keep_count + result.prune_candidate_count == result.pack_count
+
+
+def test_plan_continuity_retention_to_dict_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    d = result.to_dict()
+    for key in (
+        "pack_count",
+        "keep_count",
+        "prune_candidate_count",
+        "keep",
+        "prune_candidates",
+        "advisory",
+    ):
+        assert key in d, f"missing key: {key}"
+
+
+def test_plan_continuity_retention_to_dict_types(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    result = plan_continuity_retention(HarnessPath(tmp_path))
+    d = result.to_dict()
+    assert isinstance(d["keep"], list)
+    assert isinstance(d["prune_candidates"], list)
+    assert isinstance(d["pack_count"], int)
+    assert isinstance(d["keep_count"], int)
+    assert isinstance(d["prune_candidate_count"], int)
+    assert isinstance(d["advisory"], str)
+
+
+def test_plan_continuity_retention_is_read_only(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    paths = _export_n_packs(tmp_path, 6)
+    mtimes = {p: p.stat().st_mtime for p in paths}
+    plan_continuity_retention(HarnessPath(tmp_path))
+    for p, mtime in mtimes.items():
+        assert p.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity retention --dry-run
+# ---------------------------------------------------------------------------
+
+
+def test_cli_continuity_retention_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "retention", "--dry-run"])
+    assert result == 0
+
+
+def test_cli_continuity_retention_prints_pack_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Pack count: 3" in captured.out
+
+
+def test_cli_continuity_retention_prints_keep_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 3)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Keep count: 3" in captured.out
+
+
+def test_cli_continuity_retention_prints_prune_candidate_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 7)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Prune candidate count: 2" in captured.out
+
+
+def test_cli_continuity_retention_prints_packs_to_keep(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 2)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Packs to keep:" in captured.out
+    assert "continuity-pack-" in captured.out
+
+
+def test_cli_continuity_retention_prints_prune_candidates(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 7)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Prune candidates:" in captured.out
+
+
+def test_cli_continuity_retention_no_packs_none_label(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert "Pack count: 0" in captured.out
+    assert "none" in captured.out.lower()
+
+
+def test_cli_continuity_retention_prints_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run"])
+    captured = capsys.readouterr()
+    assert CONTINUITY_RETENTION_ADVISORY in captured.out
+
+
+def test_cli_continuity_retention_does_not_delete_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    paths = _export_n_packs(tmp_path, 7)
+    main(["continuity", "retention", "--dry-run"])
+    for p in paths:
+        assert p.exists(), f"file was deleted: {p.name}"
+
+
+# ---------------------------------------------------------------------------
+# CLI: pcae continuity retention --dry-run --json
+# ---------------------------------------------------------------------------
+
+
+def test_cli_continuity_retention_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    result = main(["continuity", "retention", "--dry-run", "--json"])
+    assert result == 0
+
+
+def test_cli_continuity_retention_json_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert isinstance(data, dict)
+
+
+def test_cli_continuity_retention_json_required_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    for key in (
+        "pack_count",
+        "keep_count",
+        "prune_candidate_count",
+        "keep",
+        "prune_candidates",
+        "advisory",
+    ):
+        assert key in data, f"missing JSON key: {key}"
+
+
+def test_cli_continuity_retention_json_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["pack_count"] == 0
+    assert data["keep_count"] == 0
+    assert data["prune_candidate_count"] == 0
+    assert data["keep"] == []
+    assert data["prune_candidates"] == []
+
+
+def test_cli_continuity_retention_json_with_packs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _export_n_packs(tmp_path, 7)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["pack_count"] == 7
+    assert data["keep_count"] == 5
+    assert data["prune_candidate_count"] == 2
+    assert len(data["keep"]) == 5
+    assert len(data["prune_candidates"]) == 2
+
+
+def test_cli_continuity_retention_json_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["advisory"] == CONTINUITY_RETENTION_ADVISORY
+
+
+def test_cli_continuity_retention_json_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    paths = _export_n_packs(tmp_path, 7)
+    main(["continuity", "retention", "--dry-run", "--json"])
+    for p in paths:
+        assert p.exists(), f"file was deleted: {p.name}"

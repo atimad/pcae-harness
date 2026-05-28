@@ -10,6 +10,7 @@ from pcae.core.context import (
     CONTINUITY_PACK_COMPATIBILITY_ADVISORY,
     CONTINUITY_PACK_GOVERNANCE_CONTINUITY_NOTE,
     CONTINUITY_PACK_INCLUDED_SECTIONS,
+    CONTINUITY_RETENTION_ADVISORY,
     analyze_continuity_pack_compatibility,
     build_context_pack,
     build_continuity_manifest,
@@ -17,6 +18,7 @@ from pcae.core.context import (
     export_context_pack,
     export_continuity_pack,
     inspect_continuity_pack,
+    plan_continuity_retention,
     resolve_profile,
 )
 from pcae.core.paths import HarnessPath
@@ -276,6 +278,31 @@ def run_continuity_compatibility(args: argparse.Namespace) -> int:
         print("  Continuity packs are portable, governance-complete, vendor-neutral exports.")
         print("  Compatibility analysis is read-only; no runtime state is changed.")
         print(CONTINUITY_PACK_COMPATIBILITY_ADVISORY)
+    return 0
+
+
+def run_continuity_retention(args: argparse.Namespace) -> int:
+    result = plan_continuity_retention(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Continuity retention plan (dry-run)")
+        print(f"Pack count: {result.pack_count}")
+        print(f"Keep count: {result.keep_count}")
+        print(f"Prune candidate count: {result.prune_candidate_count}")
+        print("Packs to keep:")
+        if result.keep:
+            for filename in result.keep:
+                print(f"  - {filename}")
+        else:
+            print("  - none")
+        print("Prune candidates:")
+        if result.prune_candidates:
+            for filename in result.prune_candidates:
+                print(f"  - {filename}")
+        else:
+            print("  - none")
+        print(CONTINUITY_RETENTION_ADVISORY)
     return 0
 
 

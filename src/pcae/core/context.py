@@ -1013,3 +1013,56 @@ def build_continuity_manifest(root: HarnessPath) -> ContinuityManifest:
         compatibility_summary=_continuity_manifest_summary(entries),
         advisory=CONTINUITY_MANIFEST_ADVISORY,
     )
+
+
+# ---------------------------------------------------------------------------
+# Continuity pack retention planning
+# ---------------------------------------------------------------------------
+
+CONTINUITY_RETENTION_KEEP_COUNT = 5
+
+CONTINUITY_RETENTION_ADVISORY = (
+    "Continuity retention planning is advisory; no continuity packs are deleted."
+)
+
+
+@dataclass(frozen=True)
+class ContinuityRetentionPlan:
+    pack_count: int
+    keep_count: int
+    prune_candidate_count: int
+    keep: tuple[str, ...]
+    prune_candidates: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "keep": list(self.keep),
+            "keep_count": self.keep_count,
+            "pack_count": self.pack_count,
+            "prune_candidate_count": self.prune_candidate_count,
+            "prune_candidates": list(self.prune_candidates),
+        }
+
+
+def plan_continuity_retention(root: HarnessPath) -> ContinuityRetentionPlan:
+    """Return a read-only retention plan for exported continuity packs.
+
+    Keeps the latest CONTINUITY_RETENTION_KEEP_COUNT packs; marks the rest as
+    prune candidates.  Never deletes or mutates any file.
+    """
+    manifest = build_continuity_manifest(root)
+    entries = manifest.manifest_entries  # already sorted newest-first
+    keep = tuple(e.filename for e in entries[:CONTINUITY_RETENTION_KEEP_COUNT])
+    prune_candidates = tuple(
+        e.filename for e in entries[CONTINUITY_RETENTION_KEEP_COUNT:]
+    )
+    return ContinuityRetentionPlan(
+        pack_count=manifest.pack_count,
+        keep_count=len(keep),
+        prune_candidate_count=len(prune_candidates),
+        keep=keep,
+        prune_candidates=prune_candidates,
+        advisory=CONTINUITY_RETENTION_ADVISORY,
+    )

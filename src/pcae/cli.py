@@ -22,6 +22,7 @@ from pcae.commands.context import (
     run_continuity_export,
     run_continuity_inspect,
     run_continuity_manifest,
+    run_continuity_retention,
 )
 from pcae.commands.ci import (
     run_ci_drift,
@@ -276,6 +277,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON manifest result.",
     )
     continuity_manifest_parser.set_defaults(handler=run_continuity_manifest)
+
+    continuity_retention_parser = continuity_subparsers.add_parser(
+        "retention",
+        help="Preview retention actions for continuity packs without deleting anything.",
+    )
+    continuity_retention_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="Preview retention plan without deleting any continuity packs.",
+    )
+    continuity_retention_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON retention plan.",
+    )
+    continuity_retention_parser.set_defaults(handler=run_continuity_retention)
 
     ci_parser = subparsers.add_parser(
         "ci",
