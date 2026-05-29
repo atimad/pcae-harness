@@ -1853,3 +1853,232 @@ def test_cli_architecture_show_with_captured_linkage(
     assert data["commit_reference"] is not None
     linkage = data["architecture_linkage"]
     assert linkage["commit_reference"] != "unavailable"
+
+
+# ---------------------------------------------------------------------------
+# Architecture memory session restore tests (Phase 36N)
+# ---------------------------------------------------------------------------
+
+from pcae.core.architecture import (
+    ADR_RESTORE_SESSION_ADVISORY,
+    ArchitectureRestoreSession,
+    build_architecture_restore_session,
+)
+
+
+def test_build_architecture_restore_session_returns_result(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert isinstance(result, ArchitectureRestoreSession)
+
+
+def test_restore_session_decision_count_at_least_sample(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert result.decision_count >= 2  # sample registry
+
+
+def test_restore_session_accepted_count_positive(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert result.accepted_count >= 1
+
+
+def test_restore_session_latest_decision_is_dict(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert isinstance(result.latest_decision, dict)
+    assert "id" in result.latest_decision
+    assert "title" in result.latest_decision
+    assert "status" in result.latest_decision
+    assert "author" in result.latest_decision
+    assert "phase_reference" in result.latest_decision
+    assert "is_human_approved" in result.latest_decision
+
+
+def test_restore_session_linkage_summary_keys(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    ls = result.linkage_summary
+    assert "commit_reference" in ls
+    assert "provenance_reference" in ls
+    assert "contributors" in ls
+    assert "is_human_approved" in ls
+
+
+def test_restore_session_linkage_unavailable_for_sample(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    ls = result.linkage_summary
+    # Sample registry ADRs have no commit/provenance captured at creation
+    assert ls["commit_reference"] == "unavailable"
+    assert ls["provenance_reference"] == "unavailable"
+
+
+def test_restore_session_session_guidance_non_empty(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert len(result.session_guidance) > 0
+    assert all(isinstance(g, str) for g in result.session_guidance)
+
+
+def test_restore_session_guidance_includes_decision_count(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    combined = " ".join(result.session_guidance)
+    assert "decision" in combined
+    assert "accepted" in combined
+
+
+def test_restore_session_advisory_matches_constant(tmp_path: Path) -> None:
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    assert result.advisory == ADR_RESTORE_SESSION_ADVISORY
+
+
+def test_restore_session_to_dict_shape(tmp_path: Path) -> None:
+    d = build_architecture_restore_session(HarnessPath(tmp_path)).to_dict()
+    assert set(d) == {
+        "decision_count",
+        "accepted_count",
+        "latest_decision",
+        "linkage_summary",
+        "session_guidance",
+        "advisory",
+    }
+    assert isinstance(d["decision_count"], int)
+    assert isinstance(d["accepted_count"], int)
+    assert isinstance(d["latest_decision"], dict)
+    assert isinstance(d["linkage_summary"], dict)
+    assert isinstance(d["session_guidance"], list)
+    assert isinstance(d["advisory"], str)
+
+
+def test_restore_session_with_persisted_adr_captures_linkage(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "README.md", "# repo\n")
+    commit_baseline(tmp_path)
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Persisted with linkage",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    ls = result.linkage_summary
+    # Persisted ADR was created in a git repo — commit should be captured
+    assert ls["commit_reference"] != "unavailable"
+
+
+def test_restore_session_proposed_count_in_guidance(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Proposed ADR",
+        rationale="Rationale.",
+        author="alice",
+        status="proposed",
+        created_at=fixed,
+    )
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    combined = " ".join(result.session_guidance)
+    assert "proposed" in combined
+
+
+def test_restore_session_is_read_only(tmp_path: Path) -> None:
+    before = list(tmp_path.iterdir())
+    build_architecture_restore_session(HarnessPath(tmp_path))
+    assert list(tmp_path.iterdir()) == before
+
+
+def test_restore_session_contributors_aggregated_across_registry(
+    tmp_path: Path,
+) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="ADR with contributors",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+        contributors=["agent-A", "agent-B"],
+    )
+    fixed2 = datetime(2026, 5, 29, 13, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="ADR with more contributors",
+        rationale="R.",
+        author="bob",
+        created_at=fixed2,
+        contributors=["agent-B", "agent-C"],
+    )
+    result = build_architecture_restore_session(HarnessPath(tmp_path))
+    contributors = result.linkage_summary["contributors"]
+    # agent-B appears in both but should be deduplicated
+    assert contributors.count("agent-B") == 1
+    assert "agent-A" in contributors
+    assert "agent-C" in contributors
+
+
+def test_cli_architecture_restore_session_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "restore-session"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture memory session restore" in output
+    assert "Decision count:" in output
+    assert "Accepted:" in output
+    assert "Latest decision:" in output
+    assert "Linkage summary:" in output
+    assert "Session guidance:" in output
+    assert ADR_RESTORE_SESSION_ADVISORY in output
+
+
+def test_cli_architecture_restore_session_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "restore-session", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "decision_count" in data
+    assert "accepted_count" in data
+    assert "latest_decision" in data
+    assert "linkage_summary" in data
+    assert "session_guidance" in data
+    assert "advisory" in data
+    assert data["advisory"] == ADR_RESTORE_SESSION_ADVISORY
+
+
+def test_cli_architecture_restore_session_json_linkage_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "restore-session", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ls = data["linkage_summary"]
+    assert "commit_reference" in ls
+    assert "provenance_reference" in ls
+    assert "contributors" in ls
+    assert "is_human_approved" in ls
+
+
+def test_cli_architecture_restore_session_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    before = list(tmp_path.iterdir())
+    main(["architecture", "restore-session"])
+    capsys.readouterr()
+    assert list(tmp_path.iterdir()) == before
+
+
+def test_cli_architecture_restore_session_latest_decision_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "restore-session", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ld = data["latest_decision"]
+    assert "id" in ld
+    assert "title" in ld
+    assert "status" in ld
+    assert "author" in ld
+    assert "phase_reference" in ld
+    assert "is_human_approved" in ld

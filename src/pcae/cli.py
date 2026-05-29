@@ -15,6 +15,7 @@ from pcae.commands.architecture import (
     run_architecture_export,
     run_architecture_history,
     run_architecture_metrics,
+    run_architecture_restore_session,
     run_architecture_show,
     run_architecture_snapshot,
     run_architecture_validate,
@@ -1375,6 +1376,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON validation result.",
     )
     architecture_validate_parser.set_defaults(handler=run_architecture_validate)
+
+    architecture_restore_session_parser = architecture_subparsers.add_parser(
+        "restore-session",
+        help="Generate a read-only architecture memory restore summary for fresh AI sessions.",
+    )
+    architecture_restore_session_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON restore session output.",
+    )
+    architecture_restore_session_parser.set_defaults(
+        handler=run_architecture_restore_session
+    )
 
     task_parser = subparsers.add_parser(
         "task",

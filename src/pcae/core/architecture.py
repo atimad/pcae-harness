@@ -919,3 +919,101 @@ def add_architecture_decision(
     )
     relative_path = persist_adr(root, adr)
     return ADRAddResult(adr=adr, relative_path=relative_path, advisory=ADR_ADD_ADVISORY)
+
+
+# ---------------------------------------------------------------------------
+# Architecture memory session restore (Phase 36N)
+# ---------------------------------------------------------------------------
+
+ADR_RESTORE_SESSION_ADVISORY = (
+    "Architecture memory restore is advisory; no ADRs are modified."
+)
+
+_SESSION_RESTORE_GUIDANCE: tuple[str, ...] = (
+    "Architecture decisions are advisory; human remains authoritative.",
+    "Contributors include vendor-neutral AI agent identifiers.",
+    "Use `pcae architecture decisions` to list all decisions.",
+    "Use `pcae architecture show DECISION_ID` to inspect a specific decision.",
+)
+
+
+@dataclass(frozen=True)
+class ArchitectureRestoreSession:
+    decision_count: int
+    accepted_count: int
+    latest_decision: dict | None
+    linkage_summary: dict
+    session_guidance: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "accepted_count": self.accepted_count,
+            "advisory": self.advisory,
+            "decision_count": self.decision_count,
+            "latest_decision": self.latest_decision,
+            "linkage_summary": self.linkage_summary,
+            "session_guidance": list(self.session_guidance),
+        }
+
+
+def build_architecture_restore_session(
+    root: HarnessPath,
+) -> ArchitectureRestoreSession:
+    """Return a compact read-only architecture memory restore summary.
+
+    Does not mutate ADRs, continuity packs, or any file.
+    """
+    registry = get_adr_registry(root)
+    decision_count = len(registry)
+    accepted_count = sum(1 for adr in registry if adr.status == "accepted")
+    proposed_count = sum(1 for adr in registry if adr.status == "proposed")
+
+    latest_decision: dict | None = None
+    linkage_summary: dict = {
+        "commit_reference": "unavailable",
+        "contributors": [],
+        "is_human_approved": False,
+        "provenance_reference": "unavailable",
+    }
+
+    if registry:
+        last = registry[-1]
+        latest_decision = {
+            "author": last.author,
+            "id": last.decision_id,
+            "is_human_approved": last.is_human_approved,
+            "phase_reference": last.phase_reference or "none",
+            "status": last.status,
+            "title": last.title,
+        }
+        seen_contributors: set[str] = set()
+        unique_contributors: list[str] = []
+        for adr in registry:
+            for contributor in adr.contributors:
+                if contributor not in seen_contributors:
+                    seen_contributors.add(contributor)
+                    unique_contributors.append(contributor)
+        linkage_summary = {
+            "commit_reference": last.commit_reference or "unavailable",
+            "contributors": unique_contributors,
+            "is_human_approved": last.is_human_approved,
+            "provenance_reference": last.provenance_reference or "unavailable",
+        }
+
+    guidance: list[str] = list(_SESSION_RESTORE_GUIDANCE)
+    guidance.insert(
+        2,
+        f"{decision_count} decision(s) available ({accepted_count} accepted"
+        + (f", {proposed_count} proposed" if proposed_count else "")
+        + ").",
+    )
+
+    return ArchitectureRestoreSession(
+        decision_count=decision_count,
+        accepted_count=accepted_count,
+        latest_decision=latest_decision,
+        linkage_summary=linkage_summary,
+        session_guidance=tuple(guidance),
+        advisory=ADR_RESTORE_SESSION_ADVISORY,
+    )

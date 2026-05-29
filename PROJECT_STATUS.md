@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36M: Architecture governance audit integration.
+Phase 36N: Architecture memory session restore.
 
 ## Governance Coherence Note
 
@@ -408,11 +408,20 @@ latest_decision, warnings, errors); `pcae governance audit --json` includes
 `architecture_memory_summary`; human output shows an "Architecture memory
 summary" section; malformed `.pcae/architecture/*.json` files fail the check;
 `count_adr_parse_failures(root)` helper detects silently-skipped ADR files;
-all operations are read-only.
+all operations are read-only, and Architecture Memory session restore is
+available as a read-only surface for fresh AI sessions (Phase 36N):
+`pcae architecture restore-session` and `--json` generate a compact restore
+summary including decision_count, accepted_count, latest_decision (id, title,
+status, author, phase_reference, is_human_approved), linkage_summary
+(commit_reference, provenance_reference, contributors deduplicated across the
+registry, is_human_approved), session_guidance (decision counts including
+proposed, advisory notes, inspection commands), and advisory "Architecture
+memory restore is advisory; no ADRs are modified."; proposed decisions surface
+in session guidance when present; the command is fully read-only.
 
 ## Next
 
-- Phase 36N: Architecture memory session restore (Option B — Architecture Memory).
+- Phase 36O: Architecture memory fleet integration (Option B — Architecture Memory).
 
 ## Future Explorations
 

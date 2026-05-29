@@ -7,11 +7,13 @@ from pcae.core.architecture import (
     ADR_ADD_ADVISORY,
     ADR_EXPORT_ADVISORY,
     ADR_INSPECTION_ADVISORY,
+    ADR_RESTORE_SESSION_ADVISORY,
     ADR_VALIDATION_ADVISORY,
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     add_architecture_decision,
     build_architecture_linkage,
+    build_architecture_restore_session,
     calculate_architecture_drift_metrics,
     export_architecture_decisions,
     get_adr_registry,
@@ -271,4 +273,38 @@ def run_architecture_export(args: argparse.Namespace) -> int:
     print(f"Decision count: {result.decision_count}")
     print(f"Exported at: {result.exported_at}")
     print(ADR_EXPORT_ADVISORY)
+    return 0
+
+
+def run_architecture_restore_session(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = build_architecture_restore_session(root)
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        return 0
+    print("Architecture memory session restore")
+    print(f"Decision count: {result.decision_count}")
+    print(f"Accepted: {result.accepted_count}")
+    if result.latest_decision is not None:
+        ld = result.latest_decision
+        print("Latest decision:")
+        print(f"  ID: {ld.get('id')}")
+        print(f"  Title: {ld.get('title')}")
+        print(f"  Status: {ld.get('status')}")
+        print(f"  Author: {ld.get('author')}")
+        print(f"  Phase reference: {ld.get('phase_reference')}")
+        print(f"  Human approved: {'yes' if ld.get('is_human_approved') else 'no'}")
+    else:
+        print("Latest decision: none")
+    ls = result.linkage_summary
+    print("Linkage summary:")
+    print(f"  Commit: {ls.get('commit_reference')}")
+    print(f"  Provenance: {ls.get('provenance_reference')}")
+    contributors = ls.get("contributors", [])
+    print(f"  Contributors: {', '.join(contributors) if contributors else 'none'}")
+    print(f"  Human approved: {'yes' if ls.get('is_human_approved') else 'no'}")
+    print("Session guidance:")
+    for note in result.session_guidance:
+        print(f"  - {note}")
+    print(ADR_RESTORE_SESSION_ADVISORY)
     return 0
