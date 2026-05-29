@@ -7,8 +7,14 @@ import subprocess
 
 from pcae.cli import main
 from pcae.commands.init import init_harness
-from pcae.core.architecture import analyze_changed_python_dependencies
-from pcae.core.architecture import write_architecture_history_snapshot
+from pcae.core.architecture import (
+    ADR_HUMAN_APPROVED_STATUS,
+    ADR_VALID_STATUSES,
+    ArchitectureDecisionRecord,
+    analyze_changed_python_dependencies,
+    create_adr,
+    write_architecture_history_snapshot,
+)
 from pcae.core.check import run_checks
 from pcae.core.git_status import GitChange
 from pcae.core.paths import HarnessPath
@@ -483,3 +489,258 @@ def write_history(root: Path, entries: list[dict]) -> None:
     history_file = root / ".pcae" / "architecture-history.json"
     history_file.parent.mkdir(parents=True, exist_ok=True)
     history_file.write_text(json.dumps(entries), encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Architecture Decision Record model tests (Phase 36F)
+# ---------------------------------------------------------------------------
+
+def test_adr_valid_statuses_contains_all_required() -> None:
+    assert "proposed" in ADR_VALID_STATUSES
+    assert "accepted" in ADR_VALID_STATUSES
+    assert "superseded" in ADR_VALID_STATUSES
+    assert "deprecated" in ADR_VALID_STATUSES
+    assert len(ADR_VALID_STATUSES) == 4
+
+
+def test_adr_human_approved_status_is_accepted() -> None:
+    assert ADR_HUMAN_APPROVED_STATUS == "accepted"
+
+
+def test_create_adr_minimal_required_fields() -> None:
+    adr = create_adr(
+        decision_id="ADR-001",
+        title="Use TOML for policy configuration",
+        status="proposed",
+        rationale="TOML is human-readable and widely supported.",
+        author="alice",
+    )
+    assert adr.decision_id == "ADR-001"
+    assert adr.title == "Use TOML for policy configuration"
+    assert adr.status == "proposed"
+    assert adr.rationale == "TOML is human-readable and widely supported."
+    assert adr.author == "alice"
+    assert adr.alternatives_considered == ()
+    assert adr.consequences == ()
+    assert adr.phase_reference is None
+    assert adr.contributors == ()
+
+
+def test_create_adr_all_fields() -> None:
+    fixed_time = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    adr = create_adr(
+        decision_id="ADR-002",
+        title="Adopt Architecture Memory as next roadmap option",
+        status="accepted",
+        rationale="Architecture Memory provides governed ADR lifecycle.",
+        alternatives_considered=["Option C — Multi-Agent", "Remote Coding"],
+        consequences=["ADR model is now a first-class PCAE artifact."],
+        created_at=fixed_time,
+        phase_reference="36F",
+        author="alice",
+        contributors=["claude-local", "codex-local"],
+    )
+    assert adr.decision_id == "ADR-002"
+    assert adr.status == "accepted"
+    assert adr.alternatives_considered == ("Option C — Multi-Agent", "Remote Coding")
+    assert adr.consequences == ("ADR model is now a first-class PCAE artifact.",)
+    assert adr.created_at == fixed_time
+    assert adr.phase_reference == "36F"
+    assert adr.contributors == ("claude-local", "codex-local")
+
+
+def test_create_adr_all_valid_statuses() -> None:
+    for status in ("proposed", "accepted", "superseded", "deprecated"):
+        adr = create_adr(
+            decision_id=f"ADR-{status}",
+            title=f"Decision with status {status}",
+            status=status,
+            rationale="Rationale.",
+            author="alice",
+        )
+        assert adr.status == status
+
+
+def test_create_adr_invalid_status_raises_value_error() -> None:
+    import pytest
+    with pytest.raises(ValueError, match="Invalid ADR status"):
+        create_adr(
+            decision_id="ADR-bad",
+            title="Bad status",
+            status="approved",
+            rationale="Rationale.",
+            author="alice",
+        )
+
+
+def test_create_adr_invalid_status_error_lists_valid_statuses() -> None:
+    import pytest
+    with pytest.raises(ValueError) as exc_info:
+        create_adr(
+            decision_id="ADR-bad",
+            title="Bad status",
+            status="unknown",
+            rationale="Rationale.",
+            author="alice",
+        )
+    message = str(exc_info.value)
+    assert "accepted" in message
+    assert "proposed" in message
+    assert "superseded" in message
+    assert "deprecated" in message
+
+
+def test_create_adr_empty_author_raises_value_error() -> None:
+    import pytest
+    with pytest.raises(ValueError, match="author must be a non-empty string"):
+        create_adr(
+            decision_id="ADR-003",
+            title="Missing author",
+            status="proposed",
+            rationale="Rationale.",
+            author="",
+        )
+
+
+def test_create_adr_empty_decision_id_raises_value_error() -> None:
+    import pytest
+    with pytest.raises(ValueError, match="decision_id must be a non-empty string"):
+        create_adr(
+            decision_id="",
+            title="No ID",
+            status="proposed",
+            rationale="Rationale.",
+            author="alice",
+        )
+
+
+def test_create_adr_empty_title_raises_value_error() -> None:
+    import pytest
+    with pytest.raises(ValueError, match="title must be a non-empty string"):
+        create_adr(
+            decision_id="ADR-004",
+            title="",
+            status="proposed",
+            rationale="Rationale.",
+            author="alice",
+        )
+
+
+def test_create_adr_empty_rationale_raises_value_error() -> None:
+    import pytest
+    with pytest.raises(ValueError, match="rationale must be a non-empty string"):
+        create_adr(
+            decision_id="ADR-005",
+            title="No rationale",
+            status="proposed",
+            rationale="",
+            author="alice",
+        )
+
+
+def test_adr_is_human_approved_true_for_accepted() -> None:
+    adr = create_adr(
+        decision_id="ADR-006",
+        title="Accepted decision",
+        status="accepted",
+        rationale="Rationale.",
+        author="alice",
+    )
+    assert adr.is_human_approved is True
+
+
+def test_adr_is_human_approved_false_for_non_accepted_statuses() -> None:
+    for status in ("proposed", "superseded", "deprecated"):
+        adr = create_adr(
+            decision_id=f"ADR-{status}",
+            title=f"Decision with status {status}",
+            status=status,
+            rationale="Rationale.",
+            author="alice",
+        )
+        assert adr.is_human_approved is False, f"Expected False for status={status}"
+
+
+def test_adr_to_dict_shape_and_values() -> None:
+    fixed_time = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    adr = create_adr(
+        decision_id="ADR-007",
+        title="Dict shape test",
+        status="proposed",
+        rationale="Rationale.",
+        author="alice",
+        alternatives_considered=["Option A"],
+        consequences=["Consequence B"],
+        created_at=fixed_time,
+        phase_reference="36F",
+        contributors=["claude-local"],
+    )
+    d = adr.to_dict()
+    assert set(d) == {
+        "decision_id",
+        "title",
+        "status",
+        "rationale",
+        "alternatives_considered",
+        "consequences",
+        "created_at",
+        "phase_reference",
+        "author",
+        "contributors",
+        "is_human_approved",
+    }
+    assert d["decision_id"] == "ADR-007"
+    assert d["status"] == "proposed"
+    assert d["author"] == "alice"
+    assert d["alternatives_considered"] == ["Option A"]
+    assert d["consequences"] == ["Consequence B"]
+    assert d["created_at"] == "2026-05-29T12:00:00+00:00"
+    assert d["phase_reference"] == "36F"
+    assert d["contributors"] == ["claude-local"]
+    assert d["is_human_approved"] is False
+
+
+def test_adr_contributors_vendor_neutral_accepts_any_string_ids() -> None:
+    adr = create_adr(
+        decision_id="ADR-008",
+        title="Vendor-neutral contributors",
+        status="accepted",
+        rationale="Any agent identifier is valid.",
+        author="alice",
+        contributors=[
+            "claude-local",
+            "codex-local",
+            "kimi-remote",
+            "deepseek-api",
+            "human-reviewer",
+        ],
+    )
+    assert len(adr.contributors) == 5
+    assert "claude-local" in adr.contributors
+    assert "deepseek-api" in adr.contributors
+
+
+def test_adr_is_frozen_dataclass() -> None:
+    import pytest
+    adr = create_adr(
+        decision_id="ADR-009",
+        title="Immutable",
+        status="proposed",
+        rationale="Rationale.",
+        author="alice",
+    )
+    with pytest.raises((AttributeError, TypeError)):
+        adr.status = "accepted"  # type: ignore[misc]
+
+
+def test_create_adr_created_at_defaults_to_utc_now() -> None:
+    before = datetime.now(timezone.utc)
+    adr = create_adr(
+        decision_id="ADR-010",
+        title="Auto timestamp",
+        status="proposed",
+        rationale="Rationale.",
+        author="alice",
+    )
+    after = datetime.now(timezone.utc)
+    assert before <= adr.created_at <= after

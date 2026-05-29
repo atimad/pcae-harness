@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36E: Roadmap awareness for predicted phases.
+Phase 36F: Architecture Decision Record model.
 
 ## Governance Coherence Note
 
@@ -327,11 +327,20 @@ predicted phase (36F Architecture Decision Record model) and surfacing the
 full `roadmap_sequence` and `predicted_phases` in output; when TODO items
 exist, `predicted_phases` is empty and the first TODO item is recommended as
 before; recommendations remain advisory, no tasks are created automatically,
-and no runtime state is mutated.
+and no runtime state is mutated, and governed Architecture Decision Records
+(ADRs) are now a first-class PCAE model with ten fields (decision_id, title,
+status, rationale, alternatives_considered, consequences, created_at,
+phase_reference, author, contributors), four lifecycle statuses (proposed,
+accepted, superseded, deprecated), a `create_adr()` factory that validates
+all required fields and rejects unknown statuses, an `is_human_approved`
+property reflecting the "accepted" status, human-authority semantics enforced
+by requiring a non-empty author, and vendor-neutral contributor support via a
+plain string tuple; no CLI commands, persistence, or automatic decision
+generation are included in this phase.
 
 ## Next
 
-- Phase 36F: Architecture Decision Record model (Option B — Architecture Memory).
+- Phase 36G: Architecture decision inspection (Option B — Architecture Memory).
 
 ## Future Explorations
 

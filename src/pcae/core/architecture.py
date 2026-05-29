@@ -408,3 +408,104 @@ def path_matches_pattern(path_text: str, pattern: str) -> bool:
     if "/" not in pattern and fnmatch(Path(path_text).name, pattern):
         return True
     return fnmatch(path_text, pattern)
+
+
+# ---------------------------------------------------------------------------
+# Architecture Decision Record model (Phase 36F)
+# ---------------------------------------------------------------------------
+
+ADR_VALID_STATUSES: frozenset[str] = frozenset({
+    "proposed",
+    "accepted",
+    "superseded",
+    "deprecated",
+})
+
+# "accepted" is the human-approved status; all other transitions require
+# explicit human action — AI agents may contribute but do not approve.
+ADR_HUMAN_APPROVED_STATUS = "accepted"
+
+
+@dataclass(frozen=True)
+class ArchitectureDecisionRecord:
+    """A governed Architecture Decision Record (ADR).
+
+    Human author is required and remains authoritative; contributors are
+    vendor-neutral and may include AI agents or tooling identifiers.
+    """
+    decision_id: str
+    title: str
+    status: str
+    rationale: str
+    alternatives_considered: tuple[str, ...]
+    consequences: tuple[str, ...]
+    created_at: datetime
+    phase_reference: str | None
+    author: str
+    contributors: tuple[str, ...]  # vendor-neutral; may include AI agent IDs
+
+    @property
+    def is_human_approved(self) -> bool:
+        return self.status == ADR_HUMAN_APPROVED_STATUS
+
+    def to_dict(self) -> dict:
+        return {
+            "decision_id": self.decision_id,
+            "title": self.title,
+            "status": self.status,
+            "rationale": self.rationale,
+            "alternatives_considered": list(self.alternatives_considered),
+            "consequences": list(self.consequences),
+            "created_at": self.created_at.isoformat(),
+            "phase_reference": self.phase_reference,
+            "author": self.author,
+            "contributors": list(self.contributors),
+            "is_human_approved": self.is_human_approved,
+        }
+
+
+def create_adr(
+    decision_id: str,
+    title: str,
+    status: str,
+    rationale: str,
+    author: str,
+    alternatives_considered: tuple[str, ...] | list[str] = (),
+    consequences: tuple[str, ...] | list[str] = (),
+    created_at: datetime | None = None,
+    phase_reference: str | None = None,
+    contributors: tuple[str, ...] | list[str] = (),
+) -> ArchitectureDecisionRecord:
+    """Return a validated ArchitectureDecisionRecord.
+
+    Raises ValueError for invalid status or empty required fields.
+    Human author is required — human remains authoritative.
+    Contributors are vendor-neutral and may include AI agent identifiers.
+    """
+    if not isinstance(decision_id, str) or not decision_id:
+        raise ValueError("decision_id must be a non-empty string.")
+    if not isinstance(title, str) or not title:
+        raise ValueError("title must be a non-empty string.")
+    if not isinstance(rationale, str) or not rationale:
+        raise ValueError("rationale must be a non-empty string.")
+    if not isinstance(author, str) or not author:
+        raise ValueError(
+            "author must be a non-empty string; human author is required."
+        )
+    if status not in ADR_VALID_STATUSES:
+        valid = ", ".join(sorted(ADR_VALID_STATUSES))
+        raise ValueError(
+            f"Invalid ADR status: {status!r}. Valid statuses: {valid}."
+        )
+    return ArchitectureDecisionRecord(
+        decision_id=decision_id,
+        title=title,
+        status=status,
+        rationale=rationale,
+        alternatives_considered=tuple(alternatives_considered),
+        consequences=tuple(consequences),
+        created_at=created_at or datetime.now(timezone.utc),
+        phase_reference=phase_reference,
+        author=author,
+        contributors=tuple(contributors),
+    )
