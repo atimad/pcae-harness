@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36I: Architecture decision export.
+Phase 36J: Architecture decision status validation.
 
 ## Governance Coherence Note
 
@@ -363,11 +363,18 @@ to `.pcae/architecture-exports/architecture-decisions-YYYYMMDD-HHMMSS.json`;
 the export includes `exported_at`, `decision_count`, `decisions` (all ten ADR
 fields plus `is_human_approved`), `statuses` (per-status count summary), and
 `advisory`; export files are Git-ignored via `.pcae/.gitignore`; the command
-is read-only and does not mutate any persisted ADR.
+is read-only and does not mutate any persisted ADR, and governed Architecture
+Decision Records can have their status validated with `pcae architecture
+validate` and `pcae architecture validate --json`; validation checks the full
+registry (sample + persisted) for status integrity issues including duplicate
+decision IDs and unknown statuses; the result includes `valid` (bool),
+`issues` (list of human-readable strings), `issue_count`, and `advisory`;
+exit code is 0 when valid and 1 when issues are found; the command is
+read-only and does not mutate any ADR or artifact.
 
 ## Next
 
-- Phase 36J: Architecture decision status validation (Option B — Architecture Memory).
+- Phase 36K: Architecture decision status transitions (Option B — Architecture Memory).
 
 ## Future Explorations
 

@@ -17,6 +17,7 @@ from pcae.commands.architecture import (
     run_architecture_metrics,
     run_architecture_show,
     run_architecture_snapshot,
+    run_architecture_validate,
 )
 from pcae.commands.check import run_check
 from pcae.commands.context import (
@@ -1363,6 +1364,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON export result.",
     )
     architecture_export_parser.set_defaults(handler=run_architecture_export)
+
+    architecture_validate_parser = architecture_subparsers.add_parser(
+        "validate",
+        help="Validate governed architecture decision record statuses.",
+    )
+    architecture_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON validation result.",
+    )
+    architecture_validate_parser.set_defaults(handler=run_architecture_validate)
 
     task_parser = subparsers.add_parser(
         "task",

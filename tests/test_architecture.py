@@ -1234,7 +1234,9 @@ def test_cli_architecture_add_default_status_is_accepted(
 from pcae.core.architecture import (
     ADR_EXPORT_ADVISORY,
     ADR_EXPORT_RELATIVE_PATH,
+    ADR_VALIDATION_ADVISORY,
     export_architecture_decisions,
+    validate_adr_registry,
 )
 
 
@@ -1379,3 +1381,163 @@ def test_cli_architecture_export_creates_file(
     data = json.loads(files[0].read_text(encoding="utf-8"))
     assert data["decision_count"] == 2
     assert len(data["decisions"]) == 2
+
+
+# ---------------------------------------------------------------------------
+# ADR status validation tests (Phase 36J)
+# ---------------------------------------------------------------------------
+
+def test_validate_adr_registry_valid_registry() -> None:
+    registry = _make_sample_registry()
+    result = validate_adr_registry(registry)
+    assert result.valid is True
+    assert result.issues == ()
+    assert result.advisory == ADR_VALIDATION_ADVISORY
+
+
+def test_validate_adr_registry_empty_registry() -> None:
+    result = validate_adr_registry(())
+    assert result.valid is True
+    assert result.issues == ()
+
+
+def test_validate_adr_registry_detects_duplicate_ids() -> None:
+    adr1 = create_adr(
+        decision_id="ADR-DUP",
+        title="First",
+        status="proposed",
+        rationale="Rationale.",
+        author="alice",
+    )
+    adr2 = create_adr(
+        decision_id="ADR-DUP",
+        title="Second",
+        status="accepted",
+        rationale="Rationale.",
+        author="bob",
+    )
+    result = validate_adr_registry((adr1, adr2))
+    assert result.valid is False
+    assert len(result.issues) == 1
+    assert "ADR-DUP" in result.issues[0]
+    assert "Duplicate" in result.issues[0]
+
+
+def test_validate_adr_registry_multiple_duplicates() -> None:
+    adr1 = create_adr(
+        decision_id="ADR-DUP",
+        title="First",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    adr2 = create_adr(
+        decision_id="ADR-DUP",
+        title="Second",
+        status="accepted",
+        rationale="R.",
+        author="bob",
+    )
+    adr3 = create_adr(
+        decision_id="ADR-DUP",
+        title="Third",
+        status="deprecated",
+        rationale="R.",
+        author="carol",
+    )
+    result = validate_adr_registry((adr1, adr2, adr3))
+    assert result.valid is False
+    # Second and third both trigger the duplicate check
+    assert len(result.issues) == 2
+
+
+def test_validate_adr_registry_to_dict_shape() -> None:
+    registry = _make_sample_registry()
+    d = validate_adr_registry(registry).to_dict()
+    assert set(d) == {"valid", "issues", "issue_count", "advisory"}
+    assert d["valid"] is True
+    assert d["issues"] == []
+    assert d["issue_count"] == 0
+    assert d["advisory"] == ADR_VALIDATION_ADVISORY
+
+
+def test_validate_adr_registry_to_dict_with_issues() -> None:
+    adr1 = create_adr(
+        decision_id="ADR-X",
+        title="A",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    adr2 = create_adr(
+        decision_id="ADR-X",
+        title="B",
+        status="accepted",
+        rationale="R.",
+        author="bob",
+    )
+    d = validate_adr_registry((adr1, adr2)).to_dict()
+    assert d["valid"] is False
+    assert len(d["issues"]) == 1
+    assert d["issue_count"] == 1
+
+
+def test_validate_adr_registry_does_not_mutate_registry(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Stable decision",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    registry = get_adr_registry(HarnessPath(tmp_path))
+    validate_adr_registry(registry)
+    after = get_adr_registry(HarnessPath(tmp_path))
+    assert registry == after
+
+
+def test_cli_architecture_validate_human_output_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "validate"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decision status validation" in output
+    assert "Valid: yes" in output
+    assert "Issues: none" in output
+    assert ADR_VALIDATION_ADVISORY in output
+
+
+def test_cli_architecture_validate_json_output_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "validate", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["issues"] == []
+    assert data["issue_count"] == 0
+    assert data["advisory"] == ADR_VALIDATION_ADVISORY
+
+
+def test_cli_architecture_validate_reports_decision_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "validate"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Decision count: 2" in output
+
+
+def test_cli_architecture_validate_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    before = list(tmp_path.iterdir())
+    main(["architecture", "validate"])
+    capsys.readouterr()
+    assert list(tmp_path.iterdir()) == before

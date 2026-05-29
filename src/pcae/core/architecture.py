@@ -759,6 +759,57 @@ def export_architecture_decisions(
     )
 
 
+# ---------------------------------------------------------------------------
+# ADR status validation (Phase 36J)
+# ---------------------------------------------------------------------------
+
+ADR_VALIDATION_ADVISORY = (
+    "Architecture decision status validation is advisory; the user remains authoritative."
+)
+
+
+@dataclass(frozen=True)
+class ADRValidationResult:
+    valid: bool
+    issues: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "valid": self.valid,
+            "issues": list(self.issues),
+            "issue_count": len(self.issues),
+            "advisory": self.advisory,
+        }
+
+
+def validate_adr_registry(
+    registry: tuple[ArchitectureDecisionRecord, ...],
+) -> ADRValidationResult:
+    """Return a read-only validation result for the ADR registry.
+
+    Checks for duplicate decision IDs and unknown statuses.
+    Does not mutate any ADR or artifact.
+    """
+    issues: list[str] = []
+
+    seen_ids: set[str] = set()
+    for adr in registry:
+        if adr.decision_id in seen_ids:
+            issues.append(f"Duplicate decision ID: {adr.decision_id!r}")
+        seen_ids.add(adr.decision_id)
+
+    for adr in registry:
+        if adr.status not in ADR_VALID_STATUSES:
+            issues.append(f"{adr.decision_id}: unknown status {adr.status!r}")
+
+    return ADRValidationResult(
+        valid=len(issues) == 0,
+        issues=tuple(issues),
+        advisory=ADR_VALIDATION_ADVISORY,
+    )
+
+
 def add_architecture_decision(
     root: HarnessPath,
     title: str,

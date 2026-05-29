@@ -7,6 +7,7 @@ from pcae.core.architecture import (
     ADR_ADD_ADVISORY,
     ADR_EXPORT_ADVISORY,
     ADR_INSPECTION_ADVISORY,
+    ADR_VALIDATION_ADVISORY,
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     add_architecture_decision,
@@ -16,6 +17,7 @@ from pcae.core.architecture import (
     list_architecture_decisions,
     lookup_adr_by_id,
     read_architecture_history_summary,
+    validate_adr_registry,
     write_architecture_history_snapshot,
 )
 from pcae.core.check import run_checks
@@ -220,6 +222,27 @@ def run_architecture_add(args: argparse.Namespace) -> int:
     print(f"Persisted at: {result.relative_path.as_posix()}")
     print(result.advisory)
     return 0
+
+
+def run_architecture_validate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    registry = get_adr_registry(root)
+    result = validate_adr_registry(registry)
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        return 0 if result.valid else 1
+    print("Architecture decision status validation")
+    print(f"Decision count: {len(registry)}")
+    if result.valid:
+        print("Valid: yes")
+        print("Issues: none")
+    else:
+        print("Valid: no")
+        print(f"Issues: {len(result.issues)}")
+        for issue in result.issues:
+            print(f"  - {issue}")
+    print(ADR_VALIDATION_ADVISORY)
+    return 0 if result.valid else 1
 
 
 def run_architecture_export(args: argparse.Namespace) -> int:
