@@ -1166,6 +1166,325 @@ def test_collaboration_handoffs_core_build_handoff_history(tmp_path: Path) -> No
 
 
 # ---------------------------------------------------------------------------
+# pcae agents runtime-discover (Phase 38A)
+# ---------------------------------------------------------------------------
+
+
+def _mock_none_find(name: str) -> None:
+    return None
+
+
+def _mock_none_probe(cmd: list, timeout: int = 5) -> None:
+    return None
+
+
+def test_agents_runtime_discover_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runtime discovery" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Agents checked: 3" in output
+    assert "advisory" in output.lower()
+
+
+def test_agents_runtime_discover_json_structure(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "agents" in data
+    assert "discovery_summary" in data
+    assert "advisory" in data
+
+
+def test_agents_runtime_discover_three_agents(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    agent_ids = [a["agent_id"] for a in data["agents"]]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+    assert len(agent_ids) == 3
+
+
+def test_agents_runtime_discover_all_not_installed(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for agent in data["agents"]:
+        assert agent["capabilities"]["installed"] is False
+    summary = data["discovery_summary"]
+    assert summary["agents_installed"] == 0
+    assert summary["agents_not_installed"] == 3
+    assert summary["agents_checked"] == 3
+
+
+def test_agents_runtime_discover_installed_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "claude" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "claude":
+            return "usage: claude [-p prompt] [--json] [--mcp] [--hooks] [remote]"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "1.0.0" if exe == "claude" else None)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    claude = next(a for a in data["agents"] if a["agent_id"] == "claude-local")
+    caps = claude["capabilities"]
+    assert caps["installed"] is True
+    assert caps["executable_path"] == "/usr/bin/claude"
+    assert caps["version"] == "1.0.0"
+    assert caps["interactive_supported"] == "yes"
+    assert data["discovery_summary"]["agents_installed"] == 1
+
+
+def test_agents_runtime_discover_capabilities_all_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for agent in data["agents"]:
+        caps = agent["capabilities"]
+        for field in (
+            "installed", "executable_path", "version",
+            "interactive_supported", "non_interactive_supported",
+            "stdin_prompt_supported", "prompt_file_supported",
+            "structured_output_supported", "mcp_supported",
+            "hooks_supported", "subagents_supported", "remote_supported",
+            "known_limitations",
+        ):
+            assert field in caps, f"Missing '{field}' in '{agent['agent_id']}'"
+
+
+def test_agents_runtime_discover_not_installed_caps_unknown(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for agent in data["agents"]:
+        caps = agent["capabilities"]
+        assert caps["installed"] is False
+        for cap in (
+            "interactive_supported", "non_interactive_supported",
+            "stdin_prompt_supported", "prompt_file_supported",
+            "structured_output_supported", "mcp_supported",
+            "hooks_supported", "subagents_supported", "remote_supported",
+        ):
+            assert caps[cap] == "unknown", (
+                f"Expected 'unknown' for '{cap}' of not-installed '{agent['agent_id']}', "
+                f"got '{caps[cap]}'"
+            )
+
+
+def test_agents_runtime_discover_detects_non_interactive(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "claude" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "claude":
+            return "usage: claude -p <prompt> run in non-interactive mode"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: None)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    claude = next(a for a in data["agents"] if a["agent_id"] == "claude-local")
+    assert claude["capabilities"]["non_interactive_supported"] == "yes"
+
+
+def test_agents_runtime_discover_detects_mcp(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        return "codex mcp-server start options" if cmd[0] == "codex" else None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: None)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    codex = next(a for a in data["agents"] if a["agent_id"] == "codex-local")
+    assert codex["capabilities"]["mcp_supported"] == "yes"
+
+
+def test_agents_runtime_discover_conservative_unknown_not_no(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "claude" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "claude":
+            return "usage: claude [options] basic help with no special features listed"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: None)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    claude = next(a for a in data["agents"] if a["agent_id"] == "claude-local")
+    caps = claude["capabilities"]
+    for cap in ("mcp_supported", "hooks_supported", "subagents_supported", "remote_supported"):
+        assert caps[cap] == "unknown", f"Expected 'unknown' (not 'no') for '{cap}', got '{caps[cap]}'"
+
+
+def test_agents_runtime_discover_advisory(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "user remains authoritative" in data["advisory"]
+
+
+def test_agents_runtime_discover_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "runtime-discover"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_runtime_discover_summary_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    summary = data["discovery_summary"]
+    assert summary["agents_checked"] == 3
+    assert "agents_installed" in summary
+    assert "agents_not_installed" in summary
+    assert summary["agents_installed"] + summary["agents_not_installed"] == summary["agents_checked"]
+
+
+def test_agents_runtime_discover_installed_interactive_yes(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    monkeypatch.setattr(agent_mod, "_find_executable", lambda name: f"/usr/bin/{name}" if name == "codex" else None)
+    monkeypatch.setattr(agent_mod, "_run_probe", lambda cmd, timeout=5: "codex usage" if cmd[0] == "codex" else None)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: None)
+
+    exit_code = main(["agents", "runtime-discover", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    codex = next(a for a in data["agents"] if a["agent_id"] == "codex-local")
+    assert codex["capabilities"]["interactive_supported"] == "yes"
+
+
+def test_agents_runtime_discover_core_build(tmp_path: Path, monkeypatch) -> None:
+    import pcae.core.agent as agent_mod
+    from pcae.core.agent import build_runtime_discovery
+
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    result = build_runtime_discovery()
+
+    assert result.advisory == "Runtime discovery is advisory; the user remains authoritative."
+    assert len(result.agents) == 3
+    for entry in result.agents:
+        assert entry.capabilities.installed is False
+
+
+# ---------------------------------------------------------------------------
 # pcae collaboration reviews (Phase 37H)
 # ---------------------------------------------------------------------------
 

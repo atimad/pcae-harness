@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Agent Runtime Capability Discovery (Phase 38A): `pcae agents runtime-discover` and `--json` with conservative CLI probing for codex/claude/kimi, capability detection from help text keywords, graceful missing-executable handling, and advisory output.
 - Completed Multi-Agent Review and Validation (Phase 37H): `pcae collaboration reviews` and `--json` with three review workflow templates, four review statuses, per-step review_status field, and advisory semantics.
 - Completed Multi-Agent Handoff Governance (Phase 37G): `pcae collaboration handoffs` and `--json` derive handoff records from provenance events, with continuity verification, architecture memory status, and malformed-record warnings.
 - Completed Collaboration Workflow Foundation (Phase 37F): `pcae collaboration workflows` and `--json` with four advisory workflow templates (implementation, documentation, architecture, handoff), ordered steps, and lifecycle status requirements.

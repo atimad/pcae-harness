@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37H: Multi-Agent Review and Validation.
+Phase 38A: Agent Runtime Capability Discovery.
 
 ## Governance Coherence Note
 
@@ -515,9 +515,21 @@ reviewed, validated, rejected; advisory note confirms no agents are
 executed or assigned automatically; all operations are strictly
 read-only.
 
+PCAE can also discover local CLI runtime capabilities for known agents
+with `pcae agents runtime-discover` and `pcae agents runtime-discover
+--json` (Phase 38A): probes codex, claude, and kimi CLIs with safe
+help/version subcommands; reports installed status, executable path,
+version, and twelve capability fields (interactive, non-interactive,
+stdin prompt, prompt file, structured output, MCP, hooks, subagents,
+remote); detection is conservative — "yes" only when specific keywords
+appear in help output, "unknown" otherwise; codex probes include exec,
+mcp, and mcp-server subcommands; stdin=DEVNULL and 5-second timeouts
+prevent interactive sessions or hangs; missing executables handled
+gracefully; all operations are strictly read-only.
+
 ## Next
 
-- Phase 37I: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 38B: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

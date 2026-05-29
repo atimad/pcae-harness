@@ -12,6 +12,7 @@ from pcae.commands.agent import (
     run_agents_config_show,
     run_agents_config_validate,
     run_agents_lifecycle,
+    run_agents_runtime_discover,
     run_agents_show,
     run_agents_validate,
     run_collaboration_handoffs,
@@ -1080,6 +1081,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON validation output.",
     )
     agents_config_validate_parser.set_defaults(handler=run_agents_config_validate)
+
+    agents_runtime_discover_parser = agents_subparsers.add_parser(
+        "runtime-discover",
+        help="Discover local CLI runtime capabilities for known agents.",
+    )
+    agents_runtime_discover_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime discovery output.",
+    )
+    agents_runtime_discover_parser.set_defaults(handler=run_agents_runtime_discover)
 
     collaboration_parser = subparsers.add_parser(
         "collaboration",

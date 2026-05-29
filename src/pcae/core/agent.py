@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import re
+import shutil
+import subprocess
 
 from pcae.core.git_status import read_git_branch
 from pcae.core.paths import HarnessPath
@@ -1023,6 +1026,219 @@ def build_review_workflows() -> dict:
         "review_statuses": list(VALID_REVIEW_STATUSES),
         "review_workflows": [w.to_dict() for w in REVIEW_WORKFLOWS],
     }
+
+
+# ---------------------------------------------------------------------------
+# Agent runtime capability discovery (Phase 38A)
+# ---------------------------------------------------------------------------
+
+RUNTIME_CAP_YES = "yes"
+RUNTIME_CAP_UNKNOWN = "unknown"
+
+RUNTIME_DISCOVERY_ADVISORY = (
+    "Runtime discovery is advisory; the user remains authoritative."
+)
+
+# Agents to probe: (agent_id, executable_name)
+_RUNTIME_PROBE_AGENTS: tuple[tuple[str, str], ...] = (
+    ("codex-local", "codex"),
+    ("claude-local", "claude"),
+    ("kimi-local", "kimi"),
+)
+
+# Capability detection keyword sets (all matched against lowercased combined help text).
+_KW_NON_INTERACTIVE = (
+    "-p ", "--print", " exec ", "exec\n", "full-auto",
+    "non-interactive", "noninteractive", "--headless",
+)
+_KW_STDIN = ("stdin", "from stdin", "pipe", "piped")
+_KW_PROMPT_FILE = ("--file", "--prompt-file", "prompt file")
+_KW_STRUCTURED_OUTPUT = ("--json", "--output=json", "json output", "output json")
+_KW_MCP = ("mcp",)
+_KW_HOOKS = ("hook",)
+_KW_SUBAGENTS = ("subagent", "sub-agent")
+_KW_REMOTE = ("remote",)
+
+
+@dataclass(frozen=True)
+class AgentRuntimeCapabilities:
+    installed: bool
+    executable_path: str | None
+    version: str | None
+    interactive_supported: str
+    non_interactive_supported: str
+    stdin_prompt_supported: str
+    prompt_file_supported: str
+    structured_output_supported: str
+    mcp_supported: str
+    hooks_supported: str
+    subagents_supported: str
+    remote_supported: str
+    known_limitations: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "executable_path": self.executable_path,
+            "hooks_supported": self.hooks_supported,
+            "installed": self.installed,
+            "interactive_supported": self.interactive_supported,
+            "known_limitations": list(self.known_limitations),
+            "mcp_supported": self.mcp_supported,
+            "non_interactive_supported": self.non_interactive_supported,
+            "prompt_file_supported": self.prompt_file_supported,
+            "remote_supported": self.remote_supported,
+            "stdin_prompt_supported": self.stdin_prompt_supported,
+            "structured_output_supported": self.structured_output_supported,
+            "subagents_supported": self.subagents_supported,
+            "version": self.version,
+        }
+
+
+@dataclass(frozen=True)
+class AgentRuntimeEntry:
+    agent_id: str
+    executable: str
+    capabilities: AgentRuntimeCapabilities
+
+    def to_dict(self) -> dict:
+        return {
+            "agent_id": self.agent_id,
+            "capabilities": self.capabilities.to_dict(),
+            "executable": self.executable,
+        }
+
+
+@dataclass(frozen=True)
+class RuntimeDiscoveryResult:
+    agents: tuple[AgentRuntimeEntry, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        installed = sum(1 for a in self.agents if a.capabilities.installed)
+        return {
+            "advisory": self.advisory,
+            "agents": [a.to_dict() for a in self.agents],
+            "discovery_summary": {
+                "agents_checked": len(self.agents),
+                "agents_installed": installed,
+                "agents_not_installed": len(self.agents) - installed,
+            },
+        }
+
+
+def _find_executable(name: str) -> str | None:
+    return shutil.which(name)
+
+
+def _run_probe(cmd: list[str], timeout: int = 5) -> str | None:
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            stdin=subprocess.DEVNULL,
+        )
+        return (result.stdout + result.stderr).lower()
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError, ValueError):
+        return None
+
+
+def _extract_version_string(executable: str) -> str | None:
+    try:
+        result = subprocess.run(
+            [executable, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            stdin=subprocess.DEVNULL,
+        )
+        output = (result.stdout + result.stderr).strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError, ValueError):
+        return None
+    if not output:
+        return None
+    match = re.search(r"\bv?(\d+\.\d+[\d.]*)\b", output)
+    return match.group(0) if match else output[:80]
+
+
+def _cap_detect(text: str, keywords: tuple[str, ...]) -> str:
+    return RUNTIME_CAP_YES if any(kw in text for kw in keywords) else RUNTIME_CAP_UNKNOWN
+
+
+def _not_installed_capabilities() -> AgentRuntimeCapabilities:
+    return AgentRuntimeCapabilities(
+        installed=False,
+        executable_path=None,
+        version=None,
+        interactive_supported=RUNTIME_CAP_UNKNOWN,
+        non_interactive_supported=RUNTIME_CAP_UNKNOWN,
+        stdin_prompt_supported=RUNTIME_CAP_UNKNOWN,
+        prompt_file_supported=RUNTIME_CAP_UNKNOWN,
+        structured_output_supported=RUNTIME_CAP_UNKNOWN,
+        mcp_supported=RUNTIME_CAP_UNKNOWN,
+        hooks_supported=RUNTIME_CAP_UNKNOWN,
+        subagents_supported=RUNTIME_CAP_UNKNOWN,
+        remote_supported=RUNTIME_CAP_UNKNOWN,
+        known_limitations=(),
+    )
+
+
+def _discover_capabilities(agent_id: str, executable: str) -> AgentRuntimeCapabilities:
+    path = _find_executable(executable)
+    if path is None:
+        return _not_installed_capabilities()
+
+    combined: list[str] = []
+
+    main_help = _run_probe([executable, "--help"])
+    if main_help:
+        combined.append(main_help)
+
+    # Codex-specific: probe subcommands for richer capability signal.
+    if executable == "codex":
+        for sub in (["codex", "exec", "--help"], ["codex", "mcp", "--help"],
+                    ["codex", "mcp-server", "--help"]):
+            out = _run_probe(sub)
+            if out:
+                combined.append(out)
+
+    h = " ".join(combined)
+
+    version = _extract_version_string(executable)
+
+    limitations: list[str] = []
+    if not h:
+        limitations.append(f"{executable} --help produced no output; capability detection limited.")
+
+    return AgentRuntimeCapabilities(
+        installed=True,
+        executable_path=path,
+        version=version,
+        interactive_supported=RUNTIME_CAP_YES,
+        non_interactive_supported=_cap_detect(h, _KW_NON_INTERACTIVE),
+        stdin_prompt_supported=_cap_detect(h, _KW_STDIN),
+        prompt_file_supported=_cap_detect(h, _KW_PROMPT_FILE),
+        structured_output_supported=_cap_detect(h, _KW_STRUCTURED_OUTPUT),
+        mcp_supported=_cap_detect(h, _KW_MCP),
+        hooks_supported=_cap_detect(h, _KW_HOOKS),
+        subagents_supported=_cap_detect(h, _KW_SUBAGENTS),
+        remote_supported=_cap_detect(h, _KW_REMOTE),
+        known_limitations=tuple(limitations),
+    )
+
+
+def build_runtime_discovery() -> RuntimeDiscoveryResult:
+    """Return a read-only agent runtime capability discovery report."""
+    entries = tuple(
+        AgentRuntimeEntry(
+            agent_id=agent_id,
+            executable=executable,
+            capabilities=_discover_capabilities(agent_id, executable),
+        )
+        for agent_id, executable in _RUNTIME_PROBE_AGENTS
+    )
+    return RuntimeDiscoveryResult(agents=entries, advisory=RUNTIME_DISCOVERY_ADVISORY)
 
 
 def read_agent_stale_after_seconds(root: HarnessPath) -> int:

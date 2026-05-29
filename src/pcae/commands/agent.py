@@ -10,6 +10,7 @@ from pcae.core.agent import (
     MULTI_AGENT_REGISTRY,
     REVIEW_ADVISORY,
     REVIEW_WORKFLOWS,
+    RUNTIME_DISCOVERY_ADVISORY,
     VALID_AGENT_STATUSES,
     VALID_REVIEW_STATUSES,
     acquire_agent_lock,
@@ -18,6 +19,7 @@ from pcae.core.agent import (
     build_lifecycle_report,
     build_multi_agent_registry,
     build_review_workflows,
+    build_runtime_discovery,
     get_agent_by_id,
     get_agent_config,
     release_agent_lock,
@@ -226,6 +228,42 @@ def run_collaboration_handoffs(args: argparse.Namespace) -> int:
                         print(f"  Warning: {w}")
         print()
         print(history.advisory)
+    return 0
+
+
+def run_agents_runtime_discover(args: argparse.Namespace) -> int:
+    result = build_runtime_discovery()
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        data = result.to_dict()
+        summary = data["discovery_summary"]
+        print("Runtime discovery")
+        print(f"Agents checked: {summary['agents_checked']}")
+        print(f"Agents installed: {summary['agents_installed']}")
+        for entry in result.agents:
+            caps = entry.capabilities
+            print(f"\n{entry.agent_id} ({entry.executable}):")
+            print(f"  Installed: {'yes' if caps.installed else 'no'}")
+            if caps.installed:
+                print(f"  Executable: {caps.executable_path}")
+                print(f"  Version: {caps.version or '(unknown)'}")
+                print(f"  Interactive: {caps.interactive_supported}")
+                print(f"  Non-interactive: {caps.non_interactive_supported}")
+                print(f"  Stdin prompt: {caps.stdin_prompt_supported}")
+                print(f"  Prompt file: {caps.prompt_file_supported}")
+                print(f"  Structured output: {caps.structured_output_supported}")
+                print(f"  MCP: {caps.mcp_supported}")
+                print(f"  Hooks: {caps.hooks_supported}")
+                print(f"  Subagents: {caps.subagents_supported}")
+                print(f"  Remote: {caps.remote_supported}")
+                if caps.known_limitations:
+                    for lim in caps.known_limitations:
+                        print(f"  Limitation: {lim}")
+                else:
+                    print("  Known limitations: none")
+        print()
+        print(RUNTIME_DISCOVERY_ADVISORY)
     return 0
 
 
