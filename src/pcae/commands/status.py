@@ -116,6 +116,23 @@ def run_governance_audit(args: argparse.Namespace) -> int:
         print(f"  Checks passed: {result.summary.passed_count}/{result.summary.check_count}")
         print(f"  Failed checks: {result.summary.failed_count}")
         print(f"  Warnings: {result.summary.warning_count}")
+        mem = result.architecture_memory_summary
+        print("Architecture memory summary:")
+        print(f"  Decision count: {mem.get('decision_count', 0)}")
+        print(f"  Accepted: {mem.get('accepted_count', 0)}")
+        latest = mem.get("latest_decision")
+        if isinstance(latest, dict):
+            print(f"  Latest: {latest.get('id')} — {latest.get('title')}")
+        else:
+            print("  Latest: none")
+        mem_warnings = mem.get("warnings") or []
+        mem_errors = mem.get("errors") or []
+        if mem_warnings:
+            for w in mem_warnings:
+                print(f"  Warning: {w}")
+        if mem_errors:
+            for e in mem_errors:
+                print(f"  Error: {e}")
     return 0 if result.valid else 1
 
 

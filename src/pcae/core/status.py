@@ -9,6 +9,11 @@ import re
 import subprocess
 
 from pcae.core.agent import build_agent_lock_state
+from pcae.core.architecture import (
+    count_adr_parse_failures,
+    get_adr_registry,
+    validate_adr_registry,
+)
 from pcae.core.check import run_checks
 from pcae.core.git_status import read_git_changes
 from pcae.core.health import build_health_data, session_continuity_status
@@ -190,6 +195,7 @@ class GovernanceAuditResult:
     checks: tuple[GovernanceAuditCheck, ...]
     warnings: tuple[CoherenceWarning, ...]
     summary: GovernanceAuditSummary
+    architecture_memory_summary: dict
 
     @property
     def valid(self) -> bool:
@@ -197,10 +203,11 @@ class GovernanceAuditResult:
 
     def to_dict(self) -> dict:
         return {
-            "valid": self.valid,
+            "architecture_memory_summary": self.architecture_memory_summary,
             "checks": [check.to_dict() for check in self.checks],
-            "warnings": [warning.to_dict() for warning in self.warnings],
             "summary": self.summary.to_dict(),
+            "valid": self.valid,
+            "warnings": [warning.to_dict() for warning in self.warnings],
         }
 
 
@@ -548,6 +555,75 @@ def check_project_status_coherence(root: HarnessPath) -> CoherenceResult:
     return CoherenceResult(warnings=tuple(warnings))
 
 
+def _build_architecture_memory_audit_summary(root: HarnessPath) -> dict:
+    """Return a compact read-only architecture memory summary for the audit."""
+    registry = get_adr_registry(root)
+    validation = validate_adr_registry(registry)
+    accepted_count = sum(1 for adr in registry if adr.status == "accepted")
+    latest_decision = None
+    if registry:
+        last = registry[-1]
+        latest_decision = {
+            "id": last.decision_id,
+            "status": last.status,
+            "title": last.title,
+        }
+    parse_failures = count_adr_parse_failures(root)
+
+    warnings: list[str] = list(validation.issues)
+    errors: list[str] = []
+    if parse_failures > 0:
+        errors.append(
+            f"{parse_failures} persisted ADR file(s) could not be parsed."
+        )
+    if not registry:
+        warnings.append("No architecture decisions found.")
+    elif accepted_count == 0:
+        warnings.append("No accepted architecture decisions found.")
+
+    return {
+        "accepted_count": accepted_count,
+        "decision_count": len(registry),
+        "errors": errors,
+        "latest_decision": latest_decision,
+        "warnings": warnings,
+    }
+
+
+def check_architecture_memory(root: HarnessPath) -> GovernanceAuditCheck:
+    """Return a GovernanceAuditCheck for architecture decision memory."""
+    registry = get_adr_registry(root)
+    validation = validate_adr_registry(registry)
+    parse_failures = count_adr_parse_failures(root)
+
+    if parse_failures > 0:
+        return GovernanceAuditCheck(
+            name="architecture_memory",
+            passed=False,
+            message=(
+                f"{parse_failures} persisted ADR file(s) could not be parsed."
+            ),
+        )
+    if not validation.valid:
+        return GovernanceAuditCheck(
+            name="architecture_memory",
+            passed=False,
+            message=(
+                f"Architecture decision validation failed: "
+                f"{len(validation.issues)} issue(s)."
+            ),
+        )
+    accepted_count = sum(1 for adr in registry if adr.status == "accepted")
+    return GovernanceAuditCheck(
+        name="architecture_memory",
+        passed=True,
+        message=(
+            f"{len(registry)} decisions readable "
+            f"({accepted_count} accepted)."
+        ),
+    )
+
+
 def audit_governance_coherence(root: HarnessPath) -> GovernanceAuditResult:
     """Return a lightweight read-only governance coherence audit."""
     checks = [
@@ -559,6 +635,7 @@ def audit_governance_coherence(root: HarnessPath) -> GovernanceAuditResult:
         check_policy_parses(root),
         check_agent_registry_non_empty(root),
         check_artifact_sync_drift(root),
+        check_architecture_memory(root),
     ]
     warnings = (
         find_stale_roadmap_references(root) + find_artifact_sync_drift_warnings(root)
@@ -578,6 +655,7 @@ def audit_governance_coherence(root: HarnessPath) -> GovernanceAuditResult:
             warning_count=len(warnings),
             status=status,
         ),
+        architecture_memory_summary=_build_architecture_memory_audit_summary(root),
     )
 
 
@@ -2255,6 +2333,7 @@ _GOVERNANCE_AUDIT_KNOWN_CHECKS: frozenset[str] = frozenset({
     "policy_configuration",
     "agent_registry",
     "artifact_sync_drift",  # added in Phase 35M
+    "architecture_memory",  # added in Phase 36M
 })
 
 # Capability checks that SHOULD exist in the audit but do not (yet).

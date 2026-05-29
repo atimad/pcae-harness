@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36L: Architecture memory continuity integration.
+Phase 36M: Architecture governance audit integration.
 
 ## Governance Coherence Note
 
@@ -398,11 +398,21 @@ continuity inspect` reports "Architecture memory present:"; a new
 `pcae continuity compatibility` includes an `architecture_memory_presence`
 check (advisory; absent packs remain compatible); `architecture_memory` is a
 known optional key excluded from future-version warnings; full ADR bodies are
-not included in any context or bootstrap output.
+not included in any context or bootstrap output, and Architecture Memory is
+now integrated into the governance audit (Phase 36M): `pcae governance audit`
+includes an `architecture_memory` check that verifies the ADR registry is
+readable, passes validation (no duplicate IDs or unknown statuses), and has
+no unparseable persisted ADR files; `GovernanceAuditResult` gains an
+`architecture_memory_summary` field (decision_count, accepted_count,
+latest_decision, warnings, errors); `pcae governance audit --json` includes
+`architecture_memory_summary`; human output shows an "Architecture memory
+summary" section; malformed `.pcae/architecture/*.json` files fail the check;
+`count_adr_parse_failures(root)` helper detects silently-skipped ADR files;
+all operations are read-only.
 
 ## Next
 
-- Phase 36M: Architecture decision status transitions (Option B — Architecture Memory).
+- Phase 36N: Architecture memory session restore (Option B — Architecture Memory).
 
 ## Future Explorations
 

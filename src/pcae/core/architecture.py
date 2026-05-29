@@ -861,6 +861,16 @@ def validate_adr_registry(
     )
 
 
+def count_adr_parse_failures(root: HarnessPath) -> int:
+    """Return the count of JSON files in .pcae/architecture/ that fail to parse."""
+    dir_path = root.join(ADR_PERSISTENCE_RELATIVE_PATH)
+    if not dir_path.is_dir():
+        return 0
+    total = sum(1 for p in dir_path.iterdir() if p.suffix == ".json")
+    loaded = len(load_persisted_adrs(root))
+    return max(0, total - loaded)
+
+
 def build_architecture_linkage(adr: ArchitectureDecisionRecord) -> dict:
     """Return a structured linkage dict aggregating provenance context fields."""
     return {

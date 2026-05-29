@@ -130,6 +130,7 @@ def test_governance_audit_valid_when_governance_artifacts_align(tmp_path: Path) 
     assert {check.name for check in result.checks} == {
         "active_task",
         "agent_registry",
+        "architecture_memory",
         "artifact_sync_drift",
         "policy_configuration",
         "project_status_current_phase",
@@ -5280,3 +5281,245 @@ def test_cli_governance_artifacts_still_works_after_export_subparser(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Governance artifact registry" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 36M: Architecture governance audit integration
+# ---------------------------------------------------------------------------
+
+from pcae.core.architecture import (
+    add_architecture_decision,
+    count_adr_parse_failures,
+)
+
+
+def test_governance_audit_includes_architecture_memory_check(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    check_names = {check.name for check in result.checks}
+    assert "architecture_memory" in check_names
+
+
+def test_governance_audit_architecture_memory_check_passes_with_sample_registry(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    arch_check = next(c for c in result.checks if c.name == "architecture_memory")
+    assert arch_check.passed is True
+
+
+def test_governance_audit_architecture_memory_check_message_includes_counts(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    arch_check = next(c for c in result.checks if c.name == "architecture_memory")
+    assert "decisions readable" in arch_check.message
+    assert "accepted" in arch_check.message
+
+
+def test_governance_audit_result_has_architecture_memory_summary(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    assert hasattr(result, "architecture_memory_summary")
+    assert isinstance(result.architecture_memory_summary, dict)
+
+
+def test_architecture_memory_summary_has_required_keys(tmp_path: Path) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    mem = result.architecture_memory_summary
+    assert "decision_count" in mem
+    assert "accepted_count" in mem
+    assert "latest_decision" in mem
+    assert "warnings" in mem
+    assert "errors" in mem
+
+
+def test_architecture_memory_summary_decision_count_at_least_sample(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    mem = result.architecture_memory_summary
+    assert mem["decision_count"] >= 2  # sample registry has 2
+
+
+def test_architecture_memory_summary_accepted_count_positive(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    mem = result.architecture_memory_summary
+    assert mem["accepted_count"] >= 1  # sample ADRs are accepted
+
+
+def test_architecture_memory_summary_latest_decision_is_dict(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    latest = result.architecture_memory_summary["latest_decision"]
+    assert isinstance(latest, dict)
+    assert "id" in latest
+    assert "title" in latest
+    assert "status" in latest
+
+
+def test_architecture_memory_summary_no_warnings_when_valid(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    mem = result.architecture_memory_summary
+    assert mem["warnings"] == []
+    assert mem["errors"] == []
+
+
+def test_governance_audit_to_dict_includes_architecture_memory_summary(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    d = audit_governance_coherence(HarnessPath(tmp_path)).to_dict()
+    assert "architecture_memory_summary" in d
+    mem = d["architecture_memory_summary"]
+    assert "decision_count" in mem
+    assert "accepted_count" in mem
+    assert "latest_decision" in mem
+    assert "warnings" in mem
+    assert "errors" in mem
+
+
+def test_governance_audit_check_fails_on_malformed_adr_file(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    adr_dir.mkdir(parents=True)
+    (adr_dir / "ADR-20260529-000000.json").write_text(
+        "{not valid json}", encoding="utf-8"
+    )
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    arch_check = next(c for c in result.checks if c.name == "architecture_memory")
+    assert arch_check.passed is False
+    assert "could not be parsed" in arch_check.message
+
+
+def test_architecture_memory_summary_errors_on_parse_failure(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    adr_dir.mkdir(parents=True)
+    (adr_dir / "ADR-20260529-000000.json").write_text("{bad}", encoding="utf-8")
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    mem = result.architecture_memory_summary
+    assert len(mem["errors"]) >= 1
+    assert "could not be parsed" in mem["errors"][0]
+
+
+def test_count_adr_parse_failures_zero_when_no_directory(
+    tmp_path: Path,
+) -> None:
+    assert count_adr_parse_failures(HarnessPath(tmp_path)) == 0
+
+
+def test_count_adr_parse_failures_zero_when_all_valid(tmp_path: Path) -> None:
+    from datetime import datetime, timezone
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Valid ADR",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    assert count_adr_parse_failures(HarnessPath(tmp_path)) == 0
+
+
+def test_count_adr_parse_failures_counts_malformed(tmp_path: Path) -> None:
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    adr_dir.mkdir(parents=True)
+    (adr_dir / "ADR-bad-1.json").write_text("{broken}", encoding="utf-8")
+    (adr_dir / "ADR-bad-2.json").write_text("{also broken}", encoding="utf-8")
+    assert count_adr_parse_failures(HarnessPath(tmp_path)) == 2
+
+
+def test_count_adr_parse_failures_mixed(tmp_path: Path) -> None:
+    from datetime import datetime, timezone
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Valid",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    (adr_dir / "ADR-broken.json").write_text("{bad}", encoding="utf-8")
+    assert count_adr_parse_failures(HarnessPath(tmp_path)) == 1
+
+
+def test_cli_governance_audit_human_includes_architecture_memory_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "audit"])
+    output = capsys.readouterr().out
+    assert "Architecture memory summary:" in output
+    assert "Decision count:" in output
+    assert "Accepted:" in output
+    assert "Latest:" in output
+
+
+def test_cli_governance_audit_json_includes_architecture_memory_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["governance", "audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "architecture_memory_summary" in data
+    mem = data["architecture_memory_summary"]
+    assert "decision_count" in mem
+    assert "accepted_count" in mem
+    assert "latest_decision" in mem
+    assert "warnings" in mem
+    assert "errors" in mem
+
+
+def test_cli_governance_audit_json_architecture_memory_check_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["governance", "audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    check_names = [c["name"] for c in data["checks"]]
+    assert "architecture_memory" in check_names
+
+
+def test_governance_audit_valid_still_passes_with_architecture_memory(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    result = audit_governance_coherence(HarnessPath(tmp_path))
+    assert result.valid
+    assert result.summary.status == "valid"
+
+
+def test_governance_audit_architecture_memory_check_is_read_only(
+    tmp_path: Path,
+) -> None:
+    write_minimal_governance_artifacts(tmp_path)
+    before = list((tmp_path / ".pcae").iterdir()) if (tmp_path / ".pcae").is_dir() else []
+    audit_governance_coherence(HarnessPath(tmp_path))
+    after = list((tmp_path / ".pcae").iterdir()) if (tmp_path / ".pcae").is_dir() else []
+    assert len(after) == len(before)
