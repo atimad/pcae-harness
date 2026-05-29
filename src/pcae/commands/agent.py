@@ -8,12 +8,16 @@ from pcae.core.agent import (
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
     MULTI_AGENT_REGISTRY,
+    REVIEW_ADVISORY,
+    REVIEW_WORKFLOWS,
     VALID_AGENT_STATUSES,
+    VALID_REVIEW_STATUSES,
     acquire_agent_lock,
     build_agent_status,
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_review_workflows,
     get_agent_by_id,
     get_agent_config,
     release_agent_lock,
@@ -222,6 +226,31 @@ def run_collaboration_handoffs(args: argparse.Namespace) -> int:
                         print(f"  Warning: {w}")
         print()
         print(history.advisory)
+    return 0
+
+
+def run_collaboration_reviews(args: argparse.Namespace) -> int:
+    data = build_review_workflows()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        names = ", ".join(w.workflow_name for w in REVIEW_WORKFLOWS)
+        statuses = ", ".join(VALID_REVIEW_STATUSES)
+        print("Review workflows")
+        print(f"Review workflow count: {len(REVIEW_WORKFLOWS)}")
+        print(f"Workflows: {names}")
+        print(f"Review statuses: {statuses}")
+        for workflow in REVIEW_WORKFLOWS:
+            print(f"\n{workflow.workflow_name} ({len(workflow.steps)} steps):")
+            for i, step in enumerate(workflow.steps, start=1):
+                print(
+                    f"  {i}. {step.step_name:<18} | role: {step.recommended_agent_role:<16}"
+                    f" | min status: {step.required_lifecycle_status}"
+                    f" | review: {step.review_status}"
+                )
+                print(f"     Purpose: {step.purpose}")
+        print()
+        print(REVIEW_ADVISORY)
     return 0
 
 

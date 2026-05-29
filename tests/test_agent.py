@@ -1166,6 +1166,221 @@ def test_collaboration_handoffs_core_build_handoff_history(tmp_path: Path) -> No
 
 
 # ---------------------------------------------------------------------------
+# pcae collaboration reviews (Phase 37H)
+# ---------------------------------------------------------------------------
+
+
+def test_collaboration_reviews_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Review workflows" in output
+    assert "Review workflow count: 3" in output
+    assert "implementation_review" in output
+    assert "documentation_review" in output
+    assert "architecture_review" in output
+    assert "Review statuses:" in output
+    assert "pending" in output
+    assert "reviewed" in output
+    assert "validated" in output
+    assert "rejected" in output
+    assert "advisory" in output.lower()
+
+
+def test_collaboration_reviews_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "review_workflows" in data
+    assert "review_statuses" in data
+    assert "advisory" in data
+
+
+def test_collaboration_reviews_json_three_workflows(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    names = [w["workflow_name"] for w in data["review_workflows"]]
+    assert "implementation_review" in names
+    assert "documentation_review" in names
+    assert "architecture_review" in names
+    assert len(names) == 3
+
+
+def test_collaboration_reviews_json_four_statuses(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    statuses = data["review_statuses"]
+    assert "pending" in statuses
+    assert "reviewed" in statuses
+    assert "validated" in statuses
+    assert "rejected" in statuses
+    assert len(statuses) == 4
+
+
+def test_collaboration_reviews_implementation_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    impl = next(w for w in data["review_workflows"] if w["workflow_name"] == "implementation_review")
+    step_names = [s["step_name"] for s in impl["steps"]]
+    assert step_names == ["implementer", "reviewer", "validator"]
+
+
+def test_collaboration_reviews_documentation_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    doc = next(w for w in data["review_workflows"] if w["workflow_name"] == "documentation_review")
+    step_names = [s["step_name"] for s in doc["steps"]]
+    assert step_names == ["author", "reviewer", "validator"]
+
+
+def test_collaboration_reviews_architecture_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    arch = next(w for w in data["review_workflows"] if w["workflow_name"] == "architecture_review")
+    step_names = [s["step_name"] for s in arch["steps"]]
+    assert step_names == ["proposer", "reviewer", "validator"]
+
+
+def test_collaboration_reviews_step_fields_present(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for workflow in data["review_workflows"]:
+        for step in workflow["steps"]:
+            for field in (
+                "step_name", "recommended_agent_role", "purpose",
+                "required_lifecycle_status", "review_status",
+            ):
+                assert field in step, (
+                    f"Missing '{field}' in step '{step.get('step_name')}' "
+                    f"of '{workflow['workflow_name']}'"
+                )
+
+
+def test_collaboration_reviews_default_status_is_pending(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for workflow in data["review_workflows"]:
+        for step in workflow["steps"]:
+            assert step["review_status"] == "pending", (
+                f"Expected 'pending' in step '{step['step_name']}' "
+                f"of '{workflow['workflow_name']}', got '{step['review_status']}'"
+            )
+
+
+def test_collaboration_reviews_steps_are_ordered(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    impl = next(w for w in data["review_workflows"] if w["workflow_name"] == "implementation_review")
+    assert impl["steps"][0]["step_name"] == "implementer"
+    assert impl["steps"][-1]["step_name"] == "validator"
+
+
+def test_collaboration_reviews_advisory_semantics(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+    assert "assigned automatically" in data["advisory"]
+
+
+def test_collaboration_reviews_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["collaboration", "reviews"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_collaboration_reviews_human_shows_review_status(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "reviews"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "review: pending" in output
+    assert "Purpose:" in output
+    assert "min status:" in output
+
+
+def test_collaboration_reviews_core_build(tmp_path: Path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import REVIEW_WORKFLOWS, build_review_workflows
+
+    data = build_review_workflows()
+    assert len(data["review_workflows"]) == 3
+    assert len(data["review_statuses"]) == 4
+    assert "no agents are executed" in data["advisory"]
+    names = [w["workflow_name"] for w in data["review_workflows"]]
+    assert names == ["implementation_review", "documentation_review", "architecture_review"]
+
+
+def test_collaboration_reviews_each_has_three_steps() -> None:
+    from pcae.core.agent import REVIEW_WORKFLOWS
+
+    for workflow in REVIEW_WORKFLOWS:
+        assert len(workflow.steps) == 3, (
+            f"Workflow '{workflow.workflow_name}' expected 3 steps, got {len(workflow.steps)}"
+        )
+
+
+# ---------------------------------------------------------------------------
 # pcae collaboration workflows (Phase 37F)
 # ---------------------------------------------------------------------------
 

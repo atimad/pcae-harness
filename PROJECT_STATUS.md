@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37G: Multi-Agent Handoff Governance.
+Phase 37H: Multi-Agent Review and Validation.
 
 ## Governance Coherence Note
 
@@ -501,11 +501,23 @@ phase (active task ID), active_task, continuity_verified (True when
 acquire immediately follows release), architecture_memory_present (True
 when architecture history has entries), summary (from preceding
 phase_completed), and warnings for malformed records; records are
-ordered most-recent first; all operations are strictly read-only.
+ordered most-recent first; all operations are strictly read-only; and
+review workflow templates are exposed as read-only governance inspection
+(Phase 37H): `pcae collaboration reviews` and
+`pcae collaboration reviews --json` list three advisory review workflow
+templates — implementation_review (implementer → reviewer → validator),
+documentation_review (author → reviewer → validator), and
+architecture_review (proposer → reviewer → validator); each step
+declares step_name, recommended_agent_role, purpose,
+required_lifecycle_status, and review_status (template default
+"pending"); four governed review statuses are exposed: pending,
+reviewed, validated, rejected; advisory note confirms no agents are
+executed or assigned automatically; all operations are strictly
+read-only.
 
 ## Next
 
-- Phase 37H: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37I: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

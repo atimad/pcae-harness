@@ -15,6 +15,7 @@ from pcae.commands.agent import (
     run_agents_show,
     run_agents_validate,
     run_collaboration_handoffs,
+    run_collaboration_reviews,
     run_collaboration_workflows,
 )
 from pcae.commands.architecture import (
@@ -1109,6 +1110,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON handoff history output.",
     )
     collaboration_handoffs_parser.set_defaults(handler=run_collaboration_handoffs)
+
+    collaboration_reviews_parser = collaboration_subparsers.add_parser(
+        "reviews",
+        help="List review workflow templates and review statuses.",
+    )
+    collaboration_reviews_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON review workflow output.",
+    )
+    collaboration_reviews_parser.set_defaults(handler=run_collaboration_reviews)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

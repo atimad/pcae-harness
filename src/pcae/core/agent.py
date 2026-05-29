@@ -882,6 +882,149 @@ def build_collaboration_workflows() -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Review workflow templates (Phase 37H)
+# ---------------------------------------------------------------------------
+
+REVIEW_STATUS_PENDING = "pending"
+REVIEW_STATUS_REVIEWED = "reviewed"
+REVIEW_STATUS_VALIDATED = "validated"
+REVIEW_STATUS_REJECTED = "rejected"
+
+VALID_REVIEW_STATUSES: tuple[str, ...] = (
+    REVIEW_STATUS_PENDING,
+    REVIEW_STATUS_REVIEWED,
+    REVIEW_STATUS_VALIDATED,
+    REVIEW_STATUS_REJECTED,
+)
+
+REVIEW_ADVISORY = (
+    "Review workflows are advisory; "
+    "no agents are executed or assigned automatically."
+)
+
+
+@dataclass(frozen=True)
+class ReviewWorkflowStep:
+    step_name: str
+    recommended_agent_role: str
+    purpose: str
+    required_lifecycle_status: str
+    review_status: str
+
+    def to_dict(self) -> dict:
+        return {
+            "purpose": self.purpose,
+            "recommended_agent_role": self.recommended_agent_role,
+            "required_lifecycle_status": self.required_lifecycle_status,
+            "review_status": self.review_status,
+            "step_name": self.step_name,
+        }
+
+
+@dataclass(frozen=True)
+class ReviewWorkflow:
+    workflow_name: str
+    steps: tuple[ReviewWorkflowStep, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "steps": [s.to_dict() for s in self.steps],
+            "workflow_name": self.workflow_name,
+        }
+
+
+REVIEW_WORKFLOWS: tuple[ReviewWorkflow, ...] = (
+    ReviewWorkflow(
+        workflow_name="implementation_review",
+        steps=(
+            ReviewWorkflowStep(
+                step_name="implementer",
+                recommended_agent_role="implementation",
+                purpose="Produces the implementation subject to review.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews implementation for correctness and completeness.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance gates and quality standards.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+        ),
+    ),
+    ReviewWorkflow(
+        workflow_name="documentation_review",
+        steps=(
+            ReviewWorkflowStep(
+                step_name="author",
+                recommended_agent_role="documentation",
+                purpose="Authors the documentation subject to review.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews documentation for accuracy and completeness.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance and documentation standards.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+        ),
+    ),
+    ReviewWorkflow(
+        workflow_name="architecture_review",
+        steps=(
+            ReviewWorkflowStep(
+                step_name="proposer",
+                recommended_agent_role="architecture",
+                purpose="Proposes the architectural design subject to review.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews architecture for soundness and trade-offs.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+            ReviewWorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance and policy compliance.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+                review_status=REVIEW_STATUS_PENDING,
+            ),
+        ),
+    ),
+)
+
+
+def build_review_workflows() -> dict:
+    """Return a read-only review workflow template catalogue."""
+    return {
+        "advisory": REVIEW_ADVISORY,
+        "review_statuses": list(VALID_REVIEW_STATUSES),
+        "review_workflows": [w.to_dict() for w in REVIEW_WORKFLOWS],
+    }
+
+
 def read_agent_stale_after_seconds(root: HarnessPath) -> int:
     policy = load_policy(root)
     if not policy.valid:
