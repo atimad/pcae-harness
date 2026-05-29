@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37B: Multi-Agent Registry Expansion and Lifecycle States.
+Phase 37C: Agent Configuration and Availability Governance.
 
 ## Governance Coherence Note
 
@@ -440,11 +440,24 @@ declared=5); `pcae agents --json` output includes a `lifecycle_summary`
 object with per-status counts; declared agents are not executable,
 available, or remotely reachable; no API integration, CLI launching,
 automatic routing, or availability probing is performed; design remains
-vendor-neutral and advisory.
+vendor-neutral and advisory, and agent configuration and availability
+governance is available as read-only inspection (Phase 37C):
+`pcae agents show AGENT_ID` and `pcae agents show AGENT_ID --json`
+display full metadata for any registered agent (available or declared),
+exiting 1 with a clear "Agent not found" message for unknown IDs;
+`pcae agents validate` and `pcae agents validate --json` validate
+registry consistency, checking for duplicate IDs, invalid lifecycle
+statuses, non-empty roles, and that available/active agents have
+capabilities and preferred workloads declared; validation reports
+Validation status (valid/invalid), errors, warnings, agent count, and
+the advisory "Agent configuration validation is advisory; the user
+remains authoritative."; exit code is 0 when valid and 1 when errors are
+found; all operations are fully read-only with no agent execution, API
+integration, CLI launching, automatic routing, or availability probing.
 
 ## Next
 
-- Phase 37C: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37D: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

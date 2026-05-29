@@ -658,6 +658,202 @@ def test_agent_entry_valid_statuses_accepted() -> None:
         assert entry.status == status
 
 
+# ---------------------------------------------------------------------------
+# pcae agents show (Phase 37C)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_show_available_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "show", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "claude-local" in output
+    assert "claude" in output
+    assert "documentation" in output
+    assert "available" in output
+    assert "Capabilities:" in output
+    assert "Preferred workloads:" in output
+
+
+def test_agents_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "show", "kimi-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "kimi-local" in output
+    assert "kimi" in output
+    assert "declared" in output
+
+
+def test_agents_show_unknown_agent_fails(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "show", "no-such-agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Agent not found" in output
+    assert "no-such-agent" in output
+
+
+def test_agents_show_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "show", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "claude-local"
+    assert data["agent_type"] == "claude"
+    assert data["role"] == "documentation"
+    assert data["status"] == "available"
+    assert isinstance(data["capabilities"], list)
+    assert isinstance(data["preferred_workloads"], list)
+
+
+def test_agents_show_declared_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "show", "deepseek-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "deepseek-local"
+    assert data["status"] == "declared"
+
+
+def test_agents_show_all_new_declared_agents(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for agent_id in ("kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
+        exit_code = main(["agents", "show", agent_id])
+        output = capsys.readouterr().out
+        assert exit_code == 0, f"Expected exit 0 for {agent_id}"
+        assert agent_id in output
+        assert "declared" in output
+
+
+# ---------------------------------------------------------------------------
+# pcae agents validate (Phase 37C)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_validate_passes_for_built_in_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent registry validation" in output
+    assert "Validation status: valid" in output
+    assert "Errors: none" in output
+    assert "advisory" in output.lower()
+
+
+def test_agents_validate_json_valid_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["errors"] == []
+    assert isinstance(data["warnings"], list)
+    assert data["agent_count"] == 8
+    assert "advisory" in data
+    assert "Agent configuration validation is advisory" in data["advisory"]
+
+
+def test_agents_validate_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for field in ("valid", "agent_count", "errors", "warnings", "advisory"):
+        assert field in data, f"Missing field '{field}' in validate output"
+
+
+def test_agents_validate_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "validate"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_validate_agent_registry_core(tmp_path: Path) -> None:
+    from pcae.core.agent import validate_agent_registry
+
+    result = validate_agent_registry()
+
+    assert result.valid is True
+    assert result.errors == ()
+    assert result.agent_count == 8
+    assert "advisory" in result.advisory.lower()
+
+
+def test_validate_agent_registry_detects_invalid_status() -> None:
+    from pcae.core.agent import (
+        AgentEntry,
+        AgentValidationResult,
+        MULTI_AGENT_REGISTRY,
+        AGENT_VALIDATION_ADVISORY,
+    )
+
+    bad = AgentEntry.__new__(AgentEntry)
+    object.__setattr__(bad, "agent_id", "bad-agent")
+    object.__setattr__(bad, "agent_type", "test")
+    object.__setattr__(bad, "role", "testing")
+    object.__setattr__(bad, "status", "nonexistent")
+    object.__setattr__(bad, "capabilities", ())
+    object.__setattr__(bad, "preferred_workloads", ())
+
+    registry = MULTI_AGENT_REGISTRY + (bad,)
+
+    errors: list[str] = []
+    seen: set[str] = set()
+    from pcae.core.agent import VALID_AGENT_STATUSES, AGENT_STATUS_AVAILABLE, AGENT_STATUS_ACTIVE
+    for entry in registry:
+        if entry.agent_id in seen:
+            errors.append(f"Duplicate agent ID: '{entry.agent_id}'.")
+        seen.add(entry.agent_id)
+        if entry.status not in VALID_AGENT_STATUSES:
+            errors.append(
+                f"Agent '{entry.agent_id}' has invalid status '{entry.status}'."
+            )
+    assert any("nonexistent" in e for e in errors)
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))

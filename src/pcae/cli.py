@@ -9,6 +9,8 @@ from pcae.commands.agent import (
     run_agent_release,
     run_agent_status,
     run_agents,
+    run_agents_show,
+    run_agents_validate,
 )
 from pcae.commands.architecture import (
     run_architecture_add,
@@ -997,6 +999,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON agent registry output.",
     )
     agents_parser.set_defaults(handler=run_agents)
+    agents_subparsers = agents_parser.add_subparsers(dest="agents_command")
+
+    agents_show_parser = agents_subparsers.add_parser(
+        "show",
+        help="Show detailed metadata for a single agent.",
+    )
+    agents_show_parser.add_argument(
+        "agent_id",
+        metavar="AGENT_ID",
+        help="Agent identifier to inspect.",
+    )
+    agents_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON agent detail output.",
+    )
+    agents_show_parser.set_defaults(handler=run_agents_show)
+
+    agents_validate_parser = agents_subparsers.add_parser(
+        "validate",
+        help="Validate agent registry consistency.",
+    )
+    agents_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON validation output.",
+    )
+    agents_validate_parser.set_defaults(handler=run_agents_validate)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

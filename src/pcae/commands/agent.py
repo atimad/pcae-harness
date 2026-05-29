@@ -8,7 +8,9 @@ from pcae.core.agent import (
     acquire_agent_lock,
     build_agent_status,
     build_multi_agent_registry,
+    get_agent_by_id,
     release_agent_lock,
+    validate_agent_registry,
 )
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import append_provenance_event
@@ -89,6 +91,51 @@ def run_agents(args: argparse.Namespace) -> int:
         print(f"Lifecycle summary: {summary_parts}")
         print(f"Advisory: {data['advisory']}")
     return 0
+
+
+def run_agents_show(args: argparse.Namespace) -> int:
+    entry = get_agent_by_id(args.agent_id)
+    if entry is None:
+        print(f"Agent not found: '{args.agent_id}'.")
+        return 1
+    if args.json:
+        print(json.dumps(entry.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(f"Agent: {entry.agent_id}")
+        print(f"Type: {entry.agent_type}")
+        print(f"Role: {entry.role}")
+        print(f"Status: {entry.status}")
+        caps = ", ".join(entry.capabilities) if entry.capabilities else "none"
+        print(f"Capabilities: {caps}")
+        workloads = (
+            ", ".join(entry.preferred_workloads) if entry.preferred_workloads else "none"
+        )
+        print(f"Preferred workloads: {workloads}")
+    return 0
+
+
+def run_agents_validate(args: argparse.Namespace) -> int:
+    result = validate_agent_registry()
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Agent registry validation")
+        print(f"Agent count: {result.agent_count}")
+        print(f"Validation status: {'valid' if result.valid else 'invalid'}")
+        if result.errors:
+            print("Errors:")
+            for error in result.errors:
+                print(f"  - {error}")
+        else:
+            print("Errors: none")
+        if result.warnings:
+            print("Warnings:")
+            for warning in result.warnings:
+                print(f"  - {warning}")
+        else:
+            print("Warnings: none")
+        print(result.advisory)
+    return 0 if result.valid else 1
 
 
 def print_agent_status(status: dict[str, object]) -> None:

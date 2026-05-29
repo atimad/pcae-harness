@@ -12,11 +12,14 @@ from pcae.core.tasks import find_latest_active_task
 
 
 # ---------------------------------------------------------------------------
-# Multi-Agent Collaboration registry (Phase 37A / 37B)
+# Multi-Agent Collaboration registry (Phase 37A / 37B / 37C)
 # ---------------------------------------------------------------------------
 
 MULTI_AGENT_REGISTRY_ADVISORY = (
     "Agent registry is read-only. The human user remains authoritative."
+)
+AGENT_VALIDATION_ADVISORY = (
+    "Agent configuration validation is advisory; the user remains authoritative."
 )
 
 AGENT_STATUS_DECLARED = "declared"
@@ -180,6 +183,72 @@ def build_multi_agent_registry() -> dict:
         "agents": agents,
         "lifecycle_summary": _build_lifecycle_summary(),
     }
+
+
+def get_agent_by_id(agent_id: str) -> AgentEntry | None:
+    """Return the AgentEntry for agent_id, or None if not found."""
+    for entry in MULTI_AGENT_REGISTRY:
+        if entry.agent_id == agent_id:
+            return entry
+    return None
+
+
+@dataclass(frozen=True)
+class AgentValidationResult:
+    valid: bool
+    agent_count: int
+    warnings: tuple[str, ...]
+    errors: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "agent_count": self.agent_count,
+            "errors": list(self.errors),
+            "valid": self.valid,
+            "warnings": list(self.warnings),
+        }
+
+
+def validate_agent_registry() -> AgentValidationResult:
+    """Return a read-only advisory validation of the multi-agent registry."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    seen_ids: set[str] = set()
+    for entry in MULTI_AGENT_REGISTRY:
+        if entry.agent_id in seen_ids:
+            errors.append(f"Duplicate agent ID: '{entry.agent_id}'.")
+        seen_ids.add(entry.agent_id)
+
+        if entry.status not in VALID_AGENT_STATUSES:
+            errors.append(
+                f"Agent '{entry.agent_id}' has invalid status '{entry.status}'."
+            )
+
+        if not entry.role or not entry.role.strip():
+            errors.append(f"Agent '{entry.agent_id}' has an empty role.")
+
+        if entry.status in (AGENT_STATUS_AVAILABLE, AGENT_STATUS_ACTIVE):
+            if not entry.capabilities:
+                errors.append(
+                    f"Agent '{entry.agent_id}' is '{entry.status}' "
+                    "but has no capabilities."
+                )
+            if not entry.preferred_workloads:
+                errors.append(
+                    f"Agent '{entry.agent_id}' is '{entry.status}' "
+                    "but has no preferred workloads."
+                )
+
+    return AgentValidationResult(
+        valid=len(errors) == 0,
+        agent_count=len(MULTI_AGENT_REGISTRY),
+        warnings=tuple(warnings),
+        errors=tuple(errors),
+        advisory=AGENT_VALIDATION_ADVISORY,
+    )
 
 
 AGENT_LOCK_RELATIVE_PATH = Path(".pcae") / "agent-lock.json"
