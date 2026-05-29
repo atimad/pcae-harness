@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Multi-Agent Handoff Governance (Phase 37G): `pcae collaboration handoffs` and `--json` derive handoff records from provenance events, with continuity verification, architecture memory status, and malformed-record warnings.
 - Completed Collaboration Workflow Foundation (Phase 37F): `pcae collaboration workflows` and `--json` with four advisory workflow templates (implementation, documentation, architecture, handoff), ordered steps, and lifecycle status requirements.
 - Completed Agent Configuration Model (Phase 37E): `pcae agents config show AGENT_ID` and `pcae agents config validate` with adapter types (cli, api, desktop_manual, native, undeclared), configuration status, executable hint, and advisory validation.
 - Completed Agent Lifecycle State Management (Phase 37D): `pcae agents lifecycle` and `pcae agents lifecycle --json` with lifecycle summary, agents grouped by state, progression guidance, validation, and advisory note.

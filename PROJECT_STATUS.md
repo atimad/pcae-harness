@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37F: Collaboration Workflow Foundation.
+Phase 37G: Multi-Agent Handoff Governance.
 
 ## Governance Coherence Note
 
@@ -492,11 +492,20 @@ step_name, recommended_agent_role, purpose, and
 required_lifecycle_status; handoff.outgoing_agent requires "active",
 all other steps require "available"; advisory note confirms no agents
 are executed or assigned automatically; all operations are strictly
-read-only.
+read-only; and multi-agent handoff history is exposed as read-only
+governance reporting (Phase 37G): `pcae collaboration handoffs` and
+`pcae collaboration handoffs --json` derive handoff records from
+provenance events by scanning for `agent_released` → `agent_acquired`
+pairs; each record includes source_agent, target_agent, timestamp,
+phase (active task ID), active_task, continuity_verified (True when
+acquire immediately follows release), architecture_memory_present (True
+when architecture history has entries), summary (from preceding
+phase_completed), and warnings for malformed records; records are
+ordered most-recent first; all operations are strictly read-only.
 
 ## Next
 
-- Phase 37G: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37H: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

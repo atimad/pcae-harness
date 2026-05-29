@@ -21,7 +21,7 @@ from pcae.core.agent import (
     validate_agent_registry,
 )
 from pcae.core.paths import HarnessPath
-from pcae.core.provenance import append_provenance_event
+from pcae.core.provenance import append_provenance_event, build_handoff_history
 
 
 def run_agent_acquire(args: argparse.Namespace) -> int:
@@ -190,6 +190,39 @@ def run_agents_config_validate(args: argparse.Namespace) -> int:
             print("Warnings: none")
         print(result.advisory)
     return 0 if result.valid else 1
+
+
+def run_collaboration_handoffs(args: argparse.Namespace) -> int:
+    history = build_handoff_history(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(history.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Handoff history")
+        print(f"Handoff count: {history.handoff_count}")
+        if not history.handoffs:
+            print("No handoff records found.")
+        else:
+            for idx, rec in enumerate(history.handoffs, start=1):
+                label = "Handoff 1 (most recent)" if idx == 1 else f"Handoff {idx}"
+                print(f"\n{label}:")
+                print(f"  Timestamp: {rec.timestamp}")
+                print(f"  Source agent: {rec.source_agent or '(unknown)'}")
+                print(f"  Target agent: {rec.target_agent or '(unknown)'}")
+                if rec.phase:
+                    print(f"  Phase: {rec.phase}")
+                if rec.active_task:
+                    title = rec.active_task.get("title", "")
+                    print(f"  Active task: {title}")
+                print(f"  Continuity verified: {'yes' if rec.continuity_verified else 'no'}")
+                print(f"  Architecture memory: {'yes' if rec.architecture_memory_present else 'no'}")
+                if rec.summary:
+                    print(f"  Summary: {rec.summary}")
+                if rec.warnings:
+                    for w in rec.warnings:
+                        print(f"  Warning: {w}")
+        print()
+        print(history.advisory)
+    return 0
 
 
 def run_collaboration_workflows(args: argparse.Namespace) -> int:

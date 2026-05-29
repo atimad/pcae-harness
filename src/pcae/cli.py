@@ -14,6 +14,7 @@ from pcae.commands.agent import (
     run_agents_lifecycle,
     run_agents_show,
     run_agents_validate,
+    run_collaboration_handoffs,
     run_collaboration_workflows,
 )
 from pcae.commands.architecture import (
@@ -1097,6 +1098,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON workflow output.",
     )
     collaboration_workflows_parser.set_defaults(handler=run_collaboration_workflows)
+
+    collaboration_handoffs_parser = collaboration_subparsers.add_parser(
+        "handoffs",
+        help="Show read-only multi-agent handoff history.",
+    )
+    collaboration_handoffs_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON handoff history output.",
+    )
+    collaboration_handoffs_parser.set_defaults(handler=run_collaboration_handoffs)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

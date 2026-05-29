@@ -14,6 +14,9 @@ from pcae.core.tasks import find_latest_active_task
 
 PROVENANCE_HISTORY_RELATIVE_PATH = Path(".pcae") / "provenance-history.json"
 PROVENANCE_EXPORTS_RELATIVE_PATH = Path(".pcae") / "provenance-exports"
+_ARCHITECTURE_HISTORY_PATH = Path(".pcae") / "architecture-history.json"
+
+HANDOFF_ADVISORY = "Handoff reporting is advisory; no handoff state is modified."
 
 
 @dataclass(frozen=True)
@@ -269,6 +272,151 @@ def find_active_session(
         if session.active:
             return session
     return None
+
+
+@dataclass(frozen=True)
+class HandoffRecord:
+    source_agent: str | None
+    target_agent: str | None
+    timestamp: str
+    phase: str | None
+    active_task: dict | None
+    continuity_verified: bool
+    architecture_memory_present: bool
+    summary: str | None
+    warnings: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "active_task": self.active_task,
+            "architecture_memory_present": self.architecture_memory_present,
+            "continuity_verified": self.continuity_verified,
+            "phase": self.phase,
+            "source_agent": self.source_agent,
+            "summary": self.summary,
+            "target_agent": self.target_agent,
+            "timestamp": self.timestamp,
+            "warnings": list(self.warnings),
+        }
+
+
+@dataclass(frozen=True)
+class HandoffHistory:
+    handoff_count: int
+    handoffs: tuple[HandoffRecord, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "handoff_count": self.handoff_count,
+            "handoffs": [h.to_dict() for h in self.handoffs],
+        }
+
+
+def build_handoff_history(root: HarnessPath) -> HandoffHistory:
+    """Return a read-only derived handoff history from provenance events."""
+    history = read_provenance_history(root)
+    arch_present = _has_architecture_memory(root)
+    records = _extract_handoff_records(history.events, arch_present)
+    return HandoffHistory(
+        handoff_count=len(records),
+        handoffs=records,
+        advisory=HANDOFF_ADVISORY,
+    )
+
+
+def _has_architecture_memory(root: HarnessPath) -> bool:
+    target = root.join(_ARCHITECTURE_HISTORY_PATH)
+    if not target.is_file():
+        return False
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+    return isinstance(data, list) and len(data) > 0
+
+
+def _extract_handoff_records(
+    events: tuple[ProvenanceEvent, ...],
+    architecture_memory_present: bool,
+) -> tuple[HandoffRecord, ...]:
+    records: list[HandoffRecord] = []
+
+    for i, event in enumerate(events):
+        if event.event_type != "agent_released":
+            continue
+
+        # Look for an agent_acquired within the next few events.
+        acquired_event: ProvenanceEvent | None = None
+        gap = 0
+        for j in range(i + 1, min(i + 4, len(events))):
+            if events[j].event_type == "agent_acquired":
+                acquired_event = events[j]
+                gap = j - (i + 1)
+                break
+
+        if acquired_event is None:
+            continue
+
+        # Find the most recent phase_completed before this release.
+        phase_completed: ProvenanceEvent | None = None
+        for k in range(i - 1, -1, -1):
+            if events[k].event_type == "phase_completed":
+                phase_completed = events[k]
+                break
+
+        source_agent = event.agent_id
+        target_agent = acquired_event.agent_id
+
+        active_task: dict | None = None
+        if phase_completed is not None and isinstance(phase_completed.active_task, dict):
+            active_task = phase_completed.active_task
+        elif isinstance(event.active_task, dict):
+            active_task = event.active_task
+
+        summary = phase_completed.summary if phase_completed is not None else None
+
+        phase: str | None = None
+        if isinstance(active_task, dict):
+            task_id = active_task.get("id")
+            if isinstance(task_id, str) and task_id:
+                phase = task_id
+
+        continuity_verified = gap == 0
+
+        warnings: list[str] = []
+        if source_agent is None:
+            warnings.append("Source agent ID missing in agent_released event.")
+        if target_agent is None:
+            warnings.append("Target agent ID missing in agent_acquired event.")
+        if not _is_valid_timestamp(event.timestamp):
+            warnings.append(f"Timestamp could not be parsed: {event.timestamp!r}.")
+
+        records.append(
+            HandoffRecord(
+                source_agent=source_agent,
+                target_agent=target_agent,
+                timestamp=event.timestamp,
+                phase=phase,
+                active_task=active_task,
+                continuity_verified=continuity_verified,
+                architecture_memory_present=architecture_memory_present,
+                summary=summary,
+                warnings=tuple(warnings),
+            )
+        )
+
+    # Return most recent first.
+    return tuple(reversed(records))
+
+
+def _is_valid_timestamp(ts: str) -> bool:
+    try:
+        datetime.fromisoformat(ts)
+        return True
+    except (ValueError, TypeError):
+        return False
 
 
 def _make_session(events: list[ProvenanceEvent], active: bool) -> ProvenanceSession:

@@ -855,6 +855,317 @@ def test_validate_agent_registry_detects_invalid_status() -> None:
 
 
 # ---------------------------------------------------------------------------
+# pcae collaboration handoffs (Phase 37G)
+# ---------------------------------------------------------------------------
+
+
+def _write_provenance_events(root: Path, events: list[dict]) -> None:
+    history_path = root / ".pcae" / "provenance-history.json"
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.write_text(
+        json.dumps(events, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _make_provenance_event(
+    event_type: str,
+    agent_id: str | None = None,
+    summary: str = "",
+    timestamp: str = "2026-05-01T10:00:00+00:00",
+    active_task: dict | None = None,
+) -> dict:
+    return {
+        "active_task": active_task,
+        "agent_id": agent_id,
+        "event_type": event_type,
+        "git_branch": "main",
+        "summary": summary,
+        "timestamp": timestamp,
+    }
+
+
+def test_collaboration_handoffs_empty_history(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "handoffs"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Handoff history" in output
+    assert "Handoff count: 0" in output
+    assert "No handoff records found." in output
+    assert "advisory" in output.lower()
+
+
+def test_collaboration_handoffs_empty_history_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoff_count"] == 0
+    assert data["handoffs"] == []
+    assert "advisory" in data
+    assert "no handoff state is modified" in data["advisory"]
+
+
+def test_collaboration_handoffs_single_record(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    task = {"id": "task-001", "title": "Test task"}
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("phase_completed", "codex-local", "Phase X done",
+                               "2026-05-01T09:00:00+00:00", task),
+        _make_provenance_event("agent_released", "codex-local", "Released",
+                               "2026-05-01T09:01:00+00:00", task),
+        _make_provenance_event("agent_acquired", "claude-local", "Acquired",
+                               "2026-05-01T09:01:01+00:00", task),
+    ])
+
+    exit_code = main(["collaboration", "handoffs"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Handoff count: 1" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "Continuity verified: yes" in output
+
+
+def test_collaboration_handoffs_json_single_record(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    task = {"id": "task-001", "title": "Test task"}
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("phase_completed", "codex-local", "Phase X done",
+                               "2026-05-01T09:00:00+00:00", task),
+        _make_provenance_event("agent_released", "codex-local", "Released",
+                               "2026-05-01T09:01:00+00:00", task),
+        _make_provenance_event("agent_acquired", "claude-local", "Acquired",
+                               "2026-05-01T09:01:01+00:00", task),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoff_count"] == 1
+    h = data["handoffs"][0]
+    assert h["source_agent"] == "codex-local"
+    assert h["target_agent"] == "claude-local"
+    assert h["continuity_verified"] is True
+    assert h["summary"] == "Phase X done"
+    assert h["phase"] == "task-001"
+    assert h["active_task"] == task
+
+
+def test_collaboration_handoffs_json_all_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "agent-a", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "agent-b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    h = data["handoffs"][0]
+    for field in (
+        "source_agent", "target_agent", "timestamp", "phase",
+        "active_task", "continuity_verified", "architecture_memory_present",
+        "summary", "warnings",
+    ):
+        assert field in h, f"Missing field '{field}' in handoff record"
+
+
+def test_collaboration_handoffs_most_recent_first(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "agent-a", "R1", "2026-05-01T08:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "agent-b", "A1", "2026-05-01T08:00:01+00:00"),
+        _make_provenance_event("agent_released", "agent-b", "R2", "2026-05-02T08:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "agent-c", "A2", "2026-05-02T08:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoff_count"] == 2
+    assert data["handoffs"][0]["timestamp"] == "2026-05-02T08:00:00+00:00"
+    assert data["handoffs"][1]["timestamp"] == "2026-05-01T08:00:00+00:00"
+
+
+def test_collaboration_handoffs_continuity_verified_direct(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "a", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoffs"][0]["continuity_verified"] is True
+
+
+def test_collaboration_handoffs_continuity_not_verified_with_gap(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "a", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("some_other_event", None, "X", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoffs"][0]["continuity_verified"] is False
+
+
+def test_collaboration_handoffs_architecture_memory_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    arch_path = tmp_path / ".pcae" / "architecture-history.json"
+    arch_path.write_text(
+        json.dumps([{"id": "ADR-0001", "title": "Test ADR"}]) + "\n",
+        encoding="utf-8",
+    )
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "a", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoffs"][0]["architecture_memory_present"] is True
+
+
+def test_collaboration_handoffs_no_architecture_memory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "a", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoffs"][0]["architecture_memory_present"] is False
+
+
+def test_collaboration_handoffs_malformed_warns_missing_source(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", None, "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "b", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert any("Source agent ID missing" in w for w in data["handoffs"][0]["warnings"])
+
+
+def test_collaboration_handoffs_release_without_acquire_ignored(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "a", "R", "2026-05-01T09:00:00+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoff_count"] == 0
+
+
+def test_collaboration_handoffs_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["collaboration", "handoffs"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_collaboration_handoffs_human_shows_continuity(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("agent_released", "codex-local", "R", "2026-05-01T09:00:00+00:00"),
+        _make_provenance_event("agent_acquired", "claude-local", "A", "2026-05-01T09:00:01+00:00"),
+    ])
+
+    exit_code = main(["collaboration", "handoffs"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Continuity verified:" in output
+    assert "Architecture memory:" in output
+
+
+def test_collaboration_handoffs_core_build_handoff_history(tmp_path: Path) -> None:
+    from pcae.core.provenance import build_handoff_history
+    from pcae.core.paths import HarnessPath
+
+    init_agent_repo(tmp_path)
+    task = {"id": "task-abc", "title": "Task ABC"}
+    _write_provenance_events(tmp_path, [
+        _make_provenance_event("phase_completed", "codex-local", "Done",
+                               "2026-05-01T09:00:00+00:00", task),
+        _make_provenance_event("agent_released", "codex-local", "R",
+                               "2026-05-01T09:01:00+00:00", task),
+        _make_provenance_event("agent_acquired", "claude-local", "A",
+                               "2026-05-01T09:01:01+00:00", task),
+    ])
+
+    history = build_handoff_history(HarnessPath(tmp_path))
+
+    assert history.handoff_count == 1
+    h = history.handoffs[0]
+    assert h.source_agent == "codex-local"
+    assert h.target_agent == "claude-local"
+    assert h.continuity_verified is True
+    assert h.summary == "Done"
+    assert h.phase == "task-abc"
+    assert "no handoff state is modified" in history.advisory
+
+
+# ---------------------------------------------------------------------------
 # pcae collaboration workflows (Phase 37F)
 # ---------------------------------------------------------------------------
 
