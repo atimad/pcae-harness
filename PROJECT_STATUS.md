@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36J: Architecture decision status validation.
+Phase 36K: Architecture provenance linkage.
 
 ## Governance Coherence Note
 
@@ -370,11 +370,24 @@ registry (sample + persisted) for status integrity issues including duplicate
 decision IDs and unknown statuses; the result includes `valid` (bool),
 `issues` (list of human-readable strings), `issue_count`, and `advisory`;
 exit code is 0 when valid and 1 when issues are found; the command is
-read-only and does not mutate any ADR or artifact.
+read-only and does not mutate any ADR or artifact, and Architecture Decision
+Records are now linked to governed phase/provenance context (Phase 36K):
+`ArchitectureDecisionRecord` gains two optional fields `commit_reference`
+and `provenance_reference` captured at ADR creation time when available;
+`add_architecture_decision` records the short HEAD commit SHA via
+`git rev-parse --short HEAD` and the timestamp of the latest provenance
+event; existing ADRs without these fields load with `None` and remain valid;
+`pcae architecture show DECISION_ID` displays an "Architecture linkage"
+section (Phase, Commit, Provenance, Contributors, Human approved) in
+human-readable output and includes an `architecture_linkage` object in
+`--json` output; `pcae architecture decisions --json` includes
+`architecture_linkage` in each decision; `build_architecture_linkage(adr)`
+returns "unavailable" for absent linkage fields; all inspection operations
+remain read-only and do not mutate provenance history or ADR files.
 
 ## Next
 
-- Phase 36K: Architecture decision status transitions (Option B — Architecture Memory).
+- Phase 36L: Architecture decision status transitions (Option B — Architecture Memory).
 
 ## Future Explorations
 

@@ -11,6 +11,7 @@ from pcae.core.architecture import (
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     add_architecture_decision,
+    build_architecture_linkage,
     calculate_architecture_drift_metrics,
     export_architecture_decisions,
     get_adr_registry,
@@ -140,7 +141,12 @@ def run_architecture_decisions(args: argparse.Namespace) -> int:
     registry = get_adr_registry(root)
     result = list_architecture_decisions(registry)
     if args.json:
-        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        data = result.to_dict()
+        data["decisions"] = [
+            {**d.to_dict(), "architecture_linkage": build_architecture_linkage(d)}
+            for d in result.decisions
+        ]
+        print(json.dumps(data, indent=2, sort_keys=True))
         return 0
     print("Architecture decisions")
     print(f"Decision count: {len(result.decisions)}")
@@ -163,7 +169,8 @@ def run_architecture_show(args: argparse.Namespace) -> int:
         print(f"Architecture decision not found: {args.decision_id!r}")
         return 1
     if args.json:
-        print(json.dumps(adr.to_dict(), indent=2, sort_keys=True))
+        data = {**adr.to_dict(), "architecture_linkage": build_architecture_linkage(adr)}
+        print(json.dumps(data, indent=2, sort_keys=True))
         return 0
     print(f"Architecture decision: {adr.decision_id}")
     print(f"Title: {adr.title}")
@@ -190,6 +197,14 @@ def run_architecture_show(args: argparse.Namespace) -> int:
             print(f"  - {contributor}")
     else:
         print("  - none")
+    linkage = build_architecture_linkage(adr)
+    print("Architecture linkage:")
+    print(f"  Phase: {linkage['phase_reference']}")
+    print(f"  Commit: {linkage['commit_reference']}")
+    print(f"  Provenance: {linkage['provenance_reference']}")
+    contributors_text = ", ".join(adr.contributors) if adr.contributors else "none"
+    print(f"  Contributors: {contributors_text}")
+    print(f"  Human approved: {'yes' if adr.is_human_approved else 'no'}")
     print(ADR_INSPECTION_ADVISORY)
     return 0
 

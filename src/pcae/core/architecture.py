@@ -7,9 +7,46 @@ from fnmatch import fnmatch
 import json
 from pathlib import Path
 import re
+import subprocess
 
 from pcae.core.git_status import GitChange, read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
+
+
+_PROVENANCE_HISTORY_PATH = Path(".pcae") / "provenance-history.json"
+
+
+def _read_git_head_commit(root: HarnessPath) -> str | None:
+    """Return the short HEAD commit SHA, or None if git is unavailable."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        sha = result.stdout.strip()
+        return sha if sha else None
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        return None
+
+
+def _read_latest_provenance_event_id(root: HarnessPath) -> str | None:
+    """Return the timestamp of the latest provenance event, or None."""
+    history_path = root.join(_PROVENANCE_HISTORY_PATH)
+    if not history_path.is_file():
+        return None
+    try:
+        data = json.loads(history_path.read_text(encoding="utf-8"))
+        if isinstance(data, list) and data:
+            last = data[-1]
+            if isinstance(last, dict):
+                ts = last.get("timestamp")
+                return ts if isinstance(ts, str) and ts else None
+    except (json.JSONDecodeError, OSError):
+        pass
+    return None
 
 
 ARCHITECTURE_HISTORY_RELATIVE_PATH = Path(".pcae") / "architecture-history.json"
@@ -433,6 +470,8 @@ class ArchitectureDecisionRecord:
 
     Human author is required and remains authoritative; contributors are
     vendor-neutral and may include AI agents or tooling identifiers.
+    commit_reference and provenance_reference are captured at creation time
+    when available; existing ADRs without them remain valid.
     """
     decision_id: str
     title: str
@@ -444,6 +483,8 @@ class ArchitectureDecisionRecord:
     phase_reference: str | None
     author: str
     contributors: tuple[str, ...]  # vendor-neutral; may include AI agent IDs
+    commit_reference: str | None = None
+    provenance_reference: str | None = None
 
     @property
     def is_human_approved(self) -> bool:
@@ -451,17 +492,19 @@ class ArchitectureDecisionRecord:
 
     def to_dict(self) -> dict:
         return {
-            "decision_id": self.decision_id,
-            "title": self.title,
-            "status": self.status,
-            "rationale": self.rationale,
             "alternatives_considered": list(self.alternatives_considered),
-            "consequences": list(self.consequences),
-            "created_at": self.created_at.isoformat(),
-            "phase_reference": self.phase_reference,
             "author": self.author,
+            "commit_reference": self.commit_reference,
+            "consequences": list(self.consequences),
             "contributors": list(self.contributors),
+            "created_at": self.created_at.isoformat(),
+            "decision_id": self.decision_id,
             "is_human_approved": self.is_human_approved,
+            "phase_reference": self.phase_reference,
+            "provenance_reference": self.provenance_reference,
+            "rationale": self.rationale,
+            "status": self.status,
+            "title": self.title,
         }
 
 
@@ -476,12 +519,16 @@ def create_adr(
     created_at: datetime | None = None,
     phase_reference: str | None = None,
     contributors: tuple[str, ...] | list[str] = (),
+    commit_reference: str | None = None,
+    provenance_reference: str | None = None,
 ) -> ArchitectureDecisionRecord:
     """Return a validated ArchitectureDecisionRecord.
 
     Raises ValueError for invalid status or empty required fields.
     Human author is required — human remains authoritative.
     Contributors are vendor-neutral and may include AI agent identifiers.
+    commit_reference and provenance_reference are optional linkage fields
+    captured at creation time; existing ADRs without them remain valid.
     """
     if not isinstance(decision_id, str) or not decision_id:
         raise ValueError("decision_id must be a non-empty string.")
@@ -509,6 +556,8 @@ def create_adr(
         phase_reference=phase_reference,
         author=author,
         contributors=tuple(contributors),
+        commit_reference=commit_reference,
+        provenance_reference=provenance_reference,
     )
 
 
@@ -639,6 +688,8 @@ def _load_adr_from_file(path: Path) -> ArchitectureDecisionRecord:
         phase_reference=data.get("phase_reference"),
         author=data["author"],
         contributors=data.get("contributors", []),
+        commit_reference=data.get("commit_reference"),
+        provenance_reference=data.get("provenance_reference"),
     )
 
 
@@ -810,6 +861,18 @@ def validate_adr_registry(
     )
 
 
+def build_architecture_linkage(adr: ArchitectureDecisionRecord) -> dict:
+    """Return a structured linkage dict aggregating provenance context fields."""
+    return {
+        "author": adr.author,
+        "commit_reference": adr.commit_reference or "unavailable",
+        "contributors": list(adr.contributors),
+        "is_human_approved": adr.is_human_approved,
+        "phase_reference": adr.phase_reference or "unavailable",
+        "provenance_reference": adr.provenance_reference or "unavailable",
+    }
+
+
 def add_architecture_decision(
     root: HarnessPath,
     title: str,
@@ -824,8 +887,9 @@ def add_architecture_decision(
 ) -> ADRAddResult:
     """Create, validate, and persist a new ADR.
 
-    Raises ValueError for invalid status or empty required fields.
-    Human author is required — human remains authoritative.
+    Captures current git HEAD commit and latest provenance event reference
+    when available. Raises ValueError for invalid status or empty required
+    fields. Human author is required — human remains authoritative.
     """
     timestamp = created_at or datetime.now(timezone.utc)
     decision_id = generate_adr_decision_id(root)
@@ -840,6 +904,8 @@ def add_architecture_decision(
         phase_reference=phase_reference,
         author=author,
         contributors=contributors,
+        commit_reference=_read_git_head_commit(root),
+        provenance_reference=_read_latest_provenance_event_id(root),
     )
     relative_path = persist_adr(root, adr)
     return ADRAddResult(adr=adr, relative_path=relative_path, advisory=ADR_ADD_ADVISORY)

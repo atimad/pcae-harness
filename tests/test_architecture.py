@@ -697,6 +697,8 @@ def test_adr_to_dict_shape_and_values() -> None:
         "author",
         "contributors",
         "is_human_approved",
+        "commit_reference",
+        "provenance_reference",
     }
     assert d["decision_id"] == "ADR-007"
     assert d["status"] == "proposed"
@@ -707,6 +709,8 @@ def test_adr_to_dict_shape_and_values() -> None:
     assert d["phase_reference"] == "36F"
     assert d["contributors"] == ["claude-local"]
     assert d["is_human_approved"] is False
+    assert d["commit_reference"] is None
+    assert d["provenance_reference"] is None
 
 
 def test_adr_contributors_vendor_neutral_accepts_any_string_ids() -> None:
@@ -884,6 +888,7 @@ def test_cli_architecture_decisions_json_decision_shape(
             "decision_id", "title", "status", "rationale",
             "alternatives_considered", "consequences", "created_at",
             "phase_reference", "author", "contributors", "is_human_approved",
+            "commit_reference", "provenance_reference", "architecture_linkage",
         }
 
 
@@ -1310,6 +1315,7 @@ def test_export_decisions_include_all_adr_fields(tmp_path: Path) -> None:
             "decision_id", "title", "status", "rationale",
             "alternatives_considered", "consequences", "created_at",
             "phase_reference", "author", "contributors", "is_human_approved",
+            "commit_reference", "provenance_reference",
         }
 
 
@@ -1541,3 +1547,309 @@ def test_cli_architecture_validate_read_only(
     main(["architecture", "validate"])
     capsys.readouterr()
     assert list(tmp_path.iterdir()) == before
+
+
+# ---------------------------------------------------------------------------
+# Architecture provenance linkage tests (Phase 36K)
+# ---------------------------------------------------------------------------
+
+from pcae.core.architecture import build_architecture_linkage
+
+
+def test_adr_commit_reference_defaults_to_none() -> None:
+    adr = create_adr(
+        decision_id="ADR-L001",
+        title="Linkage test",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    assert adr.commit_reference is None
+
+
+def test_adr_provenance_reference_defaults_to_none() -> None:
+    adr = create_adr(
+        decision_id="ADR-L002",
+        title="Linkage test",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    assert adr.provenance_reference is None
+
+
+def test_create_adr_accepts_linkage_fields() -> None:
+    adr = create_adr(
+        decision_id="ADR-L003",
+        title="Linkage test",
+        status="accepted",
+        rationale="R.",
+        author="alice",
+        commit_reference="abc1234",
+        provenance_reference="2026-05-29T12:00:00+00:00",
+    )
+    assert adr.commit_reference == "abc1234"
+    assert adr.provenance_reference == "2026-05-29T12:00:00+00:00"
+
+
+def test_adr_to_dict_includes_commit_and_provenance_reference() -> None:
+    adr = create_adr(
+        decision_id="ADR-L004",
+        title="Dict linkage",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+        commit_reference="deadbeef",
+        provenance_reference="2026-05-29T10:00:00+00:00",
+    )
+    d = adr.to_dict()
+    assert d["commit_reference"] == "deadbeef"
+    assert d["provenance_reference"] == "2026-05-29T10:00:00+00:00"
+
+
+def test_adr_to_dict_null_linkage_fields_when_none() -> None:
+    adr = create_adr(
+        decision_id="ADR-L005",
+        title="No linkage",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    d = adr.to_dict()
+    assert d["commit_reference"] is None
+    assert d["provenance_reference"] is None
+
+
+def test_build_architecture_linkage_all_fields_set() -> None:
+    adr = create_adr(
+        decision_id="ADR-L006",
+        title="Full linkage",
+        status="accepted",
+        rationale="R.",
+        author="alice",
+        phase_reference="36K",
+        contributors=["claude-local"],
+        commit_reference="abc1234",
+        provenance_reference="2026-05-29T12:00:00+00:00",
+    )
+    linkage = build_architecture_linkage(adr)
+    assert set(linkage) == {
+        "phase_reference", "commit_reference", "provenance_reference",
+        "contributors", "author", "is_human_approved",
+    }
+    assert linkage["phase_reference"] == "36K"
+    assert linkage["commit_reference"] == "abc1234"
+    assert linkage["provenance_reference"] == "2026-05-29T12:00:00+00:00"
+    assert linkage["contributors"] == ["claude-local"]
+    assert linkage["author"] == "alice"
+    assert linkage["is_human_approved"] is True
+
+
+def test_build_architecture_linkage_unavailable_when_none() -> None:
+    adr = create_adr(
+        decision_id="ADR-L007",
+        title="No linkage fields",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+    )
+    linkage = build_architecture_linkage(adr)
+    assert linkage["phase_reference"] == "unavailable"
+    assert linkage["commit_reference"] == "unavailable"
+    assert linkage["provenance_reference"] == "unavailable"
+    assert linkage["is_human_approved"] is False
+
+
+def test_build_architecture_linkage_partial_fields() -> None:
+    adr = create_adr(
+        decision_id="ADR-L008",
+        title="Partial linkage",
+        status="proposed",
+        rationale="R.",
+        author="alice",
+        phase_reference="36K",
+        commit_reference="abc1234",
+    )
+    linkage = build_architecture_linkage(adr)
+    assert linkage["phase_reference"] == "36K"
+    assert linkage["commit_reference"] == "abc1234"
+    assert linkage["provenance_reference"] == "unavailable"
+
+
+def test_add_architecture_decision_without_git_has_no_commit(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="No-git ADR",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    # tmp_path has no git repo — commit_reference must be None gracefully
+    assert result.adr.commit_reference is None
+
+
+def test_add_architecture_decision_with_git_captures_commit(tmp_path: Path) -> None:
+    write_file(tmp_path / "README.md", "# repo\n")
+    commit_baseline(tmp_path)
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Git-linked ADR",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    assert result.adr.commit_reference is not None
+    assert isinstance(result.adr.commit_reference, str)
+    assert len(result.adr.commit_reference) > 0
+
+
+def test_add_architecture_decision_persisted_file_has_linkage_fields(
+    tmp_path: Path,
+) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Linkage persisted",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    file_path = tmp_path / result.relative_path
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    assert "commit_reference" in data
+    assert "provenance_reference" in data
+
+
+def test_load_persisted_adr_without_linkage_fields_remains_valid(
+    tmp_path: Path,
+) -> None:
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    adr_dir.mkdir(parents=True)
+    old_format = {
+        "decision_id": "ADR-0003",
+        "title": "Old ADR",
+        "status": "accepted",
+        "rationale": "R.",
+        "alternatives_considered": [],
+        "consequences": [],
+        "created_at": "2026-05-01T00:00:00+00:00",
+        "phase_reference": None,
+        "author": "alice",
+        "contributors": [],
+        "is_human_approved": True,
+    }
+    (adr_dir / "ADR-20260501-000000.json").write_text(
+        json.dumps(old_format), encoding="utf-8"
+    )
+    adrs = load_persisted_adrs(HarnessPath(tmp_path))
+    assert len(adrs) == 1
+    assert adrs[0].decision_id == "ADR-0003"
+    assert adrs[0].commit_reference is None
+    assert adrs[0].provenance_reference is None
+
+
+def test_cli_architecture_show_human_includes_linkage_section(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0001"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture linkage:" in output
+    assert "Phase:" in output
+    assert "Commit:" in output
+    assert "Provenance:" in output
+    assert "Contributors:" in output
+    assert "Human approved:" in output
+
+
+def test_cli_architecture_show_human_linkage_shows_unavailable_for_sample(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "show", "ADR-0001"])
+    output = capsys.readouterr().out
+    assert "Commit: unavailable" in output
+    assert "Provenance: unavailable" in output
+
+
+def test_cli_architecture_show_json_includes_architecture_linkage(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0001", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "architecture_linkage" in data
+    linkage = data["architecture_linkage"]
+    assert set(linkage) == {
+        "phase_reference", "commit_reference", "provenance_reference",
+        "contributors", "author", "is_human_approved",
+    }
+    assert linkage["author"] == "atila"
+    assert linkage["is_human_approved"] is True
+
+
+def test_cli_architecture_show_json_linkage_unavailable_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "show", "ADR-0001", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    linkage = data["architecture_linkage"]
+    assert linkage["commit_reference"] == "unavailable"
+    assert linkage["provenance_reference"] == "unavailable"
+
+
+def test_cli_architecture_decisions_json_includes_architecture_linkage(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "decisions", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for decision in data["decisions"]:
+        assert "architecture_linkage" in decision
+        linkage = decision["architecture_linkage"]
+        assert "phase_reference" in linkage
+        assert "commit_reference" in linkage
+        assert "provenance_reference" in linkage
+        assert "contributors" in linkage
+        assert "author" in linkage
+        assert "is_human_approved" in linkage
+
+
+def test_cli_architecture_show_json_also_has_raw_linkage_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "show", "ADR-0001", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    # Raw fields on the ADR dict plus the structured linkage object
+    assert "commit_reference" in data
+    assert "provenance_reference" in data
+    assert "architecture_linkage" in data
+
+
+def test_cli_architecture_show_with_captured_linkage(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_file(tmp_path / "README.md", "# repo\n")
+    commit_baseline(tmp_path)
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Linked decision",
+        rationale="R.",
+        author="alice",
+        created_at=fixed,
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0003", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["commit_reference"] is not None
+    linkage = data["architecture_linkage"]
+    assert linkage["commit_reference"] != "unavailable"
