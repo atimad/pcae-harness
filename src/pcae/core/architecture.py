@@ -509,3 +509,90 @@ def create_adr(
         author=author,
         contributors=tuple(contributors),
     )
+
+
+# ---------------------------------------------------------------------------
+# ADR inspection API (Phase 36G)
+# ---------------------------------------------------------------------------
+
+ADR_INSPECTION_ADVISORY = (
+    "Architecture decision inspection is advisory; the user remains authoritative."
+)
+
+# Deterministic in-memory sample registry. Phase 36H will introduce
+# human-authored persistence; until then this registry provides stable
+# fixture data for the decisions and show commands.
+_SAMPLE_ADR_REGISTRY: tuple[ArchitectureDecisionRecord, ...] = (
+    create_adr(
+        decision_id="ADR-0001",
+        title="Use TOML for PCAE policy configuration",
+        status="accepted",
+        rationale=(
+            "TOML is human-readable, widely supported in Python tooling, "
+            "and expresses structured configuration without requiring a schema compiler."
+        ),
+        alternatives_considered=["JSON", "YAML", "INI"],
+        consequences=[
+            "Policy is editable by humans without dedicated tooling.",
+            "Policy parsing errors surface as clear ValueError messages.",
+        ],
+        created_at=datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc),
+        phase_reference="1A",
+        author="atila",
+        contributors=[],
+    ),
+    create_adr(
+        decision_id="ADR-0002",
+        title="Architecture Decision Records as first-class PCAE artifacts",
+        status="accepted",
+        rationale=(
+            "ADRs provide governed, human-approved decision memory that survives "
+            "agent context resets and session boundaries."
+        ),
+        alternatives_considered=["Inline comments", "Wiki pages", "No formal record"],
+        consequences=[
+            "ADR model is now a PCAE core artifact.",
+            "Contributors field preserves vendor-neutral agent attribution.",
+        ],
+        created_at=datetime(2026, 5, 29, 0, 0, tzinfo=timezone.utc),
+        phase_reference="36F",
+        author="atila",
+        contributors=["claude-local"],
+    ),
+)
+
+
+def get_adr_registry() -> tuple[ArchitectureDecisionRecord, ...]:
+    """Return the deterministic in-memory ADR registry."""
+    return _SAMPLE_ADR_REGISTRY
+
+
+@dataclass(frozen=True)
+class ADRListResult:
+    decisions: tuple[ArchitectureDecisionRecord, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "decision_count": len(self.decisions),
+            "decisions": [d.to_dict() for d in self.decisions],
+            "advisory": self.advisory,
+        }
+
+
+def list_architecture_decisions(
+    registry: tuple[ArchitectureDecisionRecord, ...],
+) -> ADRListResult:
+    """Return a read-only listing of all ADRs in the registry."""
+    return ADRListResult(decisions=registry, advisory=ADR_INSPECTION_ADVISORY)
+
+
+def lookup_adr_by_id(
+    decision_id: str,
+    registry: tuple[ArchitectureDecisionRecord, ...],
+) -> ArchitectureDecisionRecord | None:
+    """Return the ADR matching decision_id, or None if not found."""
+    for adr in registry:
+        if adr.decision_id == decision_id:
+            return adr
+    return None

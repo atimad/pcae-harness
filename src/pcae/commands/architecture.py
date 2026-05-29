@@ -4,9 +4,13 @@ import argparse
 import json
 
 from pcae.core.architecture import (
+    ADR_INSPECTION_ADVISORY,
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     calculate_architecture_drift_metrics,
+    get_adr_registry,
+    list_architecture_decisions,
+    lookup_adr_by_id,
     read_architecture_history_summary,
     write_architecture_history_snapshot,
 )
@@ -123,3 +127,60 @@ def architecture_metrics_json_data(
         "snapshots_with_warnings": metrics.snapshots_with_warnings,
         "total_snapshots": metrics.total_snapshots,
     }
+
+
+def run_architecture_decisions(args: argparse.Namespace) -> int:
+    registry = get_adr_registry()
+    result = list_architecture_decisions(registry)
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        return 0
+    print("Architecture decisions")
+    print(f"Decision count: {len(result.decisions)}")
+    if result.decisions:
+        for adr in result.decisions:
+            print(f"  - {adr.decision_id}: {adr.title}")
+            print(f"    Status: {adr.status}")
+            print(f"    Phase reference: {adr.phase_reference or 'none'}")
+    else:
+        print("  No architecture decisions recorded.")
+    print(ADR_INSPECTION_ADVISORY)
+    return 0
+
+
+def run_architecture_show(args: argparse.Namespace) -> int:
+    registry = get_adr_registry()
+    adr = lookup_adr_by_id(args.decision_id, registry)
+    if adr is None:
+        print(f"Architecture decision not found: {args.decision_id!r}")
+        return 1
+    if args.json:
+        print(json.dumps(adr.to_dict(), indent=2, sort_keys=True))
+        return 0
+    print(f"Architecture decision: {adr.decision_id}")
+    print(f"Title: {adr.title}")
+    print(f"Status: {adr.status}")
+    print(f"Rationale: {adr.rationale}")
+    print("Alternatives considered:")
+    if adr.alternatives_considered:
+        for alt in adr.alternatives_considered:
+            print(f"  - {alt}")
+    else:
+        print("  - none")
+    print("Consequences:")
+    if adr.consequences:
+        for consequence in adr.consequences:
+            print(f"  - {consequence}")
+    else:
+        print("  - none")
+    print(f"Created at: {adr.created_at.isoformat()}")
+    print(f"Phase reference: {adr.phase_reference or 'none'}")
+    print(f"Author: {adr.author}")
+    print("Contributors:")
+    if adr.contributors:
+        for contributor in adr.contributors:
+            print(f"  - {contributor}")
+    else:
+        print("  - none")
+    print(ADR_INSPECTION_ADVISORY)
+    return 0

@@ -9,10 +9,14 @@ from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.architecture import (
     ADR_HUMAN_APPROVED_STATUS,
+    ADR_INSPECTION_ADVISORY,
     ADR_VALID_STATUSES,
     ArchitectureDecisionRecord,
     analyze_changed_python_dependencies,
     create_adr,
+    get_adr_registry,
+    list_architecture_decisions,
+    lookup_adr_by_id,
     write_architecture_history_snapshot,
 )
 from pcae.core.check import run_checks
@@ -744,3 +748,194 @@ def test_create_adr_created_at_defaults_to_utc_now() -> None:
     )
     after = datetime.now(timezone.utc)
     assert before <= adr.created_at <= after
+
+
+# ---------------------------------------------------------------------------
+# ADR inspection API tests (Phase 36G)
+# ---------------------------------------------------------------------------
+
+def _make_sample_registry() -> tuple[ArchitectureDecisionRecord, ...]:
+    return (
+        create_adr(
+            decision_id="ADR-T001",
+            title="First test decision",
+            status="accepted",
+            rationale="Test rationale A.",
+            alternatives_considered=["Option X"],
+            consequences=["Consequence Y"],
+            created_at=datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc),
+            phase_reference="36G",
+            author="alice",
+            contributors=["claude-local"],
+        ),
+        create_adr(
+            decision_id="ADR-T002",
+            title="Second test decision",
+            status="proposed",
+            rationale="Test rationale B.",
+            created_at=datetime(2026, 2, 1, 0, 0, tzinfo=timezone.utc),
+            phase_reference=None,
+            author="bob",
+        ),
+    )
+
+
+def test_list_architecture_decisions_empty_registry() -> None:
+    result = list_architecture_decisions(())
+    assert result.decisions == ()
+    assert result.advisory == ADR_INSPECTION_ADVISORY
+
+
+def test_list_architecture_decisions_populated_registry() -> None:
+    registry = _make_sample_registry()
+    result = list_architecture_decisions(registry)
+    assert len(result.decisions) == 2
+    assert result.decisions[0].decision_id == "ADR-T001"
+    assert result.decisions[1].decision_id == "ADR-T002"
+    assert result.advisory == ADR_INSPECTION_ADVISORY
+
+
+def test_list_architecture_decisions_to_dict_shape() -> None:
+    registry = _make_sample_registry()
+    d = list_architecture_decisions(registry).to_dict()
+    assert d["decision_count"] == 2
+    assert len(d["decisions"]) == 2
+    assert d["advisory"] == ADR_INSPECTION_ADVISORY
+    first = d["decisions"][0]
+    assert first["decision_id"] == "ADR-T001"
+    assert first["title"] == "First test decision"
+    assert first["status"] == "accepted"
+    assert first["is_human_approved"] is True
+
+
+def test_lookup_adr_by_id_found() -> None:
+    registry = _make_sample_registry()
+    adr = lookup_adr_by_id("ADR-T001", registry)
+    assert adr is not None
+    assert adr.decision_id == "ADR-T001"
+    assert adr.title == "First test decision"
+
+
+def test_lookup_adr_by_id_not_found_returns_none() -> None:
+    registry = _make_sample_registry()
+    result = lookup_adr_by_id("ADR-MISSING", registry)
+    assert result is None
+
+
+def test_lookup_adr_by_id_empty_registry() -> None:
+    assert lookup_adr_by_id("ADR-T001", ()) is None
+
+
+def test_get_adr_registry_returns_deterministic_sample() -> None:
+    registry = get_adr_registry()
+    assert isinstance(registry, tuple)
+    assert len(registry) >= 1
+    ids = {adr.decision_id for adr in registry}
+    assert "ADR-0001" in ids
+    assert "ADR-0002" in ids
+    # Deterministic: same result on repeated calls
+    assert get_adr_registry() == registry
+
+
+def test_cli_architecture_decisions_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "decisions"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decisions" in output
+    assert "Decision count:" in output
+    assert "ADR-0001" in output
+    assert "ADR-0002" in output
+    assert ADR_INSPECTION_ADVISORY in output
+
+
+def test_cli_architecture_decisions_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "decisions", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "decision_count" in data
+    assert "decisions" in data
+    assert "advisory" in data
+    assert data["decision_count"] == len(data["decisions"])
+    assert data["advisory"] == ADR_INSPECTION_ADVISORY
+    ids = [d["decision_id"] for d in data["decisions"]]
+    assert "ADR-0001" in ids
+    assert "ADR-0002" in ids
+
+
+def test_cli_architecture_decisions_json_decision_shape(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "decisions", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for decision in data["decisions"]:
+        assert set(decision) == {
+            "decision_id", "title", "status", "rationale",
+            "alternatives_considered", "consequences", "created_at",
+            "phase_reference", "author", "contributors", "is_human_approved",
+        }
+
+
+def test_cli_architecture_show_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0001"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decision: ADR-0001" in output
+    assert "Title:" in output
+    assert "Status:" in output
+    assert "Rationale:" in output
+    assert "Alternatives considered:" in output
+    assert "Consequences:" in output
+    assert "Created at:" in output
+    assert "Phase reference:" in output
+    assert "Author:" in output
+    assert "Contributors:" in output
+    assert ADR_INSPECTION_ADVISORY in output
+
+
+def test_cli_architecture_show_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0001", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["decision_id"] == "ADR-0001"
+    assert data["title"] == "Use TOML for PCAE policy configuration"
+    assert data["status"] == "accepted"
+    assert data["is_human_approved"] is True
+    assert data["phase_reference"] == "1A"
+    assert data["author"] == "atila"
+    assert isinstance(data["alternatives_considered"], list)
+    assert isinstance(data["consequences"], list)
+    assert isinstance(data["contributors"], list)
+
+
+def test_cli_architecture_show_unknown_id_fails_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-DOES-NOT-EXIST"])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not found" in output
+    assert "ADR-DOES-NOT-EXIST" in output
+
+
+def test_cli_architecture_decisions_does_not_modify_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    before = list(tmp_path.iterdir())
+    assert main(["architecture", "decisions"]) == 0
+    capsys.readouterr()
+    assert list(tmp_path.iterdir()) == before

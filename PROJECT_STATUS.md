@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36F: Architecture Decision Record model.
+Phase 36G: Architecture decision inspection.
 
 ## Governance Coherence Note
 
@@ -336,11 +336,21 @@ all required fields and rejects unknown statuses, an `is_human_approved`
 property reflecting the "accepted" status, human-authority semantics enforced
 by requiring a non-empty author, and vendor-neutral contributor support via a
 plain string tuple; no CLI commands, persistence, or automatic decision
-generation are included in this phase.
+generation are included in this phase, and governed Architecture Decision Records can be inspected
+read-only with `pcae architecture decisions` and
+`pcae architecture decisions --json`, listing all decisions with id, title,
+status, and phase reference, and with `pcae architecture show DECISION_ID`
+and `pcae architecture show DECISION_ID --json`, showing full decision detail
+(all ten fields plus `is_human_approved`); unknown decision IDs fail with a
+clear error; a deterministic in-memory sample registry provides two decisions
+(ADR-0001, ADR-0002) until Phase 36H introduces human-authored persistence;
+inspection is read-only and does not mutate any artifacts; the advisory
+"Architecture decision inspection is advisory; the user remains authoritative."
+is included in all output.
 
 ## Next
 
-- Phase 36G: Architecture decision inspection (Option B — Architecture Memory).
+- Phase 36H: Architecture decision creation (Option B — Architecture Memory).
 
 ## Future Explorations
 

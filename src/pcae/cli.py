@@ -10,8 +10,10 @@ from pcae.commands.agent import (
     run_agent_status,
 )
 from pcae.commands.architecture import (
+    run_architecture_decisions,
     run_architecture_history,
     run_architecture_metrics,
+    run_architecture_show,
     run_architecture_snapshot,
 )
 from pcae.commands.check import run_check
@@ -1259,6 +1261,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON architecture metrics output.",
     )
     architecture_metrics_parser.set_defaults(handler=run_architecture_metrics)
+
+    architecture_decisions_parser = architecture_subparsers.add_parser(
+        "decisions",
+        help="List governed architecture decision records.",
+    )
+    architecture_decisions_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON architecture decisions output.",
+    )
+    architecture_decisions_parser.set_defaults(handler=run_architecture_decisions)
+
+    architecture_show_parser = architecture_subparsers.add_parser(
+        "show",
+        help="Show a governed architecture decision record by ID.",
+    )
+    architecture_show_parser.add_argument(
+        "decision_id",
+        metavar="DECISION_ID",
+        help="Architecture decision record identifier.",
+    )
+    architecture_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON architecture decision output.",
+    )
+    architecture_show_parser.set_defaults(handler=run_architecture_show)
 
     task_parser = subparsers.add_parser(
         "task",
