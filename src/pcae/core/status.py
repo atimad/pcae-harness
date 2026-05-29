@@ -71,6 +71,10 @@ PREDICTED_PHASES_OPTION_B: tuple[str, ...] = (
     "36K Architecture provenance linkage",
     "36L Architecture memory continuity integration",
     "36M Architecture governance audit integration",
+    "36N Architecture memory session restore",
+)
+PREDICTED_PHASES_OPTION_C: tuple[str, ...] = (
+    "37B Multi-Agent Capability Registry",
 )
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
@@ -774,13 +778,13 @@ def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
         )
         predicted_phases: tuple[str, ...] = ()
     else:
-        recommended = PREDICTED_PHASES_OPTION_B[0]
+        recommended = PREDICTED_PHASES_OPTION_C[0]
         rationale = (
             "Governance is ready and no pending TODO item was found; "
             "recommending the next predicted phase from the agreed roadmap sequence "
-            "(Option B — Architecture Memory)."
+            "(Option C — Multi-Agent Collaboration)."
         )
-        predicted_phases = PREDICTED_PHASES_OPTION_B
+        predicted_phases = PREDICTED_PHASES_OPTION_C
 
     return RoadmapRecommendation(
         recommendation_status="ready",

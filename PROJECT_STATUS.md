@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36N: Architecture memory session restore.
+Phase 37A: Multi-Agent Collaboration Foundation.
 
 ## Governance Coherence Note
 
@@ -417,11 +417,20 @@ status, author, phase_reference, is_human_approved), linkage_summary
 registry, is_human_approved), session_guidance (decision counts including
 proposed, advisory notes, inspection commands), and advisory "Architecture
 memory restore is advisory; no ADRs are modified."; proposed decisions surface
-in session guidance when present; the command is fully read-only.
+in session guidance when present; the command is fully read-only, and the multi-agent collaboration
+foundation registry is available as a read-only surface (Phase 37A):
+`pcae agents` and `pcae agents --json` inspect the built-in multi-agent
+registry; each entry includes agent_id, agent_type, role, status,
+capabilities, and preferred_workloads; initial agents are claude-local,
+codex-local, and pcae-native; human output reports agent count, agent id,
+role, and status; JSON output includes agents list with capability
+summaries and advisory; the registry is fully read-only, vendor-neutral,
+and does not perform automatic delegation, task routing, or remote
+execution; the human user remains authoritative.
 
 ## Next
 
-- Phase 36O: Architecture memory fleet integration (Option B — Architecture Memory).
+- Phase 37B: Multi-Agent Capability Registry (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

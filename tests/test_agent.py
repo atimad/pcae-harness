@@ -471,6 +471,84 @@ def test_acquire_idempotent_different_agent_raises(tmp_path: Path) -> None:
         acquire_agent_lock_idempotent(HarnessPath(tmp_path), "claude-local")
 
 
+# ---------------------------------------------------------------------------
+# pcae agents — multi-agent collaboration registry (Phase 37A)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Multi-agent registry" in output
+    assert "Agent count: 3" in output
+    assert "claude-local" in output
+    assert "codex-local" in output
+    assert "pcae-native" in output
+    assert "role: documentation" in output
+    assert "role: implementation" in output
+    assert "role: governance" in output
+    assert "status: available" in output
+    assert "Advisory:" in output
+
+
+def test_agents_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_count"] == 3
+    assert isinstance(data["agents"], list)
+    assert len(data["agents"]) == 3
+    assert "advisory" in data
+
+    ids = [entry["agent_id"] for entry in data["agents"]]
+    assert "claude-local" in ids
+    assert "codex-local" in ids
+    assert "pcae-native" in ids
+
+    claude = next(e for e in data["agents"] if e["agent_id"] == "claude-local")
+    assert claude["agent_type"] == "claude"
+    assert claude["role"] == "documentation"
+    assert claude["status"] == "available"
+    assert isinstance(claude["capabilities"], list)
+    assert len(claude["capabilities"]) > 0
+    assert isinstance(claude["preferred_workloads"], list)
+    assert len(claude["preferred_workloads"]) > 0
+
+
+def test_agents_json_all_required_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for entry in data["agents"]:
+        for field in ("agent_id", "agent_type", "role", "status", "capabilities", "preferred_workloads"):
+            assert field in entry, f"Missing field '{field}' in agent entry {entry['agent_id']}"
+
+
+def test_agents_registry_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = list((tmp_path / ".pcae").iterdir()) if (tmp_path / ".pcae").exists() else []
+    main(["agents"])
+    capsys.readouterr()
+    after = list((tmp_path / ".pcae").iterdir()) if (tmp_path / ".pcae").exists() else []
+
+    assert set(p.name for p in before) == set(p.name for p in after)
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))

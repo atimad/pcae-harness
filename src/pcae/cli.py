@@ -8,6 +8,7 @@ from pcae.commands.agent import (
     run_agent_acquire,
     run_agent_release,
     run_agent_status,
+    run_agents,
 )
 from pcae.commands.architecture import (
     run_architecture_add,
@@ -985,6 +986,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON agent lock status.",
     )
     agent_status_parser.set_defaults(handler=run_agent_status)
+
+    agents_parser = subparsers.add_parser(
+        "agents",
+        help="Inspect the multi-agent collaboration registry.",
+    )
+    agents_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON agent registry output.",
+    )
+    agents_parser.set_defaults(handler=run_agents)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

@@ -13,6 +13,7 @@ from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
     PREDICTED_PHASES_OPTION_B,
+    PREDICTED_PHASES_OPTION_C,
     ROADMAP_RECOMMENDATION_ADVISORY,
     ROADMAP_SEQUENCE,
     RESTORE_SAFETY_VALIDATION_ADVISORY,
@@ -400,13 +401,13 @@ def _setup_roadmap_no_todos_repo(tmp_path: Path) -> None:
     commit_governance_baseline(tmp_path)
 
 
-def test_roadmap_next_no_todos_references_option_b(tmp_path: Path) -> None:
+def test_roadmap_next_no_todos_references_option_c(tmp_path: Path) -> None:
     _setup_roadmap_no_todos_repo(tmp_path)
     result = recommend_next_roadmap_phase(HarnessPath(tmp_path))
     assert result.recommendation_status == "ready"
-    assert result.recommended_phase == PREDICTED_PHASES_OPTION_B[0]
-    assert result.predicted_phases == PREDICTED_PHASES_OPTION_B
-    assert "Option B" in result.rationale
+    assert result.recommended_phase == PREDICTED_PHASES_OPTION_C[0]
+    assert result.predicted_phases == PREDICTED_PHASES_OPTION_C
+    assert "Option C" in result.rationale
 
 
 def test_roadmap_next_with_todos_has_empty_predicted_phases(tmp_path: Path) -> None:
@@ -425,9 +426,9 @@ def test_cli_roadmap_next_no_todos_json_includes_roadmap_fields(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     assert data["recommendation_status"] == "ready"
-    assert data["recommended_phase"] == PREDICTED_PHASES_OPTION_B[0]
+    assert data["recommended_phase"] == PREDICTED_PHASES_OPTION_C[0]
     assert data["roadmap_sequence"] == list(ROADMAP_SEQUENCE)
-    assert data["predicted_phases"] == list(PREDICTED_PHASES_OPTION_B)
+    assert data["predicted_phases"] == list(PREDICTED_PHASES_OPTION_C)
     assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
 
 
@@ -440,9 +441,9 @@ def test_cli_roadmap_next_no_todos_human_output_includes_sequence(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Strategic roadmap sequence:" in output
-    assert "Option B — Architecture Memory" in output
-    assert "Predicted phases (Option B — Architecture Memory):" in output
-    assert PREDICTED_PHASES_OPTION_B[0] in output
+    assert "Option C — Multi-Agent Collaboration" in output
+    assert "Predicted phases (Option C — Multi-Agent Collaboration):" in output
+    assert PREDICTED_PHASES_OPTION_C[0] in output
 
 
 def test_cli_roadmap_next_human_output(tmp_path: Path, monkeypatch, capsys) -> None:

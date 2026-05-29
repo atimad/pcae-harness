@@ -4,8 +4,10 @@ import argparse
 import json
 
 from pcae.core.agent import (
+    MULTI_AGENT_REGISTRY,
     acquire_agent_lock,
     build_agent_status,
+    build_multi_agent_registry,
     release_agent_lock,
 )
 from pcae.core.paths import HarnessPath
@@ -68,6 +70,21 @@ def run_agent_status(args: argparse.Namespace) -> int:
         print(json.dumps(status, indent=2, sort_keys=True))
     else:
         print_agent_status(status)
+    return 0
+
+
+def run_agents(args: argparse.Namespace) -> int:
+    data = build_multi_agent_registry()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent registry")
+        print(f"Agent count: {data['agent_count']}")
+        for entry in MULTI_AGENT_REGISTRY:
+            print(
+                f"{entry.agent_id:<14} | role: {entry.role:<16} | status: {entry.status}"
+            )
+        print(f"Advisory: {data['advisory']}")
     return 0
 
 

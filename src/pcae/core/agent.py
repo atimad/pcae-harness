@@ -11,6 +11,86 @@ from pcae.core.policy import DEFAULT_AGENT_STALE_AFTER_SECONDS, load_policy
 from pcae.core.tasks import find_latest_active_task
 
 
+# ---------------------------------------------------------------------------
+# Multi-Agent Collaboration registry (Phase 37A)
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_REGISTRY_ADVISORY = (
+    "Agent registry is read-only. The human user remains authoritative."
+)
+
+
+@dataclass(frozen=True)
+class AgentEntry:
+    agent_id: str
+    agent_type: str
+    role: str
+    status: str
+    capabilities: tuple[str, ...]
+    preferred_workloads: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "agent_id": self.agent_id,
+            "agent_type": self.agent_type,
+            "capabilities": list(self.capabilities),
+            "preferred_workloads": list(self.preferred_workloads),
+            "role": self.role,
+            "status": self.status,
+        }
+
+
+MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
+    AgentEntry(
+        agent_id="claude-local",
+        agent_type="claude",
+        role="documentation",
+        status="available",
+        capabilities=(
+            "architecture_review",
+            "code_analysis",
+            "documentation",
+            "decision_making",
+        ),
+        preferred_workloads=("implementation", "documentation", "analysis"),
+    ),
+    AgentEntry(
+        agent_id="codex-local",
+        agent_type="codex",
+        role="implementation",
+        status="available",
+        capabilities=(
+            "code_generation",
+            "test_writing",
+            "runtime_execution",
+        ),
+        preferred_workloads=("implementation", "tests"),
+    ),
+    AgentEntry(
+        agent_id="pcae-native",
+        agent_type="pcae",
+        role="governance",
+        status="available",
+        capabilities=(
+            "governance_validation",
+            "policy_enforcement",
+            "provenance_tracking",
+        ),
+        preferred_workloads=("validation", "governance"),
+    ),
+)
+
+
+def build_multi_agent_registry() -> dict:
+    """Return a read-only multi-agent registry summary."""
+    agents = [entry.to_dict() for entry in MULTI_AGENT_REGISTRY]
+    return {
+        "advisory": MULTI_AGENT_REGISTRY_ADVISORY,
+        "agent_count": len(agents),
+        "agents": agents,
+    }
+
+
 AGENT_LOCK_RELATIVE_PATH = Path(".pcae") / "agent-lock.json"
 AGENT_LOCK_STALE_AFTER_SECONDS = DEFAULT_AGENT_STALE_AFTER_SECONDS
 
