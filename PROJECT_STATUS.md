@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36H: Architecture decision creation.
+Phase 36I: Architecture decision export.
 
 ## Governance Coherence Note
 
@@ -356,11 +356,18 @@ repeatable; `--phase-reference TEXT` is optional; invalid statuses fail with a
 clear error; `pcae architecture decisions` and `pcae architecture show` now
 include persisted ADRs; persisted ADR files are ignored by Git via
 `.pcae/.gitignore`; human author is required and remains authoritative;
-contributors are vendor-neutral string identifiers.
+contributors are vendor-neutral string identifiers, and all Architecture
+Decision Records (sample + persisted) can be exported as a portable ignored
+artifact with `pcae architecture export` and `pcae architecture export --json`
+to `.pcae/architecture-exports/architecture-decisions-YYYYMMDD-HHMMSS.json`;
+the export includes `exported_at`, `decision_count`, `decisions` (all ten ADR
+fields plus `is_human_approved`), `statuses` (per-status count summary), and
+`advisory`; export files are Git-ignored via `.pcae/.gitignore`; the command
+is read-only and does not mutate any persisted ADR.
 
 ## Next
 
-- Phase 36I: Architecture decision export (Option B — Architecture Memory).
+- Phase 36J: Architecture decision status validation (Option B — Architecture Memory).
 
 ## Future Explorations
 

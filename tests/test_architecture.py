@@ -1225,3 +1225,157 @@ def test_cli_architecture_add_default_status_is_accepted(
     data = json.loads(capsys.readouterr().out)
     assert data["adr"]["status"] == "accepted"
     assert data["adr"]["is_human_approved"] is True
+
+
+# ---------------------------------------------------------------------------
+# ADR export tests (Phase 36I)
+# ---------------------------------------------------------------------------
+
+from pcae.core.architecture import (
+    ADR_EXPORT_ADVISORY,
+    ADR_EXPORT_RELATIVE_PATH,
+    export_architecture_decisions,
+)
+
+
+def test_export_architecture_decisions_creates_file(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    export_dir = tmp_path / ".pcae" / "architecture-exports"
+    assert export_dir.is_dir()
+    files = list(export_dir.iterdir())
+    assert len(files) == 1
+    assert files[0].name == "architecture-decisions-20260529-140000.json"
+    assert result.export_path == ADR_EXPORT_RELATIVE_PATH / "architecture-decisions-20260529-140000.json"
+
+
+def test_export_architecture_decisions_result_fields(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    assert result.exported_at == "2026-05-29T14:00:00+00:00"
+    assert result.decision_count == 2  # sample registry only
+    assert result.advisory == ADR_EXPORT_ADVISORY
+
+
+def test_export_architecture_decisions_includes_persisted(tmp_path: Path) -> None:
+    fixed_add = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Persisted before export",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed_add,
+    )
+    fixed_export = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed_export)
+    assert result.decision_count == 3  # 2 sample + 1 persisted
+
+
+def test_export_file_is_valid_json_with_required_fields(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    file_path = tmp_path / result.export_path
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    assert "exported_at" in data
+    assert "decision_count" in data
+    assert "decisions" in data
+    assert "statuses" in data
+    assert "advisory" in data
+    assert data["decision_count"] == len(data["decisions"])
+    assert data["advisory"] == ADR_EXPORT_ADVISORY
+
+
+def test_export_file_statuses_summary(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    file_path = tmp_path / result.export_path
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    statuses = data["statuses"]
+    # All four statuses must be present
+    assert set(statuses) == {"accepted", "deprecated", "proposed", "superseded"}
+    # Both sample ADRs are "accepted"
+    assert statuses["accepted"] == 2
+    assert statuses["proposed"] == 0
+
+
+def test_export_decisions_include_all_adr_fields(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    file_path = tmp_path / result.export_path
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    for decision in data["decisions"]:
+        assert set(decision) == {
+            "decision_id", "title", "status", "rationale",
+            "alternatives_considered", "consequences", "created_at",
+            "phase_reference", "author", "contributors", "is_human_approved",
+        }
+
+
+def test_export_does_not_mutate_persisted_adrs(tmp_path: Path) -> None:
+    fixed_add = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Immutable decision",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed_add,
+    )
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    before = {f.name: f.read_text(encoding="utf-8") for f in adr_dir.iterdir()}
+    export_architecture_decisions(HarnessPath(tmp_path))
+    after = {f.name: f.read_text(encoding="utf-8") for f in adr_dir.iterdir()}
+    assert after == before
+
+
+def test_export_result_to_dict_shape(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 14, 0, tzinfo=timezone.utc)
+    result = export_architecture_decisions(HarnessPath(tmp_path), exported_at=fixed)
+    d = result.to_dict()
+    assert set(d) == {"export_path", "exported_at", "decision_count", "advisory"}
+    assert d["decision_count"] == 2
+    assert d["export_path"].startswith(".pcae/architecture-exports/")
+
+
+def test_cli_architecture_export_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "export"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decisions export" in output
+    assert "Export path: .pcae/architecture-exports/" in output
+    assert "Decision count: 2" in output
+    assert "Exported at:" in output
+    assert ADR_EXPORT_ADVISORY in output
+
+
+def test_cli_architecture_export_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "export_path" in data
+    assert "decision_count" in data
+    assert "exported_at" in data
+    assert "advisory" in data
+    assert data["export_path"].startswith(".pcae/architecture-exports/")
+    assert data["decision_count"] == 2
+    assert data["advisory"] == ADR_EXPORT_ADVISORY
+
+
+def test_cli_architecture_export_creates_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "export", "--json"])
+    capsys.readouterr()
+    export_dir = tmp_path / ".pcae" / "architecture-exports"
+    assert export_dir.is_dir()
+    files = list(export_dir.iterdir())
+    assert len(files) == 1
+    data = json.loads(files[0].read_text(encoding="utf-8"))
+    assert data["decision_count"] == 2
+    assert len(data["decisions"]) == 2

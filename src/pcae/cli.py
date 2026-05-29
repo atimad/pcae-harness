@@ -12,6 +12,7 @@ from pcae.commands.agent import (
 from pcae.commands.architecture import (
     run_architecture_add,
     run_architecture_decisions,
+    run_architecture_export,
     run_architecture_history,
     run_architecture_metrics,
     run_architecture_show,
@@ -1351,6 +1352,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     architecture_add_parser.set_defaults(handler=run_architecture_add)
+
+    architecture_export_parser = architecture_subparsers.add_parser(
+        "export",
+        help="Export all governed architecture decision records.",
+    )
+    architecture_export_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON export result.",
+    )
+    architecture_export_parser.set_defaults(handler=run_architecture_export)
 
     task_parser = subparsers.add_parser(
         "task",

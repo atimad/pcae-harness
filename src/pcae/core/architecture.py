@@ -693,6 +693,72 @@ class ADRAddResult:
         }
 
 
+# ---------------------------------------------------------------------------
+# ADR export (Phase 36I)
+# ---------------------------------------------------------------------------
+
+ADR_EXPORT_RELATIVE_PATH = Path(".pcae") / "architecture-exports"
+
+ADR_EXPORT_ADVISORY = (
+    "Architecture decision exports are read-only portable artifacts. "
+    "The user remains authoritative; no ADRs are mutated by export."
+)
+
+
+@dataclass(frozen=True)
+class ADRExportResult:
+    export_path: Path
+    exported_at: str
+    decision_count: int
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "export_path": self.export_path.as_posix(),
+            "exported_at": self.exported_at,
+            "decision_count": self.decision_count,
+            "advisory": self.advisory,
+        }
+
+
+def export_architecture_decisions(
+    root: HarnessPath,
+    exported_at: datetime | None = None,
+) -> ADRExportResult:
+    """Export all ADRs (sample + persisted) to .pcae/architecture-exports/."""
+    timestamp = exported_at or datetime.now(timezone.utc)
+    exported_at_str = timestamp.isoformat()
+    registry = get_adr_registry(root)
+
+    status_summary: dict[str, int] = {s: 0 for s in sorted(ADR_VALID_STATUSES)}
+    for adr in registry:
+        if adr.status in status_summary:
+            status_summary[adr.status] += 1
+
+    export_data = {
+        "advisory": ADR_EXPORT_ADVISORY,
+        "decision_count": len(registry),
+        "decisions": [adr.to_dict() for adr in registry],
+        "exported_at": exported_at_str,
+        "statuses": status_summary,
+    }
+
+    filename = f"architecture-decisions-{timestamp.strftime('%Y%m%d-%H%M%S')}.json"
+    relative_path = ADR_EXPORT_RELATIVE_PATH / filename
+    target = root.join(relative_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(export_data, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    return ADRExportResult(
+        export_path=relative_path,
+        exported_at=exported_at_str,
+        decision_count=len(registry),
+        advisory=ADR_EXPORT_ADVISORY,
+    )
+
+
 def add_architecture_decision(
     root: HarnessPath,
     title: str,

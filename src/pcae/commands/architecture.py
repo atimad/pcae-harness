@@ -5,11 +5,13 @@ import json
 
 from pcae.core.architecture import (
     ADR_ADD_ADVISORY,
+    ADR_EXPORT_ADVISORY,
     ADR_INSPECTION_ADVISORY,
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
     add_architecture_decision,
     calculate_architecture_drift_metrics,
+    export_architecture_decisions,
     get_adr_registry,
     list_architecture_decisions,
     lookup_adr_by_id,
@@ -217,4 +219,18 @@ def run_architecture_add(args: argparse.Namespace) -> int:
     print(f"Author: {adr.author}")
     print(f"Persisted at: {result.relative_path.as_posix()}")
     print(result.advisory)
+    return 0
+
+
+def run_architecture_export(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = export_architecture_decisions(root)
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        return 0
+    print("Architecture decisions export")
+    print(f"Export path: {result.export_path.as_posix()}")
+    print(f"Decision count: {result.decision_count}")
+    print(f"Exported at: {result.exported_at}")
+    print(ADR_EXPORT_ADVISORY)
     return 0
