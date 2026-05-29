@@ -9,6 +9,8 @@ from pcae.commands.agent import (
     run_agent_release,
     run_agent_status,
     run_agents,
+    run_agents_config_show,
+    run_agents_config_validate,
     run_agents_lifecycle,
     run_agents_show,
     run_agents_validate,
@@ -1039,6 +1041,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON lifecycle report output.",
     )
     agents_lifecycle_parser.set_defaults(handler=run_agents_lifecycle)
+
+    agents_config_parser = agents_subparsers.add_parser(
+        "config",
+        help="Inspect agent configuration metadata.",
+    )
+    agents_config_subparsers = agents_config_parser.add_subparsers(
+        dest="agents_config_command",
+        required=True,
+    )
+
+    agents_config_show_parser = agents_config_subparsers.add_parser(
+        "show",
+        help="Show configuration metadata for a single agent.",
+    )
+    agents_config_show_parser.add_argument(
+        "agent_id",
+        metavar="AGENT_ID",
+        help="Agent identifier to inspect.",
+    )
+    agents_config_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON configuration output.",
+    )
+    agents_config_show_parser.set_defaults(handler=run_agents_config_show)
+
+    agents_config_validate_parser = agents_config_subparsers.add_parser(
+        "validate",
+        help="Validate agent configuration model consistency.",
+    )
+    agents_config_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON validation output.",
+    )
+    agents_config_validate_parser.set_defaults(handler=run_agents_config_validate)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

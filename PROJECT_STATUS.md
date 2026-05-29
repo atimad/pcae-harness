@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37D: Agent Lifecycle State Management.
+Phase 37E: Agent Configuration Model.
 
 ## Governance Coherence Note
 
@@ -467,11 +467,24 @@ validation (valid, errors, warnings), and advisory; validation checks for
 duplicate IDs, invalid states, and inconsistent lifecycle metadata
 (available/active agents without capabilities or preferred workloads);
 all operations are strictly read-only with no agent execution, API
-integration, CLI launching, automatic routing, or availability probing.
+integration, CLI launching, automatic routing, or availability probing;
+and agent configuration metadata is exposed as read-only inspection
+(Phase 37E): `pcae agents config show AGENT_ID` and
+`pcae agents config show AGENT_ID --json` display adapter_type,
+configuration_status, executable_hint, requires_manual_setup,
+configuration_notes, and lifecycle_status for any registered agent;
+unknown agent IDs exit 1 with a clear "Agent not found" message;
+adapter types are cli, api, desktop_manual, native, and undeclared;
+available agents must not use undeclared adapter; declared future agents
+may use undeclared adapter; `pcae agents config validate` and
+`pcae agents config validate --json` validate the configuration model
+for duplicate IDs, invalid adapter types, and available/active agents
+using undeclared adapter; exit code is 0 when valid and 1 when errors
+exist; all operations are strictly read-only.
 
 ## Next
 
-- Phase 37E: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37F: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.agent import (
+    CONFIG_ADVISORY,
     MULTI_AGENT_REGISTRY,
     VALID_AGENT_STATUSES,
     acquire_agent_lock,
@@ -11,7 +12,9 @@ from pcae.core.agent import (
     build_lifecycle_report,
     build_multi_agent_registry,
     get_agent_by_id,
+    get_agent_config,
     release_agent_lock,
+    validate_agent_configs,
     validate_agent_registry,
 )
 from pcae.core.paths import HarnessPath
@@ -122,6 +125,52 @@ def run_agents_validate(args: argparse.Namespace) -> int:
         print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
     else:
         print("Agent registry validation")
+        print(f"Agent count: {result.agent_count}")
+        print(f"Validation status: {'valid' if result.valid else 'invalid'}")
+        if result.errors:
+            print("Errors:")
+            for error in result.errors:
+                print(f"  - {error}")
+        else:
+            print("Errors: none")
+        if result.warnings:
+            print("Warnings:")
+            for warning in result.warnings:
+                print(f"  - {warning}")
+        else:
+            print("Warnings: none")
+        print(result.advisory)
+    return 0 if result.valid else 1
+
+
+def run_agents_config_show(args: argparse.Namespace) -> int:
+    config = get_agent_config(args.agent_id)
+    if config is None:
+        print(f"Agent not found: '{args.agent_id}'.")
+        return 1
+    registry_entry = get_agent_by_id(args.agent_id)
+    lifecycle_status = registry_entry.status if registry_entry is not None else ""
+    if args.json:
+        print(json.dumps(config.to_dict(lifecycle_status), indent=2, sort_keys=True))
+    else:
+        print(f"Agent configuration: {config.agent_id}")
+        print(f"Adapter type: {config.adapter_type}")
+        print(f"Configuration status: {config.configuration_status}")
+        hint = config.executable_hint if config.executable_hint is not None else "(none)"
+        print(f"Executable hint: {hint}")
+        print(f"Requires manual setup: {'yes' if config.requires_manual_setup else 'no'}")
+        print(f"Configuration notes: {config.configuration_notes}")
+        print(f"Lifecycle status: {lifecycle_status}")
+        print(CONFIG_ADVISORY)
+    return 0
+
+
+def run_agents_config_validate(args: argparse.Namespace) -> int:
+    result = validate_agent_configs()
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Agent configuration validation")
         print(f"Agent count: {result.agent_count}")
         print(f"Validation status: {'valid' if result.valid else 'invalid'}")
         if result.errors:

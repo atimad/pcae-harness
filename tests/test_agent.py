@@ -855,6 +855,273 @@ def test_validate_agent_registry_detects_invalid_status() -> None:
 
 
 # ---------------------------------------------------------------------------
+# pcae agents config show / validate (Phase 37E)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_config_show_available_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "claude-local" in output
+    assert "Adapter type: cli" in output
+    assert "Configuration status: configured" in output
+    assert "Executable hint: claude" in output
+    assert "Requires manual setup: no" in output
+    assert "Lifecycle status: available" in output
+    assert "advisory" in output.lower()
+
+
+def test_agents_config_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "kimi-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "kimi-local" in output
+    assert "Adapter type: undeclared" in output
+    assert "Configuration status: unconfigured" in output
+    assert "Executable hint: (none)" in output
+    assert "Requires manual setup: yes" in output
+    assert "Lifecycle status: declared" in output
+
+
+def test_agents_config_show_native_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "pcae-native"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "pcae-native" in output
+    assert "Adapter type: native" in output
+    assert "Configuration status: configured" in output
+    assert "Executable hint: pcae" in output
+    assert "Requires manual setup: no" in output
+
+
+def test_agents_config_show_unknown_agent_fails(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "no-such-agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Agent not found" in output
+    assert "no-such-agent" in output
+
+
+def test_agents_config_show_json_available(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "claude-local"
+    assert data["adapter_type"] == "cli"
+    assert data["configuration_status"] == "configured"
+    assert data["executable_hint"] == "claude"
+    assert data["requires_manual_setup"] is False
+    assert data["lifecycle_status"] == "available"
+    assert "configuration_notes" in data
+
+
+def test_agents_config_show_json_declared(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "deepseek-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "deepseek-local"
+    assert data["adapter_type"] == "undeclared"
+    assert data["configuration_status"] == "unconfigured"
+    assert data["executable_hint"] is None
+    assert data["requires_manual_setup"] is True
+    assert data["lifecycle_status"] == "declared"
+
+
+def test_agents_config_show_json_all_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "show", "codex-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for field in (
+        "agent_id", "adapter_type", "configuration_status",
+        "executable_hint", "requires_manual_setup",
+        "configuration_notes", "lifecycle_status",
+    ):
+        assert field in data, f"Missing field '{field}' in config show output"
+
+
+def test_agents_config_show_all_declared_agents(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for agent_id in ("kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
+        exit_code = main(["agents", "config", "show", agent_id, "--json"])
+        data = json.loads(capsys.readouterr().out)
+        assert exit_code == 0, f"Expected exit 0 for {agent_id}"
+        assert data["adapter_type"] == "undeclared"
+        assert data["configuration_status"] == "unconfigured"
+        assert data["lifecycle_status"] == "declared"
+
+
+def test_agents_config_show_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "config", "show", "claude-local"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_config_validate_passes(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent configuration validation" in output
+    assert "Validation status: valid" in output
+    assert "Errors: none" in output
+    assert "advisory" in output.lower()
+
+
+def test_agents_config_validate_json_valid(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["errors"] == []
+    assert data["agent_count"] == 8
+    assert "advisory" in data
+    assert "configuration does not imply execution" in data["advisory"]
+
+
+def test_agents_config_validate_json_all_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "config", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for field in ("valid", "agent_count", "errors", "warnings", "advisory"):
+        assert field in data, f"Missing field '{field}' in config validate output"
+
+
+def test_agents_config_validate_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "config", "validate"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_config_available_agents_have_non_undeclared_adapter() -> None:
+    from pcae.core.agent import (
+        ADAPTER_TYPE_UNDECLARED,
+        AGENT_CONFIG_REGISTRY,
+        AGENT_STATUS_AVAILABLE,
+        MULTI_AGENT_REGISTRY,
+    )
+
+    available_ids = {e.agent_id for e in MULTI_AGENT_REGISTRY if e.status == AGENT_STATUS_AVAILABLE}
+    for agent_id in available_ids:
+        config = AGENT_CONFIG_REGISTRY.get(agent_id)
+        assert config is not None, f"No config entry for available agent '{agent_id}'"
+        assert config.adapter_type != ADAPTER_TYPE_UNDECLARED, (
+            f"Available agent '{agent_id}' must not use undeclared adapter"
+        )
+
+
+def test_agents_config_declared_agents_may_have_undeclared_adapter() -> None:
+    from pcae.core.agent import (
+        ADAPTER_TYPE_UNDECLARED,
+        AGENT_CONFIG_REGISTRY,
+        AGENT_STATUS_DECLARED,
+        MULTI_AGENT_REGISTRY,
+    )
+
+    declared_ids = {e.agent_id for e in MULTI_AGENT_REGISTRY if e.status == AGENT_STATUS_DECLARED}
+    for agent_id in declared_ids:
+        config = AGENT_CONFIG_REGISTRY.get(agent_id)
+        assert config is not None, f"No config entry for declared agent '{agent_id}'"
+        assert config.adapter_type == ADAPTER_TYPE_UNDECLARED, (
+            f"Declared agent '{agent_id}' expected undeclared adapter in initial mapping"
+        )
+
+
+def test_agents_config_validate_core_detects_available_with_undeclared() -> None:
+    from pcae.core.agent import (
+        ADAPTER_TYPE_UNDECLARED,
+        AGENT_CONFIG_REGISTRY,
+        AgentConfigEntry,
+        validate_agent_configs,
+    )
+    import copy
+
+    original = AGENT_CONFIG_REGISTRY.get("claude-local")
+    assert original is not None
+
+    bad_entry = AgentConfigEntry(
+        agent_id="claude-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="broken",
+    )
+
+    original_registry = dict(AGENT_CONFIG_REGISTRY)
+    AGENT_CONFIG_REGISTRY["claude-local"] = bad_entry
+    try:
+        result = validate_agent_configs()
+        assert result.valid is False
+        assert any("undeclared adapter" in e for e in result.errors)
+    finally:
+        AGENT_CONFIG_REGISTRY["claude-local"] = original_registry["claude-local"]
+
+
+def test_agents_config_core_get_agent_config() -> None:
+    from pcae.core.agent import get_agent_config
+
+    config = get_agent_config("claude-local")
+    assert config is not None
+    assert config.agent_id == "claude-local"
+    assert config.adapter_type == "cli"
+    assert config.configuration_status == "configured"
+    assert get_agent_config("no-such-agent") is None
+
+
+# ---------------------------------------------------------------------------
 # pcae agents lifecycle (Phase 37D)
 # ---------------------------------------------------------------------------
 

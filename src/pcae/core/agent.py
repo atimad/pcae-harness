@@ -463,6 +463,174 @@ def calculate_lock_age_seconds(
 
 
 # ---------------------------------------------------------------------------
+# Agent configuration model (Phase 37E)
+# ---------------------------------------------------------------------------
+
+ADAPTER_TYPE_CLI = "cli"
+ADAPTER_TYPE_API = "api"
+ADAPTER_TYPE_DESKTOP_MANUAL = "desktop_manual"
+ADAPTER_TYPE_NATIVE = "native"
+ADAPTER_TYPE_UNDECLARED = "undeclared"
+
+VALID_ADAPTER_TYPES: frozenset[str] = frozenset(
+    {
+        ADAPTER_TYPE_CLI,
+        ADAPTER_TYPE_API,
+        ADAPTER_TYPE_DESKTOP_MANUAL,
+        ADAPTER_TYPE_NATIVE,
+        ADAPTER_TYPE_UNDECLARED,
+    }
+)
+
+CONFIG_ADVISORY = (
+    "Agent configuration metadata is advisory; "
+    "configuration does not imply execution."
+)
+
+
+@dataclass(frozen=True)
+class AgentConfigEntry:
+    agent_id: str
+    adapter_type: str
+    executable_hint: str | None
+    requires_manual_setup: bool
+    configuration_notes: str
+
+    @property
+    def configuration_status(self) -> str:
+        return "configured" if self.adapter_type != ADAPTER_TYPE_UNDECLARED else "unconfigured"
+
+    def to_dict(self, lifecycle_status: str = "") -> dict:
+        return {
+            "adapter_type": self.adapter_type,
+            "agent_id": self.agent_id,
+            "configuration_notes": self.configuration_notes,
+            "configuration_status": self.configuration_status,
+            "executable_hint": self.executable_hint,
+            "lifecycle_status": lifecycle_status,
+            "requires_manual_setup": self.requires_manual_setup,
+        }
+
+
+AGENT_CONFIG_REGISTRY: dict[str, AgentConfigEntry] = {
+    "claude-local": AgentConfigEntry(
+        agent_id="claude-local",
+        adapter_type=ADAPTER_TYPE_CLI,
+        executable_hint="claude",
+        requires_manual_setup=False,
+        configuration_notes="Invoked via the Claude Code CLI.",
+    ),
+    "codex-local": AgentConfigEntry(
+        agent_id="codex-local",
+        adapter_type=ADAPTER_TYPE_CLI,
+        executable_hint="codex",
+        requires_manual_setup=False,
+        configuration_notes="Invoked via the Codex CLI.",
+    ),
+    "pcae-native": AgentConfigEntry(
+        agent_id="pcae-native",
+        adapter_type=ADAPTER_TYPE_NATIVE,
+        executable_hint="pcae",
+        requires_manual_setup=False,
+        configuration_notes="Built-in PCAE governance agent; no external invocation required.",
+    ),
+    "kimi-local": AgentConfigEntry(
+        agent_id="kimi-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+    ),
+    "deepseek-local": AgentConfigEntry(
+        agent_id="deepseek-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+    ),
+    "gemini-local": AgentConfigEntry(
+        agent_id="gemini-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+    ),
+    "grok-local": AgentConfigEntry(
+        agent_id="grok-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+    ),
+    "perplexity-local": AgentConfigEntry(
+        agent_id="perplexity-local",
+        adapter_type=ADAPTER_TYPE_UNDECLARED,
+        executable_hint=None,
+        requires_manual_setup=True,
+        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+    ),
+}
+
+
+def get_agent_config(agent_id: str) -> AgentConfigEntry | None:
+    return AGENT_CONFIG_REGISTRY.get(agent_id)
+
+
+@dataclass(frozen=True)
+class AgentConfigValidationResult:
+    valid: bool
+    agent_count: int
+    errors: tuple[str, ...]
+    warnings: tuple[str, ...]
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "agent_count": self.agent_count,
+            "errors": list(self.errors),
+            "valid": self.valid,
+            "warnings": list(self.warnings),
+        }
+
+
+def validate_agent_configs() -> AgentConfigValidationResult:
+    """Return a read-only advisory validation of the agent configuration model."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    seen_ids: set[str] = set()
+    for agent_id, config in AGENT_CONFIG_REGISTRY.items():
+        if agent_id in seen_ids:
+            errors.append(f"Duplicate config entry for agent ID: '{agent_id}'.")
+        seen_ids.add(agent_id)
+
+        if config.adapter_type not in VALID_ADAPTER_TYPES:
+            errors.append(
+                f"Agent '{agent_id}' has invalid adapter type '{config.adapter_type}'."
+            )
+
+        registry_entry = get_agent_by_id(agent_id)
+        if registry_entry is not None:
+            if (
+                registry_entry.status in (AGENT_STATUS_AVAILABLE, AGENT_STATUS_ACTIVE)
+                and config.adapter_type == ADAPTER_TYPE_UNDECLARED
+            ):
+                errors.append(
+                    f"Agent '{agent_id}' is '{registry_entry.status}' "
+                    "but has undeclared adapter type."
+                )
+
+    return AgentConfigValidationResult(
+        valid=len(errors) == 0,
+        agent_count=len(AGENT_CONFIG_REGISTRY),
+        errors=tuple(errors),
+        warnings=tuple(warnings),
+        advisory=CONFIG_ADVISORY,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Agent lifecycle reporting (Phase 37D)
 # ---------------------------------------------------------------------------
 
