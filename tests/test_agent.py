@@ -497,8 +497,8 @@ def test_agents_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
     assert "status: available" in output
     assert "status: declared" in output
     assert "Lifecycle summary:" in output
-    assert "available=3" in output
-    assert "declared=5" in output
+    assert "available=4" in output
+    assert "declared=4" in output
     assert "Advisory:" in output
 
 
@@ -571,7 +571,7 @@ def test_agents_new_agents_are_declared(tmp_path: Path, monkeypatch, capsys) -> 
     declared_ids = {
         e["agent_id"] for e in data["agents"] if e["status"] == "declared"
     }
-    assert "kimi-local" in declared_ids
+    assert "kimi-local" not in declared_ids
     assert "deepseek-local" in declared_ids
     assert "gemini-local" in declared_ids
     assert "grok-local" in declared_ids
@@ -608,8 +608,8 @@ def test_agents_json_includes_lifecycle_summary(
     assert exit_code == 0
     assert "lifecycle_summary" in data
     summary = data["lifecycle_summary"]
-    assert summary["available"] == 3
-    assert summary["declared"] == 5
+    assert summary["available"] == 4
+    assert summary["declared"] == 4
     assert summary["configured"] == 0
     assert summary["active"] == 0
 
@@ -679,7 +679,7 @@ def test_agents_show_available_agent(tmp_path: Path, monkeypatch, capsys) -> Non
     assert "Preferred workloads:" in output
 
 
-def test_agents_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+def test_agents_show_available_kimi(tmp_path: Path, monkeypatch, capsys) -> None:
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -689,7 +689,7 @@ def test_agents_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None
     assert exit_code == 0
     assert "kimi-local" in output
     assert "kimi" in output
-    assert "declared" in output
+    assert "available" in output
 
 
 def test_agents_show_unknown_agent_fails(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -738,7 +738,7 @@ def test_agents_show_all_new_declared_agents(
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    for agent_id in ("kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
+    for agent_id in ("deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
         exit_code = main(["agents", "show", agent_id])
         output = capsys.readouterr().out
         assert exit_code == 0, f"Expected exit 0 for {agent_id}"
@@ -1928,7 +1928,7 @@ def test_agents_config_show_available_agent(tmp_path: Path, monkeypatch, capsys)
     assert "advisory" in output.lower()
 
 
-def test_agents_config_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+def test_agents_config_show_kimi_local(tmp_path: Path, monkeypatch, capsys) -> None:
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -1937,11 +1937,11 @@ def test_agents_config_show_declared_agent(tmp_path: Path, monkeypatch, capsys) 
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "kimi-local" in output
-    assert "Adapter type: undeclared" in output
-    assert "Configuration status: unconfigured" in output
-    assert "Executable hint: (none)" in output
-    assert "Requires manual setup: yes" in output
-    assert "Lifecycle status: declared" in output
+    assert "Adapter type: cli" in output
+    assert "Configuration status: configured" in output
+    assert "Executable hint: kimi" in output
+    assert "Requires manual setup: no" in output
+    assert "Lifecycle status: available" in output
 
 
 def test_agents_config_show_native_agent(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -2024,7 +2024,7 @@ def test_agents_config_show_all_declared_agents(tmp_path: Path, monkeypatch, cap
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    for agent_id in ("kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
+    for agent_id in ("deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
         exit_code = main(["agents", "config", "show", agent_id, "--json"])
         data = json.loads(capsys.readouterr().out)
         assert exit_code == 0, f"Expected exit 0 for {agent_id}"
@@ -2190,12 +2190,12 @@ def test_agents_lifecycle_human_output(tmp_path: Path, monkeypatch, capsys) -> N
     assert "Agent count: 8" in output
     assert "State distribution:" in output
     assert "active=0" in output
-    assert "available=3" in output
+    assert "available=4" in output
     assert "configured=0" in output
-    assert "declared=5" in output
+    assert "declared=4" in output
     assert "Agents by lifecycle state:" in output
-    assert "available (3):" in output
-    assert "declared (5):" in output
+    assert "available (4):" in output
+    assert "declared (4):" in output
     assert "claude-local" in output
     assert "codex-local" in output
     assert "pcae-native" in output
@@ -2228,8 +2228,8 @@ def test_agents_lifecycle_json_summary_counts(tmp_path: Path, monkeypatch, capsy
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     summary = data["lifecycle_summary"]
-    assert summary["available"] == 3
-    assert summary["declared"] == 5
+    assert summary["available"] == 4
+    assert summary["declared"] == 4
     assert summary["configured"] == 0
     assert summary["active"] == 0
     assert sum(summary.values()) == 8
@@ -2244,15 +2244,15 @@ def test_agents_lifecycle_json_agents_by_state(tmp_path: Path, monkeypatch, caps
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     by_state = data["agents_by_state"]
-    assert len(by_state["available"]) == 3
-    assert len(by_state["declared"]) == 5
+    assert len(by_state["available"]) == 4
+    assert len(by_state["declared"]) == 4
     assert by_state["configured"] == []
     assert by_state["active"] == []
     available_ids = {e["agent_id"] for e in by_state["available"]}
-    assert available_ids == {"claude-local", "codex-local", "pcae-native"}
+    assert available_ids == {"claude-local", "codex-local", "pcae-native", "kimi-local"}
     declared_ids = {e["agent_id"] for e in by_state["declared"]}
     assert declared_ids == {
-        "kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"
+        "deepseek-local", "gemini-local", "grok-local", "perplexity-local"
     }
 
 
@@ -2327,8 +2327,8 @@ def test_agents_lifecycle_core_build_lifecycle_report() -> None:
 
     report = build_lifecycle_report()
 
-    assert report.lifecycle_summary["available"] == 3
-    assert report.lifecycle_summary["declared"] == 5
+    assert report.lifecycle_summary["available"] == 4
+    assert report.lifecycle_summary["declared"] == 4
     assert report.lifecycle_summary["configured"] == 0
     assert report.lifecycle_summary["active"] == 0
     assert report.validation.valid is True

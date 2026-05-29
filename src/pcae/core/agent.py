@@ -106,12 +106,12 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         ),
         preferred_workloads=("validation", "governance"),
     ),
-    # Declared agents (registered for future use; not yet configured or available)
+    # Confirmed available agents (CLI confirmed on PATH)
     AgentEntry(
         agent_id="kimi-local",
         agent_type="kimi",
         role="analysis",
-        status=AGENT_STATUS_DECLARED,
+        status=AGENT_STATUS_AVAILABLE,
         capabilities=(
             "code_analysis",
             "documentation",
@@ -119,6 +119,7 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         ),
         preferred_workloads=("analysis", "documentation"),
     ),
+    # Declared agents (registered for future use; not yet configured or available)
     AgentEntry(
         agent_id="deepseek-local",
         agent_type="deepseek",
@@ -539,10 +540,10 @@ AGENT_CONFIG_REGISTRY: dict[str, AgentConfigEntry] = {
     ),
     "kimi-local": AgentConfigEntry(
         agent_id="kimi-local",
-        adapter_type=ADAPTER_TYPE_UNDECLARED,
-        executable_hint=None,
-        requires_manual_setup=True,
-        configuration_notes="Adapter not yet declared. Configure adapter before use.",
+        adapter_type=ADAPTER_TYPE_CLI,
+        executable_hint="kimi",
+        requires_manual_setup=False,
+        configuration_notes="CLI adapter; invoked via the kimi executable.",
     ),
     "deepseek-local": AgentConfigEntry(
         agent_id="deepseek-local",

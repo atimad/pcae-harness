@@ -525,7 +525,13 @@ remote); detection is conservative — "yes" only when specific keywords
 appear in help output, "unknown" otherwise; codex probes include exec,
 mcp, and mcp-server subcommands; stdin=DEVNULL and 5-second timeouts
 prevent interactive sessions or hangs; missing executables handled
-gracefully; all operations are strictly read-only.
+gracefully; all operations are strictly read-only. kimi-local has been
+promoted to `available` status with `adapter_type=cli` and
+`executable_hint="kimi"` (Phase 38A.1), following confirmed CLI
+installation of kimi v0.6.0; non_interactive capability is detected from
+"non-interactively" in kimi --help output; all other kimi capabilities
+remain unknown pending deterministic evidence; lifecycle summary now
+reports available=4, declared=4.
 
 ## Next
 
