@@ -462,6 +462,116 @@ def calculate_lock_age_seconds(
     return max(0, int((now - acquired).total_seconds()))
 
 
+# ---------------------------------------------------------------------------
+# Agent lifecycle reporting (Phase 37D)
+# ---------------------------------------------------------------------------
+
+LIFECYCLE_ADVISORY = "Lifecycle reporting is advisory; no agent state is modified."
+
+LIFECYCLE_PROGRESSION_GUIDANCE: dict[str, str] = {
+    AGENT_STATUS_DECLARED: (
+        "Agent is registered but not yet configured. "
+        "Next: add the agent to policy.toml with kind and roles."
+    ),
+    AGENT_STATUS_CONFIGURED: (
+        "Agent is configured in policy.toml but availability is unconfirmed. "
+        "Next: verify the agent is reachable and mark it available."
+    ),
+    AGENT_STATUS_AVAILABLE: (
+        "Agent is configured and ready for task assignment. "
+        "Next: acquire the session lock to activate."
+    ),
+    AGENT_STATUS_ACTIVE: (
+        "Agent currently holds the session lock and is actively engaged. "
+        "No further progression required."
+    ),
+}
+
+
+@dataclass(frozen=True)
+class LifecycleValidationResult:
+    valid: bool
+    errors: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "errors": list(self.errors),
+            "valid": self.valid,
+            "warnings": list(self.warnings),
+        }
+
+
+@dataclass(frozen=True)
+class LifecycleReport:
+    lifecycle_summary: dict[str, int]
+    agents_by_state: dict[str, list[dict]]
+    progression_guidance: dict[str, str]
+    validation: LifecycleValidationResult
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "advisory": self.advisory,
+            "agents_by_state": self.agents_by_state,
+            "lifecycle_summary": self.lifecycle_summary,
+            "progression_guidance": self.progression_guidance,
+            "validation": self.validation.to_dict(),
+        }
+
+
+def _validate_lifecycle(registry: tuple[AgentEntry, ...]) -> LifecycleValidationResult:
+    errors: list[str] = []
+    warnings: list[str] = []
+    seen_ids: set[str] = set()
+
+    for entry in registry:
+        if entry.agent_id in seen_ids:
+            errors.append(f"Duplicate agent ID: '{entry.agent_id}'.")
+        seen_ids.add(entry.agent_id)
+
+        if entry.status not in VALID_AGENT_STATUSES:
+            errors.append(
+                f"Agent '{entry.agent_id}' has invalid lifecycle state '{entry.status}'."
+            )
+
+        if entry.status in (AGENT_STATUS_AVAILABLE, AGENT_STATUS_ACTIVE):
+            if not entry.capabilities:
+                errors.append(
+                    f"Agent '{entry.agent_id}' is '{entry.status}' "
+                    "but has no capabilities (inconsistent lifecycle metadata)."
+                )
+            if not entry.preferred_workloads:
+                errors.append(
+                    f"Agent '{entry.agent_id}' is '{entry.status}' "
+                    "but has no preferred workloads (inconsistent lifecycle metadata)."
+                )
+
+    return LifecycleValidationResult(
+        valid=len(errors) == 0,
+        errors=tuple(errors),
+        warnings=tuple(warnings),
+    )
+
+
+def build_lifecycle_report() -> LifecycleReport:
+    """Return a read-only lifecycle state distribution report."""
+    summary: dict[str, int] = {s: 0 for s in sorted(VALID_AGENT_STATUSES)}
+    agents_by_state: dict[str, list[dict]] = {s: [] for s in sorted(VALID_AGENT_STATUSES)}
+
+    for entry in MULTI_AGENT_REGISTRY:
+        summary[entry.status] += 1
+        agents_by_state[entry.status].append(entry.to_dict())
+
+    return LifecycleReport(
+        lifecycle_summary=summary,
+        agents_by_state=agents_by_state,
+        progression_guidance=dict(LIFECYCLE_PROGRESSION_GUIDANCE),
+        validation=_validate_lifecycle(MULTI_AGENT_REGISTRY),
+        advisory=LIFECYCLE_ADVISORY,
+    )
+
+
 def read_agent_stale_after_seconds(root: HarnessPath) -> int:
     policy = load_policy(root)
     if not policy.valid:

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Agent Lifecycle State Management (Phase 37D): `pcae agents lifecycle` and `pcae agents lifecycle --json` with lifecycle summary, agents grouped by state, progression guidance, validation, and advisory note.
 - Completed Option B — Architecture Memory (Phases 36F–36N): ADR model, inspection, creation, export, status validation, provenance linkage, continuity integration, governance audit integration, session restore.
 - Completed Phase 36N: Architecture memory session restore (`pcae architecture restore-session`).
 - Completed Phase 37C: Agent Configuration and Availability Governance (`pcae agents show`, `pcae agents validate`).

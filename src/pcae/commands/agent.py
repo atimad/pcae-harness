@@ -5,8 +5,10 @@ import json
 
 from pcae.core.agent import (
     MULTI_AGENT_REGISTRY,
+    VALID_AGENT_STATUSES,
     acquire_agent_lock,
     build_agent_status,
+    build_lifecycle_report,
     build_multi_agent_registry,
     get_agent_by_id,
     release_agent_lock,
@@ -136,6 +138,42 @@ def run_agents_validate(args: argparse.Namespace) -> int:
             print("Warnings: none")
         print(result.advisory)
     return 0 if result.valid else 1
+
+
+def run_agents_lifecycle(args: argparse.Namespace) -> int:
+    report = build_lifecycle_report()
+    if args.json:
+        print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
+    else:
+        print("Lifecycle summary")
+        total = sum(report.lifecycle_summary.values())
+        print(f"Agent count: {total}")
+        dist = ", ".join(
+            f"{s}={report.lifecycle_summary[s]}" for s in sorted(VALID_AGENT_STATUSES)
+        )
+        print(f"State distribution: {dist}")
+        print()
+        print("Agents by lifecycle state:")
+        for state in sorted(VALID_AGENT_STATUSES):
+            agents = report.agents_by_state[state]
+            print(f"\n{state} ({len(agents)}):")
+            if agents:
+                for entry in agents:
+                    print(f"  - {entry['agent_id']} ({entry['agent_type']}) — {entry['role']}")
+            else:
+                print("  (none)")
+        print()
+        print("Lifecycle progression guidance:")
+        for state in sorted(VALID_AGENT_STATUSES):
+            print(f"  {state}: {report.progression_guidance[state]}")
+        if not report.validation.valid:
+            print()
+            print("Validation errors:")
+            for error in report.validation.errors:
+                print(f"  - {error}")
+        print()
+        print(report.advisory)
+    return 0
 
 
 def print_agent_status(status: dict[str, object]) -> None:

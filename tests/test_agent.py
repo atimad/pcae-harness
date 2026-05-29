@@ -854,6 +854,227 @@ def test_validate_agent_registry_detects_invalid_status() -> None:
     assert any("nonexistent" in e for e in errors)
 
 
+# ---------------------------------------------------------------------------
+# pcae agents lifecycle (Phase 37D)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_lifecycle_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Lifecycle summary" in output
+    assert "Agent count: 8" in output
+    assert "State distribution:" in output
+    assert "active=0" in output
+    assert "available=3" in output
+    assert "configured=0" in output
+    assert "declared=5" in output
+    assert "Agents by lifecycle state:" in output
+    assert "available (3):" in output
+    assert "declared (5):" in output
+    assert "claude-local" in output
+    assert "codex-local" in output
+    assert "pcae-native" in output
+    assert "kimi-local" in output
+    assert "Lifecycle progression guidance:" in output
+    assert "Lifecycle reporting is advisory; no agent state is modified." in output
+
+
+def test_agents_lifecycle_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "lifecycle_summary" in data
+    assert "agents_by_state" in data
+    assert "progression_guidance" in data
+    assert "advisory" in data
+    assert "validation" in data
+
+
+def test_agents_lifecycle_json_summary_counts(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    summary = data["lifecycle_summary"]
+    assert summary["available"] == 3
+    assert summary["declared"] == 5
+    assert summary["configured"] == 0
+    assert summary["active"] == 0
+    assert sum(summary.values()) == 8
+
+
+def test_agents_lifecycle_json_agents_by_state(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_state = data["agents_by_state"]
+    assert len(by_state["available"]) == 3
+    assert len(by_state["declared"]) == 5
+    assert by_state["configured"] == []
+    assert by_state["active"] == []
+    available_ids = {e["agent_id"] for e in by_state["available"]}
+    assert available_ids == {"claude-local", "codex-local", "pcae-native"}
+    declared_ids = {e["agent_id"] for e in by_state["declared"]}
+    assert declared_ids == {
+        "kimi-local", "deepseek-local", "gemini-local", "grok-local", "perplexity-local"
+    }
+
+
+def test_agents_lifecycle_json_progression_guidance(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    guidance = data["progression_guidance"]
+    for state in ("declared", "configured", "available", "active"):
+        assert state in guidance
+        assert isinstance(guidance[state], str)
+        assert len(guidance[state]) > 0
+
+
+def test_agents_lifecycle_json_advisory(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agent state is modified" in data["advisory"]
+
+
+def test_agents_lifecycle_json_validation_valid(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["validation"]["valid"] is True
+    assert data["validation"]["errors"] == []
+
+
+def test_agents_lifecycle_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "lifecycle"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_lifecycle_human_shows_progression_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "declared:" in output
+    assert "configured:" in output
+    assert "available:" in output
+    assert "active:" in output
+
+
+def test_agents_lifecycle_core_build_lifecycle_report() -> None:
+    from pcae.core.agent import build_lifecycle_report
+
+    report = build_lifecycle_report()
+
+    assert report.lifecycle_summary["available"] == 3
+    assert report.lifecycle_summary["declared"] == 5
+    assert report.lifecycle_summary["configured"] == 0
+    assert report.lifecycle_summary["active"] == 0
+    assert report.validation.valid is True
+    assert report.validation.errors == ()
+    assert "no agent state is modified" in report.advisory
+
+
+def test_agents_lifecycle_validation_detects_duplicate_ids() -> None:
+    from pcae.core.agent import (
+        AgentEntry,
+        AGENT_STATUS_DECLARED,
+        _validate_lifecycle,
+        MULTI_AGENT_REGISTRY,
+    )
+
+    duplicate = AgentEntry(
+        agent_id="claude-local",
+        agent_type="claude",
+        role="documentation",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(),
+        preferred_workloads=(),
+    )
+    registry = MULTI_AGENT_REGISTRY + (duplicate,)
+    result = _validate_lifecycle(registry)
+
+    assert result.valid is False
+    assert any("Duplicate agent ID" in e and "claude-local" in e for e in result.errors)
+
+
+def test_agents_lifecycle_validation_detects_inconsistent_metadata() -> None:
+    from pcae.core.agent import (
+        AgentEntry,
+        AGENT_STATUS_AVAILABLE,
+        _validate_lifecycle,
+    )
+
+    bad = AgentEntry(
+        agent_id="incomplete-agent",
+        agent_type="test",
+        role="testing",
+        status=AGENT_STATUS_AVAILABLE,
+        capabilities=(),
+        preferred_workloads=(),
+    )
+    result = _validate_lifecycle((bad,))
+
+    assert result.valid is False
+    assert any("inconsistent lifecycle metadata" in e for e in result.errors)
+
+
+def test_agents_lifecycle_all_states_present_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "lifecycle"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    for state in ("active", "available", "configured", "declared"):
+        assert state in output
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))

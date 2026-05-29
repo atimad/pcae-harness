@@ -9,6 +9,7 @@ from pcae.commands.agent import (
     run_agent_release,
     run_agent_status,
     run_agents,
+    run_agents_lifecycle,
     run_agents_show,
     run_agents_validate,
 )
@@ -1027,6 +1028,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON validation output.",
     )
     agents_validate_parser.set_defaults(handler=run_agents_validate)
+
+    agents_lifecycle_parser = agents_subparsers.add_parser(
+        "lifecycle",
+        help="Report lifecycle state distribution and progression guidance.",
+    )
+    agents_lifecycle_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON lifecycle report output.",
+    )
+    agents_lifecycle_parser.set_defaults(handler=run_agents_lifecycle)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

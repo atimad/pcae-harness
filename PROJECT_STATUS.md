@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37C: Agent Configuration and Availability Governance.
+Phase 37D: Agent Lifecycle State Management.
 
 ## Governance Coherence Note
 
@@ -453,11 +453,25 @@ Validation status (valid/invalid), errors, warnings, agent count, and
 the advisory "Agent configuration validation is advisory; the user
 remains authoritative."; exit code is 0 when valid and 1 when errors are
 found; all operations are fully read-only with no agent execution, API
+integration, CLI launching, automatic routing, or availability probing;
+and agent lifecycle state management is available as read-only reporting
+(Phase 37D): `pcae agents lifecycle` and `pcae agents lifecycle --json`
+report lifecycle state distribution and progression guidance; human
+output includes agent count, state distribution (active=N, available=N,
+configured=N, declared=N), agents grouped by lifecycle state (agent_id,
+agent_type, role), lifecycle progression guidance for each of the four
+states (declared → configured → available → active), and the advisory
+"Lifecycle reporting is advisory; no agent state is modified."; JSON
+output includes lifecycle_summary, agents_by_state, progression_guidance,
+validation (valid, errors, warnings), and advisory; validation checks for
+duplicate IDs, invalid states, and inconsistent lifecycle metadata
+(available/active agents without capabilities or preferred workloads);
+all operations are strictly read-only with no agent execution, API
 integration, CLI launching, automatic routing, or availability probing.
 
 ## Next
 
-- Phase 37D: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37E: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 
