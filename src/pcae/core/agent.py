@@ -1369,3 +1369,156 @@ def get_agent_adapter(agent_id: str) -> dict | None:
             data["advisory"] = ADAPTER_ADVISORY
             return data
     return None
+
+
+# ---------------------------------------------------------------------------
+# Capability Record Model (Phase 38C)
+# ---------------------------------------------------------------------------
+
+CAP_SOURCE_HELP = "help"
+CAP_SOURCE_MANUAL = "manual"
+
+ADAPTER_INSPECT_ADVISORY = (
+    "Capabilities are discovered conservatively"
+    " and may evolve with Codex CLI versions."
+)
+
+
+@dataclass(frozen=True)
+class CapabilityRecord:
+    name: str
+    status: str
+    source: str
+    notes: str
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "notes": self.notes,
+            "source": self.source,
+            "status": self.status,
+        }
+
+
+# Each tuple: (runtime_field_attr, capability_name, yes_note, unknown_note)
+# Add new Codex capabilities here without touching any other code.
+_CAPABILITY_SPECS: tuple[tuple[str, str, str, str], ...] = (
+    (
+        "interactive_supported", "interactive",
+        "Interactive CLI usage confirmed.",
+        "Interactive CLI usage not detected.",
+    ),
+    (
+        "non_interactive_supported", "non_interactive",
+        "Non-interactive mode keywords found in help output.",
+        "Non-interactive mode keywords not found in help output.",
+    ),
+    (
+        "stdin_prompt_supported", "stdin_prompt",
+        "Stdin/pipe prompt keywords found in help output.",
+        "Stdin/pipe prompt keywords not found in help output.",
+    ),
+    (
+        "prompt_file_supported", "prompt_file",
+        "Prompt file keywords found in help output.",
+        "Prompt file keywords not found in help output.",
+    ),
+    (
+        "structured_output_supported", "structured_output",
+        "JSON output keywords found in help output.",
+        "JSON output keywords not found in help output.",
+    ),
+    (
+        "mcp_supported", "mcp",
+        "MCP keywords found in help output.",
+        "MCP keywords not found in help output.",
+    ),
+    (
+        "hooks_supported", "hooks",
+        "Hook keywords found in help output.",
+        "Hook keywords not found in help output.",
+    ),
+    (
+        "subagents_supported", "subagents",
+        "Subagent keywords found in help output.",
+        "Subagent keywords not found in help output.",
+    ),
+    (
+        "remote_supported", "remote",
+        "Remote keywords found in help output.",
+        "Remote keywords not found in help output.",
+    ),
+)
+
+
+def _build_capability_records(
+    caps: AgentRuntimeCapabilities,
+) -> tuple[CapabilityRecord, ...]:
+    return tuple(
+        CapabilityRecord(
+            name=cap_name,
+            status=getattr(caps, field_attr),
+            source=CAP_SOURCE_HELP,
+            notes=yes_note if getattr(caps, field_attr) == RUNTIME_CAP_YES else unknown_note,
+        )
+        for field_attr, cap_name, yes_note, unknown_note in _CAPABILITY_SPECS
+    )
+
+
+def _unknown_capability_records() -> tuple[CapabilityRecord, ...]:
+    return tuple(
+        CapabilityRecord(
+            name=cap_name,
+            status=RUNTIME_CAP_UNKNOWN,
+            source=CAP_SOURCE_HELP,
+            notes=unknown_note,
+        )
+        for _, cap_name, _, unknown_note in _CAPABILITY_SPECS
+    )
+
+
+def build_adapter_inspection(agent_id: str) -> dict | None:
+    """Return deep capability inspection for a single agent, or None if not found."""
+    agent = next(
+        (a for a in MULTI_AGENT_REGISTRY if a.agent_id == agent_id), None
+    )
+    if agent is None:
+        return None
+
+    config = AGENT_CONFIG_REGISTRY.get(agent_id)
+    adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+
+    discovery = build_runtime_discovery()
+    runtime_entry = next(
+        (e for e in discovery.agents if e.agent_id == agent_id), None
+    )
+
+    if runtime_entry is not None:
+        caps = runtime_entry.capabilities
+        executable_path = caps.executable_path
+        runtime_version = caps.version
+        cap_records = (
+            _build_capability_records(caps)
+            if caps.installed
+            else _unknown_capability_records()
+        )
+        execution_modes: list[str] = []
+        if caps.interactive_supported == RUNTIME_CAP_YES:
+            execution_modes.append("interactive")
+        if caps.non_interactive_supported == RUNTIME_CAP_YES:
+            execution_modes.append("non-interactive")
+    else:
+        executable_path = None
+        runtime_version = None
+        cap_records = _unknown_capability_records()
+        execution_modes = []
+
+    return {
+        "adapter_type": adapter_type,
+        "advisory": ADAPTER_INSPECT_ADVISORY,
+        "agent_id": agent_id,
+        "capabilities": [r.to_dict() for r in cap_records],
+        "execution_modes": execution_modes,
+        "executable_path": executable_path,
+        "runtime_version": runtime_version,
+    }

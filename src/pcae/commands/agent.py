@@ -5,6 +5,7 @@ import json
 
 from pcae.core.agent import (
     ADAPTER_ADVISORY,
+    ADAPTER_INSPECT_ADVISORY,
     COLLABORATION_ADVISORY,
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
@@ -15,6 +16,7 @@ from pcae.core.agent import (
     VALID_AGENT_STATUSES,
     VALID_REVIEW_STATUSES,
     acquire_agent_lock,
+    build_adapter_inspection,
     build_agent_adapters,
     build_agent_status,
     build_collaboration_workflows,
@@ -415,6 +417,44 @@ def run_agents_adapter_show(args: argparse.Namespace) -> int:
         print(f"Supports remote: {entry['supports_remote']}")
         print(f"Notes: {entry['notes']}")
         print(ADAPTER_ADVISORY)
+    return 0
+
+
+def run_agents_adapter_inspect(args: argparse.Namespace) -> int:
+    data = build_adapter_inspection(args.agent_id)
+    if data is None:
+        print(f"Agent not found: '{args.agent_id}'.")
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Adapter inspection")
+        print(f"Agent: {data['agent_id']}")
+        print(f"Adapter type: {data['adapter_type']}")
+        print(f"Version: {data['runtime_version'] or '(none)'}")
+        print(f"Executable: {data['executable_path'] or '(none)'}")
+        modes = data["execution_modes"]
+        print(f"Execution modes: {', '.join(modes) if modes else 'none'}")
+        discovered = [c for c in data["capabilities"] if c["status"] == "yes"]
+        unknown = [c for c in data["capabilities"] if c["status"] != "yes"]
+        if discovered:
+            print()
+            print("Discovered capabilities:")
+            for cap in discovered:
+                print(
+                    f"  {cap['name']:<24} [yes]     "
+                    f"({cap['source']}) {cap['notes']}"
+                )
+        if unknown:
+            print()
+            print("Unknown capabilities:")
+            for cap in unknown:
+                print(
+                    f"  {cap['name']:<24} [unknown] "
+                    f"({cap['source']}) {cap['notes']}"
+                )
+        print()
+        print(ADAPTER_INSPECT_ADVISORY)
     return 0
 
 

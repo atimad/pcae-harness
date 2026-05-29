@@ -9,6 +9,7 @@ from pcae.commands.agent import (
     run_agent_release,
     run_agent_status,
     run_agents,
+    run_agents_adapter_inspect,
     run_agents_adapter_show,
     run_agents_adapters,
     run_agents_config_show,
@@ -1129,6 +1130,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON adapter output.",
     )
     agents_adapter_show_parser.set_defaults(handler=run_agents_adapter_show)
+
+    agents_adapter_inspect_parser = agents_adapter_subparsers.add_parser(
+        "inspect",
+        help="Deep capability inspection for a single agent adapter.",
+    )
+    agents_adapter_inspect_parser.add_argument(
+        "agent_id",
+        metavar="AGENT_ID",
+        help="Agent identifier to inspect.",
+    )
+    agents_adapter_inspect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON capability inspection output.",
+    )
+    agents_adapter_inspect_parser.set_defaults(handler=run_agents_adapter_inspect)
 
     collaboration_parser = subparsers.add_parser(
         "collaboration",

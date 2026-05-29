@@ -545,9 +545,18 @@ runtime_installed=null with all capabilities unknown; adapter_summary shows
 per-type counts; advisory: "Adapter reporting is advisory; no agent runtime
 is modified."; all operations are strictly read-only.
 
+PCAE also exposes modular Codex adapter capability inspection with
+`pcae agents adapter inspect AGENT_ID` (Phase 38C): each capability is
+a `CapabilityRecord` with name, status, source, and notes; `_CAPABILITY_SPECS`
+is the single extension point for new Codex capabilities; output separates
+discovered (yes) from unknown capabilities; execution_modes derived from
+interactive/non_interactive discovery; JSON includes agent_id, adapter_type,
+capabilities, execution_modes, executable_path, runtime_version, advisory;
+all operations are strictly read-only.
+
 ## Next
 
-- Phase 38C: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
+- Phase 38D: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 
