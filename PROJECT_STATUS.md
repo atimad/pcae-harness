@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37A: Multi-Agent Collaboration Foundation.
+Phase 37B: Multi-Agent Registry Expansion and Lifecycle States.
 
 ## Governance Coherence Note
 
@@ -426,11 +426,25 @@ codex-local, and pcae-native; human output reports agent count, agent id,
 role, and status; JSON output includes agents list with capability
 summaries and advisory; the registry is fully read-only, vendor-neutral,
 and does not perform automatic delegation, task routing, or remote
-execution; the human user remains authoritative.
+execution; the human user remains authoritative, and the multi-agent
+registry is expanded with lifecycle states (Phase 37B): four lifecycle
+statuses are introduced — declared, configured, available, active —
+validated on construction so invalid statuses raise ValueError; three
+existing agents (claude-local, codex-local, pcae-native) remain
+available; five new vendor-neutral agents (kimi-local, deepseek-local,
+gemini-local, grok-local, perplexity-local) are registered as declared,
+indicating they are recognized but not yet configured or confirmed for
+local use; `pcae agents` human output shows all eight agents with their
+lifecycle status and a lifecycle summary line (e.g. available=3,
+declared=5); `pcae agents --json` output includes a `lifecycle_summary`
+object with per-status counts; declared agents are not executable,
+available, or remotely reachable; no API integration, CLI launching,
+automatic routing, or availability probing is performed; design remains
+vendor-neutral and advisory.
 
 ## Next
 
-- Phase 37B: Multi-Agent Capability Registry (Option C — Multi-Agent Collaboration).
+- Phase 37C: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

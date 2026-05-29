@@ -74,7 +74,7 @@ PREDICTED_PHASES_OPTION_B: tuple[str, ...] = (
     "36N Architecture memory session restore",
 )
 PREDICTED_PHASES_OPTION_C: tuple[str, ...] = (
-    "37B Multi-Agent Capability Registry",
+    "37C Multi-Agent Collaboration Readiness",
 )
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."

@@ -485,14 +485,20 @@ def test_agents_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Multi-agent registry" in output
-    assert "Agent count: 3" in output
+    assert "Agent count: 8" in output
     assert "claude-local" in output
     assert "codex-local" in output
     assert "pcae-native" in output
-    assert "role: documentation" in output
-    assert "role: implementation" in output
-    assert "role: governance" in output
+    assert "kimi-local" in output
+    assert "deepseek-local" in output
+    assert "gemini-local" in output
+    assert "grok-local" in output
+    assert "perplexity-local" in output
     assert "status: available" in output
+    assert "status: declared" in output
+    assert "Lifecycle summary:" in output
+    assert "available=3" in output
+    assert "declared=5" in output
     assert "Advisory:" in output
 
 
@@ -504,15 +510,20 @@ def test_agents_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
 
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert data["agent_count"] == 3
+    assert data["agent_count"] == 8
     assert isinstance(data["agents"], list)
-    assert len(data["agents"]) == 3
+    assert len(data["agents"]) == 8
     assert "advisory" in data
 
     ids = [entry["agent_id"] for entry in data["agents"]]
     assert "claude-local" in ids
     assert "codex-local" in ids
     assert "pcae-native" in ids
+    assert "kimi-local" in ids
+    assert "deepseek-local" in ids
+    assert "gemini-local" in ids
+    assert "grok-local" in ids
+    assert "perplexity-local" in ids
 
     claude = next(e for e in data["agents"] if e["agent_id"] == "claude-local")
     assert claude["agent_type"] == "claude"
@@ -547,6 +558,104 @@ def test_agents_registry_is_read_only(tmp_path: Path, monkeypatch, capsys) -> No
     after = list((tmp_path / ".pcae").iterdir()) if (tmp_path / ".pcae").exists() else []
 
     assert set(p.name for p in before) == set(p.name for p in after)
+
+
+def test_agents_new_agents_are_declared(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    declared_ids = {
+        e["agent_id"] for e in data["agents"] if e["status"] == "declared"
+    }
+    assert "kimi-local" in declared_ids
+    assert "deepseek-local" in declared_ids
+    assert "gemini-local" in declared_ids
+    assert "grok-local" in declared_ids
+    assert "perplexity-local" in declared_ids
+
+
+def test_agents_existing_agents_remain_available(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    available_ids = {
+        e["agent_id"] for e in data["agents"] if e["status"] == "available"
+    }
+    assert "claude-local" in available_ids
+    assert "codex-local" in available_ids
+    assert "pcae-native" in available_ids
+
+
+def test_agents_json_includes_lifecycle_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "lifecycle_summary" in data
+    summary = data["lifecycle_summary"]
+    assert summary["available"] == 3
+    assert summary["declared"] == 5
+    assert summary["configured"] == 0
+    assert summary["active"] == 0
+
+
+def test_agents_lifecycle_summary_counts_match_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["agents", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    summary = data["lifecycle_summary"]
+    total = sum(summary.values())
+    assert total == data["agent_count"]
+
+
+def test_agent_entry_invalid_status_raises() -> None:
+    from pcae.core.agent import AgentEntry
+
+    with pytest.raises(ValueError, match="Invalid agent status"):
+        AgentEntry(
+            agent_id="test-agent",
+            agent_type="test",
+            role="testing",
+            status="unknown_status",
+            capabilities=(),
+            preferred_workloads=(),
+        )
+
+
+def test_agent_entry_valid_statuses_accepted() -> None:
+    from pcae.core.agent import VALID_AGENT_STATUSES, AgentEntry
+
+    for status in VALID_AGENT_STATUSES:
+        entry = AgentEntry(
+            agent_id="test-agent",
+            agent_type="test",
+            role="testing",
+            status=status,
+            capabilities=(),
+            preferred_workloads=(),
+        )
+        assert entry.status == status
 
 
 def init_agent_repo(root: Path) -> None:

@@ -12,11 +12,25 @@ from pcae.core.tasks import find_latest_active_task
 
 
 # ---------------------------------------------------------------------------
-# Multi-Agent Collaboration registry (Phase 37A)
+# Multi-Agent Collaboration registry (Phase 37A / 37B)
 # ---------------------------------------------------------------------------
 
 MULTI_AGENT_REGISTRY_ADVISORY = (
     "Agent registry is read-only. The human user remains authoritative."
+)
+
+AGENT_STATUS_DECLARED = "declared"
+AGENT_STATUS_CONFIGURED = "configured"
+AGENT_STATUS_AVAILABLE = "available"
+AGENT_STATUS_ACTIVE = "active"
+
+VALID_AGENT_STATUSES: frozenset[str] = frozenset(
+    {
+        AGENT_STATUS_DECLARED,
+        AGENT_STATUS_CONFIGURED,
+        AGENT_STATUS_AVAILABLE,
+        AGENT_STATUS_ACTIVE,
+    }
 )
 
 
@@ -28,6 +42,13 @@ class AgentEntry:
     status: str
     capabilities: tuple[str, ...]
     preferred_workloads: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if self.status not in VALID_AGENT_STATUSES:
+            raise ValueError(
+                f"Invalid agent status {self.status!r}; "
+                f"must be one of: {', '.join(sorted(VALID_AGENT_STATUSES))}."
+            )
 
     def to_dict(self) -> dict:
         return {
@@ -41,11 +62,12 @@ class AgentEntry:
 
 
 MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
+    # Available agents (configured and confirmed for local use)
     AgentEntry(
         agent_id="claude-local",
         agent_type="claude",
         role="documentation",
-        status="available",
+        status=AGENT_STATUS_AVAILABLE,
         capabilities=(
             "architecture_review",
             "code_analysis",
@@ -58,7 +80,7 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         agent_id="codex-local",
         agent_type="codex",
         role="implementation",
-        status="available",
+        status=AGENT_STATUS_AVAILABLE,
         capabilities=(
             "code_generation",
             "test_writing",
@@ -70,7 +92,7 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         agent_id="pcae-native",
         agent_type="pcae",
         role="governance",
-        status="available",
+        status=AGENT_STATUS_AVAILABLE,
         capabilities=(
             "governance_validation",
             "policy_enforcement",
@@ -78,7 +100,75 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         ),
         preferred_workloads=("validation", "governance"),
     ),
+    # Declared agents (registered for future use; not yet configured or available)
+    AgentEntry(
+        agent_id="kimi-local",
+        agent_type="kimi",
+        role="analysis",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(
+            "code_analysis",
+            "documentation",
+            "research",
+        ),
+        preferred_workloads=("analysis", "documentation"),
+    ),
+    AgentEntry(
+        agent_id="deepseek-local",
+        agent_type="deepseek",
+        role="implementation",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(
+            "code_generation",
+            "reasoning",
+            "implementation",
+        ),
+        preferred_workloads=("implementation", "analysis"),
+    ),
+    AgentEntry(
+        agent_id="gemini-local",
+        agent_type="gemini",
+        role="analysis",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(
+            "code_analysis",
+            "documentation",
+            "multimodal",
+        ),
+        preferred_workloads=("analysis", "documentation"),
+    ),
+    AgentEntry(
+        agent_id="grok-local",
+        agent_type="grok",
+        role="analysis",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(
+            "reasoning",
+            "code_analysis",
+            "research",
+        ),
+        preferred_workloads=("analysis", "research"),
+    ),
+    AgentEntry(
+        agent_id="perplexity-local",
+        agent_type="perplexity",
+        role="research",
+        status=AGENT_STATUS_DECLARED,
+        capabilities=(
+            "research",
+            "documentation",
+            "web_search",
+        ),
+        preferred_workloads=("research", "documentation"),
+    ),
 )
+
+
+def _build_lifecycle_summary() -> dict[str, int]:
+    summary = {s: 0 for s in sorted(VALID_AGENT_STATUSES)}
+    for entry in MULTI_AGENT_REGISTRY:
+        summary[entry.status] += 1
+    return summary
 
 
 def build_multi_agent_registry() -> dict:
@@ -88,6 +178,7 @@ def build_multi_agent_registry() -> dict:
         "advisory": MULTI_AGENT_REGISTRY_ADVISORY,
         "agent_count": len(agents),
         "agents": agents,
+        "lifecycle_summary": _build_lifecycle_summary(),
     }
 
 

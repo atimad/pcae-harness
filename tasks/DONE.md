@@ -4,6 +4,7 @@
 
 - Completed Option B — Architecture Memory (Phases 36F–36N): ADR model, inspection, creation, export, status validation, provenance linkage, continuity integration, governance audit integration, session restore.
 - Completed Phase 36N: Architecture memory session restore (`pcae architecture restore-session`).
+- Completed Phase 37B: Multi-Agent Registry Expansion and Lifecycle States (8-agent registry, declared/configured/available/active lifecycle statuses).
 - Completed Phase 37A: Multi-Agent Collaboration Foundation (`pcae agents`, `pcae agents --json`).
 - Created Phase 1 package structure.
 - Added minimal CLI skeleton.

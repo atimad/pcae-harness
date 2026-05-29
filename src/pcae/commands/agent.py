@@ -82,8 +82,11 @@ def run_agents(args: argparse.Namespace) -> int:
         print(f"Agent count: {data['agent_count']}")
         for entry in MULTI_AGENT_REGISTRY:
             print(
-                f"{entry.agent_id:<14} | role: {entry.role:<16} | status: {entry.status}"
+                f"{entry.agent_id:<18} | role: {entry.role:<16} | status: {entry.status}"
             )
+        summary = data["lifecycle_summary"]
+        summary_parts = ", ".join(f"{k}={v}" for k, v in sorted(summary.items()) if v > 0)
+        print(f"Lifecycle summary: {summary_parts}")
         print(f"Advisory: {data['advisory']}")
     return 0
 
