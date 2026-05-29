@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36K: Architecture provenance linkage.
+Phase 36L: Architecture memory continuity integration.
 
 ## Governance Coherence Note
 
@@ -383,11 +383,26 @@ human-readable output and includes an `architecture_linkage` object in
 `--json` output; `pcae architecture decisions --json` includes
 `architecture_linkage` in each decision; `build_architecture_linkage(adr)`
 returns "unavailable" for absent linkage fields; all inspection operations
-remain read-only and do not mutate provenance history or ADR files.
+remain read-only and do not mutate provenance history or ADR files, and
+Architecture Memory is now integrated into compact continuity surfaces
+(Phase 36L): `ContextPack` gains an `architecture_memory` field (compact
+summary with decision_count, accepted_count, latest_decision, advisory)
+populated from the live ADR registry; `build_bootstrap_prompt` adds a
+single compact line ("Architecture memory: N decisions (M accepted), latest:
+ADR-XXXX"); `ContinuityPack` includes `architecture_memory` in its JSON
+export; `pcae context pack --preview` displays an "Architecture memory"
+section; `--json` output includes the field; `pcae continuity export --json`
+includes `architecture_memory_present` in `continuity_summary`; `pcae
+continuity inspect` reports "Architecture memory present:"; a new
+"architecture memory" section is added to `CONTINUITY_PACK_INCLUDED_SECTIONS`;
+`pcae continuity compatibility` includes an `architecture_memory_presence`
+check (advisory; absent packs remain compatible); `architecture_memory` is a
+known optional key excluded from future-version warnings; full ADR bodies are
+not included in any context or bootstrap output.
 
 ## Next
 
-- Phase 36L: Architecture decision status transitions (Option B — Architecture Memory).
+- Phase 36M: Architecture decision status transitions (Option B — Architecture Memory).
 
 ## Future Explorations
 

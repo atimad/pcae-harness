@@ -5,12 +5,44 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
+from pcae.core.architecture import (
+    ADR_INSPECTION_ADVISORY as _ADR_INSPECTION_ADVISORY,
+    get_adr_registry,
+)
 from pcae.core.check import run_checks
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.provenance import build_provenance_timeline
 from pcae.core.tasks import find_latest_active_task
+
+
+ARCHITECTURE_MEMORY_ADVISORY = _ADR_INSPECTION_ADVISORY
+
+
+def _build_architecture_memory_summary(root: HarnessPath) -> dict:
+    """Return a compact read-only architecture memory summary.
+
+    Includes decision count, accepted count, latest decision, and advisory.
+    Does not include full ADR bodies.
+    """
+    registry = get_adr_registry(root)
+    decision_count = len(registry)
+    accepted_count = sum(1 for adr in registry if adr.status == "accepted")
+    latest_decision = None
+    if registry:
+        last = registry[-1]
+        latest_decision = {
+            "id": last.decision_id,
+            "status": last.status,
+            "title": last.title,
+        }
+    return {
+        "accepted_count": accepted_count,
+        "advisory": ARCHITECTURE_MEMORY_ADVISORY,
+        "decision_count": decision_count,
+        "latest_decision": latest_decision,
+    }
 
 
 CONTEXT_PACK_ADVISORY = (
@@ -157,6 +189,16 @@ def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
     )
     lines.append("Vendor-neutral: not tailored to any specific AI agent or provider.")
 
+    mem = pack.architecture_memory
+    decision_count = mem.get("decision_count", 0)
+    accepted_count = mem.get("accepted_count", 0)
+    latest = mem.get("latest_decision")
+    latest_text = latest["id"] if isinstance(latest, dict) and "id" in latest else "none"
+    lines.append(
+        f"Architecture memory: {decision_count} decisions ({accepted_count} accepted),"
+        f" latest: {latest_text}"
+    )
+
     return "\n".join(lines)
 
 
@@ -231,11 +273,13 @@ class ContextPack:
     validation_commands: tuple[str, ...]
     bootstrap_handoff_notes: tuple[str, ...]
     advisory: str
+    architecture_memory: dict
 
     def to_dict(self) -> dict:
         return {
             "active_task": self.active_task,
             "advisory": self.advisory,
+            "architecture_memory": self.architecture_memory,
             "bootstrap_handoff_notes": list(self.bootstrap_handoff_notes),
             "governance_state": self.governance_state,
             "operational_rules": list(self.operational_rules),
@@ -335,6 +379,7 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         validation_commands=CONTEXT_PACK_VALIDATION_COMMANDS,
         bootstrap_handoff_notes=CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
         advisory=CONTEXT_PACK_ADVISORY,
+        architecture_memory=_build_architecture_memory_summary(root),
     )
 
 
@@ -372,7 +417,12 @@ CONTINUITY_PACK_INCLUDED_SECTIONS: tuple[str, ...] = (
     "stale-context suppression rules",
     "bootstrap continuity",
     "vendor-neutral note",
+    "architecture memory",
 )
+
+# Known optional keys that are not required for pack validity but are
+# recognized by this PCAE version and excluded from future-version warnings.
+_CONTINUITY_PACK_OPTIONAL_KEYS: frozenset[str] = frozenset({"architecture_memory"})
 
 
 @dataclass(frozen=True)
@@ -391,10 +441,12 @@ class ContinuityPack:
     stale_context_suppression_rules: tuple[str, ...]
     vendor_neutral_note: str
     bootstrap_continuity: tuple[str, ...]
+    architecture_memory: dict
 
     def to_dict(self) -> dict:
         return {
             "active_task_summary": self.active_task_summary,
+            "architecture_memory": self.architecture_memory,
             "bootstrap_continuity": list(self.bootstrap_continuity),
             "compact_bootstrap_prompt": self.compact_bootstrap_prompt,
             "compact_context_pack": self.compact_context_pack,
@@ -447,6 +499,7 @@ def build_continuity_pack(
         stale_context_suppression_rules=CONTINUITY_PACK_STALE_CONTEXT_SUPPRESSION_RULES,
         vendor_neutral_note=CONTINUITY_PACK_VENDOR_NEUTRAL_NOTE,
         bootstrap_continuity=pack.bootstrap_handoff_notes,
+        architecture_memory=pack.architecture_memory,
     )
 
 
@@ -554,16 +607,17 @@ def inspect_continuity_pack(path: Path) -> ContinuityPackInspection:
         # map canonical section names to JSON keys
         _section_key_map = {
             "active task summary": "active_task_summary",
+            "architecture memory": "architecture_memory",
+            "bootstrap continuity": "bootstrap_continuity",
+            "compact bootstrap prompt": "compact_bootstrap_prompt",
+            "compact context pack": "compact_context_pack",
             "governance state": "governance_state",
+            "operational rules": "operational_rules",
             "orchestration state": "orchestration_state",
             "provenance summary": "provenance_summary",
             "runtime snapshot metadata": "runtime_snapshot_metadata",
-            "compact context pack": "compact_context_pack",
-            "compact bootstrap prompt": "compact_bootstrap_prompt",
-            "operational rules": "operational_rules",
-            "validation commands": "validation_commands",
             "stale-context suppression rules": "stale_context_suppression_rules",
-            "bootstrap continuity": "bootstrap_continuity",
+            "validation commands": "validation_commands",
             "vendor-neutral note": "vendor_neutral_note",
         }
         json_key = _section_key_map.get(section, key)
@@ -572,6 +626,7 @@ def inspect_continuity_pack(path: Path) -> ContinuityPackInspection:
 
     continuity_summary = {
         "active_task": at,
+        "architecture_memory_present": bool(data.get("architecture_memory")),
         "compact_bootstrap_prompt_present": bool(data.get("compact_bootstrap_prompt")),
         "compact_context_pack_present": bool(data.get("compact_context_pack")),
         "governance_check": gs.get("check_status"),
@@ -810,7 +865,9 @@ def analyze_continuity_pack_compatibility(path: Path) -> ContinuityCompatibility
     ))
 
     # Check 9: future-version warning support (unexpected top-level keys)
-    extra_keys = [k for k in data if k not in CONTINUITY_PACK_REQUIRED_KEYS]
+    # Known optional keys are excluded from the future-version warning.
+    _all_known_keys = set(CONTINUITY_PACK_REQUIRED_KEYS) | _CONTINUITY_PACK_OPTIONAL_KEYS
+    extra_keys = [k for k in data if k not in _all_known_keys]
     no_extra = not extra_keys
     if no_extra:
         future_msg = "No future-version indicators detected; pack conforms to known schema."
@@ -825,6 +882,20 @@ def analyze_continuity_pack_compatibility(path: Path) -> ContinuityCompatibility
         name="future_version_warning_support",
         passed=no_extra,
         message=future_msg,
+    ))
+
+    # Check 10: architecture memory presence (advisory; does not affect compatible)
+    arch_mem = data.get("architecture_memory")
+    arch_ok = isinstance(arch_mem, dict) and bool(arch_mem)
+    arch_msg = (
+        "Architecture memory is present."
+        if arch_ok
+        else "Architecture memory is absent; pack may have been exported before Phase 36L."
+    )
+    checks.append(ContinuityCompatibilityCheck(
+        name="architecture_memory_presence",
+        passed=arch_ok,
+        message=arch_msg,
     ))
 
     # Determine support level

@@ -1603,6 +1603,7 @@ def test_build_continuity_pack_to_dict_keys(tmp_path: Path) -> None:
     d = result.to_dict()
     expected_keys = {
         "active_task_summary",
+        "architecture_memory",
         "bootstrap_continuity",
         "compact_bootstrap_prompt",
         "compact_context_pack",
@@ -2492,11 +2493,11 @@ def test_analyze_continuity_compatibility_no_warnings_on_valid_pack(
     assert len(result.warnings) == 0
 
 
-def test_analyze_continuity_compatibility_nine_checks(tmp_path: Path) -> None:
+def test_analyze_continuity_compatibility_ten_checks(tmp_path: Path) -> None:
     write_minimal_context_artifacts(tmp_path)
     pack_path = _export_pack_for_inspection(tmp_path)
     result = analyze_continuity_pack_compatibility(pack_path)
-    assert len(result.compatibility_checks) == 9
+    assert len(result.compatibility_checks) == 10
 
 
 def test_analyze_continuity_compatibility_all_checks_pass(tmp_path: Path) -> None:
@@ -2915,7 +2916,7 @@ def test_cli_continuity_compatibility_json_compatible_true(
     assert data["support_level"] == "supported"
 
 
-def test_cli_continuity_compatibility_json_nine_checks(
+def test_cli_continuity_compatibility_json_ten_checks(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     write_minimal_context_artifacts(tmp_path)
@@ -2924,7 +2925,7 @@ def test_cli_continuity_compatibility_json_nine_checks(
     main(["continuity", "compatibility", str(pack_path), "--json"])
     captured = capsys.readouterr()
     data = json.loads(captured.out)
-    assert len(data["compatibility_checks"]) == 9
+    assert len(data["compatibility_checks"]) == 10
 
 
 def test_cli_continuity_compatibility_json_advisory(
@@ -3742,3 +3743,247 @@ def test_cli_continuity_retention_json_is_read_only(
     main(["continuity", "retention", "--dry-run", "--json"])
     for p in paths:
         assert p.exists(), f"file was deleted: {p.name}"
+
+
+# ---------------------------------------------------------------------------
+# Phase 36L: Architecture memory continuity integration
+# ---------------------------------------------------------------------------
+
+from pcae.core.context import (
+    ARCHITECTURE_MEMORY_ADVISORY,
+    analyze_continuity_pack_compatibility,
+)
+
+
+def test_build_context_pack_has_architecture_memory_field(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    result = build_context_pack(HarnessPath(tmp_path))
+    assert hasattr(result, "architecture_memory")
+    assert isinstance(result.architecture_memory, dict)
+
+
+def test_architecture_memory_summary_has_required_keys(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    mem = build_context_pack(HarnessPath(tmp_path)).architecture_memory
+    assert "decision_count" in mem
+    assert "accepted_count" in mem
+    assert "latest_decision" in mem
+    assert "advisory" in mem
+
+
+def test_architecture_memory_decision_count_at_least_sample(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    mem = build_context_pack(HarnessPath(tmp_path)).architecture_memory
+    assert mem["decision_count"] >= 2
+
+
+def test_architecture_memory_accepted_count_is_int(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    mem = build_context_pack(HarnessPath(tmp_path)).architecture_memory
+    assert isinstance(mem["accepted_count"], int)
+    assert mem["accepted_count"] >= 0
+
+
+def test_architecture_memory_latest_decision_has_fields(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    latest = build_context_pack(HarnessPath(tmp_path)).architecture_memory["latest_decision"]
+    assert latest is not None
+    assert "id" in latest
+    assert "title" in latest
+    assert "status" in latest
+
+
+def test_architecture_memory_advisory_matches_constant(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    mem = build_context_pack(HarnessPath(tmp_path)).architecture_memory
+    assert mem["advisory"] == ARCHITECTURE_MEMORY_ADVISORY
+
+
+def test_context_pack_to_dict_includes_architecture_memory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    d = build_context_pack(HarnessPath(tmp_path)).to_dict()
+    assert "architecture_memory" in d
+    assert isinstance(d["architecture_memory"], dict)
+    assert "decision_count" in d["architecture_memory"]
+
+
+def test_bootstrap_prompt_includes_architecture_memory_line(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack = build_context_pack(HarnessPath(tmp_path))
+    profile, _ = resolve_profile(None)
+    prompt = build_bootstrap_prompt(pack, profile)
+    assert "Architecture memory:" in prompt
+    assert "decisions" in prompt
+    assert "accepted" in prompt
+    assert "latest:" in prompt
+
+
+def test_build_continuity_pack_has_architecture_memory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    result = build_continuity_pack(HarnessPath(tmp_path), profile)
+    assert hasattr(result, "architecture_memory")
+    assert isinstance(result.architecture_memory, dict)
+    assert "decision_count" in result.architecture_memory
+
+
+def test_continuity_pack_to_dict_includes_architecture_memory(tmp_path: Path) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    profile, _ = resolve_profile(None)
+    d = build_continuity_pack(HarnessPath(tmp_path), profile).to_dict()
+    assert "architecture_memory" in d
+    assert isinstance(d["architecture_memory"], dict)
+
+
+def test_inspect_continuity_pack_architecture_memory_present_true(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert "architecture_memory_present" in result.continuity_summary
+    assert result.continuity_summary["architecture_memory_present"] is True
+
+
+def test_inspect_continuity_pack_architecture_memory_section_in_included(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = inspect_continuity_pack(pack_path)
+    assert "architecture memory" in result.included_sections
+
+
+def test_inspect_continuity_pack_architecture_memory_absent(
+    tmp_path: Path,
+) -> None:
+    data: dict = {k: None for k in CONTINUITY_PACK_REQUIRED_KEYS}
+    data["exported_at"] = "2026-01-01T00:00:00+00:00"
+    data["profile_type"] = "universal"
+    data["governance_state"] = {"health_status": "healthy", "check_status": "passed"}
+    data["orchestration_state"] = {}
+    data["provenance_summary"] = {"event_count": 0}
+    pack_path = tmp_path / "old-pack.json"
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = inspect_continuity_pack(pack_path)
+    assert result.continuity_summary["architecture_memory_present"] is False
+
+
+def test_continuity_compatibility_has_architecture_memory_check(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    check_names = [c.name for c in result.compatibility_checks]
+    assert "architecture_memory_presence" in check_names
+
+
+def test_continuity_compatibility_architecture_memory_passes_when_present(
+    tmp_path: Path,
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    pack_path = _export_pack_for_inspection(tmp_path)
+    result = analyze_continuity_pack_compatibility(pack_path)
+    arch_check = next(
+        c for c in result.compatibility_checks if c.name == "architecture_memory_presence"
+    )
+    assert arch_check.passed is True
+
+
+def test_continuity_compatibility_architecture_memory_check_fails_when_absent(
+    tmp_path: Path,
+) -> None:
+    data: dict = {k: None for k in CONTINUITY_PACK_REQUIRED_KEYS}
+    data["exported_at"] = "2026-01-01T00:00:00+00:00"
+    data["profile_type"] = "universal"
+    data["governance_state"] = {"health_status": "healthy", "check_status": "passed"}
+    pack_path = tmp_path / "old-pack.json"
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    arch_check = next(
+        c for c in result.compatibility_checks if c.name == "architecture_memory_presence"
+    )
+    assert arch_check.passed is False
+
+
+def test_continuity_compatibility_architecture_memory_absence_does_not_break_compat(
+    tmp_path: Path,
+) -> None:
+    data: dict = {k: "placeholder" for k in CONTINUITY_PACK_REQUIRED_KEYS}
+    data["exported_at"] = "2026-01-01T00:00:00+00:00"
+    data["profile_type"] = "universal"
+    data["governance_state"] = {"health_status": "healthy", "check_status": "passed"}
+    data["compact_bootstrap_prompt"] = "bootstrap text"
+    data["operational_rules"] = ["rule"]
+    data["stale_context_suppression_rules"] = ["rule"]
+    data["vendor_neutral_note"] = "note"
+    data["runtime_snapshot_metadata"] = {
+        "governance_health_status": "healthy",
+        "governance_check_status": "passed",
+        "active_task": None,
+        "agent_lock_state": None,
+        "session_continuity_status": "verified",
+        "provenance_event_count": 0,
+    }
+    pack_path = tmp_path / "old-pack.json"
+    pack_path.write_text(json.dumps(data), encoding="utf-8")
+    result = analyze_continuity_pack_compatibility(pack_path)
+    assert result.compatible is True
+
+
+def test_cli_context_pack_preview_includes_architecture_memory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview"])
+    output = capsys.readouterr().out
+    assert "Architecture memory:" in output
+    assert "Decision count:" in output
+    assert "Accepted:" in output
+    assert "Latest:" in output
+
+
+def test_cli_context_pack_json_includes_architecture_memory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["context", "pack", "--preview", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "architecture_memory" in data
+    mem = data["architecture_memory"]
+    assert "decision_count" in mem
+    assert "accepted_count" in mem
+    assert "latest_decision" in mem
+
+
+def test_cli_continuity_inspect_shows_architecture_memory_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export"])
+    packs_dir = tmp_path / ".pcae" / "continuity-packs"
+    pack_path = next(packs_dir.glob("continuity-pack-*.json"))
+    capsys.readouterr()
+    main(["continuity", "inspect", str(pack_path)])
+    output = capsys.readouterr().out
+    assert "Architecture memory present:" in output
+    assert "True" in output
+
+
+def test_cli_continuity_export_json_includes_architecture_memory_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    write_minimal_context_artifacts(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["continuity", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "architecture_memory_present" in data["continuity_summary"]
+    assert data["continuity_summary"]["architecture_memory_present"] is True
+
+
+def test_continuity_included_sections_has_architecture_memory() -> None:
+    assert "architecture memory" in CONTINUITY_PACK_INCLUDED_SECTIONS

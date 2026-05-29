@@ -142,6 +142,15 @@ def run_context_pack(args: argparse.Namespace) -> int:
         print("Bootstrap/handoff:")
         for note in result.bootstrap_handoff_notes:
             print(f"  - {note}")
+        mem = result.architecture_memory
+        print("Architecture memory:")
+        print(f"  Decision count: {mem.get('decision_count', 0)}")
+        print(f"  Accepted: {mem.get('accepted_count', 0)}")
+        latest = mem.get("latest_decision")
+        if isinstance(latest, dict):
+            print(f"  Latest: {latest.get('id')} — {latest.get('title')}")
+        else:
+            print("  Latest: none")
         print(f"Universal agent note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
         print("Token optimization note: context pack is compact by design.")
         print(f"Quality preservation note: {result.advisory}")
@@ -161,6 +170,9 @@ def run_continuity_export(args: argparse.Namespace) -> int:
                 {
                     "continuity_summary": {
                         "active_task": continuity_pack.active_task_summary,
+                        "architecture_memory_present": bool(
+                            continuity_pack.architecture_memory
+                        ),
                         "governance_check": continuity_pack.governance_state.get(
                             "check_status"
                         ),
@@ -227,6 +239,9 @@ def run_continuity_inspect(args: argparse.Namespace) -> int:
         )
         print(
             f"  Vendor-neutral note present: {cs.get('vendor_neutral_note_present')}"
+        )
+        print(
+            f"  Architecture memory present: {cs.get('architecture_memory_present')}"
         )
         print("Portability notes:")
         for note in result.portability_notes:
