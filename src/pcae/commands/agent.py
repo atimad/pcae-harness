@@ -4,11 +4,14 @@ import argparse
 import json
 
 from pcae.core.agent import (
+    COLLABORATION_ADVISORY,
+    COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
     MULTI_AGENT_REGISTRY,
     VALID_AGENT_STATUSES,
     acquire_agent_lock,
     build_agent_status,
+    build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
     get_agent_by_id,
@@ -187,6 +190,28 @@ def run_agents_config_validate(args: argparse.Namespace) -> int:
             print("Warnings: none")
         print(result.advisory)
     return 0 if result.valid else 1
+
+
+def run_collaboration_workflows(args: argparse.Namespace) -> int:
+    data = build_collaboration_workflows()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        names = ", ".join(w.workflow_name for w in COLLABORATION_WORKFLOWS)
+        print("Collaboration workflows")
+        print(f"Workflow count: {len(COLLABORATION_WORKFLOWS)}")
+        print(f"Workflows: {names}")
+        for workflow in COLLABORATION_WORKFLOWS:
+            print(f"\n{workflow.workflow_name} ({len(workflow.steps)} steps):")
+            for i, step in enumerate(workflow.steps, start=1):
+                print(
+                    f"  {i}. {step.step_name:<18} | role: {step.recommended_agent_role:<16}"
+                    f" | min status: {step.required_lifecycle_status}"
+                )
+                print(f"     Purpose: {step.purpose}")
+        print()
+        print(COLLABORATION_ADVISORY)
+    return 0
 
 
 def run_agents_lifecycle(args: argparse.Namespace) -> int:

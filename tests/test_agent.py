@@ -855,6 +855,213 @@ def test_validate_agent_registry_detects_invalid_status() -> None:
 
 
 # ---------------------------------------------------------------------------
+# pcae collaboration workflows (Phase 37F)
+# ---------------------------------------------------------------------------
+
+
+def test_collaboration_workflows_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Collaboration workflows" in output
+    assert "Workflow count: 4" in output
+    assert "implementation" in output
+    assert "documentation" in output
+    assert "architecture" in output
+    assert "handoff" in output
+    assert "advisory" in output.lower()
+
+
+def test_collaboration_workflows_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "workflows" in data
+    assert "advisory" in data
+    assert isinstance(data["workflows"], list)
+
+
+def test_collaboration_workflows_json_four_workflows(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    names = [w["workflow_name"] for w in data["workflows"]]
+    assert "implementation" in names
+    assert "documentation" in names
+    assert "architecture" in names
+    assert "handoff" in names
+    assert len(names) == 4
+
+
+def test_collaboration_workflows_implementation_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    impl = next(w for w in data["workflows"] if w["workflow_name"] == "implementation")
+    step_names = [s["step_name"] for s in impl["steps"]]
+    assert step_names == ["implementer", "reviewer", "validator"]
+
+
+def test_collaboration_workflows_documentation_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    doc = next(w for w in data["workflows"] if w["workflow_name"] == "documentation")
+    step_names = [s["step_name"] for s in doc["steps"]]
+    assert step_names == ["author", "reviewer", "validator"]
+
+
+def test_collaboration_workflows_architecture_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    arch = next(w for w in data["workflows"] if w["workflow_name"] == "architecture")
+    step_names = [s["step_name"] for s in arch["steps"]]
+    assert step_names == ["proposer", "reviewer", "validator"]
+
+
+def test_collaboration_workflows_handoff_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    handoff = next(w for w in data["workflows"] if w["workflow_name"] == "handoff")
+    step_names = [s["step_name"] for s in handoff["steps"]]
+    assert step_names == ["outgoing_agent", "incoming_agent", "validator"]
+
+
+def test_collaboration_workflows_step_fields_present(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for workflow in data["workflows"]:
+        for step in workflow["steps"]:
+            for field in ("step_name", "recommended_agent_role", "purpose", "required_lifecycle_status"):
+                assert field in step, (
+                    f"Missing field '{field}' in step '{step.get('step_name')}' "
+                    f"of workflow '{workflow['workflow_name']}'"
+                )
+
+
+def test_collaboration_workflows_steps_are_ordered(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    impl = next(w for w in data["workflows"] if w["workflow_name"] == "implementation")
+    assert impl["steps"][0]["step_name"] == "implementer"
+    assert impl["steps"][-1]["step_name"] == "validator"
+
+
+def test_collaboration_workflows_handoff_outgoing_requires_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    handoff = next(w for w in data["workflows"] if w["workflow_name"] == "handoff")
+    outgoing = next(s for s in handoff["steps"] if s["step_name"] == "outgoing_agent")
+    assert outgoing["required_lifecycle_status"] == "active"
+
+
+def test_collaboration_workflows_advisory_semantics(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+    assert "assigned automatically" in data["advisory"]
+
+
+def test_collaboration_workflows_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["collaboration", "workflows"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_collaboration_workflows_human_shows_steps(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["collaboration", "workflows"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "implementer" in output
+    assert "proposer" in output
+    assert "outgoing_agent" in output
+    assert "incoming_agent" in output
+    assert "Purpose:" in output
+    assert "min status:" in output
+
+
+def test_collaboration_workflows_core_build() -> None:
+    from pcae.core.agent import COLLABORATION_WORKFLOWS, build_collaboration_workflows
+
+    data = build_collaboration_workflows()
+    assert len(data["workflows"]) == 4
+    assert "no agents are executed" in data["advisory"]
+    names = [w["workflow_name"] for w in data["workflows"]]
+    assert names == ["implementation", "documentation", "architecture", "handoff"]
+
+
+def test_collaboration_workflows_each_has_three_steps() -> None:
+    from pcae.core.agent import COLLABORATION_WORKFLOWS
+
+    for workflow in COLLABORATION_WORKFLOWS:
+        assert len(workflow.steps) == 3, (
+            f"Workflow '{workflow.workflow_name}' expected 3 steps, got {len(workflow.steps)}"
+        )
+
+
+# ---------------------------------------------------------------------------
 # pcae agents config show / validate (Phase 37E)
 # ---------------------------------------------------------------------------
 

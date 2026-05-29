@@ -14,6 +14,7 @@ from pcae.commands.agent import (
     run_agents_lifecycle,
     run_agents_show,
     run_agents_validate,
+    run_collaboration_workflows,
 )
 from pcae.commands.architecture import (
     run_architecture_add,
@@ -1077,6 +1078,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON validation output.",
     )
     agents_config_validate_parser.set_defaults(handler=run_agents_config_validate)
+
+    collaboration_parser = subparsers.add_parser(
+        "collaboration",
+        help="Inspect governed multi-agent collaboration workflow templates.",
+    )
+    collaboration_subparsers = collaboration_parser.add_subparsers(
+        dest="collaboration_command",
+        required=True,
+    )
+    collaboration_workflows_parser = collaboration_subparsers.add_parser(
+        "workflows",
+        help="List collaboration workflow templates.",
+    )
+    collaboration_workflows_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON workflow output.",
+    )
+    collaboration_workflows_parser.set_defaults(handler=run_collaboration_workflows)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

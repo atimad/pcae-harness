@@ -740,6 +740,148 @@ def build_lifecycle_report() -> LifecycleReport:
     )
 
 
+# ---------------------------------------------------------------------------
+# Collaboration workflow templates (Phase 37F)
+# ---------------------------------------------------------------------------
+
+COLLABORATION_ADVISORY = (
+    "Collaboration workflows are advisory templates; "
+    "no agents are executed or assigned automatically."
+)
+
+
+@dataclass(frozen=True)
+class WorkflowStep:
+    step_name: str
+    recommended_agent_role: str
+    purpose: str
+    required_lifecycle_status: str
+
+    def to_dict(self) -> dict:
+        return {
+            "purpose": self.purpose,
+            "recommended_agent_role": self.recommended_agent_role,
+            "required_lifecycle_status": self.required_lifecycle_status,
+            "step_name": self.step_name,
+        }
+
+
+@dataclass(frozen=True)
+class CollaborationWorkflow:
+    workflow_name: str
+    steps: tuple[WorkflowStep, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "steps": [s.to_dict() for s in self.steps],
+            "workflow_name": self.workflow_name,
+        }
+
+
+COLLABORATION_WORKFLOWS: tuple[CollaborationWorkflow, ...] = (
+    CollaborationWorkflow(
+        workflow_name="implementation",
+        steps=(
+            WorkflowStep(
+                step_name="implementer",
+                recommended_agent_role="implementation",
+                purpose="Produces the implementation output.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews implementation for correctness.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance and quality gates.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+        ),
+    ),
+    CollaborationWorkflow(
+        workflow_name="documentation",
+        steps=(
+            WorkflowStep(
+                step_name="author",
+                recommended_agent_role="documentation",
+                purpose="Authors the documentation content.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews documentation for accuracy.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance and quality gates.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+        ),
+    ),
+    CollaborationWorkflow(
+        workflow_name="architecture",
+        steps=(
+            WorkflowStep(
+                step_name="proposer",
+                recommended_agent_role="architecture",
+                purpose="Proposes the architectural design.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="reviewer",
+                recommended_agent_role="analysis",
+                purpose="Reviews architecture for soundness.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance and policy compliance.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+        ),
+    ),
+    CollaborationWorkflow(
+        workflow_name="handoff",
+        steps=(
+            WorkflowStep(
+                step_name="outgoing_agent",
+                recommended_agent_role="any",
+                purpose="Transfers session state and context to the incoming agent.",
+                required_lifecycle_status=AGENT_STATUS_ACTIVE,
+            ),
+            WorkflowStep(
+                step_name="incoming_agent",
+                recommended_agent_role="any",
+                purpose="Receives session state and resumes governed work.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+            WorkflowStep(
+                step_name="validator",
+                recommended_agent_role="governance",
+                purpose="Validates governance continuity after handoff.",
+                required_lifecycle_status=AGENT_STATUS_AVAILABLE,
+            ),
+        ),
+    ),
+)
+
+
+def build_collaboration_workflows() -> dict:
+    """Return a read-only collaboration workflow template catalogue."""
+    return {
+        "advisory": COLLABORATION_ADVISORY,
+        "workflows": [w.to_dict() for w in COLLABORATION_WORKFLOWS],
+    }
+
+
 def read_agent_stale_after_seconds(root: HarnessPath) -> int:
     policy = load_policy(root)
     if not policy.valid:

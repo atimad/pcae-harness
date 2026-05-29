@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Collaboration Workflow Foundation (Phase 37F): `pcae collaboration workflows` and `--json` with four advisory workflow templates (implementation, documentation, architecture, handoff), ordered steps, and lifecycle status requirements.
 - Completed Agent Configuration Model (Phase 37E): `pcae agents config show AGENT_ID` and `pcae agents config validate` with adapter types (cli, api, desktop_manual, native, undeclared), configuration status, executable hint, and advisory validation.
 - Completed Agent Lifecycle State Management (Phase 37D): `pcae agents lifecycle` and `pcae agents lifecycle --json` with lifecycle summary, agents grouped by state, progression guidance, validation, and advisory note.
 - Completed Option B — Architecture Memory (Phases 36F–36N): ADR model, inspection, creation, export, status validation, provenance linkage, continuity integration, governance audit integration, session restore.

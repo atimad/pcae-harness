@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 37E: Agent Configuration Model.
+Phase 37F: Collaboration Workflow Foundation.
 
 ## Governance Coherence Note
 
@@ -480,11 +480,23 @@ may use undeclared adapter; `pcae agents config validate` and
 `pcae agents config validate --json` validate the configuration model
 for duplicate IDs, invalid adapter types, and available/active agents
 using undeclared adapter; exit code is 0 when valid and 1 when errors
-exist; all operations are strictly read-only.
+exist; all operations are strictly read-only; and governed collaboration
+workflow templates are exposed as read-only inspection (Phase 37F):
+`pcae collaboration workflows` and `pcae collaboration workflows --json`
+list four deterministic advisory workflow templates — implementation
+(implementer → reviewer → validator), documentation
+(author → reviewer → validator), architecture
+(proposer → reviewer → validator), and handoff
+(outgoing_agent → incoming_agent → validator); each step declares
+step_name, recommended_agent_role, purpose, and
+required_lifecycle_status; handoff.outgoing_agent requires "active",
+all other steps require "available"; advisory note confirms no agents
+are executed or assigned automatically; all operations are strictly
+read-only.
 
 ## Next
 
-- Phase 37F: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
+- Phase 37G: Multi-Agent Collaboration Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 
