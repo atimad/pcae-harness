@@ -4,9 +4,11 @@ import argparse
 import json
 
 from pcae.core.architecture import (
+    ADR_ADD_ADVISORY,
     ADR_INSPECTION_ADVISORY,
     ArchitectureDriftMetrics,
     ArchitectureHistorySummary,
+    add_architecture_decision,
     calculate_architecture_drift_metrics,
     get_adr_registry,
     list_architecture_decisions,
@@ -130,7 +132,8 @@ def architecture_metrics_json_data(
 
 
 def run_architecture_decisions(args: argparse.Namespace) -> int:
-    registry = get_adr_registry()
+    root = HarnessPath.cwd()
+    registry = get_adr_registry(root)
     result = list_architecture_decisions(registry)
     if args.json:
         print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
@@ -149,7 +152,8 @@ def run_architecture_decisions(args: argparse.Namespace) -> int:
 
 
 def run_architecture_show(args: argparse.Namespace) -> int:
-    registry = get_adr_registry()
+    root = HarnessPath.cwd()
+    registry = get_adr_registry(root)
     adr = lookup_adr_by_id(args.decision_id, registry)
     if adr is None:
         print(f"Architecture decision not found: {args.decision_id!r}")
@@ -183,4 +187,34 @@ def run_architecture_show(args: argparse.Namespace) -> int:
     else:
         print("  - none")
     print(ADR_INSPECTION_ADVISORY)
+    return 0
+
+
+def run_architecture_add(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    try:
+        result = add_architecture_decision(
+            root=root,
+            title=args.title,
+            rationale=args.rationale,
+            author=args.author,
+            status=args.status,
+            alternatives_considered=tuple(args.alternative or []),
+            consequences=tuple(args.consequence or []),
+            phase_reference=args.phase_reference or None,
+            contributors=tuple(args.contributor or []),
+        )
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        return 0
+    adr = result.adr
+    print(f"Architecture decision created: {adr.decision_id}")
+    print(f"Title: {adr.title}")
+    print(f"Status: {adr.status}")
+    print(f"Author: {adr.author}")
+    print(f"Persisted at: {result.relative_path.as_posix()}")
+    print(result.advisory)
     return 0

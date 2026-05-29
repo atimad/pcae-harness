@@ -8,14 +8,19 @@ import subprocess
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.architecture import (
+    ADR_ADD_ADVISORY,
     ADR_HUMAN_APPROVED_STATUS,
     ADR_INSPECTION_ADVISORY,
+    ADR_PERSISTENCE_RELATIVE_PATH,
     ADR_VALID_STATUSES,
     ArchitectureDecisionRecord,
+    add_architecture_decision,
     analyze_changed_python_dependencies,
     create_adr,
+    generate_adr_decision_id,
     get_adr_registry,
     list_architecture_decisions,
+    load_persisted_adrs,
     lookup_adr_by_id,
     write_architecture_history_snapshot,
 )
@@ -939,3 +944,284 @@ def test_cli_architecture_decisions_does_not_modify_artifacts(
     assert main(["architecture", "decisions"]) == 0
     capsys.readouterr()
     assert list(tmp_path.iterdir()) == before
+
+
+# ---------------------------------------------------------------------------
+# ADR persistence tests (Phase 36H)
+# ---------------------------------------------------------------------------
+
+def test_load_persisted_adrs_empty_when_no_directory(tmp_path: Path) -> None:
+    assert load_persisted_adrs(HarnessPath(tmp_path)) == ()
+
+
+def test_load_persisted_adrs_empty_when_directory_is_empty(tmp_path: Path) -> None:
+    (tmp_path / ".pcae" / "architecture").mkdir(parents=True)
+    assert load_persisted_adrs(HarnessPath(tmp_path)) == ()
+
+
+def test_generate_adr_decision_id_starts_after_sample_registry(tmp_path: Path) -> None:
+    decision_id = generate_adr_decision_id(HarnessPath(tmp_path))
+    assert decision_id == "ADR-0003"
+
+
+def test_generate_adr_decision_id_increments_with_persisted(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 10, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="First persisted",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    next_id = generate_adr_decision_id(HarnessPath(tmp_path))
+    assert next_id == "ADR-0004"
+
+
+def test_add_architecture_decision_creates_file(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Use JSON for ADR storage",
+        rationale="JSON is portable and machine-readable.",
+        author="alice",
+        status="accepted",
+        alternatives_considered=["TOML", "YAML"],
+        consequences=["ADR files are human-readable."],
+        phase_reference="36H",
+        contributors=["claude-local"],
+        created_at=fixed,
+    )
+    adr_dir = tmp_path / ".pcae" / "architecture"
+    assert adr_dir.is_dir()
+    files = list(adr_dir.iterdir())
+    assert len(files) == 1
+    assert files[0].name == "ADR-20260529-120000.json"
+    assert result.relative_path == ADR_PERSISTENCE_RELATIVE_PATH / "ADR-20260529-120000.json"
+    assert result.advisory == ADR_ADD_ADVISORY
+
+
+def test_add_architecture_decision_adr_fields(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Use JSON for ADR storage",
+        rationale="JSON is portable.",
+        author="alice",
+        created_at=fixed,
+    )
+    adr = result.adr
+    assert adr.decision_id == "ADR-0003"
+    assert adr.title == "Use JSON for ADR storage"
+    assert adr.status == "accepted"
+    assert adr.author == "alice"
+    assert adr.created_at == fixed
+
+
+def test_add_architecture_decision_persisted_file_is_valid_json(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    result = add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="JSON test",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    file_path = tmp_path / result.relative_path
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    assert data["decision_id"] == "ADR-0003"
+    assert data["title"] == "JSON test"
+    assert data["status"] == "accepted"
+    assert data["author"] == "alice"
+    assert "is_human_approved" in data
+
+
+def test_add_architecture_decision_invalid_status_raises(tmp_path: Path) -> None:
+    import pytest
+    with pytest.raises(ValueError, match="Invalid ADR status"):
+        add_architecture_decision(
+            HarnessPath(tmp_path),
+            title="Bad status",
+            rationale="Rationale.",
+            author="alice",
+            status="approved",
+        )
+
+
+def test_get_adr_registry_with_root_includes_persisted(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Persisted decision",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    registry = get_adr_registry(HarnessPath(tmp_path))
+    ids = {adr.decision_id for adr in registry}
+    assert "ADR-0001" in ids  # sample
+    assert "ADR-0002" in ids  # sample
+    assert "ADR-0003" in ids  # persisted
+
+
+def test_get_adr_registry_without_root_returns_only_sample(tmp_path: Path) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Persisted decision",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    # No root passed — should not see persisted ADR
+    registry = get_adr_registry()
+    ids = {adr.decision_id for adr in registry}
+    assert "ADR-0003" not in ids
+
+
+def test_persisted_adr_appears_in_decisions_list(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="My persisted decision",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "decisions"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ADR-0003" in output
+    assert "My persisted decision" in output
+
+
+def test_persisted_adr_appears_in_decisions_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="My persisted decision",
+        rationale="Rationale.",
+        author="alice",
+        created_at=fixed,
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["architecture", "decisions", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ids = [d["decision_id"] for d in data["decisions"]]
+    assert "ADR-0003" in ids
+
+
+def test_persisted_adr_can_be_shown_by_id(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    fixed = datetime(2026, 5, 29, 12, 0, tzinfo=timezone.utc)
+    add_architecture_decision(
+        HarnessPath(tmp_path),
+        title="Showable decision",
+        rationale="Full rationale text.",
+        author="alice",
+        alternatives_considered=["Option A"],
+        consequences=["Effect B"],
+        phase_reference="36H",
+        contributors=["claude-local"],
+        created_at=fixed,
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["architecture", "show", "ADR-0003"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decision: ADR-0003" in output
+    assert "Showable decision" in output
+    assert "Full rationale text." in output
+    assert "Option A" in output
+    assert "Effect B" in output
+    assert "36H" in output
+    assert "alice" in output
+    assert "claude-local" in output
+
+
+def test_cli_architecture_add_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main([
+        "architecture", "add",
+        "--title", "Test decision",
+        "--rationale", "Because it is needed.",
+        "--author", "alice",
+    ])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Architecture decision created: ADR-0003" in output
+    assert "Title: Test decision" in output
+    assert "Status: accepted" in output
+    assert "Author: alice" in output
+    assert "Persisted at: .pcae/architecture/" in output
+    assert ADR_ADD_ADVISORY in output
+
+
+def test_cli_architecture_add_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main([
+        "architecture", "add",
+        "--title", "JSON output decision",
+        "--rationale", "JSON rationale.",
+        "--author", "bob",
+        "--status", "proposed",
+        "--alternative", "Option X",
+        "--consequence", "Effect Y",
+        "--phase-reference", "36H",
+        "--contributor", "claude-local",
+        "--json",
+    ])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["adr"]["decision_id"] == "ADR-0003"
+    assert data["adr"]["title"] == "JSON output decision"
+    assert data["adr"]["status"] == "proposed"
+    assert data["adr"]["author"] == "bob"
+    assert data["adr"]["alternatives_considered"] == ["Option X"]
+    assert data["adr"]["consequences"] == ["Effect Y"]
+    assert data["adr"]["phase_reference"] == "36H"
+    assert data["adr"]["contributors"] == ["claude-local"]
+    assert data["adr"]["is_human_approved"] is False
+    assert data["relative_path"].startswith(".pcae/architecture/")
+    assert data["advisory"] == ADR_ADD_ADVISORY
+
+
+def test_cli_architecture_add_invalid_status_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    exit_code = main([
+        "architecture", "add",
+        "--title", "Bad status",
+        "--rationale", "Rationale.",
+        "--author", "alice",
+        "--status", "approved",
+    ])
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Invalid ADR status" in output
+
+
+def test_cli_architecture_add_default_status_is_accepted(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    main([
+        "architecture", "add",
+        "--title", "Default status",
+        "--rationale", "Rationale.",
+        "--author", "alice",
+        "--json",
+    ])
+    data = json.loads(capsys.readouterr().out)
+    assert data["adr"]["status"] == "accepted"
+    assert data["adr"]["is_human_approved"] is True

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 36G: Architecture decision inspection.
+Phase 36H: Architecture decision creation.
 
 ## Governance Coherence Note
 
@@ -346,11 +346,21 @@ clear error; a deterministic in-memory sample registry provides two decisions
 (ADR-0001, ADR-0002) until Phase 36H introduces human-authored persistence;
 inspection is read-only and does not mutate any artifacts; the advisory
 "Architecture decision inspection is advisory; the user remains authoritative."
-is included in all output.
+is included in all output, and governed Architecture Decision Records can be
+created with `pcae architecture add --title TEXT --rationale TEXT --author TEXT`
+and persisted as JSON files under `.pcae/architecture/ADR-YYYYMMDD-HHMMSS.json`;
+decision IDs are generated sequentially (ADR-0003, ADR-0004, ...) after the
+sample registry (ADR-0001, ADR-0002); `--status TEXT` defaults to `accepted`;
+`--alternative TEXT`, `--consequence TEXT`, and `--contributor TEXT` are
+repeatable; `--phase-reference TEXT` is optional; invalid statuses fail with a
+clear error; `pcae architecture decisions` and `pcae architecture show` now
+include persisted ADRs; persisted ADR files are ignored by Git via
+`.pcae/.gitignore`; human author is required and remains authoritative;
+contributors are vendor-neutral string identifiers.
 
 ## Next
 
-- Phase 36H: Architecture decision creation (Option B — Architecture Memory).
+- Phase 36I: Architecture decision export (Option B — Architecture Memory).
 
 ## Future Explorations
 

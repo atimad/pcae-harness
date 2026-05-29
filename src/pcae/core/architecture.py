@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from fnmatch import fnmatch
 import json
 from pathlib import Path
+import re
 
 from pcae.core.git_status import GitChange, read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
@@ -562,9 +563,17 @@ _SAMPLE_ADR_REGISTRY: tuple[ArchitectureDecisionRecord, ...] = (
 )
 
 
-def get_adr_registry() -> tuple[ArchitectureDecisionRecord, ...]:
-    """Return the deterministic in-memory ADR registry."""
-    return _SAMPLE_ADR_REGISTRY
+def get_adr_registry(
+    root: HarnessPath | None = None,
+) -> tuple[ArchitectureDecisionRecord, ...]:
+    """Return the sample ADR registry merged with any persisted ADRs.
+
+    When root is None, returns only the deterministic sample registry.
+    When root is provided, appends persisted ADRs from .pcae/architecture/.
+    """
+    if root is None:
+        return _SAMPLE_ADR_REGISTRY
+    return _SAMPLE_ADR_REGISTRY + load_persisted_adrs(root)
 
 
 @dataclass(frozen=True)
@@ -596,3 +605,124 @@ def lookup_adr_by_id(
         if adr.decision_id == decision_id:
             return adr
     return None
+
+
+# ---------------------------------------------------------------------------
+# ADR persistence (Phase 36H)
+# ---------------------------------------------------------------------------
+
+ADR_PERSISTENCE_RELATIVE_PATH = Path(".pcae") / "architecture"
+
+ADR_ADD_ADVISORY = (
+    "Architecture decision records are governed artifacts. "
+    "Human author is required; human remains authoritative."
+)
+
+
+def _load_adr_from_file(path: Path) -> ArchitectureDecisionRecord:
+    """Parse a persisted ADR JSON file into an ArchitectureDecisionRecord."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    created_at_raw = data.get("created_at")
+    created_at = (
+        datetime.fromisoformat(created_at_raw)
+        if isinstance(created_at_raw, str) and created_at_raw
+        else datetime.now(timezone.utc)
+    )
+    return create_adr(
+        decision_id=data["decision_id"],
+        title=data["title"],
+        status=data["status"],
+        rationale=data["rationale"],
+        alternatives_considered=data.get("alternatives_considered", []),
+        consequences=data.get("consequences", []),
+        created_at=created_at,
+        phase_reference=data.get("phase_reference"),
+        author=data["author"],
+        contributors=data.get("contributors", []),
+    )
+
+
+def load_persisted_adrs(root: HarnessPath) -> tuple[ArchitectureDecisionRecord, ...]:
+    """Return ADRs loaded from .pcae/architecture/, sorted by filename."""
+    dir_path = root.join(ADR_PERSISTENCE_RELATIVE_PATH)
+    if not dir_path.is_dir():
+        return ()
+    adrs: list[ArchitectureDecisionRecord] = []
+    for path in sorted(p for p in dir_path.iterdir() if p.suffix == ".json"):
+        try:
+            adrs.append(_load_adr_from_file(path))
+        except (OSError, ValueError, KeyError):
+            continue
+    return tuple(adrs)
+
+
+def generate_adr_decision_id(root: HarnessPath) -> str:
+    """Return the next sequential ADR decision_id (e.g. ADR-0003)."""
+    existing = get_adr_registry(root)
+    max_num = 0
+    for adr in existing:
+        m = re.match(r"^ADR-(\d+)$", adr.decision_id)
+        if m:
+            max_num = max(max_num, int(m.group(1)))
+    return f"ADR-{max_num + 1:04d}"
+
+
+def persist_adr(root: HarnessPath, adr: ArchitectureDecisionRecord) -> Path:
+    """Write adr to .pcae/architecture/ADR-YYYYMMDD-HHMMSS.json and return the relative path."""
+    dir_path = root.join(ADR_PERSISTENCE_RELATIVE_PATH)
+    dir_path.mkdir(parents=True, exist_ok=True)
+    filename = f"ADR-{adr.created_at.strftime('%Y%m%d-%H%M%S')}.json"
+    file_path = dir_path / filename
+    with file_path.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(adr.to_dict(), fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    return ADR_PERSISTENCE_RELATIVE_PATH / filename
+
+
+@dataclass(frozen=True)
+class ADRAddResult:
+    adr: ArchitectureDecisionRecord
+    relative_path: Path
+    advisory: str
+
+    def to_dict(self) -> dict:
+        return {
+            "adr": self.adr.to_dict(),
+            "relative_path": self.relative_path.as_posix(),
+            "advisory": self.advisory,
+        }
+
+
+def add_architecture_decision(
+    root: HarnessPath,
+    title: str,
+    rationale: str,
+    author: str,
+    status: str = "accepted",
+    alternatives_considered: tuple[str, ...] | list[str] = (),
+    consequences: tuple[str, ...] | list[str] = (),
+    phase_reference: str | None = None,
+    contributors: tuple[str, ...] | list[str] = (),
+    created_at: datetime | None = None,
+) -> ADRAddResult:
+    """Create, validate, and persist a new ADR.
+
+    Raises ValueError for invalid status or empty required fields.
+    Human author is required — human remains authoritative.
+    """
+    timestamp = created_at or datetime.now(timezone.utc)
+    decision_id = generate_adr_decision_id(root)
+    adr = create_adr(
+        decision_id=decision_id,
+        title=title,
+        status=status,
+        rationale=rationale,
+        alternatives_considered=alternatives_considered,
+        consequences=consequences,
+        created_at=timestamp,
+        phase_reference=phase_reference,
+        author=author,
+        contributors=contributors,
+    )
+    relative_path = persist_adr(root, adr)
+    return ADRAddResult(adr=adr, relative_path=relative_path, advisory=ADR_ADD_ADVISORY)

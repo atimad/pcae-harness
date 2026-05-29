@@ -10,6 +10,7 @@ from pcae.commands.agent import (
     run_agent_status,
 )
 from pcae.commands.architecture import (
+    run_architecture_add,
     run_architecture_decisions,
     run_architecture_history,
     run_architecture_metrics,
@@ -1288,6 +1289,68 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON architecture decision output.",
     )
     architecture_show_parser.set_defaults(handler=run_architecture_show)
+
+    architecture_add_parser = architecture_subparsers.add_parser(
+        "add",
+        help="Create a governed architecture decision record.",
+    )
+    architecture_add_parser.add_argument(
+        "--title",
+        required=True,
+        metavar="TEXT",
+        help="Decision title.",
+    )
+    architecture_add_parser.add_argument(
+        "--rationale",
+        required=True,
+        metavar="TEXT",
+        help="Rationale for the decision.",
+    )
+    architecture_add_parser.add_argument(
+        "--author",
+        required=True,
+        metavar="TEXT",
+        help="Human author of the decision.",
+    )
+    architecture_add_parser.add_argument(
+        "--status",
+        default="accepted",
+        metavar="TEXT",
+        help="Decision status (default: accepted).",
+    )
+    architecture_add_parser.add_argument(
+        "--alternative",
+        action="append",
+        default=[],
+        metavar="TEXT",
+        help="Alternative considered (repeatable).",
+    )
+    architecture_add_parser.add_argument(
+        "--consequence",
+        action="append",
+        default=[],
+        metavar="TEXT",
+        help="Consequence of the decision (repeatable).",
+    )
+    architecture_add_parser.add_argument(
+        "--phase-reference",
+        default=None,
+        metavar="TEXT",
+        help="PCAE phase reference (e.g. 36H).",
+    )
+    architecture_add_parser.add_argument(
+        "--contributor",
+        action="append",
+        default=[],
+        metavar="TEXT",
+        help="Vendor-neutral contributor identifier (repeatable).",
+    )
+    architecture_add_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    architecture_add_parser.set_defaults(handler=run_architecture_add)
 
     task_parser = subparsers.add_parser(
         "task",
