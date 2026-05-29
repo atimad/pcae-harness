@@ -9,6 +9,8 @@ from pcae.commands.agent import (
     run_agent_release,
     run_agent_status,
     run_agents,
+    run_agents_adapter_show,
+    run_agents_adapters,
     run_agents_config_show,
     run_agents_config_validate,
     run_agents_lifecycle,
@@ -1092,6 +1094,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON runtime discovery output.",
     )
     agents_runtime_discover_parser.set_defaults(handler=run_agents_runtime_discover)
+
+    agents_adapters_parser = agents_subparsers.add_parser(
+        "adapters",
+        help="List all agent adapter definitions.",
+    )
+    agents_adapters_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON adapter registry output.",
+    )
+    agents_adapters_parser.set_defaults(handler=run_agents_adapters)
+
+    agents_adapter_parser = agents_subparsers.add_parser(
+        "adapter",
+        help="Inspect a single agent adapter definition.",
+    )
+    agents_adapter_subparsers = agents_adapter_parser.add_subparsers(
+        dest="agents_adapter_command",
+        required=True,
+    )
+    agents_adapter_show_parser = agents_adapter_subparsers.add_parser(
+        "show",
+        help="Show adapter metadata for a single agent.",
+    )
+    agents_adapter_show_parser.add_argument(
+        "agent_id",
+        metavar="AGENT_ID",
+        help="Agent identifier to inspect.",
+    )
+    agents_adapter_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON adapter output.",
+    )
+    agents_adapter_show_parser.set_defaults(handler=run_agents_adapter_show)
 
     collaboration_parser = subparsers.add_parser(
         "collaboration",

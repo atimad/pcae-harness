@@ -1247,3 +1247,125 @@ def read_agent_stale_after_seconds(root: HarnessPath) -> int:
     if not policy.valid:
         raise ValueError(policy.error or "Invalid policy.")
     return policy.agent_stale_after_seconds
+
+
+# ---------------------------------------------------------------------------
+# Agent Adapter Model (Phase 38B)
+# ---------------------------------------------------------------------------
+
+ADAPTER_ADVISORY = (
+    "Adapter reporting is advisory; no agent runtime is modified."
+)
+
+
+@dataclass(frozen=True)
+class AgentAdapterEntry:
+    agent_id: str
+    adapter_type: str
+    lifecycle_status: str
+    runtime_installed: bool | None
+    runtime_version: str | None
+    supports_interactive: str
+    supports_non_interactive: str
+    supports_mcp: str
+    supports_hooks: str
+    supports_remote: str
+    notes: str
+
+    def to_dict(self) -> dict:
+        return {
+            "adapter_type": self.adapter_type,
+            "agent_id": self.agent_id,
+            "lifecycle_status": self.lifecycle_status,
+            "notes": self.notes,
+            "runtime_installed": self.runtime_installed,
+            "runtime_version": self.runtime_version,
+            "supports_hooks": self.supports_hooks,
+            "supports_interactive": self.supports_interactive,
+            "supports_mcp": self.supports_mcp,
+            "supports_non_interactive": self.supports_non_interactive,
+            "supports_remote": self.supports_remote,
+        }
+
+
+def _build_adapter_entries() -> tuple[AgentAdapterEntry, ...]:
+    discovery = build_runtime_discovery()
+    runtime_by_id: dict[str, AgentRuntimeCapabilities] = {
+        e.agent_id: e.capabilities for e in discovery.agents
+    }
+    entries: list[AgentAdapterEntry] = []
+    for agent in MULTI_AGENT_REGISTRY:
+        config = AGENT_CONFIG_REGISTRY.get(agent.agent_id)
+        adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+        notes = config.configuration_notes if config else "No configuration entry."
+
+        caps = runtime_by_id.get(agent.agent_id)
+        if caps is not None:
+            runtime_installed: bool | None = caps.installed
+            runtime_version: str | None = caps.version
+            supports_interactive = caps.interactive_supported
+            supports_non_interactive = caps.non_interactive_supported
+            supports_mcp = caps.mcp_supported
+            supports_hooks = caps.hooks_supported
+            supports_remote = caps.remote_supported
+        elif adapter_type == ADAPTER_TYPE_NATIVE:
+            runtime_installed = True
+            runtime_version = None
+            supports_interactive = RUNTIME_CAP_UNKNOWN
+            supports_non_interactive = RUNTIME_CAP_UNKNOWN
+            supports_mcp = RUNTIME_CAP_UNKNOWN
+            supports_hooks = RUNTIME_CAP_UNKNOWN
+            supports_remote = RUNTIME_CAP_UNKNOWN
+        else:
+            runtime_installed = None
+            runtime_version = None
+            supports_interactive = RUNTIME_CAP_UNKNOWN
+            supports_non_interactive = RUNTIME_CAP_UNKNOWN
+            supports_mcp = RUNTIME_CAP_UNKNOWN
+            supports_hooks = RUNTIME_CAP_UNKNOWN
+            supports_remote = RUNTIME_CAP_UNKNOWN
+
+        entries.append(AgentAdapterEntry(
+            agent_id=agent.agent_id,
+            adapter_type=adapter_type,
+            lifecycle_status=agent.status,
+            runtime_installed=runtime_installed,
+            runtime_version=runtime_version,
+            supports_interactive=supports_interactive,
+            supports_non_interactive=supports_non_interactive,
+            supports_mcp=supports_mcp,
+            supports_hooks=supports_hooks,
+            supports_remote=supports_remote,
+            notes=notes,
+        ))
+    return tuple(entries)
+
+
+def build_agent_adapters() -> dict:
+    """Return adapter registry combining static config and runtime discovery."""
+    adapters = _build_adapter_entries()
+    type_counts: dict[str, int] = {}
+    for a in adapters:
+        type_counts[a.adapter_type] = type_counts.get(a.adapter_type, 0) + 1
+    return {
+        "adapter_summary": {
+            "api": type_counts.get(ADAPTER_TYPE_API, 0),
+            "cli": type_counts.get(ADAPTER_TYPE_CLI, 0),
+            "desktop_manual": type_counts.get(ADAPTER_TYPE_DESKTOP_MANUAL, 0),
+            "native": type_counts.get(ADAPTER_TYPE_NATIVE, 0),
+            "total": len(adapters),
+            "undeclared": type_counts.get(ADAPTER_TYPE_UNDECLARED, 0),
+        },
+        "adapters": [a.to_dict() for a in adapters],
+        "advisory": ADAPTER_ADVISORY,
+    }
+
+
+def get_agent_adapter(agent_id: str) -> dict | None:
+    """Return adapter entry for a single agent, or None if not found."""
+    for entry in _build_adapter_entries():
+        if entry.agent_id == agent_id:
+            data = entry.to_dict()
+            data["advisory"] = ADAPTER_ADVISORY
+            return data
+    return None

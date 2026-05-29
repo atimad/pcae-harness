@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.agent import (
+    ADAPTER_ADVISORY,
     COLLABORATION_ADVISORY,
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
@@ -14,12 +15,14 @@ from pcae.core.agent import (
     VALID_AGENT_STATUSES,
     VALID_REVIEW_STATUSES,
     acquire_agent_lock,
+    build_agent_adapters,
     build_agent_status,
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
     build_review_workflows,
     build_runtime_discovery,
+    get_agent_adapter,
     get_agent_by_id,
     get_agent_config,
     release_agent_lock,
@@ -347,6 +350,71 @@ def run_agents_lifecycle(args: argparse.Namespace) -> int:
                 print(f"  - {error}")
         print()
         print(report.advisory)
+    return 0
+
+
+def _fmt_installed(value: bool | None) -> str:
+    if value is True:
+        return "yes"
+    if value is False:
+        return "no"
+    return "not checked"
+
+
+def run_agents_adapters(args: argparse.Namespace) -> int:
+    data = build_agent_adapters()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        summary = data["adapter_summary"]
+        print("Agent adapters")
+        print(f"Total: {summary['total']}")
+        for atype in ("cli", "native", "api", "desktop_manual", "undeclared"):
+            count = summary[atype]
+            if count:
+                print(f"  {atype}: {count}")
+        print()
+        print("Adapters:")
+        for entry in data["adapters"]:
+            print(
+                f"\n  {entry['agent_id']}"
+                f" ({entry['adapter_type']}, {entry['lifecycle_status']}):"
+            )
+            print(f"    Installed: {_fmt_installed(entry['runtime_installed'])}")
+            if entry["runtime_installed"]:
+                ver = entry["runtime_version"] or "(none)"
+                print(f"    Version: {ver}")
+                print(f"    Interactive: {entry['supports_interactive']}")
+                print(f"    Non-interactive: {entry['supports_non_interactive']}")
+                print(f"    MCP: {entry['supports_mcp']}")
+                print(f"    Hooks: {entry['supports_hooks']}")
+                print(f"    Remote: {entry['supports_remote']}")
+        print()
+        print(ADAPTER_ADVISORY)
+    return 0
+
+
+def run_agents_adapter_show(args: argparse.Namespace) -> int:
+    entry = get_agent_adapter(args.agent_id)
+    if entry is None:
+        print(f"Agent not found: '{args.agent_id}'.")
+        return 1
+    if args.json:
+        print(json.dumps(entry, indent=2, sort_keys=True))
+    else:
+        print(f"Agent adapter: {entry['agent_id']}")
+        print(f"Adapter type: {entry['adapter_type']}")
+        print(f"Lifecycle status: {entry['lifecycle_status']}")
+        print(f"Installed: {_fmt_installed(entry['runtime_installed'])}")
+        ver = entry["runtime_version"] or "(none)"
+        print(f"Version: {ver}")
+        print(f"Supports interactive: {entry['supports_interactive']}")
+        print(f"Supports non-interactive: {entry['supports_non_interactive']}")
+        print(f"Supports MCP: {entry['supports_mcp']}")
+        print(f"Supports hooks: {entry['supports_hooks']}")
+        print(f"Supports remote: {entry['supports_remote']}")
+        print(f"Notes: {entry['notes']}")
+        print(ADAPTER_ADVISORY)
     return 0
 
 

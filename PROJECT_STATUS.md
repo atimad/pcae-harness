@@ -533,9 +533,21 @@ installation of kimi v0.6.0; non_interactive capability is detected from
 remain unknown pending deterministic evidence; lifecycle summary now
 reports available=4, declared=4.
 
+PCAE also exposes a governed agent adapter model with `pcae agents adapters`
+and `pcae agents adapters --json` (Phase 38B): each adapter definition
+combines static registry configuration (adapter_type, notes) with runtime
+discovery results (installed, version, supports_interactive,
+supports_non_interactive, supports_mcp, supports_hooks, supports_remote);
+`pcae agents adapter show AGENT_ID` inspects a single agent; CLI agents
+(codex, claude, kimi) report discovered capabilities; native (pcae-native)
+reports installed=true with capabilities unknown; declared agents report
+runtime_installed=null with all capabilities unknown; adapter_summary shows
+per-type counts; advisory: "Adapter reporting is advisory; no agent runtime
+is modified."; all operations are strictly read-only.
+
 ## Next
 
-- Phase 38B: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
+- Phase 38C: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
 
 ## Future Explorations
 

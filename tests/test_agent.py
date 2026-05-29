@@ -2394,6 +2394,434 @@ def test_agents_lifecycle_all_states_present_in_output(
         assert state in output
 
 
+# ---------------------------------------------------------------------------
+# pcae agents adapters / pcae agents adapter show (Phase 38B)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_adapters_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent adapters" in output
+    assert "Total:" in output
+    assert "Adapters:" in output
+    assert "Adapter reporting is advisory; no agent runtime is modified." in output
+
+
+def test_agents_adapters_json_structure(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "adapters" in data
+    assert "adapter_summary" in data
+    assert "advisory" in data
+
+
+def test_agents_adapters_json_all_eight_agents(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ids = {e["agent_id"] for e in data["adapters"]}
+    assert len(data["adapters"]) == 8
+    assert "claude-local" in ids
+    assert "codex-local" in ids
+    assert "kimi-local" in ids
+    assert "pcae-native" in ids
+    assert "deepseek-local" in ids
+    assert "gemini-local" in ids
+    assert "grok-local" in ids
+    assert "perplexity-local" in ids
+
+
+def test_agents_adapters_json_summary_counts_no_discovery(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    summary = data["adapter_summary"]
+    assert summary["total"] == 8
+    assert summary["cli"] == 3
+    assert summary["native"] == 1
+    assert summary["undeclared"] == 4
+    assert summary["api"] == 0
+    assert summary["desktop_manual"] == 0
+
+
+def test_agents_adapters_cli_adapter_types(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_id = {e["agent_id"]: e for e in data["adapters"]}
+    assert by_id["codex-local"]["adapter_type"] == "cli"
+    assert by_id["claude-local"]["adapter_type"] == "cli"
+    assert by_id["kimi-local"]["adapter_type"] == "cli"
+    assert by_id["pcae-native"]["adapter_type"] == "native"
+    assert by_id["deepseek-local"]["adapter_type"] == "undeclared"
+
+
+def test_agents_adapters_installed_agent_shows_runtime_data(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "usage: codex [-p prompt] [--json] [mcp] [hook] [remote]"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "1.2.3" if exe == "codex" else None
+    )
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_id = {e["agent_id"]: e for e in data["adapters"]}
+    codex = by_id["codex-local"]
+    assert codex["runtime_installed"] is True
+    assert codex["runtime_version"] == "1.2.3"
+    assert codex["supports_mcp"] == "yes"
+    assert codex["supports_hooks"] == "yes"
+    assert codex["supports_remote"] == "yes"
+
+
+def test_agents_adapters_not_installed_shows_null_runtime(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_id = {e["agent_id"]: e for e in data["adapters"]}
+    # CLI agents not found → installed=false, version=null
+    for agent_id in ("codex-local", "claude-local", "kimi-local"):
+        entry = by_id[agent_id]
+        assert entry["runtime_installed"] is False
+        assert entry["runtime_version"] is None
+
+
+def test_agents_adapters_declared_agents_not_checked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_id = {e["agent_id"]: e for e in data["adapters"]}
+    for agent_id in ("deepseek-local", "gemini-local", "grok-local", "perplexity-local"):
+        entry = by_id[agent_id]
+        assert entry["runtime_installed"] is None
+        assert entry["runtime_version"] is None
+        for cap_field in (
+            "supports_interactive", "supports_non_interactive",
+            "supports_mcp", "supports_hooks", "supports_remote",
+        ):
+            assert entry[cap_field] == "unknown", (
+                f"{agent_id}.{cap_field} should be unknown"
+            )
+
+
+def test_agents_adapters_native_installed_no_version(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    by_id = {e["agent_id"]: e for e in data["adapters"]}
+    native = by_id["pcae-native"]
+    assert native["adapter_type"] == "native"
+    assert native["runtime_installed"] is True
+    assert native["runtime_version"] is None
+
+
+def test_agents_adapters_all_entries_have_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    required_fields = {
+        "adapter_type", "agent_id", "lifecycle_status", "notes",
+        "runtime_installed", "runtime_version",
+        "supports_hooks", "supports_interactive", "supports_mcp",
+        "supports_non_interactive", "supports_remote",
+    }
+    for entry in data["adapters"]:
+        for field in required_fields:
+            assert field in entry, f"Missing field '{field}' in entry for {entry.get('agent_id')}"
+
+
+def test_agents_adapters_advisory_string(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agent runtime is modified" in data["advisory"]
+
+
+def test_agents_adapters_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "adapters"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_adapter_show_codex_local(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return "/usr/bin/codex" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "usage: codex exec [mcp] [hook] [remote] non-interactive"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "2.0.0" if exe == "codex" else None
+    )
+
+    exit_code = main(["agents", "adapter", "show", "codex-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "codex-local" in output
+    assert "Adapter type: cli" in output
+    assert "Lifecycle status: available" in output
+    assert "Installed: yes" in output
+    assert "Version: 2.0.0" in output
+    assert "Adapter reporting is advisory; no agent runtime is modified." in output
+
+
+def test_agents_adapter_show_kimi_local(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "-p, --prompt <prompt>  run one prompt non-interactively"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "0.6.0" if exe == "kimi" else None
+    )
+
+    exit_code = main(["agents", "adapter", "show", "kimi-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "kimi-local" in output
+    assert "Adapter type: cli" in output
+    assert "Lifecycle status: available" in output
+    assert "Installed: yes" in output
+    assert "Version: 0.6.0" in output
+    assert "Supports non-interactive: yes" in output
+
+
+def test_agents_adapter_show_unknown_agent_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "show", "no-such-agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Agent not found" in output
+    assert "no-such-agent" in output
+
+
+def test_agents_adapter_show_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "show", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "claude-local"
+    assert data["adapter_type"] == "cli"
+    assert data["lifecycle_status"] == "available"
+    assert "advisory" in data
+    assert "runtime_installed" in data
+    assert "supports_interactive" in data
+    assert "supports_non_interactive" in data
+    assert "supports_mcp" in data
+    assert "supports_hooks" in data
+    assert "supports_remote" in data
+
+
+def test_agents_adapter_show_declared_agent(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "show", "deepseek-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "deepseek-local"
+    assert data["adapter_type"] == "undeclared"
+    assert data["lifecycle_status"] == "declared"
+    assert data["runtime_installed"] is None
+    assert data["runtime_version"] is None
+    for cap_field in (
+        "supports_interactive", "supports_non_interactive",
+        "supports_mcp", "supports_hooks", "supports_remote",
+    ):
+        assert data[cap_field] == "unknown"
+
+
+def test_agents_adapter_show_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "adapter", "show", "codex-local"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_adapter_show_unknown_caps_remain_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return "/usr/bin/kimi" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "usage: kimi [options]"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "0.6.0" if exe == "kimi" else None
+    )
+
+    exit_code = main(["agents", "adapter", "show", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["runtime_installed"] is True
+    assert data["supports_mcp"] == "unknown"
+    assert data["supports_hooks"] == "unknown"
+    assert data["supports_remote"] == "unknown"
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))
