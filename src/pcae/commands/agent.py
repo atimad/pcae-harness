@@ -26,6 +26,7 @@ from pcae.core.agent import (
     build_remote_create_dry_run,
     build_remote_create_persist_preview,
     build_remote_dry_run,
+    persist_remote_job,
     build_remote_strategy,
     build_remote_jobs,
     build_remote_plan,
@@ -512,6 +513,8 @@ def run_remote_status(args: argparse.Namespace) -> int:
 def run_remote_create(args: argparse.Namespace) -> int:
     if getattr(args, "preview_persist", False):
         return _run_remote_create_persist_preview(args)
+    if getattr(args, "persist", False):
+        return _run_remote_create_persist(args)
     return _run_remote_create_dry_run(args)
 
 
@@ -612,6 +615,28 @@ def _run_remote_create_persist_preview(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in job["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def _run_remote_create_persist(args: argparse.Namespace) -> int:
+    try:
+        data = persist_remote_job(HarnessPath.cwd(), args.agent, args.prompt)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        job = data["job"]
+        print("Job created")
+        print(f"Job ID: {job['job_id']}")
+        print(f"Selected agent: {job['requested_agent']}")
+        print(f"Persisted path: {data['job_path']}")
+        print(f"Status: {job['status']}")
+        print(f"Approval state: {job['approval_state']}")
         print()
         print(data["advisory"])
     return 0

@@ -655,11 +655,29 @@ must be present; output includes `job_file_path`
 (`.pcae/remote/jobs/`), `job_preview` with all schema fields plus
 `persist_preview: true`, and `validation` result; job_id is prefixed `job-`;
 three safety notes confirm no job file is written, no agent will be executed,
-and preview is for planning only; all operations are strictly read-only.
+and preview is for planning only; all operations are strictly read-only, and
+`pcae remote create --agent AGENT_ID --prompt TEXT --persist` (Phase 40D)
+persists a remote job definition to `.pcae/remote/jobs/` without executing
+agents or submitting prompts; unknown agents exit 1; disallowed agents exit 1
+with a clear "not allowed" error and create no file; the persisted job contains
+exactly the 11 schema fields with status=draft and approval_state=pending; three
+safety notes confirm no agent has been executed, no prompt has been submitted,
+and human approval is required before any execution; the jobs directory is created
+if absent; job files are Git-ignored via `remote/` in `.pcae/.gitignore`; human
+output reports job created, job id, selected agent, persisted path, status,
+approval state, and advisory "Job persisted. No agent execution has occurred.";
+JSON output includes `persisted: true`, `job_path`, `job`, and `advisory`, and
+job IDs are collision-proof (Phase 40D.1): job IDs use microsecond precision
+(`job-YYYYMMDD-HHMMSS-FFFFFF`); `_generate_unique_job_id(jobs_dir)` loops until
+it finds a non-existing path and returns `(job_id, Path)`; `persist_remote_job()`
+uses `_generate_unique_job_id` and opens the file with `"x"` (exclusive-create)
+mode so no existing file can ever be overwritten; `build_remote_create_persist_preview()`
+also uses microsecond format for consistency; the persisted filename always equals
+`{job_id}.json`.
 
 ## Next
 
-- Phase 40D: Remote Execution Governance Summary.
+- Phase 40E: Remote Job Listing.
 
 ## Future Explorations
 

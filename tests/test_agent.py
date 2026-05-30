@@ -6591,6 +6591,550 @@ def test_remote_persist_preview_and_dry_run_mutually_exclusive(
     assert exc_info.value.code != 0
 
 
+# pcae remote create --persist (Phase 40D)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_persist_human_output_codex(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "run tests", "--persist"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Job created" in output
+    assert "codex-local" in output
+    assert "draft" in output
+    assert "pending" in output
+    assert ".pcae/remote/jobs/" in output
+    assert "Job persisted. No agent execution has occurred." in output
+
+
+def test_remote_persist_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "advisory" in data
+    assert "job" in data
+    assert "job_path" in data
+    assert "persisted" in data
+
+
+def test_remote_persist_job_schema_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job"]
+    for field in (
+        "approval_state",
+        "created_at",
+        "execution_mode",
+        "job_id",
+        "policy_compliance",
+        "requested_agent",
+        "requested_task",
+        "required_approvals",
+        "required_checks",
+        "safety_notes",
+        "status",
+    ):
+        assert field in job, f"Missing job field: {field}"
+
+
+def test_remote_persist_no_extra_fields_in_job(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job"]
+    assert "dry_run" not in job
+    assert "persist_preview" not in job
+
+
+def test_remote_persist_codex_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "run tests", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["persisted"] is True
+    assert data["job"]["requested_agent"] == "codex-local"
+    assert data["job"]["policy_compliance"]["agent_allowed"] is True
+
+
+def test_remote_persist_claude_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "claude-local", "--prompt", "review code", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["persisted"] is True
+    assert data["job"]["requested_agent"] == "claude-local"
+
+
+def test_remote_persist_kimi_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "kimi-local", "--prompt", "fix bug", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["persisted"] is True
+    assert data["job"]["requested_agent"] == "kimi-local"
+
+
+def test_remote_persist_file_is_created(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job_path = tmp_path / data["job_path"]
+    assert job_path.exists(), f"Expected job file at {job_path}"
+
+
+def test_remote_persist_file_path_format(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_path"].startswith(".pcae/remote/jobs/")
+    assert data["job_path"].endswith(".json")
+
+
+def test_remote_persist_file_content_matches_job(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test task", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job_path = tmp_path / data["job_path"]
+    persisted = json.loads(job_path.read_text(encoding="utf-8"))
+    assert persisted == data["job"]
+
+
+def test_remote_persist_status_is_draft(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job"]["status"] == "draft"
+
+
+def test_remote_persist_approval_state_pending(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job"]["approval_state"] == "pending"
+
+
+def test_remote_persist_unknown_agent_exits_1(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "totally-unknown-bot", "--prompt", "test", "--persist"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "totally-unknown-bot" in output
+
+
+def test_remote_persist_disallowed_agent_exits_1(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "pcae-native", "--prompt", "test", "--persist"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "pcae-native" in output
+    assert "not allowed" in output.lower()
+
+
+def test_remote_persist_disallowed_agent_no_file_created(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "pcae-native", "--prompt", "test", "--persist"])
+    capsys.readouterr()
+
+    remote_dir = tmp_path / ".pcae" / "remote"
+    assert not remote_dir.exists()
+
+
+def test_remote_persist_advisory_confirmed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "job persisted" in data["advisory"].lower()
+    assert "no agent execution" in data["advisory"].lower()
+
+
+def test_remote_persist_required_approvals_listed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    approvals = data["job"]["required_approvals"]
+    assert isinstance(approvals, list)
+    assert len(approvals) > 0
+
+
+def test_remote_persist_required_checks_listed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    checks = data["job"]["required_checks"]
+    assert isinstance(checks, list)
+    assert len(checks) > 0
+
+
+def test_remote_persist_prompt_stored_as_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "implement the login flow", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job"]["requested_task"] == "implement the login flow"
+
+
+def test_remote_persist_directory_created(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    assert not jobs_dir.exists()
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist"])
+    capsys.readouterr()
+
+    assert jobs_dir.exists()
+    assert jobs_dir.is_dir()
+
+
+def test_remote_persist_missing_persist_flag_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(["remote", "create", "--agent", "codex-local", "--prompt", "test"])
+
+    assert exc_info.value.code != 0
+
+
+def test_remote_persist_mutually_exclusive_with_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exc_info:
+        main([
+            "remote", "create", "--agent", "codex-local", "--prompt", "test",
+            "--dry-run", "--persist",
+        ])
+
+    assert exc_info.value.code != 0
+
+
+def test_remote_persist_job_id_starts_with_job(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job"]["job_id"].startswith("job-")
+
+
+def test_remote_persist_safety_notes_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    notes = data["job"]["safety_notes"]
+    assert isinstance(notes, list)
+    assert len(notes) == 3
+    assert any("No agent has been executed" in n for n in notes)
+    assert any("No prompt has been submitted" in n for n in notes)
+    assert any("Human approval is required" in n for n in notes)
+
+
+# pcae remote create --persist identity hardening (Phase 40D.1)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_persist_job_id_includes_microseconds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job_id = data["job"]["job_id"]
+    # Format: job-YYYYMMDD-HHMMSS-FFFFFF
+    parts = job_id.split("-")
+    assert len(parts) == 4, f"Expected 4 dash-separated parts, got: {job_id}"
+    assert parts[0] == "job"
+    assert len(parts[1]) == 8   # YYYYMMDD
+    assert len(parts[2]) == 6   # HHMMSS
+    assert len(parts[3]) == 6   # microseconds (FFFFFF)
+    assert parts[3].isdigit()
+
+
+def test_remote_persist_filename_matches_job_id(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job_id = data["job"]["job_id"]
+    job_path = data["job_path"]
+    assert job_path == f".pcae/remote/jobs/{job_id}.json"
+
+
+def test_remote_persist_rapid_jobs_all_unique(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    count = 5
+    ids_seen: list[str] = []
+    paths_seen: list[str] = []
+    for i in range(count):
+        exit_code = main(
+            ["remote", "create", "--agent", "codex-local", "--prompt", f"task {i}", "--persist", "--json"]
+        )
+        data = json.loads(capsys.readouterr().out)
+        assert exit_code == 0
+        ids_seen.append(data["job"]["job_id"])
+        paths_seen.append(data["job_path"])
+
+    assert len(set(ids_seen)) == count, f"Duplicate job IDs detected: {ids_seen}"
+    assert len(set(paths_seen)) == count, f"Duplicate job paths detected: {paths_seen}"
+    for path in paths_seen:
+        assert (tmp_path / path).exists(), f"Missing job file: {path}"
+
+
+def test_remote_persist_first_job_not_overwritten_by_second(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "first task", "--persist", "--json"]
+    )
+    first_data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    first_path = tmp_path / first_data["job_path"]
+    first_content = first_path.read_text(encoding="utf-8")
+
+    exit_code = main(
+        ["remote", "create", "--agent", "claude-local", "--prompt", "second task", "--persist", "--json"]
+    )
+    second_data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+
+    assert first_data["job"]["job_id"] != second_data["job"]["job_id"]
+    assert first_path.read_text(encoding="utf-8") == first_content
+
+
+def test_generate_unique_job_id_skips_existing_file(tmp_path: Path) -> None:
+    from pcae.core.agent import _generate_unique_job_id
+
+    jobs_dir = tmp_path / "jobs"
+    jobs_dir.mkdir()
+
+    # First call: returns a path that does not yet exist
+    job_id_1, path_1 = _generate_unique_job_id(jobs_dir)
+    assert not path_1.exists()
+    assert path_1 == jobs_dir / f"{job_id_1}.json"
+
+    # Pre-create that file to simulate a collision
+    path_1.write_text("{}", encoding="utf-8")
+
+    # Second call: must return a different path that does not exist
+    job_id_2, path_2 = _generate_unique_job_id(jobs_dir)
+    assert not path_2.exists()
+    assert job_id_2 != job_id_1
+    assert path_2 != path_1
+
+
+def test_generate_unique_job_id_path_matches_id(tmp_path: Path) -> None:
+    from pcae.core.agent import _generate_unique_job_id
+
+    jobs_dir = tmp_path / "jobs"
+    jobs_dir.mkdir()
+
+    job_id, path = _generate_unique_job_id(jobs_dir)
+    assert path == jobs_dir / f"{job_id}.json"
+
+
+def test_remote_persist_preview_job_id_includes_microseconds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--preview-persist", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job_id = data["job_preview"]["job_id"]
+    parts = job_id.split("-")
+    assert len(parts) == 4, f"Expected 4 dash-separated parts, got: {job_id}"
+    assert parts[3].isdigit() and len(parts[3]) == 6
+
+
 # ---------------------------------------------------------------------------
 
 

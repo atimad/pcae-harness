@@ -1283,6 +1283,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Preview what would be persisted, including the job file path.",
     )
+    _create_mode.add_argument(
+        "--persist",
+        action="store_true",
+        help="Persist the job definition to .pcae/remote/jobs/ without executing it.",
+    )
     remote_create_parser.add_argument(
         "--json",
         action="store_true",
