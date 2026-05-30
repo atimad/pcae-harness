@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41B.1: Codex Adapter Contract Correction.
+Phase 41B.3: Claude Adapter Contract Validation.
 
 ## Governance Coherence Note
 

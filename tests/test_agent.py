@@ -8544,3 +8544,50 @@ def write_agent_policy_threshold(root: Path, threshold: int) -> None:
         ),
         encoding="utf-8",
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 41B.3: Claude Adapter Contract Validation
+# ---------------------------------------------------------------------------
+
+
+def test_remote_execute_dry_run_command_preview_claude_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    _patch_ready(monkeypatch, "claude-local")
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cmd = data["execution_preview"]["command_preview"]
+    assert cmd is not None
+    assert "claude" in cmd
+    assert "-p" in cmd
+    assert "--print" not in cmd
+    assert "--prompt" not in cmd
+
+
+def test_remote_invoke_claude_command_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    _patch_ready(monkeypatch, "claude-local")
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(0, "PCAE Claude execution test successful.\n"),
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["executed"] is True
+    assert data["command"][0] == "claude"
+    assert data["command"][1] == "-p"
+    assert "--print" not in data["command"]
