@@ -673,11 +673,19 @@ it finds a non-existing path and returns `(job_id, Path)`; `persist_remote_job()
 uses `_generate_unique_job_id` and opens the file with `"x"` (exclusive-create)
 mode so no existing file can ever be overwritten; `build_remote_create_persist_preview()`
 also uses microsecond format for consistency; the persisted filename always equals
-`{job_id}.json`.
+`{job_id}.json`, and persisted jobs can be listed with `pcae remote jobs list`
+and `pcae remote jobs list --json` (Phase 40E): reads all `*.json` files from
+`.pcae/remote/jobs/`, sorts by filename newest first, skips malformed files with
+a warning, and handles a missing directory gracefully; `jobs` is now a subparser
+group with a `list` subcommand while the existing `pcae remote jobs` flat
+command is preserved; JSON output has `job_count`, `jobs`, `warnings`, and
+`advisory`; human output shows job count, per-job id/agent/approval/created-at,
+and warnings; `load_persisted_jobs()` added to core; `run_remote_jobs_list()`
+added to commands; all operations are strictly read-only.
 
 ## Next
 
-- Phase 40E: Remote Job Listing.
+- Phase 40F: Remote Job Inspection.
 
 ## Future Explorations
 

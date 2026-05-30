@@ -29,6 +29,7 @@ from pcae.core.agent import (
     persist_remote_job,
     build_remote_strategy,
     build_remote_jobs,
+    load_persisted_jobs,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -813,6 +814,28 @@ def run_remote_jobs(args: argparse.Namespace) -> int:
         print(f"\nSupported statuses ({len(statuses)}):")
         for s in statuses:
             print(f"  - {s}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_jobs_list(args: argparse.Namespace) -> int:
+    data = load_persisted_jobs(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Remote job listing")
+        print(f"Job count: {data['job_count']}")
+        for job in data["jobs"]:
+            print(f"\n  [{job.get('status', '?')}] {job.get('job_id', '?')}")
+            print(f"    Agent:    {job.get('requested_agent', '?')}")
+            print(f"    Approval: {job.get('approval_state', '?')}")
+            print(f"    Created:  {job.get('created_at', '?')}")
+        warnings = data["warnings"]
+        if warnings:
+            print(f"\nWarnings ({len(warnings)}):")
+            for w in warnings:
+                print(f"  - {w}")
         print()
         print(data["advisory"])
     return 0

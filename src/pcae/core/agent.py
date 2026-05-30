@@ -2553,3 +2553,36 @@ def persist_remote_job(
         "job_path": str(_REMOTE_JOBS_OUTPUT_DIR / job_file.name),
         "persisted": True,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Listing (Phase 40E)
+# ---------------------------------------------------------------------------
+
+REMOTE_JOBS_LIST_ADVISORY = "Job listing is read-only; no agents are executed."
+
+
+def load_persisted_jobs(root: HarnessPath) -> dict:
+    """Read persisted job files from .pcae/remote/jobs/, newest first. Read-only."""
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    jobs: list[dict] = []
+    warnings: list[str] = []
+
+    if jobs_dir.exists():
+        for path in sorted(jobs_dir.glob("*.json"), reverse=True):
+            try:
+                parsed = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                warnings.append(f"Skipping malformed file {path.name}: {exc}")
+                continue
+            if not isinstance(parsed, dict):
+                warnings.append(f"Skipping malformed file (not a dict): {path.name}")
+                continue
+            jobs.append(parsed)
+
+    return {
+        "advisory": REMOTE_JOBS_LIST_ADVISORY,
+        "job_count": len(jobs),
+        "jobs": jobs,
+        "warnings": warnings,
+    }

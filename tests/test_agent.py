@@ -7135,6 +7135,276 @@ def test_remote_persist_preview_job_id_includes_microseconds(
     assert parts[3].isdigit() and len(parts[3]) == 6
 
 
+# pcae remote jobs list (Phase 40E)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_jobs_list_empty_directory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote job listing" in output
+    assert "Job count: 0" in output
+    assert "Job listing is read-only" in output
+
+
+def test_remote_jobs_list_empty_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 0
+    assert data["jobs"] == []
+    assert data["warnings"] == []
+    assert "advisory" in data
+
+
+def test_remote_jobs_list_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "job_count", "jobs", "warnings"):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_jobs_list_shows_persisted_jobs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "task A", "--persist"])
+    capsys.readouterr()
+    main(["remote", "create", "--agent", "claude-local", "--prompt", "task B", "--persist"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 2
+    assert len(data["jobs"]) == 2
+
+
+def test_remote_jobs_list_sorted_newest_first(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "first", "--persist", "--json"])
+    first_data = json.loads(capsys.readouterr().out)
+
+    main(["remote", "create", "--agent", "claude-local", "--prompt", "second", "--persist", "--json"])
+    second_data = json.loads(capsys.readouterr().out)
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ids = [j["job_id"] for j in data["jobs"]]
+    # Second job was created later — should appear first
+    assert ids[0] == second_data["job"]["job_id"]
+    assert ids[1] == first_data["job"]["job_id"]
+
+
+def test_remote_jobs_list_job_fields_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["jobs"][0]
+    for field in ("job_id", "requested_agent", "status", "approval_state", "created_at"):
+        assert field in job, f"Missing field: {field}"
+
+
+def test_remote_jobs_list_human_output_with_jobs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "test task", "--persist"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "jobs", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Job count: 1" in output
+    assert "codex-local" in output
+    assert "draft" in output
+    assert "pending" in output
+    assert "Job listing is read-only" in output
+
+
+def test_remote_jobs_list_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "read-only" in data["advisory"].lower()
+    assert "no agents are executed" in data["advisory"].lower()
+
+
+def test_remote_jobs_list_malformed_file_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    (jobs_dir / "job-bad.json").write_text("not valid json{{", encoding="utf-8")
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 0
+    assert len(data["warnings"]) == 1
+    assert "job-bad.json" in data["warnings"][0]
+
+
+def test_remote_jobs_list_malformed_file_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    (jobs_dir / "job-bad.json").write_text("null", encoding="utf-8")
+
+    exit_code = main(["remote", "jobs", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Warning" in output
+    assert "job-bad.json" in output
+
+
+def test_remote_jobs_list_malformed_and_valid_mixed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "good job", "--persist"])
+    capsys.readouterr()
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    (jobs_dir / "job-broken.json").write_text("{bad json", encoding="utf-8")
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 1
+    assert len(data["warnings"]) == 1
+
+
+def test_remote_jobs_list_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "test", "--persist"])
+    capsys.readouterr()
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    files_before = set(p.name for p in jobs_dir.iterdir())
+
+    main(["remote", "jobs", "list"])
+    capsys.readouterr()
+
+    files_after = set(p.name for p in jobs_dir.iterdir())
+    assert files_before == files_after
+
+
+def test_remote_jobs_list_no_jobs_dir(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    remote_dir = tmp_path / ".pcae" / "remote"
+    assert not remote_dir.exists()
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 0
+    assert data["jobs"] == []
+
+
+def test_remote_jobs_list_three_agents(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        main(["remote", "create", "--agent", agent, "--prompt", f"task for {agent}", "--persist"])
+        capsys.readouterr()
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == 3
+    agents_in_list = {j["requested_agent"] for j in data["jobs"]}
+    assert agents_in_list == {"codex-local", "claude-local", "kimi-local"}
+
+
+def test_remote_jobs_list_job_count_matches_jobs_length(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for i in range(3):
+        main(["remote", "create", "--agent", "codex-local", "--prompt", f"task {i}", "--persist"])
+        capsys.readouterr()
+
+    exit_code = main(["remote", "jobs", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_count"] == len(data["jobs"])
+
+
 # ---------------------------------------------------------------------------
 
 
