@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_multi_agent_registry,
     build_remote_adapters,
     build_remote_approvals,
+    build_remote_create_dry_run,
     build_remote_dry_run,
     build_remote_strategy,
     build_remote_jobs,
@@ -501,6 +502,56 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print(f"  Active task: {'yes' if gov['active_task_present'] else 'no'}")
         print("\nSafety notes:")
         for note in data["safety_notes"]:
+            print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_create(args: argparse.Namespace) -> int:
+    try:
+        data = build_remote_create_dry_run(HarnessPath.cwd(), args.agent, args.prompt)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        job = data["job_preview"]
+        comp = job["policy_compliance"]
+        val = data["validation"]
+        print("Remote job creation preview")
+        print(f"Job ID: {job['job_id']}")
+        print(f"Selected agent: {job['requested_agent']}")
+        print(f"Status: {job['status']}")
+        print(f"Approval state: {job['approval_state']}")
+        print(f"Execution mode: {job['execution_mode']}")
+        print("\nPolicy compliance:")
+        print(f"  Agent allowed: {'yes' if comp['agent_allowed'] else 'no'}")
+        print(f"  Adapter allowed: {'yes' if comp['adapter_allowed'] else 'no'}")
+        print(f"  Compliant: {'yes' if comp['compliant'] else 'no'}")
+        approvals = job["required_approvals"]
+        print(f"\nRequired approvals ({len(approvals)}):")
+        for item in approvals:
+            print(f"  - {item}")
+        checks = job["required_checks"]
+        print(f"\nRequired checks ({len(checks)}):")
+        for item in checks:
+            print(f"  - {item}")
+        valid_label = "valid" if val["valid"] else "invalid"
+        print(f"\nValidation: {valid_label}")
+        if val["errors"]:
+            for e in val["errors"]:
+                print(f"  error: {e}")
+        if val["warnings"]:
+            for w in val["warnings"]:
+                print(f"  warning: {w}")
+        if val["blockers"]:
+            for b in val["blockers"]:
+                print(f"  blocker: {b}")
+        print("\nSafety notes:")
+        for note in job["safety_notes"]:
             print(f"  - {note}")
         print()
         print(data["advisory"])

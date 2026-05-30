@@ -638,9 +638,19 @@ runtime discovery, blockers, dry_run_result (would_execute/blocked), and
 three safety notes confirming no agent was executed, prompt not submitted,
 preview only; all operations are strictly read-only.
 
+PCAE also previews remote job creation with
+`pcae remote create --agent AGENT_ID --prompt TEXT --dry-run` (Phase 40B):
+`--agent`, `--prompt`, and `--dry-run` are all required; unknown agents
+exit 1; job preview includes all 11 job schema fields plus `dry_run: true`,
+status=draft, approval_state=pending, and a created_at timestamp; the
+preview is validated through `validate_remote_job()` — allowed agents
+pass clean, policy-excluded agents produce blocked validation; three safety
+notes confirm no persistence, no execution, and preview-only intent;
+all operations are strictly read-only.
+
 ## Next
 
-- Phase 40B: Remote Execution Governance Summary.
+- Phase 40C: Remote Execution Governance Summary.
 
 ## Future Explorations
 

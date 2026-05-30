@@ -5934,6 +5934,296 @@ def test_remote_dry_run_blocked_no_non_interactive(
     assert any("non-interactive" in b for b in data["blockers"])
 
 
+# pcae remote create --dry-run (Phase 40B)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_create_dry_run_human_output_codex(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "run tests", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote job creation preview" in output
+    assert "codex-local" in output
+    assert "draft" in output
+    assert "pending" in output
+    assert "No job is persisted." in output
+    assert "Remote job creation preview is advisory" in output
+
+
+def test_remote_create_dry_run_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "advisory" in data
+    assert "job_preview" in data
+    assert "validation" in data
+
+
+def test_remote_create_dry_run_job_schema_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job_preview"]
+    for field in (
+        "approval_state",
+        "created_at",
+        "dry_run",
+        "execution_mode",
+        "job_id",
+        "policy_compliance",
+        "requested_agent",
+        "requested_task",
+        "required_approvals",
+        "required_checks",
+        "safety_notes",
+        "status",
+    ):
+        assert field in job, f"Missing job field: {field}"
+
+
+def test_remote_create_dry_run_codex_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "run tests", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job_preview"]
+    assert job["requested_agent"] == "codex-local"
+    assert job["policy_compliance"]["agent_allowed"] is True
+    assert job["dry_run"] is True
+
+
+def test_remote_create_dry_run_claude_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "claude-local", "--prompt", "review code", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job_preview"]
+    assert job["requested_agent"] == "claude-local"
+    assert job["policy_compliance"]["agent_allowed"] is True
+
+
+def test_remote_create_dry_run_kimi_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "kimi-local", "--prompt", "fix bug", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    job = data["job_preview"]
+    assert job["requested_agent"] == "kimi-local"
+    assert job["policy_compliance"]["agent_allowed"] is True
+
+
+def test_remote_create_dry_run_missing_dry_run_flag_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(["remote", "create", "--agent", "codex-local", "--prompt", "test"])
+
+    assert exc_info.value.code != 0
+
+
+def test_remote_create_dry_run_unknown_agent_exits_1(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "totally-unknown-bot", "--prompt", "test", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "totally-unknown-bot" in output
+
+
+def test_remote_create_dry_run_status_is_draft(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_preview"]["status"] == "draft"
+
+
+def test_remote_create_dry_run_approval_state_pending(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_preview"]["approval_state"] == "pending"
+
+
+def test_remote_create_dry_run_flag_is_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_preview"]["dry_run"] is True
+
+
+def test_remote_create_dry_run_validation_valid_for_allowed_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    val = data["validation"]
+    assert val["valid"] is True
+    assert val["errors"] == []
+    assert val["blockers"] == []
+
+
+def test_remote_create_dry_run_validation_blocked_for_disallowed_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "pcae-native", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    val = data["validation"]
+    assert val["valid"] is False
+    assert any("not in allowed_agents" in b for b in val["blockers"])
+
+
+def test_remote_create_dry_run_job_id_starts_with_preview(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_preview"]["job_id"].startswith("preview-")
+
+
+def test_remote_create_dry_run_advisory_confirmed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no job is persisted" in data["advisory"].lower()
+    assert "no agent is executed" in data["advisory"].lower()
+
+
+def test_remote_create_dry_run_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "test", "--dry-run"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_create_dry_run_prompt_stored_as_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["remote", "create", "--agent", "codex-local", "--prompt", "fix the login bug", "--dry-run", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job_preview"]["requested_task"] == "fix the login bug"
+
+
 # ---------------------------------------------------------------------------
 
 

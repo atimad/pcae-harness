@@ -23,6 +23,7 @@ from pcae.commands.agent import (
     run_collaboration_workflows,
     run_remote_adapters,
     run_remote_approvals,
+    run_remote_create,
     run_remote_dry_run,
     run_remote_strategy,
     run_remote_jobs,
@@ -1255,6 +1256,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON dry-run output.",
     )
     remote_dry_run_parser.set_defaults(handler=run_remote_dry_run)
+
+    remote_create_parser = remote_subparsers.add_parser(
+        "create",
+        help="Preview creation of a Remote Autonomous Coding job (dry run only).",
+    )
+    remote_create_parser.add_argument(
+        "--agent",
+        required=True,
+        help="Agent ID for the job (e.g. codex-local).",
+    )
+    remote_create_parser.add_argument(
+        "--prompt",
+        required=True,
+        help="Prompt text for the job (not submitted to any agent).",
+    )
+    remote_create_parser.add_argument(
+        "--dry-run",
+        required=True,
+        action="store_true",
+        help="Required: preview the job without persisting or executing it.",
+    )
+    remote_create_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON job creation preview.",
+    )
+    remote_create_parser.set_defaults(handler=run_remote_create)
 
     remote_jobs_parser = remote_subparsers.add_parser(
         "jobs",
