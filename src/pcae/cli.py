@@ -21,6 +21,7 @@ from pcae.commands.agent import (
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
+    run_remote_adapters,
     run_remote_approvals,
     run_remote_jobs,
     run_remote_plan,
@@ -1209,6 +1210,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON remote status output.",
     )
     remote_status_parser.set_defaults(handler=run_remote_status)
+
+    remote_adapters_parser = remote_subparsers.add_parser(
+        "adapters",
+        help="Select the best available adapter for Remote Autonomous Coding.",
+    )
+    remote_adapters_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON remote adapter selection output.",
+    )
+    remote_adapters_parser.set_defaults(handler=run_remote_adapters)
 
     remote_jobs_parser = remote_subparsers.add_parser(
         "jobs",

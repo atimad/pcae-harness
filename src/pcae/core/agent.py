@@ -1965,3 +1965,127 @@ def build_remote_approvals(jobs: list | None = None) -> dict:
         "approval_states": list(REMOTE_APPROVAL_STATES),
         "pending_approvals": pending_approvals,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Execution Adapter Selection (Phase 39G)
+# ---------------------------------------------------------------------------
+
+REMOTE_ADAPTERS_ADVISORY = (
+    "Remote adapter selection is advisory; no agents are executed."
+)
+
+
+def _score_remote_agent(agent: dict) -> int:
+    if not agent["eligible"]:
+        return 0
+    score = 10
+    if agent["remote"] == RUNTIME_CAP_YES:
+        score += 2
+    elif agent["remote"] == RUNTIME_CAP_UNKNOWN:
+        score += 1
+    return score
+
+
+def build_remote_adapters() -> dict:
+    """Return an advisory remote adapter selection report."""
+    policy = build_remote_policy()
+    discovery = build_runtime_discovery()
+
+    discovery_by_id = {e.agent_id: e for e in discovery.agents}
+
+    eligible_agents: list[dict] = []
+    selection_notes: list[str] = []
+
+    for agent_id in policy["allowed_agents"]:
+        config = AGENT_CONFIG_REGISTRY.get(agent_id)
+        adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+        policy_allowed = adapter_type in policy["allowed_adapters"]
+
+        entry = discovery_by_id.get(agent_id)
+        if entry:
+            caps = entry.capabilities
+            runtime_installed = caps.installed
+            non_interactive = caps.non_interactive_supported
+            remote = caps.remote_supported
+            mcp = caps.mcp_supported
+            hooks = caps.hooks_supported
+            runtime_version = caps.version
+        else:
+            runtime_installed = False
+            non_interactive = RUNTIME_CAP_UNKNOWN
+            remote = RUNTIME_CAP_UNKNOWN
+            mcp = RUNTIME_CAP_UNKNOWN
+            hooks = RUNTIME_CAP_UNKNOWN
+            runtime_version = None
+
+        if not policy_allowed:
+            eligible = False
+            eligibility_reason = (
+                f"adapter type '{adapter_type}' not in allowed_adapters"
+            )
+        elif not runtime_installed:
+            eligible = False
+            eligibility_reason = "not installed"
+        elif non_interactive != RUNTIME_CAP_YES:
+            eligible = False
+            eligibility_reason = "non-interactive support not confirmed"
+        else:
+            eligible = True
+            if remote == RUNTIME_CAP_YES:
+                eligibility_reason = (
+                    "installed, non-interactive confirmed, remote confirmed"
+                )
+            elif remote == RUNTIME_CAP_UNKNOWN:
+                eligibility_reason = (
+                    "installed, non-interactive confirmed, remote unknown"
+                )
+                selection_notes.append(
+                    f"{agent_id} has unknown remote capability"
+                )
+            else:
+                eligibility_reason = (
+                    "installed, non-interactive confirmed, remote not detected"
+                )
+
+        missing_capabilities: list[str] = []
+        if eligible:
+            for cap_name, cap_val in (
+                ("mcp", mcp),
+                ("hooks", hooks),
+                ("remote", remote),
+            ):
+                if cap_val == RUNTIME_CAP_UNKNOWN:
+                    missing_capabilities.append(f"{cap_name} unknown")
+
+        eligible_agents.append({
+            "adapter_type": adapter_type,
+            "agent_id": agent_id,
+            "eligible": eligible,
+            "eligibility_reason": eligibility_reason,
+            "hooks": hooks,
+            "mcp": mcp,
+            "missing_capabilities": missing_capabilities,
+            "non_interactive": non_interactive,
+            "policy_allowed": policy_allowed,
+            "remote": remote,
+            "runtime_installed": runtime_installed,
+            "runtime_version": runtime_version,
+        })
+
+    eligible_list = [a for a in eligible_agents if a["eligible"]]
+    if eligible_list:
+        best = max(eligible_list, key=_score_remote_agent)
+        recommended = best["agent_id"]
+        rationale = f"{recommended} is {best['eligibility_reason']}."
+    else:
+        recommended = None
+        rationale = "No eligible remote runtime found."
+
+    return {
+        "advisory": REMOTE_ADAPTERS_ADVISORY,
+        "eligible_agents": eligible_agents,
+        "rationale": rationale,
+        "recommended_remote_runtime": recommended,
+        "selection_notes": selection_notes,
+    }

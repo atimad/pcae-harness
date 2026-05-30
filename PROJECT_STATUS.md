@@ -608,9 +608,19 @@ with approval_state=="pending"; the empty registry has no pending
 approvals; no approval mutation, job creation, or agent execution;
 all operations are strictly read-only.
 
+PCAE also recommends the best available remote runtime adapter with
+`pcae remote adapters` and `pcae remote adapters --json` (Phase 39G):
+agents are evaluated from the policy's allowed_agents list; eligibility
+requires adapter type in allowed_adapters, installed CLI, and confirmed
+non-interactive support; remote=unknown does not block eligibility but
+is noted in selection_notes and missing_capabilities; scoring prefers
+remote=yes over remote=unknown with deterministic tie-breaking; kimi-local
+is represented conservatively with unknown remote capability; all
+operations are strictly read-only.
+
 ## Next
 
-- Phase 39G: Remote Execution Audit Log.
+- Phase 39H: Remote Execution Audit Log.
 
 ## Future Explorations
 

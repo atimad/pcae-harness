@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_adapters,
     build_remote_approvals,
     build_remote_jobs,
     build_remote_plan,
@@ -499,6 +500,38 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_adapters(args: argparse.Namespace) -> int:
+    data = build_remote_adapters()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rec = data["recommended_remote_runtime"]
+        print("Remote adapter selection")
+        print(f"Recommended runtime: {rec if rec else '(none)'}")
+        agents = data["eligible_agents"]
+        print(f"\nAgents ({len(agents)}):")
+        for a in agents:
+            tag = "[eligible]" if a["eligible"] else "[ineligible]"
+            ver = a["runtime_version"] or "(unknown)"
+            print(f"  {tag} {a['agent_id']} ({a['adapter_type']}, {ver})")
+            print(f"    Policy allowed: {'yes' if a['policy_allowed'] else 'no'}")
+            print(f"    Installed: {'yes' if a['runtime_installed'] else 'no'}")
+            print(f"    Non-interactive: {a['non_interactive']}")
+            print(f"    Remote: {a['remote']}")
+            print(f"    Reason: {a['eligibility_reason']}")
+            if a["missing_capabilities"]:
+                print(f"    Missing: {', '.join(a['missing_capabilities'])}")
+        notes = data["selection_notes"]
+        if notes:
+            print("\nSelection notes:")
+            for n in notes:
+                print(f"  - {n}")
+        print(f"\nRationale: {data['rationale']}")
         print()
         print(data["advisory"])
     return 0

@@ -5018,6 +5018,338 @@ def test_remote_approvals_constants(
     assert "before_execution" in REMOTE_APPROVAL_GATES
 
 
+# pcae remote adapters (Phase 39G)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_adapters_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote adapter selection" in output
+    assert "Recommended runtime:" in output
+    assert "Remote adapter selection is advisory" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_adapters_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "advisory",
+        "eligible_agents",
+        "rationale",
+        "recommended_remote_runtime",
+        "selection_notes",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_adapters_all_three_agents_represented(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    agent_ids = [a["agent_id"] for a in data["eligible_agents"]]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+
+
+def test_remote_adapters_no_recommendation_when_none_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["recommended_remote_runtime"] is None
+    assert "No eligible" in data["rationale"]
+    for a in data["eligible_agents"]:
+        assert a["eligible"] is False
+        assert a["runtime_installed"] is False
+
+
+def test_remote_adapters_codex_eligible_with_non_interactive_and_remote(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto remote"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    codex = next(a for a in data["eligible_agents"] if a["agent_id"] == "codex-local")
+    assert codex["eligible"] is True
+    assert codex["non_interactive"] == "yes"
+    assert codex["remote"] == "yes"
+    assert codex["policy_allowed"] is True
+
+
+def test_remote_adapters_recommends_codex_when_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto remote"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["recommended_remote_runtime"] == "codex-local"
+    assert "codex-local" in data["rationale"]
+
+
+def test_remote_adapters_claude_eligible_when_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "claude" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "claude":
+            return "claude --print non-interactive remote"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "2.1.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    claude = next(a for a in data["eligible_agents"] if a["agent_id"] == "claude-local")
+    assert claude["eligible"] is True
+    assert claude["policy_allowed"] is True
+
+
+def test_remote_adapters_kimi_eligible_with_unknown_remote(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.6.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    kimi = next(a for a in data["eligible_agents"] if a["agent_id"] == "kimi-local")
+    assert kimi["eligible"] is True
+    assert kimi["remote"] == "unknown"
+    assert any("remote" in m for m in kimi["missing_capabilities"])
+
+
+def test_remote_adapters_kimi_selection_note_for_unknown_remote(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.6.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert any("kimi-local" in n and "unknown remote" in n for n in data["selection_notes"])
+
+
+def test_remote_adapters_codex_preferred_over_kimi_unknown_remote(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name in ("codex", "kimi") else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto remote"
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "1.0.0")
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["recommended_remote_runtime"] == "codex-local"
+
+
+def test_remote_adapters_agent_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for agent in data["eligible_agents"]:
+        for field in (
+            "adapter_type",
+            "agent_id",
+            "eligible",
+            "eligibility_reason",
+            "missing_capabilities",
+            "non_interactive",
+            "policy_allowed",
+            "remote",
+            "runtime_installed",
+            "runtime_version",
+        ):
+            assert field in agent, f"Missing field '{field}' in agent {agent.get('agent_id')}"
+
+
+def test_remote_adapters_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+
+
+def test_remote_adapters_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "adapters"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_adapters_ineligible_reason_not_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "adapters", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for a in data["eligible_agents"]:
+        assert "not installed" in a["eligibility_reason"]
+
+
 # ---------------------------------------------------------------------------
 
 
