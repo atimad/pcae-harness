@@ -718,7 +718,9 @@ real agent invocation under PCAE governance is available with
 `pcae remote execute JOB_ID --invoke` (Phase 41B): `--invoke` is mutually
 exclusive with `--dry-run`; readiness gate must pass or `ValueError` is raised;
 per-agent command dispatch: `claude-local` → `claude --print`, `codex-local`
-→ `codex --quiet`, all others blocked as "syntax not safely derivable";
+→ `codex exec --sandbox read-only` (corrected in Phase 41B.1, replacing the
+invalid `codex --quiet` that caused `unexpected argument` errors), all others
+blocked as "syntax not safely derivable";
 agent subprocess captured with 300 s timeout; job status updated to
 `"completed"` (rc=0) or `"failed"` (rc≠0) on disk; execution artifact
 written to `.pcae/remote/executions/<job_id>_result.json`; `_run_agent_subprocess`

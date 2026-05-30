@@ -8184,6 +8184,9 @@ def test_remote_execute_dry_run_command_preview_for_cli_agent(
     cmd = data["execution_preview"]["command_preview"]
     assert cmd is not None
     assert "codex" in cmd
+    assert "exec" in cmd
+    assert "sandbox" in cmd
+    assert "--quiet" not in cmd
 
 
 def test_remote_execute_dry_run_safety_notes_present(
@@ -8341,6 +8344,8 @@ def test_remote_invoke_success_json(
     assert data["exit_code"] == 0
     assert data["final_status"] == "completed"
     assert data["job_id"] == job_id
+    assert data["command"][:4] == ["codex", "exec", "--sandbox", "read-only"]
+    assert "--quiet" not in data["command"]
 
 
 def test_remote_invoke_success_status_completed_on_disk(
