@@ -2804,3 +2804,66 @@ def check_remote_job_readiness(root: HarnessPath, job_id: str) -> dict:
         "requested_agent": requested_agent,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# First Controlled Agent Execution Preview (Phase 41A)
+# ---------------------------------------------------------------------------
+
+REMOTE_EXECUTE_DRY_RUN_ADVISORY = "Execution preview only; no agent was invoked."
+
+_REMOTE_EXECUTE_SAFETY_NOTES: tuple[str, ...] = (
+    "No agent was executed.",
+    "The prompt was not submitted to any agent.",
+    "No files were modified.",
+    "This is a preview only; human authorisation is required before execution.",
+)
+
+_REMOTE_EXECUTE_PROMPT_PREVIEW_MAX = 200
+
+
+def _derive_command_preview(agent_id: str, prompt_preview: str) -> str | None:
+    """Return a plausible CLI invocation preview, or None if not safely derivable."""
+    config = AGENT_CONFIG_REGISTRY.get(agent_id)
+    if config is None or config.adapter_type != ADAPTER_TYPE_CLI:
+        return None
+    hint = config.executable_hint
+    if hint is None:
+        return None
+    safe_prompt = prompt_preview.replace("'", "\\'")
+    return f"[preview] {hint} --prompt '{safe_prompt}'"
+
+
+def build_remote_execute_dry_run(root: HarnessPath, job_id: str) -> dict:
+    """Return advisory execution preview for a persisted job. Never executes an agent."""
+    readiness = check_remote_job_readiness(root, job_id)
+
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+    job = json.loads(job_file.read_text(encoding="utf-8"))
+
+    requested_agent: str = job.get("requested_agent", "")
+    prompt: str = job.get("requested_task", "")
+    prompt_preview = prompt[:_REMOTE_EXECUTE_PROMPT_PREVIEW_MAX]
+
+    readiness_status = "ready" if readiness["ready"] else "blocked"
+    dry_run_result = "would_execute" if readiness["ready"] else "blocked"
+
+    execution_preview = {
+        "blockers": readiness["blockers"],
+        "command_preview": _derive_command_preview(requested_agent, prompt_preview),
+        "dry_run_result": dry_run_result,
+        "execution_mode": job.get("execution_mode", ""),
+        "job_id": readiness["job_id"],
+        "prompt_preview": prompt_preview,
+        "readiness_status": readiness_status,
+        "required_approvals": job.get("required_approvals", []),
+        "required_checks": job.get("required_checks", []),
+        "safety_notes": list(_REMOTE_EXECUTE_SAFETY_NOTES),
+        "selected_agent": requested_agent,
+    }
+
+    return {
+        "advisory": REMOTE_EXECUTE_DRY_RUN_ADVISORY,
+        "execution_preview": execution_preview,
+    }

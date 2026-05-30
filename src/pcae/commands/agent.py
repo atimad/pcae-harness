@@ -34,6 +34,7 @@ from pcae.core.agent import (
     approve_remote_job,
     deny_remote_job,
     check_remote_job_readiness,
+    build_remote_execute_dry_run,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -935,6 +936,54 @@ def run_remote_ready(args: argparse.Namespace) -> int:
             print(f"\nWarnings ({len(warnings)}):")
             for w in warnings:
                 print(f"  - {w}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_execute(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("--dry-run is required for 'pcae remote execute'. No agent was invoked.")
+        return 1
+    try:
+        data = build_remote_execute_dry_run(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        preview = data["execution_preview"]
+        status_label = "READY" if preview["readiness_status"] == "ready" else "NOT READY"
+        print("Remote execution dry run")
+        print(f"Readiness:       {status_label}")
+        print(f"Job ID:          {preview['job_id']}")
+        print(f"Agent:           {preview['selected_agent']}")
+        print(f"Execution mode:  {preview['execution_mode']}")
+        print(f"Dry-run result:  {preview['dry_run_result']}")
+        cmd = preview.get("command_preview")
+        if cmd:
+            print(f"\nExecution command preview:\n  {cmd}")
+        print(f"\nPrompt preview:\n  {preview['prompt_preview']}")
+        blockers = preview["blockers"]
+        if blockers:
+            print(f"\nBlockers ({len(blockers)}):")
+            for b in blockers:
+                print(f"  - {b}")
+        checks_label = preview.get("required_checks", [])
+        if checks_label:
+            print(f"\nRequired checks ({len(checks_label)}):")
+            for c in checks_label:
+                print(f"  - {c}")
+        approvals = preview.get("required_approvals", [])
+        if approvals:
+            print(f"\nRequired approvals ({len(approvals)}):")
+            for a in approvals:
+                print(f"  - {a}")
+        notes = preview.get("safety_notes", [])
+        print(f"\nSafety notes ({len(notes)}):")
+        for n in notes:
+            print(f"  - {n}")
         print()
         print(data["advisory"])
     return 0

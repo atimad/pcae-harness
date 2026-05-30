@@ -7999,6 +7999,208 @@ def test_remote_ready_schema_invalid_job_has_blocker(
 
 
 # ---------------------------------------------------------------------------
+# pcae remote execute --dry-run (Phase 41A)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_execute_dry_run_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id, "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "advisory" in data
+    assert "execution_preview" in data
+    preview = data["execution_preview"]
+    for key in (
+        "job_id",
+        "selected_agent",
+        "execution_mode",
+        "readiness_status",
+        "prompt_preview",
+        "command_preview",
+        "required_checks",
+        "required_approvals",
+        "blockers",
+        "safety_notes",
+        "dry_run_result",
+    ):
+        assert key in preview, f"missing key in execution_preview: {key}"
+
+
+def test_remote_execute_dry_run_approved_job_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    preview = data["execution_preview"]
+
+    assert preview["job_id"] == job_id
+    assert preview["selected_agent"] == "codex-local"
+    assert preview["prompt_preview"] != ""
+    assert isinstance(preview["blockers"], list)
+    assert isinstance(preview["safety_notes"], list)
+    assert len(preview["safety_notes"]) > 0
+
+
+def test_remote_execute_dry_run_denied_job_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+    main(["remote", "deny", job_id, "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "execute", job_id, "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    preview = data["execution_preview"]
+    assert preview["readiness_status"] == "blocked"
+    assert preview["dry_run_result"] == "blocked"
+    assert len(preview["blockers"]) > 0
+
+
+def test_remote_execute_dry_run_pending_job_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    preview = data["execution_preview"]
+    assert preview["dry_run_result"] == "blocked"
+    assert any("approval_state" in b or "status" in b for b in preview["blockers"])
+
+
+def test_remote_execute_missing_dry_run_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "--dry-run" in output
+
+
+def test_remote_execute_unknown_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "execute", "job-00000000-000000-000000", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output
+
+
+def test_remote_execute_dry_run_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id, "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote execution dry run" in output
+    assert job_id in output
+    assert "no agent was invoked" in output
+
+
+def test_remote_execute_dry_run_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["advisory"] == "Execution preview only; no agent was invoked."
+
+
+def test_remote_execute_dry_run_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    job_file = jobs_dir / f"{job_id}.json"
+    content_before = job_file.read_text(encoding="utf-8")
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    capsys.readouterr()
+
+    assert job_file.read_text(encoding="utf-8") == content_before
+
+
+def test_remote_execute_dry_run_prompt_preview_truncated(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    long_prompt = "x" * 300
+    main(["remote", "create", "--agent", "codex-local", "--prompt", long_prompt, "--persist", "--json"])
+    job_id = json.loads(capsys.readouterr().out)["job"]["job_id"]
+    main(["remote", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["execution_preview"]["prompt_preview"]) <= 200
+
+
+def test_remote_execute_dry_run_command_preview_for_cli_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cmd = data["execution_preview"]["command_preview"]
+    assert cmd is not None
+    assert "codex" in cmd
+
+
+def test_remote_execute_dry_run_safety_notes_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    notes = data["execution_preview"]["safety_notes"]
+    assert any("No agent was executed" in n for n in notes)
+    assert any("preview only" in n for n in notes)
+
+
+# ---------------------------------------------------------------------------
 
 
 def init_agent_repo(root: Path) -> None:

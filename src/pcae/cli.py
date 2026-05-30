@@ -28,6 +28,7 @@ from pcae.commands.agent import (
     run_remote_strategy,
     run_remote_approve,
     run_remote_deny,
+    run_remote_execute,
     run_remote_ready,
     run_remote_jobs,
     run_remote_jobs_list,
@@ -1386,6 +1387,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON readiness output.",
     )
     remote_ready_parser.set_defaults(handler=run_remote_ready)
+
+    remote_execute_parser = remote_subparsers.add_parser(
+        "execute",
+        help="Preview or execute a persisted Remote Autonomous Coding job.",
+    )
+    remote_execute_parser.add_argument(
+        "job_id",
+        help="ID of the job to execute.",
+    )
+    remote_execute_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        dest="dry_run",
+        help="Preview execution without invoking any agent (required).",
+    )
+    remote_execute_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON execution preview.",
+    )
+    remote_execute_parser.set_defaults(handler=run_remote_execute)
 
     remote_validate_parser = remote_subparsers.add_parser(
         "validate",

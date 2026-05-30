@@ -706,11 +706,18 @@ git_working_tree_clean, pcae_check_required, tests_required, and
 required_approvals_listed; failing hard checks produce blocker messages;
 `ready` is True only when blockers list is empty; strictly read-only;
 `check_remote_job_readiness(root, job_id)` added to core; `run_remote_ready()`
-added to commands; `ready` subcommand wired in CLI.
+added to commands; `ready` subcommand wired in CLI; execution can be previewed
+with `pcae remote execute JOB_ID --dry-run` (Phase 41A): `--dry-run` is
+required (omitting exits 1); calls the readiness gate internally; output
+includes `readiness_status`, `prompt_preview` (200 chars), `command_preview`
+(derived from `executable_hint` for CLI adapters), `blockers`, `safety_notes`,
+and `dry_run_result` (would_execute/blocked); strictly read-only;
+`build_remote_execute_dry_run(root, job_id)` added to core;
+`run_remote_execute()` added to commands; `execute` subcommand wired in CLI.
 
 ## Next
 
-- Phase 40I: Remote Job Deletion.
+- Phase 41B: First Controlled Agent Execution (Live).
 
 ## Future Explorations
 
