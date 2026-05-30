@@ -1772,3 +1772,46 @@ def build_remote_plan(
         "required_checks": required_checks,
         "safety_notes": list(_REMOTE_PLAN_SAFETY_NOTES),
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Definition Model (Phase 39D)
+# ---------------------------------------------------------------------------
+
+REMOTE_JOBS_ADVISORY = (
+    "Remote jobs are advisory definitions; no agents are executed."
+)
+
+REMOTE_JOB_SUPPORTED_STATUSES: tuple[str, ...] = (
+    "draft",
+    "awaiting_approval",
+    "approved",
+    "blocked",
+    "ready",
+    "completed",
+    "failed",
+)
+
+REMOTE_JOB_SCHEMA_FIELDS: tuple[str, ...] = (
+    "approval_state",
+    "created_at",
+    "execution_mode",
+    "job_id",
+    "policy_compliance",
+    "requested_agent",
+    "requested_task",
+    "required_approvals",
+    "required_checks",
+    "safety_notes",
+    "status",
+)
+
+
+def build_remote_jobs() -> dict:
+    """Return the advisory remote job registry (empty; no jobs created yet)."""
+    return {
+        "advisory": REMOTE_JOBS_ADVISORY,
+        "job_schema": list(REMOTE_JOB_SCHEMA_FIELDS),
+        "jobs": [],
+        "supported_statuses": list(REMOTE_JOB_SUPPORTED_STATUSES),
+    }

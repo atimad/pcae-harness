@@ -578,9 +578,19 @@ allowed_agents, not installed, adapter not allowed, or the agent does not
 support the required execution mode; all operations are strictly read-only
 with no agent execution, prompt submission, or runtime state mutation.
 
+PCAE also exposes a read-only remote job definition model with
+`pcae remote jobs` and `pcae remote jobs --json` (Phase 39D): the job
+schema defines eleven fields — job_id, requested_agent, requested_task,
+execution_mode, approval_state, policy_compliance, status, created_at,
+required_checks, required_approvals, safety_notes; seven supported
+statuses are declared — draft, awaiting_approval, approved, blocked,
+ready, completed, failed; the registry is deterministically empty for
+this phase with no job creation, execution, or prompt submission; all
+operations are strictly read-only.
+
 ## Next
 
-- Phase 39D: Remote Autonomous Coding Job Model.
+- Phase 39E: Remote Job Submission Dry-Run.
 
 ## Future Explorations
 

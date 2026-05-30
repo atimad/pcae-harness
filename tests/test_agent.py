@@ -4352,6 +4352,185 @@ def test_remote_plan_human_output_no_blockers_when_ready(
     assert "ready" in output
 
 
+# pcae remote jobs (Phase 39D)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_jobs_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote job registry" in output
+    assert "Jobs: 0" in output
+    assert "Supported statuses" in output
+    assert "Remote jobs are advisory definitions" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_jobs_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "advisory" in data
+    assert "jobs" in data
+    assert "job_schema" in data
+    assert "supported_statuses" in data
+
+
+def test_remote_jobs_empty_by_default(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["jobs"] == []
+
+
+def test_remote_jobs_all_statuses_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    statuses = data["supported_statuses"]
+    for expected in (
+        "draft",
+        "awaiting_approval",
+        "approved",
+        "blocked",
+        "ready",
+        "completed",
+        "failed",
+    ):
+        assert expected in statuses, f"Missing status: {expected}"
+
+
+def test_remote_jobs_seven_statuses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["supported_statuses"]) == 7
+
+
+def test_remote_jobs_schema_fields_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    schema = data["job_schema"]
+    for field in (
+        "approval_state",
+        "created_at",
+        "execution_mode",
+        "job_id",
+        "policy_compliance",
+        "requested_agent",
+        "requested_task",
+        "required_approvals",
+        "required_checks",
+        "safety_notes",
+        "status",
+    ):
+        assert field in schema, f"Missing schema field: {field}"
+
+
+def test_remote_jobs_schema_field_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["job_schema"]) == 11
+
+
+def test_remote_jobs_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+
+
+def test_remote_jobs_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "jobs"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_jobs_human_output_lists_statuses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    for status in ("draft", "awaiting_approval", "approved", "blocked", "ready"):
+        assert status in output, f"Missing status in human output: {status}"
+
+
+def test_remote_job_schema_fields_constant(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import REMOTE_JOB_SCHEMA_FIELDS, REMOTE_JOB_SUPPORTED_STATUSES
+
+    assert "job_id" in REMOTE_JOB_SCHEMA_FIELDS
+    assert "status" in REMOTE_JOB_SCHEMA_FIELDS
+    assert "requested_agent" in REMOTE_JOB_SCHEMA_FIELDS
+    assert "draft" in REMOTE_JOB_SUPPORTED_STATUSES
+    assert "failed" in REMOTE_JOB_SUPPORTED_STATUSES
+
+
 # ---------------------------------------------------------------------------
 
 

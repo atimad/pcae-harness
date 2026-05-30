@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_jobs,
     build_remote_plan,
     build_remote_policy,
     build_remote_status,
@@ -496,6 +497,26 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_jobs(args: argparse.Namespace) -> int:
+    data = build_remote_jobs()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        jobs = data["jobs"]
+        print("Remote job registry")
+        print(f"Jobs: {len(jobs)}")
+        if jobs:
+            for job in jobs:
+                print(f"  [{job['status']}] {job['job_id']} — {job['requested_task']}")
+        statuses = data["supported_statuses"]
+        print(f"\nSupported statuses ({len(statuses)}):")
+        for s in statuses:
+            print(f"  - {s}")
         print()
         print(data["advisory"])
     return 0
