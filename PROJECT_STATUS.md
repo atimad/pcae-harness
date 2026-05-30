@@ -554,9 +554,21 @@ interactive/non_interactive discovery; JSON includes agent_id, adapter_type,
 capabilities, execution_modes, executable_path, runtime_version, advisory;
 all operations are strictly read-only.
 
+PCAE also exposes an advisory remote autonomous coding execution policy with
+`pcae remote policy` and `pcae remote policy --json` (Phase 39B): policy
+fields include allowed_agents (claude-local, codex-local, kimi-local),
+allowed_adapters (cli), allowed_execution_modes (non_interactive),
+approval_required (true), require_clean_git (true), require_pcae_check
+(true), require_tests (true), require_human_approval_before_commit (true),
+require_human_approval_before_push (true), max_files_changed (null),
+max_runtime_minutes (null), and disallowed_operations (delete_branch,
+drop_table, force_push, rm_rf); policy is conservative and
+approval-based; all operations are strictly read-only with no agent
+execution, prompt submission, or runtime state mutation.
+
 ## Next
 
-- Phase 38D: Remote Autonomous Coding Readiness (Option C — Multi-Agent Collaboration).
+- Phase 39C: Remote Autonomous Coding Job Model.
 
 ## Future Explorations
 

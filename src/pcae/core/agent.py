@@ -1635,3 +1635,38 @@ def build_remote_status(root: HarnessPath) -> dict:
         "safety_notes": list(REMOTE_SAFETY_NOTES),
         "supported_adapters": sorted(supported_adapters),
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Autonomous Coding Execution Policy (Phase 39B)
+# ---------------------------------------------------------------------------
+
+REMOTE_POLICY_ADVISORY = (
+    "Remote execution policy is advisory; no agents are executed or scheduled."
+)
+
+_REMOTE_POLICY_DISALLOWED_OPERATIONS: tuple[str, ...] = (
+    "delete_branch",
+    "drop_table",
+    "force_push",
+    "rm_rf",
+)
+
+
+def build_remote_policy() -> dict:
+    """Return the advisory remote autonomous coding execution policy."""
+    return {
+        "advisory": REMOTE_POLICY_ADVISORY,
+        "allowed_adapters": ["cli"],
+        "allowed_agents": ["claude-local", "codex-local", "kimi-local"],
+        "allowed_execution_modes": ["non_interactive"],
+        "approval_required": True,
+        "disallowed_operations": list(_REMOTE_POLICY_DISALLOWED_OPERATIONS),
+        "max_files_changed": None,
+        "max_runtime_minutes": None,
+        "require_clean_git": True,
+        "require_human_approval_before_commit": True,
+        "require_human_approval_before_push": True,
+        "require_pcae_check": True,
+        "require_tests": True,
+    }

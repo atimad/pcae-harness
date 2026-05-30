@@ -3855,6 +3855,173 @@ def test_remote_status_supported_adapters_reflect_installed(
     assert "cli" in data["supported_adapters"]
 
 
+# pcae remote policy (Phase 39B)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_policy_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote Autonomous Coding execution policy" in output
+    assert "Approval required: yes" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "cli" in output
+    assert "non_interactive" in output
+    assert "Remote execution policy is advisory" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_policy_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "advisory",
+        "allowed_adapters",
+        "allowed_agents",
+        "allowed_execution_modes",
+        "approval_required",
+        "disallowed_operations",
+        "max_files_changed",
+        "max_runtime_minutes",
+        "require_clean_git",
+        "require_human_approval_before_commit",
+        "require_human_approval_before_push",
+        "require_pcae_check",
+        "require_tests",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_policy_default_values(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approval_required"] is True
+    assert data["require_clean_git"] is True
+    assert data["require_pcae_check"] is True
+    assert data["require_tests"] is True
+    assert data["require_human_approval_before_commit"] is True
+    assert data["require_human_approval_before_push"] is True
+    assert data["allowed_adapters"] == ["cli"]
+    assert data["allowed_execution_modes"] == ["non_interactive"]
+    assert data["max_files_changed"] is None
+    assert data["max_runtime_minutes"] is None
+
+
+def test_remote_policy_allowed_agents_include_all_three(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    agents = data["allowed_agents"]
+    assert "codex-local" in agents
+    assert "claude-local" in agents
+    assert "kimi-local" in agents
+
+
+def test_remote_policy_disallowed_operations_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ops = data["disallowed_operations"]
+    assert isinstance(ops, list)
+    assert len(ops) > 0
+    assert "force_push" in ops
+    assert "rm_rf" in ops
+
+
+def test_remote_policy_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "advisory" in data["advisory"].lower() or "policy" in data["advisory"].lower()
+    assert "no agents are executed" in data["advisory"]
+
+
+def test_remote_policy_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "policy"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_policy_human_output_shows_disallowed_operations(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Disallowed operations" in output
+    assert "force_push" in output
+    assert "rm_rf" in output
+
+
+def test_remote_policy_human_output_max_fields_unlimited(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "policy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "(unlimited)" in output
+
+
+# ---------------------------------------------------------------------------
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))

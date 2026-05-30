@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_policy,
     build_remote_status,
     build_review_workflows,
     build_runtime_discovery,
@@ -494,6 +495,40 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_policy(args: argparse.Namespace) -> int:
+    data = build_remote_policy()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Remote Autonomous Coding execution policy")
+        print(f"Approval required: {'yes' if data['approval_required'] else 'no'}")
+        print(f"Allowed agents: {', '.join(data['allowed_agents'])}")
+        print(f"Allowed adapters: {', '.join(data['allowed_adapters'])}")
+        print(f"Allowed execution modes: {', '.join(data['allowed_execution_modes'])}")
+        max_files = data["max_files_changed"]
+        max_mins = data["max_runtime_minutes"]
+        print(f"Max files changed: {max_files if max_files is not None else '(unlimited)'}")
+        print(f"Max runtime minutes: {max_mins if max_mins is not None else '(unlimited)'}")
+        print(f"Require clean git: {'yes' if data['require_clean_git'] else 'no'}")
+        print(f"Require pcae check: {'yes' if data['require_pcae_check'] else 'no'}")
+        print(f"Require tests: {'yes' if data['require_tests'] else 'no'}")
+        print(
+            f"Require human approval before commit: "
+            f"{'yes' if data['require_human_approval_before_commit'] else 'no'}"
+        )
+        print(
+            f"Require human approval before push: "
+            f"{'yes' if data['require_human_approval_before_push'] else 'no'}"
+        )
+        ops = data["disallowed_operations"]
+        print(f"\nDisallowed operations ({len(ops)}):")
+        for op in ops:
+            print(f"  - {op}")
         print()
         print(data["advisory"])
     return 0

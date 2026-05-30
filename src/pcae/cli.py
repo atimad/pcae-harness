@@ -21,6 +21,7 @@ from pcae.commands.agent import (
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
+    run_remote_policy,
     run_remote_status,
 )
 from pcae.commands.architecture import (
@@ -1204,6 +1205,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON remote status output.",
     )
     remote_status_parser.set_defaults(handler=run_remote_status)
+
+    remote_policy_parser = remote_subparsers.add_parser(
+        "policy",
+        help="Report Remote Autonomous Coding execution policy.",
+    )
+    remote_policy_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON remote policy output.",
+    )
+    remote_policy_parser.set_defaults(handler=run_remote_policy)
 
     analytics_parser = subparsers.add_parser(
         "analytics",
