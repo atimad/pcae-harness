@@ -30,6 +30,7 @@ from pcae.core.agent import (
     build_remote_strategy,
     build_remote_jobs,
     load_persisted_jobs,
+    inspect_persisted_job,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -836,6 +837,44 @@ def run_remote_jobs_list(args: argparse.Namespace) -> int:
             print(f"\nWarnings ({len(warnings)}):")
             for w in warnings:
                 print(f"  - {w}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_jobs_show(args: argparse.Namespace) -> int:
+    try:
+        data = inspect_persisted_job(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        job = data["job"]
+        print("Remote job details")
+        print(f"Job ID:           {job.get('job_id', '?')}")
+        print(f"Agent:            {job.get('requested_agent', '?')}")
+        print(f"Task:             {job.get('requested_task', '?')}")
+        print(f"Execution mode:   {job.get('execution_mode', '?')}")
+        print(f"Status:           {job.get('status', '?')}")
+        print(f"Approval state:   {job.get('approval_state', '?')}")
+        print(f"Created at:       {job.get('created_at', '?')}")
+        comp = job.get("policy_compliance", {})
+        if isinstance(comp, dict):
+            print(f"Policy compliant: {'yes' if comp.get('compliant') else 'no'}")
+        checks = job.get("required_checks", [])
+        print(f"\nRequired checks ({len(checks)}):")
+        for item in checks:
+            print(f"  - {item}")
+        approvals = job.get("required_approvals", [])
+        print(f"\nRequired approvals ({len(approvals)}):")
+        for item in approvals:
+            print(f"  - {item}")
+        notes = job.get("safety_notes", [])
+        print(f"\nSafety notes ({len(notes)}):")
+        for note in notes:
+            print(f"  - {note}")
         print()
         print(data["advisory"])
     return 0

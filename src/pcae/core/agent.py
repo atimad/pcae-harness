@@ -2586,3 +2586,32 @@ def load_persisted_jobs(root: HarnessPath) -> dict:
         "jobs": jobs,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Inspection (Phase 40F)
+# ---------------------------------------------------------------------------
+
+REMOTE_JOB_INSPECT_ADVISORY = "Job inspection is read-only; no agents are executed."
+
+
+def inspect_persisted_job(root: HarnessPath, job_id: str) -> dict:
+    """Read a single persisted job by ID. Raises ValueError on unknown or malformed."""
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        parsed = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file {job_file.name}: {exc}") from exc
+
+    if not isinstance(parsed, dict):
+        raise ValueError(f"Malformed job file {job_file.name}: content is not a JSON object.")
+
+    return {
+        "advisory": REMOTE_JOB_INSPECT_ADVISORY,
+        "job": parsed,
+    }

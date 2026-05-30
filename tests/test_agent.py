@@ -7406,6 +7406,196 @@ def test_remote_jobs_list_job_count_matches_jobs_length(
 
 
 # ---------------------------------------------------------------------------
+# pcae remote jobs show (Phase 40F)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_jobs_show_existing_job_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "do the thing", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    exit_code = main(["remote", "jobs", "show", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["job"]["job_id"] == job_id
+    assert "advisory" in data
+
+
+def test_remote_jobs_show_existing_job_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "human task", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    exit_code = main(["remote", "jobs", "show", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote job details" in output
+    assert job_id in output
+
+
+def test_remote_jobs_show_unknown_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "jobs", "show", "job-99999999-000000-000000"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output or "No file found" in output
+
+
+def test_remote_jobs_show_malformed_json_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "job-20260101-120000-000000"
+    (jobs_dir / f"{job_id}.json").write_text("{bad json", encoding="utf-8")
+
+    exit_code = main(["remote", "jobs", "show", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Malformed" in output or "malformed" in output
+
+
+def test_remote_jobs_show_malformed_not_dict_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "job-20260101-120000-000001"
+    (jobs_dir / f"{job_id}.json").write_text("[1, 2, 3]", encoding="utf-8")
+
+    exit_code = main(["remote", "jobs", "show", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Malformed" in output or "malformed" in output
+
+
+def test_remote_jobs_show_all_fields_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "inspect me", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    main(["remote", "jobs", "show", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    job = data["job"]
+    for field in (
+        "job_id",
+        "requested_agent",
+        "requested_task",
+        "execution_mode",
+        "approval_state",
+        "policy_compliance",
+        "status",
+        "created_at",
+        "required_checks",
+        "required_approvals",
+        "safety_notes",
+    ):
+        assert field in job, f"missing field: {field}"
+
+
+def test_remote_jobs_show_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "advisory check", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    main(["remote", "jobs", "show", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert data["advisory"] == "Job inspection is read-only; no agents are executed."
+
+
+def test_remote_jobs_show_advisory_in_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "human advisory", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    main(["remote", "jobs", "show", job_id])
+
+    output = capsys.readouterr().out
+    assert "read-only" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_jobs_show_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "readonly check", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    files_before = set(p.name for p in jobs_dir.iterdir())
+
+    main(["remote", "jobs", "show", job_id])
+    capsys.readouterr()
+
+    files_after = set(p.name for p in jobs_dir.iterdir())
+    assert files_before == files_after
+
+
+def test_remote_jobs_show_human_output_all_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "codex-local", "--prompt", "section check", "--persist", "--json"])
+    data_create = json.loads(capsys.readouterr().out)
+    job_id = data_create["job"]["job_id"]
+
+    main(["remote", "jobs", "show", job_id])
+
+    output = capsys.readouterr().out
+    assert "Required checks" in output
+    assert "Required approvals" in output
+    assert "Safety notes" in output
+
+
+# ---------------------------------------------------------------------------
 
 
 def init_agent_repo(root: Path) -> None:

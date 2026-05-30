@@ -681,11 +681,19 @@ group with a `list` subcommand while the existing `pcae remote jobs` flat
 command is preserved; JSON output has `job_count`, `jobs`, `warnings`, and
 `advisory`; human output shows job count, per-job id/agent/approval/created-at,
 and warnings; `load_persisted_jobs()` added to core; `run_remote_jobs_list()`
-added to commands; all operations are strictly read-only.
+added to commands; all operations are strictly read-only; persisted jobs can
+be inspected individually with `pcae remote jobs show JOB_ID` and
+`pcae remote jobs show JOB_ID --json` (Phase 40F): reads
+`.pcae/remote/jobs/<JOB_ID>.json`, exits 1 with a clear error for unknown or
+malformed jobs, displays all 11 schema fields in human output, JSON output
+has `job` and `advisory`; `inspect_persisted_job(root, job_id)` raises
+`ValueError` on error; `run_remote_jobs_show()` added to commands; `show`
+subcommand with positional `job_id` wired in CLI; all operations are strictly
+read-only.
 
 ## Next
 
-- Phase 40F: Remote Job Inspection.
+- Phase 40G: Remote Job Deletion.
 
 ## Future Explorations
 
