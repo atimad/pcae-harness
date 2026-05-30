@@ -598,9 +598,19 @@ missing fields or unsupported statuses; the empty registry validates
 cleanly; `validate_remote_job()` and `build_remote_validate()` are
 reusable helpers; all operations are strictly read-only.
 
+PCAE also exposes an advisory remote execution approval workflow with
+`pcae remote approvals` and `pcae remote approvals --json` (Phase 39F):
+four approval states (pending, approved, denied, expired) and three
+approval gates (before_execution, before_commit, before_push) are
+declared; each gate reports a required flag derived from policy and a
+human-readable description; pending approvals are collected from jobs
+with approval_state=="pending"; the empty registry has no pending
+approvals; no approval mutation, job creation, or agent execution;
+all operations are strictly read-only.
+
 ## Next
 
-- Phase 39F: Remote Job Submission Dry-Run.
+- Phase 39G: Remote Execution Audit Log.
 
 ## Future Explorations
 

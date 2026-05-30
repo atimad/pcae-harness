@@ -1897,3 +1897,71 @@ def build_remote_validate(jobs: list | None = None) -> dict:
         "valid": not all_errors and not all_blockers,
         "warnings": all_warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Execution Approval Workflow (Phase 39F)
+# ---------------------------------------------------------------------------
+
+REMOTE_APPROVALS_ADVISORY = (
+    "Remote approvals are advisory; no agents are executed."
+)
+
+REMOTE_APPROVAL_STATES: tuple[str, ...] = (
+    "pending",
+    "approved",
+    "denied",
+    "expired",
+)
+
+REMOTE_APPROVAL_GATES: tuple[str, ...] = (
+    "before_execution",
+    "before_commit",
+    "before_push",
+)
+
+_REMOTE_APPROVAL_GATE_DESCRIPTIONS: dict[str, str] = {
+    "before_execution": "Human approval required before agent execution begins",
+    "before_commit": "Human approval required before committing changes",
+    "before_push": "Human approval required before pushing to remote",
+}
+
+_REMOTE_APPROVAL_GATE_POLICY_KEYS: dict[str, str] = {
+    "before_execution": "approval_required",
+    "before_commit": "require_human_approval_before_commit",
+    "before_push": "require_human_approval_before_push",
+}
+
+
+def build_remote_approvals(jobs: list | None = None) -> dict:
+    """Return the advisory remote execution approval workflow model."""
+    policy = build_remote_policy()
+    jobs_to_check: list[dict] = (
+        build_remote_jobs()["jobs"] if jobs is None else jobs
+    )
+
+    approval_gates = [
+        {
+            "description": _REMOTE_APPROVAL_GATE_DESCRIPTIONS[gate],
+            "gate": gate,
+            "required": bool(policy[_REMOTE_APPROVAL_GATE_POLICY_KEYS[gate]]),
+        }
+        for gate in REMOTE_APPROVAL_GATES
+    ]
+
+    pending_approvals: list[dict] = []
+    for job in jobs_to_check:
+        if job.get("approval_state") == "pending":
+            pending_approvals.append({
+                "gate": "before_execution",
+                "job_id": job.get("job_id", "(unknown)"),
+                "requested_agent": job.get("requested_agent", "(unknown)"),
+                "state": "pending",
+            })
+
+    return {
+        "advisory": REMOTE_APPROVALS_ADVISORY,
+        "approval_gates": approval_gates,
+        "approval_states": list(REMOTE_APPROVAL_STATES),
+        "pending_approvals": pending_approvals,
+    }

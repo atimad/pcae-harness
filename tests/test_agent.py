@@ -4792,6 +4792,232 @@ def test_remote_validate_human_output_shows_counts(
     assert "Blockers: 0" in output
 
 
+# pcae remote approvals (Phase 39F)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_approvals_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote approval workflow" in output
+    assert "Approval states" in output
+    assert "approval gates" in output.lower()
+    assert "Pending approvals: 0" in output
+    assert "Remote approvals are advisory" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_approvals_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "approval_gates", "approval_states", "pending_approvals"):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_approvals_all_states_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    states = data["approval_states"]
+    for expected in ("pending", "approved", "denied", "expired"):
+        assert expected in states, f"Missing state: {expected}"
+
+
+def test_remote_approvals_four_states(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["approval_states"]) == 4
+
+
+def test_remote_approvals_all_gates_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    gate_names = [g["gate"] for g in data["approval_gates"]]
+    for expected in ("before_execution", "before_commit", "before_push"):
+        assert expected in gate_names, f"Missing gate: {expected}"
+
+
+def test_remote_approvals_three_gates(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["approval_gates"]) == 3
+
+
+def test_remote_approvals_gate_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for gate in data["approval_gates"]:
+        assert "gate" in gate
+        assert "required" in gate
+        assert "description" in gate
+        assert isinstance(gate["required"], bool)
+
+
+def test_remote_approvals_gates_required_from_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    gates_by_name = {g["gate"]: g for g in data["approval_gates"]}
+    assert gates_by_name["before_execution"]["required"] is True
+    assert gates_by_name["before_commit"]["required"] is True
+    assert gates_by_name["before_push"]["required"] is True
+
+
+def test_remote_approvals_empty_registry_no_pending(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["pending_approvals"] == []
+
+
+def test_remote_approvals_pending_job_appears(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_approvals
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs = [{"job_id": "job-001", "approval_state": "pending", "requested_agent": "codex-local"}]
+
+    data = build_remote_approvals(jobs=jobs)
+
+    assert len(data["pending_approvals"]) == 1
+    p = data["pending_approvals"][0]
+    assert p["job_id"] == "job-001"
+    assert p["state"] == "pending"
+    assert p["gate"] == "before_execution"
+    assert p["requested_agent"] == "codex-local"
+
+
+def test_remote_approvals_approved_job_not_pending(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_approvals
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs = [{"job_id": "job-002", "approval_state": "approved", "requested_agent": "codex-local"}]
+
+    data = build_remote_approvals(jobs=jobs)
+
+    assert data["pending_approvals"] == []
+
+
+def test_remote_approvals_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+
+
+def test_remote_approvals_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "approvals"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_approvals_human_output_shows_gate_names(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "approvals"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "before_execution" in output
+    assert "before_commit" in output
+    assert "before_push" in output
+
+
+def test_remote_approvals_constants(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import REMOTE_APPROVAL_GATES, REMOTE_APPROVAL_STATES
+
+    assert len(REMOTE_APPROVAL_STATES) == 4
+    assert len(REMOTE_APPROVAL_GATES) == 3
+    assert "pending" in REMOTE_APPROVAL_STATES
+    assert "before_execution" in REMOTE_APPROVAL_GATES
+
+
 # ---------------------------------------------------------------------------
 
 

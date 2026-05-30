@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_approvals,
     build_remote_jobs,
     build_remote_plan,
     build_remote_validate,
@@ -498,6 +499,29 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_approvals(args: argparse.Namespace) -> int:
+    data = build_remote_approvals()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        states = data["approval_states"]
+        print("Remote approval workflow")
+        print(f"Approval states ({len(states)}): {', '.join(states)}")
+        gates = data["approval_gates"]
+        required_gates = [g for g in gates if g["required"]]
+        print(f"\nRequired approval gates ({len(required_gates)}):")
+        for g in gates:
+            tag = "[required]" if g["required"] else "[optional]"
+            print(f"  {tag} {g['gate']} — {g['description']}")
+        pending = data["pending_approvals"]
+        print(f"\nPending approvals: {len(pending)}")
+        for p in pending:
+            print(f"  [{p['state']}] {p['job_id']} ({p['requested_agent']}) at {p['gate']}")
         print()
         print(data["advisory"])
     return 0
