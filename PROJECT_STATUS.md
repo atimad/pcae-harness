@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 38D: Modular Claude Adapter Inspection.
+Phase 38E: Modular Kimi Adapter Inspection.
 
 ## Governance Coherence Note
 

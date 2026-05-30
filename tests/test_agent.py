@@ -3356,6 +3356,232 @@ def test_agents_adapter_inspect_claude_cap_source_is_help(
         assert cap["source"] == "help", f"Source for {cap['name']} should be 'help'"
 
 
+# pcae agents adapter inspect kimi-local (Phase 38E)
+# ---------------------------------------------------------------------------
+
+
+def test_agents_adapter_inspect_kimi_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "1.0.0" if exe == "kimi" else None
+    )
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Adapter inspection" in output
+    assert "kimi-local" in output
+    assert "Adapter type: cli" in output
+    assert "Execution modes:" in output
+    assert "Capabilities are discovered conservatively" in output
+    assert "Kimi CLI versions" in output
+
+
+def test_agents_adapter_inspect_kimi_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["agent_id"] == "kimi-local"
+    assert data["adapter_type"] == "cli"
+    assert "capabilities" in data
+    assert "execution_modes" in data
+    assert "advisory" in data
+    assert "executable_path" in data
+    assert "runtime_version" in data
+
+
+def test_agents_adapter_inspect_kimi_advisory_says_kimi_cli(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "discovered conservatively" in data["advisory"]
+    assert "Kimi CLI versions" in data["advisory"]
+
+
+def test_agents_adapter_inspect_kimi_capability_schema_matches_codex(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    kimi_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+    kimi_data = json.loads(capsys.readouterr().out)
+
+    codex_code = main(["agents", "adapter", "inspect", "codex-local", "--json"])
+    codex_data = json.loads(capsys.readouterr().out)
+
+    assert kimi_code == 0
+    assert codex_code == 0
+    required_fields = {"name", "status", "source", "notes"}
+    for cap in kimi_data["capabilities"]:
+        assert required_fields <= cap.keys()
+    assert {c["name"] for c in kimi_data["capabilities"]} == {
+        c["name"] for c in codex_data["capabilities"]
+    }
+
+
+def test_agents_adapter_inspect_kimi_known_capabilities_reported(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return "/usr/bin/kimi" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin pipe --json mcp hook remote"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "2.0.0" if exe == "kimi" else None
+    )
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    caps_by_name = {c["name"]: c for c in data["capabilities"]}
+    assert caps_by_name["non_interactive"]["status"] == "yes"
+    assert caps_by_name["stdin_prompt"]["status"] == "yes"
+    assert caps_by_name["structured_output"]["status"] == "yes"
+    assert caps_by_name["mcp"]["status"] == "yes"
+    assert caps_by_name["hooks"]["status"] == "yes"
+    assert caps_by_name["remote"]["status"] == "yes"
+    assert caps_by_name["interactive"]["status"] == "yes"
+    assert data["runtime_version"] == "2.0.0"
+    assert data["executable_path"] == "/usr/bin/kimi"
+
+
+def test_agents_adapter_inspect_kimi_unknown_caps_remain_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return "/usr/bin/kimi" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi basic help text only"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(
+        agent_mod, "_extract_version_string", lambda exe: "1.0.0" if exe == "kimi" else None
+    )
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    caps_by_name = {c["name"]: c for c in data["capabilities"]}
+    assert caps_by_name["mcp"]["status"] == "unknown"
+    assert caps_by_name["hooks"]["status"] == "unknown"
+    assert caps_by_name["remote"]["status"] == "unknown"
+    assert caps_by_name["prompt_file"]["status"] == "unknown"
+    assert caps_by_name["subagents"]["status"] == "unknown"
+    assert caps_by_name["structured_output"]["status"] == "unknown"
+
+
+def test_agents_adapter_inspect_kimi_not_installed_all_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["executable_path"] is None
+    assert data["runtime_version"] is None
+    assert data["execution_modes"] == []
+    for cap in data["capabilities"]:
+        assert cap["status"] == "unknown"
+
+
+def test_agents_adapter_inspect_kimi_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["agents", "adapter", "inspect", "kimi-local"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_agents_adapter_inspect_kimi_cap_source_is_help(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["agents", "adapter", "inspect", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for cap in data["capabilities"]:
+        assert cap["source"] == "help", f"Source for {cap['name']} should be 'help'"
+
+
 def init_agent_repo(root: Path) -> None:
     init_git_repo(root)
     init_harness(HarnessPath(root))

@@ -1388,8 +1388,14 @@ CLAUDE_ADAPTER_INSPECT_ADVISORY = (
     " and may evolve with Claude CLI versions."
 )
 
+KIMI_ADAPTER_INSPECT_ADVISORY = (
+    "Capabilities are discovered conservatively"
+    " and may evolve with Kimi CLI versions."
+)
+
 _ADAPTER_INSPECT_ADVISORY_BY_AGENT_TYPE: dict[str, str] = {
     "claude": CLAUDE_ADAPTER_INSPECT_ADVISORY,
+    "kimi": KIMI_ADAPTER_INSPECT_ADVISORY,
 }
 
 
