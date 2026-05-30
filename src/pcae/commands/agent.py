@@ -31,6 +31,8 @@ from pcae.core.agent import (
     build_remote_jobs,
     load_persisted_jobs,
     inspect_persisted_job,
+    approve_remote_job,
+    deny_remote_job,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -878,6 +880,32 @@ def run_remote_jobs_show(args: argparse.Namespace) -> int:
         print()
         print(data["advisory"])
     return 0
+
+
+def _run_remote_approval_mutation(args: argparse.Namespace, mutate_fn) -> int:
+    try:
+        data = mutate_fn(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Job ID:                 {data['job'].get('job_id', '?')}")
+        print(f"Previous approval state: {data['previous_approval_state']}")
+        print(f"New approval state:      {data['new_approval_state']}")
+        print(f"Status:                  {data['job'].get('status', '?')}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_approve(args: argparse.Namespace) -> int:
+    return _run_remote_approval_mutation(args, approve_remote_job)
+
+
+def run_remote_deny(args: argparse.Namespace) -> int:
+    return _run_remote_approval_mutation(args, deny_remote_job)
 
 
 def run_remote_plan(args: argparse.Namespace) -> int:

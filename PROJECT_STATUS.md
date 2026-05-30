@@ -689,11 +689,19 @@ malformed jobs, displays all 11 schema fields in human output, JSON output
 has `job` and `advisory`; `inspect_persisted_job(root, job_id)` raises
 `ValueError` on error; `run_remote_jobs_show()` added to commands; `show`
 subcommand with positional `job_id` wired in CLI; all operations are strictly
-read-only.
+read-only; approval state of persisted jobs can be mutated with
+`pcae remote approve JOB_ID` and `pcae remote deny JOB_ID` (Phase 40G):
+approve sets `approval_state` to `"approved"` and `status` to `"ready"` when
+`policy_compliance.compliant` is true, otherwise `"draft"`; deny sets
+`approval_state` to `"denied"` and `status` to `"blocked"`; both commands
+exit 1 for unknown or malformed jobs; mutation is written back to disk;
+no agents are executed; `approve_remote_job()` and `deny_remote_job()` added
+to core; `run_remote_approve()` and `run_remote_deny()` added to commands;
+`approve` and `deny` subcommands wired in CLI.
 
 ## Next
 
-- Phase 40G: Remote Job Deletion.
+- Phase 40H: Remote Job Deletion.
 
 ## Future Explorations
 

@@ -26,6 +26,8 @@ from pcae.commands.agent import (
     run_remote_create,
     run_remote_dry_run,
     run_remote_strategy,
+    run_remote_approve,
+    run_remote_deny,
     run_remote_jobs,
     run_remote_jobs_list,
     run_remote_jobs_show,
@@ -1338,6 +1340,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON job details.",
     )
     remote_jobs_show_parser.set_defaults(handler=run_remote_jobs_show)
+
+    remote_approve_parser = remote_subparsers.add_parser(
+        "approve",
+        help="Approve a persisted Remote Autonomous Coding job.",
+    )
+    remote_approve_parser.add_argument(
+        "job_id",
+        help="ID of the job to approve.",
+    )
+    remote_approve_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON approval output.",
+    )
+    remote_approve_parser.set_defaults(handler=run_remote_approve)
+
+    remote_deny_parser = remote_subparsers.add_parser(
+        "deny",
+        help="Deny a persisted Remote Autonomous Coding job.",
+    )
+    remote_deny_parser.add_argument(
+        "job_id",
+        help="ID of the job to deny.",
+    )
+    remote_deny_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON denial output.",
+    )
+    remote_deny_parser.set_defaults(handler=run_remote_deny)
 
     remote_validate_parser = remote_subparsers.add_parser(
         "validate",

@@ -2615,3 +2615,59 @@ def inspect_persisted_job(root: HarnessPath, job_id: str) -> dict:
         "advisory": REMOTE_JOB_INSPECT_ADVISORY,
         "job": parsed,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Approval Mutation (Phase 40G)
+# ---------------------------------------------------------------------------
+
+REMOTE_JOB_APPROVAL_ADVISORY = "Approval state updated; no agent execution has occurred."
+
+
+def _mutate_job_approval(root: HarnessPath, job_id: str, new_approval_state: str) -> dict:
+    """Read, mutate approval_state/status, write back. Raises ValueError on bad input."""
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file {job_file.name}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(f"Malformed job file {job_file.name}: content is not a JSON object.")
+
+    previous_approval_state = job.get("approval_state", "unknown")
+
+    job["approval_state"] = new_approval_state
+    if new_approval_state == "approved":
+        compliance = job.get("policy_compliance", {})
+        compliant = isinstance(compliance, dict) and compliance.get("compliant", False)
+        job["status"] = "ready" if compliant else "draft"
+    else:
+        job["status"] = "blocked"
+
+    with job_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(job, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    return {
+        "advisory": REMOTE_JOB_APPROVAL_ADVISORY,
+        "job": job,
+        "new_approval_state": new_approval_state,
+        "previous_approval_state": previous_approval_state,
+        "updated": True,
+    }
+
+
+def approve_remote_job(root: HarnessPath, job_id: str) -> dict:
+    """Approve a persisted job. Raises ValueError on unknown or malformed job."""
+    return _mutate_job_approval(root, job_id, "approved")
+
+
+def deny_remote_job(root: HarnessPath, job_id: str) -> dict:
+    """Deny a persisted job. Raises ValueError on unknown or malformed job."""
+    return _mutate_job_approval(root, job_id, "denied")
