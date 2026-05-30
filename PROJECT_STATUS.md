@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41B.4: Kimi Adapter Contract Correction.
+Phase 41C: Governed Execution Reporting.
 
 ## Governance Coherence Note
 
@@ -728,9 +728,25 @@ extracted for testability; no commit or push performed;
 `invoke_remote_job()` added to core; `_run_remote_execute_invoke()` added to
 commands; `--invoke` flag added to CLI.
 
+PCAE also exposes governed execution results for persisted Remote Autonomous
+Coding jobs with `pcae remote results JOB_ID` and
+`pcae remote results JOB_ID --json` (Phase 41C): reads the persisted job and
+any adjacent execution artifact from
+`.pcae/remote/executions/<JOB_ID>_result.json`; exits 1 for unknown job IDs;
+reports `result_available: false` when no artifact is present; when an
+artifact exists, reports `job_id`, `requested_agent`, `command_used`,
+`execution_started_at`, `execution_finished_at`, `duration_seconds`,
+`exit_code`, `stdout_summary` (first 500 chars), `stderr_summary` (first 200
+chars), `output_path`, `final_status`, and `readiness_at_execution` (optional
+fields default to null when not recorded); advisory is
+"Execution reporting is read-only; no agents are executed."; JSON output
+includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
+and `advisory`; all operations are strictly read-only with no job mutation,
+no agent execution, and no approval state changes.
+
 ## Next
 
-- Phase 41C: Governed Execution Reporting.
+- TBD: Future Remote Coding phases (execution history, aggregation, or reporting enhancements).
 
 ## Future Explorations
 

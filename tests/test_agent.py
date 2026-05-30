@@ -8674,3 +8674,157 @@ def test_remote_invoke_claude_adapter_unchanged_after_kimi_fix(
 
     assert data["command"][:2] == ["claude", "-p"]
     assert "--print" not in data["command"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 41C: Governed Execution Reporting
+# ---------------------------------------------------------------------------
+
+
+def test_remote_results_unknown_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "results", "job-00000000-000000-000000"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output
+
+
+def test_remote_results_no_execution_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "results", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "no execution result available" in output
+    assert job_id in output
+
+
+def test_remote_results_no_execution_artifact_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "results", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_available"] is False
+    assert data["job_id"] == job_id
+    assert data["execution_result"] is None
+    assert "advisory" in data
+    assert "Execution reporting is read-only" in data["advisory"]
+
+
+def _invoke_job(tmp_path, monkeypatch, capsys, agent="codex-local") -> str:
+    """Helper: create, approve, and invoke a job; return job_id."""
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent=agent)
+    _patch_ready(monkeypatch, agent)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(0, "Task output.\n"),
+    )
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def test_remote_results_after_invoke_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "results", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_available"] is True
+    assert data["job_id"] == job_id
+    assert data["requested_agent"] == "codex-local"
+    assert "advisory" in data
+    assert "Execution reporting is read-only" in data["advisory"]
+    result = data["execution_result"]
+    assert result is not None
+    for key in (
+        "command_used", "duration_seconds", "execution_finished_at",
+        "execution_started_at", "exit_code", "final_status",
+        "output_path", "readiness_at_execution",
+        "stderr_summary", "stdout_summary",
+    ):
+        assert key in result, f"missing key: {key}"
+    assert result["exit_code"] == 0
+    assert result["final_status"] == "completed"
+    assert result["command_used"] is not None
+    assert result["output_path"].endswith(f"{job_id}_result.json")
+
+
+def test_remote_results_after_invoke_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "results", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution results" in output
+    assert job_id in output
+    assert "completed" in output
+    assert "Execution reporting is read-only" in output
+
+
+def test_remote_results_failed_job_reports_failed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(1, stderr="execution error\n"),
+    )
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "results", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_available"] is True
+    assert data["execution_result"]["exit_code"] == 1
+    assert data["execution_result"]["final_status"] == "failed"
+
+
+def test_remote_results_is_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job(tmp_path, monkeypatch, capsys)
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    before = (jobs_dir / f"{job_id}.json").read_text(encoding="utf-8")
+
+    main(["remote", "results", job_id, "--json"])
+    capsys.readouterr()
+
+    after = (jobs_dir / f"{job_id}.json").read_text(encoding="utf-8")
+    assert before == after

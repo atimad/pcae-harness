@@ -26,6 +26,7 @@ from pcae.core.agent import (
     build_remote_create_dry_run,
     build_remote_create_persist_preview,
     build_remote_dry_run,
+    build_remote_results,
     persist_remote_job,
     build_remote_strategy,
     build_remote_jobs,
@@ -1101,6 +1102,47 @@ def run_remote_policy(args: argparse.Namespace) -> int:
         print(f"\nDisallowed operations ({len(ops)}):")
         for op in ops:
             print(f"  - {op}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_results(args: argparse.Namespace) -> int:
+    try:
+        data = build_remote_results(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Execution results")
+        print(f"Job ID:          {data['job_id']}")
+        print(f"Requested agent: {data['requested_agent']}")
+        if not data["result_available"]:
+            print("Result:          no execution result available")
+        else:
+            result = data["execution_result"]
+            cmd = result.get("command_used")
+            print(f"Command:         {' '.join(cmd) if cmd else '(none)'}")
+            started = result.get("execution_started_at")
+            print(f"Started at:      {started if started is not None else '(not recorded)'}")
+            finished = result.get("execution_finished_at")
+            print(f"Finished at:     {finished if finished is not None else '(not recorded)'}")
+            duration = result.get("duration_seconds")
+            print(f"Duration:        {duration if duration is not None else '(not recorded)'}")
+            print(f"Exit code:       {result.get('exit_code')}")
+            print(f"Final status:    {result.get('final_status')}")
+            print(f"Output path:     {result.get('output_path')}")
+            readiness = result.get("readiness_at_execution")
+            if readiness is not None:
+                print(f"Readiness at execution: {readiness}")
+            stdout_summary = result.get("stdout_summary")
+            print(f"\nStdout summary:\n  {stdout_summary or '(none)'}")
+            stderr_summary = result.get("stderr_summary")
+            if stderr_summary:
+                print(f"\nStderr summary:\n  {stderr_summary}")
         print()
         print(data["advisory"])
     return 0

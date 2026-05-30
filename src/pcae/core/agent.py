@@ -2986,3 +2986,85 @@ def invoke_remote_job(root: HarnessPath, job_id: str) -> dict:
         "stderr": stderr,
         "stdout": stdout,
     }
+
+
+# ---------------------------------------------------------------------------
+# Governed Execution Reporting (Phase 41C)
+# ---------------------------------------------------------------------------
+
+REMOTE_RESULTS_ADVISORY = (
+    "Execution reporting is read-only; no agents are executed."
+)
+
+_REMOTE_STDOUT_SUMMARY_MAX = 500
+_REMOTE_STDERR_SUMMARY_MAX = 200
+
+
+def build_remote_results(root: HarnessPath, job_id: str) -> dict:
+    """Return execution results for a persisted job. Raises ValueError for unknown jobs."""
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file {job_file.name}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(
+            f"Malformed job file {job_file.name}: content is not a JSON object."
+        )
+
+    requested_agent: str = job.get("requested_agent", "")
+
+    artifact_file = root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json"
+    output_path = str(_REMOTE_EXECUTIONS_DIR / f"{job_id}_result.json")
+
+    if not artifact_file.exists():
+        return {
+            "advisory": REMOTE_RESULTS_ADVISORY,
+            "execution_result": None,
+            "job_id": job_id,
+            "requested_agent": requested_agent,
+            "result_available": False,
+        }
+
+    try:
+        artifact = json.loads(artifact_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(
+            f"Malformed execution artifact for job {job_id!r}: {exc}"
+        ) from exc
+
+    if not isinstance(artifact, dict):
+        raise ValueError(
+            f"Malformed execution artifact for job {job_id!r}: "
+            "content is not a JSON object."
+        )
+
+    stdout_full: str = artifact.get("stdout") or ""
+    stderr_full: str = artifact.get("stderr") or ""
+
+    execution_result = {
+        "command_used": artifact.get("command"),
+        "duration_seconds": artifact.get("duration_seconds"),
+        "execution_finished_at": artifact.get("execution_finished_at"),
+        "execution_started_at": artifact.get("execution_started_at"),
+        "exit_code": artifact.get("exit_code"),
+        "final_status": artifact.get("final_status"),
+        "output_path": output_path,
+        "readiness_at_execution": artifact.get("readiness_at_execution"),
+        "stderr_summary": stderr_full[:_REMOTE_STDERR_SUMMARY_MAX] or None,
+        "stdout_summary": stdout_full[:_REMOTE_STDOUT_SUMMARY_MAX] or None,
+    }
+
+    return {
+        "advisory": REMOTE_RESULTS_ADVISORY,
+        "execution_result": execution_result,
+        "job_id": job_id,
+        "requested_agent": requested_agent,
+        "result_available": True,
+    }
