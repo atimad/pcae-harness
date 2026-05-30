@@ -8201,6 +8201,295 @@ def test_remote_execute_dry_run_safety_notes_present(
 
 
 # ---------------------------------------------------------------------------
+# pcae remote execute --invoke (Phase 41B)
+# ---------------------------------------------------------------------------
+
+import subprocess as _subprocess_mod
+from pcae.core import agent as _agent_mod
+from pcae.core.agent import (
+    AgentRuntimeCapabilities,
+    AgentRuntimeEntry,
+    RuntimeDiscoveryResult,
+    RUNTIME_CAP_YES,
+    RUNTIME_CAP_UNKNOWN,
+    RUNTIME_DISCOVERY_ADVISORY,
+)
+
+
+def _make_installed_discovery(agent_id: str) -> RuntimeDiscoveryResult:
+    caps = AgentRuntimeCapabilities(
+        installed=True,
+        executable_path=f"/usr/local/bin/{agent_id.split('-')[0]}",
+        version="test-1.0.0",
+        interactive_supported=RUNTIME_CAP_YES,
+        non_interactive_supported=RUNTIME_CAP_YES,
+        stdin_prompt_supported=RUNTIME_CAP_YES,
+        prompt_file_supported=RUNTIME_CAP_YES,
+        structured_output_supported=RUNTIME_CAP_YES,
+        mcp_supported=RUNTIME_CAP_YES,
+        hooks_supported=RUNTIME_CAP_YES,
+        subagents_supported=RUNTIME_CAP_YES,
+        remote_supported=RUNTIME_CAP_YES,
+        known_limitations=(),
+    )
+    entry = AgentRuntimeEntry(
+        agent_id=agent_id,
+        executable=f"/usr/local/bin/{agent_id.split('-')[0]}",
+        capabilities=caps,
+    )
+    return RuntimeDiscoveryResult(agents=(entry,), advisory=RUNTIME_DISCOVERY_ADVISORY)
+
+
+def _fake_proc(rc: int = 0, stdout: str = "ok\n", stderr: str = "") -> _subprocess_mod.CompletedProcess:
+    return _subprocess_mod.CompletedProcess(args=[], returncode=rc, stdout=stdout, stderr=stderr)
+
+
+def test_remote_invoke_missing_flags_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "--dry-run" in output or "--invoke" in output
+
+
+def test_remote_invoke_unknown_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "execute", "job-00000000-000000-000000", "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output
+
+
+def test_remote_invoke_pending_job_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not ready" in output.lower() or "Blockers" in output or "approval_state" in output
+
+
+def test_remote_invoke_denied_job_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+    main(["remote", "deny", job_id, "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not ready" in output.lower() or "Blockers" in output or "approval_state" in output
+
+
+def test_remote_invoke_runtime_not_installed_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not ready" in output.lower() or "runtime" in output.lower()
+
+
+def _patch_ready(monkeypatch, agent_id: str = "codex-local") -> None:
+    """Patch discovery and git to make the readiness gate pass in tests."""
+    monkeypatch.setattr(_agent_mod, "build_runtime_discovery", lambda: _make_installed_discovery(agent_id))
+    monkeypatch.setattr(_agent_mod, "read_git_changes", lambda root: ())
+
+
+def test_remote_invoke_success_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "Agent output\n"))
+
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("executed", "job_id", "selected_agent", "command", "exit_code", "stdout", "stderr", "output_path", "final_status", "advisory"):
+        assert key in data, f"missing key: {key}"
+    assert data["executed"] is True
+    assert data["exit_code"] == 0
+    assert data["final_status"] == "completed"
+    assert data["job_id"] == job_id
+
+
+def test_remote_invoke_success_status_completed_on_disk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    stored = json.loads((jobs_dir / f"{job_id}.json").read_text(encoding="utf-8"))
+    assert stored["status"] == "completed"
+
+
+def test_remote_invoke_failure_status_failed_on_disk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(1, stderr="error\n"))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    stored = json.loads((jobs_dir / f"{job_id}.json").read_text(encoding="utf-8"))
+    assert stored["status"] == "failed"
+
+
+def test_remote_invoke_artifact_written(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "done\n"))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    artifact = tmp_path / ".pcae" / "remote" / "executions" / f"{job_id}_result.json"
+    assert artifact.exists()
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["executed"] is True
+    assert stored["job_id"] == job_id
+    assert data["output_path"].endswith(f"{job_id}_result.json")
+
+
+def test_remote_invoke_no_commit_no_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    import subprocess as sp
+    log_before = sp.run(["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True).stdout
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    log_after = sp.run(["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True).stdout
+    assert log_before == log_after
+
+
+def test_remote_invoke_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "no commit or push was performed" in data["advisory"]
+
+
+def test_remote_invoke_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "Task done.\n"))
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote execution result" in output
+    assert job_id in output
+    assert "no commit or push was performed" in output
+
+
+def test_remote_invoke_kimi_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "create", "--agent", "kimi-local", "--prompt", "report task", "--persist", "--json"])
+    job_id = json.loads(capsys.readouterr().out)["job"]["job_id"]
+    main(["remote", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    _patch_ready(monkeypatch, "kimi-local")
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "kimi-local" in output or "syntax" in output.lower() or "safely derivable" in output.lower()
+
+
+def test_remote_invoke_dry_run_still_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "execute", job_id, "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "execution_preview" in data
+
+
+# ---------------------------------------------------------------------------
 
 
 def init_agent_repo(root: Path) -> None:

@@ -35,6 +35,7 @@ from pcae.core.agent import (
     deny_remote_job,
     check_remote_job_readiness,
     build_remote_execute_dry_run,
+    invoke_remote_job,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -942,9 +943,21 @@ def run_remote_ready(args: argparse.Namespace) -> int:
 
 
 def run_remote_execute(args: argparse.Namespace) -> int:
-    if not args.dry_run:
-        print("--dry-run is required for 'pcae remote execute'. No agent was invoked.")
-        return 1
+    invoke = getattr(args, "invoke", False)
+    dry_run = getattr(args, "dry_run", False)
+
+    if invoke:
+        return _run_remote_execute_invoke(args)
+    if dry_run:
+        return _run_remote_execute_dry_run(args)
+    print(
+        "Either --dry-run or --invoke is required for 'pcae remote execute'. "
+        "No agent was invoked."
+    )
+    return 1
+
+
+def _run_remote_execute_dry_run(args: argparse.Namespace) -> int:
     try:
         data = build_remote_execute_dry_run(HarnessPath.cwd(), args.job_id)
     except ValueError as error:
@@ -984,6 +997,33 @@ def run_remote_execute(args: argparse.Namespace) -> int:
         print(f"\nSafety notes ({len(notes)}):")
         for n in notes:
             print(f"  - {n}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def _run_remote_execute_invoke(args: argparse.Namespace) -> int:
+    try:
+        data = invoke_remote_job(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        status_label = "COMPLETED" if data["final_status"] == "completed" else data["final_status"].upper()
+        print("Remote execution result")
+        print(f"Job ID:         {data['job_id']}")
+        print(f"Agent:          {data['selected_agent']}")
+        print(f"Command:        {' '.join(data['command'])}")
+        print(f"Exit code:      {data['exit_code']}")
+        print(f"Final status:   {status_label}")
+        print(f"Artifact:       {data['output_path']}")
+        stdout_summary = data["stdout"][:500] if data["stdout"] else "(none)"
+        stderr_summary = data["stderr"][:200] if data["stderr"] else "(none)"
+        print(f"\nStdout summary:\n  {stdout_summary}")
+        if data["stderr"]:
+            print(f"\nStderr summary:\n  {stderr_summary}")
         print()
         print(data["advisory"])
     return 0

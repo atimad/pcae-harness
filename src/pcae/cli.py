@@ -1390,22 +1390,29 @@ def build_parser() -> argparse.ArgumentParser:
 
     remote_execute_parser = remote_subparsers.add_parser(
         "execute",
-        help="Preview or execute a persisted Remote Autonomous Coding job.",
+        help="Preview or invoke a persisted Remote Autonomous Coding job.",
     )
     remote_execute_parser.add_argument(
         "job_id",
         help="ID of the job to execute.",
     )
-    remote_execute_parser.add_argument(
+    _execute_mode = remote_execute_parser.add_mutually_exclusive_group()
+    _execute_mode.add_argument(
         "--dry-run",
         action="store_true",
         dest="dry_run",
-        help="Preview execution without invoking any agent (required).",
+        help="Preview execution without invoking any agent.",
+    )
+    _execute_mode.add_argument(
+        "--invoke",
+        action="store_true",
+        dest="invoke",
+        help="Invoke the agent for real under PCAE governance.",
     )
     remote_execute_parser.add_argument(
         "--json",
         action="store_true",
-        help="Print machine-readable JSON execution preview.",
+        help="Print machine-readable JSON output.",
     )
     remote_execute_parser.set_defaults(handler=run_remote_execute)
 

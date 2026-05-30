@@ -2867,3 +2867,117 @@ def build_remote_execute_dry_run(root: HarnessPath, job_id: str) -> dict:
         "advisory": REMOTE_EXECUTE_DRY_RUN_ADVISORY,
         "execution_preview": execution_preview,
     }
+
+
+# ---------------------------------------------------------------------------
+# First Real Controlled Agent Invocation (Phase 41B)
+# ---------------------------------------------------------------------------
+
+REMOTE_INVOKE_ADVISORY = (
+    "Agent execution completed under PCAE governance; "
+    "no commit or push was performed."
+)
+
+_REMOTE_EXECUTIONS_DIR = Path(".pcae") / "remote" / "executions"
+_INVOKE_TIMEOUT_SECONDS = 300
+
+_INVOKE_UNSUPPORTED_REASON = (
+    "non-interactive command syntax is not safely derivable for this agent"
+)
+
+
+def _build_invoke_command(agent_id: str, prompt: str) -> list[str] | None:
+    """Return the argv for non-interactive agent invocation, or None if unsafe/unknown."""
+    if agent_id == "claude-local":
+        return ["claude", "--print", prompt]
+    if agent_id == "codex-local":
+        return ["codex", "--quiet", prompt]
+    # kimi-local and all others: syntax uncertain — do not guess
+    return None
+
+
+def _run_agent_subprocess(
+    command: list[str],
+    timeout: int,
+) -> subprocess.CompletedProcess:
+    """Execute the agent subprocess. Extracted for testability."""
+    return subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+
+
+def invoke_remote_job(root: HarnessPath, job_id: str) -> dict:
+    """Invoke the agent for a persisted, approved, ready job under PCAE governance."""
+    readiness = check_remote_job_readiness(root, job_id)
+
+    if not readiness["ready"]:
+        blocker_lines = "; ".join(readiness["blockers"])
+        raise ValueError(
+            f"Job '{job_id}' is not ready for execution. Blockers: {blocker_lines}"
+        )
+
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+    job = json.loads(job_file.read_text(encoding="utf-8"))
+
+    requested_agent: str = job.get("requested_agent", "")
+    prompt: str = job.get("requested_task", "")
+
+    command = _build_invoke_command(requested_agent, prompt)
+    if command is None:
+        raise ValueError(
+            f"Agent '{requested_agent}' cannot be invoked: {_INVOKE_UNSUPPORTED_REASON}."
+        )
+
+    try:
+        proc = _run_agent_subprocess(command, _INVOKE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        raise ValueError(
+            f"Agent '{requested_agent}' timed out after {_INVOKE_TIMEOUT_SECONDS}s."
+        ) from None
+    except (FileNotFoundError, OSError) as exc:
+        raise ValueError(f"Failed to invoke agent '{requested_agent}': {exc}") from exc
+
+    exit_code: int = proc.returncode
+    stdout: str = proc.stdout or ""
+    stderr: str = proc.stderr or ""
+    final_status = "completed" if exit_code == 0 else "failed"
+
+    job["status"] = final_status
+    with job_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(job, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    executions_dir = root.join(_REMOTE_EXECUTIONS_DIR)
+    executions_dir.mkdir(parents=True, exist_ok=True)
+    artifact_file = executions_dir / f"{job_id}_result.json"
+    artifact = {
+        "advisory": REMOTE_INVOKE_ADVISORY,
+        "command": command,
+        "executed": True,
+        "exit_code": exit_code,
+        "final_status": final_status,
+        "job_id": job_id,
+        "selected_agent": requested_agent,
+        "stderr": stderr,
+        "stdout": stdout,
+    }
+    with artifact_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(artifact, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    return {
+        "advisory": REMOTE_INVOKE_ADVISORY,
+        "command": command,
+        "executed": True,
+        "exit_code": exit_code,
+        "final_status": final_status,
+        "job_id": job_id,
+        "output_path": str(_REMOTE_EXECUTIONS_DIR / artifact_file.name),
+        "selected_agent": requested_agent,
+        "stderr": stderr,
+        "stdout": stdout,
+    }

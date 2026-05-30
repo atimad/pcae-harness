@@ -713,11 +713,22 @@ includes `readiness_status`, `prompt_preview` (200 chars), `command_preview`
 (derived from `executable_hint` for CLI adapters), `blockers`, `safety_notes`,
 and `dry_run_result` (would_execute/blocked); strictly read-only;
 `build_remote_execute_dry_run(root, job_id)` added to core;
-`run_remote_execute()` added to commands; `execute` subcommand wired in CLI.
+`run_remote_execute()` added to commands; `execute` subcommand wired in CLI;
+real agent invocation under PCAE governance is available with
+`pcae remote execute JOB_ID --invoke` (Phase 41B): `--invoke` is mutually
+exclusive with `--dry-run`; readiness gate must pass or `ValueError` is raised;
+per-agent command dispatch: `claude-local` → `claude --print`, `codex-local`
+→ `codex --quiet`, all others blocked as "syntax not safely derivable";
+agent subprocess captured with 300 s timeout; job status updated to
+`"completed"` (rc=0) or `"failed"` (rc≠0) on disk; execution artifact
+written to `.pcae/remote/executions/<job_id>_result.json`; `_run_agent_subprocess`
+extracted for testability; no commit or push performed;
+`invoke_remote_job()` added to core; `_run_remote_execute_invoke()` added to
+commands; `--invoke` flag added to CLI.
 
 ## Next
 
-- Phase 41B: First Controlled Agent Execution (Live).
+- Phase 41C: Governed Execution Reporting.
 
 ## Future Explorations
 
