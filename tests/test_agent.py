@@ -5350,6 +5350,206 @@ def test_remote_adapters_ineligible_reason_not_installed(
         assert "not installed" in a["eligibility_reason"]
 
 
+# pcae remote strategy (Phase 39H)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_strategy_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote execution strategy" in output
+    assert "Selection strategy: human_selected" in output
+    assert "Human override: enabled" in output
+    assert "Runtime selection remains under human control." in output
+
+
+def test_remote_strategy_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "advisory",
+        "advisory_notes",
+        "fallback_runtimes",
+        "human_override_enabled",
+        "preferred_runtime",
+        "selection_strategy",
+        "supported_strategies",
+        "tie_break_rule",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_strategy_default_is_human_selected(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["selection_strategy"] == "human_selected"
+
+
+def test_remote_strategy_human_override_enabled(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["human_override_enabled"] is True
+
+
+def test_remote_strategy_no_preferred_runtime(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["preferred_runtime"] is None
+
+
+def test_remote_strategy_empty_fallback_runtimes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["fallback_runtimes"] == []
+
+
+def test_remote_strategy_no_tie_break_rule(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["tie_break_rule"] is None
+
+
+def test_remote_strategy_advisory_notes_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    notes = data["advisory_notes"]
+    assert isinstance(notes, list)
+    assert len(notes) > 0
+    assert any("Human selection" in n for n in notes)
+    assert any("advisory" in n.lower() for n in notes)
+    assert any("neutrality" in n.lower() for n in notes)
+
+
+def test_remote_strategy_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "human control" in data["advisory"].lower()
+
+
+def test_remote_strategy_supported_strategies(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    strategies = data["supported_strategies"]
+    for expected in (
+        "human_selected",
+        "capability_based",
+        "policy_based",
+        "registry_order",
+    ):
+        assert expected in strategies, f"Missing strategy: {expected}"
+
+
+def test_remote_strategy_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "strategy"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_strategy_human_output_shows_none_for_defaults(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "strategy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Preferred runtime: (none)" in output
+    assert "Fallback runtimes: (none)" in output
+    assert "Tie-break rule: (none)" in output
+
+
+def test_remote_strategy_constants(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import REMOTE_SELECTION_STRATEGIES
+
+    assert "human_selected" in REMOTE_SELECTION_STRATEGIES
+    assert "capability_based" in REMOTE_SELECTION_STRATEGIES
+    assert "policy_based" in REMOTE_SELECTION_STRATEGIES
+    assert "registry_order" in REMOTE_SELECTION_STRATEGIES
+    assert len(REMOTE_SELECTION_STRATEGIES) == 4
+
+
 # ---------------------------------------------------------------------------
 
 

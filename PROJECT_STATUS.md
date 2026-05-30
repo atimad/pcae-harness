@@ -618,9 +618,19 @@ remote=yes over remote=unknown with deterministic tie-breaking; kimi-local
 is represented conservatively with unknown remote capability; all
 operations are strictly read-only.
 
+PCAE also exposes an advisory remote execution strategy model with
+`pcae remote strategy` and `pcae remote strategy --json` (Phase 39H):
+the default strategy is human_selected with preferred_runtime=null,
+fallback_runtimes=[], tie_break_rule=null, and human_override=true;
+four supported strategies are declared (human_selected,
+capability_based, policy_based, registry_order); advisory notes state
+that human selection always takes precedence, PCAE must not silently
+choose a runtime, recommendations are advisory, and runtime neutrality
+is preserved; all operations are strictly read-only.
+
 ## Next
 
-- Phase 39H: Remote Execution Audit Log.
+- Phase 39I: Remote Execution Governance Summary.
 
 ## Future Explorations
 

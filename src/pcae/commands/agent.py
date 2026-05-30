@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_multi_agent_registry,
     build_remote_adapters,
     build_remote_approvals,
+    build_remote_strategy,
     build_remote_jobs,
     build_remote_plan,
     build_remote_validate,
@@ -499,6 +500,30 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print(f"  Active task: {'yes' if gov['active_task_present'] else 'no'}")
         print("\nSafety notes:")
         for note in data["safety_notes"]:
+            print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_strategy(args: argparse.Namespace) -> int:
+    data = build_remote_strategy()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        preferred = data["preferred_runtime"]
+        fallback = data["fallback_runtimes"]
+        tie_break = data["tie_break_rule"]
+        print("Remote execution strategy")
+        print(f"Selection strategy: {data['selection_strategy']}")
+        print(f"Preferred runtime: {preferred if preferred is not None else '(none)'}")
+        fb_str = ", ".join(fallback) if fallback else "(none)"
+        print(f"Fallback runtimes: {fb_str}")
+        print(f"Tie-break rule: {tie_break if tie_break is not None else '(none)'}")
+        print(f"Human override: {'enabled' if data['human_override_enabled'] else 'disabled'}")
+        notes = data["advisory_notes"]
+        print(f"\nAdvisory notes ({len(notes)}):")
+        for note in notes:
             print(f"  - {note}")
         print()
         print(data["advisory"])

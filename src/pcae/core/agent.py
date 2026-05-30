@@ -2089,3 +2089,38 @@ def build_remote_adapters() -> dict:
         "recommended_remote_runtime": recommended,
         "selection_notes": selection_notes,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Execution Strategy (Phase 39H)
+# ---------------------------------------------------------------------------
+
+REMOTE_STRATEGY_ADVISORY = "Runtime selection remains under human control."
+
+REMOTE_SELECTION_STRATEGIES: tuple[str, ...] = (
+    "capability_based",
+    "human_selected",
+    "policy_based",
+    "registry_order",
+)
+
+_REMOTE_STRATEGY_ADVISORY_NOTES: tuple[str, ...] = (
+    "Human selection always takes precedence.",
+    "PCAE may recommend runtimes but must not silently choose when human selection is required.",
+    "Recommendations remain advisory.",
+    "Runtime neutrality is preserved.",
+)
+
+
+def build_remote_strategy() -> dict:
+    """Return the advisory remote execution strategy model."""
+    return {
+        "advisory": REMOTE_STRATEGY_ADVISORY,
+        "advisory_notes": list(_REMOTE_STRATEGY_ADVISORY_NOTES),
+        "fallback_runtimes": [],
+        "human_override_enabled": True,
+        "preferred_runtime": None,
+        "selection_strategy": "human_selected",
+        "supported_strategies": list(REMOTE_SELECTION_STRATEGIES),
+        "tie_break_rule": None,
+    }
