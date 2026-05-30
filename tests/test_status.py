@@ -407,7 +407,7 @@ def test_roadmap_next_no_todos_references_option_c(tmp_path: Path) -> None:
     assert result.recommendation_status == "ready"
     assert result.recommended_phase == PREDICTED_PHASES_OPTION_C[0]
     assert result.predicted_phases == PREDICTED_PHASES_OPTION_C
-    assert "Option C" in result.rationale
+    assert "Remote Coding" in result.rationale
 
 
 def test_roadmap_next_with_todos_has_empty_predicted_phases(tmp_path: Path) -> None:
@@ -442,7 +442,7 @@ def test_cli_roadmap_next_no_todos_human_output_includes_sequence(
     assert exit_code == 0
     assert "Strategic roadmap sequence:" in output
     assert "Option C — Multi-Agent Collaboration" in output
-    assert "Predicted phases (Option C — Multi-Agent Collaboration):" in output
+    assert "Predicted phases (Remote Coding):" in output
     assert PREDICTED_PHASES_OPTION_C[0] in output
 
 

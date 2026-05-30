@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 39A: Remote Autonomous Coding Foundation.
+Phase 41B.1: Codex Adapter Contract Correction.
 
 ## Governance Coherence Note
 

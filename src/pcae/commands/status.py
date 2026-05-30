@@ -175,7 +175,7 @@ def run_roadmap_next(args: argparse.Namespace) -> int:
         for item in result.roadmap_sequence:
             print(f"  - {item}")
         if result.predicted_phases:
-            print("Predicted phases (Option C — Multi-Agent Collaboration):")
+            print("Predicted phases (Remote Coding):")
             for phase in result.predicted_phases:
                 print(f"  - {phase}")
         print("Readiness factors:")

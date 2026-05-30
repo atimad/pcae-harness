@@ -74,7 +74,7 @@ PREDICTED_PHASES_OPTION_B: tuple[str, ...] = (
     "36N Architecture memory session restore",
 )
 PREDICTED_PHASES_OPTION_C: tuple[str, ...] = (
-    "37D Multi-Agent Collaboration Readiness",
+    "41C Governed Execution Reporting",
 )
 RUNTIME_SNAPSHOT_ADVISORY = (
     "Snapshot previews are advisory; the user remains authoritative."
@@ -778,13 +778,23 @@ def recommend_next_roadmap_phase(root: HarnessPath) -> RoadmapRecommendation:
         )
         predicted_phases: tuple[str, ...] = ()
     else:
-        recommended = PREDICTED_PHASES_OPTION_C[0]
-        rationale = (
-            "Governance is ready and no pending TODO item was found; "
-            "recommending the next predicted phase from the agreed roadmap sequence "
-            "(Option C — Multi-Agent Collaboration)."
-        )
-        predicted_phases = PREDICTED_PHASES_OPTION_C
+        available = _filter_predicted_phases(root, PREDICTED_PHASES_OPTION_C)
+        if available:
+            recommended = available[0]
+            rationale = (
+                "Governance is ready and no pending TODO item was found; "
+                "recommending the next predicted phase from the active "
+                "Remote Coding execution track."
+            )
+            predicted_phases = available
+        else:
+            recommended = "Consult human-authoritative roadmap for next phase"
+            rationale = (
+                "Governance is ready but all predicted phases are already "
+                "recorded as completed in DONE.md. "
+                "Human review of the roadmap is required."
+            )
+            predicted_phases = ()
 
     return RoadmapRecommendation(
         recommendation_status="ready",
@@ -838,6 +848,28 @@ def _read_done_entry_count(root: HarnessPath) -> int:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip().startswith("- ")
     )
+
+
+def _filter_predicted_phases(
+    root: HarnessPath,
+    phases: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Remove predicted phases already recorded in DONE.md."""
+    path = root.join(Path("tasks") / "DONE.md")
+    if not path.is_file():
+        return phases
+    done_text = path.read_text(encoding="utf-8")
+    result: list[str] = []
+    for phase in phases:
+        code = phase.split()[0] if phase.split() else ""
+        already_done = code and any(
+            f"Phase {code}" in line
+            for line in done_text.splitlines()
+            if line.strip().startswith("- ")
+        )
+        if not already_done:
+            result.append(phase)
+    return tuple(result)
 
 
 def preview_runtime_snapshot(root: HarnessPath) -> RuntimeSnapshotPreview:
