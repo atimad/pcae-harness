@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 38A: Agent Runtime Capability Discovery.
+Phase 38D: Modular Claude Adapter Inspection.
 
 ## Governance Coherence Note
 

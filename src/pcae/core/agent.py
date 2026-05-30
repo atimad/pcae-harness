@@ -1383,6 +1383,15 @@ ADAPTER_INSPECT_ADVISORY = (
     " and may evolve with Codex CLI versions."
 )
 
+CLAUDE_ADAPTER_INSPECT_ADVISORY = (
+    "Capabilities are discovered conservatively"
+    " and may evolve with Claude CLI versions."
+)
+
+_ADAPTER_INSPECT_ADVISORY_BY_AGENT_TYPE: dict[str, str] = {
+    "claude": CLAUDE_ADAPTER_INSPECT_ADVISORY,
+}
+
 
 @dataclass(frozen=True)
 class CapabilityRecord:
@@ -1513,9 +1522,12 @@ def build_adapter_inspection(agent_id: str) -> dict | None:
         cap_records = _unknown_capability_records()
         execution_modes = []
 
+    advisory = _ADAPTER_INSPECT_ADVISORY_BY_AGENT_TYPE.get(
+        agent.agent_type, ADAPTER_INSPECT_ADVISORY
+    )
     return {
         "adapter_type": adapter_type,
-        "advisory": ADAPTER_INSPECT_ADVISORY,
+        "advisory": advisory,
         "agent_id": agent_id,
         "capabilities": [r.to_dict() for r in cap_records],
         "execution_modes": execution_modes,

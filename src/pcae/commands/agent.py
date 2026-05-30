@@ -5,7 +5,6 @@ import json
 
 from pcae.core.agent import (
     ADAPTER_ADVISORY,
-    ADAPTER_INSPECT_ADVISORY,
     COLLABORATION_ADVISORY,
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
@@ -454,7 +453,7 @@ def run_agents_adapter_inspect(args: argparse.Namespace) -> int:
                     f"({cap['source']}) {cap['notes']}"
                 )
         print()
-        print(ADAPTER_INSPECT_ADVISORY)
+        print(data["advisory"])
     return 0
 
 
