@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41B.3: Claude Adapter Contract Validation.
+Phase 41B.4: Kimi Adapter Contract Correction.
 
 ## Governance Coherence Note
 

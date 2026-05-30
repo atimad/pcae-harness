@@ -2833,7 +2833,7 @@ def _derive_command_preview(agent_id: str, prompt_preview: str) -> str | None:
     safe_prompt = prompt_preview.replace("'", "\\'")
     if agent_id == "codex-local":
         return f"[preview] {hint} exec --sandbox read-only '{safe_prompt}'"
-    if agent_id == "claude-local":
+    if agent_id in ("claude-local", "kimi-local"):
         return f"[preview] {hint} -p '{safe_prompt}'"
     return f"[preview] {hint} --prompt '{safe_prompt}'"
 
@@ -2896,7 +2896,8 @@ def _build_invoke_command(agent_id: str, prompt: str) -> list[str] | None:
         return ["claude", "-p", prompt]
     if agent_id == "codex-local":
         return ["codex", "exec", "--sandbox", "read-only", prompt]
-    # kimi-local and all others: syntax uncertain — do not guess
+    if agent_id == "kimi-local":
+        return ["kimi", "-p", prompt]
     return None
 
 

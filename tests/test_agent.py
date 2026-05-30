@@ -8459,7 +8459,7 @@ def test_remote_invoke_human_output(
     assert "no commit or push was performed" in output
 
 
-def test_remote_invoke_kimi_blocked(
+def test_remote_invoke_kimi_succeeds(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_agent_repo(tmp_path)
@@ -8471,13 +8471,14 @@ def test_remote_invoke_kimi_blocked(
     capsys.readouterr()
 
     _patch_ready(monkeypatch, "kimi-local")
-    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "PCAE Kimi execution test successful.\n"))
 
-    exit_code = main(["remote", "execute", job_id, "--invoke"])
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--json"])
 
-    output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "kimi-local" in output or "syntax" in output.lower() or "safely derivable" in output.lower()
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["executed"] is True
+    assert data["command"][:2] == ["kimi", "-p"]
 
 
 def test_remote_invoke_dry_run_still_works(
@@ -8590,4 +8591,86 @@ def test_remote_invoke_claude_command_uses_dash_p(
     assert data["executed"] is True
     assert data["command"][0] == "claude"
     assert data["command"][1] == "-p"
+    assert "--print" not in data["command"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 41B.4: Kimi Adapter Contract Correction
+# ---------------------------------------------------------------------------
+
+
+def test_remote_execute_dry_run_command_preview_kimi_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+
+    _patch_ready(monkeypatch, "kimi-local")
+
+    main(["remote", "execute", job_id, "--dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cmd = data["execution_preview"]["command_preview"]
+    assert cmd is not None
+    assert "kimi" in cmd
+    assert "-p" in cmd
+    assert "--prompt" not in cmd
+    assert "--yolo" not in cmd
+    assert "--auto" not in cmd
+
+
+def test_remote_invoke_kimi_command_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+
+    _patch_ready(monkeypatch, "kimi-local")
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(0, "PCAE Kimi execution test successful.\n"),
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["executed"] is True
+    assert data["command"][0] == "kimi"
+    assert data["command"][1] == "-p"
+    assert "--yolo" not in data["command"]
+    assert "--auto" not in data["command"]
+
+
+def test_remote_invoke_codex_adapter_unchanged_after_kimi_fix(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+
+    _patch_ready(monkeypatch, "codex-local")
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["command"][:4] == ["codex", "exec", "--sandbox", "read-only"]
+
+
+def test_remote_invoke_claude_adapter_unchanged_after_kimi_fix(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    _patch_ready(monkeypatch, "claude-local")
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0))
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["command"][:2] == ["claude", "-p"]
     assert "--print" not in data["command"]
