@@ -1815,3 +1815,85 @@ def build_remote_jobs() -> dict:
         "jobs": [],
         "supported_statuses": list(REMOTE_JOB_SUPPORTED_STATUSES),
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Validation (Phase 39E)
+# ---------------------------------------------------------------------------
+
+REMOTE_VALIDATE_ADVISORY = (
+    "Remote job validation is advisory; no agents are executed."
+)
+
+
+def validate_remote_job(job: dict, policy: dict) -> dict:
+    """Validate a single remote job definition against policy. Read-only."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    blockers: list[str] = []
+
+    for field in REMOTE_JOB_SCHEMA_FIELDS:
+        if field not in job:
+            errors.append(f"missing required field: '{field}'")
+
+    status = job.get("status")
+    if status is not None and status not in REMOTE_JOB_SUPPORTED_STATUSES:
+        errors.append(f"unsupported status: '{status}'")
+
+    requested_agent = job.get("requested_agent")
+    if requested_agent is not None:
+        if requested_agent not in policy["allowed_agents"]:
+            blockers.append(f"agent '{requested_agent}' is not in allowed_agents")
+
+    execution_mode = job.get("execution_mode")
+    if execution_mode is not None:
+        if execution_mode not in policy["allowed_execution_modes"]:
+            blockers.append(f"execution_mode '{execution_mode}' is not allowed")
+
+    required_approvals = job.get("required_approvals")
+    if isinstance(required_approvals, list) and len(required_approvals) == 0:
+        if policy.get("approval_required"):
+            warnings.append("required_approvals is empty but policy requires approval")
+
+    required_checks = job.get("required_checks")
+    if isinstance(required_checks, list) and len(required_checks) == 0:
+        warnings.append("required_checks is empty")
+
+    compliance = job.get("policy_compliance")
+    if isinstance(compliance, dict) and compliance.get("compliant") is False:
+        warnings.append("policy_compliance.compliant is false")
+
+    return {
+        "blockers": blockers,
+        "errors": errors,
+        "job_id": job.get("job_id", "(unknown)"),
+        "valid": not errors and not blockers,
+        "warnings": warnings,
+    }
+
+
+def build_remote_validate(jobs: list | None = None) -> dict:
+    """Validate the remote job registry (or a provided list) against policy."""
+    policy = build_remote_policy()
+    jobs_to_validate: list[dict] = (
+        build_remote_jobs()["jobs"] if jobs is None else jobs
+    )
+
+    all_errors: list[str] = []
+    all_warnings: list[str] = []
+    all_blockers: list[str] = []
+
+    for job in jobs_to_validate:
+        result = validate_remote_job(job, policy)
+        all_errors.extend(result["errors"])
+        all_warnings.extend(result["warnings"])
+        all_blockers.extend(result["blockers"])
+
+    return {
+        "advisory": REMOTE_VALIDATE_ADVISORY,
+        "blockers": all_blockers,
+        "errors": all_errors,
+        "job_count": len(jobs_to_validate),
+        "valid": not all_errors and not all_blockers,
+        "warnings": all_warnings,
+    }

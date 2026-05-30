@@ -4531,6 +4531,267 @@ def test_remote_job_schema_fields_constant(
     assert "failed" in REMOTE_JOB_SUPPORTED_STATUSES
 
 
+# pcae remote validate (Phase 39E)
+# ---------------------------------------------------------------------------
+
+
+def _make_valid_job(**overrides) -> dict:
+    base = {
+        "approval_state": "pending",
+        "created_at": "2026-05-30T10:00:00+00:00",
+        "execution_mode": "non_interactive",
+        "job_id": "job-001",
+        "policy_compliance": {"compliant": True},
+        "requested_agent": "codex-local",
+        "requested_task": "Run tests",
+        "required_approvals": ["human approval required before execution"],
+        "required_checks": ["pcae check must pass"],
+        "safety_notes": ["No agents will be executed by this plan."],
+        "status": "draft",
+    }
+    base.update(overrides)
+    return base
+
+
+def test_remote_validate_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote job validation" in output
+    assert "Status: valid" in output
+    assert "Jobs validated: 0" in output
+    assert "Remote job validation is advisory" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_validate_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "blockers", "errors", "job_count", "valid", "warnings"):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_validate_empty_registry_is_valid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["job_count"] == 0
+    assert data["errors"] == []
+    assert data["warnings"] == []
+    assert data["blockers"] == []
+
+
+def test_remote_validate_advisory_string(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agents are executed" in data["advisory"]
+
+
+def test_remote_validate_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "validate"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_validate_job_missing_field(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job()
+    del job["execution_mode"]
+
+    data = build_remote_validate(jobs=[job])
+
+    assert data["valid"] is False
+    assert any("execution_mode" in e for e in data["errors"])
+
+
+def test_remote_validate_job_invalid_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(status="running")
+
+    data = build_remote_validate(jobs=[job])
+
+    assert data["valid"] is False
+    assert any("unsupported status" in e for e in data["errors"])
+
+
+def test_remote_validate_job_disallowed_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(requested_agent="forbidden-bot")
+
+    data = build_remote_validate(jobs=[job])
+
+    assert data["valid"] is False
+    assert any("not in allowed_agents" in b for b in data["blockers"])
+
+
+def test_remote_validate_job_disallowed_execution_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(execution_mode="interactive")
+
+    data = build_remote_validate(jobs=[job])
+
+    assert data["valid"] is False
+    assert any("not allowed" in b for b in data["blockers"])
+
+
+def test_remote_validate_job_empty_approvals_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(required_approvals=[])
+
+    data = build_remote_validate(jobs=[job])
+
+    assert any("required_approvals" in w for w in data["warnings"])
+
+
+def test_remote_validate_job_empty_checks_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(required_checks=[])
+
+    data = build_remote_validate(jobs=[job])
+
+    assert any("required_checks" in w for w in data["warnings"])
+
+
+def test_remote_validate_job_non_compliant_policy_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job(policy_compliance={"compliant": False})
+
+    data = build_remote_validate(jobs=[job])
+
+    assert any("policy_compliance.compliant is false" in w for w in data["warnings"])
+
+
+def test_remote_validate_valid_job_passes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job = _make_valid_job()
+
+    data = build_remote_validate(jobs=[job])
+
+    assert data["valid"] is True
+    assert data["errors"] == []
+    assert data["blockers"] == []
+    assert data["job_count"] == 1
+
+
+def test_remote_validate_multiple_jobs_accumulates_errors(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import build_remote_validate
+
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    jobs = [
+        _make_valid_job(job_id="job-001", requested_agent="bad-agent"),
+        _make_valid_job(job_id="job-002", status="unknown-status"),
+    ]
+
+    data = build_remote_validate(jobs=jobs)
+
+    assert data["valid"] is False
+    assert data["job_count"] == 2
+    assert len(data["blockers"]) >= 1
+    assert len(data["errors"]) >= 1
+
+
+def test_remote_validate_human_output_shows_counts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Errors: 0" in output
+    assert "Warnings: 0" in output
+    assert "Blockers: 0" in output
+
+
 # ---------------------------------------------------------------------------
 
 

@@ -25,6 +25,7 @@ from pcae.commands.agent import (
     run_remote_plan,
     run_remote_policy,
     run_remote_status,
+    run_remote_validate,
 )
 from pcae.commands.architecture import (
     run_architecture_add,
@@ -1218,6 +1219,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON remote jobs output.",
     )
     remote_jobs_parser.set_defaults(handler=run_remote_jobs)
+
+    remote_validate_parser = remote_subparsers.add_parser(
+        "validate",
+        help="Validate Remote Autonomous Coding job definitions.",
+    )
+    remote_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON remote validation output.",
+    )
+    remote_validate_parser.set_defaults(handler=run_remote_validate)
 
     remote_policy_parser = remote_subparsers.add_parser(
         "policy",

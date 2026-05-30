@@ -588,9 +588,19 @@ ready, completed, failed; the registry is deterministically empty for
 this phase with no job creation, execution, or prompt submission; all
 operations are strictly read-only.
 
+PCAE also validates remote job definitions with `pcae remote validate` and
+`pcae remote validate --json` (Phase 39E): validation checks schema
+completeness, status validity, agent and execution mode policy compliance,
+required approvals/checks presence, and policy_compliance flag; warnings
+are raised for empty required_approvals or required_checks and for
+non-compliant policy; blockers for disallowed agents or modes; errors for
+missing fields or unsupported statuses; the empty registry validates
+cleanly; `validate_remote_job()` and `build_remote_validate()` are
+reusable helpers; all operations are strictly read-only.
+
 ## Next
 
-- Phase 39E: Remote Job Submission Dry-Run.
+- Phase 39F: Remote Job Submission Dry-Run.
 
 ## Future Explorations
 

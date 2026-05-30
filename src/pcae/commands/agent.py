@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_multi_agent_registry,
     build_remote_jobs,
     build_remote_plan,
+    build_remote_validate,
     build_remote_policy,
     build_remote_status,
     build_review_workflows,
@@ -497,6 +498,32 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_validate(args: argparse.Namespace) -> int:
+    data = build_remote_validate()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        status_label = "valid" if data["valid"] else "invalid"
+        print("Remote job validation")
+        print(f"Status: {status_label}")
+        print(f"Jobs validated: {data['job_count']}")
+        errors = data["errors"]
+        print(f"Errors: {len(errors)}")
+        for e in errors:
+            print(f"  - {e}")
+        warnings = data["warnings"]
+        print(f"Warnings: {len(warnings)}")
+        for w in warnings:
+            print(f"  - {w}")
+        blockers = data["blockers"]
+        print(f"Blockers: {len(blockers)}")
+        for b in blockers:
+            print(f"  - {b}")
         print()
         print(data["advisory"])
     return 0
