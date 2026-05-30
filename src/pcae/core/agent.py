@@ -2883,6 +2883,7 @@ REMOTE_INVOKE_ADVISORY = (
 )
 
 _REMOTE_EXECUTIONS_DIR = Path(".pcae") / "remote" / "executions"
+_REMOTE_RESULTS_DIR = Path(".pcae") / "remote" / "results"
 _INVOKE_TIMEOUT_SECONDS = 300
 
 _INVOKE_UNSUPPORTED_REASON = (
@@ -2937,6 +2938,7 @@ def invoke_remote_job(root: HarnessPath, job_id: str) -> dict:
             f"Agent '{requested_agent}' cannot be invoked: {_INVOKE_UNSUPPORTED_REASON}."
         )
 
+    started_at = datetime.now(timezone.utc)
     try:
         proc = _run_agent_subprocess(command, _INVOKE_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired:
@@ -2945,44 +2947,55 @@ def invoke_remote_job(root: HarnessPath, job_id: str) -> dict:
         ) from None
     except (FileNotFoundError, OSError) as exc:
         raise ValueError(f"Failed to invoke agent '{requested_agent}': {exc}") from exc
+    finished_at = datetime.now(timezone.utc)
 
     exit_code: int = proc.returncode
     stdout: str = proc.stdout or ""
     stderr: str = proc.stderr or ""
     final_status = "completed" if exit_code == 0 else "failed"
+    duration_seconds = round((finished_at - started_at).total_seconds(), 3)
+    result_path = str(_REMOTE_RESULTS_DIR / f"{job_id}-result.json")
 
+    results_dir = root.join(_REMOTE_RESULTS_DIR)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    result_file = results_dir / f"{job_id}-result.json"
+    artifact = {
+        "advisory": REMOTE_INVOKE_ADVISORY,
+        "command": command,
+        "duration_seconds": duration_seconds,
+        "executed": True,
+        "exit_code": exit_code,
+        "final_status": final_status,
+        "finished_at": finished_at.isoformat(),
+        "job_id": job_id,
+        "selected_agent": requested_agent,
+        "started_at": started_at.isoformat(),
+        "stderr": stderr,
+        "stdout": stdout,
+    }
+    with result_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(artifact, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    job["executed_at"] = started_at.isoformat()
+    job["result_path"] = result_path
     job["status"] = final_status
     with job_file.open("w", encoding="utf-8", newline="\n") as fh:
         json.dump(job, fh, indent=2, sort_keys=True)
         fh.write("\n")
 
-    executions_dir = root.join(_REMOTE_EXECUTIONS_DIR)
-    executions_dir.mkdir(parents=True, exist_ok=True)
-    artifact_file = executions_dir / f"{job_id}_result.json"
-    artifact = {
-        "advisory": REMOTE_INVOKE_ADVISORY,
-        "command": command,
-        "executed": True,
-        "exit_code": exit_code,
-        "final_status": final_status,
-        "job_id": job_id,
-        "selected_agent": requested_agent,
-        "stderr": stderr,
-        "stdout": stdout,
-    }
-    with artifact_file.open("w", encoding="utf-8", newline="\n") as fh:
-        json.dump(artifact, fh, indent=2, sort_keys=True)
-        fh.write("\n")
-
     return {
         "advisory": REMOTE_INVOKE_ADVISORY,
         "command": command,
+        "duration_seconds": duration_seconds,
         "executed": True,
         "exit_code": exit_code,
         "final_status": final_status,
+        "finished_at": finished_at.isoformat(),
         "job_id": job_id,
-        "output_path": str(_REMOTE_EXECUTIONS_DIR / artifact_file.name),
+        "output_path": result_path,
         "selected_agent": requested_agent,
+        "started_at": started_at.isoformat(),
         "stderr": stderr,
         "stdout": stdout,
     }
@@ -3020,8 +3033,19 @@ def build_remote_results(root: HarnessPath, job_id: str) -> dict:
 
     requested_agent: str = job.get("requested_agent", "")
 
-    artifact_file = root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json"
-    output_path = str(_REMOTE_EXECUTIONS_DIR / f"{job_id}_result.json")
+    # Phase 41D: primary location is results/; fall back to executions/ for pre-41D artifacts.
+    results_artifact = root.join(_REMOTE_RESULTS_DIR) / f"{job_id}-result.json"
+    legacy_artifact = root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json"
+
+    if results_artifact.exists():
+        artifact_file = results_artifact
+        output_path = str(_REMOTE_RESULTS_DIR / f"{job_id}-result.json")
+    elif legacy_artifact.exists():
+        artifact_file = legacy_artifact
+        output_path = str(_REMOTE_EXECUTIONS_DIR / f"{job_id}_result.json")
+    else:
+        artifact_file = results_artifact  # canonical path for "not found" message
+        output_path = str(_REMOTE_RESULTS_DIR / f"{job_id}-result.json")
 
     if not artifact_file.exists():
         return {
@@ -3051,8 +3075,12 @@ def build_remote_results(root: HarnessPath, job_id: str) -> dict:
     execution_result = {
         "command_used": artifact.get("command"),
         "duration_seconds": artifact.get("duration_seconds"),
-        "execution_finished_at": artifact.get("execution_finished_at"),
-        "execution_started_at": artifact.get("execution_started_at"),
+        "execution_finished_at": (
+            artifact.get("finished_at") or artifact.get("execution_finished_at")
+        ),
+        "execution_started_at": (
+            artifact.get("started_at") or artifact.get("execution_started_at")
+        ),
         "exit_code": artifact.get("exit_code"),
         "final_status": artifact.get("final_status"),
         "output_path": output_path,

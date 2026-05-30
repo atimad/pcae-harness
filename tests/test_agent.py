@@ -8397,12 +8397,12 @@ def test_remote_invoke_artifact_written(
     main(["remote", "execute", job_id, "--invoke", "--json"])
     data = json.loads(capsys.readouterr().out)
 
-    artifact = tmp_path / ".pcae" / "remote" / "executions" / f"{job_id}_result.json"
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
     assert artifact.exists()
     stored = json.loads(artifact.read_text(encoding="utf-8"))
     assert stored["executed"] is True
     assert stored["job_id"] == job_id
-    assert data["output_path"].endswith(f"{job_id}_result.json")
+    assert data["output_path"].endswith(f"{job_id}-result.json")
 
 
 def test_remote_invoke_no_commit_no_push(
@@ -8769,7 +8769,7 @@ def test_remote_results_after_invoke_json(
     assert result["exit_code"] == 0
     assert result["final_status"] == "completed"
     assert result["command_used"] is not None
-    assert result["output_path"].endswith(f"{job_id}_result.json")
+    assert result["output_path"].endswith(f"{job_id}-result.json")
 
 
 def test_remote_results_after_invoke_human(
@@ -8828,3 +8828,138 @@ def test_remote_results_is_readonly(
 
     after = (jobs_dir / f"{job_id}.json").read_text(encoding="utf-8")
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 41D: Execution Result Persistence
+# ---------------------------------------------------------------------------
+
+
+def test_remote_invoke_persists_to_results_dir(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n")
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    assert artifact.exists()
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["job_id"] == job_id
+    assert stored["executed"] is True
+
+
+def test_remote_invoke_result_has_timing_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n")
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "started_at" in data
+    assert "finished_at" in data
+    assert "duration_seconds" in data
+    assert data["started_at"] is not None
+    assert data["finished_at"] is not None
+    assert isinstance(data["duration_seconds"], (int, float))
+    assert data["duration_seconds"] >= 0
+
+
+def test_remote_invoke_job_updated_with_result_path_and_executed_at(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0)
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    stored = json.loads((jobs_dir / f"{job_id}.json").read_text(encoding="utf-8"))
+    assert "result_path" in stored
+    assert "executed_at" in stored
+    assert stored["result_path"].endswith(f"{job_id}-result.json")
+    assert stored["executed_at"] is not None
+
+
+def test_remote_invoke_result_artifact_preserves_full_stdout(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    long_output = "x" * 2000
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(0, long_output),
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["stdout"] == long_output
+
+
+def test_remote_results_timing_fields_populated_after_invoke(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "results", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    result = data["execution_result"]
+    assert result["execution_started_at"] is not None
+    assert result["execution_finished_at"] is not None
+    assert result["duration_seconds"] is not None
+    assert isinstance(result["duration_seconds"], (int, float))
+
+
+def test_remote_invoke_human_output_shows_timing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "done\n")
+    )
+
+    exit_code = main(["remote", "execute", job_id, "--invoke"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Started at:" in output
+    assert "Duration:" in output

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41C: Governed Execution Reporting.
+Phase 41D: Execution Result Persistence.
 
 ## Governance Coherence Note
 
@@ -728,6 +728,17 @@ extracted for testability; no commit or push performed;
 `invoke_remote_job()` added to core; `_run_remote_execute_invoke()` added to
 commands; `--invoke` flag added to CLI.
 
+PCAE captures and persists first-class execution result artifacts for Remote
+Autonomous Coding jobs (Phase 41D): `pcae remote execute JOB_ID --invoke`
+now writes a result artifact to `.pcae/remote/results/<job_id>-result.json`
+with full timing metadata (`started_at`, `finished_at`, `duration_seconds`),
+full untruncated `stdout`/`stderr`, `command`, `exit_code`, `final_status`,
+`job_id`, and `selected_agent`; the job record is updated with `result_path`
+and `executed_at`; `pcae remote results JOB_ID` reads from the new
+`results/` directory with fallback to the legacy `executions/` path for
+pre-41D artifacts; result artifacts are Git-ignored via the existing
+`remote/` entry in `.pcae/.gitignore`; no commit or push is performed.
+
 PCAE also exposes governed execution results for persisted Remote Autonomous
 Coding jobs with `pcae remote results JOB_ID` and
 `pcae remote results JOB_ID --json` (Phase 41C): reads the persisted job and
@@ -746,7 +757,7 @@ no agent execution, and no approval state changes.
 
 ## Next
 
-- TBD: Future Remote Coding phases (execution history, aggregation, or reporting enhancements).
+- TBD: Future Remote Coding phases (execution history, aggregation, or multi-job reporting).
 
 ## Future Explorations
 
