@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41D: Execution Result Persistence.
+Phase 41E: Multi-Runtime Execution Validation.
 
 ## Governance Coherence Note
 
@@ -727,6 +727,17 @@ written to `.pcae/remote/executions/<job_id>_result.json`; `_run_agent_subproces
 extracted for testability; no commit or push performed;
 `invoke_remote_job()` added to core; `_run_remote_execute_invoke()` added to
 commands; `--invoke` flag added to CLI.
+
+The full governed execution lifecycle has been validated for both `claude-local`
+and `kimi-local` (Phase 41E): create → persist → approve → readiness gate →
+execute → result persistence → result reporting; validation prompt confirms
+the agent replies read-only with the expected response; 17 tests verify job
+creation, approval, readiness gate, exit code 0, final_status=completed,
+artifact persistence in `results/`, results reporting (JSON + human), and
+no-commit guarantee per runtime; adapter selection tests confirm
+`claude-local` uses `["claude", "-p", ...]`, `kimi-local` uses
+`["kimi", "-p", ...]`, and that the two runtimes use distinct executables;
+no new execution features were added; all tests use monkeypatched subprocess.
 
 PCAE captures and persists first-class execution result artifacts for Remote
 Autonomous Coding jobs (Phase 41D): `pcae remote execute JOB_ID --invoke`

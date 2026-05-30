@@ -8963,3 +8963,418 @@ def test_remote_invoke_human_output_shows_timing(
     assert exit_code == 0
     assert "Started at:" in output
     assert "Duration:" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 41E: Multi-Runtime Execution Validation
+# ---------------------------------------------------------------------------
+
+_VALIDATION_PROMPT_TEMPLATE = (
+    "Read-only task: reply with exactly:\n"
+    "PCAE {runtime} execution validation successful.\n"
+    "Do not modify files."
+)
+
+_VALIDATION_EXPECTED_OUTPUT_TEMPLATE = (
+    "PCAE {runtime} execution validation successful.\n"
+)
+
+
+def _make_validation_proc(runtime_name: str) -> _subprocess_mod.CompletedProcess:
+    stdout = _VALIDATION_EXPECTED_OUTPUT_TEMPLATE.format(runtime=runtime_name)
+    return _fake_proc(0, stdout)
+
+
+def _run_validated_lifecycle(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent_id: str,
+    runtime_name: str,
+) -> tuple[str, dict, dict]:
+    """Full lifecycle helper for validation. Returns (job_id, exec_data, results_data)."""
+    prompt = _VALIDATION_PROMPT_TEMPLATE.format(runtime=runtime_name)
+
+    main(["remote", "create", "--agent", agent_id, "--prompt", prompt, "--persist", "--json"])
+    job_id = json.loads(capsys.readouterr().out)["job"]["job_id"]
+
+    main(["remote", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    _patch_ready(monkeypatch, agent_id)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _make_validation_proc(runtime_name),
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    exec_data = json.loads(capsys.readouterr().out)
+
+    main(["remote", "results", job_id, "--json"])
+    results_data = json.loads(capsys.readouterr().out)
+
+    return job_id, exec_data, results_data
+
+
+# ---- Full lifecycle: claude-local ----------------------------------------
+
+def test_41e_claude_local_job_creation_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    prompt = _VALIDATION_PROMPT_TEMPLATE.format(runtime="claude")
+
+    exit_code = main(["remote", "create", "--agent", "claude-local", "--prompt", prompt, "--persist", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["persisted"] is True
+    assert data["job"]["requested_agent"] == "claude-local"
+
+
+def test_41e_claude_local_approval_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    exit_code = main(["remote", "approve", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["new_approval_state"] == "approved"
+
+
+def test_41e_claude_local_readiness_gate_passes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    _patch_ready(monkeypatch, "claude-local")
+    exit_code = main(["remote", "ready", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["ready"] is True
+    assert data["blockers"] == []
+
+
+def test_41e_claude_local_full_lifecycle(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    import subprocess as sp
+    log_before = sp.run(
+        ["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True
+    ).stdout
+
+    job_id, exec_data, results_data = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "claude-local", "claude"
+    )
+
+    # exit code and final status
+    assert exec_data["exit_code"] == 0
+    assert exec_data["final_status"] == "completed"
+
+    # artifact persisted
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    assert artifact.exists()
+
+    # results reporting
+    assert results_data["result_available"] is True
+    assert results_data["execution_result"]["final_status"] == "completed"
+
+    # no commit
+    log_after = sp.run(
+        ["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True
+    ).stdout
+    assert log_before == log_after
+
+
+# ---- Full lifecycle: kimi-local ------------------------------------------
+
+def test_41e_kimi_local_job_creation_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    prompt = _VALIDATION_PROMPT_TEMPLATE.format(runtime="kimi")
+
+    exit_code = main(["remote", "create", "--agent", "kimi-local", "--prompt", prompt, "--persist", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["persisted"] is True
+    assert data["job"]["requested_agent"] == "kimi-local"
+
+
+def test_41e_kimi_local_approval_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+
+    exit_code = main(["remote", "approve", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["new_approval_state"] == "approved"
+
+
+def test_41e_kimi_local_readiness_gate_passes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+
+    _patch_ready(monkeypatch, "kimi-local")
+    exit_code = main(["remote", "ready", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["ready"] is True
+    assert data["blockers"] == []
+
+
+def test_41e_kimi_local_full_lifecycle(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    import subprocess as sp
+    log_before = sp.run(
+        ["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True
+    ).stdout
+
+    job_id, exec_data, results_data = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "kimi-local", "kimi"
+    )
+
+    assert exec_data["exit_code"] == 0
+    assert exec_data["final_status"] == "completed"
+
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    assert artifact.exists()
+
+    assert results_data["result_available"] is True
+    assert results_data["execution_result"]["final_status"] == "completed"
+
+    log_after = sp.run(
+        ["git", "log", "--oneline"], cwd=tmp_path, capture_output=True, text=True
+    ).stdout
+    assert log_before == log_after
+
+
+# ---- Result persistence --------------------------------------------------
+
+def test_41e_result_persistence_claude_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, exec_data, _ = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "claude-local", "claude"
+    )
+
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    assert artifact.exists()
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["job_id"] == job_id
+    assert stored["selected_agent"] == "claude-local"
+    assert stored["executed"] is True
+    assert stored["exit_code"] == 0
+    assert stored["final_status"] == "completed"
+    assert "started_at" in stored
+    assert "finished_at" in stored
+    assert "duration_seconds" in stored
+    expected = _VALIDATION_EXPECTED_OUTPUT_TEMPLATE.format(runtime="claude")
+    assert stored["stdout"] == expected
+
+
+def test_41e_result_persistence_kimi_local(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, exec_data, _ = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "kimi-local", "kimi"
+    )
+
+    artifact = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    assert artifact.exists()
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["job_id"] == job_id
+    assert stored["selected_agent"] == "kimi-local"
+    assert stored["executed"] is True
+    assert stored["exit_code"] == 0
+    assert stored["final_status"] == "completed"
+    assert "started_at" in stored
+    assert "finished_at" in stored
+    assert "duration_seconds" in stored
+    expected = _VALIDATION_EXPECTED_OUTPUT_TEMPLATE.format(runtime="kimi")
+    assert stored["stdout"] == expected
+
+
+# ---- Reporting -----------------------------------------------------------
+
+def test_41e_reporting_claude_local_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _, results_data = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "claude-local", "claude"
+    )
+
+    assert results_data["result_available"] is True
+    assert results_data["job_id"] == job_id
+    assert results_data["requested_agent"] == "claude-local"
+    result = results_data["execution_result"]
+    assert result["exit_code"] == 0
+    assert result["final_status"] == "completed"
+    assert result["execution_started_at"] is not None
+    assert result["duration_seconds"] is not None
+    assert result["output_path"].endswith(f"{job_id}-result.json")
+
+
+def test_41e_reporting_kimi_local_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _, results_data = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "kimi-local", "kimi"
+    )
+
+    assert results_data["result_available"] is True
+    assert results_data["job_id"] == job_id
+    assert results_data["requested_agent"] == "kimi-local"
+    result = results_data["execution_result"]
+    assert result["exit_code"] == 0
+    assert result["final_status"] == "completed"
+    assert result["execution_started_at"] is not None
+    assert result["duration_seconds"] is not None
+    assert result["output_path"].endswith(f"{job_id}-result.json")
+
+
+def test_41e_reporting_human_output_claude(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id, _, _ = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "claude-local", "claude"
+    )
+
+    exit_code = main(["remote", "results", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution results" in output
+    assert job_id in output
+    assert "completed" in output
+    assert "Execution reporting is read-only" in output
+
+
+def test_41e_reporting_human_output_kimi(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id, _, _ = _run_validated_lifecycle(
+        tmp_path, monkeypatch, capsys, "kimi-local", "kimi"
+    )
+
+    exit_code = main(["remote", "results", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution results" in output
+    assert job_id in output
+    assert "completed" in output
+    assert "Execution reporting is read-only" in output
+
+
+# ---- Adapter selection ---------------------------------------------------
+
+def test_41e_adapter_command_claude_local_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    _patch_ready(monkeypatch, "claude-local")
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n")
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["command"][0] == "claude"
+    assert data["command"][1] == "-p"
+    assert "--print" not in data["command"]
+
+
+def test_41e_adapter_command_kimi_local_uses_dash_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+
+    _patch_ready(monkeypatch, "kimi-local")
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n")
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["command"][0] == "kimi"
+    assert data["command"][1] == "-p"
+    assert "--yolo" not in data["command"]
+    assert "--auto" not in data["command"]
+
+
+def test_41e_adapters_are_runtime_specific(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Claude and Kimi must use distinct commands; neither may use the other's executable."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    # Execute claude-local and capture command
+    job_id_claude = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n")
+    )
+    main(["remote", "execute", job_id_claude, "--invoke", "--json"])
+    claude_data = json.loads(capsys.readouterr().out)
+
+    # Execute kimi-local and capture command
+    job_id_kimi = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+    _patch_ready(monkeypatch, "kimi-local")
+    main(["remote", "execute", job_id_kimi, "--invoke", "--json"])
+    kimi_data = json.loads(capsys.readouterr().out)
+
+    assert claude_data["command"][0] == "claude"
+    assert kimi_data["command"][0] == "kimi"
+    assert claude_data["command"][0] != kimi_data["command"][0]
+    assert claude_data["selected_agent"] != kimi_data["selected_agent"]
