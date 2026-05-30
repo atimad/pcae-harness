@@ -646,11 +646,20 @@ status=draft, approval_state=pending, and a created_at timestamp; the
 preview is validated through `validate_remote_job()` — allowed agents
 pass clean, policy-excluded agents produce blocked validation; three safety
 notes confirm no persistence, no execution, and preview-only intent;
-all operations are strictly read-only.
+all operations are strictly read-only, and
+`pcae remote create --agent AGENT_ID --prompt TEXT --preview-persist` (Phase 40C)
+previews what would be persisted without writing any files or executing agents;
+`--preview-persist` is mutually exclusive with `--dry-run` — at least one
+must be present; output includes `job_file_path`
+(e.g. `.pcae/remote/jobs/job-YYYYMMDD-HHMMSS.json`), `output_directory`
+(`.pcae/remote/jobs/`), `job_preview` with all schema fields plus
+`persist_preview: true`, and `validation` result; job_id is prefixed `job-`;
+three safety notes confirm no job file is written, no agent will be executed,
+and preview is for planning only; all operations are strictly read-only.
 
 ## Next
 
-- Phase 40C: Remote Execution Governance Summary.
+- Phase 40D: Remote Execution Governance Summary.
 
 ## Future Explorations
 

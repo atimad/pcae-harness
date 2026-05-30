@@ -2342,3 +2342,106 @@ def build_remote_create_dry_run(
         "job_preview": job_preview,
         "validation": validation,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Job Persistence Preview (Phase 40C)
+# ---------------------------------------------------------------------------
+
+REMOTE_PERSIST_PREVIEW_ADVISORY = (
+    "Remote job persistence preview is advisory; "
+    "no files are written and no agent is executed."
+)
+
+_REMOTE_PERSIST_PREVIEW_SAFETY_NOTES: tuple[str, ...] = (
+    "No job file is written.",
+    "No agent will be executed.",
+    "This preview is for planning purposes only.",
+)
+
+_REMOTE_JOBS_OUTPUT_DIR = Path(".pcae") / "remote" / "jobs"
+
+
+def build_remote_create_persist_preview(
+    root: HarnessPath,
+    agent_id: str,
+    prompt: str,
+) -> dict:
+    """Return advisory job persistence preview. Raises ValueError for unknown agents."""
+    policy = build_remote_policy()
+
+    known_ids = set(policy["allowed_agents"]) | set(AGENT_CONFIG_REGISTRY.keys())
+    if agent_id not in known_ids:
+        raise ValueError(
+            f"Unknown agent '{agent_id}'. "
+            f"Run 'pcae agents show' to list known agents."
+        )
+
+    config = AGENT_CONFIG_REGISTRY.get(agent_id)
+    adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+
+    agent_allowed = agent_id in policy["allowed_agents"]
+    adapter_allowed = adapter_type in policy["allowed_adapters"]
+    execution_mode = (
+        policy["allowed_execution_modes"][0]
+        if policy["allowed_execution_modes"]
+        else "unknown"
+    )
+
+    policy_compliance = {
+        "adapter_allowed": adapter_allowed,
+        "agent_allowed": agent_allowed,
+        "compliant": agent_allowed and adapter_allowed,
+        "execution_mode_allowed": execution_mode in policy["allowed_execution_modes"],
+    }
+
+    required_approvals: list[str] = []
+    if policy["approval_required"]:
+        required_approvals.append("human approval required before execution")
+    if policy["require_human_approval_before_commit"]:
+        required_approvals.append("human approval required before commit")
+    if policy["require_human_approval_before_push"]:
+        required_approvals.append("human approval required before push")
+
+    required_checks: list[str] = []
+    if policy["require_clean_git"]:
+        required_checks.append("clean git working tree")
+    if policy["require_pcae_check"]:
+        required_checks.append("pcae check must pass")
+    if policy["require_tests"]:
+        required_checks.append("tests must pass")
+
+    now = datetime.now(timezone.utc)
+    job_id = f"job-{now.strftime('%Y%m%d-%H%M%S')}"
+    job_file_path = str(_REMOTE_JOBS_OUTPUT_DIR / f"{job_id}.json")
+
+    job_preview = {
+        "approval_state": "pending",
+        "created_at": now.isoformat(),
+        "execution_mode": execution_mode,
+        "job_id": job_id,
+        "persist_preview": True,
+        "policy_compliance": policy_compliance,
+        "requested_agent": agent_id,
+        "requested_task": prompt,
+        "required_approvals": required_approvals,
+        "required_checks": required_checks,
+        "safety_notes": list(_REMOTE_PERSIST_PREVIEW_SAFETY_NOTES),
+        "status": "draft",
+    }
+
+    result = validate_remote_job(job_preview, policy)
+    validation = {
+        "blockers": result["blockers"],
+        "errors": result["errors"],
+        "valid": result["valid"],
+        "warnings": result["warnings"],
+    }
+
+    return {
+        "advisory": REMOTE_PERSIST_PREVIEW_ADVISORY,
+        "job_file_path": job_file_path,
+        "job_preview": job_preview,
+        "output_directory": str(_REMOTE_JOBS_OUTPUT_DIR),
+        "validation": validation,
+    }

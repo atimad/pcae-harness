@@ -1259,7 +1259,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     remote_create_parser = remote_subparsers.add_parser(
         "create",
-        help="Preview creation of a Remote Autonomous Coding job (dry run only).",
+        help="Preview creation of a Remote Autonomous Coding job.",
     )
     remote_create_parser.add_argument(
         "--agent",
@@ -1271,11 +1271,17 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Prompt text for the job (not submitted to any agent).",
     )
-    remote_create_parser.add_argument(
+    _create_mode = remote_create_parser.add_mutually_exclusive_group(required=True)
+    _create_mode.add_argument(
         "--dry-run",
-        required=True,
         action="store_true",
-        help="Required: preview the job without persisting or executing it.",
+        help="Preview the job creation without persisting or executing it.",
+    )
+    _create_mode.add_argument(
+        "--preview-persist",
+        dest="preview_persist",
+        action="store_true",
+        help="Preview what would be persisted, including the job file path.",
     )
     remote_create_parser.add_argument(
         "--json",
