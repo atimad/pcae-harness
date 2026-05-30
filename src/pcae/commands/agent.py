@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_plan,
     build_remote_policy,
     build_remote_status,
     build_review_workflows,
@@ -487,6 +488,49 @@ def run_remote_status(args: argparse.Namespace) -> int:
                 print(f"  {cap}")
         else:
             print("\nMissing capabilities: none")
+        gov = data["governance_readiness"]
+        print("\nGovernance readiness:")
+        print(f"  Session active: {'yes' if gov['session_active'] else 'no'}")
+        print(f"  Architecture memory: {'yes' if gov['architecture_memory_present'] else 'no'}")
+        print(f"  Active task: {'yes' if gov['active_task_present'] else 'no'}")
+        print("\nSafety notes:")
+        for note in data["safety_notes"]:
+            print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_plan(args: argparse.Namespace) -> int:
+    data = build_remote_plan(HarnessPath.cwd(), requested_agent=args.agent)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Remote Autonomous Coding execution plan")
+        print(f"Requested agent: {data['requested_agent']}")
+        print(f"Execution mode: {data['execution_mode']}")
+        print(f"Readiness: {data['readiness_status']}")
+        comp = data["policy_compliance"]
+        print("\nPolicy compliance:")
+        print(f"  Agent allowed: {'yes' if comp['agent_allowed'] else 'no'}")
+        print(f"  Adapter allowed: {'yes' if comp['adapter_allowed'] else 'no'}")
+        print(f"  Execution mode allowed: {'yes' if comp['execution_mode_allowed'] else 'no'}")
+        print(f"  Compliant: {'yes' if comp['compliant'] else 'no'}")
+        approvals = data["required_approvals"]
+        print(f"\nRequired approvals ({len(approvals)}):")
+        for item in approvals:
+            print(f"  - {item}")
+        checks = data["required_checks"]
+        print(f"\nRequired checks ({len(checks)}):")
+        for item in checks:
+            print(f"  - {item}")
+        blockers = data["blockers"]
+        if blockers:
+            print(f"\nBlockers ({len(blockers)}):")
+            for b in blockers:
+                print(f"  - {b}")
+        else:
+            print("\nBlockers: none")
         gov = data["governance_readiness"]
         print("\nGovernance readiness:")
         print(f"  Session active: {'yes' if gov['session_active'] else 'no'}")

@@ -1670,3 +1670,105 @@ def build_remote_policy() -> dict:
         "require_pcae_check": True,
         "require_tests": True,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Execution Plan Model (Phase 39C)
+# ---------------------------------------------------------------------------
+
+REMOTE_PLAN_ADVISORY = (
+    "Remote execution plan is advisory; no agents are executed or scheduled."
+)
+
+REMOTE_PLAN_DEFAULT_AGENT = "codex-local"
+
+_REMOTE_PLAN_SAFETY_NOTES: tuple[str, ...] = (
+    "No agents will be executed by this plan.",
+    "Human review and approval required before any remote execution.",
+    "This plan is advisory only.",
+)
+
+
+def build_remote_plan(
+    root: HarnessPath,
+    requested_agent: str = REMOTE_PLAN_DEFAULT_AGENT,
+) -> dict:
+    """Return an advisory remote autonomous coding execution plan."""
+    policy = build_remote_policy()
+    discovery = build_runtime_discovery()
+    governance = _build_remote_governance_readiness(root)
+
+    execution_mode = (
+        policy["allowed_execution_modes"][0]
+        if policy["allowed_execution_modes"]
+        else "unknown"
+    )
+
+    agent_allowed = requested_agent in policy["allowed_agents"]
+
+    installed_ids = {e.agent_id for e in discovery.agents if e.capabilities.installed}
+    agent_installed = requested_agent in installed_ids
+
+    config = AGENT_CONFIG_REGISTRY.get(requested_agent)
+    adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+    adapter_allowed = adapter_type in policy["allowed_adapters"]
+
+    agent_entry = next(
+        (e for e in discovery.agents if e.agent_id == requested_agent), None
+    )
+    if agent_entry and agent_entry.capabilities.installed:
+        execution_mode_supported = (
+            agent_entry.capabilities.non_interactive_supported == RUNTIME_CAP_YES
+        )
+    else:
+        execution_mode_supported = False
+
+    policy_compliance = {
+        "adapter_allowed": adapter_allowed,
+        "agent_allowed": agent_allowed,
+        "compliant": agent_allowed and adapter_allowed,
+        "execution_mode_allowed": execution_mode in policy["allowed_execution_modes"],
+    }
+
+    required_approvals: list[str] = []
+    if policy["approval_required"]:
+        required_approvals.append("human approval required before execution")
+    if policy["require_human_approval_before_commit"]:
+        required_approvals.append("human approval required before commit")
+    if policy["require_human_approval_before_push"]:
+        required_approvals.append("human approval required before push")
+
+    required_checks: list[str] = []
+    if policy["require_clean_git"]:
+        required_checks.append("clean git working tree")
+    if policy["require_pcae_check"]:
+        required_checks.append("pcae check must pass")
+    if policy["require_tests"]:
+        required_checks.append("tests must pass")
+
+    blockers: list[str] = []
+    if not agent_allowed:
+        blockers.append(f"agent '{requested_agent}' is not in allowed_agents")
+    if not agent_installed:
+        blockers.append(f"agent '{requested_agent}' is not installed")
+    if not adapter_allowed:
+        blockers.append(f"adapter '{adapter_type}' is not in allowed_adapters")
+    if agent_installed and not execution_mode_supported:
+        blockers.append(
+            f"agent '{requested_agent}' does not support execution mode '{execution_mode}'"
+        )
+
+    readiness_status = "ready" if not blockers else "blocked"
+
+    return {
+        "advisory": REMOTE_PLAN_ADVISORY,
+        "blockers": blockers,
+        "execution_mode": execution_mode,
+        "governance_readiness": governance,
+        "policy_compliance": policy_compliance,
+        "readiness_status": readiness_status,
+        "requested_agent": requested_agent,
+        "required_approvals": required_approvals,
+        "required_checks": required_checks,
+        "safety_notes": list(_REMOTE_PLAN_SAFETY_NOTES),
+    }

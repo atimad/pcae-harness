@@ -566,9 +566,21 @@ drop_table, force_push, rm_rf); policy is conservative and
 approval-based; all operations are strictly read-only with no agent
 execution, prompt submission, or runtime state mutation.
 
+PCAE also generates advisory remote autonomous coding execution plans with
+`pcae remote plan` and `pcae remote plan --json` (Phase 39C): plans combine
+remote policy, runtime discovery, adapter model, and governance state; plan
+fields include requested_agent (default: codex-local, overridable via
+`--agent`), execution_mode, policy_compliance (agent_allowed,
+adapter_allowed, execution_mode_allowed, compliant), required_approvals,
+required_checks, safety_notes, blockers, readiness_status (ready/blocked),
+and governance_readiness; blockers are generated when the agent is not in
+allowed_agents, not installed, adapter not allowed, or the agent does not
+support the required execution mode; all operations are strictly read-only
+with no agent execution, prompt submission, or runtime state mutation.
+
 ## Next
 
-- Phase 39C: Remote Autonomous Coding Job Model.
+- Phase 39D: Remote Autonomous Coding Job Model.
 
 ## Future Explorations
 

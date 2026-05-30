@@ -4019,6 +4019,339 @@ def test_remote_policy_human_output_max_fields_unlimited(
     assert "(unlimited)" in output
 
 
+# pcae remote plan (Phase 39C)
+# ---------------------------------------------------------------------------
+
+
+def test_remote_plan_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote Autonomous Coding execution plan" in output
+    assert "Requested agent: codex-local" in output
+    assert "Execution mode: non_interactive" in output
+    assert "Remote execution plan is advisory" in output
+    assert "no agents are executed" in output
+
+
+def test_remote_plan_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "advisory",
+        "blockers",
+        "execution_mode",
+        "governance_readiness",
+        "policy_compliance",
+        "readiness_status",
+        "requested_agent",
+        "required_approvals",
+        "required_checks",
+        "safety_notes",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_plan_default_agent_is_codex(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["requested_agent"] == "codex-local"
+
+
+def test_remote_plan_policy_compliance_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    comp = data["policy_compliance"]
+    assert "agent_allowed" in comp
+    assert "adapter_allowed" in comp
+    assert "compliant" in comp
+    assert "execution_mode_allowed" in comp
+
+
+def test_remote_plan_required_approvals_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    approvals = data["required_approvals"]
+    assert isinstance(approvals, list)
+    assert len(approvals) > 0
+    assert any("approval" in a for a in approvals)
+
+
+def test_remote_plan_required_checks_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    checks = data["required_checks"]
+    assert isinstance(checks, list)
+    assert any("pcae check" in c for c in checks)
+    assert any("git" in c for c in checks)
+    assert any("tests" in c for c in checks)
+
+
+def test_remote_plan_blocked_when_agent_not_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["readiness_status"] == "blocked"
+    assert any("not installed" in b for b in data["blockers"])
+
+
+def test_remote_plan_blocked_when_agent_not_in_policy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--agent", "unknown-agent", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["readiness_status"] == "blocked"
+    assert any("not in allowed_agents" in b for b in data["blockers"])
+    assert data["policy_compliance"]["agent_allowed"] is False
+
+
+def test_remote_plan_ready_when_agent_installed_with_non_interactive(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["readiness_status"] == "ready"
+    assert data["blockers"] == []
+    assert data["policy_compliance"]["agent_allowed"] is True
+    assert data["policy_compliance"]["adapter_allowed"] is True
+
+
+def test_remote_plan_blocked_when_installed_but_no_non_interactive(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex basic help only"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["readiness_status"] == "blocked"
+    assert any("does not support execution mode" in b for b in data["blockers"])
+
+
+def test_remote_plan_agent_flag_sets_requested_agent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--agent", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["requested_agent"] == "claude-local"
+
+
+def test_remote_plan_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "plan"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_plan_governance_readiness_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    gov = data["governance_readiness"]
+    assert "session_active" in gov
+    assert "architecture_memory_present" in gov
+    assert "active_task_present" in gov
+
+
+def test_remote_plan_safety_notes_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    notes = data["safety_notes"]
+    assert isinstance(notes, list)
+    assert len(notes) > 0
+    assert any("No agents will be executed" in n for n in notes)
+
+
+def test_remote_plan_human_output_shows_blockers(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "plan"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Blockers" in output
+    assert "not installed" in output
+
+
+def test_remote_plan_human_output_no_blockers_when_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "plan"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Blockers: none" in output
+    assert "ready" in output
+
+
 # ---------------------------------------------------------------------------
 
 
