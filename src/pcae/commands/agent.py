@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_lifecycle_report,
     build_multi_agent_registry,
+    build_remote_status,
     build_review_workflows,
     build_runtime_discovery,
     get_agent_adapter,
@@ -452,6 +453,47 @@ def run_agents_adapter_inspect(args: argparse.Namespace) -> int:
                     f"  {cap['name']:<24} [unknown] "
                     f"({cap['source']}) {cap['notes']}"
                 )
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_status(args: argparse.Namespace) -> int:
+    data = build_remote_status(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Remote Autonomous Coding status")
+        print(f"Readiness: {data['readiness_status']}")
+        agents = data["available_agents"]
+        print(f"\nAvailable runtimes ({len(agents)}):")
+        if agents:
+            for a in agents:
+                ver = a["runtime_version"] or "(unknown)"
+                print(f"  {a['agent_id']} ({a['adapter_type']}, {ver})")
+                print(f"    Non-interactive: {a['non_interactive']}")
+                print(f"    MCP: {a['mcp']}")
+                print(f"    Hooks: {a['hooks']}")
+                print(f"    Remote: {a['remote']}")
+        else:
+            print("  (none)")
+        adapters = data["supported_adapters"]
+        print(f"\nSupported adapters: {', '.join(adapters) if adapters else 'none'}")
+        missing = data["missing_capabilities"]
+        if missing:
+            print("\nMissing capabilities:")
+            for cap in missing:
+                print(f"  {cap}")
+        else:
+            print("\nMissing capabilities: none")
+        gov = data["governance_readiness"]
+        print("\nGovernance readiness:")
+        print(f"  Session active: {'yes' if gov['session_active'] else 'no'}")
+        print(f"  Architecture memory: {'yes' if gov['architecture_memory_present'] else 'no'}")
+        print(f"  Active task: {'yes' if gov['active_task_present'] else 'no'}")
+        print("\nSafety notes:")
+        for note in data["safety_notes"]:
+            print(f"  - {note}")
         print()
         print(data["advisory"])
     return 0

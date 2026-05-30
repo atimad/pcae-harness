@@ -21,6 +21,7 @@ from pcae.commands.agent import (
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
+    run_remote_status,
 )
 from pcae.commands.architecture import (
     run_architecture_add,
@@ -1187,6 +1188,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON review workflow output.",
     )
     collaboration_reviews_parser.set_defaults(handler=run_collaboration_reviews)
+
+    remote_parser = subparsers.add_parser(
+        "remote",
+        help="Inspect Remote Autonomous Coding readiness.",
+    )
+    remote_subparsers = remote_parser.add_subparsers(dest="remote_command", required=True)
+    remote_status_parser = remote_subparsers.add_parser(
+        "status",
+        help="Report Remote Autonomous Coding readiness status.",
+    )
+    remote_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON remote status output.",
+    )
+    remote_status_parser.set_defaults(handler=run_remote_status)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

@@ -1540,3 +1540,98 @@ def build_adapter_inspection(agent_id: str) -> dict | None:
         "executable_path": executable_path,
         "runtime_version": runtime_version,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Autonomous Coding Foundation (Phase 39A)
+# ---------------------------------------------------------------------------
+
+REMOTE_STATUS_ADVISORY = (
+    "Remote Autonomous Coding readiness is advisory; no agents are executed."
+)
+
+REMOTE_STATUS_READY = "ready"
+REMOTE_STATUS_PARTIALLY_READY = "partially_ready"
+REMOTE_STATUS_NOT_READY = "not_ready"
+
+REMOTE_SAFETY_NOTES: tuple[str, ...] = (
+    "Remote Autonomous Coding is not yet implemented.",
+    "No agents will be executed by this command.",
+    "Human review and approval required before any remote execution.",
+)
+
+_REMOTE_ARCH_HISTORY_PATH = Path(".pcae") / "architecture-history.json"
+
+
+def _check_architecture_memory_present(root: HarnessPath) -> bool:
+    target = root.join(_REMOTE_ARCH_HISTORY_PATH)
+    if not target.is_file():
+        return False
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+    return isinstance(data, list) and len(data) > 0
+
+
+def _build_remote_governance_readiness(root: HarnessPath) -> dict[str, bool]:
+    try:
+        status = build_agent_status(root)
+        session_active = bool(status["locked"]) and not bool(status["stale"])
+    except ValueError:
+        session_active = False
+    return {
+        "active_task_present": find_latest_active_task(root) is not None,
+        "architecture_memory_present": _check_architecture_memory_present(root),
+        "session_active": session_active,
+    }
+
+
+def build_remote_status(root: HarnessPath) -> dict:
+    """Return advisory remote autonomous coding readiness status."""
+    discovery = build_runtime_discovery()
+
+    available_agents: list[dict] = []
+    supported_adapters: set[str] = set()
+    missing_caps: list[str] = []
+
+    for entry in discovery.agents:
+        caps = entry.capabilities
+        if not caps.installed:
+            continue
+        config = AGENT_CONFIG_REGISTRY.get(entry.agent_id)
+        adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+        supported_adapters.add(adapter_type)
+        available_agents.append({
+            "adapter_type": adapter_type,
+            "agent_id": entry.agent_id,
+            "hooks": caps.hooks_supported,
+            "mcp": caps.mcp_supported,
+            "non_interactive": caps.non_interactive_supported,
+            "remote": caps.remote_supported,
+            "runtime_version": caps.version,
+        })
+        for cap_name, cap_val in (
+            ("non_interactive", caps.non_interactive_supported),
+            ("mcp", caps.mcp_supported),
+            ("hooks", caps.hooks_supported),
+        ):
+            if cap_val == RUNTIME_CAP_UNKNOWN:
+                missing_caps.append(f"{cap_name} ({entry.agent_id})")
+
+    if not available_agents:
+        readiness_status = REMOTE_STATUS_NOT_READY
+    elif any(a["non_interactive"] == RUNTIME_CAP_YES for a in available_agents):
+        readiness_status = REMOTE_STATUS_READY
+    else:
+        readiness_status = REMOTE_STATUS_PARTIALLY_READY
+
+    return {
+        "advisory": REMOTE_STATUS_ADVISORY,
+        "available_agents": available_agents,
+        "governance_readiness": _build_remote_governance_readiness(root),
+        "missing_capabilities": missing_caps,
+        "readiness_status": readiness_status,
+        "safety_notes": list(REMOTE_SAFETY_NOTES),
+        "supported_adapters": sorted(supported_adapters),
+    }
