@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_multi_agent_registry,
     build_remote_adapters,
     build_remote_approvals,
+    build_remote_dry_run,
     build_remote_strategy,
     build_remote_jobs,
     build_remote_plan,
@@ -498,6 +499,57 @@ def run_remote_status(args: argparse.Namespace) -> int:
         print(f"  Session active: {'yes' if gov['session_active'] else 'no'}")
         print(f"  Architecture memory: {'yes' if gov['architecture_memory_present'] else 'no'}")
         print(f"  Active task: {'yes' if gov['active_task_present'] else 'no'}")
+        print("\nSafety notes:")
+        for note in data["safety_notes"]:
+            print(f"  - {note}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_dry_run(args: argparse.Namespace) -> int:
+    try:
+        data = build_remote_dry_run(HarnessPath.cwd(), args.agent, args.prompt)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Remote Autonomous Coding dry run")
+        print(f"Selected agent: {data['selected_agent']}")
+        print(f"Execution mode: {data['execution_mode']}")
+        print(f"Dry-run result: {data['dry_run_result']}")
+        preview = data["prompt_preview"]
+        print(f"\nPrompt preview:\n  \"{preview}\"")
+        comp = data["policy_compliance"]
+        print("\nPolicy compliance:")
+        print(f"  Agent allowed: {'yes' if comp['agent_allowed'] else 'no'}")
+        print(f"  Adapter allowed: {'yes' if comp['adapter_allowed'] else 'no'}")
+        print(f"  Compliant: {'yes' if comp['compliant'] else 'no'}")
+        approvals = data["required_approvals"]
+        print(f"\nRequired approvals ({len(approvals)}):")
+        for item in approvals:
+            print(f"  - {item}")
+        checks = data["required_checks"]
+        print(f"\nRequired checks ({len(checks)}):")
+        for item in checks:
+            print(f"  - {item}")
+        caps = data["adapter_capabilities"]
+        print("\nAdapter capabilities:")
+        print(f"  Installed: {'yes' if caps.get('installed') else 'no'}")
+        print(f"  Non-interactive: {caps.get('non_interactive', 'unknown')}")
+        print(f"  Remote: {caps.get('remote', 'unknown')}")
+        print(f"  MCP: {caps.get('mcp', 'unknown')}")
+        print(f"  Hooks: {caps.get('hooks', 'unknown')}")
+        blockers = data["blockers"]
+        if blockers:
+            print(f"\nBlockers ({len(blockers)}):")
+            for b in blockers:
+                print(f"  - {b}")
+        else:
+            print("\nBlockers: none")
         print("\nSafety notes:")
         for note in data["safety_notes"]:
             print(f"  - {note}")

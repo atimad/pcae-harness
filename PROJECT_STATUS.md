@@ -628,9 +628,19 @@ that human selection always takes precedence, PCAE must not silently
 choose a runtime, recommendations are advisory, and runtime neutrality
 is preserved; all operations are strictly read-only.
 
+PCAE introduces the first controlled Remote Autonomous Coding dry run with
+`pcae remote dry-run --agent AGENT_ID --prompt TEXT` (Phase 40A):
+`--agent` and `--prompt` are required; truly unknown agents exit 1 with
+a clear error; known but policy-restricted agents produce a blocked result;
+dry-run output includes prompt preview (truncated at 200 chars), policy
+compliance, required approvals and checks, adapter capabilities from
+runtime discovery, blockers, dry_run_result (would_execute/blocked), and
+three safety notes confirming no agent was executed, prompt not submitted,
+preview only; all operations are strictly read-only.
+
 ## Next
 
-- Phase 39I: Remote Execution Governance Summary.
+- Phase 40B: Remote Execution Governance Summary.
 
 ## Future Explorations
 

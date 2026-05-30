@@ -2124,3 +2124,125 @@ def build_remote_strategy() -> dict:
         "supported_strategies": list(REMOTE_SELECTION_STRATEGIES),
         "tie_break_rule": None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Remote Autonomous Coding Dry Run (Phase 40A)
+# ---------------------------------------------------------------------------
+
+REMOTE_DRY_RUN_ADVISORY = (
+    "Remote dry run is advisory; no agent was executed and no prompt was submitted."
+)
+
+_REMOTE_DRY_RUN_SAFETY_NOTES: tuple[str, ...] = (
+    "No agent was executed.",
+    "The prompt was not submitted to any agent.",
+    "This is a preview only.",
+)
+
+_REMOTE_DRY_RUN_PROMPT_PREVIEW_MAX = 200
+
+
+def build_remote_dry_run(
+    root: HarnessPath,
+    agent_id: str,
+    prompt: str,
+) -> dict:
+    """Return advisory dry-run preview. Raises ValueError for unknown agents."""
+    policy = build_remote_policy()
+    discovery = build_runtime_discovery()
+
+    known_ids = set(policy["allowed_agents"]) | set(AGENT_CONFIG_REGISTRY.keys())
+    if agent_id not in known_ids:
+        raise ValueError(
+            f"Unknown agent '{agent_id}'. "
+            f"Run 'pcae agents show' to list known agents."
+        )
+
+    config = AGENT_CONFIG_REGISTRY.get(agent_id)
+    adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+
+    agent_allowed = agent_id in policy["allowed_agents"]
+    adapter_allowed = adapter_type in policy["allowed_adapters"]
+    execution_mode = (
+        policy["allowed_execution_modes"][0]
+        if policy["allowed_execution_modes"]
+        else "unknown"
+    )
+
+    discovery_by_id = {e.agent_id: e for e in discovery.agents}
+    entry = discovery_by_id.get(agent_id)
+    if entry and entry.capabilities.installed:
+        caps = entry.capabilities
+        adapter_capabilities = {
+            "hooks": caps.hooks_supported,
+            "installed": True,
+            "mcp": caps.mcp_supported,
+            "non_interactive": caps.non_interactive_supported,
+            "remote": caps.remote_supported,
+            "runtime_version": caps.version,
+        }
+        agent_installed = True
+        non_interactive_ok = caps.non_interactive_supported == RUNTIME_CAP_YES
+    else:
+        adapter_capabilities = {
+            "hooks": RUNTIME_CAP_UNKNOWN,
+            "installed": False,
+            "mcp": RUNTIME_CAP_UNKNOWN,
+            "non_interactive": RUNTIME_CAP_UNKNOWN,
+            "remote": RUNTIME_CAP_UNKNOWN,
+            "runtime_version": None,
+        }
+        agent_installed = False
+        non_interactive_ok = False
+
+    policy_compliance = {
+        "adapter_allowed": adapter_allowed,
+        "agent_allowed": agent_allowed,
+        "compliant": agent_allowed and adapter_allowed,
+        "execution_mode_allowed": execution_mode in policy["allowed_execution_modes"],
+    }
+
+    required_approvals: list[str] = []
+    if policy["approval_required"]:
+        required_approvals.append("human approval required before execution")
+    if policy["require_human_approval_before_commit"]:
+        required_approvals.append("human approval required before commit")
+    if policy["require_human_approval_before_push"]:
+        required_approvals.append("human approval required before push")
+
+    required_checks: list[str] = []
+    if policy["require_clean_git"]:
+        required_checks.append("clean git working tree")
+    if policy["require_pcae_check"]:
+        required_checks.append("pcae check must pass")
+    if policy["require_tests"]:
+        required_checks.append("tests must pass")
+
+    blockers: list[str] = []
+    if not agent_allowed:
+        blockers.append(f"agent '{agent_id}' is not in allowed_agents")
+    if not agent_installed:
+        blockers.append(f"agent '{agent_id}' is not installed")
+    if not adapter_allowed:
+        blockers.append(f"adapter type '{adapter_type}' is not in allowed_adapters")
+    if agent_installed and not non_interactive_ok:
+        blockers.append(
+            f"agent '{agent_id}' does not support non-interactive execution"
+        )
+
+    prompt_preview = prompt[:_REMOTE_DRY_RUN_PROMPT_PREVIEW_MAX]
+
+    return {
+        "adapter_capabilities": adapter_capabilities,
+        "advisory": REMOTE_DRY_RUN_ADVISORY,
+        "blockers": blockers,
+        "dry_run_result": "would_execute" if not blockers else "blocked",
+        "execution_mode": execution_mode,
+        "policy_compliance": policy_compliance,
+        "prompt_preview": prompt_preview,
+        "required_approvals": required_approvals,
+        "required_checks": required_checks,
+        "safety_notes": list(_REMOTE_DRY_RUN_SAFETY_NOTES),
+        "selected_agent": agent_id,
+    }

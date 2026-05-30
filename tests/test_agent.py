@@ -5550,6 +5550,390 @@ def test_remote_strategy_constants(
     assert len(REMOTE_SELECTION_STRATEGIES) == 4
 
 
+# pcae remote dry-run (Phase 40A)
+# ---------------------------------------------------------------------------
+
+
+def _mock_codex_non_interactive_remote(find_fn=None, probe_fn=None):
+    """Return (mock_find, mock_probe) for a codex with full remote support."""
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex exec non-interactive full-auto remote mcp hook"
+        return None
+
+    return find_fn or mock_find, probe_fn or mock_probe
+
+
+def test_remote_dry_run_human_output_codex(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    mock_find, mock_probe = _mock_codex_non_interactive_remote()
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "run tests"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote Autonomous Coding dry run" in output
+    assert "Selected agent: codex-local" in output
+    assert "Dry-run result: would_execute" in output
+    assert "run tests" in output
+    assert "No agent was executed." in output
+    assert "Remote dry run is advisory" in output
+
+
+def test_remote_dry_run_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "adapter_capabilities",
+        "advisory",
+        "blockers",
+        "dry_run_result",
+        "execution_mode",
+        "policy_compliance",
+        "prompt_preview",
+        "required_approvals",
+        "required_checks",
+        "safety_notes",
+        "selected_agent",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_remote_dry_run_would_execute_when_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    mock_find, mock_probe = _mock_codex_non_interactive_remote()
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "run tests", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run_result"] == "would_execute"
+    assert data["blockers"] == []
+    assert data["selected_agent"] == "codex-local"
+
+
+def test_remote_dry_run_blocked_when_not_installed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run_result"] == "blocked"
+    assert any("not installed" in b for b in data["blockers"])
+
+
+def test_remote_dry_run_unknown_agent_exits_1(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "totally-unknown-bot", "--prompt", "test"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown agent" in output or "unknown" in output.lower()
+    assert "totally-unknown-bot" in output
+
+
+def test_remote_dry_run_agent_not_in_policy_is_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    # pcae-native is in the registry but not in policy allowed_agents
+    exit_code = main(["remote", "dry-run", "--agent", "pcae-native", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run_result"] == "blocked"
+    assert any("not in allowed_agents" in b for b in data["blockers"])
+    assert data["policy_compliance"]["agent_allowed"] is False
+
+
+def test_remote_dry_run_claude_local_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "claude" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "claude":
+            return "claude --print non-interactive remote mcp hook"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "2.1.0")
+
+    exit_code = main(["remote", "dry-run", "--agent", "claude-local", "--prompt", "review code", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["selected_agent"] == "claude-local"
+    assert data["dry_run_result"] == "would_execute"
+    assert data["policy_compliance"]["agent_allowed"] is True
+
+
+def test_remote_dry_run_kimi_local_policy_compliant(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "kimi" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "kimi":
+            return "kimi non-interactively stdin pipe"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.6.0")
+
+    exit_code = main(["remote", "dry-run", "--agent", "kimi-local", "--prompt", "fix bug", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["selected_agent"] == "kimi-local"
+    assert data["policy_compliance"]["agent_allowed"] is True
+    assert data["dry_run_result"] == "would_execute"
+
+
+def test_remote_dry_run_safety_notes_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    notes = data["safety_notes"]
+    assert any("No agent was executed" in n for n in notes)
+    assert any("not submitted" in n for n in notes)
+    assert any("preview" in n.lower() for n in notes)
+
+
+def test_remote_dry_run_prompt_preview_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "run all unit tests", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["prompt_preview"] == "run all unit tests"
+
+
+def test_remote_dry_run_prompt_truncated_at_200(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    long_prompt = "x" * 300
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", long_prompt, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["prompt_preview"]) == 200
+
+
+def test_remote_dry_run_no_execution_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "no agent was executed" in data["advisory"].lower()
+    assert "no prompt was submitted" in data["advisory"].lower()
+
+
+def test_remote_dry_run_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    before = set(p.name for p in (tmp_path / ".pcae").iterdir())
+    main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test"])
+    capsys.readouterr()
+    after = set(p.name for p in (tmp_path / ".pcae").iterdir())
+
+    assert before == after
+
+
+def test_remote_dry_run_required_approvals_listed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["required_approvals"]) > 0
+    assert any("approval" in a for a in data["required_approvals"])
+
+
+def test_remote_dry_run_required_checks_listed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    checks = data["required_checks"]
+    assert any("pcae check" in c for c in checks)
+    assert any("tests" in c for c in checks)
+    assert any("git" in c for c in checks)
+
+
+def test_remote_dry_run_adapter_capabilities_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    caps = data["adapter_capabilities"]
+    for field in ("hooks", "installed", "mcp", "non_interactive", "remote", "runtime_version"):
+        assert field in caps, f"Missing capability field: {field}"
+
+
+def test_remote_dry_run_policy_compliance_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(agent_mod, "_find_executable", _mock_none_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", _mock_none_probe)
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    comp = data["policy_compliance"]
+    for field in ("adapter_allowed", "agent_allowed", "compliant", "execution_mode_allowed"):
+        assert field in comp, f"Missing compliance field: {field}"
+
+
+def test_remote_dry_run_blocked_no_non_interactive(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.core.agent as agent_mod
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    def mock_find(name: str) -> str | None:
+        return f"/usr/bin/{name}" if name == "codex" else None
+
+    def mock_probe(cmd: list, timeout: int = 5) -> str | None:
+        if cmd[0] == "codex":
+            return "codex help only basic"
+        return None
+
+    monkeypatch.setattr(agent_mod, "_find_executable", mock_find)
+    monkeypatch.setattr(agent_mod, "_run_probe", mock_probe)
+    monkeypatch.setattr(agent_mod, "_extract_version_string", lambda exe: "0.135.0")
+
+    exit_code = main(["remote", "dry-run", "--agent", "codex-local", "--prompt", "test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run_result"] == "blocked"
+    assert any("non-interactive" in b for b in data["blockers"])
+
+
 # ---------------------------------------------------------------------------
 
 
