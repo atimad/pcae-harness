@@ -7790,6 +7790,215 @@ def test_remote_approve_advisory_text(
 
 
 # ---------------------------------------------------------------------------
+# pcae remote ready (Phase 40H)
+# ---------------------------------------------------------------------------
+
+
+def _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local") -> str:
+    """Helper: persist and approve a job; return job_id. Drains capsys."""
+    main(["remote", "create", "--agent", agent, "--prompt", "ready check task", "--persist", "--json"])
+    job_id = json.loads(capsys.readouterr().out)["job"]["job_id"]
+    main(["remote", "approve", job_id, "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def test_remote_ready_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "ready", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("ready", "job_id", "requested_agent", "checks", "blockers", "warnings", "advisory"):
+        assert key in data, f"missing key: {key}"
+
+
+def test_remote_ready_approved_job_status_checks_pass(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["checks"]["approval_state_approved"] is True
+    assert data["checks"]["status_ready"] is True
+    assert data["checks"]["policy_compliance"] is True
+
+
+def test_remote_ready_denied_job_is_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "deny", job_id, "--json"])
+    capsys.readouterr()
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["ready"] is False
+    assert data["checks"]["approval_state_approved"] is False
+    assert data["checks"]["status_ready"] is False
+
+
+def test_remote_ready_pending_job_is_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["ready"] is False
+    assert any("approval_state" in b or "status" in b for b in data["blockers"])
+
+
+def test_remote_ready_unknown_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "ready", "job-00000000-000000-000000"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output
+
+
+def test_remote_ready_malformed_job_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "job-20260101-120000-000000"
+    (jobs_dir / f"{job_id}.json").write_text("{bad json", encoding="utf-8")
+
+    exit_code = main(["remote", "ready", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Malformed" in output or "malformed" in output
+
+
+def test_remote_ready_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "ready", job_id])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert job_id in output
+    assert "Execution readiness" in output
+    assert "no agent is executed" in output
+
+
+def test_remote_ready_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["advisory"] == "Execution readiness is advisory; no agent is executed."
+
+
+def test_remote_ready_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    job_file = jobs_dir / f"{job_id}.json"
+    content_before = job_file.read_text(encoding="utf-8")
+
+    main(["remote", "ready", job_id, "--json"])
+    capsys.readouterr()
+
+    assert job_file.read_text(encoding="utf-8") == content_before
+
+
+def test_remote_ready_checks_contains_expected_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checks = data["checks"]
+    for key in (
+        "agent_allowed",
+        "adapter_allowed",
+        "approval_state_approved",
+        "execution_mode_allowed",
+        "git_working_tree_clean",
+        "job_schema_valid",
+        "non_interactive_supported",
+        "pcae_check_required",
+        "policy_compliance",
+        "required_approvals_listed",
+        "runtime_installed",
+        "status_ready",
+        "tests_required",
+    ):
+        assert key in checks, f"missing check: {key}"
+
+
+def test_remote_ready_job_id_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["job_id"] == job_id
+    assert data["requested_agent"] == "codex-local"
+
+
+def test_remote_ready_schema_invalid_job_has_blocker(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    jobs_dir = tmp_path / ".pcae" / "remote" / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "job-20260101-120000-000002"
+    (jobs_dir / f"{job_id}.json").write_text(
+        json.dumps({"job_id": job_id, "approval_state": "approved", "status": "ready"}),
+        encoding="utf-8",
+    )
+
+    main(["remote", "ready", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["ready"] is False
+    assert data["checks"]["job_schema_valid"] is False
+    assert any("missing schema fields" in b for b in data["blockers"])
+
+
+# ---------------------------------------------------------------------------
 
 
 def init_agent_repo(root: Path) -> None:

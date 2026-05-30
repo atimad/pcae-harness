@@ -33,6 +33,7 @@ from pcae.core.agent import (
     inspect_persisted_job,
     approve_remote_job,
     deny_remote_job,
+    check_remote_job_readiness,
     build_remote_plan,
     build_remote_validate,
     build_remote_policy,
@@ -906,6 +907,37 @@ def run_remote_approve(args: argparse.Namespace) -> int:
 
 def run_remote_deny(args: argparse.Namespace) -> int:
     return _run_remote_approval_mutation(args, deny_remote_job)
+
+
+def run_remote_ready(args: argparse.Namespace) -> int:
+    try:
+        data = check_remote_job_readiness(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        status_label = "READY" if data["ready"] else "NOT READY"
+        print(f"Execution readiness: {status_label}")
+        print(f"Job ID:          {data['job_id']}")
+        print(f"Requested agent: {data['requested_agent']}")
+        checks = data["checks"]
+        passed = sum(1 for v in checks.values() if v is True)
+        print(f"Checks passed:   {passed}/{len(checks)}")
+        blockers = data["blockers"]
+        if blockers:
+            print(f"\nBlockers ({len(blockers)}):")
+            for b in blockers:
+                print(f"  - {b}")
+        warnings = data["warnings"]
+        if warnings:
+            print(f"\nWarnings ({len(warnings)}):")
+            for w in warnings:
+                print(f"  - {w}")
+        print()
+        print(data["advisory"])
+    return 0
 
 
 def run_remote_plan(args: argparse.Namespace) -> int:

@@ -697,11 +697,20 @@ approve sets `approval_state` to `"approved"` and `status` to `"ready"` when
 exit 1 for unknown or malformed jobs; mutation is written back to disk;
 no agents are executed; `approve_remote_job()` and `deny_remote_job()` added
 to core; `run_remote_approve()` and `run_remote_deny()` added to commands;
-`approve` and `deny` subcommands wired in CLI.
+`approve` and `deny` subcommands wired in CLI; execution readiness of a
+persisted job can be evaluated with `pcae remote ready JOB_ID` (Phase 40H):
+runs 13 named checks including job_schema_valid, status_ready,
+approval_state_approved, policy_compliance, agent_allowed, adapter_allowed,
+execution_mode_allowed, runtime_installed, non_interactive_supported,
+git_working_tree_clean, pcae_check_required, tests_required, and
+required_approvals_listed; failing hard checks produce blocker messages;
+`ready` is True only when blockers list is empty; strictly read-only;
+`check_remote_job_readiness(root, job_id)` added to core; `run_remote_ready()`
+added to commands; `ready` subcommand wired in CLI.
 
 ## Next
 
-- Phase 40H: Remote Job Deletion.
+- Phase 40I: Remote Job Deletion.
 
 ## Future Explorations
 

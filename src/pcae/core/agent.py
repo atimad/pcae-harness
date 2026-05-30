@@ -8,7 +8,7 @@ import re
 import shutil
 import subprocess
 
-from pcae.core.git_status import read_git_branch
+from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import DEFAULT_AGENT_STALE_AFTER_SECONDS, load_policy
 from pcae.core.tasks import find_latest_active_task
@@ -2671,3 +2671,136 @@ def approve_remote_job(root: HarnessPath, job_id: str) -> dict:
 def deny_remote_job(root: HarnessPath, job_id: str) -> dict:
     """Deny a persisted job. Raises ValueError on unknown or malformed job."""
     return _mutate_job_approval(root, job_id, "denied")
+
+
+# ---------------------------------------------------------------------------
+# Remote Execution Readiness Gate (Phase 40H)
+# ---------------------------------------------------------------------------
+
+REMOTE_JOB_READINESS_ADVISORY = "Execution readiness is advisory; no agent is executed."
+
+
+def check_remote_job_readiness(root: HarnessPath, job_id: str) -> dict:
+    """Check execution readiness for a persisted job. Read-only, never mutates."""
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file {job_file.name}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(f"Malformed job file {job_file.name}: content is not a JSON object.")
+
+    policy = build_remote_policy()
+    discovery = build_runtime_discovery()
+
+    requested_agent: str = job.get("requested_agent", "")
+    execution_mode: str = job.get("execution_mode", "")
+
+    config = AGENT_CONFIG_REGISTRY.get(requested_agent)
+    adapter_type = config.adapter_type if config else ADAPTER_TYPE_UNDECLARED
+
+    installed_ids = {e.agent_id for e in discovery.agents if e.capabilities.installed}
+    agent_installed = requested_agent in installed_ids
+
+    agent_entry = next(
+        (e for e in discovery.agents if e.agent_id == requested_agent), None
+    )
+    non_interactive_ok = (
+        agent_entry is not None
+        and agent_entry.capabilities.installed
+        and agent_entry.capabilities.non_interactive_supported == RUNTIME_CAP_YES
+    )
+
+    missing_fields = [f for f in REMOTE_JOB_SCHEMA_FIELDS if f not in job]
+    job_schema_valid = not missing_fields
+
+    compliance = job.get("policy_compliance", {})
+    policy_compliance_ok = isinstance(compliance, dict) and bool(compliance.get("compliant"))
+
+    required_checks: list = job.get("required_checks") or []
+    required_approvals: list = job.get("required_approvals") or []
+
+    pcae_check_required = "pcae check must pass" in required_checks
+    tests_required = "tests must pass" in required_checks
+    required_approvals_listed = len(required_approvals) > 0
+
+    checks: dict[str, bool] = {
+        "agent_allowed": requested_agent in policy["allowed_agents"],
+        "adapter_allowed": adapter_type in policy["allowed_adapters"],
+        "approval_state_approved": job.get("approval_state") == "approved",
+        "execution_mode_allowed": execution_mode in policy["allowed_execution_modes"],
+        "job_schema_valid": job_schema_valid,
+        "non_interactive_supported": non_interactive_ok,
+        "pcae_check_required": pcae_check_required,
+        "policy_compliance": policy_compliance_ok,
+        "required_approvals_listed": required_approvals_listed,
+        "runtime_installed": agent_installed,
+        "status_ready": job.get("status") == "ready",
+        "tests_required": tests_required,
+    }
+
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if not job_schema_valid:
+        blockers.append(f"missing schema fields: {missing_fields}")
+    if not checks["status_ready"]:
+        blockers.append(f"job status is '{job.get('status')}', expected 'ready'")
+    if not checks["approval_state_approved"]:
+        blockers.append(
+            f"approval_state is '{job.get('approval_state')}', expected 'approved'"
+        )
+    if not checks["policy_compliance"]:
+        blockers.append("policy_compliance.compliant is not true")
+    if not checks["agent_allowed"]:
+        blockers.append(f"agent '{requested_agent}' is not in allowed_agents")
+    if not checks["adapter_allowed"]:
+        blockers.append(f"adapter '{adapter_type}' is not in allowed_adapters")
+    if not checks["execution_mode_allowed"]:
+        blockers.append(
+            f"execution_mode '{execution_mode}' is not in allowed_execution_modes"
+        )
+    if not checks["runtime_installed"]:
+        blockers.append(f"runtime for agent '{requested_agent}' is not installed")
+    if not checks["non_interactive_supported"]:
+        blockers.append(
+            f"agent '{requested_agent}' does not support non-interactive execution"
+        )
+
+    try:
+        git_changes = read_git_changes(root)
+        git_clean = len(git_changes) == 0
+    except Exception:
+        git_clean = None
+        warnings.append("could not determine git working tree status")
+
+    if git_clean is None:
+        checks["git_working_tree_clean"] = False
+    elif git_clean:
+        checks["git_working_tree_clean"] = True
+    else:
+        checks["git_working_tree_clean"] = False
+        blockers.append("git working tree is not clean")
+
+    if not required_approvals_listed:
+        warnings.append("required_approvals is empty — ensure approval requirements are captured")
+    if not pcae_check_required:
+        warnings.append("pcae check requirement not found in required_checks")
+    if not tests_required:
+        warnings.append("tests requirement not found in required_checks")
+
+    return {
+        "advisory": REMOTE_JOB_READINESS_ADVISORY,
+        "blockers": blockers,
+        "checks": checks,
+        "job_id": job.get("job_id", job_id),
+        "ready": not blockers,
+        "requested_agent": requested_agent,
+        "warnings": warnings,
+    }
