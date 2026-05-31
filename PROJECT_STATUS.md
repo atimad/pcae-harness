@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A.4: Kimi Writable Execution Contract Inspection.
+Phase 42A.3.1: Claude Writable Contract Correction.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,23 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE enables Claude writable execution under PCAE governance using the verified
+Claude CLI contract (Phase 42A.3.1): `pcae remote execute JOB_ID --invoke
+--allow-file-changes` for `claude-local` now uses
+`claude -p --permission-mode acceptEdits <prompt>`; read-only `--invoke` without
+`--allow-file-changes` remains `claude -p <prompt>` unchanged; `--permission-mode
+auto`, `--permission-mode bypassPermissions`, and `--dangerously-skip-permissions`
+are not used; `permission_mode` field (`acceptEdits` for claude-local, `n/a` for
+codex-local and kimi-local) added to returned dict, persisted result artifact, and
+human output ("Permission mode:" line); `_CLAUDE_PERMISSION_MODE_WRITABLE =
+"acceptEdits"` constant added; Codex sandbox behavior and Kimi behavior are
+unchanged; post-execution scope validation remains mandatory; no commit or push;
+10 new tests covering: read-only command unchanged, writable command contains
+`--permission-mode acceptEdits`, no dangerous flags, JSON output field, persisted
+artifact field, human output line, docs/ success, Codex permission_mode=n/a, and
+Kimi permission_mode=n/a; existing `test_421_claude_unaffected_by_file_changes_flag`
+updated to verify the new correct command.
 
 PCAE inspects and documents Kimi's writable execution contract before enabling
 Kimi file modifications (Phase 42A.4): `pcae remote writable-contract kimi-local`

@@ -2891,6 +2891,8 @@ _INVOKE_UNSUPPORTED_REASON = (
 )
 
 
+_CLAUDE_PERMISSION_MODE_WRITABLE = "acceptEdits"
+
 def _build_invoke_command(
     agent_id: str,
     prompt: str,
@@ -2898,6 +2900,8 @@ def _build_invoke_command(
 ) -> list[str] | None:
     """Return the argv for non-interactive agent invocation, or None if unsafe/unknown."""
     if agent_id == "claude-local":
+        if allow_file_changes:
+            return ["claude", "-p", "--permission-mode", _CLAUDE_PERMISSION_MODE_WRITABLE, prompt]
         return ["claude", "-p", prompt]
     if agent_id == "codex-local":
         sandbox = "workspace-write" if allow_file_changes else "read-only"
@@ -3173,6 +3177,8 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
 
     # Derive sandbox_mode from command for codex; n/a for other adapters.
     sandbox_mode = "workspace-write" if requested_agent == "codex-local" else "n/a"
+    # Derive permission_mode for claude; n/a for other adapters.
+    permission_mode = _CLAUDE_PERMISSION_MODE_WRITABLE if requested_agent == "claude-local" else "n/a"
 
     changed_files = _capture_git_changed_files(root)
     diff_summary = _capture_diff_summary(root)
@@ -3204,6 +3210,7 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
         "final_status": final_status,
         "finished_at": finished_at.isoformat(),
         "job_id": job_id,
+        "permission_mode": permission_mode,
         "pre_execution_head": pre_execution_head,
         "sandbox_mode": sandbox_mode,
         "scope_validation": scope_validation,
@@ -3235,6 +3242,7 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
         "finished_at": finished_at.isoformat(),
         "job_id": job_id,
         "output_path": result_path,
+        "permission_mode": permission_mode,
         "pre_execution_head": pre_execution_head,
         "sandbox_mode": sandbox_mode,
         "scope_validation": scope_validation,

@@ -11444,10 +11444,10 @@ def test_421_sandbox_mode_in_artifact(
     assert artifact["sandbox_mode"] == "workspace-write"
 
 
-def test_421_claude_unaffected_by_file_changes_flag(
+def test_421_claude_uses_permission_mode_acceptedits_with_file_changes(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    """Claude command does not gain --sandbox flag when --allow-file-changes is used."""
+    """Phase 42A.3.1: --allow-file-changes adds --permission-mode acceptEdits for claude-local."""
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -11467,9 +11467,11 @@ def test_421_claude_unaffected_by_file_changes_flag(
 
     assert len(captured_cmd) == 1
     cmd = captured_cmd[0]
-    assert "--sandbox" not in cmd
     assert cmd[0] == "claude"
     assert cmd[1] == "-p"
+    assert "--permission-mode" in cmd
+    assert cmd[cmd.index("--permission-mode") + 1] == "acceptEdits"
+    assert "--sandbox" not in cmd
 
 
 def test_421_kimi_unaffected_by_file_changes_flag(
@@ -12105,3 +12107,177 @@ def test_42a4_readonly_does_not_execute_kimi(
     main(["remote", "writable-contract", "kimi-local", "--json"])
 
     assert executed == [], "kimi must not be executed during writable-contract inspection"
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.3.1 — Claude Writable Contract Correction
+# ---------------------------------------------------------------------------
+
+
+def test_42a31_read_only_claude_command_unchanged(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Read-only Claude invocation (no --allow-file-changes) stays as `claude -p <prompt>`."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+
+    assert len(captured_cmd) == 1
+    cmd = captured_cmd[0]
+    assert cmd[0] == "claude"
+    assert cmd[1] == "-p"
+    assert "--permission-mode" not in cmd
+
+
+def test_42a31_writable_claude_uses_accept_edits(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """--allow-file-changes adds --permission-mode acceptEdits to the Claude command."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=[])
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    main(["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"])
+    capsys.readouterr()
+
+    cmd = captured_cmd[0]
+    assert "--permission-mode" in cmd
+    assert cmd[cmd.index("--permission-mode") + 1] == "acceptEdits"
+
+
+def test_42a31_no_dangerous_claude_flags(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Claude writable command must not include auto, bypassPermissions, or dangerously-skip."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=[])
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    main(["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"])
+    capsys.readouterr()
+
+    cmd = captured_cmd[0]
+    cmd_str = " ".join(cmd)
+    assert "auto" not in cmd_str or "--permission-mode acceptEdits" in cmd_str
+    assert "bypassPermissions" not in cmd_str
+    assert "dangerously-skip" not in cmd_str
+    # Specifically: if --permission-mode is present, its value must be acceptEdits
+    if "--permission-mode" in cmd:
+        assert cmd[cmd.index("--permission-mode") + 1] == "acceptEdits"
+
+
+def test_42a31_permission_mode_in_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """JSON output from --allow-file-changes includes permission_mode=acceptEdits for claude."""
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, agent="claude-local", changed_files=[]
+    )
+    assert "permission_mode" in data
+    assert data["permission_mode"] == "acceptEdits"
+
+
+def test_42a31_permission_mode_in_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Persisted result artifact includes permission_mode=acceptEdits for claude."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, agent="claude-local", changed_files=[]
+    )
+    artifact_file = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    artifact = json.loads(artifact_file.read_text())
+    assert artifact["permission_mode"] == "acceptEdits"
+
+
+def test_42a31_permission_mode_in_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Human output displays 'Permission mode: acceptEdits' for claude writable execution."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=[])
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(0, "ok\n"),
+    )
+
+    main(["remote", "execute", job_id, "--invoke", "--allow-file-changes"])
+    output = capsys.readouterr().out
+    assert "Permission mode" in output
+    assert "acceptEdits" in output
+
+
+def test_42a31_docs_modification_succeeds_with_claude(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """docs/ file change passes scope validation for claude-local writable execution."""
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        agent="claude-local",
+        changed_files=["docs/generated-note.md"],
+        diff_summary="1 file changed",
+    )
+    assert data["scope_validation"]["valid"] is True
+    assert data["final_status"] == "completed"
+    assert "docs/generated-note.md" in data["changed_files"]
+
+
+def test_42a31_codex_permission_mode_is_na(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Codex writable execution gets permission_mode=n/a (unchanged from prior behavior)."""
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, agent="codex-local", changed_files=[]
+    )
+    assert data["permission_mode"] == "n/a"
+
+
+def test_42a31_kimi_permission_mode_is_na(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Kimi writable execution gets permission_mode=n/a (unchanged from prior behavior)."""
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, agent="kimi-local", changed_files=[]
+    )
+    assert data["permission_mode"] == "n/a"
