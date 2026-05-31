@@ -28,6 +28,7 @@ from pcae.core.agent import (
     build_remote_dry_run,
     build_remote_execution_analytics,
     build_remote_results,
+    export_remote_execution_report,
     build_remote_results_registry,
     persist_remote_job,
     build_remote_strategy,
@@ -1234,6 +1235,20 @@ def run_remote_analytics(args: argparse.Namespace) -> int:
             print(f"Warning: {warning}")
         print()
         print(data["advisory"])
+    return 0
+
+
+def run_remote_report_export(args: argparse.Namespace) -> int:
+    result = export_remote_execution_report(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(f"Export path:      {result['export_path']}")
+        print(f"Total executions: {result['total_executions']}")
+        sr = result["success_rate"]
+        print(f"Success rate:     {sr if sr is not None else '(no data)'}")
+        print()
+        print(result["advisory"])
     return 0
 
 

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41H: Execution Analytics.
+Phase 41I: Execution Report Export.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,22 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE exports governed execution report artifacts (Phase 41I): `pcae remote
+report export` and `--json` compute an execution report from persisted result
+artifacts and write it to `.pcae/remote/reports/remote-execution-report-YYYYMMDD-HHMMSS.json`;
+the report includes `exported_at`, `total_executions`, `successful_executions`,
+`failed_executions`, `success_rate`, `runtime_breakdown` (per-agent metrics),
+`latest_execution`, `result_registry_summary` (result_count and warnings), and
+`advisory`; `pcae remote report export --json` returns command-level metadata
+(`export_path`, `exported_at`, `total_executions`, `success_rate`, `advisory`);
+human output shows export path, total executions, success rate, and advisory;
+the `report` subcommand is structured as a two-level subparser (`remote → report → export`)
+following the `jobs` pattern; `reports/` is covered by the existing `remote/`
+entry in `.pcae/.gitignore`; `export_remote_execution_report(root)` added to
+`core/agent.py`; `run_remote_report_export` added to `commands/agent.py`;
+`report` / `export` subparsers wired in `cli.py`; advisory: "Execution report
+export is read-only; no agents are executed."; 7 new tests.
 
 PCAE provides analytics over persisted Remote Autonomous Coding execution
 results (Phase 41H): `pcae remote analytics` and `--json` compute global

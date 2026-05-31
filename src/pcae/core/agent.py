@@ -3265,3 +3265,57 @@ def build_remote_execution_analytics(root: HarnessPath) -> dict:
         "runtime_metrics": _compute_runtime_metrics(entries),
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Execution Report Export (Phase 41I)
+# ---------------------------------------------------------------------------
+
+REMOTE_REPORTS_DIR = Path(".pcae") / "remote" / "reports"
+REMOTE_REPORT_EXPORT_ADVISORY = (
+    "Execution report export is read-only; no agents are executed."
+)
+
+
+def export_remote_execution_report(root: HarnessPath) -> dict:
+    """Export an execution report artifact to .pcae/remote/reports/. Returns export metadata."""
+    analytics_data = build_remote_execution_analytics(root)
+    a = analytics_data["analytics"]
+    registry = build_remote_results_registry(root)
+
+    from datetime import datetime, timezone  # noqa: PLC0415
+    now = datetime.now(timezone.utc)
+    timestamp = now.strftime("%Y%m%d-%H%M%S")
+    exported_at = now.isoformat()
+
+    report = {
+        "advisory": REMOTE_REPORT_EXPORT_ADVISORY,
+        "exported_at": exported_at,
+        "failed_executions": a["failed_executions"],
+        "latest_execution": a["latest_execution"],
+        "result_registry_summary": {
+            "result_count": registry["result_count"],
+            "warnings": registry["warnings"],
+        },
+        "runtime_breakdown": analytics_data["runtime_metrics"],
+        "success_rate": a["success_rate"],
+        "successful_executions": a["successful_executions"],
+        "total_executions": a["total_executions"],
+        "warnings": analytics_data["warnings"],
+    }
+
+    reports_dir = root.join(REMOTE_REPORTS_DIR)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"remote-execution-report-{timestamp}.json"
+    report_path = reports_dir / filename
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True), encoding="utf-8"
+    )
+
+    return {
+        "advisory": REMOTE_REPORT_EXPORT_ADVISORY,
+        "export_path": str(REMOTE_REPORTS_DIR / filename),
+        "exported_at": exported_at,
+        "success_rate": a["success_rate"],
+        "total_executions": a["total_executions"],
+    }

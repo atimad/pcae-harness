@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Execution Report Export (Phase 41I): `pcae remote report export` writes governed report to `.pcae/remote/reports/`; includes analytics, runtime breakdown, registry summary; git-ignored via existing `remote/` entry; 7 new tests.
 - Completed Execution Analytics (Phase 41H): `pcae remote analytics` global and per-runtime metrics over persisted result artifacts; delegates to result registry; 11 new tests.
 - Completed Remote Execution Result Registry (Phase 41G): `pcae remote results` lists all persisted result artifacts newest-first; `job_id` optional in CLI; malformed files warned; 9 new tests.
 - Completed Execution Output Normalization (Phase 41F): `pcae remote results JOB_ID` and `--json` include `output_classification` and `normalized_final_output`; four classes: `clean_stdout`, `stderr_with_status_text`, `empty_output`, `execution_error`; raw stdout/stderr preserved; 9 new tests.

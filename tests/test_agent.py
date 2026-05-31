@@ -9975,3 +9975,141 @@ def test_41h_analytics_readonly(
 
     after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 41I: Execution Report Export
+# ---------------------------------------------------------------------------
+
+
+def test_41i_report_export_creates_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "report", "export"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    reports_dir = tmp_path / ".pcae" / "remote" / "reports"
+    assert reports_dir.exists()
+    report_files = list(reports_dir.glob("remote-execution-report-*.json"))
+    assert len(report_files) == 1
+
+
+def test_41i_report_export_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "report", "export"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Export path:" in output
+    assert "Total executions:" in output
+    assert "Success rate:" in output
+    assert "Execution report export is read-only" in output
+
+
+def test_41i_report_export_json_metadata(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "report", "export", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("export_path", "exported_at", "total_executions", "success_rate", "advisory"):
+        assert key in data, f"missing key: {key}"
+    assert data["total_executions"] == 1
+    assert data["success_rate"] == 1.0
+    assert data["export_path"].startswith(".pcae/remote/reports/remote-execution-report-")
+    assert data["export_path"].endswith(".json")
+    assert "Execution report export is read-only" in data["advisory"]
+
+
+def test_41i_report_file_content(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    main(["remote", "report", "export", "--json"])
+    meta = json.loads(capsys.readouterr().out)
+
+    report_path = tmp_path / meta["export_path"]
+    assert report_path.exists()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    for key in (
+        "exported_at", "total_executions", "successful_executions",
+        "failed_executions", "success_rate", "runtime_breakdown",
+        "latest_execution", "result_registry_summary", "advisory",
+    ):
+        assert key in report, f"missing key in report: {key}"
+    assert report["total_executions"] == 1
+    assert report["successful_executions"] == 1
+    assert report["failed_executions"] == 0
+    assert report["success_rate"] == 1.0
+    assert isinstance(report["runtime_breakdown"], dict)
+    assert "codex-local" in report["runtime_breakdown"]
+    assert isinstance(report["result_registry_summary"], dict)
+    assert report["result_registry_summary"]["result_count"] == 1
+
+
+def test_41i_report_export_empty_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "report", "export", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["total_executions"] == 0
+    assert data["success_rate"] is None
+    reports_dir = tmp_path / ".pcae" / "remote" / "reports"
+    assert reports_dir.exists()
+    assert len(list(reports_dir.glob("*.json"))) == 1
+
+
+def test_41i_report_does_not_mutate_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    before = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+
+    main(["remote", "report", "export", "--json"])
+    capsys.readouterr()
+
+    after_results = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+    assert before == after_results
+
+
+def test_41i_report_filename_format(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import re
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "report", "export", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    filename = Path(data["export_path"]).name
+    assert re.match(r"remote-execution-report-\d{8}-\d{6}\.json", filename), (
+        f"unexpected filename: {filename}"
+    )
