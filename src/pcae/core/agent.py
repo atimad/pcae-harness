@@ -3126,3 +3126,52 @@ def build_remote_results(root: HarnessPath, job_id: str) -> dict:
         "requested_agent": requested_agent,
         "result_available": True,
     }
+
+
+REMOTE_REGISTRY_ADVISORY = (
+    "Execution result registry is read-only; no agents are executed."
+)
+
+
+def build_remote_results_registry(root: HarnessPath) -> dict:
+    """List all persisted execution result artifacts, newest first. Read-only."""
+    results_dir = root.join(_REMOTE_RESULTS_DIR)
+    warnings: list[str] = []
+    entries: list[dict] = []
+
+    if results_dir.exists():
+        artifact_files = sorted(
+            results_dir.glob("*-result.json"), key=lambda p: p.name, reverse=True
+        )
+        for artifact_file in artifact_files:
+            try:
+                artifact = json.loads(artifact_file.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                warnings.append(f"Skipped malformed result file {artifact_file.name}: {exc}")
+                continue
+            if not isinstance(artifact, dict):
+                warnings.append(
+                    f"Skipped result file {artifact_file.name}: content is not a JSON object."
+                )
+                continue
+            stdout_val: str = artifact.get("stdout") or ""
+            stderr_val: str = artifact.get("stderr") or ""
+            exit_code = artifact.get("exit_code")
+            classification = _classify_execution_output(stdout_val, stderr_val, exit_code)
+            entries.append({
+                "duration_seconds": artifact.get("duration_seconds"),
+                "exit_code": exit_code,
+                "final_status": artifact.get("final_status"),
+                "finished_at": artifact.get("finished_at"),
+                "job_id": artifact.get("job_id", artifact_file.stem.replace("-result", "")),
+                "output_classification": classification,
+                "output_path": str(_REMOTE_RESULTS_DIR / artifact_file.name),
+                "selected_agent": artifact.get("selected_agent"),
+            })
+
+    return {
+        "advisory": REMOTE_REGISTRY_ADVISORY,
+        "result_count": len(entries),
+        "results": entries,
+        "warnings": warnings,
+    }

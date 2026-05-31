@@ -9585,3 +9585,183 @@ def test_41f_kimi_stderr_only_normalized_output_is_none(
     result = data["execution_result"]
     assert result["output_classification"] == "stderr_with_status_text"
     assert result["normalized_final_output"] is None
+
+
+# ---------------------------------------------------------------------------
+# Phase 41G: Remote Execution Result Registry
+# ---------------------------------------------------------------------------
+
+
+def test_41g_registry_empty_directory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "results"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution result registry" in output
+    assert "Result count: 0" in output
+    assert "Execution result registry is read-only" in output
+
+
+def test_41g_registry_empty_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "results", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_count"] == 0
+    assert data["results"] == []
+    assert data["warnings"] == []
+    assert "Execution result registry is read-only" in data["advisory"]
+
+
+def test_41g_registry_lists_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="answer\n")
+
+    exit_code = main(["remote", "results"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Result count: 1" in output
+    assert "codex-local" in output
+    assert "completed" in output
+    assert "clean_stdout" in output
+
+
+def test_41g_registry_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="answer\n"
+    )
+
+    exit_code = main(["remote", "results", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_count"] == 1
+    assert len(data["results"]) == 1
+    assert data["warnings"] == []
+    assert "advisory" in data
+    entry = data["results"][0]
+    for key in (
+        "job_id", "selected_agent", "final_status", "exit_code",
+        "duration_seconds", "output_classification", "output_path", "finished_at",
+    ):
+        assert key in entry, f"missing key: {key}"
+    assert entry["job_id"] == job_id
+    assert entry["selected_agent"] == "codex-local"
+    assert entry["final_status"] == "completed"
+    assert entry["exit_code"] == 0
+    assert entry["output_classification"] == "clean_stdout"
+
+
+def test_41g_registry_sorted_newest_first(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id_1 = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="first\n"
+    )
+    job_id_2 = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "claude-local", stdout="second\n"
+    )
+
+    exit_code = main(["remote", "results", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_count"] == 2
+    ids = [e["job_id"] for e in data["results"]]
+    assert ids.index(job_id_2) < ids.index(job_id_1), "newer job should appear first"
+
+
+def test_41g_registry_malformed_file_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "job-bad-result.json").write_text("not valid json", encoding="utf-8")
+
+    exit_code = main(["remote", "results", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_count"] == 0
+    assert len(data["warnings"]) == 1
+    assert "job-bad-result.json" in data["warnings"][0]
+
+
+def test_41g_registry_includes_output_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        "kimi-local",
+        stdout="kimi answer\n",
+        stderr="thinking...\n",
+    )
+
+    exit_code = main(["remote", "results", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["results"][0]["output_classification"] == "stderr_with_status_text"
+
+
+def test_41g_job_id_still_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n"
+    )
+
+    exit_code = main(["remote", "results", job_id, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["result_available"] is True
+    assert data["job_id"] == job_id
+
+
+def test_41g_registry_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n"
+    )
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    before = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+
+    main(["remote", "results", "--json"])
+    capsys.readouterr()
+
+    after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+    assert before == after

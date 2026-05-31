@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Remote Execution Result Registry (Phase 41G): `pcae remote results` lists all persisted result artifacts newest-first; `job_id` optional in CLI; malformed files warned; 9 new tests.
 - Completed Execution Output Normalization (Phase 41F): `pcae remote results JOB_ID` and `--json` include `output_classification` and `normalized_final_output`; four classes: `clean_stdout`, `stderr_with_status_text`, `empty_output`, `execution_error`; raw stdout/stderr preserved; 9 new tests.
 - Completed Agent Runtime Capability Discovery (Phase 38A): `pcae agents runtime-discover` and `--json` with conservative CLI probing for codex/claude/kimi, capability detection from help text keywords, graceful missing-executable handling, and advisory output.
 - Completed Multi-Agent Review and Validation (Phase 37H): `pcae collaboration reviews` and `--json` with three review workflow templates, four review statuses, per-step review_status field, and advisory semantics.

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41F: Execution Output Normalization.
+Phase 41G: Remote Execution Result Registry.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,21 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE exposes a governed execution result registry (Phase 41G): `pcae remote
+results` (no argument) lists all persisted execution result artifacts from
+`.pcae/remote/results/`, sorted newest first; each entry includes `job_id`,
+`selected_agent`, `final_status`, `exit_code`, `duration_seconds`,
+`output_classification`, `output_path`, and `finished_at`; malformed artifact
+files produce per-file warnings and are skipped without aborting the listing;
+an empty or absent results directory returns an empty list gracefully;
+`pcae remote results --json` outputs `result_count`, `results`, `warnings`,
+and `advisory`; `pcae remote results JOB_ID` continues to work as before;
+`build_remote_results_registry(root)` added to `core/agent.py`;
+`REMOTE_REGISTRY_ADVISORY` exported; `run_remote_results` delegates to
+`_run_remote_results_registry` (no arg) or `_run_remote_results_single`
+(job_id provided); `job_id` made optional (`nargs="?"`) in CLI parser; 9 new
+tests; strictly read-only — no agents executed, no jobs mutated.
 
 PCAE normalizes persisted execution outputs across Codex, Claude, and Kimi
 for reporting (Phase 41F): `pcae remote results JOB_ID` and `--json` now

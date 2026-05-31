@@ -27,6 +27,7 @@ from pcae.core.agent import (
     build_remote_create_persist_preview,
     build_remote_dry_run,
     build_remote_results,
+    build_remote_results_registry,
     persist_remote_job,
     build_remote_strategy,
     build_remote_jobs,
@@ -1112,8 +1113,38 @@ def run_remote_policy(args: argparse.Namespace) -> int:
 
 
 def run_remote_results(args: argparse.Namespace) -> int:
+    job_id: str | None = getattr(args, "job_id", None)
+    if job_id is None:
+        return _run_remote_results_registry(args)
+    return _run_remote_results_single(args, job_id)
+
+
+def _run_remote_results_registry(args: argparse.Namespace) -> int:
+    data = build_remote_results_registry(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Execution result registry")
+        print(f"Result count: {data['result_count']}")
+        for entry in data["results"]:
+            print(f"  Job ID:                {entry['job_id']}")
+            print(f"  Agent:                 {entry.get('selected_agent') or '(unknown)'}")
+            print(f"  Final status:          {entry.get('final_status') or '(unknown)'}")
+            print(f"  Exit code:             {entry.get('exit_code')}")
+            print(f"  Duration (s):          {entry.get('duration_seconds')}")
+            print(f"  Output classification: {entry.get('output_classification') or '(unknown)'}")
+            print(f"  Output path:           {entry.get('output_path')}")
+            print(f"  Finished at:           {entry.get('finished_at') or '(not recorded)'}")
+            print()
+        for warning in data["warnings"]:
+            print(f"Warning: {warning}")
+        print(data["advisory"])
+    return 0
+
+
+def _run_remote_results_single(args: argparse.Namespace, job_id: str) -> int:
     try:
-        data = build_remote_results(HarnessPath.cwd(), args.job_id)
+        data = build_remote_results(HarnessPath.cwd(), job_id)
     except ValueError as error:
         print(str(error))
         return 1

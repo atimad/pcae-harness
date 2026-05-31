@@ -1468,16 +1468,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     remote_results_parser = remote_subparsers.add_parser(
         "results",
-        help="Report execution results for a persisted remote job.",
+        help="List all execution results, or report results for a specific job.",
     )
     remote_results_parser.add_argument(
         "job_id",
-        help="Job ID to report results for.",
+        nargs="?",
+        default=None,
+        help="Job ID to report results for. Omit to list all persisted results.",
     )
     remote_results_parser.add_argument(
         "--json",
         action="store_true",
-        help="Print machine-readable JSON execution results output.",
+        help="Print machine-readable JSON output.",
     )
     remote_results_parser.set_defaults(handler=run_remote_results)
 
