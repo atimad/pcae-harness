@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
+    build_change_review,
     build_claude_writable_contract,
     build_writable_contract,
     build_file_governance_design,
@@ -1493,6 +1494,47 @@ def run_remote_file_governance(args: argparse.Namespace) -> int:
         print()
 
         print(data["advisory"])
+    return 0
+
+
+def run_remote_changes(args: argparse.Namespace) -> int:
+    try:
+        data = build_change_review(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    review = data["change_review"]
+    print(f"Change Review — {review['job_id']}")
+    print(f"Agent:          {review['requested_agent']}")
+    print(f"Final status:   {review['final_status']}")
+    print(f"Risk level:     {review['risk_level']}")
+    print()
+    changed = review["changed_files"]
+    if changed:
+        print(f"Changed files ({len(changed)}):")
+        for f in changed:
+            print(f"  {f}")
+    else:
+        print("Changed files: none")
+    print()
+    scope = review["scope_validation"]
+    scope_label = "PASS" if scope.get("valid") else "FAIL"
+    print(f"Scope validation: {scope_label}")
+    for v in scope.get("violations", []):
+        print(f"  - {v}")
+    diff = review.get("diff_summary", "")
+    if diff:
+        print(f"\nDiff summary:\n  {diff}")
+    print()
+    print("Approval guidance:")
+    print(f"  Approval required: {'yes' if review['approval_required'] else 'no'}")
+    print(f"  Commit allowed:    {'yes' if review['commit_allowed'] else 'no'}")
+    print(f"  Push allowed:      {'yes' if review['push_allowed'] else 'no'}")
+    print()
+    print(data["advisory"])
     return 0
 
 

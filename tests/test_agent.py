@@ -12281,3 +12281,230 @@ def test_42a31_kimi_permission_mode_is_na(
         tmp_path, monkeypatch, capsys, agent="kimi-local", changed_files=[]
     )
     assert data["permission_mode"] == "n/a"
+
+
+# ---------------------------------------------------------------------------
+# Phase 42B — Change Review Artifacts
+# ---------------------------------------------------------------------------
+
+
+def _invoke_and_review(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str = "claude-local",
+    changed_files: list[str] | None = None,
+    diff_summary: str = "",
+    rc: int = 0,
+) -> tuple[str, dict]:
+    """Invoke a job with file changes, then call pcae remote changes <job_id> --json."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        agent=agent,
+        changed_files=changed_files,
+        diff_summary=diff_summary,
+        rc=rc,
+    )
+    exit_code = main(["remote", "changes", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    return job_id, data
+
+
+def test_42b_changes_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(tmp_path, monkeypatch, capsys, changed_files=[])
+    assert "change_review" in data
+    assert "advisory" in data
+
+
+def test_42b_change_review_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(tmp_path, monkeypatch, capsys, changed_files=[])
+    review = data["change_review"]
+    for key in (
+        "job_id",
+        "requested_agent",
+        "final_status",
+        "changed_files",
+        "scope_validation",
+        "diff_summary",
+        "risk_level",
+        "approval_required",
+        "commit_allowed",
+        "push_allowed",
+    ):
+        assert key in review, f"missing key: {key}"
+
+
+def test_42b_docs_only_change_is_low_risk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["docs/generated-note.md"],
+    )
+    assert data["change_review"]["risk_level"] == "low"
+
+
+def test_42b_tasks_only_change_is_low_risk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["tasks/notes.md"],
+    )
+    assert data["change_review"]["risk_level"] == "low"
+
+
+def test_42b_scope_violation_is_critical_risk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["src/pcae/core/agent.py"],
+    )
+    assert data["change_review"]["risk_level"] == "critical"
+
+
+def test_42b_no_changes_reports_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(tmp_path, monkeypatch, capsys, changed_files=[])
+    review = data["change_review"]
+    assert review["changed_files"] == []
+    assert review["risk_level"] == "low"
+
+
+def test_42b_scope_violation_surfaces_in_review(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["src/pcae/core/agent.py"],
+    )
+    review = data["change_review"]
+    assert review["scope_validation"]["valid"] is False
+    assert len(review["scope_validation"]["violations"]) >= 1
+
+
+def test_42b_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(tmp_path, monkeypatch, capsys, changed_files=[])
+    assert "Change review is advisory" in data["advisory"]
+    assert "no commit or push" in data["advisory"]
+
+
+def test_42b_push_always_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["docs/note.md"],
+    )
+    assert data["change_review"]["push_allowed"] is False
+
+
+def test_42b_commit_allowed_for_clean_completion(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["docs/note.md"],
+    )
+    review = data["change_review"]
+    assert review["final_status"] == "completed"
+    assert review["commit_allowed"] is True
+
+
+def test_42b_commit_not_allowed_on_scope_violation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _, data = _invoke_and_review(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["src/pcae/core/agent.py"],
+    )
+    assert data["change_review"]["commit_allowed"] is False
+
+
+def test_42b_missing_job_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "changes", "nonexistent-job-id"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown job" in output or "nonexistent" in output.lower()
+
+
+def test_42b_missing_artifact_reports_clearly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A job with no result artifact still returns a review with a clear note."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    # Persist a job manually (no execution artifact written).
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    exit_code = main(["remote", "changes", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    review = data["change_review"]
+    assert review["risk_level"] == "unknown"
+    assert "notes" in review
+    assert review["changed_files"] == []
+
+
+def test_42b_human_output_contains_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["docs/report.md"],
+    )
+    main(["remote", "changes", job_id])
+    output = capsys.readouterr().out
+
+    assert "Change Review" in output
+    assert "Risk level" in output
+    assert "Scope validation" in output
+    assert "Approval guidance" in output
+    assert "advisory" in output.lower()
+
+
+def test_42b_readonly_does_not_write_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """pcae remote changes must not create new files."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["docs/note.md"],
+    )
+
+    files_before = set(tmp_path.rglob("*"))
+    main(["remote", "changes", job_id, "--json"])
+    capsys.readouterr()
+    files_after = set(tmp_path.rglob("*"))
+
+    assert files_after == files_before

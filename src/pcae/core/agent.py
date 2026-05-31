@@ -4247,3 +4247,148 @@ def build_writable_contract(agent_id: str) -> dict:
 def build_claude_writable_contract(agent_id: str) -> dict:
     """Compatibility shim — delegates to build_writable_contract."""
     return build_writable_contract(agent_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 42B — Change Review Artifacts
+# ---------------------------------------------------------------------------
+
+CHANGE_REVIEW_ADVISORY = (
+    "Change review is advisory; no commit or push is performed."
+)
+
+# High-risk path prefixes (config, policy, CI, dependencies).
+_CHANGE_REVIEW_HIGH_RISK_PREFIXES: tuple[str, ...] = (
+    ".github/",
+    ".pcae/",
+    "pyproject.toml",
+    ".pcae/policy.toml",
+)
+# Medium-risk path prefixes (source code, tests).
+_CHANGE_REVIEW_MEDIUM_RISK_PREFIXES: tuple[str, ...] = ("src/", "tests/")
+# Low-risk path prefixes (docs, tasks).
+_CHANGE_REVIEW_LOW_RISK_PREFIXES: tuple[str, ...] = ("docs/", "tasks/")
+
+
+def _classify_change_risk(changed_files: list[str], scope_validation: dict) -> str:
+    """
+    Classify overall risk level for a set of changed files.
+
+    critical — scope violation present, or destructive/protected paths touched.
+    high     — config, policy, CI, or dependency files changed.
+    medium   — src/ or tests/ changed.
+    low      — docs/ or tasks/ only.
+
+    Returns one of: 'critical', 'high', 'medium', 'low'.
+    Read-only; does not modify any files or state.
+    """
+    if not scope_validation.get("valid", True) or scope_validation.get("violations"):
+        return "critical"
+
+    risk = "low"
+    for path in changed_files:
+        posix = path.replace("\\", "/").lstrip("/")
+        if any(
+            posix == prefix or posix.startswith(prefix)
+            for prefix in _CHANGE_REVIEW_HIGH_RISK_PREFIXES
+        ):
+            return "high"
+        if any(posix.startswith(prefix) for prefix in _CHANGE_REVIEW_MEDIUM_RISK_PREFIXES):
+            risk = "medium"
+    return risk
+
+
+def build_change_review(root: HarnessPath, job_id: str) -> dict:
+    """
+    Build a governed change review artifact for a file-modifying remote execution.
+
+    Reads the persisted job definition and execution result artifact.
+    Returns a review dict including changed_files, risk_level, scope_validation,
+    approval guidance, and advisory. Read-only; no files are modified.
+    Raises ValueError for unknown or malformed job IDs.
+    """
+    # Load job definition.
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file for {job_id!r}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(f"Malformed job file for {job_id!r}: content is not a JSON object.")
+
+    requested_agent: str = job.get("requested_agent", "")
+    job_final_status: str = job.get("status", "unknown")
+
+    # Load execution result artifact (primary path, then legacy path).
+    results_artifact = root.join(_REMOTE_RESULTS_DIR) / f"{job_id}-result.json"
+    legacy_artifact = root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json"
+
+    artifact: dict | None = None
+    if results_artifact.exists():
+        try:
+            parsed = json.loads(results_artifact.read_text(encoding="utf-8"))
+            if isinstance(parsed, dict):
+                artifact = parsed
+        except (json.JSONDecodeError, OSError):
+            artifact = None
+    elif legacy_artifact.exists():
+        try:
+            parsed = json.loads(legacy_artifact.read_text(encoding="utf-8"))
+            if isinstance(parsed, dict):
+                artifact = parsed
+        except (json.JSONDecodeError, OSError):
+            artifact = None
+
+    if artifact is None:
+        return {
+            "advisory": CHANGE_REVIEW_ADVISORY,
+            "change_review": {
+                "approval_required": True,
+                "changed_files": [],
+                "commit_allowed": False,
+                "diff_summary": "",
+                "final_status": job_final_status,
+                "job_id": job_id,
+                "notes": "No execution result artifact found for this job.",
+                "push_allowed": False,
+                "requested_agent": requested_agent,
+                "risk_level": "unknown",
+                "scope_validation": {"valid": False, "violations": [], "notes": "No artifact."},
+            },
+        }
+
+    changed_files: list[str] = artifact.get("changed_files") or []
+    scope_validation: dict = artifact.get("scope_validation") or {
+        "valid": True, "violations": [], "notes": ""
+    }
+    diff_summary: str = artifact.get("diff_summary") or ""
+    final_status: str = artifact.get("final_status") or job_final_status
+
+    risk_level = _classify_change_risk(changed_files, scope_validation)
+
+    scope_ok = scope_validation.get("valid", True)
+    approval_required = True
+    commit_allowed = scope_ok and final_status == "completed"
+    push_allowed = False  # push always requires separate human approval
+
+    return {
+        "advisory": CHANGE_REVIEW_ADVISORY,
+        "change_review": {
+            "approval_required": approval_required,
+            "changed_files": changed_files,
+            "commit_allowed": commit_allowed,
+            "diff_summary": diff_summary,
+            "final_status": final_status,
+            "job_id": job_id,
+            "push_allowed": push_allowed,
+            "requested_agent": requested_agent,
+            "risk_level": risk_level,
+            "scope_validation": scope_validation,
+        },
+    }

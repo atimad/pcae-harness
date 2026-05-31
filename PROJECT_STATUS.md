@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A.3.1: Claude Writable Contract Correction.
+Phase 42B: Change Review Artifacts.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,24 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE generates governed change review artifacts for file-modifying remote
+executions (Phase 42B): `pcae remote changes JOB_ID` and `--json` read the
+persisted job definition and execution result artifact to produce a change review
+including `job_id`, `requested_agent`, `final_status`, `changed_files`,
+`scope_validation`, `diff_summary`, `risk_level` (classified from changed paths:
+`low` for docs/tasks only, `medium` for src/tests, `high` for config/policy/CI/
+dependency files, `critical` for scope violations or protected paths), `approval_required`
+(always true), `commit_allowed` (true only when scope is clean and status is
+completed), `push_allowed` (always false — push requires separate human approval);
+missing result artifact returns a review with `risk_level="unknown"` and a clear
+note; unknown job IDs exit 1; human output shows change review summary, changed
+files, risk level, scope validation, approval guidance, and advisory; `_classify_change_risk`,
+`build_change_review`, and `CHANGE_REVIEW_ADVISORY` added to `core/agent.py`;
+`run_remote_changes` added to `commands/agent.py`; `changes JOB_ID [--json]`
+subcommand wired under `remote` in `cli.py`; advisory: "Change review is advisory;
+no commit or push is performed."; 15 new tests; strictly read-only — no files
+modified, no commits, no pushes.
 
 PCAE enables Claude writable execution under PCAE governance using the verified
 Claude CLI contract (Phase 42A.3.1): `pcae remote execute JOB_ID --invoke
