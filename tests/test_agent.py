@@ -10113,3 +10113,149 @@ def test_41i_report_filename_format(
     assert re.match(r"remote-execution-report-\d{8}-\d{6}\.json", filename), (
         f"unexpected filename: {filename}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 41J: Execution Report Inspection
+# ---------------------------------------------------------------------------
+
+
+def _export_report(tmp_path, monkeypatch, capsys) -> str:
+    """Helper: export a report and return the export_path string."""
+    main(["remote", "report", "export", "--json"])
+    return json.loads(capsys.readouterr().out)["export_path"]
+
+
+def test_41j_inspect_valid_report_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    report_path = _export_report(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "report", "inspect", report_path])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Report summary" in output
+    assert "Validation:       valid" in output
+    assert "Total executions: 1" in output
+    assert "codex-local" in output
+    assert "Report inspection is read-only" in output
+
+
+def test_41j_inspect_valid_report_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    report_path = _export_report(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "report", "inspect", report_path, "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "report", "report_path", "validation_status", "warnings"):
+        assert key in data, f"missing key: {key}"
+    assert data["validation_status"] == "valid"
+    assert data["warnings"] == []
+    assert data["report_path"] == report_path
+    assert data["report"] is not None
+    assert "Report inspection is read-only" in data["advisory"]
+
+
+def test_41j_inspect_report_fields_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="ok\n")
+    report_path = _export_report(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "report", "inspect", report_path, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    report = data["report"]
+    for key in (
+        "exported_at", "total_executions", "successful_executions",
+        "failed_executions", "success_rate", "runtime_breakdown",
+        "latest_execution", "result_registry_summary",
+    ):
+        assert key in report, f"missing report field: {key}"
+    assert report["total_executions"] == 1
+    assert "claude-local" in report["runtime_breakdown"]
+
+
+def test_41j_inspect_missing_file_fails(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "report", "inspect", ".pcae/remote/reports/nonexistent.json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not found" in output.lower() or "nonexistent" in output
+
+
+def test_41j_inspect_malformed_json_reports_invalid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    reports_dir = tmp_path / ".pcae" / "remote" / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    bad_file = reports_dir / "remote-execution-report-bad.json"
+    bad_file.write_text("not json at all", encoding="utf-8")
+
+    exit_code = main(["remote", "report", "inspect", str(bad_file), "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["validation_status"] == "invalid"
+    assert data["report"] is None
+    assert len(data["warnings"]) >= 1
+
+
+def test_41j_inspect_partial_report_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    reports_dir = tmp_path / ".pcae" / "remote" / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    partial_file = reports_dir / "remote-execution-report-partial.json"
+    partial_file.write_text(
+        json.dumps({"exported_at": "2026-01-01T00:00:00Z", "total_executions": 0}),
+        encoding="utf-8",
+    )
+
+    exit_code = main(["remote", "report", "inspect", str(partial_file), "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["validation_status"] == "partial"
+    assert data["report"] is not None
+    assert len(data["warnings"]) > 0
+    assert any("Missing required field" in w for w in data["warnings"])
+
+
+def test_41j_inspect_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    report_path = _export_report(tmp_path, monkeypatch, capsys)
+
+    reports_dir = tmp_path / ".pcae" / "remote" / "reports"
+    before = {f.name: f.read_text() for f in reports_dir.glob("*.json")}
+
+    main(["remote", "report", "inspect", report_path, "--json"])
+    capsys.readouterr()
+
+    after = {f.name: f.read_text() for f in reports_dir.glob("*.json")}
+    assert before == after

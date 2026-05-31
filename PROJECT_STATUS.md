@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41I: Execution Report Export.
+Phase 41J: Execution Report Inspection.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,24 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE can inspect previously exported execution report artifacts read-only
+(Phase 41J): `pcae remote report inspect REPORT_FILE` and `--json` read
+an exported report file (by relative or absolute path), validate that all
+required fields are present (`advisory`, `exported_at`, `failed_executions`,
+`latest_execution`, `result_registry_summary`, `runtime_breakdown`,
+`success_rate`, `successful_executions`, `total_executions`), and report
+`validation_status` of `valid` (all fields present), `partial` (some fields
+missing — per-field warnings emitted), or `invalid` (JSON parse failure or
+non-object content — report is null); human output shows file path, validation
+status, exported_at, execution counts, success rate, runtime breakdown count,
+latest execution, and `report_version` when present; JSON output includes
+`report_path`, `validation_status`, `report` (full dict or null),
+`warnings`, and `advisory`; missing files exit 1 with a clear error; strictly
+read-only — no report files mutated, no agents executed; `inspect_remote_execution_report(root, path)`
+and `REMOTE_REPORT_INSPECT_ADVISORY` added to `core/agent.py`; `run_remote_report_inspect`
+added to `commands/agent.py`; `inspect REPORT_FILE` subcommand wired under
+`remote report` in `cli.py`; 7 new tests.
 
 PCAE exports governed execution report artifacts (Phase 41I): `pcae remote
 report export` and `--json` compute an execution report from persisted result

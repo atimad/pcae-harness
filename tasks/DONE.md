@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Execution Report Inspection (Phase 41J): `pcae remote report inspect REPORT_FILE` validates required fields, reports valid/partial/invalid status; read-only; 7 new tests.
 - Completed Execution Report Export (Phase 41I): `pcae remote report export` writes governed report to `.pcae/remote/reports/`; includes analytics, runtime breakdown, registry summary; git-ignored via existing `remote/` entry; 7 new tests.
 - Completed Execution Analytics (Phase 41H): `pcae remote analytics` global and per-runtime metrics over persisted result artifacts; delegates to result registry; 11 new tests.
 - Completed Remote Execution Result Registry (Phase 41G): `pcae remote results` lists all persisted result artifacts newest-first; `job_id` optional in CLI; malformed files warned; 9 new tests.

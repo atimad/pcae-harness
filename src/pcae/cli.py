@@ -37,6 +37,7 @@ from pcae.commands.agent import (
     run_remote_policy,
     run_remote_analytics,
     run_remote_report_export,
+    run_remote_report_inspect,
     run_remote_results,
     run_remote_status,
     run_remote_validate,
@@ -1514,6 +1515,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON export metadata.",
     )
     remote_report_export_parser.set_defaults(handler=run_remote_report_export)
+
+    remote_report_inspect_parser = remote_report_subparsers.add_parser(
+        "inspect",
+        help="Inspect an exported execution report file.",
+    )
+    remote_report_inspect_parser.add_argument(
+        "report_file",
+        help="Path to the exported report file to inspect.",
+    )
+    remote_report_inspect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON inspection output.",
+    )
+    remote_report_inspect_parser.set_defaults(handler=run_remote_report_inspect)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

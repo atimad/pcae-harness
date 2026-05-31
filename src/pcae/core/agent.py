@@ -3319,3 +3319,67 @@ def export_remote_execution_report(root: HarnessPath) -> dict:
         "success_rate": a["success_rate"],
         "total_executions": a["total_executions"],
     }
+
+
+# ---------------------------------------------------------------------------
+# Execution Report Inspection (Phase 41J)
+# ---------------------------------------------------------------------------
+
+REMOTE_REPORT_INSPECT_ADVISORY = (
+    "Report inspection is read-only; no agents are executed."
+)
+
+_REQUIRED_REPORT_FIELDS = (
+    "advisory",
+    "exported_at",
+    "failed_executions",
+    "latest_execution",
+    "result_registry_summary",
+    "runtime_breakdown",
+    "success_rate",
+    "successful_executions",
+    "total_executions",
+)
+
+
+def inspect_remote_execution_report(root: HarnessPath, report_path_str: str) -> dict:
+    """Inspect an exported execution report file. Read-only; raises ValueError if unreadable."""
+    p = Path(report_path_str)
+    if not p.is_absolute():
+        p = root.join(p)
+
+    if not p.exists():
+        raise ValueError(f"Report file not found: {report_path_str!r}")
+
+    try:
+        raw = p.read_text(encoding="utf-8")
+        report = json.loads(raw)
+    except (json.JSONDecodeError, OSError) as exc:
+        return {
+            "advisory": REMOTE_REPORT_INSPECT_ADVISORY,
+            "report": None,
+            "report_path": report_path_str,
+            "validation_status": "invalid",
+            "warnings": [f"Malformed report file: {exc}"],
+        }
+
+    if not isinstance(report, dict):
+        return {
+            "advisory": REMOTE_REPORT_INSPECT_ADVISORY,
+            "report": None,
+            "report_path": report_path_str,
+            "validation_status": "invalid",
+            "warnings": ["Report content is not a JSON object."],
+        }
+
+    missing = [f for f in _REQUIRED_REPORT_FIELDS if f not in report]
+    warnings = [f"Missing required field: {f!r}" for f in missing]
+    validation_status = "valid" if not missing else "partial"
+
+    return {
+        "advisory": REMOTE_REPORT_INSPECT_ADVISORY,
+        "report": report,
+        "report_path": report_path_str,
+        "validation_status": validation_status,
+        "warnings": warnings,
+    }

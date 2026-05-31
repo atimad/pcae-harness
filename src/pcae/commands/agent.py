@@ -29,6 +29,7 @@ from pcae.core.agent import (
     build_remote_execution_analytics,
     build_remote_results,
     export_remote_execution_report,
+    inspect_remote_execution_report,
     build_remote_results_registry,
     persist_remote_job,
     build_remote_strategy,
@@ -1249,6 +1250,46 @@ def run_remote_report_export(args: argparse.Namespace) -> int:
         print(f"Success rate:     {sr if sr is not None else '(no data)'}")
         print()
         print(result["advisory"])
+    return 0
+
+
+def run_remote_report_inspect(args: argparse.Namespace) -> int:
+    try:
+        data = inspect_remote_execution_report(HarnessPath.cwd(), args.report_file)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Report summary")
+        print(f"File:             {args.report_file}")
+        print(f"Validation:       {data['validation_status']}")
+        report = data["report"]
+        if report is not None:
+            print(f"Exported at:      {report.get('exported_at', '(not recorded)')}")
+            print(f"Total executions: {report.get('total_executions')}")
+            print(f"Successful:       {report.get('successful_executions')}")
+            print(f"Failed:           {report.get('failed_executions')}")
+            sr = report.get("success_rate")
+            print(f"Success rate:     {sr if sr is not None else '(no data)'}")
+            rb = report.get("runtime_breakdown") or {}
+            if rb:
+                agents = ", ".join(sorted(rb.keys()))
+                print(f"Runtime breakdown: {len(rb)} agent(s) ({agents})")
+            latest = report.get("latest_execution")
+            if latest:
+                print(
+                    f"Latest execution: {latest.get('job_id')} "
+                    f"({latest.get('selected_agent')})"
+                )
+            if "report_version" in report:
+                print(f"Report version:   {report['report_version']}")
+        for warning in data["warnings"]:
+            print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
     return 0
 
 
