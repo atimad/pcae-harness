@@ -9765,3 +9765,213 @@ def test_41g_registry_readonly(
 
     after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 41H: Execution Analytics
+# ---------------------------------------------------------------------------
+
+
+def test_41h_analytics_empty_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "analytics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution analytics summary" in output
+    assert "Total executions:       0" in output
+    assert "Execution analytics are computed from persisted result artifacts." in output
+
+
+def test_41h_analytics_empty_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    a = data["analytics"]
+    assert a["total_executions"] == 0
+    assert a["successful_executions"] == 0
+    assert a["failed_executions"] == 0
+    assert a["success_rate"] is None
+    assert a["average_duration_seconds"] is None
+    assert a["fastest_execution"] is None
+    assert a["slowest_execution"] is None
+    assert a["latest_execution"] is None
+    assert data["runtime_metrics"] == {}
+    assert data["warnings"] == []
+    assert "advisory" in data
+
+
+def test_41h_analytics_global_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", rc=1, stdout="", stderr="err\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    a = data["analytics"]
+    assert a["total_executions"] == 2
+    assert a["successful_executions"] == 1
+    assert a["failed_executions"] == 1
+    assert a["success_rate"] == 0.5
+    assert a["average_duration_seconds"] is not None
+    assert a["fastest_execution"] is not None
+    assert a["slowest_execution"] is not None
+    assert a["latest_execution"] is not None
+
+
+def test_41h_analytics_success_rate_all_pass(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["analytics"]["success_rate"] == 1.0
+    assert data["analytics"]["failed_executions"] == 0
+
+
+def test_41h_analytics_per_runtime_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "kimi-local", stdout="ok\n", stderr="thinking\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rm = data["runtime_metrics"]
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        assert agent in rm, f"missing runtime: {agent}"
+        m = rm[agent]
+        assert m["executions"] == 1
+        assert m["successes"] == 1
+        assert m["failures"] == 0
+        assert "average_duration" in m
+
+
+def test_41h_analytics_per_runtime_failure_counted(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", rc=1, stderr="fail\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    m = data["runtime_metrics"]["codex-local"]
+    assert m["failures"] == 1
+    assert m["successes"] == 0
+
+
+def test_41h_analytics_fastest_slowest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="ok\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    a = data["analytics"]
+    assert a["fastest_execution"]["duration_seconds"] <= a["slowest_execution"]["duration_seconds"]
+    for key in ("job_id", "selected_agent", "duration_seconds", "final_status"):
+        assert key in a["fastest_execution"]
+        assert key in a["slowest_execution"]
+
+
+def test_41h_analytics_latest_execution_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    latest = data["analytics"]["latest_execution"]
+    assert latest is not None
+    for key in ("job_id", "selected_agent", "final_status", "finished_at"):
+        assert key in latest
+
+
+def test_41h_analytics_malformed_file_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "job-bad-result.json").write_text("not json", encoding="utf-8")
+
+    exit_code = main(["remote", "analytics", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["analytics"]["total_executions"] == 0
+    assert len(data["warnings"]) == 1
+    assert "job-bad-result.json" in data["warnings"][0]
+
+
+def test_41h_analytics_human_output_shows_runtime_breakdown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "analytics"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runtime breakdown" in output
+    assert "codex-local" in output
+    assert "Successes:" in output
+    assert "Execution analytics are computed from persisted result artifacts." in output
+
+
+def test_41h_analytics_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    before = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+
+    main(["remote", "analytics", "--json"])
+    capsys.readouterr()
+
+    after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+    assert before == after

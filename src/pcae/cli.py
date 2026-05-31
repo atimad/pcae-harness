@@ -35,6 +35,7 @@ from pcae.commands.agent import (
     run_remote_jobs_show,
     run_remote_plan,
     run_remote_policy,
+    run_remote_analytics,
     run_remote_results,
     run_remote_status,
     run_remote_validate,
@@ -1482,6 +1483,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     remote_results_parser.set_defaults(handler=run_remote_results)
+
+    remote_analytics_parser = remote_subparsers.add_parser(
+        "analytics",
+        help="Compute analytics over persisted execution result artifacts.",
+    )
+    remote_analytics_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON analytics output.",
+    )
+    remote_analytics_parser.set_defaults(handler=run_remote_analytics)
 
     analytics_parser = subparsers.add_parser(
         "analytics",

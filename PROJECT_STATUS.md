@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41G: Remote Execution Result Registry.
+Phase 41H: Execution Analytics.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,22 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE provides analytics over persisted Remote Autonomous Coding execution
+results (Phase 41H): `pcae remote analytics` and `--json` compute global
+metrics (`total_executions`, `successful_executions`, `failed_executions`,
+`success_rate`, `average_duration_seconds`, `fastest_execution`,
+`slowest_execution`, `latest_execution`) and per-runtime metrics (`executions`,
+`successes`, `failures`, `average_duration`) keyed by `selected_agent`; any
+runtime appearing in result artifacts is captured automatically;
+`success_rate` is `None` when no results exist; `fastest_execution` and
+`slowest_execution` are `None` when no timed results exist; malformed artifact
+files produce per-file warnings and are skipped; `build_remote_execution_analytics(root)`
+and `_compute_runtime_metrics` added to `core/agent.py`; analytics delegate to
+`build_remote_results_registry` for file scanning; `run_remote_analytics` added
+to `commands/agent.py`; `analytics` subcommand wired under `remote` in CLI;
+advisory: "Execution analytics are computed from persisted result artifacts.";
+11 new tests; strictly read-only — no agents executed, no results mutated.
 
 PCAE exposes a governed execution result registry (Phase 41G): `pcae remote
 results` (no argument) lists all persisted execution result artifacts from

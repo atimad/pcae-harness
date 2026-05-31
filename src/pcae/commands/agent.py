@@ -26,6 +26,7 @@ from pcae.core.agent import (
     build_remote_create_dry_run,
     build_remote_create_persist_preview,
     build_remote_dry_run,
+    build_remote_execution_analytics,
     build_remote_results,
     build_remote_results_registry,
     persist_remote_job,
@@ -1182,6 +1183,55 @@ def _run_remote_results_single(args: argparse.Namespace, job_id: str) -> int:
             normalized = result.get("normalized_final_output")
             if normalized is not None:
                 print(f"\nNormalized final output:\n  {normalized}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_analytics(args: argparse.Namespace) -> int:
+    data = build_remote_execution_analytics(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        a = data["analytics"]
+        print("Execution analytics summary")
+        print(f"Total executions:       {a['total_executions']}")
+        print(f"Successful:             {a['successful_executions']}")
+        print(f"Failed:                 {a['failed_executions']}")
+        sr = a["success_rate"]
+        print(f"Success rate:           {sr if sr is not None else '(no data)'}")
+        avg = a["average_duration_seconds"]
+        print(f"Average duration (s):   {avg if avg is not None else '(no data)'}")
+        fastest = a["fastest_execution"]
+        if fastest:
+            print(
+                f"Fastest execution:      {fastest['job_id']} "
+                f"({fastest['duration_seconds']}s, {fastest['selected_agent']})"
+            )
+        slowest = a["slowest_execution"]
+        if slowest:
+            print(
+                f"Slowest execution:      {slowest['job_id']} "
+                f"({slowest['duration_seconds']}s, {slowest['selected_agent']})"
+            )
+        latest = a["latest_execution"]
+        if latest:
+            print(
+                f"Latest execution:       {latest['job_id']} "
+                f"({latest['finished_at']}, {latest['selected_agent']})"
+            )
+        rm = data["runtime_metrics"]
+        if rm:
+            print("\nRuntime breakdown")
+            for agent, m in sorted(rm.items()):
+                print(f"  {agent}:")
+                print(f"    Executions:     {m['executions']}")
+                print(f"    Successes:      {m['successes']}")
+                print(f"    Failures:       {m['failures']}")
+                avg_rt = m["average_duration"]
+                print(f"    Avg duration:   {avg_rt if avg_rt is not None else '(no data)'}")
+        for warning in data["warnings"]:
+            print(f"Warning: {warning}")
         print()
         print(data["advisory"])
     return 0

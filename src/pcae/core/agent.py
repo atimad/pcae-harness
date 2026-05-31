@@ -3175,3 +3175,93 @@ def build_remote_results_registry(root: HarnessPath) -> dict:
         "results": entries,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Execution Analytics (Phase 41H)
+# ---------------------------------------------------------------------------
+
+REMOTE_ANALYTICS_ADVISORY = (
+    "Execution analytics are computed from persisted result artifacts."
+)
+
+
+def _compute_runtime_metrics(entries: list[dict]) -> dict[str, dict]:
+    """Aggregate per-agent execution metrics from registry entries."""
+    buckets: dict[str, dict] = {}
+    for entry in entries:
+        agent = entry.get("selected_agent") or "unknown"
+        if agent not in buckets:
+            buckets[agent] = {"executions": 0, "successes": 0, "failures": 0, "_durs": []}
+        buckets[agent]["executions"] += 1
+        if entry.get("final_status") == "completed":
+            buckets[agent]["successes"] += 1
+        else:
+            buckets[agent]["failures"] += 1
+        dur = entry.get("duration_seconds")
+        if dur is not None:
+            buckets[agent]["_durs"].append(dur)
+
+    result: dict[str, dict] = {}
+    for agent, m in buckets.items():
+        durs = m.pop("_durs")
+        m["average_duration"] = round(sum(durs) / len(durs), 3) if durs else None
+        result[agent] = m
+    return result
+
+
+def build_remote_execution_analytics(root: HarnessPath) -> dict:
+    """Compute analytics over persisted execution result artifacts. Read-only."""
+    registry = build_remote_results_registry(root)
+    entries: list[dict] = registry["results"]
+    warnings: list[str] = list(registry["warnings"])
+
+    total = len(entries)
+    successful = sum(1 for e in entries if e.get("final_status") == "completed")
+    failed = total - successful
+    success_rate = round(successful / total, 4) if total > 0 else None
+
+    timed = [e for e in entries if e.get("duration_seconds") is not None]
+    durs = [e["duration_seconds"] for e in timed]
+    avg_dur = round(sum(durs) / len(durs), 3) if durs else None
+    fastest_entry = min(timed, key=lambda e: e["duration_seconds"]) if timed else None
+    slowest_entry = max(timed, key=lambda e: e["duration_seconds"]) if timed else None
+
+    dated = [e for e in entries if e.get("finished_at")]
+    latest_entry = max(dated, key=lambda e: e["finished_at"]) if dated else None
+
+    def _timing_summary(e: dict | None) -> "dict | None":
+        if e is None:
+            return None
+        return {
+            "duration_seconds": e.get("duration_seconds"),
+            "final_status": e.get("final_status"),
+            "job_id": e.get("job_id"),
+            "selected_agent": e.get("selected_agent"),
+        }
+
+    def _latest_summary(e: dict | None) -> "dict | None":
+        if e is None:
+            return None
+        return {
+            "final_status": e.get("final_status"),
+            "finished_at": e.get("finished_at"),
+            "job_id": e.get("job_id"),
+            "selected_agent": e.get("selected_agent"),
+        }
+
+    return {
+        "advisory": REMOTE_ANALYTICS_ADVISORY,
+        "analytics": {
+            "average_duration_seconds": avg_dur,
+            "failed_executions": failed,
+            "fastest_execution": _timing_summary(fastest_entry),
+            "latest_execution": _latest_summary(latest_entry),
+            "slowest_execution": _timing_summary(slowest_entry),
+            "success_rate": success_rate,
+            "successful_executions": successful,
+            "total_executions": total,
+        },
+        "runtime_metrics": _compute_runtime_metrics(entries),
+        "warnings": warnings,
+    }
