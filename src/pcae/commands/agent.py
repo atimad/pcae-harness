@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
     approve_file_changes,
+    commit_file_changes,
     deny_file_changes,
     build_change_review,
     build_claude_writable_contract,
@@ -1578,6 +1579,28 @@ def run_remote_changes_deny(args: argparse.Namespace) -> int:
     print(f"New state:       {data['new_change_approval_state']}")
     print(f"Commit allowed:  {'yes' if data['commit_allowed'] else 'no'}")
     print(f"Push allowed:    {'yes' if data['push_allowed'] else 'no'}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_commit(args: argparse.Namespace) -> int:
+    try:
+        data = commit_file_changes(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Commit created — {data['job_id']}")
+    print(f"Approval state:  approved")
+    changed = data["changed_files"]
+    print(f"Changed files ({len(changed)}):")
+    for f in changed:
+        print(f"  {f}")
+    print(f"Commit SHA:      {data['commit_sha']}")
+    print(f"Push allowed:    no")
     print()
     print(data["advisory"])
     return 0

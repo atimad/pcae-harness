@@ -12749,3 +12749,267 @@ def test_42c_previous_state_is_pending_initially(
     data = json.loads(capsys.readouterr().out)
 
     assert data["previous_change_approval_state"] == "pending"
+
+
+# ---------------------------------------------------------------------------
+# Phase 42D — Controlled Commit
+# ---------------------------------------------------------------------------
+
+
+def _setup_approved_change(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str = "claude-local",
+    changed_files: list[str] | None = None,
+) -> str:
+    """Create, execute, approve changes, and return job_id. Drains capsys."""
+    if changed_files is None:
+        changed_files = ["docs/note.md"]
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, agent=agent, changed_files=changed_files)
+    main(["remote", "changes", "approve", job_id, "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def _patch_commit_helpers(
+    monkeypatch,
+    dirty_files: list[str] | None = None,
+    commit_sha: str = "def5678",
+    git_add_rc: int = 0,
+    git_commit_rc: int = 0,
+) -> None:
+    """Patch git helpers for commit tests."""
+    if dirty_files is None:
+        dirty_files = ["docs/note.md"]
+    monkeypatch.setattr(
+        _agent_mod,
+        "_capture_git_changed_files",
+        _fake_git_changed_files(dirty_files),
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_git_head", _fake_git_head(commit_sha))
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_git_add",
+        lambda files, cwd: _fake_proc(git_add_rc),
+    )
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_git_commit",
+        lambda message, cwd: _fake_proc(git_commit_rc, stdout="[main abc1234] PCAE: ...\n"),
+    )
+
+
+def test_42d_approved_change_can_be_committed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    exit_code = main(["remote", "commit", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["committed"] is True
+
+
+def test_42d_commit_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    main(["remote", "commit", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in ("committed", "job_id", "commit_sha", "changed_files", "push_allowed", "advisory"):
+        assert key in data, f"missing key: {key}"
+
+
+def test_42d_commit_sha_captured(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"], commit_sha="cafe1234")
+
+    main(["remote", "commit", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["commit_sha"] == "cafe1234"
+
+
+def test_42d_push_always_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    main(["remote", "commit", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["push_allowed"] is False
+
+
+def test_42d_commit_persists_sha_in_job_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"], commit_sha="abc9999")
+
+    main(["remote", "commit", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["commit_sha"] == "abc9999"
+    assert "committed_at" in job
+
+
+def test_42d_pending_change_cannot_be_committed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "pending" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_denied_change_cannot_be_committed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    main(["remote", "changes", "deny", job_id])
+    capsys.readouterr()
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "denied" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_no_changed_files_cannot_be_committed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(
+        tmp_path, monkeypatch, capsys, changed_files=[]
+    )
+    _patch_commit_helpers(monkeypatch, dirty_files=[])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "no files were changed" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_scope_violation_cannot_be_committed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A scope-violated job cannot be committed (and cannot be approved)."""
+    job_id = _setup_executed_job(
+        tmp_path, monkeypatch, capsys, changed_files=["src/pcae/core/agent.py"]
+    )
+    _patch_commit_helpers(monkeypatch, dirty_files=["src/pcae/core/agent.py"])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "scope" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_unexpected_dirty_files_blocks_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md", "docs/extra.md"])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unexpected" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_missing_expected_file_blocks_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    _patch_commit_helpers(monkeypatch, dirty_files=[])
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "not found in working tree" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_git_add_failure_blocks_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"], git_add_rc=1)
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "git add failed" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_git_commit_failure_blocks_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"], git_commit_rc=1)
+
+    exit_code = main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "git commit failed" in output.lower() or "cannot commit" in output.lower()
+
+
+def test_42d_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"])
+
+    main(["remote", "commit", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no push was performed" in data["advisory"].lower()
+
+
+def test_42d_human_output_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_commit_helpers(monkeypatch, dirty_files=["docs/note.md"], commit_sha="abc1234")
+
+    main(["remote", "commit", job_id])
+    output = capsys.readouterr().out
+
+    assert "Commit SHA" in output or "commit" in output.lower()
+    assert "abc1234" in output
+    assert "no push" in output.lower()
+
+
+def test_42d_missing_job_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "commit", "nonexistent-job-id"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower() or "cannot commit" in output.lower()

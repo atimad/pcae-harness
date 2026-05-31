@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42C: Human Approval Gate for Changes.
+Phase 42D: Controlled Commit.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,22 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE creates governed git commits for approved file changes (Phase 42D):
+`pcae remote commit JOB_ID` and `--json` commit approved changes; commit is
+allowed only when a result artifact exists, `changed_files` is non-empty,
+`scope_validation` passed, `change_approval_state == "approved"`, all expected
+files are present in the working tree, and no unexpected dirty files exist;
+commit message format is `PCAE: <job_id>\n\nAgent: <agent_id>\nFiles: <count>`;
+`commit_sha` and `committed_at` persisted on the job file; JSON output includes
+`committed`, `job_id`, `commit_sha`, `changed_files`, `push_allowed`, `advisory`;
+refuses for pending/denied approval, scope violations, empty changed_files,
+missing expected files, or unexpected dirty files; never pushes; `_run_git_add`
+and `_run_git_commit` extracted as injectable helpers for testability;
+`commit_file_changes`, `CONTROLLED_COMMIT_ADVISORY`, `_run_git_add`,
+`_run_git_commit` added to `core/agent.py`; `run_remote_commit` added to
+`commands/agent.py`; `commit JOB_ID [--json]` wired under `remote` in `cli.py`;
+advisory: "Commit created; no push was performed."; 16 new tests.
 
 PCAE exposes a human approval gate for file changes produced by remote execution
 (Phase 42C): `pcae remote changes approve JOB_ID` and `--json` approve file

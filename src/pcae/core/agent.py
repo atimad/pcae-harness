@@ -4534,3 +4534,145 @@ def deny_file_changes(root: HarnessPath, job_id: str) -> dict:
         "push_allowed": False,
         "updated": True,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 42D — Controlled Commit
+# ---------------------------------------------------------------------------
+
+CONTROLLED_COMMIT_ADVISORY = "Commit created; no push was performed."
+
+
+def _run_git_add(
+    files: list[str], cwd: str
+) -> subprocess.CompletedProcess:
+    """Run 'git add -- <files>'. Extracted for testability."""
+    return subprocess.run(
+        ["git", "add", "--"] + files,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+def _run_git_commit(
+    message: str, cwd: str
+) -> subprocess.CompletedProcess:
+    """Run 'git commit -m <message>'. Extracted for testability."""
+    return subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+def commit_file_changes(root: HarnessPath, job_id: str) -> dict:
+    """
+    Create a governed git commit for approved file changes.
+
+    Pre-conditions:
+    - Result artifact exists.
+    - changed_files is non-empty.
+    - scope_validation passed.
+    - change_approval_state == "approved".
+    - Working tree contains all expected changed files.
+    - No dirty files beyond the approved changed_files.
+
+    Never pushes. Never approves automatically. Never modifies files.
+    Raises ValueError on any blocking condition.
+    """
+    job, artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    if artifact is None:
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: no result artifact found."
+        )
+
+    changed_files: list[str] = artifact.get("changed_files") or []
+    if not changed_files:
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: no files were changed."
+        )
+
+    scope_validation: dict = artifact.get("scope_validation") or {}
+    if not scope_validation.get("valid", False):
+        violations = scope_validation.get("violations", [])
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: scope validation failed. "
+            f"Violations: {violations}"
+        )
+
+    approval_state: str = job.get("change_approval_state", "pending")
+    if approval_state == "pending":
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: change approval is pending. "
+            "Approve changes first with 'pcae remote changes approve'."
+        )
+    if approval_state == "denied":
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: changes were denied."
+        )
+    if approval_state != "approved":
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: unexpected approval state {approval_state!r}."
+        )
+
+    current_dirty = set(_capture_git_changed_files(root))
+    expected = set(changed_files)
+
+    missing_from_tree = expected - current_dirty
+    if missing_from_tree:
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: expected changed files not found in working tree: "
+            f"{sorted(missing_from_tree)}"
+        )
+
+    unexpected = current_dirty - expected
+    if unexpected:
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: unexpected uncommitted changes found: "
+            f"{sorted(unexpected)}. Working tree must only contain the approved changes."
+        )
+
+    requested_agent: str = job.get("requested_agent", "unknown")
+    commit_message = (
+        f"PCAE: {job_id}\n"
+        f"\n"
+        f"Agent: {requested_agent}\n"
+        f"Files: {len(changed_files)}\n"
+    )
+
+    try:
+        stage_proc = _run_git_add(changed_files, str(root.path))
+        if stage_proc.returncode != 0:
+            raise ValueError(
+                f"Cannot commit job {job_id!r}: git add failed. {stage_proc.stderr.strip()}"
+            )
+
+        commit_proc = _run_git_commit(commit_message, str(root.path))
+        if commit_proc.returncode != 0:
+            raise ValueError(
+                f"Cannot commit job {job_id!r}: git commit failed. {commit_proc.stderr.strip()}"
+            )
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(
+            f"Cannot commit job {job_id!r}: git operation timed out."
+        ) from exc
+
+    commit_sha = _capture_git_head(root)
+
+    job["commit_sha"] = commit_sha
+    job["committed_at"] = datetime.now(timezone.utc).isoformat()
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": CONTROLLED_COMMIT_ADVISORY,
+        "changed_files": changed_files,
+        "commit_sha": commit_sha,
+        "committed": True,
+        "job_id": job_id,
+        "push_allowed": False,
+    }

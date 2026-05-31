@@ -42,6 +42,7 @@ from pcae.commands.agent import (
     run_remote_changes_approve,
     run_remote_changes_deny,
     run_remote_changes_show,
+    run_remote_commit,
     run_remote_file_governance,
     run_remote_writable_contract,
     run_remote_report_export,
@@ -1626,6 +1627,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     remote_changes_deny_parser.set_defaults(handler=run_remote_changes_deny)
+
+    remote_commit_parser = remote_subparsers.add_parser(
+        "commit",
+        help="Create a governed git commit for approved file changes.",
+    )
+    remote_commit_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose approved changes to commit.",
+    )
+    remote_commit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_commit_parser.set_defaults(handler=run_remote_commit)
 
     remote_writable_contract_parser = remote_subparsers.add_parser(
         "writable-contract",
