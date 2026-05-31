@@ -5078,6 +5078,113 @@ def deny_rollback(root: HarnessPath, job_id: str) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Phase 43D — Controlled Rollback Execution
+# ---------------------------------------------------------------------------
+
+CONTROLLED_ROLLBACK_ADVISORY = "Rollback commit created; no push was performed."
+
+
+def _run_git_revert(commit_sha: str, cwd: str) -> subprocess.CompletedProcess:
+    """Run 'git revert --no-edit <commit_sha>'. Extracted for testability."""
+    return subprocess.run(
+        ["git", "revert", "--no-edit", commit_sha],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
+def execute_rollback(root: HarnessPath, job_id: str) -> dict:
+    """
+    Execute a governed rollback using git revert for an approved rollback plan.
+
+    Pre-conditions:
+    - rollback_approval_state == "approved".
+    - Rollback review is eligible (original commit SHA + changed_files present).
+    - rollback_mode_recommendation == "revert_commit".
+    - Working tree is clean.
+    - Original governed commit is reachable from HEAD.
+
+    Runs: git revert --no-edit <original_commit_sha>
+    Captures rollback commit SHA. Persists rollback metadata on the job file.
+    Never pushes. Never resets. Never modifies files beyond the revert commit.
+    Raises ValueError on any blocking condition.
+    """
+    review_data = build_rollback_review(root, job_id)
+    review = review_data["rollback_review"]
+
+    job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    rollback_approval_state: str = job.get("rollback_approval_state", "pending")
+    if rollback_approval_state == "pending":
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: rollback approval is pending. "
+            "Approve the rollback first with 'pcae remote rollback approve'."
+        )
+    if rollback_approval_state == "denied":
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: rollback was denied."
+        )
+    if rollback_approval_state != "approved":
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: unexpected rollback approval state "
+            f"{rollback_approval_state!r}."
+        )
+
+    if not review["rollback_eligible"]:
+        notes = review.get("eligibility_notes", [])
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: rollback is not eligible. "
+            f"Notes: {notes}"
+        )
+
+    if review["rollback_mode_recommendation"] != "revert_commit":
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: mode is "
+            f"{review['rollback_mode_recommendation']!r}; only 'revert_commit' is supported."
+        )
+
+    original_commit_sha: str = review["original_commit_sha"]
+
+    dirty = _capture_git_changed_files(root)
+    if dirty:
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: working tree is dirty. "
+            f"Unexpected changes: {dirty}"
+        )
+
+    if not _check_commit_is_ancestor(original_commit_sha, str(root.path)):
+        raise ValueError(
+            f"Cannot execute rollback for job {job_id!r}: original governed commit "
+            f"({original_commit_sha!r}) is not reachable from HEAD."
+        )
+
+    revert_proc = _run_git_revert(original_commit_sha, str(root.path))
+    if revert_proc.returncode != 0:
+        raise ValueError(
+            f"Rollback failed for job {job_id!r}: git revert exited "
+            f"{revert_proc.returncode}. stderr: {revert_proc.stderr.strip()!r}"
+        )
+
+    rollback_commit_sha = _capture_git_head(root)
+
+    job["rollback_commit_sha"] = rollback_commit_sha
+    job["rollback_status"] = "rolled_back"
+    job["rolled_back_at"] = datetime.now(timezone.utc).isoformat()
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": CONTROLLED_ROLLBACK_ADVISORY,
+        "job_id": job_id,
+        "original_commit_sha": original_commit_sha,
+        "rollback_commit_sha": rollback_commit_sha,
+        "rollback_status": "rolled_back",
+        "rolled_back": True,
+    }
+
+
 def build_rollback_review(root: HarnessPath, job_id: str) -> dict:
     """
     Generate a governed rollback review artifact for a specific job.

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43C: Rollback Approval Gate.
+Phase 43D: Controlled Rollback Execution.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,23 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE executes governed rollbacks under human approval (Phase 43D):
+`pcae remote rollback execute JOB_ID` and `--json` run `git revert
+--no-edit <original_commit_sha>` for an approved rollback plan; five
+gates: `rollback_approval_state=="approved"`, rollback review eligible,
+`rollback_mode_recommendation=="revert_commit"`, clean working tree, and
+original commit reachable from HEAD; on success, rollback commit SHA is
+captured and `rollback_commit_sha`, `rollback_status`, `rolled_back_at`
+are persisted on the job file; JSON output includes `rolled_back`,
+`job_id`, `original_commit_sha`, `rollback_commit_sha`, `rollback_status`,
+`advisory`; pending/denied approval, dirty tree, unreachable commit, and
+git revert failure all exit 1 with clear messages; no push is performed;
+`_run_git_revert`, `execute_rollback`, `CONTROLLED_ROLLBACK_ADVISORY`
+added to `core/agent.py`; `run_remote_rollback_execute` added to
+`commands/agent.py`; `execute JOB_ID [--json]` wired under `remote
+rollback` in `cli.py`; advisory: "Rollback commit created; no push was
+performed."; 15 new tests.
 
 PCAE enforces a human approval gate for rollback plans (Phase 43C):
 `pcae remote rollback approve JOB_ID` and `--json` approve a rollback plan;

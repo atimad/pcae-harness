@@ -46,6 +46,7 @@ from pcae.commands.agent import (
     run_remote_push,
     run_remote_rollback_approve,
     run_remote_rollback_deny,
+    run_remote_rollback_execute,
     run_remote_rollback_governance,
     run_remote_rollback_review,
     run_remote_file_governance,
@@ -1732,6 +1733,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     remote_rollback_deny_parser.set_defaults(handler=run_remote_rollback_deny)
+
+    remote_rollback_execute_parser = remote_rollback_subparsers.add_parser(
+        "execute",
+        help="Execute a governed rollback using git revert for an approved job.",
+    )
+    remote_rollback_execute_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose approved rollback plan to execute.",
+    )
+    remote_rollback_execute_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_rollback_execute_parser.set_defaults(handler=run_remote_rollback_execute)
 
     remote_writable_contract_parser = remote_subparsers.add_parser(
         "writable-contract",

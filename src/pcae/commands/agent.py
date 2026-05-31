@@ -25,6 +25,7 @@ from pcae.core.agent import (
     commit_file_changes,
     deny_file_changes,
     deny_rollback,
+    execute_rollback,
     push_file_changes,
     build_change_review,
     build_claude_writable_contract,
@@ -1681,6 +1682,24 @@ def run_remote_rollback_deny(args: argparse.Namespace) -> int:
     print(f"New rollback approval state:      {data['new_rollback_approval_state']}")
     print(f"Rollback eligible:                {'yes' if data['rollback_eligible'] else 'no'}")
     print(f"Rollback mode recommendation:     {data['rollback_mode_recommendation']}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_rollback_execute(args: argparse.Namespace) -> int:
+    try:
+        data = execute_rollback(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Rollback Execution — {data['job_id']}")
+    print(f"Original commit SHA:  {data['original_commit_sha']}")
+    print(f"Rollback commit SHA:  {data['rollback_commit_sha']}")
+    print(f"Rollback status:      {data['rollback_status']}")
     print()
     print(data["advisory"])
     return 0

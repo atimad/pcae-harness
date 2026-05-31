@@ -13994,3 +13994,265 @@ def test_43c_missing_job_deny_returns_error(
 
     assert exit_code == 1
     assert "unknown job" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 43D — Controlled Rollback Execution
+# ---------------------------------------------------------------------------
+
+
+def _setup_approved_rollback(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    commit_sha: str = "def5678",
+    changed_files: list[str] | None = None,
+) -> str:
+    """Create, execute, commit, and rollback-approve a job. Returns job_id."""
+    job_id = _setup_committed_change(
+        tmp_path, monkeypatch, capsys,
+        commit_sha=commit_sha,
+        changed_files=changed_files or ["docs/note.md"],
+    )
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def _patch_rollback_execute_helpers(
+    monkeypatch,
+    revert_rc: int = 0,
+    revert_sha: str = "rev1234",
+    dirty_files: list[str] | None = None,
+    ancestor: bool = True,
+) -> None:
+    """Patch git helpers for rollback execute tests."""
+    monkeypatch.setattr(
+        _agent_mod,
+        "_capture_git_changed_files",
+        _fake_git_changed_files(dirty_files or []),
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_git_head", _fake_git_head(revert_sha))
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_git_revert",
+        lambda sha, cwd: _fake_proc(revert_rc, stdout=f"[main {revert_sha}] Revert ...\n"),
+    )
+    monkeypatch.setattr(
+        _agent_mod,
+        "_check_commit_is_ancestor",
+        lambda sha, cwd: ancestor,
+    )
+
+
+def test_43d_approved_rollback_creates_revert_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    exit_code = main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["rolled_back"] is True
+
+
+def test_43d_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in (
+        "rolled_back",
+        "job_id",
+        "original_commit_sha",
+        "rollback_commit_sha",
+        "rollback_status",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_43d_rollback_commit_sha_captured(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, revert_sha="cafe9876")
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_commit_sha"] == "cafe9876"
+
+
+def test_43d_original_commit_sha_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["original_commit_sha"] == "def5678"
+
+
+def test_43d_persists_rollback_metadata(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, revert_sha="cafe9876")
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["rollback_commit_sha"] == "cafe9876"
+    assert job["rollback_status"] == "rolled_back"
+    assert "rolled_back_at" in job
+
+
+def test_43d_rollback_status_is_rolled_back(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_status"] == "rolled_back"
+
+
+def test_43d_pending_approval_blocks_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "pending" in output.lower()
+
+
+def test_43d_denied_approval_blocks_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    main(["remote", "rollback", "deny", job_id, "--json"])
+    capsys.readouterr()
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "denied" in output.lower()
+
+
+def test_43d_dirty_tree_blocks_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, dirty_files=["docs/unexpected.md"])
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "dirty" in output.lower()
+
+
+def test_43d_commit_not_in_history_blocks_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, ancestor=False)
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "not reachable from head" in output.lower()
+
+
+def test_43d_git_revert_failure_blocks_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, revert_rc=1)
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "rollback failed" in output.lower()
+
+
+def test_43d_no_push_performed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+
+    push_calls: list = []
+    _patch_rollback_execute_helpers(monkeypatch)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_git_push",
+        lambda remote, branch, cwd: push_calls.append((remote, branch)) or _fake_proc(0),
+    )
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+
+    assert push_calls == [], f"Unexpected push calls: {push_calls}"
+
+
+def test_43d_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no push was performed" in data["advisory"].lower()
+
+
+def test_43d_human_output_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_rollback_execute_helpers(monkeypatch, revert_sha="rev1234")
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Rollback Execution" in output
+    assert "def5678" in output
+    assert "rev1234" in output
+    assert "rolled_back" in output
+    assert "no push was performed" in output.lower()
+
+
+def test_43d_missing_job_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback", "execute", "no-such-job"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower()
