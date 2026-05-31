@@ -29,6 +29,7 @@ from pcae.core.agent import (
     build_writable_contract,
     build_file_governance_design,
     build_rollback_governance,
+    build_rollback_review,
     invoke_remote_job_with_file_changes,
     build_lifecycle_report,
     build_multi_agent_registry,
@@ -1603,6 +1604,43 @@ def run_remote_commit(args: argparse.Namespace) -> int:
         print(f"  {f}")
     print(f"Commit SHA:      {data['commit_sha']}")
     print(f"Push allowed:    no")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_rollback_review(args: argparse.Namespace) -> int:
+    try:
+        data = build_rollback_review(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    review = data["rollback_review"]
+    print(f"Rollback Review — {review['job_id']}")
+    print(f"Agent:           {review['requested_agent']}")
+    print(f"Original commit: {review['original_commit_sha'] or '(none)'}")
+    print()
+    affected = review["affected_files"]
+    if affected:
+        print(f"Affected files ({len(affected)}):")
+        for f in affected:
+            print(f"  {f}")
+    else:
+        print("Affected files: none")
+    print()
+    print(f"Rollback recommendation: {review['rollback_mode_recommendation']}")
+    print(f"Rollback eligible:       {'yes' if review['rollback_eligible'] else 'no'}")
+    for note in review.get("eligibility_notes", []):
+        print(f"  Note: {note}")
+    print(f"Risk level:              {review['rollback_risk_level']}")
+    print()
+    print("Approval guidance:")
+    print(f"  Approval required: {'yes' if review['rollback_approval_required'] else 'no'}")
+    print(f"  Commit required:   {'yes' if review['rollback_commit_required'] else 'no'}")
+    print(f"  Push required:     {'yes' if review['rollback_push_required'] else 'no'}")
     print()
     print(data["advisory"])
     return 0

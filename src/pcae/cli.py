@@ -45,6 +45,7 @@ from pcae.commands.agent import (
     run_remote_commit,
     run_remote_push,
     run_remote_rollback_governance,
+    run_remote_rollback_review,
     run_remote_file_governance,
     run_remote_writable_contract,
     run_remote_report_export,
@@ -1672,6 +1673,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     remote_rollback_governance_parser.set_defaults(handler=run_remote_rollback_governance)
+
+    remote_rollback_review_parser = remote_subparsers.add_parser(
+        "rollback-review",
+        help="Generate a governed rollback review artifact for a job (read-only).",
+    )
+    remote_rollback_review_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID to generate a rollback review for.",
+    )
+    remote_rollback_review_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_rollback_review_parser.set_defaults(handler=run_remote_rollback_review)
 
     remote_writable_contract_parser = remote_subparsers.add_parser(
         "writable-contract",

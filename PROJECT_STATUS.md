@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43A: Governed Rollback Design.
+Phase 43B: Rollback Review Artifacts.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,19 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE generates governed rollback review artifacts (Phase 43B): `pcae remote
+rollback-review JOB_ID` and `--json` produce a rollback review for a specific
+job; `rollback_eligible` is True when result artifact exists, `commit_sha` is
+recorded, and `changed_files` is non-empty; `rollback_mode_recommendation` is
+`revert_commit` for eligible jobs and `not_applicable` otherwise; risk levels
+follow the standard classification: low (docs/tasks), medium (src/tests), high
+(config/policy/deps), critical (scope violations); `rollback_approval_required`,
+`rollback_commit_required`, and `rollback_push_required` are always True; exits
+1 for unknown jobs; `build_rollback_review` and `ROLLBACK_REVIEW_ADVISORY`
+added to `core/agent.py`; `run_remote_rollback_review` added to
+`commands/agent.py`; `rollback-review JOB_ID [--json]` wired under `remote` in
+`cli.py`; strictly read-only; 13 new tests.
 
 PCAE exposes a governed rollback design (Phase 43A): `pcae remote
 rollback-governance` and `--json` expose a read-only rollback governance

@@ -4991,3 +4991,94 @@ def build_rollback_governance() -> dict:
         },
         "rollback_modes": _ROLLBACK_MODES,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 43B — Rollback Review Artifacts
+# ---------------------------------------------------------------------------
+
+ROLLBACK_REVIEW_ADVISORY = "Rollback review is advisory; no rollback is performed."
+
+
+def build_rollback_review(root: HarnessPath, job_id: str) -> dict:
+    """
+    Generate a governed rollback review artifact for a specific job.
+
+    Reads the persisted job and execution result artifact.
+    Returns a review dict with rollback eligibility, recommendation,
+    risk level, and approval guidance. Read-only; no files modified,
+    no rollback performed.
+    Raises ValueError for unknown or malformed job IDs.
+    """
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file for {job_id!r}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(f"Malformed job file for {job_id!r}: content is not a JSON object.")
+
+    requested_agent: str = job.get("requested_agent", "")
+    original_commit_sha: str = job.get("commit_sha") or ""
+
+    artifact: dict | None = None
+    for candidate in (
+        root.join(_REMOTE_RESULTS_DIR) / f"{job_id}-result.json",
+        root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json",
+    ):
+        if candidate.exists():
+            try:
+                parsed = json.loads(candidate.read_text(encoding="utf-8"))
+                if isinstance(parsed, dict):
+                    artifact = parsed
+                    break
+            except (json.JSONDecodeError, OSError):
+                pass
+
+    eligibility_notes: list[str] = []
+    if artifact is None:
+        eligibility_notes.append("No result artifact found.")
+    if not original_commit_sha:
+        eligibility_notes.append("No governed commit recorded on job.")
+
+    changed_files: list[str] = []
+    scope_validation: dict = {}
+
+    if artifact is not None:
+        changed_files = artifact.get("changed_files") or []
+        scope_validation = artifact.get("scope_validation") or {}
+        if not changed_files:
+            eligibility_notes.append("No files were changed in this execution.")
+
+    rollback_eligible = len(eligibility_notes) == 0
+
+    rollback_risk_level: str
+    if changed_files:
+        rollback_risk_level = _classify_change_risk(changed_files, scope_validation)
+    else:
+        rollback_risk_level = "unknown"
+
+    rollback_mode_recommendation = "revert_commit" if rollback_eligible else "not_applicable"
+
+    return {
+        "advisory": ROLLBACK_REVIEW_ADVISORY,
+        "rollback_review": {
+            "affected_files": changed_files,
+            "eligibility_notes": eligibility_notes,
+            "job_id": job_id,
+            "original_commit_sha": original_commit_sha,
+            "requested_agent": requested_agent,
+            "rollback_approval_required": True,
+            "rollback_commit_required": True,
+            "rollback_eligible": rollback_eligible,
+            "rollback_mode_recommendation": rollback_mode_recommendation,
+            "rollback_push_required": True,
+            "rollback_risk_level": rollback_risk_level,
+        },
+    }

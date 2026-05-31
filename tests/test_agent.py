@@ -13564,3 +13564,187 @@ def test_42e1_exact_match_has_no_warnings(
     data = json.loads(capsys.readouterr().out)
 
     assert data["warnings"] == []
+
+
+# ---------------------------------------------------------------------------
+# Phase 43B — Rollback Review Artifacts
+# ---------------------------------------------------------------------------
+
+
+def test_43b_rollback_review_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+
+    exit_code = main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert "rollback_review" in data
+    assert "advisory" in data
+
+
+def test_43b_rollback_review_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    review = data["rollback_review"]
+    for key in (
+        "job_id",
+        "original_commit_sha",
+        "rollback_mode_recommendation",
+        "rollback_eligible",
+        "affected_files",
+        "rollback_risk_level",
+        "rollback_approval_required",
+        "rollback_commit_required",
+        "rollback_push_required",
+    ):
+        assert key in review, f"missing field: {key}"
+
+
+def test_43b_eligible_job_is_eligible(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_review"]["rollback_eligible"] is True
+
+
+def test_43b_no_artifact_not_eligible(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    exit_code = main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["rollback_review"]["rollback_eligible"] is False
+    notes = " ".join(data["rollback_review"]["eligibility_notes"]).lower()
+    assert "no result artifact" in notes or "no governed commit" in notes
+
+
+def test_43b_no_commit_sha_not_eligible(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    review = data["rollback_review"]
+    assert review["rollback_eligible"] is False
+    notes = " ".join(review["eligibility_notes"]).lower()
+    assert "no governed commit" in notes
+
+
+def test_43b_revert_commit_recommended_for_eligible_job(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_review"]["rollback_mode_recommendation"] == "revert_commit"
+
+
+def test_43b_docs_only_is_low_risk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_review"]["rollback_risk_level"] == "low"
+
+
+def test_43b_src_change_is_medium_or_higher_risk(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(
+        tmp_path, monkeypatch, capsys, changed_files=["src/pcae/core/agent.py"]
+    )
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_review"]["rollback_risk_level"] in ("medium", "critical")
+
+
+def test_43b_approval_fields_always_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    review = data["rollback_review"]
+    assert review["rollback_approval_required"] is True
+    assert review["rollback_commit_required"] is True
+    assert review["rollback_push_required"] is True
+
+
+def test_43b_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no rollback is performed" in data["advisory"].lower()
+
+
+def test_43b_human_output_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback-review", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Rollback Review" in output
+    assert "revert_commit" in output
+    assert "Affected files" in output or "affected" in output.lower()
+    assert "no rollback is performed" in output.lower()
+
+
+def test_43b_read_only_no_file_mutations(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    before = job_file.read_text()
+
+    main(["remote", "rollback-review", job_id, "--json"])
+    capsys.readouterr()
+
+    assert job_file.read_text() == before
+
+
+def test_43b_missing_job_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback-review", "no-such-job"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower()
