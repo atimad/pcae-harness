@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A.2: Git Change Detection After Writable Execution.
+Phase 42A.3: Claude Writable Execution Contract Inspection.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,16 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE inspects and documents Claude's writable execution contract before enabling
+Claude file modifications (Phase 42A.3): `pcae remote writable-contract
+claude-local` and `--json` report `agent_id`, `current_invocation_command`
+(`claude -p <prompt>`), `known_read_only_behavior`, `writable_support_status`
+(`unknown` — not assumed), `required_flags_if_known` (empty — none confirmed),
+`unknowns` (open questions about sandbox flags and writable behavior), and a
+conservative `safety_recommendation`; unknown agent IDs return an error and exit
+1; command is strictly read-only — no agents executed, no files modified, Claude
+writable mode not enabled, Codex and Kimi behavior unchanged; 10 new tests.
 
 PCAE correctly detects all post-execution file changes including untracked files
 (Phase 42A.2): two bugs fixed — `root.root` AttributeError (silently caught,

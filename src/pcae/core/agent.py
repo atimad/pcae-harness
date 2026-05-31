@@ -4121,3 +4121,59 @@ def build_file_governance_design() -> dict:
         "risk_model": _FILE_GOVERNANCE_RISK_MODEL,
         "rollback_model": _FILE_GOVERNANCE_ROLLBACK_STRATEGY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.3 — Claude Writable Execution Contract Inspection
+# ---------------------------------------------------------------------------
+
+CLAUDE_WRITABLE_CONTRACT_ADVISORY = (
+    "Claude writable contract inspection is advisory and read-only. "
+    "No agents are executed, no files are modified, and Claude writable "
+    "mode is not enabled by this command."
+)
+
+_CLAUDE_READ_ONLY_INVOCATION = ["claude", "-p", "<prompt>"]
+
+_CLAUDE_KNOWN_READ_ONLY_BEHAVIORS = [
+    "claude -p '<prompt>' runs non-interactively and returns output to stdout.",
+    "Read-only execution is confirmed: no --sandbox flag is required.",
+    "Exit code 0 on success; non-zero on failure.",
+    "stdout contains the agent response; stderr may contain status or reasoning text.",
+]
+
+_CLAUDE_WRITABLE_UNKNOWNS = [
+    "Whether claude -p supports a writable sandbox flag is not yet confirmed.",
+    "No --sandbox or equivalent writable flag has been identified in claude --help output.",
+    "Writable execution behavior has not been tested under PCAE governance.",
+    "Side effects of file modification (scope, extent) are not documented.",
+]
+
+
+def build_claude_writable_contract(agent_id: str) -> dict:
+    """Return the writable execution contract inspection for the given agent.
+
+    Currently only claude-local is supported. Returns an error dict for unknown agents.
+    Read-only; no agents are executed and no files are modified.
+    """
+    if agent_id != "claude-local":
+        return {
+            "agent_id": agent_id,
+            "error": f"Writable contract inspection is not available for '{agent_id}'.",
+            "advisory": CLAUDE_WRITABLE_CONTRACT_ADVISORY,
+        }
+
+    return {
+        "agent_id": agent_id,
+        "current_invocation_command": " ".join(_CLAUDE_READ_ONLY_INVOCATION),
+        "known_read_only_behavior": _CLAUDE_KNOWN_READ_ONLY_BEHAVIORS,
+        "writable_support_status": "unknown",
+        "required_flags_if_known": [],
+        "unknowns": _CLAUDE_WRITABLE_UNKNOWNS,
+        "safety_recommendation": (
+            "Do not enable Claude writable mode until writable flags and sandbox "
+            "behavior are confirmed. Conservative default: treat claude-local as "
+            "read-only until explicit writable contract is established and approved."
+        ),
+        "advisory": CLAUDE_WRITABLE_CONTRACT_ADVISORY,
+    }

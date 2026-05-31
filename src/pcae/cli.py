@@ -39,6 +39,7 @@ from pcae.commands.agent import (
     run_remote_benchmark,
     run_remote_benchmark_controlled,
     run_remote_file_governance,
+    run_remote_writable_contract,
     run_remote_report_export,
     run_remote_report_inspect,
     run_remote_trends,
@@ -1562,6 +1563,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance design.",
     )
     remote_file_governance_parser.set_defaults(handler=run_remote_file_governance)
+
+    remote_writable_contract_parser = remote_subparsers.add_parser(
+        "writable-contract",
+        help="Inspect the writable execution contract for a given agent (read-only).",
+    )
+    remote_writable_contract_parser.add_argument(
+        "agent_id",
+        metavar="AGENT_ID",
+        help="Agent ID to inspect (e.g. claude-local).",
+    )
+    remote_writable_contract_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_writable_contract_parser.set_defaults(handler=run_remote_writable_contract)
 
     remote_report_parser = remote_subparsers.add_parser(
         "report",

@@ -11755,3 +11755,163 @@ def test_422_integration_src_file_is_scope_violation(
     assert data["final_status"] == "failed"
     assert data["scope_validation"]["valid"] is False
     assert any("src/" in v for v in data["scope_validation"]["violations"])
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.3 — Claude Writable Execution Contract Inspection
+# ---------------------------------------------------------------------------
+
+
+def test_42a3_writable_contract_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Claude Writable Execution Contract" in output
+    assert "claude-local" in output
+    assert "claude -p" in output
+    assert "Writable support:" in output
+    assert "unknown" in output
+    assert "Safety recommendation:" in output
+    assert "advisory" in output.lower()
+
+
+def test_42a3_writable_contract_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "agent_id",
+        "current_invocation_command",
+        "known_read_only_behavior",
+        "writable_support_status",
+        "required_flags_if_known",
+        "unknowns",
+        "safety_recommendation",
+        "advisory",
+    ):
+        assert key in data
+
+
+def test_42a3_writable_support_is_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["writable_support_status"] == "unknown"
+
+
+def test_42a3_required_flags_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["required_flags_if_known"] == []
+
+
+def test_42a3_invocation_command_is_claude_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "claude" in data["current_invocation_command"]
+    assert "-p" in data["current_invocation_command"]
+
+
+def test_42a3_unknowns_are_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["unknowns"]) >= 1
+
+
+def test_42a3_safety_recommendation_is_conservative(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "claude-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rec = data["safety_recommendation"].lower()
+    assert "do not enable" in rec or "conservative" in rec
+
+
+def test_42a3_unknown_agent_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "unknown-agent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Error" in output
+
+
+def test_42a3_unknown_agent_json_has_error_key(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "unknown-agent", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert "error" in data
+
+
+def test_42a3_readonly_does_not_execute_claude(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    executed: list[str] = []
+
+    original_run = __import__("subprocess").run
+
+    def patched_run(cmd, **kwargs):  # type: ignore[no-untyped-def]
+        if isinstance(cmd, list) and cmd and "claude" in cmd[0]:
+            executed.append(str(cmd))
+        return original_run(cmd, **kwargs)
+
+    monkeypatch.setattr("subprocess.run", patched_run)
+    main(["remote", "writable-contract", "claude-local", "--json"])
+
+    assert executed == [], "claude must not be executed during writable-contract inspection"

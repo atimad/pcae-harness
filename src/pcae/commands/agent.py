@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
+    build_claude_writable_contract,
     build_file_governance_design,
     invoke_remote_job_with_file_changes,
     build_lifecycle_report,
@@ -1490,6 +1491,41 @@ def run_remote_file_governance(args: argparse.Namespace) -> int:
         print()
 
         print(data["advisory"])
+    return 0
+
+
+def run_remote_writable_contract(args: argparse.Namespace) -> int:
+    data = build_claude_writable_contract(args.agent_id)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0 if "error" not in data else 1
+    if "error" in data:
+        print(f"Error: {data['error']}")
+        print(data["advisory"])
+        return 1
+    print(f"Claude Writable Execution Contract — {data['agent_id']}")
+    print()
+    print(f"Invocation command:    {data['current_invocation_command']}")
+    print(f"Writable support:      {data['writable_support_status']}")
+    print()
+    print("Known read-only behavior:")
+    for item in data["known_read_only_behavior"]:
+        print(f"  - {item}")
+    print()
+    print("Required flags (if known):")
+    if data["required_flags_if_known"]:
+        for flag in data["required_flags_if_known"]:
+            print(f"  - {flag}")
+    else:
+        print("  None confirmed.")
+    print()
+    print("Unknowns:")
+    for item in data["unknowns"]:
+        print(f"  - {item}")
+    print()
+    print(f"Safety recommendation: {data['safety_recommendation']}")
+    print()
+    print(data["advisory"])
     return 0
 
 
