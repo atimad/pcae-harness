@@ -4845,3 +4845,149 @@ def push_file_changes(root: HarnessPath, job_id: str) -> dict:
         "remote_branch": remote_branch,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 43A — Governed Rollback Design
+# ---------------------------------------------------------------------------
+
+ROLLBACK_GOVERNANCE_ADVISORY = (
+    "Rollback governance is advisory; no rollback is performed."
+)
+
+_ROLLBACK_ELIGIBILITY_MODEL: dict = {
+    "required_conditions": [
+        "Governed job exists in .pcae/remote/jobs/.",
+        "Result artifact exists in .pcae/remote/results/.",
+        "commit_sha is recorded on the job (governed commit was created).",
+        "Governed commit is reachable from the current branch.",
+        "Working tree is clean.",
+        "Rollback target (pre-execution HEAD SHA) is identified.",
+    ],
+    "blocking_conditions": [
+        "No governed job record.",
+        "No result artifact.",
+        "No commit_sha on job (commit was never created).",
+        "Governed commit not reachable from current branch.",
+        "Working tree is dirty.",
+        "Rollback target SHA unknown or unavailable.",
+    ],
+}
+
+_ROLLBACK_MODES: list = [
+    {
+        "mode": "revert_commit",
+        "description": (
+            "Create a new git revert commit that undoes the governed commit. "
+            "Preserves full commit history."
+        ),
+        "preferred": True,
+        "allowed_by_default": True,
+        "risk_level": "medium",
+        "notes": "Preferred rollback mode. Non-destructive; history is preserved.",
+    },
+    {
+        "mode": "restore_files",
+        "description": (
+            "Restore changed files to their pre-execution state without "
+            "creating a revert commit."
+        ),
+        "preferred": False,
+        "allowed_by_default": True,
+        "risk_level": "medium",
+        "notes": (
+            "Available when a revert commit is not suitable. "
+            "Requires a separate governed commit and approval."
+        ),
+    },
+    {
+        "mode": "reset_branch",
+        "description": (
+            "Reset the branch pointer to a prior SHA. "
+            "Destructive; rewrites history."
+        ),
+        "preferred": False,
+        "allowed_by_default": False,
+        "risk_level": "critical",
+        "notes": (
+            "Dangerous. Not allowed by default. "
+            "Requires explicit future policy override and human approval."
+        ),
+    },
+]
+
+_ROLLBACK_SAFETY_RULES: list = [
+    "revert_commit is preferred over reset_branch.",
+    "No destructive reset without explicit future policy override.",
+    "No automatic rollback; human approval is required.",
+    "No push after rollback unless separately approved.",
+    "Rollback review required before rollback approval.",
+    "Rollback commit is separate from rollback push.",
+    "Human remains authoritative at every rollback checkpoint.",
+]
+
+_ROLLBACK_ARTIFACT_FIELDS: dict = {
+    "rollback_plan": "Description of the rollback approach and scope.",
+    "affected_files": "List of files that would be restored or reverted.",
+    "original_commit": "The governed commit SHA being rolled back.",
+    "rollback_commit": "The SHA of the revert commit, if created.",
+    "risk_level": "Risk classification of the rollback operation.",
+    "approval_state": "Human approval state: pending, approved, or denied.",
+}
+
+_ROLLBACK_RISK_MODEL: dict = {
+    "levels": [
+        {
+            "level": "low",
+            "description": "Rollback of docs/ or tasks/ only changes.",
+        },
+        {
+            "level": "medium",
+            "description": "Rollback of src/ or tests/ changes.",
+        },
+        {
+            "level": "high",
+            "description": "Rollback of config, policy, CI, or dependency files.",
+        },
+        {
+            "level": "critical",
+            "description": "Branch reset or other destructive rollback operation.",
+        },
+    ],
+    "risk_note": (
+        "Risk level is advisory. Human review is required at every rollback "
+        "checkpoint regardless of the computed risk level."
+    ),
+}
+
+_ROLLBACK_APPROVAL_MODEL: dict = {
+    "approval_gates": [
+        "before_rollback_execution",
+        "before_rollback_commit",
+        "before_rollback_push",
+    ],
+    "auto_rollback_allowed": False,
+    "notes": (
+        "Rollback review and approval are separate governance steps. "
+        "No rollback is executed, committed, or pushed without explicit human approval."
+    ),
+    "rollback_approval_required": True,
+    "rollback_commit_separate": True,
+    "rollback_push_separate": True,
+    "rollback_review_required": True,
+}
+
+
+def build_rollback_governance() -> dict:
+    """Return the rollback governance design. Read-only; no files modified, no rollback performed."""
+    return {
+        "advisory": ROLLBACK_GOVERNANCE_ADVISORY,
+        "approval_model": _ROLLBACK_APPROVAL_MODEL,
+        "risk_model": _ROLLBACK_RISK_MODEL,
+        "rollback_governance": {
+            "eligibility_model": _ROLLBACK_ELIGIBILITY_MODEL,
+            "rollback_artifacts": _ROLLBACK_ARTIFACT_FIELDS,
+            "safety_rules": _ROLLBACK_SAFETY_RULES,
+        },
+        "rollback_modes": _ROLLBACK_MODES,
+    }

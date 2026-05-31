@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42E.1: Governed Commit Lineage Validation.
+Phase 43A: Governed Rollback Design.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,22 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE exposes a governed rollback design (Phase 43A): `pcae remote
+rollback-governance` and `--json` expose a read-only rollback governance
+design; three rollback modes: `revert_commit` (preferred, allowed by default),
+`restore_files` (allowed by default), `reset_branch` (dangerous, not allowed by
+default, risk_level="critical"); eligibility model lists required and blocking
+conditions; safety rules enforce no automatic rollback, revert preferred over
+reset, separate approval gates for execution/commit/push; risk model covers low
+(docs/tasks), medium (src/tests), high (config/policy/dependency), critical
+(destructive reset); approval model requires rollback_review_required,
+rollback_approval_required, rollback_commit_separate, rollback_push_separate all
+true, auto_rollback_allowed false; `build_rollback_governance` and
+`ROLLBACK_GOVERNANCE_ADVISORY` added to `core/agent.py`; `run_remote_rollback_governance`
+added to `commands/agent.py`; `rollback-governance [--json]` wired under
+`remote` in `cli.py`; advisory: "Rollback governance is advisory; no rollback is
+performed."; 10 new tests; strictly read-only.
 
 PCAE validates governed commit lineage before pushing (Phase 42E.1): `pcae
 remote push JOB_ID` allows push when the governed commit is an ancestor of

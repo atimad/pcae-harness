@@ -13266,6 +13266,157 @@ def test_42e_missing_job_returns_error(
 
 
 # ---------------------------------------------------------------------------
+# Phase 43A — Governed Rollback Design
+# ---------------------------------------------------------------------------
+
+
+def test_43a_rollback_governance_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    for key in ("advisory", "rollback_governance", "rollback_modes", "risk_model", "approval_model"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_43a_rollback_governance_inner_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    gov = data["rollback_governance"]
+    for key in ("eligibility_model", "rollback_artifacts", "safety_rules"):
+        assert key in gov, f"missing rollback_governance key: {key}"
+
+
+def test_43a_rollback_modes_defined(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    modes = {m["mode"] for m in data["rollback_modes"]}
+    assert "revert_commit" in modes
+    assert "restore_files" in modes
+    assert "reset_branch" in modes
+
+
+def test_43a_reset_branch_not_allowed_by_default(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    reset = next(m for m in data["rollback_modes"] if m["mode"] == "reset_branch")
+    assert reset["allowed_by_default"] is False
+    assert reset["risk_level"] == "critical"
+    assert "dangerous" in reset["notes"].lower() or "not allowed" in reset["notes"].lower()
+
+
+def test_43a_revert_commit_is_preferred(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    revert = next(m for m in data["rollback_modes"] if m["mode"] == "revert_commit")
+    assert revert["preferred"] is True
+    assert revert["allowed_by_default"] is True
+
+
+def test_43a_approval_model_defined(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    am = data["approval_model"]
+    assert am["rollback_review_required"] is True
+    assert am["rollback_approval_required"] is True
+    assert am["rollback_commit_separate"] is True
+    assert am["rollback_push_separate"] is True
+    assert am["auto_rollback_allowed"] is False
+
+
+def test_43a_risk_model_four_levels(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    levels = {lvl["level"] for lvl in data["risk_model"]["levels"]}
+    assert levels == {"low", "medium", "high", "critical"}
+
+
+def test_43a_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "rollback-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no rollback is performed" in data["advisory"].lower()
+
+
+def test_43a_human_output_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback-governance"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Rollback Governance Design" in output
+    assert "Rollback Modes" in output
+    assert "Safety Rules" in output
+    assert "Risk Model" in output
+    assert "Approval Model" in output
+    assert "no rollback is performed" in output.lower()
+
+
+def test_43a_read_only_no_execution(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before = list((tmp_path / ".pcae").rglob("*"))
+    main(["remote", "rollback-governance", "--json"])
+    capsys.readouterr()
+    after = list((tmp_path / ".pcae").rglob("*"))
+
+    assert before == after
+
+
+# ---------------------------------------------------------------------------
 # Phase 42E.1 — Governed Commit Lineage Validation
 # ---------------------------------------------------------------------------
 

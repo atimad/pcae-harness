@@ -28,6 +28,7 @@ from pcae.core.agent import (
     build_claude_writable_contract,
     build_writable_contract,
     build_file_governance_design,
+    build_rollback_governance,
     invoke_remote_job_with_file_changes,
     build_lifecycle_report,
     build_multi_agent_registry,
@@ -1603,6 +1604,60 @@ def run_remote_commit(args: argparse.Namespace) -> int:
     print(f"Commit SHA:      {data['commit_sha']}")
     print(f"Push allowed:    no")
     print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_rollback_governance(args: argparse.Namespace) -> int:
+    data = build_rollback_governance()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    print("Rollback Governance Design")
+    print()
+
+    gov = data["rollback_governance"]
+
+    print("Eligibility Model")
+    print("  Required conditions:")
+    for c in gov["eligibility_model"]["required_conditions"]:
+        print(f"    - {c}")
+    print("  Blocking conditions:")
+    for c in gov["eligibility_model"]["blocking_conditions"]:
+        print(f"    - {c}")
+    print()
+
+    print("Rollback Modes")
+    for mode in data["rollback_modes"]:
+        tag = " (preferred)" if mode["preferred"] else ""
+        allowed = "allowed" if mode["allowed_by_default"] else "NOT allowed by default"
+        print(f"  {mode['mode']}{tag}")
+        print(f"    Description: {mode['description']}")
+        print(f"    Risk level:  {mode['risk_level']}")
+        print(f"    Default:     {allowed}")
+        print(f"    Notes:       {mode['notes']}")
+    print()
+
+    print("Safety Rules")
+    for rule in gov["safety_rules"]:
+        print(f"  - {rule}")
+    print()
+
+    print("Risk Model")
+    for lvl in data["risk_model"]["levels"]:
+        print(f"  {lvl['level']}: {lvl['description']}")
+    print()
+
+    print("Approval Model")
+    am = data["approval_model"]
+    print(f"  Rollback review required:   {'yes' if am['rollback_review_required'] else 'no'}")
+    print(f"  Rollback approval required: {'yes' if am['rollback_approval_required'] else 'no'}")
+    print(f"  Rollback commit separate:   {'yes' if am['rollback_commit_separate'] else 'no'}")
+    print(f"  Rollback push separate:     {'yes' if am['rollback_push_separate'] else 'no'}")
+    print(f"  Auto rollback allowed:      {'yes' if am['auto_rollback_allowed'] else 'no'}")
+    print()
+
     print(data["advisory"])
     return 0
 
