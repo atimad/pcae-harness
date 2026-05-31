@@ -38,6 +38,7 @@ from pcae.commands.agent import (
     run_remote_analytics,
     run_remote_report_export,
     run_remote_report_inspect,
+    run_remote_trends,
     run_remote_results,
     run_remote_status,
     run_remote_validate,
@@ -1496,6 +1497,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON analytics output.",
     )
     remote_analytics_parser.set_defaults(handler=run_remote_analytics)
+
+    remote_trends_parser = remote_subparsers.add_parser(
+        "trends",
+        help="Analyze historical execution trends from persisted result artifacts.",
+    )
+    remote_trends_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON trends output.",
+    )
+    remote_trends_parser.set_defaults(handler=run_remote_trends)
 
     remote_report_parser = remote_subparsers.add_parser(
         "report",

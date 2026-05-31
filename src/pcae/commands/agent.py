@@ -27,6 +27,7 @@ from pcae.core.agent import (
     build_remote_create_persist_preview,
     build_remote_dry_run,
     build_remote_execution_analytics,
+    build_remote_execution_trends,
     build_remote_results,
     export_remote_execution_report,
     inspect_remote_execution_report,
@@ -1232,6 +1233,54 @@ def run_remote_analytics(args: argparse.Namespace) -> int:
                 print(f"    Failures:       {m['failures']}")
                 avg_rt = m["average_duration"]
                 print(f"    Avg duration:   {avg_rt if avg_rt is not None else '(no data)'}")
+        for warning in data["warnings"]:
+            print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_trends(args: argparse.Namespace) -> int:
+    data = build_remote_execution_trends(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ts = data["trend_summary"]
+        print("Execution trends summary")
+        print(f"Total executions:     {ts['total_executions']}")
+        print(f"Trend status:         {ts['trend_status']}")
+        print(f"Success rate trend:   {ts['success_rate_trend']}")
+        print(f"Avg duration trend:   {ts['average_duration_trend']}")
+        span = ts["execution_timespan"]
+        print(f"Execution timespan:   {f'{span}s' if span is not None else '(no data)'}")
+        oldest = ts["oldest_execution"]
+        if oldest:
+            print(
+                f"Oldest execution:     {oldest['job_id']} "
+                f"({oldest['selected_agent']}, {oldest['finished_at']})"
+            )
+        newest = ts["newest_execution"]
+        if newest:
+            print(
+                f"Newest execution:     {newest['job_id']} "
+                f"({newest['selected_agent']}, {newest['finished_at']})"
+            )
+        rt = data["runtime_trends"]
+        if rt:
+            print("\nRuntime trend breakdown")
+            for agent, m in sorted(rt.items()):
+                print(f"  {agent}:")
+                print(f"    Executions:   {m['execution_count']}")
+                sr = m["success_rate"]
+                print(f"    Success rate: {sr if sr is not None else '(no data)'}")
+                avg = m["average_duration"]
+                print(f"    Avg duration: {f'{avg}s' if avg is not None else '(no data)'}")
+                fastest = m["fastest_execution"]
+                if fastest:
+                    print(f"    Fastest:      {fastest['job_id']} ({fastest['duration_seconds']}s)")
+                slowest = m["slowest_execution"]
+                if slowest:
+                    print(f"    Slowest:      {slowest['job_id']} ({slowest['duration_seconds']}s)")
         for warning in data["warnings"]:
             print(f"Warning: {warning}")
         print()

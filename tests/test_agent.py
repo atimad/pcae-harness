@@ -10259,3 +10259,206 @@ def test_41j_inspect_readonly(
 
     after = {f.name: f.read_text() for f in reports_dir.glob("*.json")}
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 41K: Execution Trends
+# ---------------------------------------------------------------------------
+
+
+def test_41k_trends_empty_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "trends"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution trends summary" in output
+    assert "Total executions:     0" in output
+    assert "insufficient_data" in output
+    assert "Execution trends are computed from persisted execution history." in output
+
+
+def test_41k_trends_empty_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "trend_summary", "runtime_trends", "warnings"):
+        assert key in data, f"missing key: {key}"
+    ts = data["trend_summary"]
+    assert ts["total_executions"] == 0
+    assert ts["trend_status"] == "insufficient_data"
+    assert ts["success_rate_trend"] == "insufficient_data"
+    assert ts["average_duration_trend"] == "insufficient_data"
+    assert ts["newest_execution"] is None
+    assert ts["oldest_execution"] is None
+    assert ts["execution_timespan"] is None
+    assert data["runtime_trends"] == {}
+
+
+def test_41k_trends_insufficient_data_with_few_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for _ in range(4):
+        _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ts = data["trend_summary"]
+    assert ts["total_executions"] == 4
+    assert ts["trend_status"] == "insufficient_data"
+    assert ts["success_rate_trend"] == "insufficient_data"
+    assert ts["average_duration_trend"] == "insufficient_data"
+
+
+def test_41k_trends_stable_with_five_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for _ in range(5):
+        _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ts = data["trend_summary"]
+    assert ts["total_executions"] == 5
+    assert ts["trend_status"] != "insufficient_data"
+    assert ts["success_rate_trend"] in ("stable", "increasing", "decreasing")
+    assert ts["average_duration_trend"] in ("stable", "increasing", "decreasing",
+                                             "insufficient_data")
+
+
+def test_41k_trends_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ts = data["trend_summary"]
+    for key in (
+        "total_executions", "trend_status", "success_rate_trend",
+        "average_duration_trend", "execution_timespan",
+        "oldest_execution", "newest_execution",
+    ):
+        assert key in ts, f"missing trend_summary key: {key}"
+
+
+def test_41k_trends_runtime_breakdown_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="ok\n")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rt = data["runtime_trends"]
+    assert "codex-local" in rt
+    assert "claude-local" in rt
+    for agent in ("codex-local", "claude-local"):
+        m = rt[agent]
+        for key in ("execution_count", "average_duration", "fastest_execution",
+                    "slowest_execution", "success_rate"):
+            assert key in m, f"missing key {key!r} for {agent}"
+        assert m["execution_count"] == 1
+        assert m["success_rate"] == 1.0
+
+
+def test_41k_trends_oldest_and_newest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="first\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="second\n")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    ts = data["trend_summary"]
+    oldest = ts["oldest_execution"]
+    newest = ts["newest_execution"]
+    assert oldest is not None
+    assert newest is not None
+    for key in ("job_id", "selected_agent", "final_status", "finished_at"):
+        assert key in oldest
+        assert key in newest
+    if oldest["finished_at"] and newest["finished_at"]:
+        assert oldest["finished_at"] <= newest["finished_at"]
+
+
+def test_41k_trends_malformed_file_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "job-bad-result.json").write_text("not json", encoding="utf-8")
+
+    exit_code = main(["remote", "trends", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["trend_summary"]["total_executions"] == 0
+    assert len(data["warnings"]) >= 1
+
+
+def test_41k_trends_human_output_format(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "trends"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution trends summary" in output
+    assert "Trend status:" in output
+    assert "Runtime trend breakdown" in output
+    assert "codex-local" in output
+    assert "Execution trends are computed from persisted execution history." in output
+
+
+def test_41k_trends_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    before = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+
+    main(["remote", "trends", "--json"])
+    capsys.readouterr()
+
+    after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+    assert before == after

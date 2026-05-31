@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41J: Execution Report Inspection.
+Phase 41K: Execution Trends.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,25 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE analyzes historical execution behavior with `pcae remote trends` and
+`--json` (Phase 41K): global trend summary includes `total_executions`,
+`execution_timespan` (seconds between oldest and newest `finished_at`),
+`trend_status`, `success_rate_trend`, `average_duration_trend`,
+`oldest_execution`, and `newest_execution`; per-runtime trends include
+`execution_count`, `average_duration`, `fastest_execution`, `slowest_execution`,
+and `success_rate`; trend indicators are `increasing`, `decreasing`, `stable`,
+or `insufficient_data`; with fewer than 5 total executions all trend indicators
+are `insufficient_data`; with ≥5 entries, trends are computed by comparing
+first-half and second-half averages with a 10% relative change threshold;
+`trend_status` reflects the success rate trend; malformed result artifacts
+produce per-file warnings and are skipped; JSON output includes `trend_summary`,
+`runtime_trends`, `warnings`, `advisory`; `build_remote_execution_trends(root)`
+and `_compute_trend_indicator` added to `core/agent.py`; delegates to
+`build_remote_results_registry` for file scanning; `run_remote_trends` added
+to `commands/agent.py`; `trends` subcommand wired under `remote` in `cli.py`;
+advisory: "Execution trends are computed from persisted execution history."; 10
+new tests; strictly read-only — no agents executed, no results mutated.
 
 PCAE can inspect previously exported execution report artifacts read-only
 (Phase 41J): `pcae remote report inspect REPORT_FILE` and `--json` read

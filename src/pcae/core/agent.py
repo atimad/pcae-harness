@@ -3383,3 +3383,136 @@ def inspect_remote_execution_report(root: HarnessPath, report_path_str: str) -> 
         "validation_status": validation_status,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Execution Trends (Phase 41K)
+# ---------------------------------------------------------------------------
+
+REMOTE_TRENDS_ADVISORY = (
+    "Execution trends are computed from persisted execution history."
+)
+
+_TREND_INSUFFICIENT_DATA = "insufficient_data"
+_TREND_INCREASING = "increasing"
+_TREND_DECREASING = "decreasing"
+_TREND_STABLE = "stable"
+_TREND_MIN_EXECUTIONS = 5
+_TREND_CHANGE_THRESHOLD = 0.1
+
+
+def _compute_trend_indicator(ordered_values: list[float]) -> str:
+    """Return a trend direction from an ordered (oldest-first) list of numeric values."""
+    if len(ordered_values) < _TREND_MIN_EXECUTIONS:
+        return _TREND_INSUFFICIENT_DATA
+    half = len(ordered_values) // 2
+    tail = len(ordered_values) - half
+    first_avg = sum(ordered_values[:half]) / half
+    second_avg = sum(ordered_values[half:]) / tail
+    if first_avg == 0:
+        return _TREND_STABLE
+    change = (second_avg - first_avg) / abs(first_avg)
+    if change > _TREND_CHANGE_THRESHOLD:
+        return _TREND_INCREASING
+    if change < -_TREND_CHANGE_THRESHOLD:
+        return _TREND_DECREASING
+    return _TREND_STABLE
+
+
+def build_remote_execution_trends(root: HarnessPath) -> dict:
+    """Compute execution trends over persisted result artifacts. Read-only."""
+    from datetime import datetime  # noqa: PLC0415
+
+    registry = build_remote_results_registry(root)
+    entries: list[dict] = registry["results"]
+    warnings: list[str] = list(registry["warnings"])
+
+    total = len(entries)
+
+    # Sort oldest-first by finished_at; undated entries appended last.
+    dated = sorted(
+        [e for e in entries if e.get("finished_at")],
+        key=lambda e: e["finished_at"],
+    )
+    undated = [e for e in entries if not e.get("finished_at")]
+    sorted_entries = dated + undated
+
+    # Global trend indicators
+    if total < _TREND_MIN_EXECUTIONS:
+        trend_status = success_rate_trend = average_duration_trend = _TREND_INSUFFICIENT_DATA
+    else:
+        success_values = [
+            1.0 if e.get("final_status") == "completed" else 0.0
+            for e in sorted_entries
+        ]
+        dur_values = [
+            e["duration_seconds"]
+            for e in sorted_entries
+            if e.get("duration_seconds") is not None
+        ]
+        success_rate_trend = _compute_trend_indicator(success_values)
+        average_duration_trend = _compute_trend_indicator(dur_values)
+        trend_status = success_rate_trend
+
+    # Execution timespan in seconds
+    execution_timespan: "float | None" = None
+    if len(dated) >= 2:
+        try:
+            oldest_ts = datetime.fromisoformat(dated[0]["finished_at"])
+            newest_ts = datetime.fromisoformat(dated[-1]["finished_at"])
+            execution_timespan = round((newest_ts - oldest_ts).total_seconds(), 1)
+        except (ValueError, TypeError):
+            pass
+
+    def _summary(e: "dict | None") -> "dict | None":
+        if e is None:
+            return None
+        return {
+            "final_status": e.get("final_status"),
+            "finished_at": e.get("finished_at"),
+            "job_id": e.get("job_id"),
+            "selected_agent": e.get("selected_agent"),
+        }
+
+    # Per-runtime trends
+    runtime_buckets: dict[str, list[dict]] = {}
+    for entry in sorted_entries:
+        agent = entry.get("selected_agent") or "unknown"
+        runtime_buckets.setdefault(agent, []).append(entry)
+
+    runtime_trends: dict[str, dict] = {}
+    for agent, bucket in runtime_buckets.items():
+        timed = [e for e in bucket if e.get("duration_seconds") is not None]
+        durs = [e["duration_seconds"] for e in timed]
+        successes = sum(1 for e in bucket if e.get("final_status") == "completed")
+        avg_dur = round(sum(durs) / len(durs), 3) if durs else None
+        fastest = min(timed, key=lambda e: e["duration_seconds"]) if timed else None
+        slowest = max(timed, key=lambda e: e["duration_seconds"]) if timed else None
+        runtime_trends[agent] = {
+            "average_duration": avg_dur,
+            "execution_count": len(bucket),
+            "fastest_execution": (
+                {"duration_seconds": fastest["duration_seconds"], "job_id": fastest.get("job_id")}
+                if fastest else None
+            ),
+            "slowest_execution": (
+                {"duration_seconds": slowest["duration_seconds"], "job_id": slowest.get("job_id")}
+                if slowest else None
+            ),
+            "success_rate": round(successes / len(bucket), 4) if bucket else None,
+        }
+
+    return {
+        "advisory": REMOTE_TRENDS_ADVISORY,
+        "runtime_trends": runtime_trends,
+        "trend_summary": {
+            "average_duration_trend": average_duration_trend,
+            "execution_timespan": execution_timespan,
+            "newest_execution": _summary(dated[-1] if dated else None),
+            "oldest_execution": _summary(dated[0] if dated else None),
+            "success_rate_trend": success_rate_trend,
+            "total_executions": total,
+            "trend_status": trend_status,
+        },
+        "warnings": warnings,
+    }
