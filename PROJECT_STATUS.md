@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A.1: Codex Writable Sandbox Contract.
+Phase 42A.2: Git Change Detection After Writable Execution.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,17 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE correctly detects all post-execution file changes including untracked files
+(Phase 42A.2): two bugs fixed — `root.root` AttributeError (silently caught,
+always returning []) corrected to `root.path` in all three git-capture helpers
+(`_capture_git_head`, `_capture_git_changed_files`, `_capture_diff_summary`);
+`git status --porcelain` without `--untracked-files=all` collapses untracked
+directories to a single `?? dirname/` entry — fix adds `--untracked-files=all`
+so individual new files (e.g. `docs/remote-controlled-modification-test.md`)
+are always listed; renamed-file paths now take destination only; integration
+tests now commit all initial files and gitignore `remote/` so job/result
+artifacts don't contaminate post-execution change detection; 6 new tests.
 
 PCAE selects the correct Codex sandbox mode based on `--allow-file-changes`
 (Phase 42A.1): `pcae remote execute JOB_ID --invoke --allow-file-changes` for

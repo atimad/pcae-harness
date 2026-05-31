@@ -11553,3 +11553,205 @@ def test_421_sandbox_mode_in_human_output(
     assert exit_code == 0
     assert "Sandbox mode" in output
     assert "workspace-write" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.2 — Git Change Detection After Writable Execution
+# ---------------------------------------------------------------------------
+
+
+def test_422_capture_untracked_file_in_tracked_dir(
+    tmp_path: Path,
+) -> None:
+    """Files added to an already-tracked directory are detected."""
+    init_git_repo(tmp_path)
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    (docs_dir / "existing.md").write_text("existing\n")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        env={**__import__("os").environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+             "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"},
+    )
+
+    (docs_dir / "remote-controlled-modification-test.md").write_text("PCAE test\n")
+
+    from pcae.core.agent import _capture_git_changed_files
+    files = _capture_git_changed_files(HarnessPath(tmp_path))
+
+    assert any("remote-controlled-modification-test.md" in f for f in files)
+
+
+def test_422_capture_untracked_file_in_untracked_dir(
+    tmp_path: Path,
+) -> None:
+    """Files inside an entirely-untracked directory are detected individually."""
+    init_git_repo(tmp_path)
+    # docs/ has never been committed — without --untracked-files=all git
+    # would only report 'docs/' not the individual file inside it.
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    (docs_dir / "remote-controlled-modification-test.md").write_text("PCAE test\n")
+
+    from pcae.core.agent import _capture_git_changed_files
+    files = _capture_git_changed_files(HarnessPath(tmp_path))
+
+    # Must see the individual file, not just the directory entry.
+    assert any("remote-controlled-modification-test.md" in f for f in files)
+    # No trailing-slash directory-only entries.
+    assert "docs/" not in files
+
+
+def test_422_no_changes_returns_empty(
+    tmp_path: Path,
+) -> None:
+    """Clean working tree produces an empty changed-files list."""
+    init_git_repo(tmp_path)
+    (tmp_path / "init.txt").write_text("x\n")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        env={**__import__("os").environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+             "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"},
+    )
+
+    from pcae.core.agent import _capture_git_changed_files
+    files = _capture_git_changed_files(HarnessPath(tmp_path))
+
+    assert files == []
+
+
+def _make_file_creating_subprocess(tmp_path: Path, rel_path: str, content: str = "PCAE test\n"):
+    """
+    Return a fake _run_agent_subprocess that creates a real file in tmp_path.
+
+    This lets _capture_git_changed_files run against real git without needing
+    to be mocked, verifying the full post-execution detection pipeline.
+    """
+    def _subprocess(cmd, timeout):
+        target = tmp_path / rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content)
+        return _fake_proc(0, "Created file.\n")
+    return _subprocess
+
+
+def _commit_repo_for_file_detection(tmp_path: Path) -> None:
+    """
+    Prepare a clean git state for file-detection integration tests.
+
+    Extends .pcae/.gitignore to include 'remote/' so job and result artifacts
+    are not tracked, then commits every file. After this call git status is
+    clean, and only files created by the fake agent subprocess will appear in
+    _capture_git_changed_files output.
+    """
+    pcae_gitignore = tmp_path / ".pcae" / ".gitignore"
+    pcae_gitignore.write_text(
+        "session.json\narchitecture-history.json\nagent-lock.json\nremote/\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "initial"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_422_integration_untracked_docs_file_detected(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """
+    End-to-end: agent creates docs/ file → _capture_git_changed_files detects it →
+    scope validation passes → final_status == 'completed'.
+    """
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _commit_repo_for_file_detection(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+    # Do NOT patch _capture_git_changed_files — let it run for real.
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        _make_file_creating_subprocess(tmp_path, "docs/remote-controlled-modification-test.md"),
+    )
+    # Patch diff summary (git diff --stat won't show untracked files).
+    monkeypatch.setattr(_agent_mod, "_capture_diff_summary", lambda root: "")
+
+    exit_code = main(
+        ["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert any(
+        "remote-controlled-modification-test.md" in f for f in data["changed_files"]
+    ), f"changed_files={data['changed_files']}"
+    assert data["scope_validation"]["valid"] is True
+    assert data["final_status"] == "completed"
+
+
+def test_422_integration_completed_with_no_changes_when_clean(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """
+    End-to-end: agent creates no files → _capture_git_changed_files returns [] →
+    final_status == 'completed_with_no_changes'.
+    """
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _commit_repo_for_file_detection(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "nothing done\n")
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_diff_summary", lambda root: "")
+
+    exit_code = main(
+        ["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["changed_files"] == []
+    assert data["final_status"] == "completed_with_no_changes"
+
+
+def test_422_integration_src_file_is_scope_violation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """
+    End-to-end: agent creates src/ file → scope validation fails →
+    final_status == 'failed'.
+    """
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _commit_repo_for_file_detection(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        _make_file_creating_subprocess(tmp_path, "src/unauthorized.py"),
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_diff_summary", lambda root: "")
+
+    exit_code = main(
+        ["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["final_status"] == "failed"
+    assert data["scope_validation"]["valid"] is False
+    assert any("src/" in v for v in data["scope_validation"]["violations"])

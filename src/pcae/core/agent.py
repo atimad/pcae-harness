@@ -3037,7 +3037,7 @@ def _capture_git_head(root: HarnessPath) -> str:
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],
-            cwd=str(root.root),
+            cwd=str(root.path),
             capture_output=True,
             text=True,
             timeout=10,
@@ -3048,11 +3048,18 @@ def _capture_git_head(root: HarnessPath) -> str:
 
 
 def _capture_git_changed_files(root: HarnessPath) -> list[str]:
-    """Return a list of modified/added/deleted paths from 'git status --porcelain'."""
+    """
+    Return all changed paths after writable execution.
+
+    Uses --untracked-files=all so new files inside untracked directories are
+    listed individually rather than collapsed to a directory entry (e.g.
+    'docs/new.md' not 'docs/'). Handles renamed files by taking the destination
+    path only.
+    """
     try:
         proc = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=str(root.root),
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=str(root.path),
             capture_output=True,
             text=True,
             timeout=10,
@@ -3062,7 +3069,11 @@ def _capture_git_changed_files(root: HarnessPath) -> list[str]:
         files = []
         for line in proc.stdout.splitlines():
             if len(line) > 3:
-                files.append(line[3:].strip())
+                path_part = line[3:].strip()
+                # Renamed files: "old-name -> new-name" — keep destination only.
+                if " -> " in path_part:
+                    path_part = path_part.split(" -> ", 1)[-1]
+                files.append(path_part)
         return files
     except Exception:
         return []
@@ -3073,7 +3084,7 @@ def _capture_diff_summary(root: HarnessPath) -> str:
     try:
         proc = subprocess.run(
             ["git", "diff", "--stat"],
-            cwd=str(root.root),
+            cwd=str(root.path),
             capture_output=True,
             text=True,
             timeout=10,

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fixed Git Change Detection After Writable Execution (Phase 42A.2): `root.root → root.path` in all three git-capture helpers; added `--untracked-files=all` to `git status --porcelain` so collapsed directory entries expand to individual files; renamed-file format handled; integration tests commit initial repo and gitignore remote/; 6 new tests.
 - Completed Codex Writable Sandbox Contract (Phase 42A.1): `--allow-file-changes` now selects `--sandbox workspace-write` for codex-local; read-only path keeps `--sandbox read-only`; Claude and Kimi unaffected; `sandbox_mode` field in result and artifact; 9 new tests.
 - Completed Controlled File Modification (Phase 42A): `pcae remote execute JOB_ID --invoke --allow-file-changes` extends execution pipeline with governed file-write; pre-execution HEAD, changed files, diff summary, and scope validation captured and persisted; Phase 42A scope allows docs/ and tasks/ only; src/, tests/, .pcae/, .git/, .github/, pyproject.toml denied; scope violations → failed; no changes → completed_with_no_changes; no commit, push, or rollback; existing --invoke remains read-only; 15 new tests.
 - Completed File Modification Governance Design (Phase 41M): `pcae remote file-governance` and `--json` expose governance design for future file-modifying execution; seven sections covering writable scope, change capture, approval workflow, commit governance, push governance, rollback strategy, safety model; risk model with four levels; advisory only; 9 new tests; strictly read-only.
