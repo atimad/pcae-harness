@@ -21,8 +21,10 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
     approve_file_changes,
+    approve_rollback,
     commit_file_changes,
     deny_file_changes,
+    deny_rollback,
     push_file_changes,
     build_change_review,
     build_claude_writable_contract,
@@ -1641,6 +1643,44 @@ def run_remote_rollback_review(args: argparse.Namespace) -> int:
     print(f"  Approval required: {'yes' if review['rollback_approval_required'] else 'no'}")
     print(f"  Commit required:   {'yes' if review['rollback_commit_required'] else 'no'}")
     print(f"  Push required:     {'yes' if review['rollback_push_required'] else 'no'}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_rollback_approve(args: argparse.Namespace) -> int:
+    try:
+        data = approve_rollback(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Rollback Approval — {data['job_id']}")
+    print(f"Previous rollback approval state: {data['previous_rollback_approval_state']}")
+    print(f"New rollback approval state:      {data['new_rollback_approval_state']}")
+    print(f"Rollback eligible:                {'yes' if data['rollback_eligible'] else 'no'}")
+    print(f"Rollback mode recommendation:     {data['rollback_mode_recommendation']}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_rollback_deny(args: argparse.Namespace) -> int:
+    try:
+        data = deny_rollback(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Rollback Denial — {data['job_id']}")
+    print(f"Previous rollback approval state: {data['previous_rollback_approval_state']}")
+    print(f"New rollback approval state:      {data['new_rollback_approval_state']}")
+    print(f"Rollback eligible:                {'yes' if data['rollback_eligible'] else 'no'}")
+    print(f"Rollback mode recommendation:     {data['rollback_mode_recommendation']}")
     print()
     print(data["advisory"])
     return 0

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43B: Rollback Review Artifacts.
+Phase 43C: Rollback Approval Gate.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,25 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE enforces a human approval gate for rollback plans (Phase 43C):
+`pcae remote rollback approve JOB_ID` and `--json` approve a rollback plan;
+approval is allowed only when the rollback review is eligible (result artifact
+exists, `commit_sha` is recorded, and `changed_files` is non-empty); persists
+`rollback_approval_state="approved"` on the job file; `pcae remote rollback
+deny JOB_ID` and `--json` deny a rollback plan; denial is allowed for any
+rollback-reviewed job regardless of eligibility; persists
+`rollback_approval_state="denied"`; JSON output includes `updated`, `job_id`,
+`previous_rollback_approval_state`, `new_rollback_approval_state`,
+`rollback_eligible`, `rollback_mode_recommendation`, `advisory`; ineligible
+jobs exit 1 on approve with a clear error; no rollback execution, no git
+revert, no git reset, no commit, no push; `approve_rollback`, `deny_rollback`,
+`ROLLBACK_APPROVAL_ADVISORY`, `_ROLLBACK_APPROVAL_STATES` added to
+`core/agent.py`; `run_remote_rollback_approve`, `run_remote_rollback_deny`
+added to `commands/agent.py`; `rollback` subparser group with `approve` and
+`deny` subcommands wired under `remote` in `cli.py`; advisory: "Rollback
+approval updated; no rollback was performed."; 17 new tests; strictly
+read-only — no rollback performed.
 
 PCAE generates governed rollback review artifacts (Phase 43B): `pcae remote
 rollback-review JOB_ID` and `--json` produce a rollback review for a specific

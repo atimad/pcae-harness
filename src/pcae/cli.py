@@ -44,6 +44,8 @@ from pcae.commands.agent import (
     run_remote_changes_show,
     run_remote_commit,
     run_remote_push,
+    run_remote_rollback_approve,
+    run_remote_rollback_deny,
     run_remote_rollback_governance,
     run_remote_rollback_review,
     run_remote_file_governance,
@@ -1689,6 +1691,47 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     remote_rollback_review_parser.set_defaults(handler=run_remote_rollback_review)
+
+    remote_rollback_parser = remote_subparsers.add_parser(
+        "rollback",
+        help="Approve or deny a governed rollback plan for a job.",
+    )
+    remote_rollback_subparsers = remote_rollback_parser.add_subparsers(
+        dest="rollback_command",
+        required=True,
+    )
+
+    remote_rollback_approve_parser = remote_rollback_subparsers.add_parser(
+        "approve",
+        help="Approve a rollback plan for an eligible job.",
+    )
+    remote_rollback_approve_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose rollback plan to approve.",
+    )
+    remote_rollback_approve_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_rollback_approve_parser.set_defaults(handler=run_remote_rollback_approve)
+
+    remote_rollback_deny_parser = remote_rollback_subparsers.add_parser(
+        "deny",
+        help="Deny a rollback plan for a job.",
+    )
+    remote_rollback_deny_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose rollback plan to deny.",
+    )
+    remote_rollback_deny_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_rollback_deny_parser.set_defaults(handler=run_remote_rollback_deny)
 
     remote_writable_contract_parser = remote_subparsers.add_parser(
         "writable-contract",

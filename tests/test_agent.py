@@ -13748,3 +13748,249 @@ def test_43b_missing_job_returns_error(
 
     assert exit_code == 1
     assert "unknown job" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 43C — Rollback Approval Gate
+# ---------------------------------------------------------------------------
+
+
+def test_43c_approve_eligible_job_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["updated"] is True
+    assert data["new_rollback_approval_state"] == "approved"
+
+
+def test_43c_approve_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in (
+        "updated",
+        "job_id",
+        "previous_rollback_approval_state",
+        "new_rollback_approval_state",
+        "rollback_eligible",
+        "rollback_mode_recommendation",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_43c_approve_eligible_sets_rollback_eligible_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_eligible"] is True
+    assert data["rollback_mode_recommendation"] == "revert_commit"
+
+
+def test_43c_approve_persists_state_in_job_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["rollback_approval_state"] == "approved"
+
+
+def test_43c_approve_records_previous_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["previous_rollback_approval_state"] == "pending"
+
+
+def test_43c_ineligible_rollback_cannot_be_approved(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "not eligible" in output.lower()
+
+
+def test_43c_deny_eligible_job_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["updated"] is True
+    assert data["new_rollback_approval_state"] == "denied"
+
+
+def test_43c_deny_ineligible_job_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["updated"] is True
+    assert data["new_rollback_approval_state"] == "denied"
+    assert data["rollback_eligible"] is False
+
+
+def test_43c_deny_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in (
+        "updated",
+        "job_id",
+        "previous_rollback_approval_state",
+        "new_rollback_approval_state",
+        "rollback_eligible",
+        "rollback_mode_recommendation",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_43c_deny_persists_state_in_job_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "deny", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["rollback_approval_state"] == "denied"
+
+
+def test_43c_advisory_text_approve(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no rollback was performed" in data["advisory"].lower()
+
+
+def test_43c_advisory_text_deny(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "rollback", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no rollback was performed" in data["advisory"].lower()
+
+
+def test_43c_human_output_approve(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Rollback Approval" in output
+    assert "approved" in output
+    assert "revert_commit" in output
+    assert "no rollback was performed" in output.lower()
+
+
+def test_43c_human_output_deny(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "rollback", "deny", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Rollback Denial" in output
+    assert "denied" in output
+    assert "no rollback was performed" in output.lower()
+
+
+def test_43c_no_rollback_performed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    git_calls: list[str] = []
+
+    original_run = __import__("subprocess").run
+
+    def _spy_subprocess_run(cmd, **kwargs):
+        if isinstance(cmd, (list, tuple)) and cmd and cmd[0] == "git":
+            git_calls.append(str(cmd))
+        return original_run(cmd, **kwargs)
+
+    monkeypatch.setattr(__import__("subprocess"), "run", _spy_subprocess_run)
+
+    main(["remote", "rollback", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    revert_or_reset = [c for c in git_calls if "revert" in c or "reset" in c or "commit" in c or "push" in c]
+    assert revert_or_reset == [], f"Unexpected git calls: {revert_or_reset}"
+
+
+def test_43c_missing_job_approve_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback", "approve", "no-such-job"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower()
+
+
+def test_43c_missing_job_deny_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "rollback", "deny", "no-such-job"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower()

@@ -4999,6 +4999,84 @@ def build_rollback_governance() -> dict:
 
 ROLLBACK_REVIEW_ADVISORY = "Rollback review is advisory; no rollback is performed."
 
+# ---------------------------------------------------------------------------
+# Phase 43C — Rollback Approval Gate
+# ---------------------------------------------------------------------------
+
+ROLLBACK_APPROVAL_ADVISORY = "Rollback approval updated; no rollback was performed."
+
+_ROLLBACK_APPROVAL_STATES: tuple[str, ...] = ("pending", "approved", "denied")
+
+
+def approve_rollback(root: HarnessPath, job_id: str) -> dict:
+    """
+    Approve a rollback plan for a specific job.
+
+    Rules:
+    - Rollback review must indicate eligible (result artifact, commit_sha,
+      and changed_files are all present).
+    - Does not execute rollback, git revert, git reset, commit, or push.
+
+    Returns result dict with updated rollback_approval_state.
+    Raises ValueError on unknown jobs or ineligible rollback.
+    """
+    review_data = build_rollback_review(root, job_id)
+    review = review_data["rollback_review"]
+
+    if not review["rollback_eligible"]:
+        notes = review.get("eligibility_notes", [])
+        raise ValueError(
+            f"Cannot approve rollback for job {job_id!r}: rollback is not eligible. "
+            f"Notes: {notes}"
+        )
+
+    job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    previous_state: str = job.get("rollback_approval_state", "pending")
+    job["rollback_approval_state"] = "approved"
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": ROLLBACK_APPROVAL_ADVISORY,
+        "job_id": job_id,
+        "new_rollback_approval_state": "approved",
+        "previous_rollback_approval_state": previous_state,
+        "rollback_eligible": True,
+        "rollback_mode_recommendation": review["rollback_mode_recommendation"],
+        "updated": True,
+    }
+
+
+def deny_rollback(root: HarnessPath, job_id: str) -> dict:
+    """
+    Deny a rollback plan for a specific job.
+
+    Rules:
+    - Denial is allowed for any rollback-reviewed job, eligible or not.
+    - Does not execute rollback, git revert, git reset, commit, or push.
+
+    Returns result dict with updated rollback_approval_state.
+    Raises ValueError on unknown or malformed jobs.
+    """
+    review_data = build_rollback_review(root, job_id)
+    review = review_data["rollback_review"]
+
+    job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    previous_state: str = job.get("rollback_approval_state", "pending")
+    job["rollback_approval_state"] = "denied"
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": ROLLBACK_APPROVAL_ADVISORY,
+        "job_id": job_id,
+        "new_rollback_approval_state": "denied",
+        "previous_rollback_approval_state": previous_state,
+        "rollback_eligible": review["rollback_eligible"],
+        "rollback_mode_recommendation": review["rollback_mode_recommendation"],
+        "updated": True,
+    }
+
 
 def build_rollback_review(root: HarnessPath, job_id: str) -> dict:
     """
