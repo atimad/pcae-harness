@@ -29,6 +29,7 @@ from pcae.core.agent import (
     build_remote_execution_analytics,
     build_remote_execution_trends,
     build_remote_results,
+    build_remote_runtime_benchmark,
     export_remote_execution_report,
     inspect_remote_execution_report,
     build_remote_results_registry,
@@ -1281,6 +1282,54 @@ def run_remote_trends(args: argparse.Namespace) -> int:
                 slowest = m["slowest_execution"]
                 if slowest:
                     print(f"    Slowest:      {slowest['job_id']} ({slowest['duration_seconds']}s)")
+        for warning in data["warnings"]:
+            print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_benchmark(args: argparse.Namespace) -> int:
+    data = build_remote_runtime_benchmark(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        bs = data["benchmark_summary"]
+        print("Runtime benchmark summary")
+        print(f"Total executions: {bs['total_executions']}")
+        print(f"Runtimes:         {bs['runtime_count']}")
+        print(f"Confidence:       {bs['benchmark_confidence']}")
+        r = data["rankings"]
+        fastest = r["fastest_runtime"]
+        slowest = r["slowest_runtime"]
+        highest = r["highest_success_rate"]
+        if fastest or slowest or highest:
+            print("\nRankings")
+            if fastest:
+                avg = data["runtime_metrics"][fastest]["average_duration_seconds"]
+                print(f"  Fastest runtime:      {fastest} (avg {avg}s)")
+            if slowest:
+                avg = data["runtime_metrics"][slowest]["average_duration_seconds"]
+                print(f"  Slowest runtime:      {slowest} (avg {avg}s)")
+            if highest:
+                sr = data["runtime_metrics"][highest]["success_rate"]
+                print(f"  Highest success rate: {highest} ({sr})")
+        rm = data["runtime_metrics"]
+        if rm:
+            print("\nRuntime metrics")
+            for agent, m in rm.items():
+                print(f"  {agent}:")
+                print(f"    Executions:    {m['execution_count']}")
+                print(f"    Success rate:  {m['success_rate']}")
+                avg = m["average_duration_seconds"]
+                print(f"    Avg duration:  {f'{avg}s' if avg is not None else '(no data)'}")
+                fastest_s = m["fastest_execution_seconds"]
+                print(f"    Fastest:       {f'{fastest_s}s' if fastest_s is not None else '(no data)'}")
+                slowest_s = m["slowest_execution_seconds"]
+                print(f"    Slowest:       {f'{slowest_s}s' if slowest_s is not None else '(no data)'}")
+                bd = m["output_classification_breakdown"]
+                parts = ", ".join(f"{k}={v}" for k, v in bd.items() if v > 0)
+                print(f"    Classifications: {parts if parts else 'none'}")
         for warning in data["warnings"]:
             print(f"Warning: {warning}")
         print()

@@ -3516,3 +3516,121 @@ def build_remote_execution_trends(root: HarnessPath) -> dict:
         },
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Runtime Benchmarking (Phase 41L)
+# ---------------------------------------------------------------------------
+
+REMOTE_BENCHMARK_ADVISORY = (
+    "Runtime benchmarks are computed from persisted execution history."
+)
+
+_BENCHMARK_CONFIDENCE_THRESHOLDS = (
+    (20, "high"),
+    (10, "medium"),
+    (5, "low"),
+    (0, "insufficient_data"),
+)
+
+
+def _compute_benchmark_confidence(min_executions_per_runtime: int) -> str:
+    """Return benchmark confidence level from the minimum per-runtime execution count."""
+    for threshold, level in _BENCHMARK_CONFIDENCE_THRESHOLDS:
+        if min_executions_per_runtime >= threshold:
+            return level
+    return "insufficient_data"
+
+
+def build_remote_runtime_benchmark(root: HarnessPath) -> dict:
+    """Compute per-runtime benchmark metrics from persisted result artifacts. Read-only."""
+    registry = build_remote_results_registry(root)
+    entries: list[dict] = registry["results"]
+    warnings: list[str] = list(registry["warnings"])
+
+    total = len(entries)
+
+    # Group by runtime, sorted alphabetically for deterministic rankings.
+    runtime_buckets: dict[str, list[dict]] = {}
+    for entry in entries:
+        agent = entry.get("selected_agent") or "unknown"
+        runtime_buckets.setdefault(agent, []).append(entry)
+
+    min_count = min((len(v) for v in runtime_buckets.values()), default=0)
+    confidence = _compute_benchmark_confidence(min_count)
+
+    # Per-runtime metrics
+    runtime_metrics: dict[str, dict] = {}
+    for agent in sorted(runtime_buckets):
+        bucket = runtime_buckets[agent]
+        timed = [e for e in bucket if e.get("duration_seconds") is not None]
+        durs = [e["duration_seconds"] for e in timed]
+        successes = sum(1 for e in bucket if e.get("final_status") == "completed")
+        avg_dur = round(sum(durs) / len(durs), 3) if durs else None
+        fastest_s = round(min(durs), 3) if durs else None
+        slowest_s = round(max(durs), 3) if durs else None
+
+        dated = [e for e in bucket if e.get("finished_at")]
+        latest = max(dated, key=lambda e: e["finished_at"]) if dated else None
+
+        breakdown: dict[str, int] = {
+            OUTPUT_CLASS_CLEAN_STDOUT: 0,
+            OUTPUT_CLASS_STDERR_STATUS: 0,
+            OUTPUT_CLASS_EMPTY: 0,
+            OUTPUT_CLASS_ERROR: 0,
+        }
+        for e in bucket:
+            cls = e.get("output_classification")
+            if cls in breakdown:
+                breakdown[cls] += 1
+
+        runtime_metrics[agent] = {
+            "average_duration_seconds": avg_dur,
+            "execution_count": len(bucket),
+            "fastest_execution_seconds": fastest_s,
+            "latest_execution": (
+                {
+                    "final_status": latest.get("final_status"),
+                    "finished_at": latest.get("finished_at"),
+                    "job_id": latest.get("job_id"),
+                }
+                if latest else None
+            ),
+            "output_classification_breakdown": breakdown,
+            "slowest_execution_seconds": slowest_s,
+            "success_rate": round(successes / len(bucket), 4),
+        }
+
+    # Rankings — deterministic: alphabetical tie-break via sorted dict order.
+    timed_runtimes = {
+        a: m for a, m in runtime_metrics.items()
+        if m["average_duration_seconds"] is not None
+    }
+    fastest_runtime = (
+        min(timed_runtimes, key=lambda a: timed_runtimes[a]["average_duration_seconds"])
+        if timed_runtimes else None
+    )
+    slowest_runtime = (
+        max(timed_runtimes, key=lambda a: timed_runtimes[a]["average_duration_seconds"])
+        if timed_runtimes else None
+    )
+    highest_success_rate = (
+        max(runtime_metrics, key=lambda a: runtime_metrics[a]["success_rate"])
+        if runtime_metrics else None
+    )
+
+    return {
+        "advisory": REMOTE_BENCHMARK_ADVISORY,
+        "benchmark_summary": {
+            "benchmark_confidence": confidence,
+            "runtime_count": len(runtime_buckets),
+            "total_executions": total,
+        },
+        "rankings": {
+            "fastest_runtime": fastest_runtime,
+            "highest_success_rate": highest_success_rate,
+            "slowest_runtime": slowest_runtime,
+        },
+        "runtime_metrics": runtime_metrics,
+        "warnings": warnings,
+    }

@@ -10462,3 +10462,219 @@ def test_41k_trends_readonly(
 
     after = {f.name: f.read_text() for f in results_dir.glob("*.json")}
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 41L: Runtime Benchmarking
+# ---------------------------------------------------------------------------
+
+
+def test_41l_benchmark_empty_registry(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runtime benchmark summary" in output
+    assert "Total executions: 0" in output
+    assert "insufficient_data" in output
+    assert "Runtime benchmarks are computed from persisted execution history." in output
+
+
+def test_41l_benchmark_empty_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "benchmark_summary", "runtime_metrics", "rankings", "warnings"):
+        assert key in data, f"missing key: {key}"
+    bs = data["benchmark_summary"]
+    assert bs["total_executions"] == 0
+    assert bs["runtime_count"] == 0
+    assert bs["benchmark_confidence"] == "insufficient_data"
+    assert data["runtime_metrics"] == {}
+    r = data["rankings"]
+    assert r["fastest_runtime"] is None
+    assert r["slowest_runtime"] is None
+    assert r["highest_success_rate"] is None
+
+
+def test_41l_benchmark_json_structure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    bs = data["benchmark_summary"]
+    for key in ("total_executions", "runtime_count", "benchmark_confidence"):
+        assert key in bs
+    for key in ("fastest_runtime", "slowest_runtime", "highest_success_rate"):
+        assert key in data["rankings"]
+    assert "codex-local" in data["runtime_metrics"]
+
+
+def test_41l_benchmark_per_runtime_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    m = data["runtime_metrics"]["codex-local"]
+    for key in (
+        "execution_count", "success_rate", "average_duration_seconds",
+        "fastest_execution_seconds", "slowest_execution_seconds",
+        "latest_execution", "output_classification_breakdown",
+    ):
+        assert key in m, f"missing key: {key}"
+    assert m["execution_count"] == 1
+    assert m["success_rate"] == 1.0
+    assert m["average_duration_seconds"] is not None
+    assert m["fastest_execution_seconds"] is not None
+    assert m["slowest_execution_seconds"] is not None
+    assert m["latest_execution"] is not None
+
+
+def test_41l_benchmark_output_classification_breakdown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", rc=1, stderr="err\n"
+    )
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    bd = data["runtime_metrics"]["codex-local"]["output_classification_breakdown"]
+    for cls in ("clean_stdout", "stderr_with_status_text", "empty_output", "execution_error"):
+        assert cls in bd, f"missing classification: {cls}"
+    assert bd["clean_stdout"] == 1
+    assert bd["execution_error"] == 1
+    assert bd["clean_stdout"] + bd["execution_error"] == 2
+
+
+def test_41l_benchmark_rankings_computed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "claude-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    r = data["rankings"]
+    assert r["fastest_runtime"] is not None
+    assert r["slowest_runtime"] is not None
+    assert r["highest_success_rate"] is not None
+    assert r["fastest_runtime"] in data["runtime_metrics"]
+    assert r["slowest_runtime"] in data["runtime_metrics"]
+    assert r["highest_success_rate"] in data["runtime_metrics"]
+    fastest_avg = data["runtime_metrics"][r["fastest_runtime"]]["average_duration_seconds"]
+    slowest_avg = data["runtime_metrics"][r["slowest_runtime"]]["average_duration_seconds"]
+    assert fastest_avg <= slowest_avg
+
+
+def test_41l_benchmark_insufficient_data_confidence(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for _ in range(4):
+        _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["benchmark_summary"]["benchmark_confidence"] == "insufficient_data"
+
+
+def test_41l_benchmark_low_confidence_with_five(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for _ in range(5):
+        _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["benchmark_summary"]["benchmark_confidence"] == "low"
+
+
+def test_41l_benchmark_human_output_format(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    exit_code = main(["remote", "benchmark"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runtime benchmark summary" in output
+    assert "Runtime metrics" in output
+    assert "codex-local" in output
+    assert "Runtime benchmarks are computed from persisted execution history." in output
+
+
+def test_41l_benchmark_malformed_file_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "job-bad-result.json").write_text("not json", encoding="utf-8")
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["benchmark_summary"]["total_executions"] == 0
+    assert len(data["warnings"]) >= 1
+
+
+def test_41l_benchmark_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    _invoke_job_with_output(tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n")
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    before = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+
+    main(["remote", "benchmark", "--json"])
+    capsys.readouterr()
+
+    after_benchmark = {f.name: f.read_text() for f in results_dir.glob("*.json")}
+    assert before == after_benchmark

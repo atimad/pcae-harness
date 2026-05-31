@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41K: Execution Trends.
+Phase 41L: Runtime Benchmarking.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,25 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE benchmarks supported runtimes using persisted execution history (Phase
+41L): `pcae remote benchmark` and `--json` compute per-runtime metrics
+(`execution_count`, `success_rate`, `average_duration_seconds`,
+`fastest_execution_seconds`, `slowest_execution_seconds`, `latest_execution`,
+`output_classification_breakdown`) and global rankings (`fastest_runtime`,
+`slowest_runtime`, `highest_success_rate`) with a `benchmark_confidence` level
+(`insufficient_data` for min < 5 executions per runtime, `low` for ≥5, `medium`
+for ≥10, `high` for ≥20); rankings are deterministic (alphabetical tie-break
+via sorted dict iteration); `output_classification_breakdown` counts all four
+output classes per runtime; malformed artifacts produce per-file warnings and
+are skipped; JSON output includes `benchmark_summary` (`total_executions`,
+`runtime_count`, `benchmark_confidence`), `runtime_metrics`, `rankings`,
+`warnings`, `advisory`; `build_remote_runtime_benchmark(root)`,
+`_compute_benchmark_confidence`, and `_BENCHMARK_CONFIDENCE_THRESHOLDS` added
+to `core/agent.py`; delegates to `build_remote_results_registry`; `run_remote_benchmark`
+added to `commands/agent.py`; `benchmark` subcommand wired under `remote` in
+`cli.py`; advisory: "Runtime benchmarks are computed from persisted execution
+history."; 11 new tests; strictly read-only.
 
 PCAE analyzes historical execution behavior with `pcae remote trends` and
 `--json` (Phase 41K): global trend summary includes `total_executions`,
