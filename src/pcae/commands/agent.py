@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
     build_claude_writable_contract,
+    build_writable_contract,
     build_file_governance_design,
     invoke_remote_job_with_file_changes,
     build_lifecycle_report,
@@ -1495,7 +1496,7 @@ def run_remote_file_governance(args: argparse.Namespace) -> int:
 
 
 def run_remote_writable_contract(args: argparse.Namespace) -> int:
-    data = build_claude_writable_contract(args.agent_id)
+    data = build_writable_contract(args.agent_id)
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
         return 0 if "error" not in data else 1
@@ -1503,7 +1504,7 @@ def run_remote_writable_contract(args: argparse.Namespace) -> int:
         print(f"Error: {data['error']}")
         print(data["advisory"])
         return 1
-    print(f"Claude Writable Execution Contract — {data['agent_id']}")
+    print(f"Writable Execution Contract — {data['agent_id']}")
     print()
     print(f"Invocation command:    {data['current_invocation_command']}")
     print(f"Writable support:      {data['writable_support_status']}")
@@ -1519,6 +1520,12 @@ def run_remote_writable_contract(args: argparse.Namespace) -> int:
     else:
         print("  None confirmed.")
     print()
+    dangerous = data.get("dangerous_flags", [])
+    if dangerous:
+        print("Dangerous flags (not allowed under PCAE governance):")
+        for flag in dangerous:
+            print(f"  - {flag}")
+        print()
     print("Unknowns:")
     for item in data["unknowns"]:
         print(f"  - {item}")

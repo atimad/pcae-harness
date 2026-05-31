@@ -4125,11 +4125,24 @@ def build_file_governance_design() -> dict:
 
 # ---------------------------------------------------------------------------
 # Phase 42A.3 — Claude Writable Execution Contract Inspection
+# Phase 42A.4 — Kimi Writable Execution Contract Inspection
 # ---------------------------------------------------------------------------
 
 CLAUDE_WRITABLE_CONTRACT_ADVISORY = (
     "Claude writable contract inspection is advisory and read-only. "
     "No agents are executed, no files are modified, and Claude writable "
+    "mode is not enabled by this command."
+)
+
+KIMI_WRITABLE_CONTRACT_ADVISORY = (
+    "Kimi writable contract inspection is advisory and read-only. "
+    "No agents are executed, no files are modified, and Kimi writable "
+    "mode is not enabled by this command."
+)
+
+WRITABLE_CONTRACT_ADVISORY = (
+    "Writable contract inspection is advisory and read-only. "
+    "No agents are executed, no files are modified, and writable "
     "mode is not enabled by this command."
 )
 
@@ -4149,31 +4162,80 @@ _CLAUDE_WRITABLE_UNKNOWNS = [
     "Side effects of file modification (scope, extent) are not documented.",
 ]
 
+_KIMI_READ_ONLY_INVOCATION = ["kimi", "-p", "<prompt>"]
 
-def build_claude_writable_contract(agent_id: str) -> dict:
+_KIMI_KNOWN_READ_ONLY_BEHAVIORS = [
+    "kimi -p '<prompt>' runs non-interactively and returns output to stdout.",
+    "Positional prompt invocation ('kimi <prompt>') fails with: too many arguments.",
+    "Exit code 0 on success; non-zero on failure.",
+    "stdout contains the agent response; stderr may contain status or reasoning text.",
+    "Known options: -p/--prompt, --output-format text, --output-format stream-json, "
+    "--plan, -S/--session, -C/--continue.",
+]
+
+_KIMI_DANGEROUS_FLAGS = [
+    "--yolo (-y): bypasses safety checks — not allowed under PCAE governance.",
+    "--auto: enables autonomous behavior without explicit per-step approval — "
+    "not allowed under PCAE governance.",
+]
+
+_KIMI_WRITABLE_UNKNOWNS = [
+    "Whether kimi -p supports governed file-write without --yolo or --auto is not confirmed.",
+    "Writable execution scope and side effects have not been tested under PCAE governance.",
+    "Whether --plan or --session affect file write behavior is not documented.",
+    "Interaction between kimi writable mode and PCAE scope validation is not established.",
+]
+
+
+def build_writable_contract(agent_id: str) -> dict:
     """Return the writable execution contract inspection for the given agent.
 
-    Currently only claude-local is supported. Returns an error dict for unknown agents.
+    Supports claude-local (Phase 42A.3) and kimi-local (Phase 42A.4).
+    Returns an error dict for unsupported agents.
     Read-only; no agents are executed and no files are modified.
     """
-    if agent_id != "claude-local":
+    if agent_id == "claude-local":
         return {
             "agent_id": agent_id,
-            "error": f"Writable contract inspection is not available for '{agent_id}'.",
+            "current_invocation_command": " ".join(_CLAUDE_READ_ONLY_INVOCATION),
+            "known_read_only_behavior": _CLAUDE_KNOWN_READ_ONLY_BEHAVIORS,
+            "writable_support_status": "unknown",
+            "required_flags_if_known": [],
+            "dangerous_flags": [],
+            "unknowns": _CLAUDE_WRITABLE_UNKNOWNS,
+            "safety_recommendation": (
+                "Do not enable Claude writable mode until writable flags and sandbox "
+                "behavior are confirmed. Conservative default: treat claude-local as "
+                "read-only until explicit writable contract is established and approved."
+            ),
             "advisory": CLAUDE_WRITABLE_CONTRACT_ADVISORY,
+        }
+
+    if agent_id == "kimi-local":
+        return {
+            "agent_id": agent_id,
+            "current_invocation_command": " ".join(_KIMI_READ_ONLY_INVOCATION),
+            "known_read_only_behavior": _KIMI_KNOWN_READ_ONLY_BEHAVIORS,
+            "writable_support_status": "unknown",
+            "required_flags_if_known": [],
+            "dangerous_flags": _KIMI_DANGEROUS_FLAGS,
+            "unknowns": _KIMI_WRITABLE_UNKNOWNS,
+            "safety_recommendation": (
+                "Do not enable Kimi writable mode. --yolo and --auto are dangerous "
+                "and are not allowed under PCAE governance. Writable behavior without "
+                "these flags is unconfirmed. Conservative default: treat kimi-local as "
+                "read-only until an explicit writable contract is established and approved."
+            ),
+            "advisory": KIMI_WRITABLE_CONTRACT_ADVISORY,
         }
 
     return {
         "agent_id": agent_id,
-        "current_invocation_command": " ".join(_CLAUDE_READ_ONLY_INVOCATION),
-        "known_read_only_behavior": _CLAUDE_KNOWN_READ_ONLY_BEHAVIORS,
-        "writable_support_status": "unknown",
-        "required_flags_if_known": [],
-        "unknowns": _CLAUDE_WRITABLE_UNKNOWNS,
-        "safety_recommendation": (
-            "Do not enable Claude writable mode until writable flags and sandbox "
-            "behavior are confirmed. Conservative default: treat claude-local as "
-            "read-only until explicit writable contract is established and approved."
-        ),
-        "advisory": CLAUDE_WRITABLE_CONTRACT_ADVISORY,
+        "error": f"Writable contract inspection is not available for '{agent_id}'.",
+        "advisory": WRITABLE_CONTRACT_ADVISORY,
     }
+
+
+def build_claude_writable_contract(agent_id: str) -> dict:
+    """Compatibility shim — delegates to build_writable_contract."""
+    return build_writable_contract(agent_id)

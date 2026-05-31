@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A.3: Claude Writable Execution Contract Inspection.
+Phase 42A.4: Kimi Writable Execution Contract Inspection.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,17 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE inspects and documents Kimi's writable execution contract before enabling
+Kimi file modifications (Phase 42A.4): `pcae remote writable-contract kimi-local`
+and `--json` report `agent_id`, `current_invocation_command` (`kimi -p <prompt>`),
+`known_read_only_behavior` (including that positional invocation fails with "too
+many arguments"), `writable_support_status` (`unknown`), `required_flags_if_known`
+(empty), `dangerous_flags` (`--yolo/-y` and `--auto` — not allowed under PCAE
+governance), `unknowns`, and a conservative `safety_recommendation`; `build_writable_contract(agent_id)`
+is the unified entry point covering both `claude-local` and `kimi-local`;
+`dangerous_flags` field added to all contracts (empty list for Claude); Codex and
+Claude behavior are unchanged; strictly read-only; 11 new tests.
 
 PCAE inspects and documents Claude's writable execution contract before enabling
 Claude file modifications (Phase 42A.3): `pcae remote writable-contract

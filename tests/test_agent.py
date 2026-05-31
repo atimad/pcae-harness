@@ -11772,7 +11772,7 @@ def test_42a3_writable_contract_human_output(
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Claude Writable Execution Contract" in output
+    assert "Writable Execution Contract" in output
     assert "claude-local" in output
     assert "claude -p" in output
     assert "Writable support:" in output
@@ -11915,3 +11915,193 @@ def test_42a3_readonly_does_not_execute_claude(
     main(["remote", "writable-contract", "claude-local", "--json"])
 
     assert executed == [], "claude must not be executed during writable-contract inspection"
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.4 — Kimi Writable Execution Contract Inspection
+# ---------------------------------------------------------------------------
+
+
+def test_42a4_writable_contract_kimi_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Writable Execution Contract" in output
+    assert "kimi-local" in output
+    assert "kimi -p" in output
+    assert "Writable support:" in output
+    assert "unknown" in output
+    assert "Dangerous flags" in output
+    assert "--yolo" in output
+    assert "--auto" in output
+    assert "Safety recommendation:" in output
+    assert "advisory" in output.lower()
+
+
+def test_42a4_writable_contract_kimi_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in (
+        "agent_id",
+        "current_invocation_command",
+        "known_read_only_behavior",
+        "writable_support_status",
+        "required_flags_if_known",
+        "dangerous_flags",
+        "unknowns",
+        "safety_recommendation",
+        "advisory",
+    ):
+        assert key in data
+
+
+def test_42a4_kimi_writable_support_is_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["writable_support_status"] == "unknown"
+
+
+def test_42a4_kimi_required_flags_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["required_flags_if_known"] == []
+
+
+def test_42a4_kimi_invocation_command_is_kimi_p(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "kimi" in data["current_invocation_command"]
+    assert "-p" in data["current_invocation_command"]
+
+
+def test_42a4_kimi_dangerous_flags_surfaces_yolo_and_auto(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    dangerous = data["dangerous_flags"]
+    assert len(dangerous) >= 2
+    combined = " ".join(dangerous)
+    assert "--yolo" in combined
+    assert "--auto" in combined
+
+
+def test_42a4_kimi_unknowns_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(data["unknowns"]) >= 1
+
+
+def test_42a4_kimi_safety_recommendation_is_conservative(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rec = data["safety_recommendation"].lower()
+    assert "do not enable" in rec or "conservative" in rec
+    assert "yolo" in rec or "dangerous" in rec or "not allowed" in rec
+
+
+def test_42a4_kimi_known_read_only_behavior_includes_positional_failure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    combined = " ".join(data["known_read_only_behavior"]).lower()
+    assert "too many arguments" in combined
+
+
+def test_42a4_kimi_does_not_affect_claude_contract(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["remote", "writable-contract", "claude-local", "--json"])
+    claude_data = json.loads(capsys.readouterr().out)
+
+    main(["remote", "writable-contract", "kimi-local", "--json"])
+    kimi_data = json.loads(capsys.readouterr().out)
+
+    assert claude_data["agent_id"] == "claude-local"
+    assert kimi_data["agent_id"] == "kimi-local"
+    assert "claude" in claude_data["current_invocation_command"]
+    assert "kimi" in kimi_data["current_invocation_command"]
+    assert claude_data["dangerous_flags"] == []
+    assert len(kimi_data["dangerous_flags"]) >= 2
+
+
+def test_42a4_readonly_does_not_execute_kimi(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    executed: list[str] = []
+
+    original_run = __import__("subprocess").run
+
+    def patched_run(cmd, **kwargs):  # type: ignore[no-untyped-def]
+        if isinstance(cmd, list) and cmd and "kimi" in cmd[0]:
+            executed.append(str(cmd))
+        return original_run(cmd, **kwargs)
+
+    monkeypatch.setattr("subprocess.run", patched_run)
+    main(["remote", "writable-contract", "kimi-local", "--json"])
+
+    assert executed == [], "kimi must not be executed during writable-contract inspection"
