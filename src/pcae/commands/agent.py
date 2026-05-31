@@ -1621,6 +1621,8 @@ def run_remote_push(args: argparse.Namespace) -> int:
     print(f"Commit SHA:      {data['commit_sha']}")
     print(f"Push status:     {data['push_status']}")
     print(f"Remote branch:   {data['remote_branch']}")
+    for warning in data.get("warnings", []):
+        print(f"Warning: {warning}")
     print()
     print(data["advisory"])
     return 0

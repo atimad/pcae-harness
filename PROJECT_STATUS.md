@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42E: Controlled Push.
+Phase 42E.1: Governed Commit Lineage Validation.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,16 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE validates governed commit lineage before pushing (Phase 42E.1): `pcae
+remote push JOB_ID` allows push when the governed commit is an ancestor of
+HEAD, not only when HEAD exactly equals the governed commit; `git merge-base
+--is-ancestor` is used to check ancestry; `lineage_status` is `"exact_match"`
+when HEAD == governed commit (no warning), `"ancestor"` when governed commit is
+reachable from HEAD (warning: "Additional commits exist after the governed
+commit."), or push is blocked when the governed commit is not in branch history;
+`lineage_status` and `warnings` added to JSON output and human output; `_check_commit_is_ancestor`
+added to `core/agent.py` as an injectable helper; 10 new tests.
 
 PCAE executes governed git pushes for approved committed jobs (Phase 42E):
 `pcae remote push JOB_ID` and `--json` push the governed commit to the remote;

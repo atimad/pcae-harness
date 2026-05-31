@@ -13202,12 +13202,13 @@ def test_42e_head_mismatch_blocks_push(
 ) -> None:
     job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
     _patch_push_helpers(monkeypatch, head_sha="aaabbb1")
+    monkeypatch.setattr(_agent_mod, "_check_commit_is_ancestor", lambda sha, cwd: False)
 
     exit_code = main(["remote", "push", job_id])
     output = capsys.readouterr().out
 
     assert exit_code == 1
-    assert "does not match" in output.lower() or "cannot push" in output.lower()
+    assert "not in current branch history" in output.lower() or "cannot push" in output.lower()
 
 
 def test_42e_git_push_failure_blocks_push(
@@ -13262,3 +13263,153 @@ def test_42e_missing_job_returns_error(
 
     assert exit_code == 1
     assert "unknown job" in output.lower() or "cannot push" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 42E.1 — Governed Commit Lineage Validation
+# ---------------------------------------------------------------------------
+
+
+def _patch_push_lineage(monkeypatch, is_ancestor: bool = True) -> None:
+    """Patch _check_commit_is_ancestor for push tests where HEAD != commit."""
+    monkeypatch.setattr(
+        _agent_mod,
+        "_check_commit_is_ancestor",
+        lambda sha, cwd: is_ancestor,
+    )
+
+
+def test_42e1_push_allowed_when_head_equals_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Exact match: HEAD == governed commit → push succeeds, no warning."""
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="def5678")
+
+    exit_code = main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["pushed"] is True
+
+
+def test_42e1_push_allowed_when_commit_is_ancestor(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Ancestor: governed commit is reachable from HEAD → push succeeds."""
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="advanced1")
+    _patch_push_lineage(monkeypatch, is_ancestor=True)
+
+    exit_code = main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["pushed"] is True
+
+
+def test_42e1_warning_shown_when_head_has_advanced_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """When HEAD advanced beyond governed commit, warning appears in JSON."""
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="advanced1")
+    _patch_push_lineage(monkeypatch, is_ancestor=True)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert len(data["warnings"]) > 0
+    assert any("additional commits" in w.lower() for w in data["warnings"])
+
+
+def test_42e1_warning_shown_when_head_has_advanced_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """When HEAD advanced beyond governed commit, warning appears in human output."""
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="advanced1")
+    _patch_push_lineage(monkeypatch, is_ancestor=True)
+
+    main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert "warning" in output.lower()
+    assert "additional commits" in output.lower()
+
+
+def test_42e1_push_blocked_when_commit_not_in_history(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Governed commit is not reachable from HEAD → push blocked."""
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="diverged1")
+    _patch_push_lineage(monkeypatch, is_ancestor=False)
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "not in current branch history" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e1_json_includes_lineage_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "lineage_status" in data
+
+
+def test_42e1_json_includes_warnings_field(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "warnings" in data
+    assert isinstance(data["warnings"], list)
+
+
+def test_42e1_lineage_status_exact_match(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="def5678")
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["lineage_status"] == "exact_match"
+
+
+def test_42e1_lineage_status_ancestor(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="advanced1")
+    _patch_push_lineage(monkeypatch, is_ancestor=True)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["lineage_status"] == "ancestor"
+
+
+def test_42e1_exact_match_has_no_warnings(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="def5678")
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["warnings"] == []

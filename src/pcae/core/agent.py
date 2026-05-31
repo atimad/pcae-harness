@@ -4729,6 +4729,21 @@ def _run_git_push(
     )
 
 
+def _check_commit_is_ancestor(commit_sha: str, cwd: str) -> bool:
+    """Return True if commit_sha is an ancestor of (or equal to) HEAD."""
+    try:
+        proc = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", commit_sha, "HEAD"],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
+
+
 def push_file_changes(root: HarnessPath, job_id: str) -> dict:
     """
     Execute a governed git push for an approved and committed job.
@@ -4784,11 +4799,18 @@ def push_file_changes(root: HarnessPath, job_id: str) -> dict:
         raise ValueError(
             f"Cannot push job {job_id!r}: could not determine current HEAD."
         )
-    if current_head != commit_sha:
-        raise ValueError(
-            f"Cannot push job {job_id!r}: current HEAD ({current_head!r}) "
-            f"does not match governed commit ({commit_sha!r})."
-        )
+
+    warnings: list[str] = []
+    if current_head == commit_sha:
+        lineage_status = "exact_match"
+    else:
+        if not _check_commit_is_ancestor(commit_sha, str(root.path)):
+            raise ValueError(
+                f"Cannot push job {job_id!r}: governed commit ({commit_sha!r}) "
+                f"is not in current branch history (HEAD: {current_head!r})."
+            )
+        lineage_status = "ancestor"
+        warnings.append("Additional commits exist after the governed commit.")
 
     branch = _get_current_branch(root)
     remote = _get_git_remote(root)
@@ -4817,7 +4839,9 @@ def push_file_changes(root: HarnessPath, job_id: str) -> dict:
         "advisory": CONTROLLED_PUSH_ADVISORY,
         "commit_sha": commit_sha,
         "job_id": job_id,
+        "lineage_status": lineage_status,
         "push_status": push_status,
         "pushed": True,
         "remote_branch": remote_branch,
+        "warnings": warnings,
     }
