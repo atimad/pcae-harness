@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42A: Controlled File Modification.
+Phase 42A.1: Codex Writable Sandbox Contract.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,15 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE selects the correct Codex sandbox mode based on `--allow-file-changes`
+(Phase 42A.1): `pcae remote execute JOB_ID --invoke --allow-file-changes` for
+codex-local now uses `codex exec --sandbox workspace-write`; read-only
+`--invoke` without the flag continues to use `--sandbox read-only`; Claude and
+Kimi commands are unchanged; `sandbox_mode` field added to result dict and
+persisted artifact (`workspace-write` for codex-local, `n/a` for others);
+`_build_invoke_command` gains `allow_file_changes` parameter; post-execution
+scope validation and file capture remain mandatory; 9 new tests.
 
 PCAE allows the first governed file-modifying remote execution with
 `pcae remote execute JOB_ID --invoke --allow-file-changes` and `--json`

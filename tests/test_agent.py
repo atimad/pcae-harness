@@ -11345,3 +11345,211 @@ def test_42a_human_output(
     assert "Changed files" in output
     assert "Scope validation" in output
     assert "no commit or push" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A.1 — Codex Writable Sandbox Contract
+# ---------------------------------------------------------------------------
+
+
+def test_421_codex_read_only_invoke_uses_read_only_sandbox(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Standard --invoke (no --allow-file-changes) keeps --sandbox read-only for codex."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--json"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    assert len(captured_cmd) == 1
+    cmd = captured_cmd[0]
+    assert "--sandbox" in cmd
+    sandbox_value = cmd[cmd.index("--sandbox") + 1]
+    assert sandbox_value == "read-only"
+
+
+def test_421_codex_file_changes_uses_workspace_write_sandbox(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """--allow-file-changes switches codex to --sandbox workspace-write."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=["docs/test.md"])
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    exit_code = main(
+        ["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"]
+    )
+
+    capsys.readouterr()
+    assert exit_code == 0
+    assert len(captured_cmd) == 1
+    cmd = captured_cmd[0]
+    assert "--sandbox" in cmd
+    sandbox_value = cmd[cmd.index("--sandbox") + 1]
+    assert sandbox_value == "workspace-write"
+
+
+def test_421_sandbox_mode_in_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        agent="codex-local",
+        changed_files=["docs/test.md"],
+    )
+
+    assert "sandbox_mode" in data
+    assert data["sandbox_mode"] == "workspace-write"
+
+
+def test_421_sandbox_mode_in_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        agent="codex-local",
+        changed_files=["docs/test.md"],
+    )
+
+    artifact_file = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    artifact = json.loads(artifact_file.read_text())
+    assert artifact["sandbox_mode"] == "workspace-write"
+
+
+def test_421_claude_unaffected_by_file_changes_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Claude command does not gain --sandbox flag when --allow-file-changes is used."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=[])
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    main(["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"])
+    capsys.readouterr()
+
+    assert len(captured_cmd) == 1
+    cmd = captured_cmd[0]
+    assert "--sandbox" not in cmd
+    assert cmd[0] == "claude"
+    assert cmd[1] == "-p"
+
+
+def test_421_kimi_unaffected_by_file_changes_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Kimi command does not gain --sandbox flag when --allow-file-changes is used."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    captured_cmd: list[list[str]] = []
+
+    def _fake_subprocess(cmd, timeout):
+        captured_cmd.append(cmd)
+        return _fake_proc(0, "ok\n")
+
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="kimi-local")
+    _patch_ready(monkeypatch, "kimi-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=[])
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", _fake_subprocess)
+
+    main(["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"])
+    capsys.readouterr()
+
+    assert len(captured_cmd) == 1
+    cmd = captured_cmd[0]
+    assert "--sandbox" not in cmd
+    assert cmd[0] == "kimi"
+    assert cmd[1] == "-p"
+
+
+def test_421_codex_docs_modification_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        agent="codex-local",
+        changed_files=["docs/remote-controlled-modification-test.md"],
+        diff_summary=" docs/remote-controlled-modification-test.md | 1 +",
+    )
+
+    assert data["final_status"] == "completed"
+    assert data["scope_validation"]["valid"] is True
+    assert data["sandbox_mode"] == "workspace-write"
+
+
+def test_421_codex_src_violation_still_detected(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        agent="codex-local",
+        changed_files=["src/pcae/core/agent.py"],
+    )
+
+    assert data["final_status"] == "failed"
+    assert data["scope_validation"]["valid"] is False
+    assert data["sandbox_mode"] == "workspace-write"
+
+
+def test_421_sandbox_mode_in_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="codex-local")
+    _patch_ready(monkeypatch, "codex-local")
+    _patch_file_change_helpers(monkeypatch, changed_files=["docs/test.md"])
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "Done.\n")
+    )
+
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--allow-file-changes"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Sandbox mode" in output
+    assert "workspace-write" in output

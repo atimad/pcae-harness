@@ -2891,12 +2891,17 @@ _INVOKE_UNSUPPORTED_REASON = (
 )
 
 
-def _build_invoke_command(agent_id: str, prompt: str) -> list[str] | None:
+def _build_invoke_command(
+    agent_id: str,
+    prompt: str,
+    allow_file_changes: bool = False,
+) -> list[str] | None:
     """Return the argv for non-interactive agent invocation, or None if unsafe/unknown."""
     if agent_id == "claude-local":
         return ["claude", "-p", prompt]
     if agent_id == "codex-local":
-        return ["codex", "exec", "--sandbox", "read-only", prompt]
+        sandbox = "workspace-write" if allow_file_changes else "read-only"
+        return ["codex", "exec", "--sandbox", sandbox, prompt]
     if agent_id == "kimi-local":
         return ["kimi", "-p", prompt]
     return None
@@ -3130,7 +3135,7 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
     requested_agent: str = job.get("requested_agent", "")
     prompt: str = job.get("requested_task", "")
 
-    command = _build_invoke_command(requested_agent, prompt)
+    command = _build_invoke_command(requested_agent, prompt, allow_file_changes=True)
     if command is None:
         raise ValueError(
             f"Agent '{requested_agent}' cannot be invoked: {_INVOKE_UNSUPPORTED_REASON}."
@@ -3154,6 +3159,9 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
     stderr: str = proc.stderr or ""
     agent_succeeded = exit_code == 0
     duration_seconds = round((finished_at - started_at).total_seconds(), 3)
+
+    # Derive sandbox_mode from command for codex; n/a for other adapters.
+    sandbox_mode = "workspace-write" if requested_agent == "codex-local" else "n/a"
 
     changed_files = _capture_git_changed_files(root)
     diff_summary = _capture_diff_summary(root)
@@ -3186,6 +3194,7 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
         "finished_at": finished_at.isoformat(),
         "job_id": job_id,
         "pre_execution_head": pre_execution_head,
+        "sandbox_mode": sandbox_mode,
         "scope_validation": scope_validation,
         "selected_agent": requested_agent,
         "started_at": started_at.isoformat(),
@@ -3216,6 +3225,7 @@ def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
         "job_id": job_id,
         "output_path": result_path,
         "pre_execution_head": pre_execution_head,
+        "sandbox_mode": sandbox_mode,
         "scope_validation": scope_validation,
         "selected_agent": requested_agent,
         "started_at": started_at.isoformat(),

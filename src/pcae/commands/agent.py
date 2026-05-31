@@ -1357,6 +1357,8 @@ def _run_remote_execute_invoke_file_changes(args: argparse.Namespace) -> int:
         print("Remote execution result (file changes allowed)")
         print(f"Job ID:              {data['job_id']}")
         print(f"Agent:               {data['selected_agent']}")
+        print(f"Sandbox mode:        {data.get('sandbox_mode', 'n/a')}")
+        print(f"Command:             {' '.join(data['command'])}")
         print(f"Pre-execution HEAD:  {data['pre_execution_head']}")
         print(f"Exit code:           {data['exit_code']}")
         print(f"Final status:        {status_label}")
