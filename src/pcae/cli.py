@@ -37,6 +37,7 @@ from pcae.commands.agent import (
     run_remote_policy,
     run_remote_analytics,
     run_remote_benchmark,
+    run_remote_benchmark_controlled,
     run_remote_report_export,
     run_remote_report_inspect,
     run_remote_trends,
@@ -1514,12 +1515,32 @@ def build_parser() -> argparse.ArgumentParser:
         "benchmark",
         help="Benchmark supported runtimes using persisted execution history.",
     )
+    remote_benchmark_subparsers = remote_benchmark_parser.add_subparsers(
+        dest="benchmark_command",
+    )
     remote_benchmark_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON benchmark output.",
     )
     remote_benchmark_parser.set_defaults(handler=run_remote_benchmark)
+
+    remote_benchmark_controlled_parser = remote_benchmark_subparsers.add_parser(
+        "controlled",
+        help="Preview a controlled benchmark plan without executing agents.",
+    )
+    remote_benchmark_controlled_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="Preview the controlled benchmark plan (required).",
+    )
+    remote_benchmark_controlled_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON benchmark plan.",
+    )
+    remote_benchmark_controlled_parser.set_defaults(handler=run_remote_benchmark_controlled)
 
     remote_report_parser = remote_subparsers.add_parser(
         "report",

@@ -3634,3 +3634,69 @@ def build_remote_runtime_benchmark(root: HarnessPath) -> dict:
         "runtime_metrics": runtime_metrics,
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------------------
+# Controlled Runtime Benchmarking (Phase 41L.1)
+# ---------------------------------------------------------------------------
+
+CONTROLLED_BENCHMARK_ADVISORY = (
+    "Controlled benchmarks measure end-to-end runtime execution, not pure model performance."
+)
+
+_CONTROLLED_BENCHMARK_RUNTIMES: tuple[str, ...] = (
+    "claude-local",
+    "codex-local",
+    "kimi-local",
+)
+_CONTROLLED_BENCHMARK_PROMPT = "Reply with exactly: PCAE controlled benchmark successful."
+_CONTROLLED_BENCHMARK_RUNS_PER_RUNTIME = 3
+_CONTROLLED_BENCHMARK_EXECUTION_MODE = "non_interactive"
+
+_CONTROLLED_BENCHMARK_PLANNED_METRICS: tuple[str, ...] = (
+    "duration_seconds",
+    "exit_code",
+    "stdout_length",
+    "stderr_length",
+    "output_classification",
+    "success_or_failure",
+)
+
+_CONTROLLED_BENCHMARK_FUTURE_METRICS: tuple[str, ...] = (
+    "mean_duration",
+    "median_duration",
+    "p95_duration",
+    "stddev_duration",
+    "success_rate",
+)
+
+_CONTROLLED_BENCHMARK_LIMITATIONS: tuple[str, ...] = (
+    "Duration is end-to-end wall-clock time, not model inference time.",
+    "Network latency, system load, and process startup are included in duration.",
+    "Rankings are not valid with fewer than the planned runs per runtime.",
+    "Human approval is required before any real execution occurs.",
+    "This dry-run previews the plan only; no agents are executed.",
+)
+
+
+def build_controlled_benchmark_plan() -> dict:
+    """Return the controlled benchmark plan. Read-only; no agents executed."""
+    return {
+        "advisory": CONTROLLED_BENCHMARK_ADVISORY,
+        "benchmark_plan": {
+            "execution_mode": _CONTROLLED_BENCHMARK_EXECUTION_MODE,
+            "human_approval_required": True,
+            "prompt": _CONTROLLED_BENCHMARK_PROMPT,
+            "runs_per_runtime": _CONTROLLED_BENCHMARK_RUNS_PER_RUNTIME,
+            "runtimes": list(_CONTROLLED_BENCHMARK_RUNTIMES),
+            "sandbox_behavior": (
+                "sandbox/read-only preserved where supported by the runtime adapter"
+            ),
+            "total_planned_runs": (
+                len(_CONTROLLED_BENCHMARK_RUNTIMES) * _CONTROLLED_BENCHMARK_RUNS_PER_RUNTIME
+            ),
+        },
+        "future_metrics": list(_CONTROLLED_BENCHMARK_FUTURE_METRICS),
+        "limitations": list(_CONTROLLED_BENCHMARK_LIMITATIONS),
+        "planned_metrics": list(_CONTROLLED_BENCHMARK_PLANNED_METRICS),
+    }

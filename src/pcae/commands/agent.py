@@ -19,6 +19,7 @@ from pcae.core.agent import (
     build_agent_adapters,
     build_agent_status,
     build_collaboration_workflows,
+    build_controlled_benchmark_plan,
     build_lifecycle_report,
     build_multi_agent_registry,
     build_remote_adapters,
@@ -1332,6 +1333,31 @@ def run_remote_benchmark(args: argparse.Namespace) -> int:
                 print(f"    Classifications: {parts if parts else 'none'}")
         for warning in data["warnings"]:
             print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_benchmark_controlled(args: argparse.Namespace) -> int:
+    data = build_controlled_benchmark_plan()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        plan = data["benchmark_plan"]
+        print("Controlled benchmark plan (dry run)")
+        print(f"Runtimes:         {', '.join(plan['runtimes'])}")
+        print(f"Identical prompt: {plan['prompt']}")
+        print(f"Runs per runtime: {plan['runs_per_runtime']}")
+        print(f"Total runs:       {plan['total_planned_runs']}")
+        print(f"Execution mode:   {plan['execution_mode']}")
+        print(f"Sandbox behavior: {plan['sandbox_behavior']}")
+        print(f"Human approval:   required before real execution")
+        print("\nPlanned metrics")
+        for metric in data["planned_metrics"]:
+            print(f"  - {metric}")
+        print("\nLimitations")
+        for limitation in data["limitations"]:
+            print(f"  - {limitation}")
         print()
         print(data["advisory"])
     return 0

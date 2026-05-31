@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Controlled Runtime Benchmarking plan preview (Phase 41L.1): `pcae remote benchmark controlled --dry-run` previews controlled benchmark plan; runtimes, identical prompt, runs_per_runtime, planned metrics, limitations, advisory; `--dry-run` required; existing historical benchmark unchanged; 9 new tests; strictly read-only.
 - Completed Runtime Benchmarking (Phase 41L): `pcae remote benchmark` per-runtime metrics and rankings with confidence levels; 11 new tests.
 - Completed Execution Trends (Phase 41K): `pcae remote trends` global and per-runtime trend metrics; insufficient_data below 5 executions; 10 new tests.
 - Completed Execution Report Inspection (Phase 41J): `pcae remote report inspect REPORT_FILE` validates required fields, reports valid/partial/invalid status; read-only; 7 new tests.

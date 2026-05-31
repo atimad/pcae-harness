@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41L: Runtime Benchmarking.
+Phase 41L.1: Controlled Runtime Benchmarking.
 
 ## Governance Coherence Note
 
@@ -887,9 +887,29 @@ added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
 
+PCAE previews a controlled benchmark plan with `pcae remote benchmark controlled
+--dry-run` and `--dry-run --json` (Phase 41L.1): plan fields include `runtimes`
+(claude-local, codex-local, kimi-local), `prompt` (identical across all
+runtimes: "Reply with exactly: PCAE controlled benchmark successful."),
+`runs_per_runtime` (3), `execution_mode` (non_interactive),
+`human_approval_required` (true), `total_planned_runs` (9), and
+`sandbox_behavior`; `planned_metrics` lists duration_seconds, exit_code,
+stdout_length, stderr_length, output_classification, success_or_failure;
+`future_metrics` lists mean_duration, median_duration, p95_duration,
+stddev_duration, success_rate; `limitations` explicitly labels duration as
+end-to-end wall-clock time and states rankings require sufficient data and
+human approval is required before any real execution; `build_controlled_benchmark_plan()`
+added to `core/agent.py`; `run_remote_benchmark_controlled` added to
+`commands/agent.py`; `controlled` subcommand with required `--dry-run` wired
+under `remote benchmark` in `cli.py`; existing `pcae remote benchmark`
+historical command unchanged; 9 new tests; strictly read-only — no agents
+executed, no jobs created, no runtime state mutated; advisory:
+"Controlled benchmarks measure end-to-end runtime execution, not pure model
+performance."
+
 ## Next
 
-- TBD: Future Remote Coding phases (execution history, aggregation, or multi-job reporting).
+- TBD: Future Remote Coding phases (controlled benchmark execution, multi-job reporting).
 
 ## Future Explorations
 

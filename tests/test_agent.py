@@ -10678,3 +10678,152 @@ def test_41l_benchmark_readonly(
 
     after_benchmark = {f.name: f.read_text() for f in results_dir.glob("*.json")}
     assert before == after_benchmark
+
+
+# ---------------------------------------------------------------------------
+# Phase 41L.1 — Controlled Runtime Benchmarking (dry-run only)
+# ---------------------------------------------------------------------------
+
+
+def test_411_controlled_benchmark_dry_run_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Controlled benchmark plan (dry run)" in output
+    assert "claude-local" in output
+    assert "codex-local" in output
+    assert "kimi-local" in output
+    assert "Reply with exactly: PCAE controlled benchmark successful." in output
+    assert "Runs per runtime: 3" in output
+    assert "Planned metrics" in output
+    assert "Limitations" in output
+    assert "Controlled benchmarks measure end-to-end runtime execution" in output
+
+
+def test_411_controlled_benchmark_dry_run_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "benchmark_plan", "planned_metrics", "limitations", "future_metrics"):
+        assert key in data
+
+
+def test_411_controlled_benchmark_plan_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    plan = data["benchmark_plan"]
+    assert plan["runtimes"] == ["claude-local", "codex-local", "kimi-local"]
+    assert plan["prompt"] == "Reply with exactly: PCAE controlled benchmark successful."
+    assert plan["runs_per_runtime"] == 3
+    assert plan["execution_mode"] == "non_interactive"
+    assert plan["human_approval_required"] is True
+    assert plan["total_planned_runs"] == 9
+
+
+def test_411_controlled_benchmark_planned_metrics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    metrics = data["planned_metrics"]
+    for m in ("duration_seconds", "exit_code", "stdout_length", "stderr_length",
+              "output_classification", "success_or_failure"):
+        assert m in metrics
+
+
+def test_411_controlled_benchmark_limitations_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    limitations = data["limitations"]
+    assert len(limitations) >= 1
+    combined = " ".join(limitations)
+    assert "wall-clock" in combined
+    assert "human approval" in combined.lower()
+    assert "no agents are executed" in combined
+
+
+def test_411_controlled_benchmark_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "end-to-end runtime execution" in data["advisory"]
+    assert "model performance" in data["advisory"]
+
+
+def test_411_controlled_benchmark_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before_files = list((tmp_path / ".pcae").rglob("*.json"))
+
+    main(["remote", "benchmark", "controlled", "--dry-run", "--json"])
+    capsys.readouterr()
+
+    after_files = list((tmp_path / ".pcae").rglob("*.json"))
+    assert set(f.name for f in before_files) == set(f.name for f in after_files)
+
+
+def test_411_controlled_benchmark_historical_unchanged(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "benchmark", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "benchmark_summary" in data
+    assert "runtime_metrics" in data
+    assert "rankings" in data
+
+
+def test_411_controlled_benchmark_dry_run_required(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(["remote", "benchmark", "controlled"])
+
+    assert exc_info.value.code != 0
