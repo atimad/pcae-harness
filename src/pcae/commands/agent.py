@@ -20,6 +20,8 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
+    approve_file_changes,
+    deny_file_changes,
     build_change_review,
     build_claude_writable_contract,
     build_writable_contract,
@@ -1498,6 +1500,11 @@ def run_remote_file_governance(args: argparse.Namespace) -> int:
 
 
 def run_remote_changes(args: argparse.Namespace) -> int:
+    print("Usage: pcae remote changes <show|approve|deny> JOB_ID [--json]")
+    return 1
+
+
+def run_remote_changes_show(args: argparse.Namespace) -> int:
     try:
         data = build_change_review(HarnessPath.cwd(), args.job_id)
     except ValueError as error:
@@ -1533,6 +1540,44 @@ def run_remote_changes(args: argparse.Namespace) -> int:
     print(f"  Approval required: {'yes' if review['approval_required'] else 'no'}")
     print(f"  Commit allowed:    {'yes' if review['commit_allowed'] else 'no'}")
     print(f"  Push allowed:      {'yes' if review['push_allowed'] else 'no'}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_changes_approve(args: argparse.Namespace) -> int:
+    try:
+        data = approve_file_changes(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Change approval updated — {data['job_id']}")
+    print(f"Previous state:  {data['previous_change_approval_state']}")
+    print(f"New state:       {data['new_change_approval_state']}")
+    print(f"Commit allowed:  {'yes' if data['commit_allowed'] else 'no'}")
+    print(f"Push allowed:    {'yes' if data['push_allowed'] else 'no'}")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_changes_deny(args: argparse.Namespace) -> int:
+    try:
+        data = deny_file_changes(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Change approval updated — {data['job_id']}")
+    print(f"Previous state:  {data['previous_change_approval_state']}")
+    print(f"New state:       {data['new_change_approval_state']}")
+    print(f"Commit allowed:  {'yes' if data['commit_allowed'] else 'no'}")
+    print(f"Push allowed:    {'yes' if data['push_allowed'] else 'no'}")
     print()
     print(data["advisory"])
     return 0

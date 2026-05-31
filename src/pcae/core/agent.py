@@ -4392,3 +4392,145 @@ def build_change_review(root: HarnessPath, job_id: str) -> dict:
             "scope_validation": scope_validation,
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 42C — Human Approval Gate for Changes
+# ---------------------------------------------------------------------------
+
+CHANGE_APPROVAL_ADVISORY = (
+    "Change approval updated; no commit or push was performed."
+)
+
+_CHANGE_APPROVAL_STATES: tuple[str, ...] = ("pending", "approved", "denied")
+
+
+def _load_job_and_artifact(
+    root: HarnessPath, job_id: str
+) -> tuple[dict, dict | None, str]:
+    """
+    Load the persisted job dict and its result artifact (or None).
+
+    Returns (job, artifact, job_file_path_str).
+    Raises ValueError for unknown or malformed jobs.
+    """
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+
+    if not job_file.exists():
+        raise ValueError(f"Unknown job: {job_id!r}. No file found at {job_file}.")
+
+    try:
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"Malformed job file for {job_id!r}: {exc}") from exc
+
+    if not isinstance(job, dict):
+        raise ValueError(f"Malformed job file for {job_id!r}: content is not a JSON object.")
+
+    artifact: dict | None = None
+    for candidate in (
+        root.join(_REMOTE_RESULTS_DIR) / f"{job_id}-result.json",
+        root.join(_REMOTE_EXECUTIONS_DIR) / f"{job_id}_result.json",
+    ):
+        if candidate.exists():
+            try:
+                parsed = json.loads(candidate.read_text(encoding="utf-8"))
+                if isinstance(parsed, dict):
+                    artifact = parsed
+                    break
+            except (json.JSONDecodeError, OSError):
+                pass
+
+    return job, artifact, str(job_file)
+
+
+def _write_job(job_file_path: str, job: dict) -> None:
+    """Write the mutated job dict back to disk."""
+    path = Path(job_file_path)
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(job, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+
+def approve_file_changes(root: HarnessPath, job_id: str) -> dict:
+    """
+    Approve the file changes produced by a remote execution.
+
+    Rules:
+    - Result artifact must exist.
+    - changed_files must be non-empty.
+    - scope_validation must be valid (no violations).
+    - Does not commit or push.
+
+    Returns result dict with updated change_approval_state.
+    Raises ValueError on unknown jobs or failed preconditions.
+    """
+    job, artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    if artifact is None:
+        raise ValueError(
+            f"Cannot approve changes for job {job_id!r}: no result artifact found."
+        )
+
+    changed_files: list[str] = artifact.get("changed_files") or []
+    if not changed_files:
+        raise ValueError(
+            f"Cannot approve changes for job {job_id!r}: no files were changed."
+        )
+
+    scope_validation: dict = artifact.get("scope_validation") or {}
+    if not scope_validation.get("valid", False):
+        violations = scope_validation.get("violations", [])
+        raise ValueError(
+            f"Cannot approve changes for job {job_id!r}: scope validation failed. "
+            f"Violations: {violations}"
+        )
+
+    previous_state: str = job.get("change_approval_state", "pending")
+    job["change_approval_state"] = "approved"
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": CHANGE_APPROVAL_ADVISORY,
+        "commit_allowed": True,
+        "job_id": job_id,
+        "new_change_approval_state": "approved",
+        "previous_change_approval_state": previous_state,
+        "push_allowed": False,
+        "updated": True,
+    }
+
+
+def deny_file_changes(root: HarnessPath, job_id: str) -> dict:
+    """
+    Deny the file changes produced by a remote execution.
+
+    Rules:
+    - Result artifact must exist.
+    - Denial is allowed regardless of changed_files or scope_validation.
+    - Does not commit or push.
+
+    Returns result dict with updated change_approval_state.
+    Raises ValueError on unknown jobs or missing artifact.
+    """
+    job, artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    if artifact is None:
+        raise ValueError(
+            f"Cannot deny changes for job {job_id!r}: no result artifact found."
+        )
+
+    previous_state: str = job.get("change_approval_state", "pending")
+    job["change_approval_state"] = "denied"
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": CHANGE_APPROVAL_ADVISORY,
+        "commit_allowed": False,
+        "job_id": job_id,
+        "new_change_approval_state": "denied",
+        "previous_change_approval_state": previous_state,
+        "push_allowed": False,
+        "updated": True,
+    }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42B: Change Review Artifacts.
+Phase 42C: Human Approval Gate for Changes.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,24 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE exposes a human approval gate for file changes produced by remote execution
+(Phase 42C): `pcae remote changes approve JOB_ID` and `--json` approve file
+changes from a result artifact; approval requires a result artifact, non-empty
+`changed_files`, and a passing `scope_validation`; `commit_allowed=true` and
+`push_allowed=false` on approval; `pcae remote changes deny JOB_ID` and `--json`
+deny changes; denial requires only a result artifact and is allowed for any job
+including scope violations; both commands persist `change_approval_state`
+(`approved`/`denied`) on the job file and report `previous_change_approval_state`,
+`new_change_approval_state`, `commit_allowed`, `push_allowed`, and advisory;
+`changes` subcommand restructured into a subparser group with `show`, `approve`,
+and `deny` subcommands (Phase 42B tests updated from `changes JOB_ID` to
+`changes show JOB_ID`); `_load_job_and_artifact`, `_write_job`,
+`approve_file_changes`, `deny_file_changes`, `CHANGE_APPROVAL_ADVISORY`, and
+`_CHANGE_APPROVAL_STATES` added to `core/agent.py`; `run_remote_changes_show`,
+`run_remote_changes_approve`, and `run_remote_changes_deny` added to
+`commands/agent.py`; advisory: "Change approval updated; no commit or push was
+performed."; 16 new tests; no commit or push performed.
 
 PCAE generates governed change review artifacts for file-modifying remote
 executions (Phase 42B): `pcae remote changes JOB_ID` and `--json` read the

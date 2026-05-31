@@ -12309,7 +12309,7 @@ def _invoke_and_review(
         diff_summary=diff_summary,
         rc=rc,
     )
-    exit_code = main(["remote", "changes", job_id, "--json"])
+    exit_code = main(["remote", "changes", "show", job_id, "--json"])
     data = json.loads(capsys.readouterr().out)
     return job_id, data
 
@@ -12439,7 +12439,7 @@ def test_42b_missing_job_returns_error(
     init_agent_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["remote", "changes", "nonexistent-job-id"])
+    exit_code = main(["remote", "changes", "show", "nonexistent-job-id"])
 
     output = capsys.readouterr().out
     assert exit_code == 1
@@ -12456,7 +12456,7 @@ def test_42b_missing_artifact_reports_clearly(
     # Persist a job manually (no execution artifact written).
     job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
 
-    exit_code = main(["remote", "changes", job_id, "--json"])
+    exit_code = main(["remote", "changes", "show", job_id, "--json"])
     data = json.loads(capsys.readouterr().out)
 
     assert exit_code == 0
@@ -12478,7 +12478,7 @@ def test_42b_human_output_contains_key_sections(
         capsys,
         changed_files=["docs/report.md"],
     )
-    main(["remote", "changes", job_id])
+    main(["remote", "changes", "show", job_id])
     output = capsys.readouterr().out
 
     assert "Change Review" in output
@@ -12503,8 +12503,249 @@ def test_42b_readonly_does_not_write_files(
     )
 
     files_before = set(tmp_path.rglob("*"))
-    main(["remote", "changes", job_id, "--json"])
+    main(["remote", "changes", "show", job_id, "--json"])
     capsys.readouterr()
     files_after = set(tmp_path.rglob("*"))
 
     assert files_after == files_before
+
+
+# ---------------------------------------------------------------------------
+# Phase 42C — Human Approval Gate for Changes
+# ---------------------------------------------------------------------------
+
+
+def _setup_executed_job(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str = "claude-local",
+    changed_files: list[str] | None = None,
+) -> str:
+    """Create, execute, and return a job_id with a result artifact on disk."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id, _ = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        agent=agent,
+        changed_files=changed_files if changed_files is not None else ["docs/note.md"],
+    )
+    return job_id
+
+
+def test_42c_approve_valid_job_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "changes", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["updated"] is True
+    assert data["new_change_approval_state"] == "approved"
+
+
+def test_42c_approve_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in (
+        "updated",
+        "job_id",
+        "previous_change_approval_state",
+        "new_change_approval_state",
+        "commit_allowed",
+        "push_allowed",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_42c_approve_sets_commit_allowed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["commit_allowed"] is True
+    assert data["push_allowed"] is False
+
+
+def test_42c_approve_persists_state_in_job_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["change_approval_state"] == "approved"
+
+
+def test_42c_deny_valid_job_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    exit_code = main(["remote", "changes", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["updated"] is True
+    assert data["new_change_approval_state"] == "denied"
+
+
+def test_42c_deny_sets_commit_not_allowed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["commit_allowed"] is False
+    assert data["push_allowed"] is False
+
+
+def test_42c_deny_persists_state_in_job_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "deny", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["change_approval_state"] == "denied"
+
+
+def test_42c_no_change_job_cannot_be_approved(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A job that produced no file changes cannot be approved."""
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=[])
+
+    exit_code = main(["remote", "changes", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "no files were changed" in output.lower() or "cannot approve" in output.lower()
+
+
+def test_42c_scope_violation_job_cannot_be_approved(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A job with scope violations cannot be approved."""
+    job_id = _setup_executed_job(
+        tmp_path, monkeypatch, capsys, changed_files=["src/pcae/core/agent.py"]
+    )
+
+    exit_code = main(["remote", "changes", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "scope" in output.lower() or "cannot approve" in output.lower()
+
+
+def test_42c_deny_allowed_for_scope_violation_job(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Denial is allowed even when scope is violated."""
+    job_id = _setup_executed_job(
+        tmp_path, monkeypatch, capsys, changed_files=["src/pcae/core/agent.py"]
+    )
+
+    exit_code = main(["remote", "changes", "deny", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["new_change_approval_state"] == "denied"
+
+
+def test_42c_approve_missing_artifact_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Approve fails when no result artifact exists."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    exit_code = main(["remote", "changes", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "no result artifact" in output.lower() or "cannot approve" in output.lower()
+
+
+def test_42c_deny_missing_artifact_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Deny fails when no result artifact exists."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+
+    exit_code = main(["remote", "changes", "deny", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "no result artifact" in output.lower() or "cannot deny" in output.lower()
+
+
+def test_42c_approve_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id])
+    output = capsys.readouterr().out
+
+    assert "approved" in output.lower()
+    assert "Commit allowed" in output
+    assert "no commit or push" in output.lower()
+
+
+def test_42c_deny_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "deny", job_id])
+    output = capsys.readouterr().out
+
+    assert "denied" in output.lower()
+    assert "no commit or push" in output.lower()
+
+
+def test_42c_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "no commit or push" in data["advisory"].lower()
+
+
+def test_42c_previous_state_is_pending_initially(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+
+    main(["remote", "changes", "approve", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["previous_change_approval_state"] == "pending"

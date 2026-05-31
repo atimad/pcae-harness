@@ -39,6 +39,9 @@ from pcae.commands.agent import (
     run_remote_benchmark,
     run_remote_benchmark_controlled,
     run_remote_changes,
+    run_remote_changes_approve,
+    run_remote_changes_deny,
+    run_remote_changes_show,
     run_remote_file_governance,
     run_remote_writable_contract,
     run_remote_report_export,
@@ -1567,19 +1570,62 @@ def build_parser() -> argparse.ArgumentParser:
 
     remote_changes_parser = remote_subparsers.add_parser(
         "changes",
-        help="Review governed change artifacts for a file-modifying remote execution.",
+        help="Review and approve/deny governed change artifacts.",
     )
-    remote_changes_parser.add_argument(
+    remote_changes_parser.set_defaults(handler=run_remote_changes)
+
+    remote_changes_subparsers = remote_changes_parser.add_subparsers(
+        dest="changes_command",
+        required=False,
+    )
+
+    remote_changes_show_parser = remote_changes_subparsers.add_parser(
+        "show",
+        help="Review change artifacts for a file-modifying remote execution.",
+    )
+    remote_changes_show_parser.add_argument(
         "job_id",
         metavar="JOB_ID",
         help="Job ID to review changes for.",
     )
-    remote_changes_parser.add_argument(
+    remote_changes_show_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON output.",
     )
-    remote_changes_parser.set_defaults(handler=run_remote_changes)
+    remote_changes_show_parser.set_defaults(handler=run_remote_changes_show)
+
+    remote_changes_approve_parser = remote_changes_subparsers.add_parser(
+        "approve",
+        help="Approve file changes produced by a remote execution.",
+    )
+    remote_changes_approve_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose changes to approve.",
+    )
+    remote_changes_approve_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_changes_approve_parser.set_defaults(handler=run_remote_changes_approve)
+
+    remote_changes_deny_parser = remote_changes_subparsers.add_parser(
+        "deny",
+        help="Deny file changes produced by a remote execution.",
+    )
+    remote_changes_deny_parser.add_argument(
+        "job_id",
+        metavar="JOB_ID",
+        help="Job ID whose changes to deny.",
+    )
+    remote_changes_deny_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    remote_changes_deny_parser.set_defaults(handler=run_remote_changes_deny)
 
     remote_writable_contract_parser = remote_subparsers.add_parser(
         "writable-contract",
