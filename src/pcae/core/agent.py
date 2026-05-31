@@ -5107,6 +5107,9 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
     - Working tree is clean.
     - Original governed commit is reachable from HEAD.
 
+    Idempotent: if rollback_commit_sha is already recorded on the job,
+    returns already_rolled_back without running git revert again.
+
     Runs: git revert --no-edit <original_commit_sha>
     Captures rollback commit SHA. Persists rollback metadata on the job file.
     Never pushes. Never resets. Never modifies files beyond the revert commit.
@@ -5116,6 +5119,17 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
     review = review_data["rollback_review"]
 
     job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    existing_rollback_sha: str = job.get("rollback_commit_sha") or ""
+    if existing_rollback_sha:
+        return {
+            "advisory": CONTROLLED_ROLLBACK_ADVISORY,
+            "job_id": job_id,
+            "original_commit_sha": review["original_commit_sha"],
+            "rollback_commit_sha": existing_rollback_sha,
+            "rollback_status": "already_rolled_back",
+            "rolled_back": True,
+        }
 
     rollback_approval_state: str = job.get("rollback_approval_state", "pending")
     if rollback_approval_state == "pending":

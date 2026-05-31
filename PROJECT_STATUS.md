@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43D: Controlled Rollback Execution.
+Phase 43D.1: Rollback Result Consistency Fix.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,19 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE executes governed rollbacks idempotently (Phase 43D.1):
+`execute_rollback` now checks for an existing `rollback_commit_sha` on
+the job before attempting `git revert`; if found, it returns
+`rollback_status="already_rolled_back"` with `rolled_back=true` and
+exit code 0 without running git revert again; this fixes the observed
+split where a first call reported `rolled_back` but a second call
+emitted a failure message (git revert exits 1 when already applied);
+JSON and human outputs always agree: success → `rolled_back`, repeated
+→ `already_rolled_back`, failure → error; existing rollback metadata is
+preserved and never overwritten; no approval state mutation, no push,
+no reset; change is a single early-return guard added to
+`execute_rollback` in `core/agent.py`; 6 new tests.
 
 PCAE executes governed rollbacks under human approval (Phase 43D):
 `pcae remote rollback execute JOB_ID` and `--json` run `git revert

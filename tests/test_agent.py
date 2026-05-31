@@ -14256,3 +14256,127 @@ def test_43d_missing_job_returns_error(
 
     assert exit_code == 1
     assert "unknown job" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 43D.1 — Rollback Result Consistency Fix
+# ---------------------------------------------------------------------------
+
+
+def test_43d1_second_execute_returns_already_rolled_back(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    # First execute — succeeds
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+
+    # Second execute — must return already_rolled_back, not failure
+    exit_code = main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["rollback_status"] == "already_rolled_back"
+    assert data["rolled_back"] is True
+
+
+def test_43d1_second_execute_preserves_rollback_sha(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch, revert_sha="cafe9876")
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["rollback_commit_sha"] == "cafe9876"
+
+
+def test_43d1_no_duplicate_revert_on_second_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+
+    revert_calls: list[str] = []
+    original_revert = _agent_mod._run_git_revert
+
+    def _counting_revert(sha: str, cwd: str):
+        revert_calls.append(sha)
+        return _fake_proc(0, stdout=f"[main rev1234] Revert\n")
+
+    monkeypatch.setattr(_agent_mod, "_run_git_revert", _counting_revert)
+    monkeypatch.setattr(_agent_mod, "_capture_git_changed_files", _fake_git_changed_files([]))
+    monkeypatch.setattr(_agent_mod, "_capture_git_head", _fake_git_head("rev1234"))
+    monkeypatch.setattr(_agent_mod, "_check_commit_is_ancestor", lambda sha, cwd: True)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+    assert len(revert_calls) == 1
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+    assert len(revert_calls) == 1, "git revert must not run a second time"
+
+
+def test_43d1_already_rolled_back_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    capsys.readouterr()
+
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in (
+        "rolled_back",
+        "job_id",
+        "original_commit_sha",
+        "rollback_commit_sha",
+        "rollback_status",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_43d1_success_does_not_emit_failure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    exit_code = main(["remote", "rollback", "execute", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "failed" not in output.lower()
+    assert "error" not in output.lower()
+
+
+def test_43d1_human_and_json_agree_on_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_approved_rollback(tmp_path, monkeypatch, capsys)
+    _patch_rollback_execute_helpers(monkeypatch)
+
+    # First call — both outputs must say rolled_back
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["rollback_status"] == "rolled_back"
+    assert data["rolled_back"] is True
+
+    # Second call — both outputs must say already_rolled_back
+    main(["remote", "rollback", "execute", job_id])
+    human = capsys.readouterr().out
+    main(["remote", "rollback", "execute", job_id, "--json"])
+    data2 = json.loads(capsys.readouterr().out)
+
+    assert data2["rollback_status"] == "already_rolled_back"
+    assert "already_rolled_back" in human
