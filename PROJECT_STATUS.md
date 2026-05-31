@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43D.1: Rollback Result Consistency Fix.
+Phase 43E: Controlled Rollback Push.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,21 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE pushes governed rollback commits (Phase 43E): `pcae remote rollback
+push JOB_ID` and `--json` push the rollback commit; five gates:
+`rollback_approval_state=="approved"`, `rollback_commit_sha` present,
+`rollback_status` in `("rolled_back", "already_rolled_back")`, clean
+working tree, and rollback commit reachable from HEAD; persists
+`rollback_pushed_at`, `rollback_push_status`, `rollback_remote_branch`
+on the job file; JSON: `pushed`, `job_id`, `rollback_commit_sha`,
+`remote_branch`, `push_status`, `advisory`; pending/denied approval,
+missing SHA, invalid status, dirty tree, and unreachable commit all
+exit 1; no new commit is created; `push_rollback`,
+`ROLLBACK_PUSH_ADVISORY`, `_ROLLBACK_EXECUTED_STATUSES` added to
+`core/agent.py`; `run_remote_rollback_push` added to `commands/agent.py`;
+`push JOB_ID [--json]` wired under `remote rollback` in `cli.py`;
+advisory: "Rollback push completed through PCAE governance."; 14 new tests.
 
 PCAE executes governed rollbacks idempotently (Phase 43D.1):
 `execute_rollback` now checks for an existing `rollback_commit_sha` on

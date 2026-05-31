@@ -5199,6 +5199,106 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Phase 43E — Controlled Rollback Push
+# ---------------------------------------------------------------------------
+
+ROLLBACK_PUSH_ADVISORY = "Rollback push completed through PCAE governance."
+
+_ROLLBACK_EXECUTED_STATUSES: tuple[str, ...] = ("rolled_back", "already_rolled_back")
+
+
+def push_rollback(root: HarnessPath, job_id: str) -> dict:
+    """
+    Push the rollback commit for an approved and executed rollback.
+
+    Pre-conditions:
+    - rollback_approval_state == "approved".
+    - rollback_commit_sha is recorded on the job.
+    - rollback_status is "rolled_back" or "already_rolled_back".
+    - Working tree is clean.
+    - Rollback commit is reachable from HEAD.
+
+    Never creates commits. Never approves automatically. Never modifies files.
+    Raises ValueError on any blocking condition.
+    """
+    job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    rollback_approval_state: str = job.get("rollback_approval_state", "pending")
+    if rollback_approval_state == "pending":
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: rollback approval is pending. "
+            "Approve the rollback first with 'pcae remote rollback approve'."
+        )
+    if rollback_approval_state == "denied":
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: rollback was denied."
+        )
+    if rollback_approval_state != "approved":
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: unexpected rollback approval state "
+            f"{rollback_approval_state!r}."
+        )
+
+    rollback_commit_sha: str = job.get("rollback_commit_sha") or ""
+    if not rollback_commit_sha:
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: no rollback commit found. "
+            "Run 'pcae remote rollback execute' first."
+        )
+
+    rollback_status: str = job.get("rollback_status") or ""
+    if rollback_status not in _ROLLBACK_EXECUTED_STATUSES:
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: rollback was not successfully executed "
+            f"(status: {rollback_status!r})."
+        )
+
+    dirty = _capture_git_changed_files(root)
+    if dirty:
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: working tree is dirty. "
+            f"Unexpected changes: {dirty}"
+        )
+
+    if not _check_commit_is_ancestor(rollback_commit_sha, str(root.path)):
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: rollback commit "
+            f"({rollback_commit_sha!r}) is not reachable from HEAD."
+        )
+
+    branch = _get_current_branch(root)
+    remote = _get_git_remote(root)
+    remote_branch = f"{remote}/{branch}"
+
+    try:
+        push_proc = _run_git_push(remote, branch, str(root.path))
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: git push timed out."
+        ) from exc
+
+    if push_proc.returncode != 0:
+        raise ValueError(
+            f"Cannot push rollback for job {job_id!r}: git push failed. "
+            f"{push_proc.stderr.strip()}"
+        )
+
+    job["rollback_pushed_at"] = datetime.now(timezone.utc).isoformat()
+    job["rollback_push_status"] = "pushed"
+    job["rollback_remote_branch"] = remote_branch
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": ROLLBACK_PUSH_ADVISORY,
+        "job_id": job_id,
+        "push_status": "pushed",
+        "pushed": True,
+        "remote_branch": remote_branch,
+        "rollback_commit_sha": rollback_commit_sha,
+    }
+
+
 def build_rollback_review(root: HarnessPath, job_id: str) -> dict:
     """
     Generate a governed rollback review artifact for a specific job.
