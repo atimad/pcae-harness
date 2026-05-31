@@ -3012,6 +3012,30 @@ REMOTE_RESULTS_ADVISORY = (
 _REMOTE_STDOUT_SUMMARY_MAX = 500
 _REMOTE_STDERR_SUMMARY_MAX = 200
 
+OUTPUT_CLASS_CLEAN_STDOUT = "clean_stdout"
+OUTPUT_CLASS_STDERR_STATUS = "stderr_with_status_text"
+OUTPUT_CLASS_EMPTY = "empty_output"
+OUTPUT_CLASS_ERROR = "execution_error"
+
+
+def _classify_execution_output(stdout: str, stderr: str, exit_code: object) -> str:
+    """Classify execution output into one of four normalized categories."""
+    if exit_code is not None and exit_code != 0:
+        return OUTPUT_CLASS_ERROR
+    if not stdout.strip() and not stderr.strip():
+        return OUTPUT_CLASS_EMPTY
+    if stderr.strip():
+        return OUTPUT_CLASS_STDERR_STATUS
+    return OUTPUT_CLASS_CLEAN_STDOUT
+
+
+def _normalize_final_output(stdout: str, classification: str) -> "str | None":
+    """Return the normalized final answer text, or None when not applicable."""
+    if classification in (OUTPUT_CLASS_ERROR, OUTPUT_CLASS_EMPTY):
+        return None
+    stripped = stdout.strip()
+    return stripped if stripped else None
+
 
 def build_remote_results(root: HarnessPath, job_id: str) -> dict:
     """Return execution results for a persisted job. Raises ValueError for unknown jobs."""
@@ -3071,6 +3095,10 @@ def build_remote_results(root: HarnessPath, job_id: str) -> dict:
 
     stdout_full: str = artifact.get("stdout") or ""
     stderr_full: str = artifact.get("stderr") or ""
+    exit_code = artifact.get("exit_code")
+
+    classification = _classify_execution_output(stdout_full, stderr_full, exit_code)
+    normalized_out = _normalize_final_output(stdout_full, classification)
 
     execution_result = {
         "command_used": artifact.get("command"),
@@ -3081,8 +3109,10 @@ def build_remote_results(root: HarnessPath, job_id: str) -> dict:
         "execution_started_at": (
             artifact.get("started_at") or artifact.get("execution_started_at")
         ),
-        "exit_code": artifact.get("exit_code"),
+        "exit_code": exit_code,
         "final_status": artifact.get("final_status"),
+        "normalized_final_output": normalized_out,
+        "output_classification": classification,
         "output_path": output_path,
         "readiness_at_execution": artifact.get("readiness_at_execution"),
         "stderr_summary": stderr_full[:_REMOTE_STDERR_SUMMARY_MAX] or None,

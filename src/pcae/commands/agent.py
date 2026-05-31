@@ -1142,11 +1142,15 @@ def run_remote_results(args: argparse.Namespace) -> int:
             readiness = result.get("readiness_at_execution")
             if readiness is not None:
                 print(f"Readiness at execution: {readiness}")
+            print(f"Output classification: {result.get('output_classification', '(not recorded)')}")
             stdout_summary = result.get("stdout_summary")
             print(f"\nStdout summary:\n  {stdout_summary or '(none)'}")
             stderr_summary = result.get("stderr_summary")
             if stderr_summary:
                 print(f"\nStderr summary:\n  {stderr_summary}")
+            normalized = result.get("normalized_final_output")
+            if normalized is not None:
+                print(f"\nNormalized final output:\n  {normalized}")
         print()
         print(data["advisory"])
     return 0

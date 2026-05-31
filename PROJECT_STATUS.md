@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41E: Multi-Runtime Execution Validation.
+Phase 41F: Execution Output Normalization.
 
 ## Governance Coherence Note
 
@@ -765,6 +765,24 @@ fields default to null when not recorded); advisory is
 includes `result_available`, `job_id`, `requested_agent`, `execution_result`,
 and `advisory`; all operations are strictly read-only with no job mutation,
 no agent execution, and no approval state changes.
+
+PCAE normalizes persisted execution outputs across Codex, Claude, and Kimi
+for reporting (Phase 41F): `pcae remote results JOB_ID` and `--json` now
+include `output_classification` and `normalized_final_output` fields in
+`execution_result`; four classification values: `clean_stdout` (stdout has
+content, stderr empty), `stderr_with_status_text` (stderr has content
+regardless of stdout — covers Kimi's reasoning/status text pattern),
+`empty_output` (both stdout and stderr are blank), `execution_error`
+(non-zero exit code); `normalized_final_output` is the stripped stdout string
+for `clean_stdout` and `stderr_with_status_text` classifications, or `null`
+for `empty_output` and `execution_error`; raw `stdout` and `stderr` in
+persisted result artifacts are never modified; `stdout_summary` and
+`stderr_summary` are preserved unchanged; human output shows "Output
+classification:" and "Normalized final output:" lines when a result is
+available; `_classify_execution_output` and `_normalize_final_output` helpers
+added to `core/agent.py`; four classification constants exported; 9 new tests;
+strictly read-only — no job files mutated, no agents executed, no approval
+state changed.
 
 ## Next
 

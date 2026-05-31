@@ -9378,3 +9378,210 @@ def test_41e_adapters_are_runtime_specific(
     assert kimi_data["command"][0] == "kimi"
     assert claude_data["command"][0] != kimi_data["command"][0]
     assert claude_data["selected_agent"] != kimi_data["selected_agent"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 41F: Execution Output Normalization
+# ---------------------------------------------------------------------------
+
+
+def _invoke_job_with_output(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str,
+    rc: int = 0,
+    stdout: str = "ok\n",
+    stderr: str = "",
+) -> str:
+    """Create, approve, and invoke a job for agent with given subprocess output. Returns job_id."""
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent=agent)
+    _patch_ready(monkeypatch, agent)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(rc, stdout, stderr),
+    )
+    main(["remote", "execute", job_id, "--invoke", "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def test_41f_codex_clean_stdout_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="Codex answer.\n"
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "clean_stdout"
+    assert result["normalized_final_output"] == "Codex answer."
+    assert result["stdout_summary"] is not None
+    assert result["stderr_summary"] is None
+
+
+def test_41f_claude_clean_stdout_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "claude-local", stdout="Claude answer.\n"
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "clean_stdout"
+    assert result["normalized_final_output"] == "Claude answer."
+
+
+def test_41f_kimi_stderr_status_text_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        "kimi-local",
+        stdout="Kimi final answer.\n",
+        stderr="Thinking... reasoning step 1\nreasoning step 2\n",
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "stderr_with_status_text"
+    assert result["normalized_final_output"] == "Kimi final answer."
+    assert result["stderr_summary"] is not None
+    assert "Thinking" in result["stderr_summary"]
+
+
+def test_41f_empty_output_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="", stderr=""
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "empty_output"
+    assert result["normalized_final_output"] is None
+
+
+def test_41f_execution_error_classification(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        "codex-local",
+        rc=1,
+        stdout="partial output\n",
+        stderr="error: something failed\n",
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "execution_error"
+    assert result["normalized_final_output"] is None
+
+
+def test_41f_json_includes_normalized_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="ok\n"
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert "output_classification" in result
+    assert "normalized_final_output" in result
+    assert "stdout_summary" in result
+    assert "stderr_summary" in result
+
+
+def test_41f_raw_stdout_stderr_preserved_in_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        "codex-local",
+        stdout="raw answer\n",
+        stderr="raw status\n",
+    )
+
+    results_file = tmp_path / ".pcae" / "remote" / "results" / f"{job_id}-result.json"
+    artifact = json.loads(results_file.read_text(encoding="utf-8"))
+    assert artifact["stdout"] == "raw answer\n"
+    assert artifact["stderr"] == "raw status\n"
+
+
+def test_41f_human_output_shows_classification_and_normalized(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path, monkeypatch, capsys, "codex-local", stdout="human answer\n"
+    )
+
+    main(["remote", "results", job_id])
+    output = capsys.readouterr().out
+
+    assert "Output classification:" in output
+    assert "clean_stdout" in output
+    assert "Normalized final output:" in output
+    assert "human answer" in output
+
+
+def test_41f_kimi_stderr_only_normalized_output_is_none(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """When Kimi emits only stderr and stdout is empty, normalized_final_output is None."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _invoke_job_with_output(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        "kimi-local",
+        stdout="",
+        stderr="status text only\n",
+    )
+
+    main(["remote", "results", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    result = data["execution_result"]
+    assert result["output_classification"] == "stderr_with_status_text"
+    assert result["normalized_final_output"] is None
