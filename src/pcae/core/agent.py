@@ -4676,3 +4676,148 @@ def commit_file_changes(root: HarnessPath, job_id: str) -> dict:
         "job_id": job_id,
         "push_allowed": False,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 42E — Controlled Push
+# ---------------------------------------------------------------------------
+
+CONTROLLED_PUSH_ADVISORY = "Push completed through PCAE governance."
+
+
+def _get_current_branch(root: HarnessPath) -> str:
+    """Return current git branch name, or 'unknown'."""
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=str(root.path),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return proc.stdout.strip() if proc.returncode == 0 else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def _get_git_remote(root: HarnessPath) -> str:
+    """Return first configured remote name, or 'origin' when none found."""
+    try:
+        proc = subprocess.run(
+            ["git", "remote"],
+            cwd=str(root.path),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        remotes = proc.stdout.strip().splitlines()
+        return remotes[0] if remotes else "origin"
+    except Exception:
+        return "origin"
+
+
+def _run_git_push(
+    remote: str, branch: str, cwd: str
+) -> subprocess.CompletedProcess:
+    """Run 'git push <remote> HEAD:<branch>'. Extracted for testability."""
+    return subprocess.run(
+        ["git", "push", remote, f"HEAD:{branch}"],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
+def push_file_changes(root: HarnessPath, job_id: str) -> dict:
+    """
+    Execute a governed git push for an approved and committed job.
+
+    Pre-conditions:
+    - Result artifact exists.
+    - change_approval_state == "approved".
+    - commit_sha recorded on the job (governed commit was created).
+    - Working tree is clean.
+    - Current HEAD matches the governed commit SHA.
+
+    Never creates commits. Never approves changes. Never modifies files.
+    Raises ValueError on any blocking condition.
+    """
+    job, artifact, job_file_path = _load_job_and_artifact(root, job_id)
+
+    if artifact is None:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: no result artifact found."
+        )
+
+    approval_state: str = job.get("change_approval_state", "pending")
+    if approval_state == "pending":
+        raise ValueError(
+            f"Cannot push job {job_id!r}: change approval is pending. "
+            "Approve and commit first."
+        )
+    if approval_state == "denied":
+        raise ValueError(
+            f"Cannot push job {job_id!r}: changes were denied."
+        )
+    if approval_state != "approved":
+        raise ValueError(
+            f"Cannot push job {job_id!r}: unexpected approval state {approval_state!r}."
+        )
+
+    commit_sha: str = job.get("commit_sha") or ""
+    if not commit_sha:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: no governed commit found. "
+            "Run 'pcae remote commit' first."
+        )
+
+    dirty = _capture_git_changed_files(root)
+    if dirty:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: working tree is dirty. "
+            f"Unexpected changes: {dirty}"
+        )
+
+    current_head = _capture_git_head(root)
+    if current_head == "unknown":
+        raise ValueError(
+            f"Cannot push job {job_id!r}: could not determine current HEAD."
+        )
+    if current_head != commit_sha:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: current HEAD ({current_head!r}) "
+            f"does not match governed commit ({commit_sha!r})."
+        )
+
+    branch = _get_current_branch(root)
+    remote = _get_git_remote(root)
+    remote_branch = f"{remote}/{branch}"
+
+    try:
+        push_proc = _run_git_push(remote, branch, str(root.path))
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: git push timed out."
+        ) from exc
+
+    if push_proc.returncode != 0:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: git push failed. {push_proc.stderr.strip()}"
+        )
+
+    push_status = "pushed"
+
+    job["pushed_at"] = datetime.now(timezone.utc).isoformat()
+    job["push_status"] = push_status
+    job["remote_branch"] = remote_branch
+    _write_job(job_file_path, job)
+
+    return {
+        "advisory": CONTROLLED_PUSH_ADVISORY,
+        "commit_sha": commit_sha,
+        "job_id": job_id,
+        "push_status": push_status,
+        "pushed": True,
+        "remote_branch": remote_branch,
+    }

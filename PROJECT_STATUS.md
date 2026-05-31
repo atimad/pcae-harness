@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 42D: Controlled Commit.
+Phase 42E: Controlled Push.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,22 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE executes governed git pushes for approved committed jobs (Phase 42E):
+`pcae remote push JOB_ID` and `--json` push the governed commit to the remote;
+push is allowed only when a result artifact exists, `change_approval_state ==
+"approved"`, `commit_sha` is recorded on the job, the working tree is clean,
+and current HEAD matches the governed commit SHA; `push_status`, `pushed_at`,
+and `remote_branch` persisted on the job file; JSON output includes `pushed`,
+`job_id`, `commit_sha`, `remote_branch`, `push_status`, `advisory`; refuses for
+pending/denied approval, missing governed commit, dirty working tree, or HEAD
+mismatch; never creates commits, never approves changes, never modifies files;
+`_get_current_branch`, `_get_git_remote`, `_run_git_push` extracted as
+injectable helpers; `push_file_changes`, `CONTROLLED_PUSH_ADVISORY`,
+`_get_current_branch`, `_get_git_remote`, `_run_git_push` added to
+`core/agent.py`; `run_remote_push` added to `commands/agent.py`; `push JOB_ID
+[--json]` wired under `remote` in `cli.py`; advisory: "Push completed through
+PCAE governance."; 15 new tests.
 
 PCAE creates governed git commits for approved file changes (Phase 42D):
 `pcae remote commit JOB_ID` and `--json` commit approved changes; commit is

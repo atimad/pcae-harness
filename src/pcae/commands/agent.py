@@ -23,6 +23,7 @@ from pcae.core.agent import (
     approve_file_changes,
     commit_file_changes,
     deny_file_changes,
+    push_file_changes,
     build_change_review,
     build_claude_writable_contract,
     build_writable_contract,
@@ -1601,6 +1602,25 @@ def run_remote_commit(args: argparse.Namespace) -> int:
         print(f"  {f}")
     print(f"Commit SHA:      {data['commit_sha']}")
     print(f"Push allowed:    no")
+    print()
+    print(data["advisory"])
+    return 0
+
+
+def run_remote_push(args: argparse.Namespace) -> int:
+    try:
+        data = push_file_changes(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Push completed — {data['job_id']}")
+    print(f"Approval state:  approved")
+    print(f"Commit SHA:      {data['commit_sha']}")
+    print(f"Push status:     {data['push_status']}")
+    print(f"Remote branch:   {data['remote_branch']}")
     print()
     print(data["advisory"])
     return 0

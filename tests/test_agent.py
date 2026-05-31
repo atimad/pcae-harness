@@ -13013,3 +13013,252 @@ def test_42d_missing_job_returns_error(
 
     assert exit_code == 1
     assert "unknown job" in output.lower() or "cannot commit" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 42E — Controlled Push
+# ---------------------------------------------------------------------------
+
+
+def _setup_committed_change(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str = "claude-local",
+    changed_files: list[str] | None = None,
+    commit_sha: str = "def5678",
+) -> str:
+    """Create, execute, approve, and commit changes. Returns job_id."""
+    if changed_files is None:
+        changed_files = ["docs/note.md"]
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys, agent=agent, changed_files=changed_files)
+    _patch_commit_helpers(monkeypatch, dirty_files=changed_files, commit_sha=commit_sha)
+    main(["remote", "commit", job_id, "--json"])
+    capsys.readouterr()
+    return job_id
+
+
+def _patch_push_helpers(
+    monkeypatch,
+    dirty_files: list[str] | None = None,
+    head_sha: str = "def5678",
+    branch: str = "main",
+    remote: str = "origin",
+    push_rc: int = 0,
+) -> None:
+    """Patch git helpers for push tests."""
+    if dirty_files is None:
+        dirty_files = []
+    monkeypatch.setattr(
+        _agent_mod,
+        "_capture_git_changed_files",
+        _fake_git_changed_files(dirty_files),
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_git_head", _fake_git_head(head_sha))
+    monkeypatch.setattr(_agent_mod, "_get_current_branch", lambda root: branch)
+    monkeypatch.setattr(_agent_mod, "_get_git_remote", lambda root: remote)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_git_push",
+        lambda rem, br, cwd: _fake_proc(push_rc, stdout="To origin\n" if push_rc == 0 else ""),
+    )
+
+
+def test_42e_approved_committed_change_can_be_pushed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    exit_code = main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert data["pushed"] is True
+
+
+def test_42e_push_json_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    for key in ("pushed", "job_id", "commit_sha", "remote_branch", "push_status", "advisory"):
+        assert key in data, f"missing key: {key}"
+
+
+def test_42e_push_status_is_pushed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["push_status"] == "pushed"
+
+
+def test_42e_commit_sha_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="cafe9876")
+    _patch_push_helpers(monkeypatch, head_sha="cafe9876")
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["commit_sha"] == "cafe9876"
+
+
+def test_42e_remote_branch_in_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch, branch="main", remote="origin")
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["remote_branch"] == "origin/main"
+
+
+def test_42e_job_updated_with_push_metadata(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    capsys.readouterr()
+
+    job_file = tmp_path / ".pcae" / "remote" / "jobs" / f"{job_id}.json"
+    job = json.loads(job_file.read_text())
+    assert job["push_status"] == "pushed"
+    assert "pushed_at" in job
+    assert "remote_branch" in job
+
+
+def test_42e_pending_change_cannot_be_pushed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    _patch_push_helpers(monkeypatch)
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "pending" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_denied_change_cannot_be_pushed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_executed_job(tmp_path, monkeypatch, capsys, changed_files=["docs/note.md"])
+    main(["remote", "changes", "deny", job_id])
+    capsys.readouterr()
+    _patch_push_helpers(monkeypatch)
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "denied" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_no_governed_commit_blocks_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Approved job without a commit cannot be pushed."""
+    job_id = _setup_approved_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "no governed commit" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_dirty_working_tree_blocks_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch, dirty_files=["docs/unexpected.md"])
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "dirty" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_head_mismatch_blocks_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="aaabbb1")
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "does not match" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_git_push_failure_blocks_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch, push_rc=1)
+
+    exit_code = main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "git push failed" in output.lower() or "cannot push" in output.lower()
+
+
+def test_42e_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys)
+    _patch_push_helpers(monkeypatch)
+
+    main(["remote", "push", job_id, "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert "push completed" in data["advisory"].lower()
+    assert "governance" in data["advisory"].lower()
+
+
+def test_42e_human_output_key_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    job_id = _setup_committed_change(tmp_path, monkeypatch, capsys, commit_sha="def5678")
+    _patch_push_helpers(monkeypatch, head_sha="def5678", branch="main", remote="origin")
+
+    main(["remote", "push", job_id])
+    output = capsys.readouterr().out
+
+    assert "def5678" in output
+    assert "origin/main" in output
+    assert "pushed" in output.lower()
+    assert "governance" in output.lower()
+
+
+def test_42e_missing_job_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "push", "nonexistent-job-id"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "unknown job" in output.lower() or "cannot push" in output.lower()
