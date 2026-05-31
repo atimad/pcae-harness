@@ -10986,3 +10986,362 @@ def test_41m_file_governance_readonly(
 
     after_files = set(f.name for f in (tmp_path / ".pcae").rglob("*.json"))
     assert before_files == after_files
+
+
+# ---------------------------------------------------------------------------
+# Phase 42A — Controlled File Modification
+# ---------------------------------------------------------------------------
+
+# Helpers for the file-change git capture functions.
+
+def _fake_git_head(sha: str = "abc1234"):
+    """Return a patcher that makes _capture_git_head return sha."""
+    def _capture(root):
+        return sha
+    return _capture
+
+
+def _fake_git_changed_files(files: list[str]):
+    """Return a patcher that makes _capture_git_changed_files return files."""
+    def _capture(root):
+        return files
+    return _capture
+
+
+def _fake_diff_summary(summary: str = ""):
+    """Return a patcher that makes _capture_diff_summary return summary."""
+    def _capture(root):
+        return summary
+    return _capture
+
+
+def _patch_file_change_helpers(
+    monkeypatch,
+    changed_files: list[str] | None = None,
+    diff_summary: str = "",
+    head_sha: str = "abc1234",
+) -> None:
+    """Patch all three git-capture helpers for file-change tests."""
+    monkeypatch.setattr(_agent_mod, "_capture_git_head", _fake_git_head(head_sha))
+    monkeypatch.setattr(
+        _agent_mod,
+        "_capture_git_changed_files",
+        _fake_git_changed_files(changed_files if changed_files is not None else []),
+    )
+    monkeypatch.setattr(_agent_mod, "_capture_diff_summary", _fake_diff_summary(diff_summary))
+
+
+def _invoke_job_with_file_changes(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    agent: str = "claude-local",
+    changed_files: list[str] | None = None,
+    diff_summary: str = "",
+    rc: int = 0,
+    stdout: str = "ok\n",
+    stderr: str = "",
+) -> tuple[str, dict]:
+    """Create, approve, and invoke a job with --allow-file-changes. Returns (job_id, data)."""
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent=agent)
+    _patch_ready(monkeypatch, agent)
+    _patch_file_change_helpers(monkeypatch, changed_files=changed_files, diff_summary=diff_summary)
+    monkeypatch.setattr(
+        _agent_mod,
+        "_run_agent_subprocess",
+        lambda cmd, timeout: _fake_proc(rc, stdout, stderr),
+    )
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--allow-file-changes", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    return job_id, data
+
+
+def test_42a_file_changes_requires_allow_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Without --allow-file-changes, --invoke uses the read-only path."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys)
+    _patch_ready(monkeypatch)
+    monkeypatch.setattr(_agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "ok\n"))
+
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    # Read-only invoke does NOT produce file-change fields.
+    assert "changed_files" not in data
+    assert "scope_validation" not in data
+    assert "pre_execution_head" not in data
+
+
+def test_42a_no_changes_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, changed_files=[]
+    )
+
+    assert data["final_status"] == "completed_with_no_changes"
+    assert data["changed_files"] == []
+    assert data["scope_validation"]["valid"] is True
+
+
+def test_42a_docs_modification_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["docs/remote-controlled-modification-test.md"],
+        diff_summary=" docs/remote-controlled-modification-test.md | 1 +",
+    )
+
+    assert data["final_status"] == "completed"
+    assert "docs/remote-controlled-modification-test.md" in data["changed_files"]
+    assert data["scope_validation"]["valid"] is True
+    assert data["scope_validation"]["violations"] == []
+
+
+def test_42a_tasks_modification_succeeds(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["tasks/notes.md"],
+    )
+
+    assert data["final_status"] == "completed"
+    assert data["scope_validation"]["valid"] is True
+
+
+def test_42a_src_modification_is_scope_violation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["src/pcae/core/agent.py"],
+    )
+
+    assert data["final_status"] == "failed"
+    scope = data["scope_validation"]
+    assert scope["valid"] is False
+    assert len(scope["violations"]) >= 1
+    assert any("src/" in v for v in scope["violations"])
+
+
+def test_42a_tests_modification_is_scope_violation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["tests/test_something.py"],
+    )
+
+    assert data["final_status"] == "failed"
+    assert data["scope_validation"]["valid"] is False
+
+
+def test_42a_pcae_dir_is_scope_violation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=[".pcae/policy.toml"],
+    )
+
+    assert data["final_status"] == "failed"
+    assert data["scope_validation"]["valid"] is False
+
+
+def test_42a_json_output_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["docs/test.md"],
+        diff_summary=" docs/test.md | 1 +",
+    )
+
+    for key in (
+        "executed",
+        "job_id",
+        "selected_agent",
+        "pre_execution_head",
+        "changed_files",
+        "scope_validation",
+        "diff_summary",
+        "final_status",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_42a_pre_execution_head_captured(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=[],
+    )
+
+    assert data["pre_execution_head"] == "abc1234"
+
+
+def test_42a_diff_summary_captured(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path,
+        monkeypatch,
+        capsys,
+        changed_files=["docs/note.md"],
+        diff_summary=" docs/note.md | 3 +++",
+    )
+
+    assert "docs/note.md" in data["diff_summary"]
+
+
+def test_42a_advisory_text(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, changed_files=[]
+    )
+
+    assert "no commit or push" in data["advisory"].lower()
+
+
+def test_42a_no_commit_no_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Verify no git commit or push commands are invoked by the handler."""
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    commits_before = subprocess.run(
+        ["git", "log", "--oneline"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["docs/test.md"],
+    )
+
+    commits_after = subprocess.run(
+        ["git", "log", "--oneline"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert commits_before == commits_after
+
+
+def test_42a_artifact_persisted(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    job_id, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys, changed_files=["docs/test.md"]
+    )
+
+    results_dir = tmp_path / ".pcae" / "remote" / "results"
+    artifact_file = results_dir / f"{job_id}-result.json"
+    assert artifact_file.exists()
+    artifact = json.loads(artifact_file.read_text())
+    assert artifact["file_changes_allowed"] is True
+    assert "changed_files" in artifact
+    assert "scope_validation" in artifact
+    assert "pre_execution_head" in artifact
+
+
+def test_42a_agent_failure_marks_failed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    _, data = _invoke_job_with_file_changes(
+        tmp_path, monkeypatch, capsys,
+        changed_files=["docs/test.md"],
+        rc=1,
+        stderr="Agent error.\n",
+    )
+
+    assert data["final_status"] == "failed"
+    assert data["exit_code"] == 1
+
+
+def test_42a_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    job_id = _create_approved_job(tmp_path, monkeypatch, capsys, agent="claude-local")
+    _patch_ready(monkeypatch, "claude-local")
+    _patch_file_change_helpers(
+        monkeypatch,
+        changed_files=["docs/test.md"],
+        diff_summary=" docs/test.md | 1 +",
+    )
+    monkeypatch.setattr(
+        _agent_mod, "_run_agent_subprocess", lambda cmd, timeout: _fake_proc(0, "Done.\n")
+    )
+
+    exit_code = main(["remote", "execute", job_id, "--invoke", "--allow-file-changes"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Remote execution result (file changes allowed)" in output
+    assert "Pre-execution HEAD" in output
+    assert "Changed files" in output
+    assert "Scope validation" in output
+    assert "no commit or push" in output.lower()

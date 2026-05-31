@@ -1418,6 +1418,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Invoke the agent for real under PCAE governance.",
     )
     remote_execute_parser.add_argument(
+        "--allow-file-changes",
+        action="store_true",
+        dest="allow_file_changes",
+        help=(
+            "Allow the agent to write files under governed scope rules. "
+            "Requires --invoke. No commit or push is performed."
+        ),
+    )
+    remote_execute_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON output.",

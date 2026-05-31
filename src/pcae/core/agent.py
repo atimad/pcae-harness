@@ -3002,6 +3002,229 @@ def invoke_remote_job(root: HarnessPath, job_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Controlled File Modification (Phase 42A)
+# ---------------------------------------------------------------------------
+
+FILE_MODIFY_ADVISORY = (
+    "Files may have been modified, but no commit or push was performed."
+)
+
+_FILE_MODIFY_STATUS_NO_CHANGES = "completed_with_no_changes"
+
+# Paths allowed for modification in Phase 42A (prefix match on posix path).
+_PHASE_42A_ALLOWED_PREFIXES: tuple[str, ...] = ("docs/", "tasks/")
+
+# Paths unconditionally denied regardless of scope.
+_PHASE_42A_DENIED_PREFIXES: tuple[str, ...] = (
+    "src/",
+    "tests/",
+    ".pcae/",
+    ".git/",
+    ".github/",
+)
+_PHASE_42A_DENIED_EXACT: frozenset[str] = frozenset(
+    {"pyproject.toml", ".pcae/policy.toml"}
+)
+
+
+def _capture_git_head(root: HarnessPath) -> str:
+    """Return the short HEAD commit SHA, or 'unknown' if git fails."""
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(root.root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return proc.stdout.strip() if proc.returncode == 0 else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def _capture_git_changed_files(root: HarnessPath) -> list[str]:
+    """Return a list of modified/added/deleted paths from 'git status --porcelain'."""
+    try:
+        proc = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=str(root.root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if proc.returncode != 0:
+            return []
+        files = []
+        for line in proc.stdout.splitlines():
+            if len(line) > 3:
+                files.append(line[3:].strip())
+        return files
+    except Exception:
+        return []
+
+
+def _capture_diff_summary(root: HarnessPath) -> str:
+    """Return a compact diff summary (stat lines). Empty string if none."""
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--stat"],
+            cwd=str(root.root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return proc.stdout.strip() if proc.returncode == 0 else ""
+    except Exception:
+        return ""
+
+
+def _validate_file_change_scope(changed_files: list[str]) -> dict:
+    """
+    Validate changed files against Phase 42A scope rules.
+
+    Returns a dict with 'valid' (bool), 'violations' (list[str]), and 'notes'.
+    """
+    violations: list[str] = []
+    for path in changed_files:
+        posix = path.replace("\\", "/").lstrip("/")
+        if posix in _PHASE_42A_DENIED_EXACT:
+            violations.append(f"scope violation: protected file modified: {path}")
+            continue
+        denied = any(posix.startswith(prefix) for prefix in _PHASE_42A_DENIED_PREFIXES)
+        if denied:
+            violations.append(f"scope violation: denied path modified: {path}")
+            continue
+        allowed = any(posix.startswith(prefix) for prefix in _PHASE_42A_ALLOWED_PREFIXES)
+        if not allowed:
+            violations.append(
+                f"scope violation: path not in allowed scope (docs/, tasks/): {path}"
+            )
+    return {
+        "allowed_prefixes": list(_PHASE_42A_ALLOWED_PREFIXES),
+        "denied_prefixes": list(_PHASE_42A_DENIED_PREFIXES),
+        "notes": "Phase 42A allows modifications only under docs/ and tasks/.",
+        "valid": len(violations) == 0,
+        "violations": violations,
+    }
+
+
+def invoke_remote_job_with_file_changes(root: HarnessPath, job_id: str) -> dict:
+    """
+    Invoke a governed job and allow workspace writes.
+
+    Captures pre/post git state, validates changed files against Phase 42A
+    scope rules, and persists change metadata with the execution artifact.
+    No commit or push is performed.
+    """
+    readiness = check_remote_job_readiness(root, job_id)
+    if not readiness["ready"]:
+        blocker_lines = "; ".join(readiness["blockers"])
+        raise ValueError(
+            f"Job '{job_id}' is not ready for execution. Blockers: {blocker_lines}"
+        )
+
+    jobs_dir = root.join(_REMOTE_JOBS_OUTPUT_DIR)
+    job_file = jobs_dir / f"{job_id}.json"
+    job = json.loads(job_file.read_text(encoding="utf-8"))
+
+    requested_agent: str = job.get("requested_agent", "")
+    prompt: str = job.get("requested_task", "")
+
+    command = _build_invoke_command(requested_agent, prompt)
+    if command is None:
+        raise ValueError(
+            f"Agent '{requested_agent}' cannot be invoked: {_INVOKE_UNSUPPORTED_REASON}."
+        )
+
+    pre_execution_head = _capture_git_head(root)
+
+    started_at = datetime.now(timezone.utc)
+    try:
+        proc = _run_agent_subprocess(command, _INVOKE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        raise ValueError(
+            f"Agent '{requested_agent}' timed out after {_INVOKE_TIMEOUT_SECONDS}s."
+        ) from None
+    except (FileNotFoundError, OSError) as exc:
+        raise ValueError(f"Failed to invoke agent '{requested_agent}': {exc}") from exc
+    finished_at = datetime.now(timezone.utc)
+
+    exit_code: int = proc.returncode
+    stdout: str = proc.stdout or ""
+    stderr: str = proc.stderr or ""
+    agent_succeeded = exit_code == 0
+    duration_seconds = round((finished_at - started_at).total_seconds(), 3)
+
+    changed_files = _capture_git_changed_files(root)
+    diff_summary = _capture_diff_summary(root)
+    scope_validation = _validate_file_change_scope(changed_files)
+
+    if not agent_succeeded:
+        final_status = "failed"
+    elif scope_validation["violations"]:
+        final_status = "failed"
+    elif not changed_files:
+        final_status = _FILE_MODIFY_STATUS_NO_CHANGES
+    else:
+        final_status = "completed"
+
+    result_path = str(_REMOTE_RESULTS_DIR / f"{job_id}-result.json")
+    results_dir = root.join(_REMOTE_RESULTS_DIR)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    result_file = results_dir / f"{job_id}-result.json"
+
+    artifact = {
+        "advisory": FILE_MODIFY_ADVISORY,
+        "changed_files": changed_files,
+        "command": command,
+        "diff_summary": diff_summary,
+        "duration_seconds": duration_seconds,
+        "executed": True,
+        "exit_code": exit_code,
+        "file_changes_allowed": True,
+        "final_status": final_status,
+        "finished_at": finished_at.isoformat(),
+        "job_id": job_id,
+        "pre_execution_head": pre_execution_head,
+        "scope_validation": scope_validation,
+        "selected_agent": requested_agent,
+        "started_at": started_at.isoformat(),
+        "stderr": stderr,
+        "stdout": stdout,
+    }
+    with result_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(artifact, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    job["executed_at"] = started_at.isoformat()
+    job["result_path"] = result_path
+    job["status"] = final_status
+    with job_file.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(job, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    return {
+        "advisory": FILE_MODIFY_ADVISORY,
+        "changed_files": changed_files,
+        "command": command,
+        "diff_summary": diff_summary,
+        "duration_seconds": duration_seconds,
+        "executed": True,
+        "exit_code": exit_code,
+        "final_status": final_status,
+        "finished_at": finished_at.isoformat(),
+        "job_id": job_id,
+        "output_path": result_path,
+        "pre_execution_head": pre_execution_head,
+        "scope_validation": scope_validation,
+        "selected_agent": requested_agent,
+        "started_at": started_at.isoformat(),
+        "stderr": stderr,
+        "stdout": stdout,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Governed Execution Reporting (Phase 41C)
 # ---------------------------------------------------------------------------
 

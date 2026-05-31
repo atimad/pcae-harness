@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41M: File Modification Governance Design.
+Phase 42A: Controlled File Modification.
 
 ## Governance Coherence Note
 
@@ -887,6 +887,25 @@ added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
 
+PCAE allows the first governed file-modifying remote execution with
+`pcae remote execute JOB_ID --invoke --allow-file-changes` and `--json`
+(Phase 42A): pre-execution HEAD SHA captured; changed files captured via
+`git status --porcelain` after execution; diff summary captured via `git diff
+--stat`; Phase 42A scope allows only `docs/` and `tasks/` writes — `src/`,
+`tests/`, `.pcae/`, `.git/`, `.github/`, `pyproject.toml`, and policy files are
+unconditionally denied; scope violations set `final_status=failed` with
+per-file violation messages; no changed files sets
+`final_status=completed_with_no_changes`; change metadata persisted in result
+artifact with `file_changes_allowed=true`; no commit, push, or rollback
+performed; existing `--invoke` without `--allow-file-changes` remains fully
+read-only; `invoke_remote_job_with_file_changes`, `_capture_git_head`,
+`_capture_git_changed_files`, `_capture_diff_summary`, and
+`_validate_file_change_scope` added to `core/agent.py`;
+`_run_remote_execute_invoke_file_changes` added to `commands/agent.py`;
+`--allow-file-changes` flag added to `remote execute` in `cli.py`; 15 new
+tests; advisory: "Files may have been modified, but no commit or push was
+performed."
+
 PCAE exposes a read-only governance design for future file-modifying autonomous
 coding with `pcae remote file-governance` and `--json` (Phase 41M): seven design
 sections — writable_scope_rules (repository root constraint, allowed/denied
@@ -930,7 +949,7 @@ performance."
 
 ## Next
 
-- TBD: Future Remote Coding phases (file modification execution, controlled benchmark execution, multi-job reporting).
+- TBD: Future Remote Coding phases (commit governance, controlled benchmark execution, multi-job reporting).
 
 ## Future Explorations
 

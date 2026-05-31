@@ -21,6 +21,7 @@ from pcae.core.agent import (
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
     build_file_governance_design,
+    invoke_remote_job_with_file_changes,
     build_lifecycle_report,
     build_multi_agent_registry,
     build_remote_adapters,
@@ -954,7 +955,10 @@ def run_remote_ready(args: argparse.Namespace) -> int:
 def run_remote_execute(args: argparse.Namespace) -> int:
     invoke = getattr(args, "invoke", False)
     dry_run = getattr(args, "dry_run", False)
+    allow_file_changes = getattr(args, "allow_file_changes", False)
 
+    if invoke and allow_file_changes:
+        return _run_remote_execute_invoke_file_changes(args)
     if invoke:
         return _run_remote_execute_invoke(args)
     if dry_run:
@@ -1334,6 +1338,47 @@ def run_remote_benchmark(args: argparse.Namespace) -> int:
                 print(f"    Classifications: {parts if parts else 'none'}")
         for warning in data["warnings"]:
             print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def _run_remote_execute_invoke_file_changes(args: argparse.Namespace) -> int:
+    try:
+        data = invoke_remote_job_with_file_changes(HarnessPath.cwd(), args.job_id)
+    except ValueError as error:
+        print(str(error))
+        return 1
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        final_status = data["final_status"]
+        status_label = "COMPLETED" if final_status == "completed" else final_status.upper()
+        print("Remote execution result (file changes allowed)")
+        print(f"Job ID:              {data['job_id']}")
+        print(f"Agent:               {data['selected_agent']}")
+        print(f"Pre-execution HEAD:  {data['pre_execution_head']}")
+        print(f"Exit code:           {data['exit_code']}")
+        print(f"Final status:        {status_label}")
+        changed = data["changed_files"]
+        if changed:
+            print(f"\nChanged files ({len(changed)}):")
+            for f in changed:
+                print(f"  {f}")
+        else:
+            print("\nChanged files: none")
+        scope = data["scope_validation"]
+        scope_label = "PASS" if scope["valid"] else "FAIL"
+        print(f"\nScope validation:    {scope_label}")
+        for v in scope.get("violations", []):
+            print(f"  - {v}")
+        diff = data.get("diff_summary", "")
+        if diff:
+            print(f"\nDiff summary:\n  {diff}")
+        stdout_summary = data["stdout"][:500] if data["stdout"] else "(none)"
+        print(f"\nStdout summary:\n  {stdout_summary}")
+        if data["stderr"]:
+            print(f"\nStderr summary:\n  {data['stderr'][:200]}")
         print()
         print(data["advisory"])
     return 0

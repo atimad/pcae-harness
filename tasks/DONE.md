@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed Controlled File Modification (Phase 42A): `pcae remote execute JOB_ID --invoke --allow-file-changes` extends execution pipeline with governed file-write; pre-execution HEAD, changed files, diff summary, and scope validation captured and persisted; Phase 42A scope allows docs/ and tasks/ only; src/, tests/, .pcae/, .git/, .github/, pyproject.toml denied; scope violations → failed; no changes → completed_with_no_changes; no commit, push, or rollback; existing --invoke remains read-only; 15 new tests.
 - Completed File Modification Governance Design (Phase 41M): `pcae remote file-governance` and `--json` expose governance design for future file-modifying execution; seven sections covering writable scope, change capture, approval workflow, commit governance, push governance, rollback strategy, safety model; risk model with four levels; advisory only; 9 new tests; strictly read-only.
 - Completed Controlled Runtime Benchmarking plan preview (Phase 41L.1): `pcae remote benchmark controlled --dry-run` previews controlled benchmark plan; runtimes, identical prompt, runs_per_runtime, planned metrics, limitations, advisory; `--dry-run` required; existing historical benchmark unchanged; 9 new tests; strictly read-only.
 - Completed Runtime Benchmarking (Phase 41L): `pcae remote benchmark` per-runtime metrics and rankings with confidence levels; 11 new tests.
