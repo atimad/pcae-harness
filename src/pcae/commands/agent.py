@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
+    build_file_governance_design,
     build_lifecycle_report,
     build_multi_agent_registry,
     build_remote_adapters,
@@ -1359,6 +1360,88 @@ def run_remote_benchmark_controlled(args: argparse.Namespace) -> int:
         for limitation in data["limitations"]:
             print(f"  - {limitation}")
         print()
+        print(data["advisory"])
+    return 0
+
+
+def run_remote_file_governance(args: argparse.Namespace) -> int:
+    data = build_file_governance_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["governance_design"]
+        print("File Modification Governance Design")
+        print()
+
+        scope = design["writable_scope_rules"]
+        print("Writable Scope Rules")
+        print(f"  Repository root: {scope['repository_root_constraint']}")
+        print("  Allowed paths:")
+        for p in scope["allowed_paths"]:
+            print(f"    - {p}")
+        print("  Denied paths:")
+        for p in scope["denied_paths"]:
+            print(f"    - {p}")
+        print("  Protected files:")
+        for p in scope["protected_files"]:
+            print(f"    - {p}")
+        print()
+
+        capture = design["change_capture"]
+        print("Change Capture")
+        for field, desc in capture.items():
+            print(f"  {field}: {desc}")
+        print()
+
+        approval = design["approval_workflow"]
+        print("Approval Workflow")
+        print(f"  Human review required: {approval['human_review_required']}")
+        print("  Checkpoints:")
+        for checkpoint in approval["approval_checkpoints"]:
+            print(f"    - {checkpoint}")
+        print(f"  Rejection: {approval['rejection_handling']}")
+        print()
+
+        commit = design["commit_governance"]
+        print("Commit Governance")
+        print(f"  {commit['commit_separated_from_modification']}")
+        print("  Approval requirements:")
+        for req in commit["commit_approval_requirements"]:
+            print(f"    - {req}")
+        print()
+
+        push = design["push_governance"]
+        print("Push Governance")
+        print(f"  {push['push_separated_from_commit']}")
+        print("  Branch restrictions:")
+        for r in push["branch_restrictions"]:
+            print(f"    - {r}")
+        print()
+
+        rollback = design["rollback_strategy"]
+        print("Rollback Strategy")
+        print("  Prerequisites:")
+        for p in rollback["rollback_prerequisites"]:
+            print(f"    - {p}")
+        print("  Recovery workflow:")
+        for step in rollback["recovery_workflow"]:
+            print(f"    - {step}")
+        print()
+
+        safety = design["safety_model"]
+        print("Safety Model")
+        print(f"  Default: {safety['read_only_default']}")
+        print(f"  Opt-in:  {safety['file_modifying_opt_in']}")
+        print()
+
+        risk = data["risk_model"]
+        print("Risk Model")
+        print(f"  Levels: {', '.join(risk['risk_levels'])}")
+        for level, desc in sorted(risk["classification_scheme"].items()):
+            print(f"  {level}: {desc}")
+        print(f"  Note: {risk['risk_note']}")
+        print()
+
         print(data["advisory"])
     return 0
 

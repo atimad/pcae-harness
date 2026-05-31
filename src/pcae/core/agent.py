@@ -3700,3 +3700,180 @@ def build_controlled_benchmark_plan() -> dict:
         "limitations": list(_CONTROLLED_BENCHMARK_LIMITATIONS),
         "planned_metrics": list(_CONTROLLED_BENCHMARK_PLANNED_METRICS),
     }
+
+
+# ---------------------------------------------------------------------------
+# File Modification Governance Design (Phase 41M)
+# ---------------------------------------------------------------------------
+
+FILE_GOVERNANCE_ADVISORY = (
+    "This phase defines governance only; no file modifications are performed."
+)
+
+_FILE_GOVERNANCE_RISK_LEVELS: tuple[str, ...] = ("low", "medium", "high", "critical")
+
+_FILE_GOVERNANCE_WRITABLE_SCOPE: dict = {
+    "allowed_paths": [
+        "src/",
+        "tests/",
+        "docs/",
+        "tasks/",
+        "CHANGELOG.md",
+        "PROJECT_STATUS.md",
+    ],
+    "denied_paths": [
+        ".pcae/agent-lock.json",
+        ".pcae/provenance-history.json",
+        ".pcae/session.json",
+        ".github/",
+        ".git/",
+    ],
+    "generated_artifact_paths": [
+        ".pcae/remote/",
+        ".pcae/runtime-snapshots/",
+        ".pcae/context-packs/",
+        ".pcae/continuity-packs/",
+        ".pcae/architecture-exports/",
+        ".pcae/provenance-exports/",
+    ],
+    "protected_files": [
+        ".pcae/policy.toml",
+        "pyproject.toml",
+        ".githooks/pre-commit",
+    ],
+    "repository_root_constraint": (
+        "All modifications must remain within the governed repository root. "
+        "Paths outside the repository root are unconditionally denied."
+    ),
+}
+
+_FILE_GOVERNANCE_CHANGE_CAPTURE: dict = {
+    "changed_files": "Full list of paths written or deleted during execution.",
+    "diff_collection": "Unified diff of every modified file captured before commit.",
+    "modification_summary": (
+        "Human-readable summary: files added, modified, deleted, and total lines changed."
+    ),
+    "risk_classification": (
+        "Each change is classified low/medium/high/critical based on path sensitivity "
+        "and operation type (create < modify < delete)."
+    ),
+}
+
+_FILE_GOVERNANCE_APPROVAL_WORKFLOW: dict = {
+    "approval_checkpoints": [
+        "before_execution: human approves the prompt and planned scope.",
+        "after_execution: human reviews captured diff before any commit.",
+        "before_commit: human approves the commit message and changed files.",
+        "before_push: human approves the target branch and remote.",
+    ],
+    "human_review_required": True,
+    "rejection_handling": (
+        "Any denied checkpoint aborts the workflow. No partial commits are created. "
+        "The working tree is restored to pre-execution state."
+    ),
+    "re_execution_requirements": (
+        "Re-execution requires a new human approval cycle from the "
+        "before_execution checkpoint."
+    ),
+}
+
+_FILE_GOVERNANCE_COMMIT_GOVERNANCE: dict = {
+    "commit_approval_requirements": [
+        "Human must approve the diff at the after_execution checkpoint.",
+        "Human must confirm the commit message before commit is created.",
+        "pcae check must pass on the post-execution working tree.",
+        "python -m pytest must pass on the post-execution working tree.",
+    ],
+    "commit_metadata_requirements": [
+        "Commit message must identify the governed job ID.",
+        "Commit message must identify the agent that produced the changes.",
+        "Co-authored-by attribution must be present.",
+    ],
+    "commit_separated_from_modification": (
+        "Execution and commit are separate governed steps. "
+        "Agent execution never triggers an automatic commit."
+    ),
+}
+
+_FILE_GOVERNANCE_PUSH_GOVERNANCE: dict = {
+    "branch_restrictions": [
+        "Force-push to any branch is unconditionally disallowed.",
+        "Direct push to the default branch requires explicit human override.",
+        "Push to protected branches requires a pull-request workflow.",
+    ],
+    "push_approval_requirements": [
+        "Human must approve the target branch at the before_push checkpoint.",
+        "Human must confirm no protected branch rules are violated.",
+    ],
+    "push_separated_from_commit": (
+        "Commit and push are separate governed steps. "
+        "A committed change is never automatically pushed."
+    ),
+}
+
+_FILE_GOVERNANCE_ROLLBACK_STRATEGY: dict = {
+    "recovery_workflow": [
+        "Identify the pre-execution commit SHA from the job record.",
+        "Human reviews the rollback scope and confirms the target SHA.",
+        "git reset --hard <pre-execution SHA> restores the working tree.",
+        "pcae check is run to confirm governance health after rollback.",
+    ],
+    "rollback_artifact_requirements": [
+        "Job record must contain the pre-execution git HEAD SHA.",
+        "Captured diff must be retained in the execution artifact.",
+        "Rollback must be initiated by the human user, not the agent.",
+    ],
+    "rollback_prerequisites": [
+        "Pre-execution HEAD SHA recorded in the job artifact.",
+        "Working tree must be clean before rollback is initiated.",
+        "No subsequent governed commits may have been pushed to shared remotes.",
+    ],
+}
+
+_FILE_GOVERNANCE_SAFETY_MODEL: dict = {
+    "file_modifying_opt_in": (
+        "File-modifying execution is an explicit opt-in flag. "
+        "Omitting the flag keeps execution read-only by default."
+    ),
+    "protected_operation_handling": (
+        "Operations matching protected patterns (delete_branch, drop_table, "
+        "force_push, rm_rf) are unconditionally blocked regardless of approval state."
+    ),
+    "read_only_default": (
+        "All governed remote executions are read-only by default. "
+        "No file is written, committed, or pushed without explicit human approval."
+    ),
+}
+
+_FILE_GOVERNANCE_RISK_MODEL: dict = {
+    "classification_scheme": {
+        "critical": "Deletion of protected governance files or irreversible operations.",
+        "high": "Modification of policy, CI, hooks, or dependency configuration.",
+        "low": "Addition of new source files or documentation with no deletions.",
+        "medium": "Modification of existing source or test files.",
+    },
+    "risk_levels": list(_FILE_GOVERNANCE_RISK_LEVELS),
+    "risk_note": (
+        "Risk level is advisory. Human review is required at every approval checkpoint "
+        "regardless of the computed risk level."
+    ),
+}
+
+
+def build_file_governance_design() -> dict:
+    """Return the file modification governance design. Read-only; no files modified."""
+    return {
+        "advisory": FILE_GOVERNANCE_ADVISORY,
+        "approval_model": _FILE_GOVERNANCE_APPROVAL_WORKFLOW,
+        "governance_design": {
+            "approval_workflow": _FILE_GOVERNANCE_APPROVAL_WORKFLOW,
+            "change_capture": _FILE_GOVERNANCE_CHANGE_CAPTURE,
+            "commit_governance": _FILE_GOVERNANCE_COMMIT_GOVERNANCE,
+            "push_governance": _FILE_GOVERNANCE_PUSH_GOVERNANCE,
+            "rollback_strategy": _FILE_GOVERNANCE_ROLLBACK_STRATEGY,
+            "safety_model": _FILE_GOVERNANCE_SAFETY_MODEL,
+            "writable_scope_rules": _FILE_GOVERNANCE_WRITABLE_SCOPE,
+        },
+        "risk_model": _FILE_GOVERNANCE_RISK_MODEL,
+        "rollback_model": _FILE_GOVERNANCE_ROLLBACK_STRATEGY,
+    }

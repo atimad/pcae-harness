@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Completed File Modification Governance Design (Phase 41M): `pcae remote file-governance` and `--json` expose governance design for future file-modifying execution; seven sections covering writable scope, change capture, approval workflow, commit governance, push governance, rollback strategy, safety model; risk model with four levels; advisory only; 9 new tests; strictly read-only.
 - Completed Controlled Runtime Benchmarking plan preview (Phase 41L.1): `pcae remote benchmark controlled --dry-run` previews controlled benchmark plan; runtimes, identical prompt, runs_per_runtime, planned metrics, limitations, advisory; `--dry-run` required; existing historical benchmark unchanged; 9 new tests; strictly read-only.
 - Completed Runtime Benchmarking (Phase 41L): `pcae remote benchmark` per-runtime metrics and rankings with confidence levels; 11 new tests.
 - Completed Execution Trends (Phase 41K): `pcae remote trends` global and per-runtime trend metrics; insufficient_data below 5 executions; 10 new tests.

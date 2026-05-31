@@ -10827,3 +10827,162 @@ def test_411_controlled_benchmark_dry_run_required(
         main(["remote", "benchmark", "controlled"])
 
     assert exc_info.value.code != 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 41M — File Modification Governance Design
+# ---------------------------------------------------------------------------
+
+
+def test_41m_file_governance_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "File Modification Governance Design" in output
+    assert "Writable Scope Rules" in output
+    assert "Approval Workflow" in output
+    assert "Rollback Strategy" in output
+    assert "Risk Model" in output
+    assert "This phase defines governance only; no file modifications are performed." in output
+
+
+def test_41m_file_governance_json_top_level_keys(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for key in ("advisory", "governance_design", "risk_model", "approval_model", "rollback_model"):
+        assert key in data
+
+
+def test_41m_file_governance_design_sections(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    design = data["governance_design"]
+    for section in (
+        "writable_scope_rules",
+        "change_capture",
+        "approval_workflow",
+        "commit_governance",
+        "push_governance",
+        "rollback_strategy",
+        "safety_model",
+    ):
+        assert section in design
+
+
+def test_41m_file_governance_writable_scope(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    scope = data["governance_design"]["writable_scope_rules"]
+    assert "allowed_paths" in scope
+    assert "denied_paths" in scope
+    assert "protected_files" in scope
+    assert "repository_root_constraint" in scope
+    assert len(scope["allowed_paths"]) >= 1
+    assert len(scope["denied_paths"]) >= 1
+
+
+def test_41m_file_governance_approval_workflow(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    approval = data["governance_design"]["approval_workflow"]
+    assert approval["human_review_required"] is True
+    assert len(approval["approval_checkpoints"]) >= 1
+    assert "rejection_handling" in approval
+    assert "re_execution_requirements" in approval
+
+
+def test_41m_file_governance_risk_model(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    risk = data["risk_model"]
+    assert set(risk["risk_levels"]) == {"low", "medium", "high", "critical"}
+    assert "classification_scheme" in risk
+    for level in ("low", "medium", "high", "critical"):
+        assert level in risk["classification_scheme"]
+
+
+def test_41m_file_governance_rollback_model(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rollback = data["rollback_model"]
+    assert "rollback_prerequisites" in rollback
+    assert "rollback_artifact_requirements" in rollback
+    assert "recovery_workflow" in rollback
+    assert len(rollback["recovery_workflow"]) >= 1
+
+
+def test_41m_file_governance_advisory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["remote", "file-governance", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "governance only" in data["advisory"]
+    assert "no file modifications" in data["advisory"]
+
+
+def test_41m_file_governance_readonly(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before_files = set(f.name for f in (tmp_path / ".pcae").rglob("*.json"))
+
+    main(["remote", "file-governance", "--json"])
+    capsys.readouterr()
+
+    after_files = set(f.name for f in (tmp_path / ".pcae").rglob("*.json"))
+    assert before_files == after_files

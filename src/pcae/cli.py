@@ -38,6 +38,7 @@ from pcae.commands.agent import (
     run_remote_analytics,
     run_remote_benchmark,
     run_remote_benchmark_controlled,
+    run_remote_file_governance,
     run_remote_report_export,
     run_remote_report_inspect,
     run_remote_trends,
@@ -1541,6 +1542,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON benchmark plan.",
     )
     remote_benchmark_controlled_parser.set_defaults(handler=run_remote_benchmark_controlled)
+
+    remote_file_governance_parser = remote_subparsers.add_parser(
+        "file-governance",
+        help="Display the governance design for future file-modifying autonomous coding.",
+    )
+    remote_file_governance_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance design.",
+    )
+    remote_file_governance_parser.set_defaults(handler=run_remote_file_governance)
 
     remote_report_parser = remote_subparsers.add_parser(
         "report",

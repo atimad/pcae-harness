@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 41L.1: Controlled Runtime Benchmarking.
+Phase 41M: File Modification Governance Design.
 
 ## Governance Coherence Note
 
@@ -887,6 +887,27 @@ added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
 
+PCAE exposes a read-only governance design for future file-modifying autonomous
+coding with `pcae remote file-governance` and `--json` (Phase 41M): seven design
+sections — writable_scope_rules (repository root constraint, allowed/denied
+paths, generated artifact paths, protected files), change_capture (changed
+files, diff collection, modification summary, risk classification),
+approval_workflow (human_review_required=true, four checkpoints:
+before_execution/after_execution/before_commit/before_push, rejection handling,
+re-execution requirements), commit_governance (commit separated from execution,
+approval requirements, metadata requirements), push_governance (push separated
+from commit, branch restrictions, approval requirements), rollback_strategy
+(prerequisites, artifact requirements, recovery workflow), safety_model
+(read-only default, file-modifying opt-in, protected operation handling);
+risk_model defines four levels (low/medium/high/critical) with classification
+scheme and advisory note that human review is required regardless of risk level;
+`build_file_governance_design()` added to `core/agent.py`;
+`run_remote_file_governance` added to `commands/agent.py`;
+`file-governance` subcommand wired under `remote` in `cli.py`; 9 new tests;
+strictly read-only — no files modified, no execution, no commits, no pushes;
+advisory: "This phase defines governance only; no file modifications are
+performed."
+
 PCAE previews a controlled benchmark plan with `pcae remote benchmark controlled
 --dry-run` and `--dry-run --json` (Phase 41L.1): plan fields include `runtimes`
 (claude-local, codex-local, kimi-local), `prompt` (identical across all
@@ -909,7 +930,7 @@ performance."
 
 ## Next
 
-- TBD: Future Remote Coding phases (controlled benchmark execution, multi-job reporting).
+- TBD: Future Remote Coding phases (file modification execution, controlled benchmark execution, multi-job reporting).
 
 ## Future Explorations
 
