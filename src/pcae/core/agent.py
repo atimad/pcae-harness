@@ -6588,6 +6588,151 @@ _COORDINATOR_FUTURE_AGENTS: tuple[str, ...] = (
 # Multi-Agent Planning Prototype Design (Phase 44H)
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Planning Artifact Dry-Run (Phase 44I)
+# ---------------------------------------------------------------------------
+
+PLANNING_DRY_RUN_ADVISORY = (
+    "Planning dry-run is simulated. No planning agents were executed."
+)
+
+_PLANNING_DRY_RUN_OBJECTIVE_ID = "plan-dry-run-001"
+_PLANNING_DRY_RUN_OBJECTIVE_TEXT = "Implement a capability validation framework"
+_PLANNING_DRY_RUN_SCOPE = "core/agent.py, tests/test_agent.py, docs"
+_PLANNING_DRY_RUN_REQUIRED_CAPABILITIES = ("planning", "architecture", "roadmap-generation")
+
+# Deterministic mock planner selection derived from known capability profiles.
+# Uses the same agents that build_capability_registry populates at validated+.
+_PLANNING_DRY_RUN_PLANNER_SELECTION: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "selection_reason": "Declares planning capability at validated confidence via adapter contract.",
+        "capability_used": "planning",
+        "confidence_level": "validated",
+    },
+    {
+        "agent_id": "claude-local",
+        "selection_reason": "Declares planning capability at validated confidence via adapter contract.",
+        "capability_used": "planning",
+        "confidence_level": "validated",
+    },
+    {
+        "agent_id": "kimi-local",
+        "selection_reason": "Declares planning capability at validated confidence via governed execution history.",
+        "capability_used": "planning",
+        "confidence_level": "validated",
+    },
+)
+
+# Deterministic mock planning artifacts — one per selected planner.
+_PLANNING_DRY_RUN_SIMULATED_PLANS: tuple[dict, ...] = (
+    {
+        "planner_id": "codex-local",
+        "proposed_phases": [
+            "Phase 1: Define capability model",
+            "Phase 2: Implement validation rules",
+            "Phase 3: Add CLI commands",
+            "Phase 4: Write tests",
+        ],
+        "assumptions": [
+            "Capability model is well-defined",
+            "CLI patterns are established",
+        ],
+        "risks": [
+            "Capability categories may expand",
+            "Validation rules may conflict",
+        ],
+    },
+    {
+        "planner_id": "claude-local",
+        "proposed_phases": [
+            "Phase 1: Design capability ontology",
+            "Phase 2: Implement registry",
+            "Phase 3: Build validation pipeline",
+            "Phase 4: Integration tests",
+        ],
+        "assumptions": [
+            "Registry is extensible",
+            "Test framework supports parametric tests",
+        ],
+        "risks": [
+            "Ontology drift over time",
+            "Registry performance at scale",
+        ],
+    },
+    {
+        "planner_id": "kimi-local",
+        "proposed_phases": [
+            "Phase 1: Capability data model",
+            "Phase 2: Evidence collection pipeline",
+            "Phase 3: Confidence scoring",
+            "Phase 4: CLI and documentation",
+        ],
+        "assumptions": [
+            "Evidence sources are well-defined",
+            "Confidence thresholds are fixed",
+        ],
+        "risks": [
+            "Evidence collection requires agent runtime",
+            "Confidence scoring is subjective",
+        ],
+    },
+)
+
+_PLANNING_DRY_RUN_SIMULATED_CONSENSUS: dict = {
+    "agreements": [
+        "CLI commands are required",
+        "Tests are required",
+        "Registry must be read-only by default",
+    ],
+    "conflicts": [
+        "Phase ordering: codex-local favors implementation-first; claude-local favors design-first.",
+        "Scope: kimi-local includes confidence scoring as a separate phase.",
+    ],
+    "consensus_summary": (
+        "Three planners agree on core deliverables (CLI, tests, registry). "
+        "Phase ordering and scope boundaries require human decision."
+    ),
+}
+
+_PLANNING_DRY_RUN_HUMAN_REVIEW: dict = {
+    "human_decision_required": True,
+    "review_items": [
+        "Resolve phase ordering conflict",
+        "Confirm scope boundaries",
+        "Approve proposed phases before execution",
+    ],
+}
+
+_PLANNING_DRY_RUN_NEXT_ACTIONS: tuple[str, ...] = (
+    "Human reviews simulated plans",
+    "Human resolves conflicts and selects preferred approach",
+    "Human approves planning artifact before execution",
+    "Run pcae planning-dry-run --json for machine-readable output",
+)
+
+
+def build_planning_dry_run() -> dict:
+    """Return a simulated multi-agent planning dry-run. Read-only; no agents executed."""
+    return {
+        "objective": {
+            "objective_id": _PLANNING_DRY_RUN_OBJECTIVE_ID,
+            "objective_text": _PLANNING_DRY_RUN_OBJECTIVE_TEXT,
+            "planning_scope": _PLANNING_DRY_RUN_SCOPE,
+            "required_capabilities": list(_PLANNING_DRY_RUN_REQUIRED_CAPABILITIES),
+        },
+        "planner_selection": {
+            "selected_agents": [p["agent_id"] for p in _PLANNING_DRY_RUN_PLANNER_SELECTION],
+            "selection_details": list(_PLANNING_DRY_RUN_PLANNER_SELECTION),
+        },
+        "simulated_plans": list(_PLANNING_DRY_RUN_SIMULATED_PLANS),
+        "simulated_consensus": _PLANNING_DRY_RUN_SIMULATED_CONSENSUS,
+        "human_review": _PLANNING_DRY_RUN_HUMAN_REVIEW,
+        "next_actions": list(_PLANNING_DRY_RUN_NEXT_ACTIONS),
+        "advisory": PLANNING_DRY_RUN_ADVISORY,
+    }
+
+
 PLANNING_PROTOTYPE_DESIGN_ADVISORY = (
     "Planning prototype design is advisory; no planning agents are executed."
 )

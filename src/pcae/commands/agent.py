@@ -24,6 +24,7 @@ from pcae.core.agent import (
     build_coordinator_design,
     build_orchestration_design,
     build_parallel_execution_design,
+    build_planning_dry_run,
     build_planning_prototype_design,
     build_capability_registry,
     build_capability_discovery,
@@ -2111,6 +2112,57 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_planning_dry_run(args: argparse.Namespace) -> int:
+    data = build_planning_dry_run()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        obj = data["objective"]
+        print("Planning dry-run summary")
+        print(f"  Objective: {obj['objective_text']}")
+        print(f"  Objective ID: {obj['objective_id']}")
+        print(f"  Scope: {obj['planning_scope']}")
+        caps = ", ".join(obj["required_capabilities"])
+        print(f"  Required capabilities: {caps}")
+        print()
+        sel = data["planner_selection"]
+        agents = ", ".join(sel["selected_agents"])
+        print(f"Planner selection: {agents}")
+        for detail in sel["selection_details"]:
+            print(f"  {detail['agent_id']}: {detail['capability_used']} "
+                  f"[{detail['confidence_level']}] — {detail['selection_reason']}")
+        print()
+        print("Simulated plans:")
+        for plan in data["simulated_plans"]:
+            print(f"  {plan['planner_id']}:")
+            for phase in plan["proposed_phases"]:
+                print(f"    - {phase}")
+            if plan["risks"]:
+                print(f"    Risks: {'; '.join(plan['risks'])}")
+        print()
+        cons = data["simulated_consensus"]
+        print("Simulated consensus:")
+        print("  Agreements:")
+        for item in cons["agreements"]:
+            print(f"    - {item}")
+        print("  Conflicts:")
+        for item in cons["conflicts"]:
+            print(f"    - {item}")
+        print(f"  Summary: {cons['consensus_summary']}")
+        print()
+        review = data["human_review"]
+        print(f"Human review required: {review['human_decision_required']}")
+        for item in review["review_items"]:
+            print(f"  - {item}")
+        print()
+        print("Next actions:")
+        for action in data["next_actions"]:
+            print(f"  - {action}")
         print()
         print(data["advisory"])
     return 0

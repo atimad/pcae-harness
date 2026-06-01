@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44H: Multi-Agent Planning Prototype Design.
+Phase 44I: Planning Artifact Dry-Run.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,31 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE simulates a multi-agent planning dry-run without executing agents
+(Phase 44I): `pcae planning-dry-run` and `pcae planning-dry-run --json`
+simulate a planning workflow for the fixed objective "Implement a
+capability validation framework"; coordinator intake produces objective_id
+(plan-dry-run-001), planning_scope, and required_capabilities (planning,
+architecture, roadmap-generation); planner selection derives three eligible
+agents from known capability profiles (codex-local, claude-local,
+kimi-local — all at validated confidence) with selection_reason,
+capability_used, and confidence_level per agent; three simulated planning
+artifacts are generated (one per planner) each with proposed_phases (4
+phases), assumptions, and risks — codex-local proposes
+define→validate→CLI→tests, claude-local proposes
+ontology→registry→pipeline→tests, kimi-local proposes
+model→evidence→scoring→CLI; simulated consensus reports three agreements
+(CLI needed, tests needed, read-only by default), two conflicts (phase
+ordering and scope boundary), and a consensus_summary requiring human
+decision; human review stage reports human_decision_required=true with
+three review items; next_actions guides human through review, conflict
+resolution, approval, and JSON output; JSON output includes `objective`,
+`planner_selection`, `simulated_plans`, `simulated_consensus`,
+`human_review`, `next_actions`, `advisory`; strictly read-only — no
+agent execution, no child task creation, no roadmap mutation; advisory:
+"Planning dry-run is simulated. No planning agents were executed.";
+13 new tests.
 
 PCAE exposes a read-only multi-agent planning prototype design
 (Phase 44H): `pcae planning-prototype-design` and

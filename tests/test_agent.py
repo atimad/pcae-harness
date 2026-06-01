@@ -16344,3 +16344,125 @@ def test_44h_planning_prototype_design_human_output_shows_advisory(capsys) -> No
     output = capsys.readouterr().out
     assert "Planning prototype design is advisory" in output
     assert "no planning agents are executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44I — Planning Artifact Dry-Run
+# ---------------------------------------------------------------------------
+
+
+def test_44i_planning_dry_run_command_exits_zero(capsys) -> None:
+    exit_code = main(["planning-dry-run"])
+    assert exit_code == 0
+
+
+def test_44i_planning_dry_run_json_exits_zero(capsys) -> None:
+    exit_code = main(["planning-dry-run", "--json"])
+    assert exit_code == 0
+
+
+def test_44i_planning_dry_run_json_has_required_top_level_keys(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "objective" in data
+    assert "planner_selection" in data
+    assert "simulated_plans" in data
+    assert "simulated_consensus" in data
+    assert "human_review" in data
+    assert "advisory" in data
+
+
+def test_44i_planning_dry_run_objective_is_capability_validation(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    obj = data["objective"]
+    assert "capability validation framework" in obj["objective_text"].lower()
+    assert obj["objective_id"] == "plan-dry-run-001"
+    assert "planning" in obj["required_capabilities"]
+    assert "architecture" in obj["required_capabilities"]
+    assert "roadmap-generation" in obj["required_capabilities"]
+
+
+def test_44i_planning_dry_run_selects_three_planners(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sel = data["planner_selection"]
+    assert len(sel["selected_agents"]) == 3
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in sel["selected_agents"]
+
+
+def test_44i_planning_dry_run_selection_details_have_required_fields(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for detail in data["planner_selection"]["selection_details"]:
+        assert "agent_id" in detail
+        assert "selection_reason" in detail
+        assert "capability_used" in detail
+        assert "confidence_level" in detail
+        assert detail["confidence_level"] in ("observed", "validated", "proven")
+
+
+def test_44i_planning_dry_run_simulated_plans_one_per_planner(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plans = data["simulated_plans"]
+    assert len(plans) == 3
+    planner_ids = [p["planner_id"] for p in plans]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in planner_ids
+
+
+def test_44i_planning_dry_run_simulated_plans_have_required_fields(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for plan in data["simulated_plans"]:
+        assert "planner_id" in plan
+        assert "proposed_phases" in plan
+        assert "assumptions" in plan
+        assert "risks" in plan
+        assert len(plan["proposed_phases"]) > 0
+
+
+def test_44i_planning_dry_run_simulated_consensus_has_required_fields(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cons = data["simulated_consensus"]
+    assert "agreements" in cons
+    assert "conflicts" in cons
+    assert "consensus_summary" in cons
+    assert len(cons["agreements"]) > 0
+    assert len(cons["conflicts"]) > 0
+
+
+def test_44i_planning_dry_run_human_review_required(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    review = data["human_review"]
+    assert review["human_decision_required"] is True
+    assert len(review["review_items"]) > 0
+
+
+def test_44i_planning_dry_run_advisory_is_correct(capsys) -> None:
+    main(["planning-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "simulated" in data["advisory"].lower()
+    assert "no planning agents were executed" in data["advisory"].lower()
+
+
+def test_44i_planning_dry_run_human_output_shows_planner_selection(capsys) -> None:
+    main(["planning-dry-run"])
+    output = capsys.readouterr().out
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "validated" in output
+
+
+def test_44i_planning_dry_run_human_output_shows_consensus_and_advisory(capsys) -> None:
+    main(["planning-dry-run"])
+    output = capsys.readouterr().out
+    assert "Simulated consensus" in output
+    assert "Human review required" in output
+    assert "Planning dry-run is simulated" in output
+    assert "No planning agents were executed" in output
