@@ -6576,6 +6576,173 @@ _COORDINATOR_FUTURE_AGENTS: tuple[str, ...] = (
 )
 
 
+# ---------------------------------------------------------------------------
+# Consensus Engine Design (Phase 44F)
+# ---------------------------------------------------------------------------
+
+CONSENSUS_DESIGN_ADVISORY = (
+    "Consensus design is advisory; no consensus execution is performed."
+)
+
+_CONSENSUS_INPUT_FIELDS: tuple[str, ...] = (
+    "agent_id",
+    "assigned_role",
+    "task_id",
+    "recommendation",
+    "confidence",
+    "rationale",
+    "evidence_artifacts",
+    "execution_result_refs",
+)
+
+_CONSENSUS_DECISION_TYPES: tuple[dict, ...] = (
+    {
+        "decision": "approve",
+        "description": "All or majority of agents agree the work is acceptable.",
+    },
+    {
+        "decision": "reject",
+        "description": "All or majority of agents agree the work should not proceed.",
+    },
+    {
+        "decision": "request_changes",
+        "description": "Agents agree the work needs modification before proceeding.",
+    },
+    {
+        "decision": "inconclusive",
+        "description": "Agents disagree and no policy threshold is met.",
+    },
+    {
+        "decision": "escalate_to_human",
+        "description": "Conflict cannot be resolved automatically; human decision required.",
+    },
+)
+
+_CONSENSUS_POLICIES: tuple[dict, ...] = (
+    {
+        "policy": "unanimous",
+        "description": "All agents must agree for a decision to be reached.",
+        "is_default": False,
+    },
+    {
+        "policy": "majority",
+        "description": "More than half of agents must agree for a decision to be reached.",
+        "is_default": False,
+    },
+    {
+        "policy": "weighted",
+        "description": "Agents are assigned numeric weights; decision goes to the weighted majority.",
+        "is_default": False,
+    },
+    {
+        "policy": "confidence_weighted",
+        "description": "Agent weights are derived from their capability confidence levels.",
+        "is_default": False,
+    },
+    {
+        "policy": "role_priority",
+        "description": "Certain roles (e.g. validator) have decision authority over others.",
+        "is_default": False,
+    },
+    {
+        "policy": "human_escalation",
+        "description": "Conflicts are always escalated to the human for final decision.",
+        "is_default": True,
+    },
+)
+
+_CONSENSUS_DEFAULT_POLICY = "human_escalation"
+
+_CONSENSUS_WEIGHT_SOURCES: tuple[dict, ...] = (
+    {
+        "source": "capability_confidence",
+        "description": "Higher confidence level (proven > validated > observed > unknown) yields higher weight.",
+    },
+    {
+        "source": "runtime_availability",
+        "description": "Agents with confirmed available lifecycle status receive higher weight.",
+    },
+    {
+        "source": "successful_execution_history",
+        "description": "Agents with more successful governed executions receive higher weight.",
+    },
+    {
+        "source": "role_fit",
+        "description": "Weight is higher when the agent's declared role matches the task role.",
+    },
+    {
+        "source": "task_class_fit",
+        "description": "Weight is higher when the agent's capabilities match the task class.",
+    },
+)
+
+_CONSENSUS_CONFLICT_HANDLING: dict = {
+    "rule": (
+        "When agents disagree, the consensus engine preserves all recommendations "
+        "and rationales, produces a conflict summary, and escalates to the human "
+        "by default. No automatic resolution is performed."
+    ),
+    "steps": [
+        "preserve all agent recommendations",
+        "preserve all agent rationales",
+        "produce conflict summary",
+        "escalate to human by default",
+    ],
+}
+
+_CONSENSUS_GOVERNANCE_BOUNDARIES: dict = {
+    "engine_may": [
+        "aggregate agent recommendations",
+        "produce advisory decision",
+        "flag conflicts for human review",
+        "request human decision",
+    ],
+    "engine_may_not": [
+        "approve changes",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+    "note": (
+        "Consensus engine output is advisory only. "
+        "All approval, commit, push, and rollback operations remain "
+        "governed by existing PCAE controls."
+    ),
+}
+
+_CONSENSUS_FUTURE_EXPANSIONS: tuple[str, ...] = (
+    "quorum thresholds",
+    "veto-capable roles",
+    "domain-specific weighting",
+    "reviewer panels",
+    "roadmap proposal consensus",
+)
+
+
+def build_consensus_design() -> dict:
+    """Return a read-only consensus engine architecture design."""
+    return {
+        "consensus_design": {
+            "input_fields": list(_CONSENSUS_INPUT_FIELDS),
+            "default_policy": _CONSENSUS_DEFAULT_POLICY,
+        },
+        "decision_types": list(_CONSENSUS_DECISION_TYPES),
+        "consensus_policies": list(_CONSENSUS_POLICIES),
+        "weighting_model": {
+            "description": (
+                "Weights are derived from agent-specific evidence rather than "
+                "hardcoded values. No weight is assigned without supporting evidence."
+            ),
+            "weight_sources": list(_CONSENSUS_WEIGHT_SOURCES),
+        },
+        "conflict_handling": _CONSENSUS_CONFLICT_HANDLING,
+        "governance_boundaries": _CONSENSUS_GOVERNANCE_BOUNDARIES,
+        "future_expansions": list(_CONSENSUS_FUTURE_EXPANSIONS),
+        "advisory": CONSENSUS_DESIGN_ADVISORY,
+    }
+
+
 def build_coordinator_design() -> dict:
     """Return a read-only coordinator agent architecture design."""
     return {

@@ -15959,3 +15959,132 @@ def test_44e_coordinator_design_human_output_shows_advisory(capsys) -> None:
     output = capsys.readouterr().out
     assert "Coordinator design is advisory" in output
     assert "no orchestration is performed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44F — Consensus Engine Design
+# ---------------------------------------------------------------------------
+
+
+def test_44f_consensus_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-design"])
+    assert exit_code == 0
+
+
+def test_44f_consensus_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44f_consensus_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "consensus_design" in data
+    assert "decision_types" in data
+    assert "consensus_policies" in data
+    assert "weighting_model" in data
+    assert "conflict_handling" in data
+    assert "governance_boundaries" in data
+    assert "advisory" in data
+
+
+def test_44f_consensus_design_input_fields_defined(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["consensus_design"]["input_fields"]
+    for expected in (
+        "agent_id", "assigned_role", "task_id", "recommendation",
+        "confidence", "rationale", "evidence_artifacts", "execution_result_refs",
+    ):
+        assert expected in fields
+
+
+def test_44f_consensus_design_has_five_decision_types(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    decisions = [d["decision"] for d in data["decision_types"]]
+    assert len(decisions) == 5
+    for expected in ("approve", "reject", "request_changes", "inconclusive", "escalate_to_human"):
+        assert expected in decisions
+
+
+def test_44f_consensus_design_has_six_policies(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    policies = [p["policy"] for p in data["consensus_policies"]]
+    assert len(policies) == 6
+    for expected in ("unanimous", "majority", "weighted", "confidence_weighted", "role_priority", "human_escalation"):
+        assert expected in policies
+
+
+def test_44f_consensus_design_default_policy_is_human_escalation(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["consensus_design"]["default_policy"] == "human_escalation"
+    default_policies = [p for p in data["consensus_policies"] if p["is_default"]]
+    assert len(default_policies) == 1
+    assert default_policies[0]["policy"] == "human_escalation"
+
+
+def test_44f_consensus_design_weighting_model_has_five_sources(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sources = [s["source"] for s in data["weighting_model"]["weight_sources"]]
+    assert len(sources) == 5
+    for expected in (
+        "capability_confidence", "runtime_availability",
+        "successful_execution_history", "role_fit", "task_class_fit",
+    ):
+        assert expected in sources
+
+
+def test_44f_consensus_design_conflict_handling_preserves_recommendations(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    steps = data["conflict_handling"]["steps"]
+    assert any("preserve all agent recommendations" in s for s in steps)
+    assert any("preserve all agent rationales" in s for s in steps)
+    assert any("conflict summary" in s for s in steps)
+    assert any("escalate to human" in s for s in steps)
+
+
+def test_44f_consensus_design_governance_boundaries_defined(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_boundaries"]
+    may = gov["engine_may"]
+    may_not = gov["engine_may_not"]
+    assert any("aggregate" in item for item in may)
+    assert any("advisory" in item for item in may)
+    for prohibited in ("commit", "push", "rollback"):
+        assert any(prohibited in item for item in may_not)
+    assert any("bypass governance" in item for item in may_not)
+
+
+def test_44f_consensus_design_future_expansions_defined(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expansions = data["future_expansions"]
+    assert len(expansions) >= 5
+    assert any("quorum" in e for e in expansions)
+    assert any("veto" in e for e in expansions)
+
+
+def test_44f_consensus_design_advisory_is_correct(capsys) -> None:
+    main(["consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "no consensus execution" in data["advisory"].lower()
+
+
+def test_44f_consensus_design_human_output_shows_decision_types(capsys) -> None:
+    main(["consensus-design"])
+    output = capsys.readouterr().out
+    for dt in ("approve", "reject", "request_changes", "inconclusive", "escalate_to_human"):
+        assert dt in output
+
+
+def test_44f_consensus_design_human_output_shows_advisory(capsys) -> None:
+    main(["consensus-design"])
+    output = capsys.readouterr().out
+    assert "Consensus design is advisory" in output
+    assert "no consensus execution is performed" in output

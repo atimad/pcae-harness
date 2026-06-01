@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44E: Coordinator Agent Design.
+Phase 44F: Consensus Engine Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,29 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only consensus engine architecture design
+(Phase 44F): `pcae consensus-design` and `pcae consensus-design --json`
+generate a consensus architecture covering eight consensus input fields
+(agent_id, assigned_role, task_id, recommendation, confidence, rationale,
+evidence_artifacts, execution_result_refs), five decision types (approve,
+reject, request_changes, inconclusive, escalate_to_human), six consensus
+policies (unanimous, majority, weighted, confidence_weighted, role_priority,
+human_escalation) with human_escalation as the default, a weighting model
+whose weights derive from five evidence-based sources (capability_confidence,
+runtime_availability, successful_execution_history, role_fit, task_class_fit)
+without hardcoded values, conflict handling that preserves all recommendations
+and rationales and escalates to the human by default, governance boundaries
+(engine may aggregate recommendations, produce advisory decisions, flag
+conflicts, request human decisions; engine may not approve changes, commit,
+push, rollback, or bypass governance), and five future expansion items
+(quorum thresholds, veto-capable roles, domain-specific weighting, reviewer
+panels, roadmap proposal consensus); JSON output includes `consensus_design`,
+`decision_types`, `consensus_policies`, `weighting_model`,
+`conflict_handling`, `governance_boundaries`, `future_expansions`,
+`advisory`; strictly read-only — no consensus execution, no approval
+mutation, no agent spawning; advisory: "Consensus design is advisory;
+no consensus execution is performed."; 14 new tests.
 
 PCAE exposes a read-only coordinator agent architecture design
 (Phase 44E): `pcae coordinator-design` and `pcae coordinator-design

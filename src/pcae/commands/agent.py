@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_design,
     build_collaboration_workflows,
+    build_consensus_design,
     build_coordinator_design,
     build_orchestration_design,
     build_capability_registry,
@@ -2108,6 +2109,57 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_consensus_design(args: argparse.Namespace) -> int:
+    data = build_consensus_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Consensus engine architecture design")
+        print()
+        print("Consensus inputs:")
+        fields = ", ".join(data["consensus_design"]["input_fields"])
+        print(f"  Fields: {fields}")
+        print(f"  Default policy: {data['consensus_design']['default_policy']}")
+        print()
+        print("Decision types:")
+        for dt in data["decision_types"]:
+            print(f"  {dt['decision']}: {dt['description']}")
+        print()
+        print("Consensus policies:")
+        for policy in data["consensus_policies"]:
+            default_label = " (default)" if policy["is_default"] else ""
+            print(f"  {policy['policy']}{default_label}: {policy['description']}")
+        print()
+        print("Weighting model:")
+        print(f"  {data['weighting_model']['description']}")
+        print("  Weight sources:")
+        for source in data["weighting_model"]["weight_sources"]:
+            print(f"    {source['source']}: {source['description']}")
+        print()
+        print("Conflict handling:")
+        print(f"  Rule: {data['conflict_handling']['rule']}")
+        print("  Steps:")
+        for step in data["conflict_handling"]["steps"]:
+            print(f"    - {step}")
+        print()
+        print("Governance boundaries:")
+        gov = data["governance_boundaries"]
+        print("  Engine may:")
+        for item in gov["engine_may"]:
+            print(f"    - {item}")
+        print("  Engine may not:")
+        for item in gov["engine_may_not"]:
+            print(f"    - {item}")
+        print(f"  Note: {gov['note']}")
+        print()
+        print("Future expansions:")
+        for ext in data["future_expansions"]:
+            print(f"  - {ext}")
         print()
         print(data["advisory"])
     return 0
