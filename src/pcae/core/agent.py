@@ -6132,6 +6132,61 @@ def _build_agent_capability_profile(
     )
 
 
+# ---------------------------------------------------------------------------
+# Phase 44D.1: Capability Classification Normalization
+# ---------------------------------------------------------------------------
+# Normalization maps individual capability names into higher-level summary
+# groups without erasing original records or altering confidence levels.
+# Any capability at observed or better qualifies an agent for a group.
+
+_MULTI_AGENT_CAPABILITIES: frozenset[str] = frozenset({
+    "subagent-coordination",
+    "swarm-coordination",
+    "custom-agent-support",
+})
+
+_EXTENSIBILITY_CAPABILITIES: frozenset[str] = frozenset({
+    "skill-execution",
+})
+
+
+def _has_capability_observed(profile: AgentCapabilityProfile, cap_name: str) -> bool:
+    """Return True if the agent holds *cap_name* at observed confidence or better."""
+    for cap in profile.capabilities:
+        if cap.name == cap_name and cap.confidence != _CAP_CONF_UNKNOWN:
+            return True
+    return False
+
+
+def _build_normalized_summary(profiles: list[AgentCapabilityProfile]) -> dict:
+    """Return normalized capability group membership lists. Read-only; no confidence mutation."""
+    subagent_capable = [p.agent_id for p in profiles if p.subagent_profile.supported]
+    swarm_capable = [
+        p.agent_id for p in profiles
+        if _has_capability_observed(p, "swarm-coordination")
+    ]
+    multi_agent_capable = [
+        p.agent_id for p in profiles
+        if any(_has_capability_observed(p, cap) for cap in _MULTI_AGENT_CAPABILITIES)
+    ]
+    extensibility_capable = [
+        p.agent_id for p in profiles
+        if any(_has_capability_observed(p, cap) for cap in _EXTENSIBILITY_CAPABILITIES)
+    ]
+    return {
+        "subagent_capable_agents": subagent_capable,
+        "swarm_capable_agents": swarm_capable,
+        "multi_agent_capable_agents": multi_agent_capable,
+        "extensibility_capable_agents": extensibility_capable,
+        "normalization_rules": {
+            "subagent-coordination": "multi_agent_capable",
+            "swarm-coordination": "multi_agent_capable",
+            "custom-agent-support": "multi_agent_capable",
+            "skill-execution": "extensibility_capable",
+        },
+    }
+
+
 def _build_discovery_summary(profiles: list[AgentCapabilityProfile]) -> dict:
     installed_count = sum(1 for p in profiles if p.installed)
     proven_count = sum(
@@ -6144,14 +6199,17 @@ def _build_discovery_summary(profiles: list[AgentCapabilityProfile]) -> dict:
         for c in p.capabilities
         if c.confidence == _CAP_CONF_UNKNOWN
     )
-    subagent_supported = [p.agent_id for p in profiles if p.subagent_profile.supported]
+    normalized = _build_normalized_summary(profiles)
     return {
         "agents_checked": len(profiles),
         "agents_installed": installed_count,
         "agents_not_installed": len(profiles) - installed_count,
         "proven_capability_entries": proven_count,
         "unknown_capability_entries": unknown_count,
-        "subagent_capable_agents": subagent_supported,
+        "subagent_capable_agents": normalized["subagent_capable_agents"],
+        "swarm_capable_agents": normalized["swarm_capable_agents"],
+        "multi_agent_capable_agents": normalized["multi_agent_capable_agents"],
+        "extensibility_capable_agents": normalized["extensibility_capable_agents"],
     }
 
 
@@ -6350,6 +6408,7 @@ def build_capability_validation(root: HarnessPath) -> dict:
         for spec in _CAPABILITY_AGENT_SPECS
     ]
     validation_candidates = _build_validation_candidates(profiles)
+    normalized_summary = _build_normalized_summary(profiles)
     validation_framework = {
         "description": (
             "Framework for defining how PCAE promotes discovered agent capabilities "
@@ -6375,5 +6434,6 @@ def build_capability_validation(root: HarnessPath) -> dict:
         "validation_framework": validation_framework,
         "promotion_rules": list(_CAPABILITY_PROMOTION_RULES),
         "validation_candidates": validation_candidates,
+        "normalized_summary": normalized_summary,
         "advisory": CAPABILITY_VALIDATION_ADVISORY,
     }

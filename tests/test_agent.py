@@ -15557,3 +15557,128 @@ def test_44d_capability_validation_no_execution_performed(capsys) -> None:
     main(["capability-validation", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "executed" in data["advisory"].lower()
+
+
+# Phase 44D.1: Capability Classification Normalization
+
+
+def test_44d1_discovery_summary_has_normalized_group_keys(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "subagent_capable_agents" in summary
+    assert "swarm_capable_agents" in summary
+    assert "multi_agent_capable_agents" in summary
+    assert "extensibility_capable_agents" in summary
+
+
+def test_44d1_registry_summary_has_normalized_group_keys(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "subagent_capable_agents" in summary
+    assert "swarm_capable_agents" in summary
+    assert "multi_agent_capable_agents" in summary
+    assert "extensibility_capable_agents" in summary
+
+
+def test_44d1_kimi_swarm_rolls_up_into_multi_agent(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "kimi-local" in summary["swarm_capable_agents"]
+    assert "kimi-local" in summary["multi_agent_capable_agents"]
+
+
+def test_44d1_codex_subagent_rolls_up_into_multi_agent(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "codex-local" in summary["subagent_capable_agents"]
+    assert "codex-local" in summary["multi_agent_capable_agents"]
+
+
+def test_44d1_claude_subagent_rolls_up_into_multi_agent(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "claude-local" in summary["subagent_capable_agents"]
+    assert "claude-local" in summary["multi_agent_capable_agents"]
+
+
+def test_44d1_multi_agent_includes_all_three_installed_runtimes(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    multi = set(data["discovery_summary"]["multi_agent_capable_agents"])
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        assert agent in multi, f"{agent} missing from multi_agent_capable_agents"
+
+
+def test_44d1_original_capability_records_preserved_in_discovery(capsys) -> None:
+    # Normalization is summary-level only — individual capability entries must survive unchanged.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(p for p in data["capability_registry"] if p["agent_id"] == "kimi-local")
+    cap_names = {c["name"] for c in kimi["capabilities"]}
+    assert "swarm-coordination" in cap_names
+    swarm_cap = next(c for c in kimi["capabilities"] if c["name"] == "swarm-coordination")
+    assert swarm_cap["confidence"] == "observed"
+
+
+def test_44d1_normalization_does_not_promote_confidence(capsys) -> None:
+    # Grouped agents must not have their individual confidence levels altered.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] in ("subagent-coordination", "swarm-coordination",
+                               "custom-agent-support", "skill-execution"):
+                assert cap["confidence"] in ("unknown", "observed", "validated", "proven"), (
+                    f"{profile['agent_id']}.{cap['name']} has unexpected confidence "
+                    f"{cap['confidence']!r}"
+                )
+
+
+def test_44d1_validation_normalized_summary_present(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "normalized_summary" in data
+    ns = data["normalized_summary"]
+    assert "multi_agent_capable_agents" in ns
+    assert "extensibility_capable_agents" in ns
+    assert "swarm_capable_agents" in ns
+    assert "subagent_capable_agents" in ns
+
+
+def test_44d1_validation_kimi_in_multi_agent_via_swarm(capsys) -> None:
+    # Validation uses doc-catalog evidence (no CLI probing):
+    # kimi's swarm-coordination is observed → kimi is multi_agent_capable.
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ns = data["normalized_summary"]
+    assert "kimi-local" in ns["swarm_capable_agents"]
+    assert "kimi-local" in ns["multi_agent_capable_agents"]
+
+
+def test_44d1_validation_normalization_rules_exposed(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["normalized_summary"].get("normalization_rules", {})
+    assert rules.get("subagent-coordination") == "multi_agent_capable"
+    assert rules.get("swarm-coordination") == "multi_agent_capable"
+    assert rules.get("custom-agent-support") == "multi_agent_capable"
+    assert rules.get("skill-execution") == "extensibility_capable"
+
+
+def test_44d1_human_output_shows_normalized_groups_in_registry(capsys) -> None:
+    main(["capability-registry"])
+    output = capsys.readouterr().out
+    assert "multi-agent capable" in output.lower() or "multi_agent" in output.lower()
+    assert "swarm" in output.lower()
+
+
+def test_44d1_human_output_shows_normalized_groups_in_validation(capsys) -> None:
+    main(["capability-validation"])
+    output = capsys.readouterr().out
+    assert "normalized" in output.lower()
+    assert "multi_agent" in output.lower() or "multi-agent" in output.lower()

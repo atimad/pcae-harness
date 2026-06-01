@@ -1946,8 +1946,17 @@ def _print_capability_registry_data(data: dict) -> None:
           f"{summary['agents_installed']} installed, "
           f"{summary['agents_not_installed']} not installed")
     subagent_capable = summary.get("subagent_capable_agents", [])
+    swarm_capable = summary.get("swarm_capable_agents", [])
+    multi_agent = summary.get("multi_agent_capable_agents", [])
+    extensibility = summary.get("extensibility_capable_agents", [])
     print(f"Subagent-capable agents: "
           f"{', '.join(subagent_capable) if subagent_capable else 'none'}")
+    print(f"Swarm-capable agents:    "
+          f"{', '.join(swarm_capable) if swarm_capable else 'none'}")
+    print(f"Multi-agent capable:     "
+          f"{', '.join(multi_agent) if multi_agent else 'none'}")
+    print(f"Extensibility capable:   "
+          f"{', '.join(extensibility) if extensibility else 'none'}")
     print()
     for profile in data["capability_registry"]:
         installed_label = "installed" if profile["installed"] else "not installed"
@@ -2048,6 +2057,15 @@ def run_capability_validation(args: argparse.Namespace) -> int:
         if agent["recommended_validation_method"] != "not_applicable":
             print(f"    Recommended method: {agent['recommended_validation_method']}")
     print()
+    ns = data.get("normalized_summary", {})
+    if ns:
+        print("Normalized capability groups:")
+        _fmt = lambda lst: ", ".join(lst) if lst else "none"
+        print(f"  multi_agent_capable:   {_fmt(ns.get('multi_agent_capable_agents', []))}")
+        print(f"  extensibility_capable: {_fmt(ns.get('extensibility_capable_agents', []))}")
+        print(f"  swarm_capable:         {_fmt(ns.get('swarm_capable_agents', []))}")
+        print(f"  subagent_capable:      {_fmt(ns.get('subagent_capable_agents', []))}")
+        print()
     print(data["advisory"])
     return 0
 

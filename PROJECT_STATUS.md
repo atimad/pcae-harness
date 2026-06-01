@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44D: Capability Validation Framework.
+Phase 44D.1: Capability Classification Normalization.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,23 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE normalizes multi-agent capability names into higher-level summary
+groups (Phase 44D.1): `pcae capability-registry`, `pcae capability-discovery`,
+and `pcae capability-validation` discovery summaries now include four
+normalized group fields — `subagent_capable_agents`, `swarm_capable_agents`,
+`multi_agent_capable_agents`, and `extensibility_capable_agents`;
+normalization rules: subagent-coordination → multi_agent_capable,
+swarm-coordination → multi_agent_capable, custom-agent-support →
+multi_agent_capable, skill-execution → extensibility_capable; kimi-local's
+swarm-coordination capability rolls up into multi_agent_capable_agents so
+all three installed runtimes (codex-local, claude-local, kimi-local) appear
+in the group; normalization is summary-level only — original capability names
+and confidence levels are never erased or promoted; `_MULTI_AGENT_CAPABILITIES`,
+`_EXTENSIBILITY_CAPABILITIES`, `_has_capability_observed`,
+`_build_normalized_summary` added to `core/agent.py`; `build_capability_validation`
+exposes `normalized_summary` as a top-level JSON key including `normalization_rules`;
+human output updated in `commands/agent.py`; 13 new tests.
 
 PCAE exposes a capability validation framework (Phase 44D):
 `pcae capability-validation` and `pcae capability-validation --json`
