@@ -16088,3 +16088,129 @@ def test_44f_consensus_design_human_output_shows_advisory(capsys) -> None:
     output = capsys.readouterr().out
     assert "Consensus design is advisory" in output
     assert "no consensus execution is performed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44G — Parallel Agent Execution Design
+# ---------------------------------------------------------------------------
+
+
+def test_44g_parallel_execution_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["parallel-execution-design"])
+    assert exit_code == 0
+
+
+def test_44g_parallel_execution_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["parallel-execution-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44g_parallel_execution_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "parallel_execution_design" in data
+    assert "execution_topologies" in data
+    assert "child_task_model" in data
+    assert "safety_rules" in data
+    assert "failure_model" in data
+    assert "result_aggregation" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44g_parallel_execution_design_has_seven_topologies(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    topologies = [t["topology"] for t in data["execution_topologies"]]
+    assert len(topologies) == 7
+    for expected in (
+        "fan_out", "fan_in", "map_reduce",
+        "parallel_review", "parallel_planning", "parallel_validation", "swarm",
+    ):
+        assert expected in topologies
+
+
+def test_44g_parallel_execution_design_all_topologies_are_parallel(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for topo in data["execution_topologies"]:
+        assert topo["parallel"] is True
+
+
+def test_44g_parallel_execution_design_child_task_fields_defined(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["child_task_model"]["fields"]
+    for expected in (
+        "child_task_id", "parent_task_id", "assigned_agent", "assigned_role",
+        "capability_required", "execution_mode", "writable_allowed",
+        "timeout_seconds", "status", "result_ref", "failure_reason",
+    ):
+        assert expected in fields
+
+
+def test_44g_parallel_execution_design_safety_rules_defined(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["safety_rules"]
+    assert any("read-only" in r for r in rules)
+    assert any("commit" in r for r in rules)
+    assert any("push" in r for r in rules)
+    assert any("rollback" in r for r in rules)
+    assert any("bypass" in r for r in rules)
+
+
+def test_44g_parallel_execution_design_failure_model_has_seven_statuses(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    statuses = data["failure_model"]["statuses"]
+    assert len(statuses) == 7
+    for expected in ("pending", "running", "completed", "failed", "timed_out", "cancelled", "blocked"):
+        assert expected in statuses
+
+
+def test_44g_parallel_execution_design_failure_handling_preserves_partial(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    handling = data["failure_model"]["failure_handling"]
+    assert any("partial" in h for h in handling)
+    assert any("human escalation" in h for h in handling)
+    assert any("timeout" in h for h in handling)
+
+
+def test_44g_parallel_execution_design_result_aggregation_fields_defined(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["result_aggregation"]["aggregate_fields"]
+    for expected in ("recommendations", "confidence", "conflicts", "evidence_artifacts"):
+        assert expected in fields
+
+
+def test_44g_parallel_execution_design_governance_integration_defined(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    feeds_into = data["governance_integration"]["feeds_into"]
+    assert any("consensus" in f for f in feeds_into)
+    assert any("approval" in f for f in feeds_into)
+    assert any("commit" in f for f in feeds_into)
+    assert any("push" in f for f in feeds_into)
+
+
+def test_44g_parallel_execution_design_advisory_is_correct(capsys) -> None:
+    main(["parallel-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "no parallel execution" in data["advisory"].lower()
+
+
+def test_44g_parallel_execution_design_human_output_shows_topologies(capsys) -> None:
+    main(["parallel-execution-design"])
+    output = capsys.readouterr().out
+    for topo in ("fan_out", "fan_in", "map_reduce", "swarm"):
+        assert topo in output
+
+
+def test_44g_parallel_execution_design_human_output_shows_advisory(capsys) -> None:
+    main(["parallel-execution-design"])
+    output = capsys.readouterr().out
+    assert "Parallel execution design is advisory" in output
+    assert "no parallel execution is performed" in output

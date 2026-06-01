@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_consensus_design,
     build_coordinator_design,
     build_orchestration_design,
+    build_parallel_execution_design,
     build_capability_registry,
     build_capability_discovery,
     build_capability_validation,
@@ -2109,6 +2110,47 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_parallel_execution_design(args: argparse.Namespace) -> int:
+    data = build_parallel_execution_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Parallel agent execution design")
+        print()
+        print("Coordinator responsibilities:")
+        for resp in data["parallel_execution_design"]["coordinator_responsibilities"]:
+            print(f"  - {resp}")
+        print()
+        print("Execution topologies:")
+        for topo in data["execution_topologies"]:
+            parallel_label = "parallel" if topo["parallel"] else "sequential"
+            print(f"  {topo['topology']:<24} [{parallel_label}] — {topo['description']}")
+        print()
+        print("Child task model fields:")
+        print(f"  {', '.join(data['child_task_model']['fields'])}")
+        print()
+        print("Safety rules:")
+        for rule in data["safety_rules"]:
+            print(f"  - {rule}")
+        print()
+        print("Failure model:")
+        statuses = ", ".join(data["failure_model"]["statuses"])
+        print(f"  Statuses: {statuses}")
+        print("  Failure handling:")
+        for item in data["failure_model"]["failure_handling"]:
+            print(f"    - {item}")
+        print()
+        print("Result aggregation fields:")
+        print(f"  {', '.join(data['result_aggregation']['aggregate_fields'])}")
+        print()
+        print("Governance integration (feeds into):")
+        for target in data["governance_integration"]["feeds_into"]:
+            print(f"  - {target}")
         print()
         print(data["advisory"])
     return 0

@@ -6580,6 +6580,150 @@ _COORDINATOR_FUTURE_AGENTS: tuple[str, ...] = (
 # Consensus Engine Design (Phase 44F)
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Parallel Agent Execution Design (Phase 44G)
+# ---------------------------------------------------------------------------
+
+PARALLEL_EXECUTION_DESIGN_ADVISORY = (
+    "Parallel execution design is advisory; no parallel execution is performed."
+)
+
+_PARALLEL_EXECUTION_TOPOLOGIES: tuple[dict, ...] = (
+    {
+        "topology": "fan_out",
+        "description": "Coordinator distributes a single task to multiple agents simultaneously.",
+        "parallel": True,
+    },
+    {
+        "topology": "fan_in",
+        "description": "Multiple agent outputs are collected and merged by the coordinator.",
+        "parallel": True,
+    },
+    {
+        "topology": "map_reduce",
+        "description": "Task is split into sub-tasks (map), each executed in parallel; results are reduced by the coordinator.",
+        "parallel": True,
+    },
+    {
+        "topology": "parallel_review",
+        "description": "Multiple reviewers evaluate the same artifact in parallel.",
+        "parallel": True,
+    },
+    {
+        "topology": "parallel_planning",
+        "description": "Multiple planners produce independent plans in parallel; coordinator aggregates.",
+        "parallel": True,
+    },
+    {
+        "topology": "parallel_validation",
+        "description": "Multiple validators run checks in parallel; results fed to consensus engine.",
+        "parallel": True,
+    },
+    {
+        "topology": "swarm",
+        "description": "Many agents operate on distinct sub-tasks simultaneously; coordinator collects all outputs.",
+        "parallel": True,
+    },
+)
+
+_PARALLEL_COORDINATOR_RESPONSIBILITIES: tuple[str, ...] = (
+    "create child tasks",
+    "assign agents based on capability registry",
+    "define execution mode per child task",
+    "monitor timeout and deadline",
+    "collect outputs",
+    "normalize results",
+    "aggregate findings",
+    "pass outputs to consensus engine",
+    "hand off to existing governance controls",
+)
+
+_PARALLEL_CHILD_TASK_FIELDS: tuple[str, ...] = (
+    "child_task_id",
+    "parent_task_id",
+    "assigned_agent",
+    "assigned_role",
+    "capability_required",
+    "execution_mode",
+    "writable_allowed",
+    "timeout_seconds",
+    "status",
+    "result_ref",
+    "failure_reason",
+)
+
+_PARALLEL_SAFETY_RULES: tuple[str, ...] = (
+    "default child tasks are read-only",
+    "writable child tasks require explicit governance approval",
+    "no child task may commit",
+    "no child task may push",
+    "no child task may rollback",
+    "coordinator cannot bypass human approval",
+)
+
+_PARALLEL_CHILD_TASK_STATUSES: tuple[str, ...] = (
+    "pending",
+    "running",
+    "completed",
+    "failed",
+    "timed_out",
+    "cancelled",
+    "blocked",
+)
+
+_PARALLEL_FAILURE_HANDLING: tuple[str, ...] = (
+    "partial results are preserved",
+    "failed child does not invalidate all results by default",
+    "timeout produces incomplete result",
+    "consensus engine decides whether partial outputs are usable",
+    "human escalation is default for conflicting or incomplete outcomes",
+)
+
+_PARALLEL_RESULT_AGGREGATION_FIELDS: tuple[str, ...] = (
+    "stdout_stderr_summaries",
+    "execution_metadata",
+    "evidence_artifacts",
+    "changed_files",
+    "recommendations",
+    "confidence",
+    "conflicts",
+)
+
+_PARALLEL_GOVERNANCE_INTEGRATION: tuple[str, ...] = (
+    "consensus engine",
+    "change review",
+    "approval gates",
+    "commit governance",
+    "push governance",
+    "rollback governance",
+)
+
+
+def build_parallel_execution_design() -> dict:
+    """Return a read-only parallel agent execution architecture design."""
+    return {
+        "parallel_execution_design": {
+            "coordinator_responsibilities": list(_PARALLEL_COORDINATOR_RESPONSIBILITIES),
+        },
+        "execution_topologies": list(_PARALLEL_EXECUTION_TOPOLOGIES),
+        "child_task_model": {
+            "fields": list(_PARALLEL_CHILD_TASK_FIELDS),
+        },
+        "safety_rules": list(_PARALLEL_SAFETY_RULES),
+        "failure_model": {
+            "statuses": list(_PARALLEL_CHILD_TASK_STATUSES),
+            "failure_handling": list(_PARALLEL_FAILURE_HANDLING),
+        },
+        "result_aggregation": {
+            "aggregate_fields": list(_PARALLEL_RESULT_AGGREGATION_FIELDS),
+        },
+        "governance_integration": {
+            "feeds_into": list(_PARALLEL_GOVERNANCE_INTEGRATION),
+        },
+        "advisory": PARALLEL_EXECUTION_DESIGN_ADVISORY,
+    }
+
+
 CONSENSUS_DESIGN_ADVISORY = (
     "Consensus design is advisory; no consensus execution is performed."
 )

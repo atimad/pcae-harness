@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44F: Consensus Engine Design.
+Phase 44G: Parallel Agent Execution Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,36 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only parallel agent execution architecture design
+(Phase 44G): `pcae parallel-execution-design` and
+`pcae parallel-execution-design --json` generate a design for
+coordinating multiple agents in parallel while preserving governance
+boundaries; seven execution topologies (fan_out, fan_in, map_reduce,
+parallel_review, parallel_planning, parallel_validation, swarm) all
+classified as parallel; nine coordinator responsibilities (create child
+tasks, assign agents based on capability registry, define execution mode,
+monitor timeout/deadline, collect outputs, normalize results, aggregate
+findings, pass to consensus engine, hand off to governance); eleven child
+task model fields (child_task_id, parent_task_id, assigned_agent,
+assigned_role, capability_required, execution_mode, writable_allowed,
+timeout_seconds, status, result_ref, failure_reason); six safety rules
+(default read-only, writable requires governance approval, no commit/push/
+rollback, coordinator cannot bypass human approval); seven child task
+statuses (pending, running, completed, failed, timed_out, cancelled,
+blocked); five failure handling rules (partial results preserved, failed
+child does not invalidate all results, timeout produces incomplete result,
+consensus engine decides usability, human escalation is default); seven
+result aggregation fields (stdout_stderr_summaries, execution_metadata,
+evidence_artifacts, changed_files, recommendations, confidence, conflicts);
+governance integration feeds into consensus engine, change review, approval
+gates, commit/push/rollback governance; JSON output includes
+`parallel_execution_design`, `execution_topologies`, `child_task_model`,
+`safety_rules`, `failure_model`, `result_aggregation`,
+`governance_integration`, `advisory`; strictly read-only — no parallel
+execution, no child task creation, no agent spawning; advisory: "Parallel
+execution design is advisory; no parallel execution is performed.";
+14 new tests.
 
 PCAE exposes a read-only consensus engine architecture design
 (Phase 44F): `pcae consensus-design` and `pcae consensus-design --json`

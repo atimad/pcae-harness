@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Completed Parallel Agent Execution Design (Phase 44G): `pcae parallel-execution-design` and `--json`; 7 topologies (all parallel), 11 child task fields, 6 safety rules, 7 failure statuses, 5 failure handling rules, 7 result aggregation fields, governance integration; `build_parallel_execution_design` in core; `run_parallel_execution_design` in commands; `parallel-execution-design` wired in CLI; 14 new tests; strictly read-only.
+
 - Completed Consensus Engine Design (Phase 44F): `pcae consensus-design` and `--json`; 8 input fields, 5 decision types, 6 policies (default: human_escalation), 5 evidence-based weight sources, conflict handling preserving all recommendations with human escalation, governance boundaries, 5 future expansions; `build_consensus_design` in core; `run_consensus_design` in commands; `consensus-design` wired in CLI; 14 new tests; strictly read-only.
 
 - Completed Coordinator Agent Design (Phase 44E): `pcae coordinator-design` and `--json` generate a read-only coordinator architecture; 8 responsibilities, 12 task classes, capability-based selection model prohibiting hardcoded assignments, 6 orchestration strategies (single_agent/sequential/parallel_review/parallel_planning/swarm/consensus), governance boundaries, future agent expansion; `build_coordinator_design` added to core; `run_coordinator_design` added to commands; `coordinator-design` wired in CLI; 14 new tests; strictly read-only.
