@@ -2007,7 +2007,7 @@ def run_capability_validation(args: argparse.Namespace) -> int:
     fw = data["validation_framework"]
     print("Capability validation framework")
     print()
-    print("Confidence model (lifecycle):")
+    print("Confidence lifecycle:")
     for level in fw["lifecycle"]:
         desc = fw["lifecycle_descriptions"][level]
         print(f"  {level}: {desc}")
@@ -2018,25 +2018,35 @@ def run_capability_validation(args: argparse.Namespace) -> int:
     print()
     print("Promotion rules:")
     for rule in fw["promotion_rules"]:
+        sources = ", ".join(rule["validation_sources"]) if rule["validation_sources"] else "n/a"
         print(
             f"  {rule['from_confidence']} → {rule['to_confidence']}: "
-            f"{rule['required_validation']} (via {rule['validation_source']})"
+            f"{rule['required_validation']} (sources: {sources})"
         )
         print(f"    {rule['description']}")
     print()
-    candidates = fw["promotion_candidates"]
-    print(f"Promotion candidates ({fw['promotion_candidate_count']}):")
-    if candidates:
-        for c in candidates:
-            ev = ", ".join(c["evidence_sources"]) if c["evidence_sources"] else "none"
-            print(
-                f"  {c['agent_id']} / {c['capability']}: "
-                f"{c['promotion_path']} "
-                f"[requires: {c['required_validation']}] "
-                f"[evidence: {ev}]"
-            )
-    else:
-        print("  none")
+    print("Validation candidates (per agent):")
+    for agent in data["validation_candidates"]:
+        installed_label = "installed" if agent["installed"] else "not installed"
+        print(f"  {agent['agent_id']} [{installed_label}]")
+        if agent["observed_capabilities"]:
+            print(f"    Observed:   {', '.join(agent['observed_capabilities'])}")
+        if agent["validated_capabilities"]:
+            print(f"    Validated:  {', '.join(agent['validated_capabilities'])}")
+        if agent["proven_capabilities"]:
+            print(f"    Proven:     {', '.join(agent['proven_capabilities'])}")
+        next_cands = agent["next_validation_candidates"]
+        if next_cands:
+            print(f"    Next candidates ({len(next_cands)}):")
+            for c in next_cands:
+                print(
+                    f"      {c['capability']}: {c['promotion_path']} "
+                    f"[method: {c['recommended_validation_method']}]"
+                )
+        else:
+            print("    Next candidates: none")
+        if agent["recommended_validation_method"] != "not_applicable":
+            print(f"    Recommended method: {agent['recommended_validation_method']}")
     print()
     print(data["advisory"])
     return 0

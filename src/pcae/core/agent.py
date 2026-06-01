@@ -6197,8 +6197,7 @@ def build_capability_discovery(root: HarnessPath) -> dict:
 # ---------------------------------------------------------------------------
 
 CAPABILITY_VALIDATION_ADVISORY = (
-    "Capability validation framework is advisory and read-only; "
-    "no agents are executed, no prompts are submitted, no files are modified."
+    "Capability validation is advisory; no runtime validation is executed."
 )
 
 # Ordered lifecycle levels from lowest to highest confidence.
@@ -6209,21 +6208,36 @@ CAPABILITY_VALIDATION_LIFECYCLE: tuple[str, ...] = (
     _CAP_CONF_PROVEN,
 )
 
-# Recognized validation sources for the framework.
+# All recognized validation source types.
 CAPABILITY_VALIDATION_SOURCES: tuple[str, ...] = (
-    "runtime_validation",
+    "documentation_reference",
+    "cli_discovery",
     "manual_validation",
+    "runtime_validation",
     "governed_execution_history",
+    "writable_execution_history",
+    "adapter_contract",
 )
 
-# Promotion rules keyed by "from_confidence".
+# All promotion rules, including unknown→observed and the proven no-downgrade guard.
 _CAPABILITY_PROMOTION_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "unknown_to_observed",
+        "from_confidence": _CAP_CONF_UNKNOWN,
+        "to_confidence": _CAP_CONF_OBSERVED,
+        "required_validation": "evidence_collection",
+        "validation_sources": ["documentation_reference", "cli_discovery"],
+        "description": (
+            "A capability becomes observed when evidence is collected from "
+            "documentation references or CLI help/runtime discovery."
+        ),
+    },
     {
         "rule_id": "observed_to_validated",
         "from_confidence": _CAP_CONF_OBSERVED,
         "to_confidence": _CAP_CONF_VALIDATED,
         "required_validation": "successful_controlled_experiment",
-        "validation_source": "runtime_validation",
+        "validation_sources": ["runtime_validation", "manual_validation"],
         "description": (
             "A successful controlled PCAE experiment must confirm the capability "
             "behaves as expected in a governed session."
@@ -6234,43 +6248,88 @@ _CAPABILITY_PROMOTION_RULES: tuple[dict, ...] = (
         "from_confidence": _CAP_CONF_VALIDATED,
         "to_confidence": _CAP_CONF_PROVEN,
         "required_validation": "successful_governed_production_usage",
-        "validation_source": "governed_execution_history",
+        "validation_sources": ["governed_execution_history", "writable_execution_history"],
         "description": (
             "The capability must be successfully exercised in real governed production "
             "usage recorded in PCAE execution history."
+        ),
+    },
+    {
+        "rule_id": "proven_no_downgrade",
+        "from_confidence": _CAP_CONF_PROVEN,
+        "to_confidence": _CAP_CONF_PROVEN,
+        "required_validation": "not_applicable",
+        "validation_sources": [],
+        "description": (
+            "Proven capabilities cannot be downgraded by documentation-only evidence. "
+            "Once proven, the confidence level is permanent unless explicitly reset by "
+            "a human governance decision."
         ),
     },
 )
 
 
 def _promotion_rule_for(confidence: str) -> dict | None:
-    """Return the promotion rule that applies when current confidence equals *confidence*."""
+    """Return the rule for promoting *beyond* the given confidence, or None if not promotable."""
     for rule in _CAPABILITY_PROMOTION_RULES:
-        if rule["from_confidence"] == confidence:
+        if rule["from_confidence"] == confidence and rule["to_confidence"] != confidence:
             return rule
     return None
 
 
-def _build_promotion_candidates(
+def _recommended_validation_method(rule: dict) -> str:
+    """Return the primary validation source from a promotion rule."""
+    sources = rule.get("validation_sources", [])
+    return sources[0] if sources else "not_applicable"
+
+
+def _build_validation_candidates(
     profiles: list[AgentCapabilityProfile],
 ) -> list[dict]:
-    """Return per-agent/capability promotion candidate records for promotable capabilities."""
+    """Return per-agent validation candidate records for installed agents."""
     candidates: list[dict] = []
     for profile in profiles:
+        observed: list[str] = []
+        validated: list[str] = []
+        proven: list[str] = []
+        next_candidates: list[dict] = []
+
+        for cap in profile.capabilities:
+            if cap.confidence == _CAP_CONF_OBSERVED:
+                observed.append(cap.name)
+            elif cap.confidence == _CAP_CONF_VALIDATED:
+                validated.append(cap.name)
+            elif cap.confidence == _CAP_CONF_PROVEN:
+                proven.append(cap.name)
+
+        # Next validation candidates are observed capabilities (can be promoted to validated).
         for cap in profile.capabilities:
             rule = _promotion_rule_for(cap.confidence)
             if rule is None:
                 continue
-            promotion_path = f"{cap.confidence} → {rule['to_confidence']}"
-            candidates.append({
-                "agent_id": profile.agent_id,
+            next_candidates.append({
                 "capability": cap.name,
                 "current_confidence": cap.confidence,
-                "promotion_path": promotion_path,
+                "promotion_path": f"{cap.confidence} → {rule['to_confidence']}",
+                "recommended_validation_method": _recommended_validation_method(rule),
                 "required_validation": rule["required_validation"],
-                "validation_source": rule["validation_source"],
-                "evidence_sources": list(cap.evidence_sources),
             })
+
+        # Primary recommended method: use rule for the first next candidate, or n/a.
+        if next_candidates:
+            primary_method = next_candidates[0]["recommended_validation_method"]
+        else:
+            primary_method = "not_applicable"
+
+        candidates.append({
+            "agent_id": profile.agent_id,
+            "installed": profile.installed,
+            "observed_capabilities": observed,
+            "validated_capabilities": validated,
+            "proven_capabilities": proven,
+            "next_validation_candidates": next_candidates,
+            "recommended_validation_method": primary_method,
+        })
     return candidates
 
 
@@ -6279,7 +6338,7 @@ def build_capability_validation(root: HarnessPath) -> dict:
 
     Includes documentation-reference capabilities from the doc catalog so that
     observed capabilities (subagent-coordination, swarm-coordination, etc.)
-    appear as promotion candidates without requiring live CLI probing.
+    appear as validation candidates without requiring live CLI probing.
     """
     profiles = [
         _build_agent_capability_profile(
@@ -6290,26 +6349,31 @@ def build_capability_validation(root: HarnessPath) -> dict:
         )
         for spec in _CAPABILITY_AGENT_SPECS
     ]
-    candidates = _build_promotion_candidates(profiles)
+    validation_candidates = _build_validation_candidates(profiles)
     validation_framework = {
         "description": (
-            "Framework for validating and promoting discovered agent capabilities "
-            "through controlled PCAE experiments and governed production usage."
+            "Framework for defining how PCAE promotes discovered agent capabilities "
+            "from observed to validated and proven through controlled evidence."
         ),
         "lifecycle": list(CAPABILITY_VALIDATION_LIFECYCLE),
         "lifecycle_descriptions": {
             _CAP_CONF_UNKNOWN: "No evidence collected; capability unverified.",
-            _CAP_CONF_OBSERVED: "Evidence from CLI help, runtime discovery, or documentation; not yet validated by experiment.",
+            _CAP_CONF_OBSERVED: (
+                "Evidence from documentation references or CLI discovery; "
+                "not yet validated by a controlled experiment."
+            ),
             _CAP_CONF_VALIDATED: "Confirmed by a successful controlled PCAE experiment.",
-            _CAP_CONF_PROVEN: "Confirmed by successful governed production usage in execution history.",
+            _CAP_CONF_PROVEN: (
+                "Confirmed by successful governed production usage in execution history; "
+                "cannot be downgraded by documentation-only evidence."
+            ),
         },
         "validation_sources": list(CAPABILITY_VALIDATION_SOURCES),
         "promotion_rules": list(_CAPABILITY_PROMOTION_RULES),
-        "promotion_candidate_count": len(candidates),
-        "promotion_candidates": candidates,
     }
     return {
         "validation_framework": validation_framework,
         "promotion_rules": list(_CAPABILITY_PROMOTION_RULES),
+        "validation_candidates": validation_candidates,
         "advisory": CAPABILITY_VALIDATION_ADVISORY,
     }

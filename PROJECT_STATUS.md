@@ -932,32 +932,35 @@ evidence-based and should be refreshed after runtime updates." 24 new tests.
 
 PCAE exposes a capability validation framework (Phase 44D):
 `pcae capability-validation` and `pcae capability-validation --json`
-define a read-only framework for promoting discovered agent capabilities
-through controlled experiments and governed production usage; four-level
-confidence lifecycle: unknown → observed → validated → proven; three
-validation sources: runtime_validation, manual_validation,
-governed_execution_history; two promotion rules —
-observed→validated (requires successful_controlled_experiment via
-runtime_validation) and validated→proven (requires
-successful_governed_production_usage via governed_execution_history);
-reads the static capability registry with doc-catalog evidence (no CLI
-probing) to enumerate promotion candidates, including
-codex-local/subagent-coordination (observed→validated),
-claude-local/subagent-coordination (observed→validated), and
-kimi-local/swarm-coordination (observed→validated); JSON output includes
-`validation_framework` (lifecycle, lifecycle_descriptions,
-validation_sources, promotion_rules, promotion_candidate_count,
-promotion_candidates), `promotion_rules`, and `advisory`; human output
-shows confidence model, validation sources, promotion rules with
-descriptions, and promotion candidates; `build_capability_validation`,
+define how PCAE promotes discovered capabilities from observed to
+validated and proven through controlled evidence; four-level confidence
+lifecycle: unknown → observed → validated → proven; seven validation
+source types: documentation_reference, cli_discovery, manual_validation,
+runtime_validation, governed_execution_history, writable_execution_history,
+adapter_contract; four promotion rules — unknown→observed
+(evidence_collection via documentation_reference or cli_discovery),
+observed→validated (successful_controlled_experiment via runtime_validation
+or manual_validation), validated→proven (successful_governed_production_usage
+via governed_execution_history or writable_execution_history), and
+proven→proven no-downgrade (proven capabilities cannot be downgraded by
+documentation-only evidence); per-agent validation candidates for all 7
+agents with observed_capabilities, validated_capabilities,
+proven_capabilities, next_validation_candidates, and
+recommended_validation_method; Codex/subagent-coordination,
+Claude/subagent-coordination, Kimi/swarm-coordination all appear as
+observed→validated candidates; JSON output includes `validation_framework`
+(lifecycle, lifecycle_descriptions, validation_sources, promotion_rules),
+`promotion_rules`, `validation_candidates`, and `advisory`; human output
+shows confidence lifecycle, validation sources, promotion rules with
+descriptions, per-agent candidates, and advisory; `build_capability_validation`,
 `CAPABILITY_VALIDATION_ADVISORY`, `CAPABILITY_VALIDATION_LIFECYCLE`,
-`CAPABILITY_VALIDATION_SOURCES`, `_CAPABILITY_PROMOTION_RULES` added to
-`core/agent.py`; `run_capability_validation` added to `commands/agent.py`;
+`CAPABILITY_VALIDATION_SOURCES`, `_CAPABILITY_PROMOTION_RULES`,
+`_build_validation_candidates` added to `core/agent.py`;
+`run_capability_validation` updated in `commands/agent.py`;
 `capability-validation [--json]` wired in `cli.py`; strictly read-only —
-no agents executed, no prompts submitted, no files modified;
-advisory: "Capability validation framework is advisory and read-only;
-no agents are executed, no prompts are submitted, no files are modified."
-16 new tests.
+no agents executed, no runtime validation performed, no files modified;
+advisory: "Capability validation is advisory; no runtime validation is
+executed." 22 new tests.
 
 PCAE exposes a read-only multi-agent orchestration architecture design
 (Phase 44B): `pcae orchestration-design` and `pcae orchestration-design
