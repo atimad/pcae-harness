@@ -19,6 +19,7 @@ from pcae.commands.agent import (
     run_agents_show,
     run_agents_validate,
     run_collaboration_design,
+    run_coordinator_design,
     run_orchestration_design,
     run_capability_registry,
     run_capability_discovery,
@@ -1251,6 +1252,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON orchestration design output.",
     )
     orchestration_design_parser.set_defaults(handler=run_orchestration_design)
+
+    coordinator_design_parser = subparsers.add_parser(
+        "coordinator-design",
+        help="Show read-only coordinator agent architecture design.",
+    )
+    coordinator_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON coordinator design output.",
+    )
+    coordinator_design_parser.set_defaults(handler=run_coordinator_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

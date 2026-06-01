@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44D.2: Registry / Summary Consistency Validation.
+Phase 44E: Coordinator Agent Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,34 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only coordinator agent architecture design
+(Phase 44E): `pcae coordinator-design` and `pcae coordinator-design
+--json` generate a coordinator architecture covering eight coordinator
+responsibilities (task_intake, task_classification, capability_lookup,
+agent_selection, orchestration_strategy_selection, result_aggregation,
+conflict_escalation, governance_handoff), twelve supported task classes
+(planning, implementation, review, validation, research, testing,
+architecture, documentation, security, performance, dependency-analysis,
+roadmap-generation), a capability-based selection model that prohibits
+hardcoded runtime-to-role assignments (no "codex → implementer",
+"claude → reviewer", "kimi → planner") and instead queries the
+capability registry, checks confidence level, verifies lifecycle status,
+and selects eligible agents dynamically with selection output fields
+(task_id, selected_agents, selection_reason, capability_used,
+confidence_level), six orchestration strategies (single_agent,
+sequential, parallel_review, parallel_planning, swarm, consensus) with
+parallel/sequential classification and diagram examples, governance
+boundaries (coordinator may assign work and aggregate results; may not
+approve changes, commit, push, rollback, or bypass governance), and
+future agent expansion covering codex-local, claude-local, kimi-local,
+deepseek-local, gemini-local, grok-local, perplexity-local, and future
+local/cloud runtimes without redesign; JSON output includes
+`coordinator_design`, `task_classification`, `selection_model`,
+`orchestration_strategies`, `governance_integration`, `advisory`;
+strictly read-only — no agents executed, no files modified, no
+orchestration performed; advisory: "Coordinator design is advisory;
+no orchestration is performed."; 14 new tests.
 
 PCAE ensures registry and summary group consistency (Phase 44D.2):
 `pcae capability-registry` now includes documentation-backed capability

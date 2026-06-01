@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Completed Coordinator Agent Design (Phase 44E): `pcae coordinator-design` and `--json` generate a read-only coordinator architecture; 8 responsibilities, 12 task classes, capability-based selection model prohibiting hardcoded assignments, 6 orchestration strategies (single_agent/sequential/parallel_review/parallel_planning/swarm/consensus), governance boundaries, future agent expansion; `build_coordinator_design` added to core; `run_coordinator_design` added to commands; `coordinator-design` wired in CLI; 14 new tests; strictly read-only.
+
 - Fixed Git Change Detection After Writable Execution (Phase 42A.2): `root.root → root.path` in all three git-capture helpers; added `--untracked-files=all` to `git status --porcelain` so collapsed directory entries expand to individual files; renamed-file format handled; integration tests commit initial repo and gitignore remote/; 6 new tests.
 - Completed Codex Writable Sandbox Contract (Phase 42A.1): `--allow-file-changes` now selects `--sandbox workspace-write` for codex-local; read-only path keeps `--sandbox read-only`; Claude and Kimi unaffected; `sandbox_mode` field in result and artifact; 9 new tests.
 - Completed Controlled File Modification (Phase 42A): `pcae remote execute JOB_ID --invoke --allow-file-changes` extends execution pipeline with governed file-write; pre-execution HEAD, changed files, diff summary, and scope validation captured and persisted; Phase 42A scope allows docs/ and tasks/ only; src/, tests/, .pcae/, .git/, .github/, pyproject.toml denied; scope violations → failed; no changes → completed_with_no_changes; no commit, push, or rollback; existing --invoke remains read-only; 15 new tests.

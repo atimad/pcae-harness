@@ -15810,3 +15810,152 @@ def test_44d2_original_capability_names_preserved_in_registry(capsys) -> None:
     assert "swarm-coordination" in cap_names
     # Normalization is summary-level only — the original name must survive in the registry.
     assert "multi_agent_capable" not in cap_names
+
+
+# ---------------------------------------------------------------------------
+# Phase 44E — Coordinator Agent Design
+# ---------------------------------------------------------------------------
+
+
+def test_44e_coordinator_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["coordinator-design"])
+    assert exit_code == 0
+
+
+def test_44e_coordinator_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["coordinator-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44e_coordinator_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "coordinator_design" in data
+    assert "task_classification" in data
+    assert "selection_model" in data
+    assert "orchestration_strategies" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44e_coordinator_design_has_eight_responsibilities(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    responsibilities = data["coordinator_design"]["responsibilities"]
+    assert len(responsibilities) == 8
+    names = [r["name"] for r in responsibilities]
+    assert "task_intake" in names
+    assert "task_classification" in names
+    assert "capability_lookup" in names
+    assert "agent_selection" in names
+    assert "orchestration_strategy_selection" in names
+    assert "result_aggregation" in names
+    assert "conflict_escalation" in names
+    assert "governance_handoff" in names
+
+
+def test_44e_coordinator_design_task_classification_has_twelve_classes(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    classes = data["task_classification"]["supported_task_classes"]
+    assert len(classes) == 12
+    for expected in (
+        "planning", "implementation", "review", "validation", "research",
+        "testing", "architecture", "documentation", "security", "performance",
+        "dependency-analysis", "roadmap-generation",
+    ):
+        assert expected in classes
+
+
+def test_44e_coordinator_design_selection_model_prohibits_hardcoding(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["selection_model"]
+    prohibited = model["prohibited_hardcoding"]
+    assert any("codex" in p and "implementer" in p for p in prohibited)
+    assert any("claude" in p and "reviewer" in p for p in prohibited)
+    assert any("kimi" in p and "planner" in p for p in prohibited)
+
+
+def test_44e_coordinator_design_selection_criteria_defined(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    criteria = [c["criterion"] for c in data["selection_model"]["selection_criteria"]]
+    assert "capability_present" in criteria
+    assert "confidence_threshold" in criteria
+    assert "agent_installed" in criteria
+    assert "agent_available" in criteria
+
+
+def test_44e_coordinator_design_selection_output_fields_defined(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["selection_model"]["selection_output_fields"]
+    assert "task_id" in fields
+    assert "selected_agents" in fields
+    assert "selection_reason" in fields
+    assert "capability_used" in fields
+    assert "confidence_level" in fields
+
+
+def test_44e_coordinator_design_has_six_orchestration_strategies(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    strategies = data["orchestration_strategies"]
+    assert len(strategies) == 6
+    names = [s["strategy"] for s in strategies]
+    assert "single_agent" in names
+    assert "sequential" in names
+    assert "parallel_review" in names
+    assert "parallel_planning" in names
+    assert "swarm" in names
+    assert "consensus" in names
+
+
+def test_44e_coordinator_design_governance_boundaries_defined(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "coordinator_may" in gov
+    assert "coordinator_may_not" in gov
+    may = gov["coordinator_may"]
+    may_not = gov["coordinator_may_not"]
+    assert any("assign work" in item for item in may)
+    assert any("aggregate results" in item for item in may)
+    for prohibited in ("commit", "push", "rollback"):
+        assert any(prohibited in item for item in may_not)
+    assert any("bypass governance" in item for item in may_not)
+
+
+def test_44e_coordinator_design_future_expansion_includes_all_agents(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = data["future_agent_expansion"]
+    for expected in (
+        "codex-local", "claude-local", "kimi-local",
+        "deepseek-local", "gemini-local", "grok-local", "perplexity-local",
+    ):
+        assert expected in agents
+
+
+def test_44e_coordinator_design_advisory_is_correct(capsys) -> None:
+    main(["coordinator-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data
+    assert "no orchestration" in data["advisory"].lower()
+
+
+def test_44e_coordinator_design_human_output_shows_responsibilities(capsys) -> None:
+    main(["coordinator-design"])
+    output = capsys.readouterr().out
+    assert "task_intake" in output
+    assert "capability_lookup" in output
+    assert "agent_selection" in output
+    assert "governance_handoff" in output
+
+
+def test_44e_coordinator_design_human_output_shows_advisory(capsys) -> None:
+    main(["coordinator-design"])
+    output = capsys.readouterr().out
+    assert "Coordinator design is advisory" in output
+    assert "no orchestration is performed" in output

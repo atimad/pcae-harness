@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_design,
     build_collaboration_workflows,
+    build_coordinator_design,
     build_orchestration_design,
     build_capability_registry,
     build_capability_discovery,
@@ -2107,6 +2108,57 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_coordinator_design(args: argparse.Namespace) -> int:
+    data = build_coordinator_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Coordinator agent architecture design")
+        print()
+        print("Coordinator responsibilities:")
+        for resp in data["coordinator_design"]["responsibilities"]:
+            print(f"  {resp['name']}: {resp['description']}")
+        print()
+        print("Task classification:")
+        classes = ", ".join(data["task_classification"]["supported_task_classes"])
+        print(f"  Supported task classes: {classes}")
+        print()
+        print("Capability-based selection model:")
+        model = data["selection_model"]
+        print(f"  Rule: {model['rule']}")
+        print("  Prohibited hardcoding:")
+        for item in model["prohibited_hardcoding"]:
+            print(f"    - {item}")
+        print("  Selection criteria:")
+        for criterion in model["selection_criteria"]:
+            print(f"    {criterion['criterion']}: {criterion['description']}")
+        print("  Selection output fields:")
+        print(f"    {', '.join(model['selection_output_fields'])}")
+        print()
+        print("Orchestration strategies:")
+        for strategy in data["orchestration_strategies"]:
+            parallel_label = "parallel" if strategy["parallel"] else "sequential"
+            print(f"  {strategy['strategy']:<22} [{parallel_label}] — {strategy['example']}")
+            print(f"    {strategy['description']}")
+        print()
+        print("Governance integration:")
+        gov = data["governance_integration"]
+        print("  Coordinator may:")
+        for item in gov["coordinator_may"]:
+            print(f"    - {item}")
+        print("  Coordinator may not:")
+        for item in gov["coordinator_may_not"]:
+            print(f"    - {item}")
+        print(f"  Note: {gov['note']}")
+        print()
+        print("Future agent expansion:")
+        agents = ", ".join(data["future_agent_expansion"])
+        print(f"  {agents}")
         print()
         print(data["advisory"])
     return 0

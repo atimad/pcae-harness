@@ -6402,6 +6402,197 @@ def _build_validation_candidates(
     return candidates
 
 
+# ---------------------------------------------------------------------------
+# Coordinator Agent Design (Phase 44E)
+# ---------------------------------------------------------------------------
+
+COORDINATOR_DESIGN_ADVISORY = (
+    "Coordinator design is advisory; no orchestration is performed."
+)
+
+_COORDINATOR_RESPONSIBILITIES: tuple[dict, ...] = (
+    {
+        "name": "task_intake",
+        "description": "Receive and record incoming task requests.",
+    },
+    {
+        "name": "task_classification",
+        "description": "Classify tasks into supported task classes.",
+    },
+    {
+        "name": "capability_lookup",
+        "description": "Query the capability registry for agents matching the task class.",
+    },
+    {
+        "name": "agent_selection",
+        "description": "Select eligible agents based on capability, confidence, and lifecycle status.",
+    },
+    {
+        "name": "orchestration_strategy_selection",
+        "description": "Choose the appropriate orchestration strategy for the task.",
+    },
+    {
+        "name": "result_aggregation",
+        "description": "Collect and aggregate results from assigned agents.",
+    },
+    {
+        "name": "conflict_escalation",
+        "description": "Escalate conflicts or disagreements to the human for resolution.",
+    },
+    {
+        "name": "governance_handoff",
+        "description": "Transfer results and context through governed PCAE checkpoints.",
+    },
+)
+
+_COORDINATOR_TASK_CLASSES: tuple[str, ...] = (
+    "planning",
+    "implementation",
+    "review",
+    "validation",
+    "research",
+    "testing",
+    "architecture",
+    "documentation",
+    "security",
+    "performance",
+    "dependency-analysis",
+    "roadmap-generation",
+)
+
+_COORDINATOR_SELECTION_CRITERIA: tuple[dict, ...] = (
+    {
+        "criterion": "capability_present",
+        "description": "Agent declares the required capability in the registry.",
+    },
+    {
+        "criterion": "confidence_threshold",
+        "description": "Capability confidence is observed or higher (not unknown).",
+    },
+    {
+        "criterion": "agent_installed",
+        "description": "Agent runtime is confirmed installed on the local system.",
+    },
+    {
+        "criterion": "agent_available",
+        "description": "Agent lifecycle status is available or active.",
+    },
+)
+
+_COORDINATOR_SELECTION_MODEL: dict = {
+    "rule": (
+        "Coordinator must not hardcode runtime-to-role assignments. "
+        "Instead, query the capability registry, check confidence level, "
+        "verify lifecycle status, and select eligible agents dynamically."
+    ),
+    "prohibited_hardcoding": [
+        "codex -> implementer",
+        "claude -> reviewer",
+        "kimi -> planner",
+    ],
+    "selection_criteria": list(_COORDINATOR_SELECTION_CRITERIA),
+    "selection_output_fields": [
+        "task_id",
+        "selected_agents",
+        "selection_reason",
+        "capability_used",
+        "confidence_level",
+    ],
+}
+
+_COORDINATOR_ORCHESTRATION_STRATEGIES: tuple[dict, ...] = (
+    {
+        "strategy": "single_agent",
+        "description": "One agent handles the full task.",
+        "parallel": False,
+        "steps": ["coordinator → agent"],
+        "example": "coordinator → agent",
+    },
+    {
+        "strategy": "sequential",
+        "description": "Agents execute in sequence: planner, then implementer, then reviewer.",
+        "parallel": False,
+        "steps": ["planner", "implementer", "reviewer"],
+        "example": "planner → implementer → reviewer",
+    },
+    {
+        "strategy": "parallel_review",
+        "description": "One implementer, multiple reviewers operating in parallel.",
+        "parallel": True,
+        "steps": ["implementer", "reviewerA | reviewerB | reviewerC"],
+        "example": "implementer → [reviewerA, reviewerB, reviewerC]",
+    },
+    {
+        "strategy": "parallel_planning",
+        "description": "Multiple planners in parallel; coordinator aggregates plans.",
+        "parallel": True,
+        "steps": ["plannerA | plannerB", "coordinator aggregation"],
+        "example": "[plannerA, plannerB] → coordinator aggregation",
+    },
+    {
+        "strategy": "swarm",
+        "description": "Multiple agents work in parallel; coordinator collects all results.",
+        "parallel": True,
+        "steps": ["agentA | agentB | agentC", "coordinator aggregation"],
+        "example": "[agentA, agentB, agentC] → coordinator aggregation",
+    },
+    {
+        "strategy": "consensus",
+        "description": "Multiple planners propose; coordinator computes consensus.",
+        "parallel": True,
+        "steps": ["planner1 | planner2 | planner3", "coordinator consensus"],
+        "example": "[planner1, planner2, planner3] → coordinator consensus",
+    },
+)
+
+_COORDINATOR_GOVERNANCE_BOUNDARIES: dict = {
+    "coordinator_may": [
+        "assign work to eligible agents",
+        "aggregate results from agents",
+    ],
+    "coordinator_may_not": [
+        "approve changes",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+    "note": (
+        "All execution remains governed by existing PCAE controls. "
+        "Coordinator authority is advisory and coordination-scoped only."
+    ),
+}
+
+_COORDINATOR_FUTURE_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+    "deepseek-local",
+    "gemini-local",
+    "grok-local",
+    "perplexity-local",
+    "future-local-runtimes",
+    "future-cloud-runtimes",
+)
+
+
+def build_coordinator_design() -> dict:
+    """Return a read-only coordinator agent architecture design."""
+    return {
+        "coordinator_design": {
+            "responsibilities": list(_COORDINATOR_RESPONSIBILITIES),
+        },
+        "task_classification": {
+            "supported_task_classes": list(_COORDINATOR_TASK_CLASSES),
+        },
+        "selection_model": _COORDINATOR_SELECTION_MODEL,
+        "orchestration_strategies": list(_COORDINATOR_ORCHESTRATION_STRATEGIES),
+        "governance_integration": _COORDINATOR_GOVERNANCE_BOUNDARIES,
+        "future_agent_expansion": list(_COORDINATOR_FUTURE_AGENTS),
+        "advisory": COORDINATOR_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 
