@@ -15682,3 +15682,131 @@ def test_44d1_human_output_shows_normalized_groups_in_validation(capsys) -> None
     output = capsys.readouterr().out
     assert "normalized" in output.lower()
     assert "multi_agent" in output.lower() or "multi-agent" in output.lower()
+
+
+# Phase 44D.2: Registry / Summary Consistency Validation
+
+
+def test_44d2_registry_kimi_swarm_is_observed_with_doc_evidence(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(p for p in data["capability_registry"] if p["agent_id"] == "kimi-local")
+    swarm = next(c for c in kimi["capabilities"] if c["name"] == "swarm-coordination")
+    assert swarm["confidence"] == "observed", (
+        f"kimi-local swarm-coordination confidence={swarm['confidence']!r}, expected 'observed'"
+    )
+    assert "documentation_reference" in swarm["evidence_sources"], (
+        f"kimi-local swarm-coordination missing documentation_reference evidence"
+    )
+    assert len(swarm["evidence_sources"]) > 0
+
+
+def test_44d2_registry_summary_includes_kimi_in_swarm_capable(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "kimi-local" in data["discovery_summary"]["swarm_capable_agents"]
+
+
+def test_44d2_registry_summary_includes_all_three_in_multi_agent(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    multi = set(data["discovery_summary"]["multi_agent_capable_agents"])
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        assert agent in multi, f"{agent} missing from registry multi_agent_capable_agents"
+
+
+def test_44d2_registry_swarm_capable_derived_from_registry_evidence(capsys) -> None:
+    # Each agent in swarm_capable_agents must have swarm-coordination at observed+.
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    registry_by_id = {p["agent_id"]: p for p in data["capability_registry"]}
+    for agent_id in data["discovery_summary"]["swarm_capable_agents"]:
+        profile = registry_by_id[agent_id]
+        swarm = next(
+            (c for c in profile["capabilities"] if c["name"] == "swarm-coordination"), None
+        )
+        assert swarm is not None, f"{agent_id} in swarm_capable but has no swarm-coordination cap"
+        assert swarm["confidence"] in ("observed", "validated", "proven"), (
+            f"{agent_id} in swarm_capable but swarm-coordination confidence={swarm['confidence']!r}"
+        )
+        assert len(swarm["evidence_sources"]) > 0, (
+            f"{agent_id} swarm-coordination has empty evidence_sources"
+        )
+
+
+def test_44d2_registry_multi_agent_capable_derivable_from_registry(capsys) -> None:
+    # Each agent in multi_agent_capable_agents must have at least one qualifying cap at observed+.
+    _qualifying = {"subagent-coordination", "swarm-coordination", "custom-agent-support"}
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    registry_by_id = {p["agent_id"]: p for p in data["capability_registry"]}
+    for agent_id in data["discovery_summary"]["multi_agent_capable_agents"]:
+        profile = registry_by_id[agent_id]
+        found = any(
+            c["name"] in _qualifying and c["confidence"] in ("observed", "validated", "proven")
+            for c in profile["capabilities"]
+        )
+        assert found, (
+            f"{agent_id} in multi_agent_capable_agents but no qualifying capability at observed+"
+        )
+
+
+def test_44d2_registry_extensibility_capable_derivable_from_registry(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    registry_by_id = {p["agent_id"]: p for p in data["capability_registry"]}
+    for agent_id in data["discovery_summary"]["extensibility_capable_agents"]:
+        profile = registry_by_id[agent_id]
+        skill = next(
+            (c for c in profile["capabilities"] if c["name"] == "skill-execution"), None
+        )
+        assert skill is not None
+        assert skill["confidence"] in ("observed", "validated", "proven"), (
+            f"{agent_id} in extensibility_capable but skill-execution={skill['confidence']!r}"
+        )
+        assert len(skill["evidence_sources"]) > 0
+
+
+def test_44d2_registry_doc_evidence_never_exceeds_observed(capsys) -> None:
+    # Documentation reference evidence alone must not produce validated or proven confidence.
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["evidence_sources"] == ["documentation_reference"]:
+                assert cap["confidence"] in ("unknown", "observed"), (
+                    f"{profile['agent_id']}.{cap['name']} has only documentation_reference "
+                    f"but confidence={cap['confidence']!r} — must be at most 'observed'"
+                )
+
+
+def test_44d2_discovery_and_registry_swarm_agree(capsys) -> None:
+    # kimi must appear in swarm_capable_agents in both commands.
+    main(["capability-registry", "--json"])
+    reg = json.loads(capsys.readouterr().out)
+    main(["capability-discovery", "--json"])
+    disc = json.loads(capsys.readouterr().out)
+    assert "kimi-local" in reg["discovery_summary"]["swarm_capable_agents"]
+    assert "kimi-local" in disc["discovery_summary"]["swarm_capable_agents"]
+
+
+def test_44d2_discovery_and_registry_multi_agent_agree(capsys) -> None:
+    main(["capability-registry", "--json"])
+    reg = json.loads(capsys.readouterr().out)
+    main(["capability-discovery", "--json"])
+    disc = json.loads(capsys.readouterr().out)
+    reg_multi = set(reg["discovery_summary"]["multi_agent_capable_agents"])
+    disc_multi = set(disc["discovery_summary"]["multi_agent_capable_agents"])
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        assert agent in reg_multi, f"{agent} not in registry multi_agent_capable_agents"
+        assert agent in disc_multi, f"{agent} not in discovery multi_agent_capable_agents"
+
+
+def test_44d2_original_capability_names_preserved_in_registry(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(p for p in data["capability_registry"] if p["agent_id"] == "kimi-local")
+    cap_names = {c["name"] for c in kimi["capabilities"]}
+    assert "swarm-coordination" in cap_names
+    # Normalization is summary-level only — the original name must survive in the registry.
+    assert "multi_agent_capable" not in cap_names

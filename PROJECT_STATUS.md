@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44D.1: Capability Classification Normalization.
+Phase 44D.2: Registry / Summary Consistency Validation.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,19 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE ensures registry and summary group consistency (Phase 44D.2):
+`pcae capability-registry` now includes documentation-backed capability
+entries at `confidence=observed` with `evidence_source=documentation_reference`,
+matching the behavior of `capability-discovery` and `capability-validation`;
+kimi-local's `swarm-coordination` appears in the registry as `observed` so
+that `swarm_capable_agents` and `multi_agent_capable_agents` in the summary
+are derived directly from registry records; no capability is promoted above
+`observed` by documentation-only evidence; original capability names are
+preserved; `build_capability_registry` in `core/agent.py` updated to pass
+`_DOC_CAPABILITY_CATALOG`; 10 new consistency tests verify that every agent
+in each normalized summary group has the backing capability at `observed+`
+with non-empty evidence sources in the registry.
 
 PCAE normalizes multi-agent capability names into higher-level summary
 groups (Phase 44D.1): `pcae capability-registry`, `pcae capability-discovery`,

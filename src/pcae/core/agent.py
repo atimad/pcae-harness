@@ -6214,9 +6214,20 @@ def _build_discovery_summary(profiles: list[AgentCapabilityProfile]) -> dict:
 
 
 def build_capability_registry(root: HarnessPath) -> dict:
-    """Return the evidence-based agent capability registry (no CLI probing)."""
+    """Return the evidence-based agent capability registry (no CLI probing).
+
+    Documentation-backed capabilities from the doc catalog are included at
+    confidence=observed with evidence_source=documentation_reference so that
+    the registry summary groups are consistent with capability-discovery and
+    capability-validation output.
+    """
     profiles = [
-        _build_agent_capability_profile(spec, root, probe_cli=False)
+        _build_agent_capability_profile(
+            spec,
+            root,
+            probe_cli=False,
+            doc_capabilities=_DOC_CAPABILITY_CATALOG.get(spec.agent_id, ()),
+        )
         for spec in _CAPABILITY_AGENT_SPECS
     ]
     return {
