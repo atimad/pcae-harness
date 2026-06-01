@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44B: Multi-Agent Orchestration Design.
+Phase 44C: Agent Capability Auto-Discovery.
 
 ## Governance Coherence Note
 
@@ -902,6 +902,33 @@ or scope violation), and future extension notes; JSON output includes
 read-only — no agents executed, no files modified, no orchestration
 performed; advisory: "Multi-agent collaboration design is advisory; no
 orchestration is performed."; 12 new tests.
+
+PCAE provides an evidence-based agent capability auto-discovery framework
+(Phase 44C): `pcae capability-registry` and `pcae capability-registry --json`
+show the capability registry (static evidence + execution history, no CLI
+probing); `pcae capability-discovery` and `pcae capability-discovery --json`
+run full auto-discovery (CLI help inspection + execution history + adapter
+contracts). Both commands cover 7 agents (codex-local, claude-local,
+kimi-local, deepseek-local, gemini-local, grok-local, perplexity-local) and
+19 capability categories (planning, implementation, review, validation,
+research, testing, architecture, documentation, security, performance,
+dependency-analysis, data-science, devops, refactoring, code-generation,
+roadmap-generation, subagent-coordination, skill-execution,
+swarm-coordination). Per-agent capability profile includes: agent_id, runtime,
+lifecycle_status, installed, version, capabilities (name, confidence,
+evidence_sources, notes), and subagent_profile (supported, confidence,
+mechanism, evidence_sources, notes). Confidence levels: unknown → observed →
+validated → proven. Evidence sources: adapter_contract, manual_validation,
+runtime_discovery, CLI help inspection, governed_execution_history,
+writable_execution_history, documentation_reference. Discovery rules:
+subagent/skill/swarm capabilities detected from CLI help remain observed
+(never proven); declared agents with no installation remain unknown;
+writable execution history promotes implementation to proven; governed
+execution history promotes code-generation, testing, validation to proven.
+JSON output includes `capability_registry`, `discovery_summary`, and
+`advisory`. Read-only: no agents executed, no files modified, no prompts
+submitted. Advisory: "Capability registry is advisory; capabilities are
+evidence-based and should be refreshed after runtime updates." 24 new tests.
 
 PCAE exposes a read-only multi-agent orchestration architecture design
 (Phase 44B): `pcae orchestration-design` and `pcae orchestration-design

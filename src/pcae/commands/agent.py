@@ -21,6 +21,9 @@ from pcae.core.agent import (
     build_collaboration_design,
     build_collaboration_workflows,
     build_orchestration_design,
+    build_capability_registry,
+    build_capability_discovery,
+    CAPABILITY_CATEGORIES,
     build_controlled_benchmark_plan,
     approve_file_changes,
     approve_rollback,
@@ -1932,6 +1935,64 @@ def run_remote_report_inspect(args: argparse.Namespace) -> int:
             print(f"Warning: {warning}")
         print()
         print(data["advisory"])
+    return 0
+
+
+def _print_capability_registry_data(data: dict) -> None:
+    print("Capability registry")
+    summary = data["discovery_summary"]
+    print(f"Agents: {summary['agents_checked']} checked, "
+          f"{summary['agents_installed']} installed, "
+          f"{summary['agents_not_installed']} not installed")
+    subagent_capable = summary.get("subagent_capable_agents", [])
+    print(f"Subagent-capable agents: "
+          f"{', '.join(subagent_capable) if subagent_capable else 'none'}")
+    print()
+    for profile in data["capability_registry"]:
+        installed_label = "installed" if profile["installed"] else "not installed"
+        ver = profile.get("version") or "(unknown)"
+        print(f"{profile['agent_id']} [{profile['lifecycle_status']}, {installed_label}]"
+              f" version={ver}")
+        caps = profile["capabilities"]
+        proven = [c for c in caps if c["confidence"] == "proven"]
+        validated = [c for c in caps if c["confidence"] == "validated"]
+        observed = [c for c in caps if c["confidence"] == "observed"]
+        unknown = [c for c in caps if c["confidence"] == "unknown"]
+        if proven:
+            print(f"  Proven:    {', '.join(c['name'] for c in proven)}")
+        if validated:
+            print(f"  Validated: {', '.join(c['name'] for c in validated)}")
+        if observed:
+            print(f"  Observed:  {', '.join(c['name'] for c in observed)}")
+        if unknown:
+            print(f"  Unknown:   {', '.join(c['name'] for c in unknown)}")
+        sp = profile["subagent_profile"]
+        subagent_label = "supported" if sp["supported"] else "not supported"
+        print(f"  Subagent:  {subagent_label} [{sp['confidence']}]"
+              f" mechanism={sp['mechanism']}")
+        print()
+    print(data["advisory"])
+
+
+def run_capability_registry(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_capability_registry(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        _print_capability_registry_data(data)
+    return 0
+
+
+def run_capability_discovery(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_capability_discovery(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Capability discovery")
+        print()
+        _print_capability_registry_data(data)
     return 0
 
 

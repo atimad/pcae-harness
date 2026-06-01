@@ -5723,3 +5723,373 @@ def build_orchestration_design() -> dict:
         "future_agent_expansion": list(_ORCHESTRATION_FUTURE_AGENTS),
         "advisory": ORCHESTRATION_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Agent Capability Auto-Discovery (Phase 44C)
+# ---------------------------------------------------------------------------
+
+_CAP_CONF_UNKNOWN = "unknown"
+_CAP_CONF_OBSERVED = "observed"
+_CAP_CONF_VALIDATED = "validated"
+_CAP_CONF_PROVEN = "proven"
+
+VALID_CAPABILITY_CONFIDENCES: frozenset[str] = frozenset({
+    _CAP_CONF_UNKNOWN,
+    _CAP_CONF_OBSERVED,
+    _CAP_CONF_VALIDATED,
+    _CAP_CONF_PROVEN,
+})
+
+CAPABILITY_CATEGORIES: tuple[str, ...] = (
+    "planning",
+    "implementation",
+    "review",
+    "validation",
+    "research",
+    "testing",
+    "architecture",
+    "documentation",
+    "security",
+    "performance",
+    "dependency-analysis",
+    "data-science",
+    "devops",
+    "refactoring",
+    "code-generation",
+    "roadmap-generation",
+    "subagent-coordination",
+    "skill-execution",
+    "swarm-coordination",
+)
+
+CAPABILITY_REGISTRY_ADVISORY = (
+    "Capability registry is advisory; capabilities are evidence-based "
+    "and should be refreshed after runtime updates."
+)
+
+CAPABILITY_DISCOVERY_ADVISORY = (
+    "Capability discovery is advisory and read-only; no agents are executed."
+)
+
+# Evidence source constants
+_EV_RUNTIME_DISC = "runtime_discovery"
+_EV_CLI_HELP = "CLI help inspection"
+_EV_EXEC_HIST = "governed_execution_history"
+_EV_WRITABLE_HIST = "writable_execution_history"
+_EV_MANUAL_VAL = "manual_validation"
+_EV_DOC_REF = "documentation_reference"
+_EV_ADAPTER = "adapter_contract"
+
+# CLI help keyword sets for advanced capability detection
+_KW_CAP_SUBAGENT = ("subagent", "sub-agent", "agent team")
+_KW_CAP_SKILL = ("skill",)
+_KW_CAP_SWARM = ("swarm", "agent-swarm")
+
+
+@dataclass(frozen=True)
+class CapabilityEntry:
+    name: str
+    confidence: str
+    evidence_sources: tuple[str, ...]
+    notes: str
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "confidence": self.confidence,
+            "evidence_sources": list(self.evidence_sources),
+            "notes": self.notes,
+        }
+
+
+@dataclass(frozen=True)
+class SubagentProfile:
+    supported: bool
+    confidence: str
+    mechanism: str
+    evidence_sources: tuple[str, ...]
+    notes: str
+
+    def to_dict(self) -> dict:
+        return {
+            "supported": self.supported,
+            "confidence": self.confidence,
+            "mechanism": self.mechanism,
+            "evidence_sources": list(self.evidence_sources),
+            "notes": self.notes,
+        }
+
+
+@dataclass(frozen=True)
+class AgentCapabilityProfile:
+    agent_id: str
+    runtime: str
+    lifecycle_status: str
+    installed: bool
+    version: str | None
+    capabilities: tuple[CapabilityEntry, ...]
+    subagent_profile: SubagentProfile
+
+    def to_dict(self) -> dict:
+        return {
+            "agent_id": self.agent_id,
+            "runtime": self.runtime,
+            "lifecycle_status": self.lifecycle_status,
+            "installed": self.installed,
+            "version": self.version,
+            "capabilities": [c.to_dict() for c in self.capabilities],
+            "subagent_profile": self.subagent_profile.to_dict(),
+        }
+
+
+# Base capability declarations per agent from adapter contracts.
+# Format per tuple: (name, confidence, evidence_sources_tuple, notes)
+_CapSpec = tuple[str, str, tuple[str, ...], str]
+
+_CODEX_BASE: tuple[_CapSpec, ...] = (
+    ("planning", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("implementation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("code-generation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("testing", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("review", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("validation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("documentation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("refactoring", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+)
+
+_CLAUDE_BASE: tuple[_CapSpec, ...] = (
+    ("planning", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("implementation", _CAP_CONF_VALIDATED, (_EV_ADAPTER, _EV_MANUAL_VAL),
+     "acceptEdits writable support confirmed via manual validation."),
+    ("code-generation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("review", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("validation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("documentation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("architecture", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("research", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("security", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("refactoring", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+)
+
+_KIMI_BASE: tuple[_CapSpec, ...] = (
+    ("planning", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("implementation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("code-generation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("review", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("documentation", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+    ("research", _CAP_CONF_VALIDATED, (_EV_ADAPTER,), "Confirmed via adapter contract."),
+)
+
+
+@dataclass(frozen=True)
+class _AgentCapabilitySpec:
+    agent_id: str
+    runtime: str
+    executable: str | None
+    lifecycle_status: str
+    base_capabilities: tuple[_CapSpec, ...]
+
+
+_CAPABILITY_AGENT_SPECS: tuple[_AgentCapabilitySpec, ...] = (
+    _AgentCapabilitySpec("codex-local", "codex", "codex", AGENT_STATUS_AVAILABLE, _CODEX_BASE),
+    _AgentCapabilitySpec("claude-local", "claude", "claude", AGENT_STATUS_AVAILABLE, _CLAUDE_BASE),
+    _AgentCapabilitySpec("kimi-local", "kimi", "kimi", AGENT_STATUS_AVAILABLE, _KIMI_BASE),
+    _AgentCapabilitySpec("deepseek-local", "deepseek", None, AGENT_STATUS_DECLARED, ()),
+    _AgentCapabilitySpec("gemini-local", "gemini", None, AGENT_STATUS_DECLARED, ()),
+    _AgentCapabilitySpec("grok-local", "grok", None, AGENT_STATUS_DECLARED, ()),
+    _AgentCapabilitySpec("perplexity-local", "perplexity", None, AGENT_STATUS_DECLARED, ()),
+)
+
+
+def _check_agent_execution_history(
+    root: HarnessPath, agent_id: str
+) -> tuple[bool, bool]:
+    """Return (has_governed_execution, has_writable_execution) for agent_id."""
+    results_dir = root.join(_REMOTE_RESULTS_DIR)
+    if not results_dir.exists():
+        return False, False
+    has_exec = False
+    has_writable = False
+    for f in results_dir.glob("*-result.json"):
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        if data.get("selected_agent") != agent_id:
+            continue
+        if data.get("final_status") == "completed":
+            has_exec = True
+            if data.get("changed_files"):
+                has_writable = True
+    return has_exec, has_writable
+
+
+def _build_agent_capability_profile(
+    spec: _AgentCapabilitySpec,
+    root: HarnessPath,
+    probe_cli: bool,
+) -> AgentCapabilityProfile:
+    """Build a capability profile for one agent. Read-only."""
+    installed = False
+    version: str | None = None
+    help_text = ""
+
+    if spec.executable is not None:
+        path = _find_executable(spec.executable)
+        installed = path is not None
+
+        if installed and probe_cli:
+            version = _extract_version_string(spec.executable)
+            main_help = _run_probe([spec.executable, "--help"])
+            if main_help:
+                help_text = main_help
+            if spec.executable == "codex":
+                for sub in (["codex", "exec", "--help"], ["codex", "mcp", "--help"]):
+                    out = _run_probe(sub)
+                    if out:
+                        help_text += " " + out
+
+    has_exec, has_writable = _check_agent_execution_history(root, spec.agent_id)
+
+    capabilities: list[CapabilityEntry] = []
+    seen_names: set[str] = set()
+
+    for name, conf, ev_srcs, notes in spec.base_capabilities:
+        if not installed:
+            capabilities.append(CapabilityEntry(
+                name=name,
+                confidence=_CAP_CONF_UNKNOWN,
+                evidence_sources=(),
+                notes="Agent not installed; capability unverifiable.",
+            ))
+            seen_names.add(name)
+            continue
+
+        final_conf = conf
+        final_ev: list[str] = list(ev_srcs)
+
+        if name == "implementation" and has_writable:
+            final_conf = _CAP_CONF_PROVEN
+            if _EV_WRITABLE_HIST not in final_ev:
+                final_ev.append(_EV_WRITABLE_HIST)
+        elif name in ("implementation", "code-generation", "testing", "validation") and has_exec:
+            final_conf = _CAP_CONF_PROVEN
+            if _EV_EXEC_HIST not in final_ev:
+                final_ev.append(_EV_EXEC_HIST)
+
+        capabilities.append(CapabilityEntry(
+            name=name,
+            confidence=final_conf,
+            evidence_sources=tuple(final_ev),
+            notes=notes,
+        ))
+        seen_names.add(name)
+
+    # CLI help detection for advanced capabilities (observed only)
+    if installed and help_text:
+        for cap_name, kw_set in (
+            ("subagent-coordination", _KW_CAP_SUBAGENT),
+            ("skill-execution", _KW_CAP_SKILL),
+            ("swarm-coordination", _KW_CAP_SWARM),
+        ):
+            if cap_name not in seen_names and any(kw in help_text for kw in kw_set):
+                capabilities.append(CapabilityEntry(
+                    name=cap_name,
+                    confidence=_CAP_CONF_OBSERVED,
+                    evidence_sources=(_EV_CLI_HELP,),
+                    notes=f"Detected from CLI help; not confirmed by execution history.",
+                ))
+                seen_names.add(cap_name)
+
+    # Fill remaining categories as unknown
+    for cat in CAPABILITY_CATEGORIES:
+        if cat not in seen_names:
+            capabilities.append(CapabilityEntry(
+                name=cat,
+                confidence=_CAP_CONF_UNKNOWN,
+                evidence_sources=(),
+                notes="No evidence collected." if installed else "Agent not installed.",
+            ))
+
+    # Build subagent profile from subagent-coordination capability
+    subagent_cap = next(
+        (c for c in capabilities if c.name == "subagent-coordination"), None
+    )
+    if subagent_cap is not None and subagent_cap.confidence != _CAP_CONF_UNKNOWN:
+        subagent_profile = SubagentProfile(
+            supported=True,
+            confidence=subagent_cap.confidence,
+            mechanism="CLI help keyword detection",
+            evidence_sources=subagent_cap.evidence_sources,
+            notes=subagent_cap.notes,
+        )
+    else:
+        subagent_profile = SubagentProfile(
+            supported=False,
+            confidence=_CAP_CONF_UNKNOWN,
+            mechanism="none",
+            evidence_sources=(),
+            notes="No subagent support detected." if installed else "Agent not installed.",
+        )
+
+    return AgentCapabilityProfile(
+        agent_id=spec.agent_id,
+        runtime=spec.runtime,
+        lifecycle_status=spec.lifecycle_status,
+        installed=installed,
+        version=version,
+        capabilities=tuple(capabilities),
+        subagent_profile=subagent_profile,
+    )
+
+
+def _build_discovery_summary(profiles: list[AgentCapabilityProfile]) -> dict:
+    installed_count = sum(1 for p in profiles if p.installed)
+    proven_count = sum(
+        1 for p in profiles
+        for c in p.capabilities
+        if c.confidence == _CAP_CONF_PROVEN
+    )
+    unknown_count = sum(
+        1 for p in profiles
+        for c in p.capabilities
+        if c.confidence == _CAP_CONF_UNKNOWN
+    )
+    subagent_supported = [p.agent_id for p in profiles if p.subagent_profile.supported]
+    return {
+        "agents_checked": len(profiles),
+        "agents_installed": installed_count,
+        "agents_not_installed": len(profiles) - installed_count,
+        "proven_capability_entries": proven_count,
+        "unknown_capability_entries": unknown_count,
+        "subagent_capable_agents": subagent_supported,
+    }
+
+
+def build_capability_registry(root: HarnessPath) -> dict:
+    """Return the evidence-based agent capability registry (no CLI probing)."""
+    profiles = [
+        _build_agent_capability_profile(spec, root, probe_cli=False)
+        for spec in _CAPABILITY_AGENT_SPECS
+    ]
+    return {
+        "capability_registry": [p.to_dict() for p in profiles],
+        "discovery_summary": _build_discovery_summary(profiles),
+        "advisory": CAPABILITY_REGISTRY_ADVISORY,
+    }
+
+
+def build_capability_discovery(root: HarnessPath) -> dict:
+    """Run auto-discovery of agent capabilities via CLI help inspection. Read-only."""
+    profiles = [
+        _build_agent_capability_profile(spec, root, probe_cli=True)
+        for spec in _CAPABILITY_AGENT_SPECS
+    ]
+    return {
+        "capability_registry": [p.to_dict() for p in profiles],
+        "discovery_summary": _build_discovery_summary(profiles),
+        "advisory": CAPABILITY_DISCOVERY_ADVISORY,
+    }

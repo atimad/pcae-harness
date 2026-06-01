@@ -20,6 +20,8 @@ from pcae.commands.agent import (
     run_agents_validate,
     run_collaboration_design,
     run_orchestration_design,
+    run_capability_registry,
+    run_capability_discovery,
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
@@ -1248,6 +1250,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON orchestration design output.",
     )
     orchestration_design_parser.set_defaults(handler=run_orchestration_design)
+
+    capability_registry_parser = subparsers.add_parser(
+        "capability-registry",
+        help="Show the evidence-based agent capability registry (no CLI probing).",
+    )
+    capability_registry_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON capability registry output.",
+    )
+    capability_registry_parser.set_defaults(handler=run_capability_registry)
+
+    capability_discovery_parser = subparsers.add_parser(
+        "capability-discovery",
+        help="Run auto-discovery of agent capabilities via CLI help inspection.",
+    )
+    capability_discovery_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON capability discovery output.",
+    )
+    capability_discovery_parser.set_defaults(handler=run_capability_discovery)
 
     remote_parser = subparsers.add_parser(
         "remote",

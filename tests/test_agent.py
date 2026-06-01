@@ -14884,3 +14884,233 @@ def test_44b_orchestration_design_human_output_shows_advisory(capsys) -> None:
     main(["orchestration-design"])
     output = capsys.readouterr().out
     assert "advisory" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 44C: Agent Capability Auto-Discovery
+# ---------------------------------------------------------------------------
+
+
+def test_44c_capability_registry_command_exits_zero(capsys) -> None:
+    exit_code = main(["capability-registry"])
+    assert exit_code == 0
+
+
+def test_44c_capability_registry_json_exits_zero(capsys) -> None:
+    exit_code = main(["capability-registry", "--json"])
+    assert exit_code == 0
+
+
+def test_44c_capability_registry_json_has_required_top_level_keys(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "capability_registry" in data
+    assert "discovery_summary" in data
+    assert "advisory" in data
+
+
+def test_44c_capability_registry_includes_all_agents(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agent_ids = [p["agent_id"] for p in data["capability_registry"]]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+    assert "deepseek-local" in agent_ids
+    assert "gemini-local" in agent_ids
+    assert "grok-local" in agent_ids
+    assert "perplexity-local" in agent_ids
+
+
+def test_44c_capability_registry_profile_fields_present(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        assert "agent_id" in profile
+        assert "runtime" in profile
+        assert "lifecycle_status" in profile
+        assert "installed" in profile
+        assert "version" in profile
+        assert "capabilities" in profile
+        assert "subagent_profile" in profile
+
+
+def test_44c_capability_registry_capability_entry_fields(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            assert "name" in cap
+            assert "confidence" in cap
+            assert "evidence_sources" in cap
+            assert "notes" in cap
+
+
+def test_44c_capability_registry_subagent_profile_fields(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        sp = profile["subagent_profile"]
+        assert "supported" in sp
+        assert "confidence" in sp
+        assert "mechanism" in sp
+        assert "evidence_sources" in sp
+        assert "notes" in sp
+
+
+def test_44c_capability_registry_declared_future_agents_are_unknown(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    declared_ids = {"deepseek-local", "gemini-local", "grok-local", "perplexity-local"}
+    for profile in data["capability_registry"]:
+        if profile["agent_id"] in declared_ids:
+            assert profile["installed"] is False
+            for cap in profile["capabilities"]:
+                assert cap["confidence"] == "unknown"
+            assert profile["subagent_profile"]["supported"] is False
+            assert profile["subagent_profile"]["confidence"] == "unknown"
+
+
+def test_44c_capability_registry_valid_confidence_values(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    valid = {"unknown", "observed", "validated", "proven"}
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            assert cap["confidence"] in valid
+        assert profile["subagent_profile"]["confidence"] in valid
+
+
+def test_44c_capability_registry_all_categories_present_per_agent(capsys) -> None:
+    from pcae.core.agent import CAPABILITY_CATEGORIES
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        cap_names = {c["name"] for c in profile["capabilities"]}
+        for cat in CAPABILITY_CATEGORIES:
+            assert cat in cap_names, (
+                f"Agent {profile['agent_id']} missing capability category {cat!r}"
+            )
+
+
+def test_44c_capability_registry_subagent_swarm_not_proven(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] in ("subagent-coordination", "skill-execution", "swarm-coordination"):
+                assert cap["confidence"] != "proven", (
+                    f"Agent {profile['agent_id']} has {cap['name']} "
+                    f"marked as 'proven' — should be at most 'observed' from CLI help."
+                )
+
+
+def test_44c_capability_registry_advisory_is_correct(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "evidence-based" in data["advisory"].lower()
+    assert "refreshed" in data["advisory"].lower()
+
+
+def test_44c_capability_registry_human_output_shows_agent_ids(capsys) -> None:
+    main(["capability-registry"])
+    output = capsys.readouterr().out
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+
+
+def test_44c_capability_registry_human_output_shows_advisory(capsys) -> None:
+    main(["capability-registry"])
+    output = capsys.readouterr().out
+    assert "advisory" in output.lower()
+
+
+def test_44c_capability_discovery_command_exits_zero(capsys) -> None:
+    exit_code = main(["capability-discovery"])
+    assert exit_code == 0
+
+
+def test_44c_capability_discovery_json_exits_zero(capsys) -> None:
+    exit_code = main(["capability-discovery", "--json"])
+    assert exit_code == 0
+
+
+def test_44c_capability_discovery_json_has_required_top_level_keys(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "capability_registry" in data
+    assert "discovery_summary" in data
+    assert "advisory" in data
+
+
+def test_44c_capability_discovery_includes_all_agents(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agent_ids = [p["agent_id"] for p in data["capability_registry"]]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+    assert "deepseek-local" in agent_ids
+    assert "gemini-local" in agent_ids
+    assert "grok-local" in agent_ids
+    assert "perplexity-local" in agent_ids
+
+
+def test_44c_capability_discovery_no_proven_subagent_swarm(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] in ("subagent-coordination", "skill-execution", "swarm-coordination"):
+                assert cap["confidence"] != "proven", (
+                    f"Agent {profile['agent_id']} has {cap['name']} "
+                    f"marked as 'proven' — CLI help can produce at most 'observed'."
+                )
+
+
+def test_44c_capability_discovery_declared_future_agents_remain_unknown(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    declared_ids = {"deepseek-local", "gemini-local", "grok-local", "perplexity-local"}
+    for profile in data["capability_registry"]:
+        if profile["agent_id"] in declared_ids:
+            assert profile["installed"] is False
+            for cap in profile["capabilities"]:
+                assert cap["confidence"] == "unknown"
+
+
+def test_44c_capability_discovery_advisory_is_correct(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no agents are executed" in data["advisory"].lower()
+
+
+def test_44c_capability_discovery_human_output_shows_agent_ids(capsys) -> None:
+    main(["capability-discovery"])
+    output = capsys.readouterr().out
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+
+
+def test_44c_capability_discovery_human_output_shows_advisory(capsys) -> None:
+    main(["capability-discovery"])
+    output = capsys.readouterr().out
+    assert "advisory" in output.lower()
+
+
+def test_44c_capability_registry_discovery_summary_fields(capsys) -> None:
+    main(["capability-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    assert "agents_checked" in summary
+    assert "agents_installed" in summary
+    assert "agents_not_installed" in summary
+    assert "proven_capability_entries" in summary
+    assert "unknown_capability_entries" in summary
+    assert "subagent_capable_agents" in summary
+    assert summary["agents_checked"] == 7
+    assert summary["agents_not_installed"] == summary["agents_checked"] - summary["agents_installed"]
