@@ -5762,12 +5762,23 @@ CAPABILITY_CATEGORIES: tuple[str, ...] = (
     "data-science",
     "devops",
     "refactoring",
+    "custom-agent-support",
     "code-generation",
     "roadmap-generation",
     "subagent-coordination",
     "skill-execution",
     "swarm-coordination",
 )
+
+# Documentation capability catalog (Phase 44C.1).
+# Maps agent_id → capabilities documented by vendor.
+# Produces confidence=observed only; never validated or proven.
+# Add future agents here without changing discovery code.
+_DOC_CAPABILITY_CATALOG: dict[str, tuple[str, ...]] = {
+    "codex-local": ("subagent-coordination", "skill-execution"),
+    "claude-local": ("subagent-coordination", "custom-agent-support"),
+    "kimi-local": ("swarm-coordination",),
+}
 
 CAPABILITY_REGISTRY_ADVISORY = (
     "Capability registry is advisory; capabilities are evidence-based "
@@ -5945,12 +5956,16 @@ def _build_agent_capability_profile(
     root: HarnessPath,
     probe_cli: bool,
     runtime_caps_by_id: dict[str, AgentRuntimeCapabilities] | None = None,
+    doc_capabilities: tuple[str, ...] = (),
 ) -> AgentCapabilityProfile:
     """Build a capability profile for one agent. Read-only.
 
     runtime_caps_by_id: optional pre-computed runtime discovery results keyed by
     agent_id; when present, used as an additional ``runtime_discovery`` evidence
     source alongside CLI help inspection.
+
+    doc_capabilities: vendor-documented capabilities for this agent; each name
+    produces at most ``observed`` confidence with evidence ``documentation_reference``.
     """
     installed = False
     version: str | None = None
@@ -6043,6 +6058,38 @@ def _build_agent_capability_profile(
                 ))
                 seen_names.add(cap_name)
 
+    # Documentation reference pass — vendor-documented capabilities.
+    # Applies regardless of installation status: documentation is external evidence.
+    # Produces at most confidence=observed; never validates or proves a capability.
+    for cap_name in doc_capabilities:
+        existing_idx = next(
+            (i for i, c in enumerate(capabilities) if c.name == cap_name), None
+        )
+        if existing_idx is None:
+            # Capability not yet recorded — create as observed from documentation.
+            capabilities.append(CapabilityEntry(
+                name=cap_name,
+                confidence=_CAP_CONF_OBSERVED,
+                evidence_sources=(_EV_DOC_REF,),
+                notes="Documented by vendor; not yet validated by PCAE.",
+            ))
+            seen_names.add(cap_name)
+        else:
+            # Capability already recorded — add documentation_reference as additional source.
+            existing = capabilities[existing_idx]
+            if _EV_DOC_REF not in existing.evidence_sources:
+                new_conf = (
+                    _CAP_CONF_OBSERVED
+                    if existing.confidence == _CAP_CONF_UNKNOWN
+                    else existing.confidence
+                )
+                capabilities[existing_idx] = CapabilityEntry(
+                    name=existing.name,
+                    confidence=new_conf,
+                    evidence_sources=existing.evidence_sources + (_EV_DOC_REF,),
+                    notes=existing.notes,
+                )
+
     # Fill remaining categories as unknown
     for cat in CAPABILITY_CATEGORIES:
         if cat not in seen_names:
@@ -6061,7 +6108,7 @@ def _build_agent_capability_profile(
         subagent_profile = SubagentProfile(
             supported=True,
             confidence=subagent_cap.confidence,
-            mechanism="CLI help keyword detection or runtime discovery",
+            mechanism="CLI help keyword detection, runtime discovery, or documentation reference",
             evidence_sources=subagent_cap.evidence_sources,
             notes=subagent_cap.notes,
         )
@@ -6130,7 +6177,11 @@ def build_capability_discovery(root: HarnessPath) -> dict:
     }
     profiles = [
         _build_agent_capability_profile(
-            spec, root, probe_cli=True, runtime_caps_by_id=runtime_caps_by_id
+            spec,
+            root,
+            probe_cli=True,
+            runtime_caps_by_id=runtime_caps_by_id,
+            doc_capabilities=_DOC_CAPABILITY_CATALOG.get(spec.agent_id, ()),
         )
         for spec in _CAPABILITY_AGENT_SPECS
     ]

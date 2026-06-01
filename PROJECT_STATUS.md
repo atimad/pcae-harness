@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44C: Agent Capability Auto-Discovery.
+Phase 44C.1: Documentation Capability Discovery.
 
 ## Governance Coherence Note
 

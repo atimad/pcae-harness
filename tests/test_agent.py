@@ -15182,19 +15182,146 @@ def test_44c_capability_discovery_installed_subagent_support_is_observed_not_unk
             )
 
 
-def test_44c_capability_discovery_subagent_evidence_includes_cli_or_runtime(
+def test_44c_capability_discovery_subagent_evidence_includes_approved_source(
     capsys,
 ) -> None:
     # For any agent with observed subagent-coordination, at least one evidence source
-    # must be CLI help inspection or runtime_discovery.
+    # must be an approved discovery source (CLI, runtime, or documentation).
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    approved = {"CLI help inspection", "runtime_discovery", "documentation_reference"}
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] == "subagent-coordination" and cap["confidence"] == "observed":
+                assert any(src in approved for src in cap["evidence_sources"]), (
+                    f"{profile['agent_id']} subagent-coordination is observed but "
+                    f"evidence_sources {cap['evidence_sources']} contains no approved source"
+                )
+
+
+# ---------------------------------------------------------------------------
+# Phase 44C.1: Documentation Capability Discovery
+# ---------------------------------------------------------------------------
+
+
+def test_44c1_codex_subagent_coordination_is_observed(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    codex = next(p for p in data["capability_registry"] if p["agent_id"] == "codex-local")
+    cap = next(c for c in codex["capabilities"] if c["name"] == "subagent-coordination")
+    assert cap["confidence"] == "observed"
+    assert "documentation_reference" in cap["evidence_sources"]
+
+
+def test_44c1_codex_skill_execution_is_observed(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    codex = next(p for p in data["capability_registry"] if p["agent_id"] == "codex-local")
+    cap = next(c for c in codex["capabilities"] if c["name"] == "skill-execution")
+    assert cap["confidence"] == "observed"
+    assert "documentation_reference" in cap["evidence_sources"]
+
+
+def test_44c1_claude_custom_agent_support_is_observed(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    claude = next(p for p in data["capability_registry"] if p["agent_id"] == "claude-local")
+    cap = next(c for c in claude["capabilities"] if c["name"] == "custom-agent-support")
+    assert cap["confidence"] == "observed"
+    assert "documentation_reference" in cap["evidence_sources"]
+
+
+def test_44c1_kimi_swarm_coordination_is_observed(capsys) -> None:
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(p for p in data["capability_registry"] if p["agent_id"] == "kimi-local")
+    cap = next(c for c in kimi["capabilities"] if c["name"] == "swarm-coordination")
+    assert cap["confidence"] == "observed"
+    assert "documentation_reference" in cap["evidence_sources"]
+
+
+def test_44c1_multiple_evidence_sources_supported(capsys) -> None:
+    # Claude's subagent-coordination should have both documentation_reference
+    # and CLI help inspection (and possibly runtime_discovery).
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    claude = next(p for p in data["capability_registry"] if p["agent_id"] == "claude-local")
+    cap = next(c for c in claude["capabilities"] if c["name"] == "subagent-coordination")
+    assert cap["confidence"] == "observed"
+    assert len(cap["evidence_sources"]) >= 2
+    assert "documentation_reference" in cap["evidence_sources"]
+
+
+def test_44c1_doc_reference_never_produces_proven(capsys) -> None:
+    # No capability whose sole evidence is documentation_reference may be proven.
     main(["capability-discovery", "--json"])
     data = json.loads(capsys.readouterr().out)
     for profile in data["capability_registry"]:
         for cap in profile["capabilities"]:
-            if cap["name"] == "subagent-coordination" and cap["confidence"] == "observed":
-                cli_or_runtime = {"CLI help inspection", "runtime_discovery"}
-                assert any(src in cli_or_runtime for src in cap["evidence_sources"]), (
-                    f"{profile['agent_id']} subagent-coordination is observed but "
-                    f"evidence_sources {cap['evidence_sources']} contains neither "
-                    f"'CLI help inspection' nor 'runtime_discovery'"
+            if (
+                cap["evidence_sources"] == ["documentation_reference"]
+                or cap["evidence_sources"] == ("documentation_reference",)
+            ):
+                assert cap["confidence"] != "proven", (
+                    f"{profile['agent_id']}.{cap['name']} is proven from "
+                    f"documentation_reference alone — not allowed"
                 )
+                assert cap["confidence"] != "validated", (
+                    f"{profile['agent_id']}.{cap['name']} is validated from "
+                    f"documentation_reference alone — not allowed"
+                )
+
+
+def test_44c1_doc_reference_max_confidence_is_observed(capsys) -> None:
+    # Any capability with documentation_reference as an evidence source must
+    # be at most observed (documentation cannot validate or prove).
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if "documentation_reference" in cap["evidence_sources"]:
+                assert cap["confidence"] in ("observed", "unknown"), (
+                    f"{profile['agent_id']}.{cap['name']} has documentation_reference "
+                    f"but confidence={cap['confidence']!r} — must be at most 'observed'"
+                )
+
+
+def test_44c1_future_agents_remain_unknown_no_doc_entries(capsys) -> None:
+    # Declared agents without doc catalog entries must stay unknown for
+    # the advanced capabilities.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    future_ids = {"deepseek-local", "gemini-local", "grok-local", "perplexity-local"}
+    for profile in data["capability_registry"]:
+        if profile["agent_id"] not in future_ids:
+            continue
+        for cap in profile["capabilities"]:
+            assert "documentation_reference" not in cap["evidence_sources"], (
+                f"{profile['agent_id']}.{cap['name']} has documentation_reference "
+                f"but no doc catalog entry exists for this agent"
+            )
+
+
+def test_44c1_custom_agent_support_in_all_profiles(capsys) -> None:
+    # custom-agent-support must appear in every agent profile (unknown for those
+    # without a doc catalog entry, observed for claude).
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        cap_names = {c["name"] for c in profile["capabilities"]}
+        assert "custom-agent-support" in cap_names, (
+            f"{profile['agent_id']} missing custom-agent-support capability"
+        )
+
+
+def test_44c1_doc_capabilities_from_catalog_not_hardcoded_cli(capsys) -> None:
+    # Discovery uses the catalog lookup; an agent not in the catalog gets no
+    # documentation_reference evidence — even if installed.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    no_doc_ids = {"deepseek-local", "gemini-local", "grok-local", "perplexity-local"}
+    for profile in data["capability_registry"]:
+        if profile["agent_id"] not in no_doc_ids:
+            continue
+        for cap in profile["capabilities"]:
+            assert "documentation_reference" not in cap["evidence_sources"]
