@@ -14737,3 +14737,150 @@ def test_44a_collaboration_design_human_output_shows_advisory(capsys) -> None:
     main(["collaboration-design"])
     output = capsys.readouterr().out
     assert "advisory" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 44B: Multi-Agent Orchestration Design
+# ---------------------------------------------------------------------------
+
+
+def test_44b_orchestration_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["orchestration-design"])
+    assert exit_code == 0
+
+
+def test_44b_orchestration_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["orchestration-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44b_orchestration_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "orchestration_design" in data
+    assert "capability_profile_model" in data
+    assert "orchestration_patterns" in data
+    assert "governance_integration" in data
+    assert "conflict_resolution" in data
+    assert "future_agent_expansion" in data
+    assert "advisory" in data
+
+
+def test_44b_orchestration_design_coordinator_responsibilities_defined(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    responsibilities = data["orchestration_design"]["coordinator_responsibilities"]
+    names = [r["name"] for r in responsibilities]
+    assert "task_decomposition" in names
+    assert "role_assignment" in names
+    assert "parallel_execution_planning" in names
+    assert "result_collection" in names
+    assert "conflict_detection" in names
+    assert "consensus_calculation" in names
+    assert "governance_handoff" in names
+
+
+def test_44b_orchestration_design_capability_profile_model_defined(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["capability_profile_model"]
+    fields = model["fields"]
+    assert "agent_id" in fields
+    assert "runtime" in fields
+    assert "lifecycle_status" in fields
+    assert "capabilities" in fields
+    assert "writable_supported" in fields
+    assert "subagent_supported" in fields
+    assert "evidence_source" in fields
+    assert "confidence" in fields
+    cats = model["capability_categories"]
+    assert "planning" in cats
+    assert "implementation" in cats
+    assert "review" in cats
+    assert "validation" in cats
+    assert "research" in cats
+    assert "testing" in cats
+    assert "architecture" in cats
+    assert "documentation" in cats
+    assert "security" in cats
+    assert "performance" in cats
+    assert "dependency-analysis" in cats
+    assert "data-science" in cats
+    assert "devops" in cats
+
+
+def test_44b_orchestration_design_patterns_defined(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    patterns = [p["pattern"] for p in data["orchestration_patterns"]]
+    assert "sequential" in patterns
+    assert "parallel_review" in patterns
+    assert "parallel_planning" in patterns
+    assert "swarm" in patterns
+    assert "full_pipeline" in patterns
+
+
+def test_44b_orchestration_design_governance_rules_defined(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["governance_integration"]["rules"]
+    assert len(rules) > 0
+    assert any("only implementer" in r for r in rules)
+    assert any("read-only" in r for r in rules)
+    assert any("human remains authoritative" in r for r in rules)
+
+
+def test_44b_orchestration_design_conflict_resolution_model_defined(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cr = data["conflict_resolution"]
+    policies = [p["policy"] for p in cr["policies"]]
+    assert "unanimous" in policies
+    assert "majority" in policies
+    assert "weighted" in policies
+    assert "human_escalation" in policies
+    assert cr["default_policy"] == "human_escalation"
+    assert "escalation_rule" in cr
+
+
+def test_44b_orchestration_design_future_agent_expansion_included(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = [a["agent_id"] for a in data["future_agent_expansion"]]
+    assert "deepseek-local" in agents
+    assert "gemini-local" in agents
+    assert "grok-local" in agents
+    assert "perplexity-local" in agents
+
+
+def test_44b_orchestration_design_advisory_is_correct(capsys) -> None:
+    main(["orchestration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data
+    assert "advisory" in data["advisory"].lower()
+    assert "no orchestration" in data["advisory"].lower()
+
+
+def test_44b_orchestration_design_human_output_shows_coordinator_responsibilities(
+    capsys,
+) -> None:
+    main(["orchestration-design"])
+    output = capsys.readouterr().out
+    assert "task_decomposition" in output
+    assert "role_assignment" in output
+    assert "governance_handoff" in output
+
+
+def test_44b_orchestration_design_human_output_shows_patterns(capsys) -> None:
+    main(["orchestration-design"])
+    output = capsys.readouterr().out
+    assert "sequential" in output
+    assert "parallel_review" in output
+    assert "swarm" in output
+    assert "full_pipeline" in output
+
+
+def test_44b_orchestration_design_human_output_shows_advisory(capsys) -> None:
+    main(["orchestration-design"])
+    output = capsys.readouterr().out
+    assert "advisory" in output.lower()

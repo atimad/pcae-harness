@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44A: Multi-Agent Collaboration Design.
+Phase 44B: Multi-Agent Orchestration Design.
 
 ## Governance Coherence Note
 
@@ -902,6 +902,31 @@ or scope violation), and future extension notes; JSON output includes
 read-only — no agents executed, no files modified, no orchestration
 performed; advisory: "Multi-agent collaboration design is advisory; no
 orchestration is performed."; 12 new tests.
+
+PCAE exposes a read-only multi-agent orchestration architecture design
+(Phase 44B): `pcae orchestration-design` and `pcae orchestration-design
+--json` generate an orchestration design covering coordinator
+responsibilities (task decomposition, role assignment, parallel execution
+planning, result collection, conflict detection, consensus calculation,
+governance handoff), capability profile model (fields: agent_id, runtime,
+lifecycle_status, capabilities, writable_supported, subagent_supported,
+evidence_source, confidence; 13 capability categories: planning,
+implementation, review, validation, research, testing, architecture,
+documentation, security, performance, dependency-analysis, data-science,
+devops), five orchestration patterns (sequential, parallel_review,
+parallel_planning, swarm, full_pipeline), governance integration rules
+(only implementer may modify files; planner/reviewer/validator read-only;
+file modification requires existing governance; commit/push separately
+governed; human authoritative), conflict resolution policies (unanimous,
+majority, weighted, human_escalation; default: human_escalation), and
+future agent expansion (deepseek-local, gemini-local, grok-local,
+perplexity-local, future cloud/local agents); JSON output includes
+`orchestration_design`, `capability_profile_model`,
+`orchestration_patterns`, `governance_integration`, `conflict_resolution`,
+`future_agent_expansion`, and `advisory`; strictly read-only — no agents
+executed, no files modified, no orchestration performed; advisory:
+"Multi-agent orchestration design is advisory; no orchestration is
+performed."; 13 new tests.
 
 PCAE pushes governed rollback commits (Phase 43E): `pcae remote rollback
 push JOB_ID` and `--json` push the rollback commit; five gates:

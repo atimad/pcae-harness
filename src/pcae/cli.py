@@ -19,6 +19,7 @@ from pcae.commands.agent import (
     run_agents_show,
     run_agents_validate,
     run_collaboration_design,
+    run_orchestration_design,
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
@@ -1236,6 +1237,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON collaboration design output.",
     )
     collaboration_design_parser.set_defaults(handler=run_collaboration_design)
+
+    orchestration_design_parser = subparsers.add_parser(
+        "orchestration-design",
+        help="Show read-only multi-agent orchestration architecture design.",
+    )
+    orchestration_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON orchestration design output.",
+    )
+    orchestration_design_parser.set_defaults(handler=run_orchestration_design)
 
     remote_parser = subparsers.add_parser(
         "remote",

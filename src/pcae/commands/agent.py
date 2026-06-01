@@ -20,6 +20,7 @@ from pcae.core.agent import (
     build_agent_status,
     build_collaboration_design,
     build_collaboration_workflows,
+    build_orchestration_design,
     build_controlled_benchmark_plan,
     approve_file_changes,
     approve_rollback,
@@ -1929,6 +1930,48 @@ def run_remote_report_inspect(args: argparse.Namespace) -> int:
                 print(f"Report version:   {report['report_version']}")
         for warning in data["warnings"]:
             print(f"Warning: {warning}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_orchestration_design(args: argparse.Namespace) -> int:
+    data = build_orchestration_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent orchestration design")
+        print()
+        print("Coordinator responsibilities:")
+        for resp in data["orchestration_design"]["coordinator_responsibilities"]:
+            print(f"  {resp['name']}: {resp['description']}")
+        print()
+        print("Capability profile model:")
+        fields = ", ".join(data["capability_profile_model"]["fields"])
+        print(f"  Fields: {fields}")
+        cats = ", ".join(data["capability_profile_model"]["capability_categories"])
+        print(f"  Capability categories: {cats}")
+        print()
+        print("Orchestration patterns:")
+        for pattern in data["orchestration_patterns"]:
+            parallel_label = "parallel" if pattern["parallel"] else "sequential"
+            steps = " → ".join(pattern["steps"])
+            print(f"  {pattern['pattern']:<18} [{parallel_label}] — {steps}")
+            print(f"    {pattern['description']}")
+        print()
+        print("Governance integration:")
+        for rule in data["governance_integration"]["rules"]:
+            print(f"  - {rule}")
+        print()
+        print("Conflict resolution:")
+        for policy in data["conflict_resolution"]["policies"]:
+            default_label = " (default)" if policy["policy"] == data["conflict_resolution"]["default_policy"] else ""
+            print(f"  {policy['policy']}{default_label}: {policy['description']}")
+        print(f"  Escalation rule: {data['conflict_resolution']['escalation_rule']}")
+        print()
+        print("Future agent expansion:")
+        for agent in data["future_agent_expansion"]:
+            print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
         print()
         print(data["advisory"])
     return 0

@@ -5506,3 +5506,220 @@ def build_collaboration_design() -> dict:
         "future_extensions": list(_COLLABORATION_FUTURE_EXTENSIONS),
         "advisory": COLLABORATION_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Multi-Agent Orchestration Design (Phase 44B)
+# ---------------------------------------------------------------------------
+
+ORCHESTRATION_DESIGN_ADVISORY = (
+    "Multi-agent orchestration design is advisory; no orchestration is performed."
+)
+
+_ORCHESTRATION_COORDINATOR_RESPONSIBILITIES: tuple[dict, ...] = (
+    {
+        "name": "task_decomposition",
+        "description": (
+            "Break complex tasks into subtasks and assign each to an appropriate agent role."
+        ),
+    },
+    {
+        "name": "role_assignment",
+        "description": (
+            "Select the most capable agent for each role based on capability profiles."
+        ),
+    },
+    {
+        "name": "parallel_execution_planning",
+        "description": (
+            "Identify independent subtasks that can execute concurrently across agents."
+        ),
+    },
+    {
+        "name": "result_collection",
+        "description": (
+            "Gather, normalize, and aggregate outputs from all participating agents."
+        ),
+    },
+    {
+        "name": "conflict_detection",
+        "description": (
+            "Detect disagreements or contradictions across agent outputs before proceeding."
+        ),
+    },
+    {
+        "name": "consensus_calculation",
+        "description": (
+            "Apply the configured conflict resolution policy to produce a unified result."
+        ),
+    },
+    {
+        "name": "governance_handoff",
+        "description": (
+            "Transfer governed state, provenance, and task context to the next agent or human."
+        ),
+    },
+)
+
+_ORCHESTRATION_CAPABILITY_PROFILE_FIELDS: tuple[str, ...] = (
+    "agent_id",
+    "runtime",
+    "lifecycle_status",
+    "capabilities",
+    "writable_supported",
+    "subagent_supported",
+    "evidence_source",
+    "confidence",
+)
+
+_ORCHESTRATION_CAPABILITY_CATEGORIES: tuple[str, ...] = (
+    "planning",
+    "implementation",
+    "review",
+    "validation",
+    "research",
+    "testing",
+    "architecture",
+    "documentation",
+    "security",
+    "performance",
+    "dependency-analysis",
+    "data-science",
+    "devops",
+)
+
+_ORCHESTRATION_PATTERNS: tuple[dict, ...] = (
+    {
+        "pattern": "sequential",
+        "description": (
+            "Agents execute one after another; each agent consumes the prior agent's output."
+        ),
+        "steps": ["agent_1", "agent_2", "...", "agent_n"],
+        "parallel": False,
+    },
+    {
+        "pattern": "parallel_review",
+        "description": (
+            "Multiple reviewer agents run concurrently; results are collected and reconciled."
+        ),
+        "steps": ["implementer", "reviewer_1 || reviewer_2 || ... || reviewer_n", "reconciler"],
+        "parallel": True,
+    },
+    {
+        "pattern": "parallel_planning",
+        "description": (
+            "Multiple planner agents produce plans concurrently; coordinator selects or merges."
+        ),
+        "steps": ["planner_1 || planner_2 || ... || planner_n", "coordinator"],
+        "parallel": True,
+    },
+    {
+        "pattern": "swarm",
+        "description": (
+            "Many agents work simultaneously on independent subtasks; coordinator collects results."
+        ),
+        "steps": ["coordinator", "agent_1 || agent_2 || ... || agent_n", "result_collection"],
+        "parallel": True,
+    },
+    {
+        "pattern": "full_pipeline",
+        "description": (
+            "Full governed pipeline: plan → implement → review → validate."
+        ),
+        "steps": ["planner", "implementer", "reviewer", "validator"],
+        "parallel": False,
+    },
+)
+
+_ORCHESTRATION_GOVERNANCE_RULES: tuple[str, ...] = (
+    "only implementer role may modify files",
+    "planner, reviewer, and validator are read-only by default",
+    "file modification requires existing execution governance",
+    "commit remains separately governed from file modification",
+    "push remains separately governed from commit",
+    "human remains authoritative over all orchestration decisions",
+)
+
+_ORCHESTRATION_CONFLICT_RESOLUTION_POLICIES: tuple[dict, ...] = (
+    {
+        "policy": "unanimous",
+        "description": "All agents must agree; any disagreement halts progress.",
+    },
+    {
+        "policy": "majority",
+        "description": "A simple majority of agent outputs determines the result.",
+    },
+    {
+        "policy": "weighted",
+        "description": (
+            "Agent outputs are weighted by confidence or role; highest weight wins."
+        ),
+    },
+    {
+        "policy": "human_escalation",
+        "description": (
+            "Disagreements are escalated to the human for resolution. Human is authoritative."
+        ),
+    },
+)
+
+_ORCHESTRATION_DEFAULT_CONFLICT_POLICY = "human_escalation"
+
+_ORCHESTRATION_FUTURE_AGENTS: tuple[dict, ...] = (
+    {
+        "agent_id": "deepseek-local",
+        "status": "planned",
+        "notes": "Future local agent expansion; vendor-neutral design supports addition.",
+    },
+    {
+        "agent_id": "gemini-local",
+        "status": "planned",
+        "notes": "Future local agent expansion; vendor-neutral design supports addition.",
+    },
+    {
+        "agent_id": "grok-local",
+        "status": "planned",
+        "notes": "Future local agent expansion; vendor-neutral design supports addition.",
+    },
+    {
+        "agent_id": "perplexity-local",
+        "status": "planned",
+        "notes": "Future local agent expansion; vendor-neutral design supports addition.",
+    },
+    {
+        "agent_id": "future-cloud-agents",
+        "status": "planned",
+        "notes": "Design supports cloud-based agent runtimes without hardcoding providers.",
+    },
+    {
+        "agent_id": "future-local-agents",
+        "status": "planned",
+        "notes": "Design supports additional local runtimes via the adapter registry.",
+    },
+)
+
+
+def build_orchestration_design() -> dict:
+    """Return a read-only multi-agent orchestration architecture design."""
+    return {
+        "orchestration_design": {
+            "coordinator_responsibilities": list(_ORCHESTRATION_COORDINATOR_RESPONSIBILITIES),
+        },
+        "capability_profile_model": {
+            "fields": list(_ORCHESTRATION_CAPABILITY_PROFILE_FIELDS),
+            "capability_categories": list(_ORCHESTRATION_CAPABILITY_CATEGORIES),
+        },
+        "orchestration_patterns": list(_ORCHESTRATION_PATTERNS),
+        "governance_integration": {
+            "rules": list(_ORCHESTRATION_GOVERNANCE_RULES),
+        },
+        "conflict_resolution": {
+            "policies": list(_ORCHESTRATION_CONFLICT_RESOLUTION_POLICIES),
+            "default_policy": _ORCHESTRATION_DEFAULT_CONFLICT_POLICY,
+            "escalation_rule": (
+                "When no consensus is reached, the human is authoritative."
+            ),
+        },
+        "future_agent_expansion": list(_ORCHESTRATION_FUTURE_AGENTS),
+        "advisory": ORCHESTRATION_DESIGN_ADVISORY,
+    }
