@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 43E: Controlled Rollback Push.
+Phase 44A: Multi-Agent Collaboration Design.
 
 ## Governance Coherence Note
 
@@ -886,6 +886,22 @@ available; `_classify_execution_output` and `_normalize_final_output` helpers
 added to `core/agent.py`; four classification constants exported; 9 new tests;
 strictly read-only — no job files mutated, no agents executed, no approval
 state changed.
+
+PCAE exposes a read-only multi-agent collaboration architecture design
+(Phase 44A): `pcae collaboration-design` and `pcae collaboration-design
+--json` generate a collaboration design covering four agent roles
+(planner, implementer, reviewer, validator) with `may_modify_files`
+semantics (implementer only), runtime mapping for codex-local,
+claude-local, and kimi-local (all four roles), five collaboration
+patterns (single-agent, dual-agent, review, validation, full-pipeline),
+governance rules (file modification authority, review/approval/commit/push
+sequencing), conflict model (halt on reviewer rejection, validator failure,
+or scope violation), and future extension notes; JSON output includes
+`collaboration_design`, `runtime_mapping`, `governance_model`,
+`conflict_model`, `future_extensions`, and `advisory`; strictly
+read-only — no agents executed, no files modified, no orchestration
+performed; advisory: "Multi-agent collaboration design is advisory; no
+orchestration is performed."; 12 new tests.
 
 PCAE pushes governed rollback commits (Phase 43E): `pcae remote rollback
 push JOB_ID` and `--json` push the rollback commit; five gates:

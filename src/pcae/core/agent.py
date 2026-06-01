@@ -5381,3 +5381,128 @@ def build_rollback_review(root: HarnessPath, job_id: str) -> dict:
             "rollback_risk_level": rollback_risk_level,
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Multi-Agent Collaboration Design (Phase 44A)
+# ---------------------------------------------------------------------------
+
+COLLABORATION_DESIGN_ADVISORY = (
+    "Multi-agent collaboration design is advisory; no orchestration is performed."
+)
+
+_COLLABORATION_AGENT_ROLES: tuple[dict, ...] = (
+    {
+        "role": "planner",
+        "description": "Decomposes work and produces an execution plan.",
+        "may_modify_files": False,
+    },
+    {
+        "role": "implementer",
+        "description": "Modifies files and creates governed execution results.",
+        "may_modify_files": True,
+    },
+    {
+        "role": "reviewer",
+        "description": "Reviews changes and produces review artifacts.",
+        "may_modify_files": False,
+    },
+    {
+        "role": "validator",
+        "description": "Runs checks/tests and validates outcomes.",
+        "may_modify_files": False,
+    },
+)
+
+_COLLABORATION_RUNTIME_MAPPING: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "supported_roles": ["planner", "implementer", "reviewer", "validator"],
+    },
+    {
+        "agent_id": "claude-local",
+        "supported_roles": ["planner", "implementer", "reviewer", "validator"],
+    },
+    {
+        "agent_id": "kimi-local",
+        "supported_roles": ["planner", "implementer", "reviewer", "validator"],
+    },
+)
+
+_COLLABORATION_PATTERNS: tuple[dict, ...] = (
+    {
+        "pattern": "single-agent",
+        "description": "One agent acts as planner, implementer, and reviewer.",
+        "steps": ["planner == implementer == reviewer"],
+    },
+    {
+        "pattern": "dual-agent",
+        "description": "One agent plans, another implements.",
+        "steps": ["planner", "implementer"],
+    },
+    {
+        "pattern": "review",
+        "description": "Implementer hands off to a separate reviewer.",
+        "steps": ["implementer", "reviewer"],
+    },
+    {
+        "pattern": "validation",
+        "description": "Implementer hands off to a separate validator.",
+        "steps": ["implementer", "validator"],
+    },
+    {
+        "pattern": "full-pipeline",
+        "description": "Full four-stage pipeline: plan → implement → review → validate.",
+        "steps": ["planner", "implementer", "reviewer", "validator"],
+    },
+)
+
+_COLLABORATION_GOVERNANCE_RULES: tuple[str, ...] = (
+    "implementer may modify files",
+    "planner may not modify files",
+    "reviewer may not modify files",
+    "validator may not modify files",
+    "review required before approval",
+    "approval required before commit",
+    "commit required before push",
+)
+
+_COLLABORATION_CONFLICT_MODEL: tuple[dict, ...] = (
+    {
+        "condition": "reviewer rejects",
+        "outcome": "execution halted",
+    },
+    {
+        "condition": "validator fails",
+        "outcome": "execution halted",
+    },
+    {
+        "condition": "scope validation fails",
+        "outcome": "execution halted",
+    },
+)
+
+_COLLABORATION_FUTURE_EXTENSIONS: tuple[str, ...] = (
+    "agent voting",
+    "multiple reviewers",
+    "consensus thresholds",
+    "agent specialization",
+    "remote/cloud agents",
+)
+
+
+def build_collaboration_design() -> dict:
+    """Return a read-only multi-agent collaboration architecture design."""
+    return {
+        "collaboration_design": {
+            "agent_roles": list(_COLLABORATION_AGENT_ROLES),
+            "collaboration_patterns": list(_COLLABORATION_PATTERNS),
+        },
+        "runtime_mapping": list(_COLLABORATION_RUNTIME_MAPPING),
+        "governance_model": {
+            "rules": list(_COLLABORATION_GOVERNANCE_RULES),
+        },
+        "conflict_model": list(_COLLABORATION_CONFLICT_MODEL),
+        "future_extensions": list(_COLLABORATION_FUTURE_EXTENSIONS),
+        "advisory": COLLABORATION_DESIGN_ADVISORY,
+    }

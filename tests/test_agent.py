@@ -14628,3 +14628,112 @@ def test_43e_already_rolled_back_status_can_be_pushed(
 
     assert exit_code == 0
     assert data["pushed"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 44A: Multi-Agent Collaboration Design
+# ---------------------------------------------------------------------------
+
+
+def test_44a_collaboration_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["collaboration-design"])
+    assert exit_code == 0
+
+
+def test_44a_collaboration_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["collaboration-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44a_collaboration_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "collaboration_design" in data
+    assert "runtime_mapping" in data
+    assert "governance_model" in data
+    assert "conflict_model" in data
+    assert "advisory" in data
+
+
+def test_44a_collaboration_design_defines_four_agent_roles(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    roles = [r["role"] for r in data["collaboration_design"]["agent_roles"]]
+    assert "planner" in roles
+    assert "implementer" in roles
+    assert "reviewer" in roles
+    assert "validator" in roles
+
+
+def test_44a_collaboration_design_only_implementer_may_modify_files(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for role_def in data["collaboration_design"]["agent_roles"]:
+        if role_def["role"] == "implementer":
+            assert role_def["may_modify_files"] is True
+        else:
+            assert role_def["may_modify_files"] is False
+
+
+def test_44a_collaboration_design_runtime_mapping_includes_all_agents(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agent_ids = [m["agent_id"] for m in data["runtime_mapping"]]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+
+
+def test_44a_collaboration_design_all_agents_support_all_four_roles(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for mapping in data["runtime_mapping"]:
+        roles = mapping["supported_roles"]
+        assert "planner" in roles
+        assert "implementer" in roles
+        assert "reviewer" in roles
+        assert "validator" in roles
+
+
+def test_44a_collaboration_design_governance_model_has_rules(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["governance_model"]["rules"]
+    assert len(rules) > 0
+    assert any("implementer may modify files" in r for r in rules)
+    assert any("approval required before commit" in r for r in rules)
+    assert any("commit required before push" in r for r in rules)
+
+
+def test_44a_collaboration_design_conflict_model_covers_halt_conditions(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    conditions = [item["condition"] for item in data["conflict_model"]]
+    assert any("reviewer rejects" in c for c in conditions)
+    assert any("validator fails" in c for c in conditions)
+    assert any("scope validation fails" in c for c in conditions)
+    for item in data["conflict_model"]:
+        assert item["outcome"] == "execution halted"
+
+
+def test_44a_collaboration_design_advisory_is_correct(capsys) -> None:
+    main(["collaboration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data
+    assert "advisory" in data["advisory"].lower()
+    assert "no orchestration" in data["advisory"].lower()
+
+
+def test_44a_collaboration_design_human_output_shows_agent_roles(capsys) -> None:
+    main(["collaboration-design"])
+    output = capsys.readouterr().out
+    assert "planner" in output
+    assert "implementer" in output
+    assert "reviewer" in output
+    assert "validator" in output
+
+
+def test_44a_collaboration_design_human_output_shows_advisory(capsys) -> None:
+    main(["collaboration-design"])
+    output = capsys.readouterr().out
+    assert "advisory" in output.lower()

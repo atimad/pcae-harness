@@ -18,6 +18,7 @@ from pcae.core.agent import (
     build_adapter_inspection,
     build_agent_adapters,
     build_agent_status,
+    build_collaboration_design,
     build_collaboration_workflows,
     build_controlled_benchmark_plan,
     approve_file_changes,
@@ -357,6 +358,44 @@ def run_collaboration_workflows(args: argparse.Namespace) -> int:
                 print(f"     Purpose: {step.purpose}")
         print()
         print(COLLABORATION_ADVISORY)
+    return 0
+
+
+def run_collaboration_design(args: argparse.Namespace) -> int:
+    data = build_collaboration_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent collaboration design")
+        print()
+        print("Agent roles:")
+        for role_def in data["collaboration_design"]["agent_roles"]:
+            may = "yes" if role_def["may_modify_files"] else "no"
+            print(f"  {role_def['role']:<14} — {role_def['description']} (may modify files: {may})")
+        print()
+        print("Runtime mapping:")
+        for mapping in data["runtime_mapping"]:
+            roles = ", ".join(mapping["supported_roles"])
+            print(f"  {mapping['agent_id']:<14} — {roles}")
+        print()
+        print("Collaboration patterns:")
+        for pattern in data["collaboration_design"]["collaboration_patterns"]:
+            steps = " → ".join(pattern["steps"])
+            print(f"  {pattern['pattern']:<16} — {steps}")
+        print()
+        print("Governance rules:")
+        for rule in data["governance_model"]["rules"]:
+            print(f"  - {rule}")
+        print()
+        print("Conflict model:")
+        for item in data["conflict_model"]:
+            print(f"  if {item['condition']}: {item['outcome']}")
+        print()
+        print("Future extensions:")
+        for ext in data["future_extensions"]:
+            print(f"  - {ext}")
+        print()
+        print(data["advisory"])
     return 0
 
 
