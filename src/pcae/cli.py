@@ -23,6 +23,7 @@ from pcae.commands.agent import (
     run_coordinator_design,
     run_orchestration_design,
     run_parallel_execution_design,
+    run_planning_prototype_design,
     run_capability_registry,
     run_capability_discovery,
     run_capability_validation,
@@ -1287,6 +1288,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON parallel execution design output.",
     )
     parallel_execution_design_parser.set_defaults(handler=run_parallel_execution_design)
+
+    planning_prototype_design_parser = subparsers.add_parser(
+        "planning-prototype-design",
+        help="Show read-only multi-agent planning prototype architecture design.",
+    )
+    planning_prototype_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON planning prototype design output.",
+    )
+    planning_prototype_design_parser.set_defaults(handler=run_planning_prototype_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -24,6 +24,7 @@ from pcae.core.agent import (
     build_coordinator_design,
     build_orchestration_design,
     build_parallel_execution_design,
+    build_planning_prototype_design,
     build_capability_registry,
     build_capability_discovery,
     build_capability_validation,
@@ -2110,6 +2111,46 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_planning_prototype_design(args: argparse.Namespace) -> int:
+    data = build_planning_prototype_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent planning prototype design")
+        print()
+        print("Planning objective model fields:")
+        print(f"  {', '.join(data['planning_objective_model']['fields'])}")
+        print()
+        print("Planner selection:")
+        caps = ", ".join(data["planner_selection"]["required_capabilities"])
+        print(f"  Required capabilities: {caps}")
+        print("  Selection rules:")
+        for rule in data["planner_selection"]["selection_rules"]:
+            print(f"    - {rule}")
+        print()
+        print("Parallel planning flow:")
+        for i, step in enumerate(data["parallel_planning_flow"], 1):
+            print(f"  {i}. {step}")
+        print()
+        print("Planning artifact model fields:")
+        print(f"  {', '.join(data['planning_artifact_model']['fields'])}")
+        print()
+        print("Governance rules:")
+        for rule in data["governance_rules"]:
+            print(f"  - {rule}")
+        print()
+        print("Conflict handling:")
+        for item in data["conflict_handling"]:
+            print(f"  - {item}")
+        print()
+        print("Future path:")
+        for entry in data["planning_prototype_design"]["future_path"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0

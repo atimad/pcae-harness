@@ -16214,3 +16214,133 @@ def test_44g_parallel_execution_design_human_output_shows_advisory(capsys) -> No
     output = capsys.readouterr().out
     assert "Parallel execution design is advisory" in output
     assert "no parallel execution is performed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44H — Multi-Agent Planning Prototype Design
+# ---------------------------------------------------------------------------
+
+
+def test_44h_planning_prototype_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["planning-prototype-design"])
+    assert exit_code == 0
+
+
+def test_44h_planning_prototype_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["planning-prototype-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44h_planning_prototype_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "planning_prototype_design" in data
+    assert "planning_objective_model" in data
+    assert "planner_selection" in data
+    assert "parallel_planning_flow" in data
+    assert "planning_artifact_model" in data
+    assert "governance_rules" in data
+    assert "conflict_handling" in data
+    assert "advisory" in data
+
+
+def test_44h_planning_prototype_design_objective_model_fields_defined(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["planning_objective_model"]["fields"]
+    for expected in (
+        "objective_id", "objective_text", "planning_scope", "constraints",
+        "required_capabilities", "output_format", "human_approval_required",
+    ):
+        assert expected in fields
+
+
+def test_44h_planning_prototype_design_planner_selection_capabilities_defined(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    caps = data["planner_selection"]["required_capabilities"]
+    for expected in ("planning", "architecture", "roadmap-generation", "documentation", "review"):
+        assert expected in caps
+
+
+def test_44h_planning_prototype_design_selection_is_capability_based_and_neutral(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["planner_selection"]["selection_rules"]
+    assert any("capability-based" in r for r in rules)
+    assert any("runtime-neutral" in r for r in rules)
+    assert any("human-overridable" in r for r in rules)
+
+
+def test_44h_planning_prototype_design_parallel_flow_has_seven_steps(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    flow = data["parallel_planning_flow"]
+    assert len(flow) == 7
+    assert any("coordinator receives objective" in s for s in flow)
+    assert any("planners produce independent plans" in s for s in flow)
+    assert any("consensus engine" in s for s in flow)
+    assert any("human reviews" in s for s in flow)
+
+
+def test_44h_planning_prototype_design_artifact_model_fields_defined(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["planning_artifact_model"]["fields"]
+    for expected in (
+        "plan_id", "objective_id", "planner_agents", "proposed_phases",
+        "dependencies", "risks", "assumptions", "conflicts",
+        "consensus_summary", "human_decision_required",
+    ):
+        assert expected in fields
+
+
+def test_44h_planning_prototype_design_governance_rules_defined(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["governance_rules"]
+    assert any("read-only" in r for r in rules)
+    assert any("cannot modify files" in r for r in rules)
+    assert any("cannot commit" in r for r in rules)
+    assert any("cannot push" in r for r in rules)
+    assert any("advisory" in r for r in rules)
+    assert any("human approves" in r for r in rules)
+
+
+def test_44h_planning_prototype_design_conflict_handling_preserves_all_plans(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    handling = data["conflict_handling"]
+    assert any("preserve all proposed plans" in h for h in handling)
+    assert any("human decision" in h for h in handling)
+    assert any("auto-select" in h for h in handling)
+
+
+def test_44h_planning_prototype_design_future_path_defined(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["planning_prototype_design"]["future_path"]]
+    assert "44I" in phases
+    assert "44J" in phases
+    assert "45A" in phases
+
+
+def test_44h_planning_prototype_design_advisory_is_correct(capsys) -> None:
+    main(["planning-prototype-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "no planning agents are executed" in data["advisory"].lower()
+
+
+def test_44h_planning_prototype_design_human_output_shows_flow(capsys) -> None:
+    main(["planning-prototype-design"])
+    output = capsys.readouterr().out
+    assert "coordinator receives objective" in output
+    assert "consensus engine" in output
+    assert "human reviews" in output
+
+
+def test_44h_planning_prototype_design_human_output_shows_advisory(capsys) -> None:
+    main(["planning-prototype-design"])
+    output = capsys.readouterr().out
+    assert "Planning prototype design is advisory" in output
+    assert "no planning agents are executed" in output

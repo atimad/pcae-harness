@@ -6584,6 +6584,118 @@ _COORDINATOR_FUTURE_AGENTS: tuple[str, ...] = (
 # Parallel Agent Execution Design (Phase 44G)
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Multi-Agent Planning Prototype Design (Phase 44H)
+# ---------------------------------------------------------------------------
+
+PLANNING_PROTOTYPE_DESIGN_ADVISORY = (
+    "Planning prototype design is advisory; no planning agents are executed."
+)
+
+_PLANNING_OBJECTIVE_FIELDS: tuple[str, ...] = (
+    "objective_id",
+    "objective_text",
+    "planning_scope",
+    "constraints",
+    "required_capabilities",
+    "output_format",
+    "human_approval_required",
+)
+
+_PLANNER_SELECTION_CAPABILITIES: tuple[str, ...] = (
+    "planning",
+    "architecture",
+    "roadmap-generation",
+    "documentation",
+    "review",
+)
+
+_PLANNER_SELECTION_RULES: tuple[str, ...] = (
+    "capability-based: agents must declare the required capability in the registry",
+    "confidence-aware: capability confidence must be observed or higher",
+    "runtime-neutral: no agent is hardcoded as the planner",
+    "human-overridable: the human may override any agent selection",
+)
+
+_PARALLEL_PLANNING_FLOW: tuple[str, ...] = (
+    "coordinator receives objective",
+    "coordinator selects eligible planners from capability registry",
+    "coordinator creates read-only planning child tasks",
+    "planners produce independent plans in parallel",
+    "coordinator aggregates plans",
+    "consensus engine identifies agreements and conflicts",
+    "human reviews proposed plan and makes final decision",
+)
+
+_PLANNING_ARTIFACT_FIELDS: tuple[str, ...] = (
+    "plan_id",
+    "objective_id",
+    "planner_agents",
+    "proposed_phases",
+    "dependencies",
+    "risks",
+    "assumptions",
+    "conflicts",
+    "consensus_summary",
+    "human_decision_required",
+)
+
+_PLANNING_GOVERNANCE_RULES: tuple[str, ...] = (
+    "planning is read-only",
+    "planners cannot modify files",
+    "planners cannot approve changes",
+    "planners cannot commit",
+    "planners cannot push",
+    "planner output is advisory",
+    "human approves roadmap before execution",
+)
+
+_PLANNING_CONFLICT_HANDLING: tuple[str, ...] = (
+    "preserve all proposed plans",
+    "highlight disagreements between planners",
+    "require human decision for conflicts",
+    "do not auto-select roadmap when consensus is weak",
+)
+
+_PLANNING_FUTURE_PATH: tuple[dict, ...] = (
+    {
+        "phase": "44I",
+        "description": "Planning artifact dry-run",
+    },
+    {
+        "phase": "44J",
+        "description": "Multi-agent planning execution",
+    },
+    {
+        "phase": "45A",
+        "description": "Autonomous roadmap generation",
+    },
+)
+
+
+def build_planning_prototype_design() -> dict:
+    """Return a read-only multi-agent planning prototype architecture design."""
+    return {
+        "planning_prototype_design": {
+            "future_path": list(_PLANNING_FUTURE_PATH),
+        },
+        "planning_objective_model": {
+            "fields": list(_PLANNING_OBJECTIVE_FIELDS),
+        },
+        "planner_selection": {
+            "required_capabilities": list(_PLANNER_SELECTION_CAPABILITIES),
+            "selection_rules": list(_PLANNER_SELECTION_RULES),
+        },
+        "parallel_planning_flow": list(_PARALLEL_PLANNING_FLOW),
+        "planning_artifact_model": {
+            "fields": list(_PLANNING_ARTIFACT_FIELDS),
+        },
+        "governance_rules": list(_PLANNING_GOVERNANCE_RULES),
+        "conflict_handling": list(_PLANNING_CONFLICT_HANDLING),
+        "advisory": PLANNING_PROTOTYPE_DESIGN_ADVISORY,
+    }
+
+
 PARALLEL_EXECUTION_DESIGN_ADVISORY = (
     "Parallel execution design is advisory; no parallel execution is performed."
 )

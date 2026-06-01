@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44G: Parallel Agent Execution Design.
+Phase 44H: Multi-Agent Planning Prototype Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,36 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only multi-agent planning prototype design
+(Phase 44H): `pcae planning-prototype-design` and
+`pcae planning-prototype-design --json` generate a design for using
+multiple planning-capable agents to propose project roadmaps and
+implementation plans; planning objective model with seven fields
+(objective_id, objective_text, planning_scope, constraints,
+required_capabilities, output_format, human_approval_required); planner
+selection uses capability registry and coordinator design to select agents
+with planning, architecture, roadmap-generation, documentation, or review
+capabilities using four selection rules (capability-based,
+confidence-aware, runtime-neutral, human-overridable); seven-step parallel
+planning flow (coordinator receives objective → selects eligible planners
+→ creates read-only child tasks → planners produce independent plans →
+coordinator aggregates → consensus engine identifies agreements/conflicts
+→ human reviews and decides); planning artifact model with ten fields
+(plan_id, objective_id, planner_agents, proposed_phases, dependencies,
+risks, assumptions, conflicts, consensus_summary,
+human_decision_required); seven governance rules (planning read-only,
+planners cannot modify files/approve/commit/push, output advisory, human
+approves before execution); four conflict handling rules (preserve all
+plans, highlight disagreements, require human decision, do not auto-select
+on weak consensus); future path to phases 44I (planning artifact dry-run),
+44J (multi-agent planning execution), and 45A (autonomous roadmap
+generation); JSON output includes `planning_prototype_design`,
+`planning_objective_model`, `planner_selection`, `parallel_planning_flow`,
+`planning_artifact_model`, `governance_rules`, `conflict_handling`,
+`advisory`; strictly read-only — no agent execution, no child task
+creation, no roadmap mutation; advisory: "Planning prototype design is
+advisory; no planning agents are executed."; 14 new tests.
 
 PCAE exposes a read-only parallel agent execution architecture design
 (Phase 44G): `pcae parallel-execution-design` and
