@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44C.1: Documentation Capability Discovery.
+Phase 44D: Capability Validation Framework.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,35 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a capability validation framework (Phase 44D):
+`pcae capability-validation` and `pcae capability-validation --json`
+define a read-only framework for promoting discovered agent capabilities
+through controlled experiments and governed production usage; four-level
+confidence lifecycle: unknown → observed → validated → proven; three
+validation sources: runtime_validation, manual_validation,
+governed_execution_history; two promotion rules —
+observed→validated (requires successful_controlled_experiment via
+runtime_validation) and validated→proven (requires
+successful_governed_production_usage via governed_execution_history);
+reads the static capability registry with doc-catalog evidence (no CLI
+probing) to enumerate promotion candidates, including
+codex-local/subagent-coordination (observed→validated),
+claude-local/subagent-coordination (observed→validated), and
+kimi-local/swarm-coordination (observed→validated); JSON output includes
+`validation_framework` (lifecycle, lifecycle_descriptions,
+validation_sources, promotion_rules, promotion_candidate_count,
+promotion_candidates), `promotion_rules`, and `advisory`; human output
+shows confidence model, validation sources, promotion rules with
+descriptions, and promotion candidates; `build_capability_validation`,
+`CAPABILITY_VALIDATION_ADVISORY`, `CAPABILITY_VALIDATION_LIFECYCLE`,
+`CAPABILITY_VALIDATION_SOURCES`, `_CAPABILITY_PROMOTION_RULES` added to
+`core/agent.py`; `run_capability_validation` added to `commands/agent.py`;
+`capability-validation [--json]` wired in `cli.py`; strictly read-only —
+no agents executed, no prompts submitted, no files modified;
+advisory: "Capability validation framework is advisory and read-only;
+no agents are executed, no prompts are submitted, no files are modified."
+16 new tests.
 
 PCAE exposes a read-only multi-agent orchestration architecture design
 (Phase 44B): `pcae orchestration-design` and `pcae orchestration-design

@@ -22,6 +22,7 @@ from pcae.commands.agent import (
     run_orchestration_design,
     run_capability_registry,
     run_capability_discovery,
+    run_capability_validation,
     run_collaboration_handoffs,
     run_collaboration_reviews,
     run_collaboration_workflows,
@@ -1272,6 +1273,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON capability discovery output.",
     )
     capability_discovery_parser.set_defaults(handler=run_capability_discovery)
+
+    capability_validation_parser = subparsers.add_parser(
+        "capability-validation",
+        help="Show the capability validation framework and promotion rules (Phase 44D).",
+    )
+    capability_validation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON capability validation output.",
+    )
+    capability_validation_parser.set_defaults(handler=run_capability_validation)
 
     remote_parser = subparsers.add_parser(
         "remote",

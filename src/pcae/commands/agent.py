@@ -23,6 +23,7 @@ from pcae.core.agent import (
     build_orchestration_design,
     build_capability_registry,
     build_capability_discovery,
+    build_capability_validation,
     CAPABILITY_CATEGORIES,
     build_controlled_benchmark_plan,
     approve_file_changes,
@@ -1993,6 +1994,51 @@ def run_capability_discovery(args: argparse.Namespace) -> int:
         print("Capability discovery")
         print()
         _print_capability_registry_data(data)
+    return 0
+
+
+def run_capability_validation(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_capability_validation(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    fw = data["validation_framework"]
+    print("Capability validation framework")
+    print()
+    print("Confidence model (lifecycle):")
+    for level in fw["lifecycle"]:
+        desc = fw["lifecycle_descriptions"][level]
+        print(f"  {level}: {desc}")
+    print()
+    print("Validation sources:")
+    for src in fw["validation_sources"]:
+        print(f"  - {src}")
+    print()
+    print("Promotion rules:")
+    for rule in fw["promotion_rules"]:
+        print(
+            f"  {rule['from_confidence']} → {rule['to_confidence']}: "
+            f"{rule['required_validation']} (via {rule['validation_source']})"
+        )
+        print(f"    {rule['description']}")
+    print()
+    candidates = fw["promotion_candidates"]
+    print(f"Promotion candidates ({fw['promotion_candidate_count']}):")
+    if candidates:
+        for c in candidates:
+            ev = ", ".join(c["evidence_sources"]) if c["evidence_sources"] else "none"
+            print(
+                f"  {c['agent_id']} / {c['capability']}: "
+                f"{c['promotion_path']} "
+                f"[requires: {c['required_validation']}] "
+                f"[evidence: {ev}]"
+            )
+    else:
+        print("  none")
+    print()
+    print(data["advisory"])
     return 0
 
 

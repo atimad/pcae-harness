@@ -6190,3 +6190,126 @@ def build_capability_discovery(root: HarnessPath) -> dict:
         "discovery_summary": _build_discovery_summary(profiles),
         "advisory": CAPABILITY_DISCOVERY_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 44D: Capability Validation Framework
+# ---------------------------------------------------------------------------
+
+CAPABILITY_VALIDATION_ADVISORY = (
+    "Capability validation framework is advisory and read-only; "
+    "no agents are executed, no prompts are submitted, no files are modified."
+)
+
+# Ordered lifecycle levels from lowest to highest confidence.
+CAPABILITY_VALIDATION_LIFECYCLE: tuple[str, ...] = (
+    _CAP_CONF_UNKNOWN,
+    _CAP_CONF_OBSERVED,
+    _CAP_CONF_VALIDATED,
+    _CAP_CONF_PROVEN,
+)
+
+# Recognized validation sources for the framework.
+CAPABILITY_VALIDATION_SOURCES: tuple[str, ...] = (
+    "runtime_validation",
+    "manual_validation",
+    "governed_execution_history",
+)
+
+# Promotion rules keyed by "from_confidence".
+_CAPABILITY_PROMOTION_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "observed_to_validated",
+        "from_confidence": _CAP_CONF_OBSERVED,
+        "to_confidence": _CAP_CONF_VALIDATED,
+        "required_validation": "successful_controlled_experiment",
+        "validation_source": "runtime_validation",
+        "description": (
+            "A successful controlled PCAE experiment must confirm the capability "
+            "behaves as expected in a governed session."
+        ),
+    },
+    {
+        "rule_id": "validated_to_proven",
+        "from_confidence": _CAP_CONF_VALIDATED,
+        "to_confidence": _CAP_CONF_PROVEN,
+        "required_validation": "successful_governed_production_usage",
+        "validation_source": "governed_execution_history",
+        "description": (
+            "The capability must be successfully exercised in real governed production "
+            "usage recorded in PCAE execution history."
+        ),
+    },
+)
+
+
+def _promotion_rule_for(confidence: str) -> dict | None:
+    """Return the promotion rule that applies when current confidence equals *confidence*."""
+    for rule in _CAPABILITY_PROMOTION_RULES:
+        if rule["from_confidence"] == confidence:
+            return rule
+    return None
+
+
+def _build_promotion_candidates(
+    profiles: list[AgentCapabilityProfile],
+) -> list[dict]:
+    """Return per-agent/capability promotion candidate records for promotable capabilities."""
+    candidates: list[dict] = []
+    for profile in profiles:
+        for cap in profile.capabilities:
+            rule = _promotion_rule_for(cap.confidence)
+            if rule is None:
+                continue
+            promotion_path = f"{cap.confidence} → {rule['to_confidence']}"
+            candidates.append({
+                "agent_id": profile.agent_id,
+                "capability": cap.name,
+                "current_confidence": cap.confidence,
+                "promotion_path": promotion_path,
+                "required_validation": rule["required_validation"],
+                "validation_source": rule["validation_source"],
+                "evidence_sources": list(cap.evidence_sources),
+            })
+    return candidates
+
+
+def build_capability_validation(root: HarnessPath) -> dict:
+    """Return the capability validation framework. Read-only; no CLI probing.
+
+    Includes documentation-reference capabilities from the doc catalog so that
+    observed capabilities (subagent-coordination, swarm-coordination, etc.)
+    appear as promotion candidates without requiring live CLI probing.
+    """
+    profiles = [
+        _build_agent_capability_profile(
+            spec,
+            root,
+            probe_cli=False,
+            doc_capabilities=_DOC_CAPABILITY_CATALOG.get(spec.agent_id, ()),
+        )
+        for spec in _CAPABILITY_AGENT_SPECS
+    ]
+    candidates = _build_promotion_candidates(profiles)
+    validation_framework = {
+        "description": (
+            "Framework for validating and promoting discovered agent capabilities "
+            "through controlled PCAE experiments and governed production usage."
+        ),
+        "lifecycle": list(CAPABILITY_VALIDATION_LIFECYCLE),
+        "lifecycle_descriptions": {
+            _CAP_CONF_UNKNOWN: "No evidence collected; capability unverified.",
+            _CAP_CONF_OBSERVED: "Evidence from CLI help, runtime discovery, or documentation; not yet validated by experiment.",
+            _CAP_CONF_VALIDATED: "Confirmed by a successful controlled PCAE experiment.",
+            _CAP_CONF_PROVEN: "Confirmed by successful governed production usage in execution history.",
+        },
+        "validation_sources": list(CAPABILITY_VALIDATION_SOURCES),
+        "promotion_rules": list(_CAPABILITY_PROMOTION_RULES),
+        "promotion_candidate_count": len(candidates),
+        "promotion_candidates": candidates,
+    }
+    return {
+        "validation_framework": validation_framework,
+        "promotion_rules": list(_CAPABILITY_PROMOTION_RULES),
+        "advisory": CAPABILITY_VALIDATION_ADVISORY,
+    }

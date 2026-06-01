@@ -15325,3 +15325,171 @@ def test_44c1_doc_capabilities_from_catalog_not_hardcoded_cli(capsys) -> None:
             continue
         for cap in profile["capabilities"]:
             assert "documentation_reference" not in cap["evidence_sources"]
+
+
+# Phase 44D: Capability Validation Framework
+
+
+def test_44d_capability_validation_json_has_required_top_level_keys(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "validation_framework" in data
+    assert "promotion_rules" in data
+    assert "advisory" in data
+
+
+def test_44d_capability_validation_lifecycle_has_four_levels(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["validation_framework"]["lifecycle"]
+    assert lifecycle == ["unknown", "observed", "validated", "proven"]
+
+
+def test_44d_capability_validation_validation_sources_declared(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sources = data["validation_framework"]["validation_sources"]
+    assert "runtime_validation" in sources
+    assert "manual_validation" in sources
+    assert "governed_execution_history" in sources
+
+
+def test_44d_capability_validation_promotion_rules_observed_to_validated(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["promotion_rules"]
+    rule = next((r for r in rules if r["rule_id"] == "observed_to_validated"), None)
+    assert rule is not None
+    assert rule["from_confidence"] == "observed"
+    assert rule["to_confidence"] == "validated"
+    assert rule["required_validation"] == "successful_controlled_experiment"
+    assert rule["validation_source"] == "runtime_validation"
+
+
+def test_44d_capability_validation_promotion_rules_validated_to_proven(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["promotion_rules"]
+    rule = next((r for r in rules if r["rule_id"] == "validated_to_proven"), None)
+    assert rule is not None
+    assert rule["from_confidence"] == "validated"
+    assert rule["to_confidence"] == "proven"
+    assert rule["required_validation"] == "successful_governed_production_usage"
+    assert rule["validation_source"] == "governed_execution_history"
+
+
+def test_44d_capability_validation_codex_subagent_is_observed_to_validated(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    candidates = data["validation_framework"]["promotion_candidates"]
+    match = next(
+        (c for c in candidates
+         if c["agent_id"] == "codex-local" and c["capability"] == "subagent-coordination"),
+        None,
+    )
+    assert match is not None, "codex-local / subagent-coordination not in promotion candidates"
+    assert match["current_confidence"] == "observed"
+    assert match["promotion_path"] == "observed → validated"
+    assert match["required_validation"] == "successful_controlled_experiment"
+
+
+def test_44d_capability_validation_claude_subagent_is_observed_to_validated(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    candidates = data["validation_framework"]["promotion_candidates"]
+    match = next(
+        (c for c in candidates
+         if c["agent_id"] == "claude-local" and c["capability"] == "subagent-coordination"),
+        None,
+    )
+    assert match is not None, "claude-local / subagent-coordination not in promotion candidates"
+    assert match["current_confidence"] == "observed"
+    assert match["promotion_path"] == "observed → validated"
+
+
+def test_44d_capability_validation_kimi_swarm_is_observed_to_validated(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    candidates = data["validation_framework"]["promotion_candidates"]
+    match = next(
+        (c for c in candidates
+         if c["agent_id"] == "kimi-local" and c["capability"] == "swarm-coordination"),
+        None,
+    )
+    assert match is not None, "kimi-local / swarm-coordination not in promotion candidates"
+    assert match["current_confidence"] == "observed"
+    assert match["promotion_path"] == "observed → validated"
+
+
+def test_44d_capability_validation_candidate_fields_complete(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    candidates = data["validation_framework"]["promotion_candidates"]
+    assert len(candidates) > 0
+    for c in candidates:
+        assert "agent_id" in c
+        assert "capability" in c
+        assert "current_confidence" in c
+        assert "promotion_path" in c
+        assert "required_validation" in c
+        assert "validation_source" in c
+        assert "evidence_sources" in c
+
+
+def test_44d_capability_validation_advisory_mentions_no_execution(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no agents are executed" in advisory
+    assert "no prompts are submitted" in advisory
+    assert "no files are modified" in advisory
+
+
+def test_44d_capability_validation_human_output_shows_framework(capsys) -> None:
+    main(["capability-validation"])
+    output = capsys.readouterr().out
+    assert "capability validation framework" in output.lower()
+    assert "confidence model" in output.lower()
+    assert "promotion rules" in output.lower()
+
+
+def test_44d_capability_validation_human_output_shows_all_lifecycle_levels(capsys) -> None:
+    main(["capability-validation"])
+    output = capsys.readouterr().out
+    for level in ("unknown", "observed", "validated", "proven"):
+        assert level in output
+
+
+def test_44d_capability_validation_human_output_shows_promotion_candidates(capsys) -> None:
+    main(["capability-validation"])
+    output = capsys.readouterr().out
+    assert "subagent-coordination" in output
+    assert "swarm-coordination" in output
+    assert "observed → validated" in output
+
+
+def test_44d_capability_validation_lifecycle_descriptions_present(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    descs = data["validation_framework"]["lifecycle_descriptions"]
+    assert "unknown" in descs
+    assert "observed" in descs
+    assert "validated" in descs
+    assert "proven" in descs
+
+
+def test_44d_capability_validation_promotion_candidate_count_matches_list(capsys) -> None:
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fw = data["validation_framework"]
+    assert fw["promotion_candidate_count"] == len(fw["promotion_candidates"])
+
+
+def test_44d_capability_validation_no_unknown_in_promotion_candidates(capsys) -> None:
+    # "unknown" has no promotion path — should never appear as a candidate.
+    main(["capability-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for c in data["validation_framework"]["promotion_candidates"]:
+        assert c["current_confidence"] != "unknown", (
+            f"{c['agent_id']}/{c['capability']} is unknown but appears as promotion candidate"
+        )
