@@ -15114,3 +15114,87 @@ def test_44c_capability_registry_discovery_summary_fields(capsys) -> None:
     assert "subagent_capable_agents" in summary
     assert summary["agents_checked"] == 7
     assert summary["agents_not_installed"] == summary["agents_checked"] - summary["agents_installed"]
+
+
+def test_44c_capability_discovery_subagent_capable_agents_populated_when_supported(
+    capsys,
+) -> None:
+    # Any installed agent whose CLI help contains subagent-related keywords must
+    # appear in subagent_capable_agents.  We verify the list is consistent with
+    # the per-agent subagent_profile, not that a specific runtime is listed.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["discovery_summary"]
+    expected = {
+        p["agent_id"]
+        for p in data["capability_registry"]
+        if p["subagent_profile"]["supported"]
+    }
+    assert set(summary["subagent_capable_agents"]) == expected
+
+
+def test_44c_capability_discovery_observed_subagent_uses_approved_evidence_sources(
+    capsys,
+) -> None:
+    # Any capability marked as "observed" must cite only approved evidence sources.
+    approved = {
+        "runtime_discovery",
+        "CLI help inspection",
+        "governed_execution_history",
+        "writable_execution_history",
+        "manual_validation",
+        "documentation_reference",
+        "adapter_contract",
+    }
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] in ("subagent-coordination", "skill-execution", "swarm-coordination"):
+                if cap["confidence"] == "observed":
+                    for src in cap["evidence_sources"]:
+                        assert src in approved, (
+                            f"Agent {profile['agent_id']} cap {cap['name']} "
+                            f"uses unapproved evidence source {src!r}"
+                        )
+
+
+def test_44c_capability_discovery_installed_subagent_support_is_observed_not_unknown(
+    capsys,
+) -> None:
+    # Agents with subagent support detected from CLI help must be "observed", not "unknown".
+    # This verifies the mechanism fires for any installed agent that matches keywords —
+    # without hardcoding which agent must match.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        if not profile["installed"]:
+            continue
+        if profile["subagent_profile"]["supported"]:
+            subagent_cap = next(
+                (c for c in profile["capabilities"] if c["name"] == "subagent-coordination"),
+                None,
+            )
+            assert subagent_cap is not None
+            assert subagent_cap["confidence"] == "observed", (
+                f"{profile['agent_id']} subagent_profile.supported=True but "
+                f"subagent-coordination confidence={subagent_cap['confidence']!r}"
+            )
+
+
+def test_44c_capability_discovery_subagent_evidence_includes_cli_or_runtime(
+    capsys,
+) -> None:
+    # For any agent with observed subagent-coordination, at least one evidence source
+    # must be CLI help inspection or runtime_discovery.
+    main(["capability-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for profile in data["capability_registry"]:
+        for cap in profile["capabilities"]:
+            if cap["name"] == "subagent-coordination" and cap["confidence"] == "observed":
+                cli_or_runtime = {"CLI help inspection", "runtime_discovery"}
+                assert any(src in cli_or_runtime for src in cap["evidence_sources"]), (
+                    f"{profile['agent_id']} subagent-coordination is observed but "
+                    f"evidence_sources {cap['evidence_sources']} contains neither "
+                    f"'CLI help inspection' nor 'runtime_discovery'"
+                )

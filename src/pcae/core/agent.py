@@ -1057,7 +1057,13 @@ _KW_PROMPT_FILE = ("--file", "--prompt-file", "prompt file")
 _KW_STRUCTURED_OUTPUT = ("--json", "--output=json", "json output", "output json")
 _KW_MCP = ("mcp",)
 _KW_HOOKS = ("hook",)
-_KW_SUBAGENTS = ("subagent", "sub-agent")
+_KW_SUBAGENTS = (
+    "subagent",
+    "sub-agent",
+    "background agent",   # e.g. "Manage background agents"
+    "multi-agent",        # e.g. "multi-agent code review"
+    "--agents",           # e.g. "--agents <json> defining custom agents"
+)
 _KW_REMOTE = ("remote",)
 
 
@@ -5781,8 +5787,15 @@ _EV_MANUAL_VAL = "manual_validation"
 _EV_DOC_REF = "documentation_reference"
 _EV_ADAPTER = "adapter_contract"
 
-# CLI help keyword sets for advanced capability detection
-_KW_CAP_SUBAGENT = ("subagent", "sub-agent", "agent team")
+# CLI help keyword sets for advanced capability detection.
+# Kept in sync with _KW_SUBAGENTS to share the same evidence-gathering basis.
+_KW_CAP_SUBAGENT = (
+    "subagent",
+    "sub-agent",
+    "background agent",   # e.g. "Manage background agents"
+    "multi-agent",        # e.g. "multi-agent code review"
+    "--agents",           # e.g. "--agents <json> defining custom agents"
+)
 _KW_CAP_SKILL = ("skill",)
 _KW_CAP_SWARM = ("swarm", "agent-swarm")
 
@@ -5931,8 +5944,14 @@ def _build_agent_capability_profile(
     spec: _AgentCapabilitySpec,
     root: HarnessPath,
     probe_cli: bool,
+    runtime_caps_by_id: dict[str, AgentRuntimeCapabilities] | None = None,
 ) -> AgentCapabilityProfile:
-    """Build a capability profile for one agent. Read-only."""
+    """Build a capability profile for one agent. Read-only.
+
+    runtime_caps_by_id: optional pre-computed runtime discovery results keyed by
+    agent_id; when present, used as an additional ``runtime_discovery`` evidence
+    source alongside CLI help inspection.
+    """
     installed = False
     version: str | None = None
     help_text = ""
@@ -5943,14 +5962,17 @@ def _build_agent_capability_profile(
 
         if installed and probe_cli:
             version = _extract_version_string(spec.executable)
+            parts: list[str] = []
             main_help = _run_probe([spec.executable, "--help"])
             if main_help:
-                help_text = main_help
-            if spec.executable == "codex":
-                for sub in (["codex", "exec", "--help"], ["codex", "mcp", "--help"]):
-                    out = _run_probe(sub)
-                    if out:
-                        help_text += " " + out
+                parts.append(main_help)
+            # Probe known subcommands for richer signal; executable-agnostic probing
+            # of common subcommand patterns (exec, mcp, mcp-server).
+            for sub in ("exec", "mcp", "mcp-server"):
+                out = _run_probe([spec.executable, sub, "--help"])
+                if out:
+                    parts.append(out)
+            help_text = " ".join(parts)
 
     has_exec, has_writable = _check_agent_execution_history(root, spec.agent_id)
 
@@ -5988,19 +6010,36 @@ def _build_agent_capability_profile(
         ))
         seen_names.add(name)
 
-    # CLI help detection for advanced capabilities (observed only)
-    if installed and help_text:
-        for cap_name, kw_set in (
-            ("subagent-coordination", _KW_CAP_SUBAGENT),
-            ("skill-execution", _KW_CAP_SKILL),
-            ("swarm-coordination", _KW_CAP_SWARM),
+    # Advanced capability detection from CLI help keywords and runtime discovery.
+    # Any installed agent whose help text or runtime caps match these patterns
+    # is elevated to "observed" — evidence-based, not hardcoded per runtime.
+    if installed:
+        runtime_caps = (runtime_caps_by_id or {}).get(spec.agent_id)
+        for cap_name, kw_set, runtime_attr in (
+            ("subagent-coordination", _KW_CAP_SUBAGENT, "subagents_supported"),
+            ("skill-execution", _KW_CAP_SKILL, None),
+            ("swarm-coordination", _KW_CAP_SWARM, None),
         ):
-            if cap_name not in seen_names and any(kw in help_text for kw in kw_set):
+            if cap_name in seen_names:
+                continue
+            ev_srcs: list[str] = []
+            # CLI help inspection
+            if help_text and any(kw in help_text for kw in kw_set):
+                ev_srcs.append(_EV_CLI_HELP)
+            # Runtime discovery as secondary evidence source
+            if (
+                runtime_attr is not None
+                and runtime_caps is not None
+                and getattr(runtime_caps, runtime_attr, RUNTIME_CAP_UNKNOWN) == RUNTIME_CAP_YES
+                and _EV_RUNTIME_DISC not in ev_srcs
+            ):
+                ev_srcs.append(_EV_RUNTIME_DISC)
+            if ev_srcs:
                 capabilities.append(CapabilityEntry(
                     name=cap_name,
                     confidence=_CAP_CONF_OBSERVED,
-                    evidence_sources=(_EV_CLI_HELP,),
-                    notes=f"Detected from CLI help; not confirmed by execution history.",
+                    evidence_sources=tuple(ev_srcs),
+                    notes="Detected from CLI help or runtime discovery; not confirmed by execution.",
                 ))
                 seen_names.add(cap_name)
 
@@ -6022,7 +6061,7 @@ def _build_agent_capability_profile(
         subagent_profile = SubagentProfile(
             supported=True,
             confidence=subagent_cap.confidence,
-            mechanism="CLI help keyword detection",
+            mechanism="CLI help keyword detection or runtime discovery",
             evidence_sources=subagent_cap.evidence_sources,
             notes=subagent_cap.notes,
         )
@@ -6083,9 +6122,16 @@ def build_capability_registry(root: HarnessPath) -> dict:
 
 
 def build_capability_discovery(root: HarnessPath) -> dict:
-    """Run auto-discovery of agent capabilities via CLI help inspection. Read-only."""
+    """Run auto-discovery of agent capabilities via CLI help + runtime discovery. Read-only."""
+    # Run runtime discovery once and pass results as a second evidence source.
+    rt_result = build_runtime_discovery()
+    runtime_caps_by_id: dict[str, AgentRuntimeCapabilities] = {
+        entry.agent_id: entry.capabilities for entry in rt_result.agents
+    }
     profiles = [
-        _build_agent_capability_profile(spec, root, probe_cli=True)
+        _build_agent_capability_profile(
+            spec, root, probe_cli=True, runtime_caps_by_id=runtime_caps_by_id
+        )
         for spec in _CAPABILITY_AGENT_SPECS
     ]
     return {
