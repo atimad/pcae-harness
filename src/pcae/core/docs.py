@@ -277,6 +277,11 @@ def render_commands_reference() -> str:
 
 - `pcae consensus-prototype`
 - `pcae consensus-prototype --json`
+
+## invocation-pilot
+
+- `pcae invocation-pilot`
+- `pcae invocation-pilot --json`
 """
 
 

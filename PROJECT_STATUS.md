@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44S: Consensus Prototype.
+Phase 44T: Controlled Runtime Invocation Pilot.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,27 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only controlled runtime invocation pilot design (Phase 44T):
+`pcae invocation-pilot` and `pcae invocation-pilot --json` govern a pilot for
+invoking a single runtime (default: codex-local) through the execution framework;
+design only — no runtime execution, no adapter implementation, no file
+modification; seven-stage lifecycle: request → safety_validation →
+adapter_resolution → invocation_preparation → runtime_execution (conceptual) →
+result_capture → human_review; pilot request model: pilot_id, runtime_id,
+agent_id, objective, timeout_seconds (300), writable_allowed (false),
+governance_mode (read_only); five safety gates: runtime available, read-only
+mode enforced, capability match verified, governance valid, timeout valid; result
+capture fields: status, stdout_summary, stderr_summary, artifacts, timestamps;
+ten pilot scope restrictions including single_runtime_only, read_only_only,
+no_subagents, no_swarm, no_consensus_execution; governance: pilot may prepare
+invocation, resolve adapter, capture results; pilot may not modify files, commit,
+push, rollback, or bypass governance; future evolution: 44U Multi-Agent Runtime
+Pilot, 44V Consensus Runtime Pilot, 45A Autonomous Roadmap Generation;
+`build_invocation_pilot` added to `core/agent.py`; `run_invocation_pilot` added
+to `commands/agent.py`; `invocation-pilot [--json]` wired in `cli.py`; strictly
+read-only; advisory: "Invocation pilot is a design only. No runtime execution
+occurs."; 14 new tests.
 
 PCAE exposes a read-only consensus prototype using simulated multi-agent outputs
 (Phase 44S): `pcae consensus-prototype` and `pcae consensus-prototype --json`

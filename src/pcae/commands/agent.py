@@ -40,6 +40,8 @@ from pcae.core.agent import (
     MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY,
     build_consensus_prototype,
     CONSENSUS_PROTOTYPE_ADVISORY,
+    build_invocation_pilot,
+    INVOCATION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2893,6 +2895,52 @@ def run_consensus_prototype(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  Prototype may:     {', '.join(gov['prototype_may'])}")
         print(f"  Prototype may not: {', '.join(gov['prototype_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_pilot(args: argparse.Namespace) -> int:
+    data = build_invocation_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        req = data["pilot_request_model"]
+        print("Controlled runtime invocation pilot")
+        print()
+        print(f"  Default runtime: {req['runtime_id']}")
+        print(f"  Governance mode: {req['governance_mode']}")
+        print()
+        lifecycle = data["pilot_lifecycle"]
+        print(f"Pilot lifecycle ({len(lifecycle)} stages):")
+        for i, stage in enumerate(lifecycle, 1):
+            print(f"  {i}. {stage}")
+        print()
+        print("Pilot request model fields:")
+        print(f"  {', '.join(req['fields'])}")
+        print()
+        gates = data["safety_gates"]
+        print(f"Safety gates ({len(gates)}):")
+        for gate in gates:
+            print(f"  - {gate}")
+        print()
+        rc = data["result_capture"]
+        print("Result capture fields:")
+        print(f"  {', '.join(rc['fields'])}")
+        print()
+        scope = data["pilot_scope"]
+        print(f"Pilot scope ({len(scope)} restrictions):")
+        for restriction in scope:
+            print(f"  - {restriction}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Pilot may:     {', '.join(gov['pilot_may'])}")
+        print(f"  Pilot may not: {', '.join(gov['pilot_may_not'])}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

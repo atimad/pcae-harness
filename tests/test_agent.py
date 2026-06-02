@@ -18044,3 +18044,163 @@ def test_44s_consensus_prototype_human_output_shows_sections_and_advisory(capsys
     assert "Recommendation preview" in output
     assert "Governance" in output
     assert "Consensus prototype is simulated" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44T: Controlled Runtime Invocation Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_44t_invocation_pilot_command_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-pilot"])
+    assert exit_code == 0
+
+
+def test_44t_invocation_pilot_json_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-pilot", "--json"])
+    assert exit_code == 0
+
+
+def test_44t_invocation_pilot_json_has_required_top_level_keys(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "pilot_lifecycle" in data
+    assert "pilot_request_model" in data
+    assert "safety_gates" in data
+    assert "result_capture" in data
+    assert "pilot_scope" in data
+    assert "governance_rules" in data
+    assert "future_evolution" in data
+    assert "advisory" in data
+
+
+def test_44t_invocation_pilot_lifecycle_has_required_stages(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert len(lifecycle) == 7
+    combined = " ".join(lifecycle)
+    assert "request" in combined
+    assert "safety_validation" in combined
+    assert "adapter_resolution" in combined
+    assert "invocation_preparation" in combined
+    assert "result_capture" in combined
+    assert "human_review" in combined
+
+
+def test_44t_invocation_pilot_lifecycle_ordered_correctly(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert lifecycle[0] == "request"
+    assert lifecycle[-1] == "human_review"
+    result_idx = next(i for i, s in enumerate(lifecycle) if "result_capture" in s)
+    review_idx = lifecycle.index("human_review")
+    assert result_idx < review_idx
+
+
+def test_44t_invocation_pilot_request_model_fields(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    req = data["pilot_request_model"]
+    for field in ("pilot_id", "runtime_id", "agent_id", "objective",
+                  "timeout_seconds", "writable_allowed", "governance_mode"):
+        assert field in req["fields"]
+        assert field in req
+
+
+def test_44t_invocation_pilot_request_model_defaults(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    req = data["pilot_request_model"]
+    assert req["runtime_id"] == "codex-local"
+    assert req["writable_allowed"] is False
+    assert req["governance_mode"] == "read_only"
+    assert isinstance(req["timeout_seconds"], int)
+    assert req["timeout_seconds"] > 0
+
+
+def test_44t_invocation_pilot_safety_gates_defined(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gates = data["safety_gates"]
+    assert len(gates) == 5
+    combined = " ".join(gates).lower()
+    assert "runtime available" in combined
+    assert "read-only" in combined
+    assert "capability" in combined
+    assert "governance" in combined
+    assert "timeout" in combined
+
+
+def test_44t_invocation_pilot_result_capture_fields(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["result_capture"]["fields"]
+    for expected in ("status", "stdout_summary", "stderr_summary", "artifacts", "timestamps"):
+        assert expected in fields
+
+
+def test_44t_invocation_pilot_scope_enforces_restrictions(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    scope = data["pilot_scope"]
+    for restriction in (
+        "single_runtime_only",
+        "read_only_only",
+        "no_writable_execution",
+        "no_file_modification",
+        "no_subagents",
+        "no_swarm",
+        "no_consensus_execution",
+        "no_commit",
+        "no_push",
+        "no_rollback",
+    ):
+        assert restriction in scope
+
+
+def test_44t_invocation_pilot_governance_rules_defined(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "pilot_may" in gov
+    assert "pilot_may_not" in gov
+    may = " ".join(gov["pilot_may"]).lower()
+    may_not = " ".join(gov["pilot_may_not"]).lower()
+    assert "prepare invocation" in may
+    assert "resolve adapter" in may
+    assert "capture results" in may
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+    assert "bypass governance" in may_not
+
+
+def test_44t_invocation_pilot_advisory_is_correct(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "design only" in data["advisory"].lower()
+    assert "no runtime execution" in data["advisory"].lower()
+
+
+def test_44t_invocation_pilot_future_evolution_defined(capsys) -> None:
+    main(["invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44U" in phases
+    assert "44V" in phases
+    assert "45A" in phases
+
+
+def test_44t_invocation_pilot_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["invocation-pilot"])
+    output = capsys.readouterr().out
+    assert "Controlled runtime invocation pilot" in output
+    assert "Pilot lifecycle" in output
+    assert "Safety gates" in output
+    assert "Result capture" in output
+    assert "Pilot scope" in output
+    assert "Governance" in output
+    assert "Invocation pilot is a design only" in output

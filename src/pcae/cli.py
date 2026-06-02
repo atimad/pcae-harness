@@ -32,6 +32,7 @@ from pcae.commands.agent import (
     run_planner_adapter_prototype,
     run_multi_agent_prototype,
     run_consensus_prototype,
+    run_invocation_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1431,6 +1432,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON consensus prototype output.",
     )
     consensus_prototype_parser.set_defaults(handler=run_consensus_prototype)
+
+    invocation_pilot_parser = subparsers.add_parser(
+        "invocation-pilot",
+        help="Show read-only controlled runtime invocation pilot design (Phase 44T).",
+    )
+    invocation_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON invocation pilot output.",
+    )
+    invocation_pilot_parser.set_defaults(handler=run_invocation_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

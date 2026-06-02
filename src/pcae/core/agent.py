@@ -8823,3 +8823,115 @@ def build_consensus_prototype() -> dict:
         "future_evolution": list(_CPROTO_FUTURE_EVOLUTION),
         "advisory": CONSENSUS_PROTOTYPE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 44T: Controlled Runtime Invocation Pilot
+# ---------------------------------------------------------------------------
+
+INVOCATION_PILOT_ADVISORY = (
+    "Invocation pilot is a design only. No runtime execution occurs."
+)
+
+_IPILOT_DEFAULT_RUNTIME = "codex-local"
+_IPILOT_DEFAULT_AGENT = "codex"
+_IPILOT_GOVERNANCE_MODE = "read_only"
+_IPILOT_TIMEOUT_SECONDS = 300
+
+_IPILOT_LIFECYCLE: tuple[str, ...] = (
+    "request",
+    "safety_validation",
+    "adapter_resolution",
+    "invocation_preparation",
+    "runtime_execution (conceptual)",
+    "result_capture",
+    "human_review",
+)
+
+_IPILOT_REQUEST_FIELDS: tuple[str, ...] = (
+    "pilot_id",
+    "runtime_id",
+    "agent_id",
+    "objective",
+    "timeout_seconds",
+    "writable_allowed",
+    "governance_mode",
+)
+
+_IPILOT_SAFETY_GATES: tuple[str, ...] = (
+    "runtime available",
+    "read-only mode enforced",
+    "capability match verified",
+    "governance valid",
+    "timeout valid",
+)
+
+_IPILOT_RESULT_CAPTURE_FIELDS: tuple[str, ...] = (
+    "status",
+    "stdout_summary",
+    "stderr_summary",
+    "artifacts",
+    "timestamps",
+)
+
+_IPILOT_PILOT_SCOPE: tuple[str, ...] = (
+    "single_runtime_only",
+    "read_only_only",
+    "no_writable_execution",
+    "no_file_modification",
+    "no_subagents",
+    "no_swarm",
+    "no_consensus_execution",
+    "no_commit",
+    "no_push",
+    "no_rollback",
+)
+
+_IPILOT_GOVERNANCE_RULES: dict = {
+    "pilot_may": [
+        "prepare invocation",
+        "resolve adapter",
+        "capture results",
+    ],
+    "pilot_may_not": [
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_IPILOT_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44U", "description": "Multi-Agent Runtime Pilot"},
+    {"phase": "44V", "description": "Consensus Runtime Pilot"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_invocation_pilot() -> dict:
+    """Return a read-only controlled runtime invocation pilot design."""
+    pilot_request_model = {
+        "pilot_id": "pilot-44t-preview",
+        "runtime_id": _IPILOT_DEFAULT_RUNTIME,
+        "agent_id": _IPILOT_DEFAULT_AGENT,
+        "objective": "<task objective — provided at invocation time>",
+        "timeout_seconds": _IPILOT_TIMEOUT_SECONDS,
+        "writable_allowed": False,
+        "governance_mode": _IPILOT_GOVERNANCE_MODE,
+        "fields": list(_IPILOT_REQUEST_FIELDS),
+    }
+
+    return {
+        "pilot_lifecycle": list(_IPILOT_LIFECYCLE),
+        "pilot_request_model": pilot_request_model,
+        "safety_gates": list(_IPILOT_SAFETY_GATES),
+        "result_capture": {
+            "fields": list(_IPILOT_RESULT_CAPTURE_FIELDS),
+        },
+        "pilot_scope": list(_IPILOT_PILOT_SCOPE),
+        "governance_rules": _IPILOT_GOVERNANCE_RULES,
+        "future_evolution": list(_IPILOT_FUTURE_EVOLUTION),
+        "advisory": INVOCATION_PILOT_ADVISORY,
+    }
+
