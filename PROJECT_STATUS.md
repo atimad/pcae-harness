@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44W: Governed Execution Dry-Run.
+Phase 44X: Runtime Invocation Validation.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,17 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes validated runtime invocation contracts (Phase 44X): `pcae invocation-contracts`
+and `pcae invocation-contracts --json` report per-runtime validated commands and flag
+deprecated preview placeholders; codex-local validated (read_only: `codex exec --sandbox
+read-only "<prompt>"`, writable: `codex exec --sandbox workspace-write "<prompt>"`);
+claude-local validated (read_only: `claude -p "<prompt>"`, writable: `claude -p
+--permission-mode acceptEdits "<prompt>"`); kimi-local validated (read_only/writable:
+`kimi -p "<prompt>"`); 3 invalid_preview_contracts flagged (codex/claude/kimi
+`--non-interactive --output-format json` placeholders, status=invalid_preview_contract,
+should_not_use_for_real_execution=true); strictly read-only; advisory: "Invocation
+contracts are validated references; no runtimes are invoked."; 13 new tests.
 
 PCAE exposes a read-only governed execution dry-run (Phase 44W): `pcae governed-execution-dry-run`
 and `pcae governed-execution-dry-run --json` simulate the complete governed multi-agent

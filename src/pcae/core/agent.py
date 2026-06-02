@@ -9468,3 +9468,112 @@ def build_governed_execution_dry_run() -> dict:
         "future_evolution": list(_GEDR_FUTURE_EVOLUTION),
         "advisory": GOVERNED_EXECUTION_DRY_RUN_ADVISORY,
     }
+
+# Phase 44X: Runtime Invocation Validation
+# ---------------------------------------------------------------------------
+
+INVOCATION_CONTRACTS_ADVISORY = (
+    "Invocation contracts are validated references; no runtimes are invoked."
+)
+
+_ICONV_VALIDATED_CONTRACTS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "status": "validated",
+        "read_only": {
+            "command": 'codex exec --sandbox read-only "<prompt>"',
+            "mode": "read_only",
+            "writable_allowed": False,
+        },
+        "writable": {
+            "command": 'codex exec --sandbox workspace-write "<prompt>"',
+            "mode": "writable",
+            "writable_allowed": True,
+        },
+    },
+    {
+        "runtime_id": "claude-local",
+        "status": "validated",
+        "read_only": {
+            "command": 'claude -p "<prompt>"',
+            "mode": "read_only",
+            "writable_allowed": False,
+        },
+        "writable": {
+            "command": 'claude -p --permission-mode acceptEdits "<prompt>"',
+            "mode": "writable",
+            "writable_allowed": True,
+        },
+    },
+    {
+        "runtime_id": "kimi-local",
+        "status": "validated",
+        "read_only": {
+            "command": 'kimi -p "<prompt>"',
+            "mode": "read_only",
+            "writable_allowed": False,
+        },
+        "writable": {
+            "command": 'kimi -p "<prompt>"',
+            "mode": "writable",
+            "writable_allowed": True,
+        },
+    },
+)
+
+_ICONV_INVALID_PREVIEW_CONTRACTS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "command": "codex --non-interactive --output-format json <prompt>",
+        "status": "invalid_preview_contract",
+        "should_not_use_for_real_execution": True,
+        "reason": "Preview-only placeholder; not a real codex invocation contract.",
+    },
+    {
+        "runtime_id": "claude-local",
+        "command": "claude --non-interactive --output-format json <prompt>",
+        "status": "invalid_preview_contract",
+        "should_not_use_for_real_execution": True,
+        "reason": "Preview-only placeholder; not a real claude invocation contract.",
+    },
+    {
+        "runtime_id": "kimi-local",
+        "command": "kimi --non-interactive --output-format json <prompt>",
+        "status": "invalid_preview_contract",
+        "should_not_use_for_real_execution": True,
+        "reason": "Preview-only placeholder; not a real kimi invocation contract.",
+    },
+)
+
+_ICONV_GOVERNANCE_RULES: dict = {
+    "validation_may": [
+        "report validated invocation contracts",
+        "flag invalid preview contracts",
+        "expose per-runtime read-only commands",
+        "expose per-runtime writable commands",
+    ],
+    "validation_may_not": [
+        "invoke runtimes",
+        "submit prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_ICONV_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_invocation_contracts() -> dict:
+    """Return validated runtime invocation contracts and flagged invalid preview contracts."""
+    return {
+        "invocation_contracts": list(_ICONV_VALIDATED_CONTRACTS),
+        "invalid_preview_contracts": list(_ICONV_INVALID_PREVIEW_CONTRACTS),
+        "governance_rules": _ICONV_GOVERNANCE_RULES,
+        "future_evolution": list(_ICONV_FUTURE_EVOLUTION),
+        "advisory": INVOCATION_CONTRACTS_ADVISORY,
+    }

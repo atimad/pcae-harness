@@ -36,6 +36,7 @@ from pcae.commands.agent import (
     run_multi_runtime_pilot,
     run_consensus_runtime_pilot,
     run_governed_execution_dry_run,
+    run_invocation_contracts,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1479,6 +1480,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governed execution dry-run output.",
     )
     governed_execution_dry_run_parser.set_defaults(handler=run_governed_execution_dry_run)
+
+    invocation_contracts_parser = subparsers.add_parser(
+        "invocation-contracts",
+        help="Report validated runtime invocation contracts and flag invalid preview contracts (Phase 44X).",
+    )
+    invocation_contracts_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON invocation contracts output.",
+    )
+    invocation_contracts_parser.set_defaults(handler=run_invocation_contracts)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

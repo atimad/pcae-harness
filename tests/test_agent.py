@@ -18747,3 +18747,149 @@ def test_44w_governed_execution_dry_run_human_output_shows_sections(capsys) -> N
     assert "Blockers" in output
     assert "Governance" in output
     assert "Governed execution dry-run is simulated" in output
+
+# Phase 44X: Runtime Invocation Validation
+# ---------------------------------------------------------------------------
+
+
+def test_44x_invocation_contracts_command_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-contracts"])
+    assert exit_code == 0
+
+
+def test_44x_invocation_contracts_json_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-contracts", "--json"])
+    assert exit_code == 0
+
+
+def test_44x_invocation_contracts_json_has_required_top_level_keys(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "invocation_contracts" in data
+    assert "invalid_preview_contracts" in data
+    assert "advisory" in data
+
+
+def test_44x_invocation_contracts_codex_validated(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    contracts = {c["runtime_id"]: c for c in data["invocation_contracts"]}
+    assert "codex-local" in contracts
+    codex = contracts["codex-local"]
+    assert codex["status"] == "validated"
+    assert "read_only" in codex and "writable" in codex
+    assert codex["read_only"]["writable_allowed"] is False
+    assert codex["writable"]["writable_allowed"] is True
+    assert "codex exec" in codex["read_only"]["command"]
+    assert "read-only" in codex["read_only"]["command"]
+    assert "workspace-write" in codex["writable"]["command"]
+
+
+def test_44x_invocation_contracts_claude_validated(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    contracts = {c["runtime_id"]: c for c in data["invocation_contracts"]}
+    assert "claude-local" in contracts
+    claude = contracts["claude-local"]
+    assert claude["status"] == "validated"
+    assert claude["read_only"]["writable_allowed"] is False
+    assert claude["writable"]["writable_allowed"] is True
+    assert "claude -p" in claude["read_only"]["command"]
+    assert "acceptEdits" in claude["writable"]["command"]
+
+
+def test_44x_invocation_contracts_kimi_validated(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    contracts = {c["runtime_id"]: c for c in data["invocation_contracts"]}
+    assert "kimi-local" in contracts
+    kimi = contracts["kimi-local"]
+    assert kimi["status"] == "validated"
+    assert kimi["read_only"]["writable_allowed"] is False
+    assert "kimi -p" in kimi["read_only"]["command"]
+
+
+def test_44x_invocation_contracts_contract_fields(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for contract in data["invocation_contracts"]:
+        assert "runtime_id" in contract
+        assert "status" in contract
+        assert "read_only" in contract
+        assert "writable" in contract
+        for mode_key in ("read_only", "writable"):
+            mode = contract[mode_key]
+            assert "command" in mode
+            assert "mode" in mode
+            assert "writable_allowed" in mode
+
+
+def test_44x_invocation_contracts_invalid_preview_all_three_runtimes(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    invalid = data["invalid_preview_contracts"]
+    runtime_ids = [c["runtime_id"] for c in invalid]
+    assert "codex-local" in runtime_ids
+    assert "claude-local" in runtime_ids
+    assert "kimi-local" in runtime_ids
+    assert len(invalid) == 3
+
+
+def test_44x_invocation_contracts_invalid_preview_fields(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for inv in data["invalid_preview_contracts"]:
+        assert inv["status"] == "invalid_preview_contract"
+        assert inv["should_not_use_for_real_execution"] is True
+        assert "reason" in inv
+        assert "command" in inv
+        assert "--non-interactive" in inv["command"]
+        assert "--output-format json" in inv["command"]
+
+
+def test_44x_invocation_contracts_governance_rules(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "validation_may" in gov
+    assert "validation_may_not" in gov
+    may = " ".join(gov["validation_may"]).lower()
+    may_not = " ".join(gov["validation_may_not"]).lower()
+    assert "validated invocation contracts" in may
+    assert "invalid preview contracts" in may
+    assert "invoke runtimes" in may_not
+    assert "submit prompts" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44x_invocation_contracts_advisory(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "validated references" in advisory
+    assert "no runtimes are invoked" in advisory
+
+
+def test_44x_invocation_contracts_future_evolution(capsys) -> None:
+    main(["invocation-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "45A" in phases
+
+
+def test_44x_invocation_contracts_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-contracts"])
+    output = capsys.readouterr().out
+    assert "Invocation contract validation summary" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "read-only" in output
+    assert "writable" in output
+    assert "Invalid preview contracts" in output
+    assert "invalid_preview_contract" in output
+    assert "Governance" in output
+    assert "Invocation contracts are validated references" in output

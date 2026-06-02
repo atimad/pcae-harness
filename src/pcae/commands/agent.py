@@ -48,6 +48,8 @@ from pcae.core.agent import (
     CONSENSUS_RUNTIME_PILOT_ADVISORY,
     build_governed_execution_dry_run,
     GOVERNED_EXECUTION_DRY_RUN_ADVISORY,
+    build_invocation_contracts,
+    INVOCATION_CONTRACTS_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3139,6 +3141,43 @@ def run_governed_execution_dry_run(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  Dry-run may:     {', '.join(gov['dry_run_may'])}")
         print(f"  Dry-run may not: {', '.join(gov['dry_run_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_contracts(args: argparse.Namespace) -> int:
+    data = build_invocation_contracts()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        contracts = data["invocation_contracts"]
+        print("Invocation contract validation summary")
+        print(f"  Validated runtimes: {len(contracts)}")
+        print()
+        for contract in contracts:
+            rid = contract["runtime_id"]
+            ro = contract["read_only"]
+            wr = contract["writable"]
+            print(f"{rid} [{contract['status']}]")
+            print(f"  read-only: {ro['command']}")
+            print(f"  writable:  {wr['command']}")
+        print()
+        invalid = data["invalid_preview_contracts"]
+        print(f"Invalid preview contracts ({len(invalid)} — do not use for real execution):")
+        for inv in invalid:
+            print(f"  [{inv['runtime_id']}] {inv['command']}")
+            print(f"    status: {inv['status']}")
+            print(f"    reason: {inv['reason']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Validation may:     {', '.join(gov['validation_may'])}")
+        print(f"  Validation may not: {', '.join(gov['validation_may_not'])}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:
