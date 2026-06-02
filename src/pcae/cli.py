@@ -41,6 +41,7 @@ from pcae.commands.agent import (
     run_adapter_registry_design,
     run_roadmap_generation_design,
     run_roadmap_evidence,
+    run_roadmap_proposal_dry_run,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1539,6 +1540,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON evidence package output.",
     )
     roadmap_evidence_parser.set_defaults(handler=run_roadmap_evidence)
+
+    roadmap_proposal_dry_run_parser = subparsers.add_parser(
+        "roadmap-proposal-dry-run",
+        help="Generate a simulated roadmap proposal from evidence (Phase 45C).",
+    )
+    roadmap_proposal_dry_run_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON roadmap proposal output.",
+    )
+    roadmap_proposal_dry_run_parser.set_defaults(handler=run_roadmap_proposal_dry_run)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

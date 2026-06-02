@@ -19598,3 +19598,207 @@ def test_45b_roadmap_evidence_human_output_shows_all_sections(capsys) -> None:
     assert "Identified gaps" in output
     assert "Candidate roadmap focus areas" in output
     assert "Roadmap evidence collection is read-only" in output
+
+
+# Phase 45C: Roadmap Proposal Dry-Run
+# ---------------------------------------------------------------------------
+
+
+def test_45c_roadmap_proposal_dry_run_command_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-proposal-dry-run"])
+    assert exit_code == 0
+
+
+def test_45c_roadmap_proposal_dry_run_json_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-proposal-dry-run", "--json"])
+    assert exit_code == 0
+
+
+def test_45c_roadmap_proposal_dry_run_json_has_required_top_level_keys(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "proposal_id",
+        "generated_at",
+        "evidence_package_id",
+        "gap_analysis",
+        "candidate_phases",
+        "dependencies",
+        "recommended_ordering",
+        "risks",
+        "assumptions",
+        "confidence",
+        "human_decision_required",
+        "governance_rules",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45c_roadmap_proposal_dry_run_proposal_id_starts_with_rdp(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data["proposal_id"], str)
+    assert data["proposal_id"].startswith("rdp-")
+
+
+def test_45c_roadmap_proposal_dry_run_evidence_package_id_consumed(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data["evidence_package_id"], str)
+    assert data["evidence_package_id"].startswith("rev-")
+
+
+def test_45c_roadmap_proposal_dry_run_gap_analysis_structure(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ga = data["gap_analysis"]
+    for key in (
+        "readiness_gaps",
+        "capability_gaps",
+        "governance_gaps",
+        "runtime_integration_gaps",
+        "validation_gaps",
+        "task_gaps",
+        "total",
+    ):
+        assert key in ga, f"gap_analysis missing key: {key}"
+    assert ga["total"] > 0
+    assert len(ga["readiness_gaps"]) > 0
+    assert len(ga["capability_gaps"]) > 0
+    assert len(ga["runtime_integration_gaps"]) > 0
+    assert len(ga["validation_gaps"]) > 0
+
+
+def test_45c_roadmap_proposal_dry_run_candidate_phases_nonempty(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = data["candidate_phases"]
+    assert isinstance(phases, list)
+    assert len(phases) >= 4
+
+
+def test_45c_roadmap_proposal_dry_run_candidate_phases_fields(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for phase in data["candidate_phases"]:
+        assert "phase_id" in phase, f"phase missing phase_id: {phase}"
+        assert "title" in phase, f"phase missing title: {phase}"
+        assert "rationale" in phase, f"phase missing rationale: {phase}"
+        assert "evidence_refs" in phase, f"phase missing evidence_refs: {phase}"
+        assert "confidence" in phase, f"phase missing confidence: {phase}"
+        assert isinstance(phase["evidence_refs"], list)
+        assert 0.0 <= phase["confidence"] <= 1.0
+
+
+def test_45c_roadmap_proposal_dry_run_future_phases_present(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phase_ids = [p["phase_id"] for p in data["candidate_phases"]]
+    for expected in ("45D", "45E", "45F", "45G"):
+        assert expected in phase_ids, f"missing future phase: {expected}"
+
+
+def test_45c_roadmap_proposal_dry_run_dependencies_nonempty(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    deps = data["dependencies"]
+    assert isinstance(deps, list)
+    assert len(deps) > 0
+    for dep in deps:
+        assert "dep_id" in dep
+        assert "from_phase" in dep
+        assert "to_phase" in dep
+        assert "relationship" in dep
+        assert "rationale" in dep
+
+
+def test_45c_roadmap_proposal_dry_run_recommended_ordering_covers_all_phases(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ordering = data["recommended_ordering"]
+    phase_ids = {p["phase_id"] for p in data["candidate_phases"]}
+    assert set(ordering) == phase_ids
+    assert ordering.index("45D") < ordering.index("45E")
+    assert ordering.index("45E") < ordering.index("45F")
+    assert ordering.index("45F") < ordering.index("45G")
+
+
+def test_45c_roadmap_proposal_dry_run_risks_nonempty_with_fields(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    risks = data["risks"]
+    assert isinstance(risks, list)
+    assert len(risks) > 0
+    for risk in risks:
+        assert "risk_id" in risk
+        assert "category" in risk
+        assert "description" in risk
+        assert "severity" in risk
+        assert "mitigation" in risk
+        assert risk["severity"] in ("high", "medium", "low")
+
+
+def test_45c_roadmap_proposal_dry_run_assumptions_nonempty(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assumptions = data["assumptions"]
+    assert isinstance(assumptions, list)
+    assert len(assumptions) >= 5
+    assert any("human approval" in a.lower() for a in assumptions)
+    assert any("read-only" in a.lower() for a in assumptions)
+
+
+def test_45c_roadmap_proposal_dry_run_confidence_is_valid_float(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    confidence = data["confidence"]
+    assert isinstance(confidence, float)
+    assert 0.0 <= confidence <= 1.0
+
+
+def test_45c_roadmap_proposal_dry_run_human_decision_required(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_decision_required"] is True
+
+
+def test_45c_roadmap_proposal_dry_run_governance_rules(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "proposal_may" in gov
+    assert "proposal_may_not" in gov
+    may = " ".join(gov["proposal_may"]).lower()
+    may_not = " ".join(gov["proposal_may_not"]).lower()
+    assert "recommend phases" in may
+    assert "recommend ordering" in may
+    assert "create phases" in may_not
+    assert "modify roadmap" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert gov["human_decision_required"] is True
+
+
+def test_45c_roadmap_proposal_dry_run_advisory(capsys) -> None:
+    main(["roadmap-proposal-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"]
+    assert "advisory" in advisory.lower()
+    assert "no roadmap changes" in advisory.lower()
+
+
+def test_45c_roadmap_proposal_dry_run_human_output_shows_all_sections(capsys) -> None:
+    main(["roadmap-proposal-dry-run"])
+    output = capsys.readouterr().out
+    assert "Roadmap proposal dry-run" in output
+    assert "Gap analysis" in output
+    assert "Candidate phases" in output
+    assert "Dependency graph summary" in output
+    assert "45D" in output
+    assert "45E" in output
+    assert "Risks" in output
+    assert "Assumptions" in output
+    assert "Overall confidence" in output
+    assert "Human review required" in output
+    assert "Roadmap proposal dry-run is advisory" in output

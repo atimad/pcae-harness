@@ -10364,3 +10364,297 @@ def build_roadmap_evidence(root: HarnessPath) -> dict:
         "candidate_focus_areas": candidate_focus_areas,
         "advisory": ROADMAP_EVIDENCE_ADVISORY,
     }
+
+
+# Phase 45C: Roadmap Proposal Dry-Run
+# ---------------------------------------------------------------------------
+
+ROADMAP_PROPOSAL_DRY_RUN_ADVISORY = (
+    "Roadmap proposal dry-run is advisory; no roadmap changes are performed."
+)
+
+_RPDRUN_GOVERNANCE_RULES: dict = {
+    "proposal_may": [
+        "recommend phases",
+        "recommend ordering",
+        "recommend priorities",
+        "summarize evidence",
+        "report risks and assumptions",
+    ],
+    "proposal_may_not": [
+        "create phases",
+        "modify roadmap",
+        "create tasks",
+        "execute work",
+        "commit",
+        "push",
+    ],
+    "human_decision_required": True,
+    "advisory": True,
+}
+
+
+def _categorize_gaps(identified_gaps: list[dict]) -> dict:
+    """Categorize identified gaps for proposal gap analysis."""
+    by_cat: dict[str, list[str]] = {}
+    for gap in identified_gaps:
+        by_cat.setdefault(gap["category"], []).append(gap["gap_id"])
+    return {
+        "readiness_gaps": by_cat.get("subsystem_partial_readiness", []),
+        "capability_gaps": by_cat.get("missing_implementation", []),
+        "governance_gaps": by_cat.get("governance", []),
+        "runtime_integration_gaps": by_cat.get("missing_runtime_integration", []),
+        "validation_gaps": by_cat.get("missing_validation", []),
+        "task_gaps": by_cat.get("pending_tasks", []),
+        "total": len(identified_gaps),
+    }
+
+
+def _generate_candidate_phases(identified_gaps: list[dict]) -> list[dict]:
+    """Generate candidate roadmap phases from evidence gaps."""
+    phases: list[dict] = []
+    n = 1
+
+    impl_gaps = [g for g in identified_gaps if g["category"] == "missing_implementation"]
+    if impl_gaps:
+        phases.append({
+            "phase_id": f"candidate-{n:03d}",
+            "title": "Runtime Adapter Registry Implementation",
+            "rationale": "Close missing runtime dispatch and adapter registry implementation gaps.",
+            "evidence_refs": [g["gap_id"] for g in impl_gaps],
+            "confidence": 0.80,
+        })
+        n += 1
+
+    rt_gaps = [g for g in identified_gaps if g["category"] == "missing_runtime_integration"]
+    if rt_gaps:
+        phases.append({
+            "phase_id": f"candidate-{n:03d}",
+            "title": "Runtime Adapter Wiring",
+            "rationale": f"Wire {len(rt_gaps)} runtime adapter(s) to the execution framework.",
+            "evidence_refs": [g["gap_id"] for g in rt_gaps],
+            "confidence": 0.75,
+        })
+        n += 1
+
+    val_gaps = [g for g in identified_gaps if g["category"] == "missing_validation"]
+    if val_gaps:
+        phases.append({
+            "phase_id": f"candidate-{n:03d}",
+            "title": "Runtime Integration Validation",
+            "rationale": "Validate real runtime execution end-to-end before enabling production use.",
+            "evidence_refs": [g["gap_id"] for g in val_gaps],
+            "confidence": 0.70,
+        })
+        n += 1
+
+    candidate_ids = [p["phase_id"] for p in phases]
+    last_candidate = candidate_ids[-1] if candidate_ids else "phase_45c_dry_run"
+
+    for pid, title, rationale, refs in [
+        ("45D", "Multi-Agent Roadmap Proposal",
+         "Extend dry-run with real multi-agent deliberation for proposal generation.",
+         [last_candidate]),
+        ("45E", "Roadmap Approval Workflow",
+         "Implement human approval workflow for generated roadmap proposals.",
+         ["45D"]),
+        ("45F", "Prompt Generation Design",
+         "Design structured prompt generation for agent task delegation.",
+         ["45E"]),
+        ("45G", "Adaptive Agent-Specific Prompt Generation",
+         "Generate prompts adapted to individual agent capabilities and task requirements.",
+         ["45F"]),
+    ]:
+        phases.append({
+            "phase_id": pid,
+            "title": title,
+            "rationale": rationale,
+            "evidence_refs": refs,
+            "confidence": 0.80,
+        })
+
+    return phases
+
+
+def _generate_proposal_dependencies(candidate_phases: list[dict]) -> tuple[list[dict], list[str]]:
+    """Generate dependency pairs and recommended ordering from candidate phases."""
+    phase_ids = [p["phase_id"] for p in candidate_phases]
+    candidate_ids = sorted(p for p in phase_ids if p.startswith("candidate-"))
+    future_ids = [p for p in phase_ids if not p.startswith("candidate-")]
+
+    deps: list[dict] = []
+    n = 1
+
+    for i in range(len(candidate_ids) - 1):
+        deps.append({
+            "dep_id": f"dep-{n:03d}",
+            "from_phase": candidate_ids[i],
+            "to_phase": candidate_ids[i + 1],
+            "relationship": "must_precede",
+            "rationale": f"{candidate_ids[i]} must complete before {candidate_ids[i + 1]} begins.",
+        })
+        n += 1
+
+    if candidate_ids and future_ids:
+        deps.append({
+            "dep_id": f"dep-{n:03d}",
+            "from_phase": candidate_ids[-1],
+            "to_phase": future_ids[0],
+            "relationship": "recommended_precede",
+            "rationale": "Implementation maturity supports advanced roadmap generation phases.",
+        })
+        n += 1
+
+    for i in range(len(future_ids) - 1):
+        deps.append({
+            "dep_id": f"dep-{n:03d}",
+            "from_phase": future_ids[i],
+            "to_phase": future_ids[i + 1],
+            "relationship": "must_precede",
+            "rationale": f"{future_ids[i]} must complete before {future_ids[i + 1]} begins.",
+        })
+        n += 1
+
+    ordering = candidate_ids + future_ids
+    return deps, ordering
+
+
+def _generate_proposal_risks(
+    identified_gaps: list[dict],
+    readiness_summary: dict,
+) -> list[dict]:
+    """Derive risks from identified gaps and readiness evidence."""
+    risks: list[dict] = []
+    n = 1
+
+    if not readiness_summary.get("execution_safe", True):
+        risks.append({
+            "risk_id": f"risk-{n:03d}",
+            "category": "execution_safety",
+            "description": (
+                "Real execution is not yet safe; execution_safe=false in readiness assessment."
+            ),
+            "severity": "high",
+            "mitigation": (
+                "Complete adapter registry and writable control validations "
+                "before enabling real execution."
+            ),
+        })
+        n += 1
+
+    rt_gaps = [g for g in identified_gaps if g["category"] == "missing_runtime_integration"]
+    if rt_gaps:
+        risks.append({
+            "risk_id": f"risk-{n:03d}",
+            "category": "runtime_integration",
+            "description": (
+                f"{len(rt_gaps)} runtime adapter(s) not yet wired to the execution framework."
+            ),
+            "severity": "high",
+            "mitigation": "Implement adapter wiring phase before enabling coordinated execution.",
+        })
+        n += 1
+
+    impl_gaps = [g for g in identified_gaps if g["category"] == "missing_implementation"]
+    if impl_gaps:
+        risks.append({
+            "risk_id": f"risk-{n:03d}",
+            "category": "implementation_gap",
+            "description": f"{len(impl_gaps)} missing implementation(s) block production readiness.",
+            "severity": "medium",
+            "mitigation": "Prioritize implementation gaps in the next planning cycle.",
+        })
+        n += 1
+
+    val_gaps = [g for g in identified_gaps if g["category"] == "missing_validation"]
+    if val_gaps:
+        risks.append({
+            "risk_id": f"risk-{n:03d}",
+            "category": "validation_gap",
+            "description": (
+                f"{len(val_gaps)} end-to-end validation(s) not yet performed."
+            ),
+            "severity": "medium",
+            "mitigation": "Schedule integration validation phases before production deployment.",
+        })
+        n += 1
+
+    risks.append({
+        "risk_id": f"risk-{n:03d}",
+        "category": "proposal_advisory",
+        "description": (
+            "This proposal is a dry-run; candidate phases require human review before adoption."
+        ),
+        "severity": "low",
+        "mitigation": "All proposals require explicit human approval via roadmap approval workflow.",
+    })
+
+    return risks
+
+
+def _generate_proposal_assumptions(evidence: dict) -> list[str]:
+    """Derive proposal assumptions from collected evidence."""
+    ps = evidence.get("project_summary", {})
+    ts = evidence.get("test_summary", {})
+    assumptions = [
+        "Test suite remains green throughout implementation phases.",
+        "Human approval is required before any candidate phase is acted upon.",
+        "Evidence collection reflects current repository state at generation time.",
+        "Read-only constraints remain enforced throughout the roadmap generation pipeline.",
+        "Governance policy remains consistent with current .pcae/policy.toml.",
+    ]
+    total = ts.get("total_collected", 0)
+    if total > 0:
+        assumptions.append(
+            f"Test coverage ({total} tests collected) is sufficient to detect "
+            "regressions introduced by candidate phases."
+        )
+    done = ps.get("done_entries", 0)
+    if done > 0:
+        assumptions.append(
+            f"Completed phases ({done} in tasks/DONE.md) represent stable "
+            "foundations that candidate phases may build upon."
+        )
+    return assumptions
+
+
+def _compute_proposal_confidence(evidence: dict) -> float:
+    """Compute overall proposal confidence from evidence quality and gap count."""
+    rs = evidence.get("readiness_summary", {})
+    total = max(rs.get("total_areas", 1), 1)
+    ready = rs.get("subsystems_ready", 0)
+    base = 0.40 + (ready / total) * 0.40
+    gap_count = len(evidence.get("identified_gaps", []))
+    gap_penalty = min(gap_count * 0.02, 0.15)
+    return round(max(base - gap_penalty, 0.20), 2)
+
+
+def build_roadmap_proposal_dry_run(root: HarnessPath) -> dict:
+    """Generate a simulated roadmap proposal from collected evidence. Read-only."""
+    evidence = build_roadmap_evidence(root)
+
+    identified_gaps = evidence.get("identified_gaps", [])
+    readiness_summary = evidence.get("readiness_summary", {})
+
+    gap_analysis = _categorize_gaps(identified_gaps)
+    candidate_phases = _generate_candidate_phases(identified_gaps)
+    dependencies, recommended_ordering = _generate_proposal_dependencies(candidate_phases)
+    risks = _generate_proposal_risks(identified_gaps, readiness_summary)
+    assumptions = _generate_proposal_assumptions(evidence)
+    confidence = _compute_proposal_confidence(evidence)
+
+    return {
+        "proposal_id": f"rdp-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "evidence_package_id": evidence.get("package_id", "unknown"),
+        "gap_analysis": gap_analysis,
+        "candidate_phases": candidate_phases,
+        "dependencies": dependencies,
+        "recommended_ordering": recommended_ordering,
+        "risks": risks,
+        "assumptions": assumptions,
+        "confidence": confidence,
+        "human_decision_required": True,
+        "governance_rules": dict(_RPDRUN_GOVERNANCE_RULES),
+        "advisory": ROADMAP_PROPOSAL_DRY_RUN_ADVISORY,
+    }

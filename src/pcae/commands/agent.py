@@ -58,6 +58,8 @@ from pcae.core.agent import (
     ROADMAP_GENERATION_DESIGN_ADVISORY,
     build_roadmap_evidence,
     ROADMAP_EVIDENCE_ADVISORY,
+    build_roadmap_proposal_dry_run,
+    ROADMAP_PROPOSAL_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3389,6 +3391,56 @@ def run_roadmap_evidence(args: argparse.Namespace) -> int:
         for area in data["candidate_focus_areas"]:
             print(f"  [{area['area_id']}] [{area['priority']}] {area['focus_area']}")
             print(f"    {area['rationale']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_roadmap_proposal_dry_run(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_roadmap_proposal_dry_run(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Roadmap proposal dry-run")
+        print(f"Proposal: {data['proposal_id']}  Generated: {data['generated_at']}")
+        print(f"Evidence:  {data['evidence_package_id']}")
+        print()
+        ga = data["gap_analysis"]
+        print(f"Gap analysis (total: {ga['total']}):")
+        print(f"  Readiness gaps:          {len(ga['readiness_gaps'])} {ga['readiness_gaps']}")
+        print(f"  Capability gaps:         {len(ga['capability_gaps'])} {ga['capability_gaps']}")
+        print(f"  Runtime integration:     {len(ga['runtime_integration_gaps'])} {ga['runtime_integration_gaps']}")
+        print(f"  Validation gaps:         {len(ga['validation_gaps'])} {ga['validation_gaps']}")
+        print(f"  Governance gaps:         {len(ga['governance_gaps'])} {ga['governance_gaps']}")
+        print()
+        print(f"Candidate phases ({len(data['candidate_phases'])}):")
+        for phase in data["candidate_phases"]:
+            print(f"  [{phase['phase_id']}] {phase['title']} (confidence: {phase['confidence']})")
+            print(f"    {phase['rationale']}")
+            print(f"    evidence_refs: {', '.join(phase['evidence_refs'])}")
+        print()
+        print("Dependency graph summary:")
+        for dep in data["dependencies"]:
+            print(f"  {dep['from_phase']} → {dep['to_phase']} [{dep['relationship']}]")
+        print(f"  Recommended ordering: {' → '.join(data['recommended_ordering'])}")
+        print()
+        print(f"Risks ({len(data['risks'])}):")
+        for risk in data["risks"]:
+            print(f"  [{risk['risk_id']}] ({risk['severity']}) {risk['description']}")
+            print(f"    Mitigation: {risk['mitigation']}")
+        print()
+        print(f"Assumptions ({len(data['assumptions'])}):")
+        for i, assumption in enumerate(data["assumptions"], 1):
+            print(f"  {i}. {assumption}")
+        print()
+        print(f"Overall confidence: {data['confidence']}")
+        print(f"Human review required: {data['human_decision_required']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  May:     {', '.join(gov['proposal_may'])}")
+        print(f"  May not: {', '.join(gov['proposal_may_not'])}")
         print()
         print(data["advisory"])
     return 0

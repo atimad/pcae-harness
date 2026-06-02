@@ -322,6 +322,11 @@ def render_commands_reference() -> str:
 
 - `pcae roadmap-evidence`
 - `pcae roadmap-evidence --json`
+
+## roadmap-proposal-dry-run
+
+- `pcae roadmap-proposal-dry-run`
+- `pcae roadmap-proposal-dry-run --json`
 """
 
 

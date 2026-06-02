@@ -301,3 +301,8 @@
 
 - `pcae roadmap-evidence`
 - `pcae roadmap-evidence --json`
+
+## roadmap-proposal-dry-run
+
+- `pcae roadmap-proposal-dry-run`
+- `pcae roadmap-proposal-dry-run --json`

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45B: Roadmap Evidence Collector.
+Phase 45C: Roadmap Proposal Dry-Run.
 
 ## Governance Coherence Note
 
@@ -977,6 +977,28 @@ unavailable/unknown), probe_mode=on-demand; capability_synchronization: capabili
 of truth; governance: registry may discover/resolve/report; may not invoke runtimes, approve, commit,
 push, or rollback; future evolution: 45A/45B/45C; strictly design-only; advisory: "Adapter registry
 design is read-only; no adapters are implemented or invoked."; 12 new tests.
+
+PCAE generates a simulated roadmap proposal from collected evidence (Phase 45C):
+`pcae roadmap-proposal-dry-run` and `pcae roadmap-proposal-dry-run --json` produce a
+read-only roadmap proposal by consuming the Phase 45B evidence package; proposal_id
+(rdp-timestamp), evidence_package_id (consumed rev-timestamp), gap_analysis: 7-category
+breakdown (readiness_gaps, capability_gaps, governance_gaps, runtime_integration_gaps,
+validation_gaps, task_gaps, total); candidate_phases: derived from evidence gaps
+(candidate-001 Runtime Adapter Registry Implementation, candidate-002 Runtime Adapter
+Wiring, candidate-003 Runtime Integration Validation) plus defined future phases (45D
+Multi-Agent Roadmap Proposal, 45E Roadmap Approval Workflow, 45F Prompt Generation
+Design, 45G Adaptive Agent-Specific Prompt Generation); each phase has phase_id, title,
+rationale, evidence_refs, confidence; dependencies: 6 pairs with dep_id, from/to_phase,
+relationship (must_precede/recommended_precede), rationale; recommended_ordering: topological
+sort of all phase IDs; risks: derived from execution_safe=False, runtime integration gaps,
+implementation gaps, validation gaps, proposal_advisory — each with risk_id, category,
+description, severity (high/medium/low), mitigation; assumptions: 7 entries (5 static +
+2 evidence-derived from test count and done_entries); confidence: computed from
+readiness (base = 0.40 + ready/total * 0.40, gap_penalty = min(gaps*0.02, 0.15));
+human_decision_required=true always; governance: proposal may recommend phases/ordering/
+priorities/summarize evidence/report risks; may not create phases, modify roadmap, create
+tasks, execute work, commit, push; strictly read-only; advisory: "Roadmap proposal dry-run
+is advisory; no roadmap changes are performed."; 18 new tests.
 
 PCAE collects structured repository evidence for roadmap generation (Phase 45B):
 `pcae roadmap-evidence` and `pcae roadmap-evidence --json` produce a read-only evidence
