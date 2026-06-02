@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44Z: Runtime Adapter Registry Design.
+Phase 45A: Autonomous Roadmap Generation Design.
 
 ## Governance Coherence Note
 
@@ -977,6 +977,25 @@ unavailable/unknown), probe_mode=on-demand; capability_synchronization: capabili
 of truth; governance: registry may discover/resolve/report; may not invoke runtimes, approve, commit,
 push, or rollback; future evolution: 45A/45B/45C; strictly design-only; advisory: "Adapter registry
 design is read-only; no adapters are implemented or invoked."; 12 new tests.
+
+PCAE exposes an autonomous roadmap generation architecture design (Phase 45A):
+`pcae roadmap-generation-design` and `pcae roadmap-generation-design --json` define how
+PCAE will generate roadmap proposals from repository evidence using coordinated agents;
+design-only; evidence_sources: 8 sources (PROJECT_STATUS.md, CHANGELOG.md, tasks/TODO.md,
+tasks/DONE.md, tests, capability registry, execution/readiness assessments, governance
+history); agent_roles: 6 roles (repository_analyst, architecture_analyst, test_analyst,
+governance_analyst, capability_analyst, planning_coordinator); lifecycle: 7 steps
+(evidence_collection → gap_analysis → candidate_phase_generation → dependency_ordering →
+risk_assessment → consensus_review → human_approval); proposal_model: 9 fields
+(proposal_id, generated_at, evidence_sources, candidate_phases, dependencies, risks,
+assumptions, confidence, human_decision_required); governance: proposal may describe
+candidate phases, summarize evidence, express dependencies, report risks/assumptions,
+report confidence; proposal may not mutate roadmap, create tasks, execute phases, commit,
+push, or approve itself; human_approval_required=true, advisory=true; future evolution:
+45B Roadmap Evidence Collector, 45C Roadmap Proposal Dry-Run, 45D Multi-Agent Roadmap
+Proposal, 45E Roadmap Approval Workflow; strictly design-only; advisory: "Roadmap
+generation design is read-only; no roadmap proposals are generated or mutated."; 14 new
+tests.
 
 PCAE exposes a governed runtime execution readiness assessment (Phase 44Y):
 `pcae execution-readiness` and `pcae execution-readiness --json` assess PCAE readiness

@@ -54,6 +54,8 @@ from pcae.core.agent import (
     EXECUTION_READINESS_ADVISORY,
     build_adapter_registry_design,
     ADAPTER_REGISTRY_DESIGN_ADVISORY,
+    build_roadmap_generation_design,
+    ROADMAP_GENERATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3288,6 +3290,44 @@ def run_adapter_registry_design(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  Registry may:     {', '.join(gov['registry_may'])}")
         print(f"  Registry may not: {', '.join(gov['registry_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_roadmap_generation_design(args: argparse.Namespace) -> int:
+    data = build_roadmap_generation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Autonomous roadmap generation design")
+        print()
+        print("Evidence sources:")
+        for src in data["evidence_sources"]:
+            print(f"  - {src}")
+        print()
+        print("Roadmap agent roles:")
+        for role in data["agent_roles"]:
+            print(f"  {role['role']}: {role['responsibility']}")
+        print()
+        print("Roadmap generation lifecycle:")
+        for i, step in enumerate(data["lifecycle"], 1):
+            print(f"  {i}. {step}")
+        print()
+        print("Roadmap proposal model:")
+        for field in data["proposal_model"]:
+            print(f"  {field['field']} ({field['type']}): {field['description']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance rules:")
+        print(f"  Proposal may:     {', '.join(gov['proposal_may'])}")
+        print(f"  Proposal may not: {', '.join(gov['proposal_may_not'])}")
+        print(f"  Human approval required: {gov['human_approval_required']}")
+        print(f"  Advisory: {gov['advisory']}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

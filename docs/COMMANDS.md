@@ -291,3 +291,8 @@
 
 - `pcae adapter-registry-design`
 - `pcae adapter-registry-design --json`
+
+## roadmap-generation-design
+
+- `pcae roadmap-generation-design`
+- `pcae roadmap-generation-design --json`

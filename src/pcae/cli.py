@@ -39,6 +39,7 @@ from pcae.commands.agent import (
     run_invocation_contracts,
     run_execution_readiness,
     run_adapter_registry_design,
+    run_roadmap_generation_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1515,6 +1516,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON adapter registry design output.",
     )
     adapter_registry_design_parser.set_defaults(handler=run_adapter_registry_design)
+
+    roadmap_generation_design_parser = subparsers.add_parser(
+        "roadmap-generation-design",
+        help="Show read-only autonomous roadmap generation architecture design (Phase 45A).",
+    )
+    roadmap_generation_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON roadmap generation design output.",
+    )
+    roadmap_generation_design_parser.set_defaults(handler=run_roadmap_generation_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

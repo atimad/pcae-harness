@@ -9888,3 +9888,164 @@ def build_adapter_registry_design() -> dict:
         "future_evolution": list(_ARDSGN_FUTURE_EVOLUTION),
         "advisory": ADAPTER_REGISTRY_DESIGN_ADVISORY,
     }
+
+
+# Phase 45A: Autonomous Roadmap Generation Design
+# ---------------------------------------------------------------------------
+
+ROADMAP_GENERATION_DESIGN_ADVISORY = (
+    "Roadmap generation design is read-only; no roadmap proposals are generated or mutated."
+)
+
+_RGDSGN_EVIDENCE_SOURCES: tuple[str, ...] = (
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/TODO.md",
+    "tasks/DONE.md",
+    "tests",
+    "capability registry",
+    "execution/readiness assessments",
+    "governance history",
+)
+
+_RGDSGN_AGENT_ROLES: tuple[dict, ...] = (
+    {
+        "role": "repository_analyst",
+        "responsibility": (
+            "Reads and summarizes project state from PROJECT_STATUS.md, "
+            "CHANGELOG.md, and task files."
+        ),
+    },
+    {
+        "role": "architecture_analyst",
+        "responsibility": (
+            "Identifies structural gaps and evolution opportunities from "
+            "architecture documentation."
+        ),
+    },
+    {
+        "role": "test_analyst",
+        "responsibility": (
+            "Surveys test coverage and identifies untested capabilities."
+        ),
+    },
+    {
+        "role": "governance_analyst",
+        "responsibility": (
+            "Evaluates governance history, policy compliance, and readiness "
+            "assessments."
+        ),
+    },
+    {
+        "role": "capability_analyst",
+        "responsibility": (
+            "Reads the capability registry and identifies missing or "
+            "underdeveloped capabilities."
+        ),
+    },
+    {
+        "role": "planning_coordinator",
+        "responsibility": (
+            "Aggregates evidence from all analysts, generates candidate phases, "
+            "orders dependencies, and compiles the roadmap proposal."
+        ),
+    },
+)
+
+_RGDSGN_LIFECYCLE_STEPS: tuple[str, ...] = (
+    "evidence_collection",
+    "gap_analysis",
+    "candidate_phase_generation",
+    "dependency_ordering",
+    "risk_assessment",
+    "consensus_review",
+    "human_approval",
+)
+
+_RGDSGN_PROPOSAL_MODEL_FIELDS: tuple[dict, ...] = (
+    {
+        "field": "proposal_id",
+        "type": "str",
+        "description": "Unique identifier for this roadmap proposal.",
+    },
+    {
+        "field": "generated_at",
+        "type": "str",
+        "description": "ISO 8601 timestamp when the proposal was generated.",
+    },
+    {
+        "field": "evidence_sources",
+        "type": "list[str]",
+        "description": "Evidence sources consulted during generation.",
+    },
+    {
+        "field": "candidate_phases",
+        "type": "list[dict]",
+        "description": "Proposed next phases with title, rationale, and priority.",
+    },
+    {
+        "field": "dependencies",
+        "type": "list[dict]",
+        "description": "Dependency relationships between candidate phases.",
+    },
+    {
+        "field": "risks",
+        "type": "list[dict]",
+        "description": "Risks identified during generation with severity and mitigation notes.",
+    },
+    {
+        "field": "assumptions",
+        "type": "list[str]",
+        "description": "Assumptions made during evidence analysis.",
+    },
+    {
+        "field": "confidence",
+        "type": "float",
+        "description": "Aggregate confidence score (0.0–1.0) for the proposal.",
+    },
+    {
+        "field": "human_decision_required",
+        "type": "bool",
+        "description": "Always true; human approval is required before acting on any proposal.",
+    },
+)
+
+_RGDSGN_GOVERNANCE_RULES: dict = {
+    "proposal_may": [
+        "describe candidate phases",
+        "summarize evidence",
+        "express dependencies",
+        "report risks and assumptions",
+        "report confidence",
+    ],
+    "proposal_may_not": [
+        "mutate roadmap",
+        "create tasks",
+        "execute phases",
+        "commit",
+        "push",
+        "approve itself",
+    ],
+    "human_approval_required": True,
+    "advisory": True,
+}
+
+_RGDSGN_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45B", "description": "Roadmap Evidence Collector"},
+    {"phase": "45C", "description": "Roadmap Proposal Dry-Run"},
+    {"phase": "45D", "description": "Multi-Agent Roadmap Proposal"},
+    {"phase": "45E", "description": "Roadmap Approval Workflow"},
+)
+
+
+def build_roadmap_generation_design() -> dict:
+    """Return a read-only autonomous roadmap generation architecture design."""
+    return {
+        "evidence_sources": list(_RGDSGN_EVIDENCE_SOURCES),
+        "agent_roles": list(_RGDSGN_AGENT_ROLES),
+        "lifecycle": list(_RGDSGN_LIFECYCLE_STEPS),
+        "proposal_model": list(_RGDSGN_PROPOSAL_MODEL_FIELDS),
+        "governance_rules": dict(_RGDSGN_GOVERNANCE_RULES),
+        "future_evolution": list(_RGDSGN_FUTURE_EVOLUTION),
+        "advisory": ROADMAP_GENERATION_DESIGN_ADVISORY,
+    }

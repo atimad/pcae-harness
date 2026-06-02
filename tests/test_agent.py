@@ -19209,3 +19209,189 @@ def test_44z_adapter_registry_design_human_output_shows_all_sections(capsys) -> 
     assert "capability_registry" in output
     assert "Governance" in output
     assert "Adapter registry design is read-only" in output
+
+
+# Phase 45A: Autonomous Roadmap Generation Design
+# ---------------------------------------------------------------------------
+
+
+def test_45a_roadmap_generation_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-generation-design"])
+    assert exit_code == 0
+
+
+def test_45a_roadmap_generation_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-generation-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45a_roadmap_generation_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "evidence_sources",
+        "agent_roles",
+        "lifecycle",
+        "proposal_model",
+        "governance_rules",
+        "future_evolution",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45a_roadmap_generation_design_evidence_sources(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sources = data["evidence_sources"]
+    for expected in (
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md",
+        "tasks/TODO.md",
+        "tasks/DONE.md",
+        "tests",
+        "capability registry",
+        "execution/readiness assessments",
+        "governance history",
+    ):
+        assert expected in sources, f"missing evidence source: {expected}"
+
+
+def test_45a_roadmap_generation_design_agent_roles(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    roles = data["agent_roles"]
+    role_names = [r["role"] for r in roles]
+    for expected in (
+        "repository_analyst",
+        "architecture_analyst",
+        "test_analyst",
+        "governance_analyst",
+        "capability_analyst",
+        "planning_coordinator",
+    ):
+        assert expected in role_names, f"missing agent role: {expected}"
+    for role in roles:
+        assert "role" in role
+        assert "responsibility" in role
+        assert len(role["responsibility"]) > 0
+
+
+def test_45a_roadmap_generation_design_lifecycle_steps(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    for expected in (
+        "evidence_collection",
+        "gap_analysis",
+        "candidate_phase_generation",
+        "dependency_ordering",
+        "risk_assessment",
+        "consensus_review",
+        "human_approval",
+    ):
+        assert expected in lifecycle, f"missing lifecycle step: {expected}"
+
+
+def test_45a_roadmap_generation_design_proposal_model_fields(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["proposal_model"]
+    field_names = [f["field"] for f in model]
+    for expected in (
+        "proposal_id",
+        "generated_at",
+        "evidence_sources",
+        "candidate_phases",
+        "dependencies",
+        "risks",
+        "assumptions",
+        "confidence",
+        "human_decision_required",
+    ):
+        assert expected in field_names, f"missing proposal model field: {expected}"
+    for field in model:
+        assert "field" in field
+        assert "type" in field
+        assert "description" in field
+
+
+def test_45a_roadmap_generation_design_proposal_model_human_decision_required(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["proposal_model"]
+    hdr = next(f for f in model if f["field"] == "human_decision_required")
+    assert hdr["type"] == "bool"
+    assert "always true" in hdr["description"].lower()
+
+
+def test_45a_roadmap_generation_design_governance_rules_may(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "proposal_may" in gov
+    may = " ".join(gov["proposal_may"]).lower()
+    assert "describe candidate phases" in may
+    assert "summarize evidence" in may
+    assert "report confidence" in may
+
+
+def test_45a_roadmap_generation_design_governance_rules_may_not(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "proposal_may_not" in gov
+    may_not = " ".join(gov["proposal_may_not"]).lower()
+    assert "mutate roadmap" in may_not
+    assert "create tasks" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "approve itself" in may_not
+
+
+def test_45a_roadmap_generation_design_governance_human_approval_required(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert gov["human_approval_required"] is True
+    assert gov["advisory"] is True
+
+
+def test_45a_roadmap_generation_design_advisory(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "read-only" in advisory
+    assert "no roadmap proposals are generated or mutated" in advisory
+
+
+def test_45a_roadmap_generation_design_future_evolution(capsys) -> None:
+    main(["roadmap-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "45B" in phases
+    assert "45C" in phases
+    assert "45D" in phases
+    assert "45E" in phases
+
+
+def test_45a_roadmap_generation_design_human_output_shows_all_sections(capsys) -> None:
+    main(["roadmap-generation-design"])
+    output = capsys.readouterr().out
+    assert "Autonomous roadmap generation design" in output
+    assert "Evidence sources" in output
+    assert "PROJECT_STATUS.md" in output
+    assert "governance history" in output
+    assert "Roadmap agent roles" in output
+    assert "repository_analyst" in output
+    assert "planning_coordinator" in output
+    assert "Roadmap generation lifecycle" in output
+    assert "evidence_collection" in output
+    assert "human_approval" in output
+    assert "Roadmap proposal model" in output
+    assert "human_decision_required" in output
+    assert "Governance rules" in output
+    assert "mutate roadmap" in output
+    assert "Future evolution" in output
+    assert "45B" in output
+    assert "Roadmap generation design is read-only" in output
