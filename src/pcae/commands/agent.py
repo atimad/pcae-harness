@@ -44,6 +44,8 @@ from pcae.core.agent import (
     INVOCATION_PILOT_ADVISORY,
     build_multi_runtime_pilot,
     MULTI_RUNTIME_PILOT_ADVISORY,
+    build_consensus_runtime_pilot,
+    CONSENSUS_RUNTIME_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2995,6 +2997,67 @@ def run_multi_runtime_pilot(args: argparse.Namespace) -> int:
         print(f"  Agreement candidates: {cp['agreement_candidates']}")
         print(f"  Conflict candidates:  {cp['conflict_candidates']}")
         print(f"  Note: {cp['note']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Pilot may:     {', '.join(gov['pilot_may'])}")
+        print(f"  Pilot may not: {', '.join(gov['pilot_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_consensus_runtime_pilot(args: argparse.Namespace) -> int:
+    data = build_consensus_runtime_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Consensus runtime pilot")
+        print(f"  Pilot ID: {data['pilot_id']}")
+        print()
+        print("Runtime pilot summary:")
+        rs = data["result_collection"]["runtime_summary"]
+        print(f"  Total runtimes:    {rs['total_runtimes']}")
+        print(f"  Outputs collected: {rs['outputs_collected']}")
+        dist = rs["recommendation_distribution"]
+        for rec, count in dist.items():
+            print(f"  {rec}: {count}")
+        print()
+        print("Collected outputs:")
+        for out in data["runtime_outputs"]:
+            print(f"  {out['runtime_id']}:")
+            print(f"    recommendation:   {out['recommendation']}")
+            print(f"    confidence:       {out['confidence']}")
+            print(f"    rationale:        {out['rationale']}")
+            print(f"    artifact_summary: {out['artifact_summary']}")
+        print()
+        ag = data["agreement_analysis"]
+        print("Agreement analysis:")
+        print(f"  Matching runtimes:       {', '.join(ag['matching_recommendations'])}")
+        print(f"  Matching recommendation: {ag['matching_recommendation']}")
+        for ev in ag["supporting_evidence"]:
+            print(f"  Evidence: {ev}")
+        print()
+        cf = data["conflict_analysis"]
+        print("Conflict analysis:")
+        for conflict in cf["conflicting_recommendations"]:
+            print(f"  {conflict['runtime_id']} recommends {conflict['recommendation']}")
+            print(f"    conflicts with: {conflict['conflicts_with']}")
+        cdiff = cf["confidence_differences"]
+        print(f"  Confidence spread: {cdiff['confidence_spread']}")
+        for gap in cf["missing_evidence"]:
+            print(f"  Missing evidence: {gap}")
+        print()
+        rp = data["recommendation_preview"]
+        print("Recommendation preview:")
+        print(f"  Consensus recommendation: {rp['consensus_recommendation']}")
+        print(f"  Basis:                    {rp['basis']}")
+        print(f"  Human review required:    {'yes' if rp['human_review_required'] else 'no'}")
+        print(f"  Human review reason:      {rp['human_review_reason']}")
         print()
         gov = data["governance_rules"]
         print("Governance:")

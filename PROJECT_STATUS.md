@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44U: Multi-Agent Runtime Pilot.
+Phase 44V: Consensus Runtime Pilot.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,26 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only consensus runtime pilot (Phase 44V): `pcae consensus-runtime-pilot`
+and `pcae consensus-runtime-pilot --json` prototype how simulated multi-runtime outputs
+flow through the consensus system; no runtimes invoked, no prompts submitted; simulated
+outputs for codex-local (approve, 0.85), claude-local (approve, 0.90), kimi-local
+(request_changes, 0.70); result_collection: collected_outputs, output_metadata
+(collection_mode=simulated, writable_allowed=false), runtime_summary
+(total=3, collected=3, approve=2/request_changes=1); agreement_analysis: matching
+recommendations (codex-local, claude-local) for approve, supporting_evidence;
+conflict_analysis: kimi-local conflicts with majority, confidence_spread=0.20,
+missing_evidence; recommendation_preview: consensus_recommendation=approve,
+basis=weighted majority 2 of 3, valid_outcomes (5), human_review_required=true always;
+governance: pilot may collect outputs, analyze agreements/conflicts, generate
+recommendation preview; pilot may not invoke runtimes, submit prompts, modify files,
+commit, push, rollback, or bypass governance; future evolution: 44W Governed Execution
+Dry-Run, 44X Runtime Invocation Validation, 45A Autonomous Roadmap Generation;
+`build_consensus_runtime_pilot` added to `core/agent.py`; `run_consensus_runtime_pilot`
+added to `commands/agent.py`; `consensus-runtime-pilot [--json]` wired in `cli.py`;
+strictly read-only; advisory: "Consensus runtime pilot is simulated; no runtimes are
+invoked."; 14 new tests.
 
 PCAE exposes a read-only multi-runtime pilot (Phase 44U): `pcae multi-runtime-pilot`
 and `pcae multi-runtime-pilot --json` prototype governed orchestration of multiple

@@ -18383,3 +18383,159 @@ def test_44u_multi_runtime_pilot_human_output_shows_sections_and_advisory(capsys
     assert "Consensus preparation" in output
     assert "Governance" in output
     assert "Multi-runtime pilot is read-only" in output
+
+# Phase 44V: Consensus Runtime Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_44v_consensus_runtime_pilot_command_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-runtime-pilot"])
+    assert exit_code == 0
+
+
+def test_44v_consensus_runtime_pilot_json_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-runtime-pilot", "--json"])
+    assert exit_code == 0
+
+
+def test_44v_consensus_runtime_pilot_json_has_required_top_level_keys(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "pilot_id" in data
+    assert "runtime_outputs" in data
+    assert "result_collection" in data
+    assert "agreement_analysis" in data
+    assert "conflict_analysis" in data
+    assert "recommendation_preview" in data
+    assert "governance_rules" in data
+    assert "advisory" in data
+
+
+def test_44v_consensus_runtime_pilot_simulated_outputs_present(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    outputs = data["runtime_outputs"]
+    runtime_ids = [o["runtime_id"] for o in outputs]
+    assert "codex-local" in runtime_ids
+    assert "claude-local" in runtime_ids
+    assert "kimi-local" in runtime_ids
+    assert len(outputs) == 3
+
+
+def test_44v_consensus_runtime_pilot_output_fields(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for out in data["runtime_outputs"]:
+        assert "runtime_id" in out
+        assert "recommendation" in out
+        assert "confidence" in out
+        assert "rationale" in out
+        assert "artifact_summary" in out
+        assert isinstance(out["confidence"], float)
+        assert 0.0 <= out["confidence"] <= 1.0
+
+
+def test_44v_consensus_runtime_pilot_result_collection_fields(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rc = data["result_collection"]
+    assert "collected_outputs" in rc
+    assert "output_metadata" in rc
+    assert "runtime_summary" in rc
+    assert rc["output_metadata"]["collection_mode"] == "simulated"
+    assert rc["output_metadata"]["writable_allowed"] is False
+
+
+def test_44v_consensus_runtime_pilot_agreement_analysis(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ag = data["agreement_analysis"]
+    assert "matching_recommendations" in ag
+    assert "matching_recommendation" in ag
+    assert "supporting_evidence" in ag
+    assert len(ag["matching_recommendations"]) >= 1
+    assert len(ag["supporting_evidence"]) >= 1
+    assert ag["matching_recommendation"] == "approve"
+
+
+def test_44v_consensus_runtime_pilot_conflict_analysis(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cf = data["conflict_analysis"]
+    assert "conflicting_recommendations" in cf
+    assert "confidence_differences" in cf
+    assert "missing_evidence" in cf
+    assert len(cf["conflicting_recommendations"]) >= 1
+    cdiff = cf["confidence_differences"]
+    assert "confidence_spread" in cdiff
+    assert cdiff["confidence_spread"] > 0.0
+
+
+def test_44v_consensus_runtime_pilot_recommendation_preview(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rp = data["recommendation_preview"]
+    assert "consensus_recommendation" in rp
+    assert "basis" in rp
+    assert "valid_outcomes" in rp
+    assert "human_review_required" in rp
+    assert "human_review_reason" in rp
+    assert rp["human_review_required"] is True
+    assert rp["consensus_recommendation"] in rp["valid_outcomes"]
+
+
+def test_44v_consensus_runtime_pilot_valid_outcomes(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    outcomes = data["recommendation_preview"]["valid_outcomes"]
+    for expected in ("approve", "reject", "request_changes", "inconclusive", "escalate_to_human"):
+        assert expected in outcomes
+
+
+def test_44v_consensus_runtime_pilot_governance_rules(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "pilot_may" in gov
+    assert "pilot_may_not" in gov
+    may = " ".join(gov["pilot_may"]).lower()
+    may_not = " ".join(gov["pilot_may_not"]).lower()
+    assert "collect outputs" in may
+    assert "analyze agreements" in may
+    assert "analyze conflicts" in may
+    assert "invoke runtimes" in may_not
+    assert "submit prompts" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44v_consensus_runtime_pilot_advisory_is_correct(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "simulated" in data["advisory"].lower()
+    assert "no runtimes are invoked" in data["advisory"].lower()
+
+
+def test_44v_consensus_runtime_pilot_future_evolution_defined(capsys) -> None:
+    main(["consensus-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44W" in phases
+    assert "44X" in phases
+    assert "45A" in phases
+
+
+def test_44v_consensus_runtime_pilot_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["consensus-runtime-pilot"])
+    output = capsys.readouterr().out
+    assert "Consensus runtime pilot" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Agreement analysis" in output
+    assert "Conflict analysis" in output
+    assert "Recommendation preview" in output
+    assert "Governance" in output
+    assert "Consensus runtime pilot is simulated" in output

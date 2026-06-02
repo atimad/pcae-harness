@@ -9107,3 +9107,159 @@ def build_multi_runtime_pilot() -> dict:
         "advisory": MULTI_RUNTIME_PILOT_ADVISORY,
     }
 
+
+# Phase 44V: Consensus Runtime Pilot
+# ---------------------------------------------------------------------------
+
+CONSENSUS_RUNTIME_PILOT_ADVISORY = (
+    "Consensus runtime pilot is simulated; no runtimes are invoked."
+)
+
+_CRPILOT_PILOT_ID = "pilot-44v-preview"
+
+_CRPILOT_DEFAULT_RUNTIMES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_CRPILOT_SIMULATED_OUTPUTS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "recommendation": "approve",
+        "confidence": 0.85,
+        "rationale": "Code changes are well-structured and follow project conventions.",
+        "artifact_summary": "3 files reviewed, 0 critical issues, 2 minor suggestions.",
+    },
+    {
+        "runtime_id": "claude-local",
+        "recommendation": "approve",
+        "confidence": 0.90,
+        "rationale": "Implementation is correct and documentation is complete.",
+        "artifact_summary": "Architecture review complete; governance docs verified.",
+    },
+    {
+        "runtime_id": "kimi-local",
+        "recommendation": "request_changes",
+        "confidence": 0.70,
+        "rationale": "Edge case in error handling requires attention before approval.",
+        "artifact_summary": "2 potential edge cases identified; test coverage gap detected.",
+    },
+)
+
+_CRPILOT_OUTPUT_METADATA: dict = {
+    "collection_mode": "simulated",
+    "runtime_count": 3,
+    "collection_timestamp": "pilot-44v-simulated",
+    "writable_allowed": False,
+}
+
+_CRPILOT_RUNTIME_SUMMARY: dict = {
+    "total_runtimes": 3,
+    "outputs_collected": 3,
+    "outputs_missing": 0,
+    "recommendation_distribution": {
+        "approve": 2,
+        "request_changes": 1,
+    },
+}
+
+_CRPILOT_AGREEMENT_ANALYSIS: dict = {
+    "matching_recommendations": ["codex-local", "claude-local"],
+    "matching_recommendation": "approve",
+    "compatible_recommendations": ["codex-local", "claude-local"],
+    "supporting_evidence": [
+        "codex-local and claude-local both recommend 'approve'",
+        "Combined confidence of matching agents: 0.875",
+        "No critical issues identified by matching agents",
+    ],
+}
+
+_CRPILOT_CONFLICT_ANALYSIS: dict = {
+    "conflicting_recommendations": [
+        {
+            "runtime_id": "kimi-local",
+            "recommendation": "request_changes",
+            "conflicts_with": "approve (codex-local, claude-local)",
+        }
+    ],
+    "confidence_differences": {
+        "max_confidence": 0.90,
+        "min_confidence": 0.70,
+        "confidence_spread": 0.20,
+    },
+    "missing_evidence": [
+        "kimi-local did not identify specific lines requiring changes"
+    ],
+}
+
+_CRPILOT_VALID_OUTCOMES: tuple[str, ...] = (
+    "approve",
+    "reject",
+    "request_changes",
+    "inconclusive",
+    "escalate_to_human",
+)
+
+_CRPILOT_RECOMMENDATION_PREVIEW: dict = {
+    "consensus_recommendation": "approve",
+    "basis": "weighted majority 2 of 3",
+    "human_review_required": True,
+    "human_review_reason": "conflict detected: kimi-local recommends request_changes",
+}
+
+_CRPILOT_GOVERNANCE_RULES: dict = {
+    "pilot_may": [
+        "collect outputs",
+        "analyze agreements",
+        "analyze conflicts",
+        "generate recommendation preview",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "submit prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_CRPILOT_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44W", "description": "Governed Execution Dry-Run"},
+    {"phase": "44X", "description": "Runtime Invocation Validation"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_consensus_runtime_pilot() -> dict:
+    """Return a read-only consensus runtime pilot with simulated multi-runtime outputs."""
+    runtime_outputs = list(_CRPILOT_SIMULATED_OUTPUTS)
+
+    result_collection = {
+        "collected_outputs": runtime_outputs,
+        "output_metadata": dict(_CRPILOT_OUTPUT_METADATA),
+        "runtime_summary": dict(_CRPILOT_RUNTIME_SUMMARY),
+    }
+
+    recommendation_preview = {
+        "consensus_recommendation": _CRPILOT_RECOMMENDATION_PREVIEW["consensus_recommendation"],
+        "basis": _CRPILOT_RECOMMENDATION_PREVIEW["basis"],
+        "valid_outcomes": list(_CRPILOT_VALID_OUTCOMES),
+        "human_review_required": _CRPILOT_RECOMMENDATION_PREVIEW["human_review_required"],
+        "human_review_reason": _CRPILOT_RECOMMENDATION_PREVIEW["human_review_reason"],
+    }
+
+    return {
+        "pilot_id": _CRPILOT_PILOT_ID,
+        "runtime_outputs": runtime_outputs,
+        "result_collection": result_collection,
+        "agreement_analysis": dict(_CRPILOT_AGREEMENT_ANALYSIS),
+        "conflict_analysis": dict(_CRPILOT_CONFLICT_ANALYSIS),
+        "recommendation_preview": recommendation_preview,
+        "governance_rules": _CRPILOT_GOVERNANCE_RULES,
+        "future_evolution": list(_CRPILOT_FUTURE_EVOLUTION),
+        "advisory": CONSENSUS_RUNTIME_PILOT_ADVISORY,
+    }
+

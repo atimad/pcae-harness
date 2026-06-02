@@ -287,6 +287,11 @@ def render_commands_reference() -> str:
 
 - `pcae multi-runtime-pilot`
 - `pcae multi-runtime-pilot --json`
+
+## consensus-runtime-pilot
+
+- `pcae consensus-runtime-pilot`
+- `pcae consensus-runtime-pilot --json`
 """
 
 
