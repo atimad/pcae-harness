@@ -42,6 +42,8 @@ from pcae.core.agent import (
     CONSENSUS_PROTOTYPE_ADVISORY,
     build_invocation_pilot,
     INVOCATION_PILOT_ADVISORY,
+    build_multi_runtime_pilot,
+    MULTI_RUNTIME_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2936,6 +2938,63 @@ def run_invocation_pilot(args: argparse.Namespace) -> int:
         print(f"Pilot scope ({len(scope)} restrictions):")
         for restriction in scope:
             print(f"  - {restriction}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Pilot may:     {', '.join(gov['pilot_may'])}")
+        print(f"  Pilot may not: {', '.join(gov['pilot_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_multi_runtime_pilot(args: argparse.Namespace) -> int:
+    data = build_multi_runtime_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rs = data["runtime_selection"]
+        plan = data["execution_plan"]
+        print("Multi-runtime pilot")
+        print(f"  Pilot ID:               {plan['pilot_id']}")
+        print(f"  Orchestration strategy: {plan['orchestration_strategy']}")
+        print()
+        runtimes = rs["selected_runtimes"]
+        agents = rs["selected_agents"]
+        caps = rs["capability_summary"]
+        print(f"Selected runtimes ({len(runtimes)}):")
+        for rid in runtimes:
+            print(
+                f"  {rid:<16} agent={agents[rid]:<8} "
+                f"capabilities={', '.join(caps[rid])}"
+            )
+        print()
+        previews = data["invocation_previews"]
+        print("Invocation previews:")
+        for inv in previews:
+            print(f"  {inv['runtime_id']}:")
+            print(f"    adapter:  {inv['adapter_id']}")
+            print(f"    preview:  {inv['invocation_preview']}")
+            print(f"    timeout:  {inv['timeout_seconds']}s")
+            print(f"    writable: {'yes' if inv['writable_allowed'] else 'no'}")
+        print()
+        rcp = data["result_capture_plan"]
+        print("Result capture plan:")
+        print(f"  Expected artifacts:       {', '.join(rcp['expected_artifacts'])}")
+        print(f"  Expected recommendations: {', '.join(rcp['expected_recommendations'])}")
+        print(f"  Expected confidence:      {rcp['expected_confidence']}")
+        print(f"  Expected metadata:        {', '.join(rcp['expected_metadata'])}")
+        print()
+        cp = data["consensus_preparation"]
+        print("Consensus preparation:")
+        print(f"  Consensus inputs:    {', '.join(cp['consensus_inputs'])}")
+        print(f"  Agreement candidates: {cp['agreement_candidates']}")
+        print(f"  Conflict candidates:  {cp['conflict_candidates']}")
+        print(f"  Note: {cp['note']}")
         print()
         gov = data["governance_rules"]
         print("Governance:")

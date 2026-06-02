@@ -18204,3 +18204,182 @@ def test_44t_invocation_pilot_human_output_shows_sections_and_advisory(capsys) -
     assert "Pilot scope" in output
     assert "Governance" in output
     assert "Invocation pilot is a design only" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44U: Multi-Agent Runtime Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_44u_multi_runtime_pilot_command_exits_zero(capsys) -> None:
+    exit_code = main(["multi-runtime-pilot"])
+    assert exit_code == 0
+
+
+def test_44u_multi_runtime_pilot_json_exits_zero(capsys) -> None:
+    exit_code = main(["multi-runtime-pilot", "--json"])
+    assert exit_code == 0
+
+
+def test_44u_multi_runtime_pilot_json_has_required_top_level_keys(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "runtime_selection" in data
+    assert "execution_plan" in data
+    assert "invocation_previews" in data
+    assert "result_capture_plan" in data
+    assert "consensus_preparation" in data
+    assert "governance_rules" in data
+    assert "advisory" in data
+
+
+def test_44u_multi_runtime_pilot_selects_default_runtimes(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["runtime_selection"]
+    selected = rs["selected_runtimes"]
+    assert "codex-local" in selected
+    assert "claude-local" in selected
+    assert "kimi-local" in selected
+    assert len(selected) == 3
+
+
+def test_44u_multi_runtime_pilot_runtime_selection_fields(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["runtime_selection"]
+    assert "selected_runtimes" in rs
+    assert "selected_agents" in rs
+    assert "capability_summary" in rs
+    for rid in rs["selected_runtimes"]:
+        assert rid in rs["selected_agents"]
+        assert rid in rs["capability_summary"]
+        assert len(rs["capability_summary"][rid]) >= 1
+
+
+def test_44u_multi_runtime_pilot_execution_plan_fields(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["execution_plan"]
+    assert "pilot_id" in plan
+    assert "orchestration_strategy" in plan
+    assert "supported_strategies" in plan
+    assert "participating_runtimes" in plan
+    assert "participating_agents" in plan
+    assert "timeout_seconds" in plan
+    assert "writable_allowed" in plan
+
+
+def test_44u_multi_runtime_pilot_execution_plan_defaults(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["execution_plan"]
+    assert plan["orchestration_strategy"] == "parallel_review"
+    assert plan["orchestration_strategy"] in plan["supported_strategies"]
+    assert plan["writable_allowed"] is False
+    assert isinstance(plan["timeout_seconds"], int)
+    assert plan["timeout_seconds"] > 0
+
+
+def test_44u_multi_runtime_pilot_supported_strategies(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    strategies = data["execution_plan"]["supported_strategies"]
+    for strategy in ("sequential", "parallel_review", "parallel_planning", "consensus_preparation"):
+        assert strategy in strategies
+
+
+def test_44u_multi_runtime_pilot_invocation_previews_per_runtime(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    previews = data["invocation_previews"]
+    assert len(previews) == 3
+    for inv in previews:
+        assert "runtime_id" in inv
+        assert "adapter_id" in inv
+        assert "invocation_preview" in inv
+        assert "timeout_seconds" in inv
+        assert "writable_allowed" in inv
+        assert inv["writable_allowed"] is False
+
+
+def test_44u_multi_runtime_pilot_invocation_previews_match_selected(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    selected = set(data["runtime_selection"]["selected_runtimes"])
+    preview_ids = {inv["runtime_id"] for inv in data["invocation_previews"]}
+    assert preview_ids == selected
+
+
+def test_44u_multi_runtime_pilot_result_capture_plan_fields(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rcp = data["result_capture_plan"]
+    assert "expected_artifacts" in rcp
+    assert "expected_recommendations" in rcp
+    assert "expected_confidence" in rcp
+    assert "expected_metadata" in rcp
+    assert len(rcp["expected_artifacts"]) >= 1
+    assert len(rcp["expected_recommendations"]) >= 1
+    assert len(rcp["expected_metadata"]) >= 1
+
+
+def test_44u_multi_runtime_pilot_consensus_preparation(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cp = data["consensus_preparation"]
+    assert "consensus_inputs" in cp
+    assert "agreement_candidates" in cp
+    assert "conflict_candidates" in cp
+    assert len(cp["consensus_inputs"]) >= 1
+    combined = " ".join(cp["consensus_inputs"]).lower()
+    assert "recommendation" in combined
+    assert "confidence" in combined
+
+
+def test_44u_multi_runtime_pilot_governance_rules(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "pilot_may" in gov
+    assert "pilot_may_not" in gov
+    may = " ".join(gov["pilot_may"]).lower()
+    may_not = " ".join(gov["pilot_may_not"]).lower()
+    assert "select runtimes" in may
+    assert "invoke runtimes" in may_not
+    assert "submit prompts" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+    assert "bypass governance" in may_not
+
+
+def test_44u_multi_runtime_pilot_advisory_is_correct(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "read-only" in data["advisory"].lower()
+    assert "no runtimes are invoked" in data["advisory"].lower()
+
+
+def test_44u_multi_runtime_pilot_future_evolution_defined(capsys) -> None:
+    main(["multi-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44V" in phases
+    assert "44W" in phases
+    assert "45A" in phases
+
+
+def test_44u_multi_runtime_pilot_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["multi-runtime-pilot"])
+    output = capsys.readouterr().out
+    assert "Multi-runtime pilot" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Invocation previews" in output
+    assert "Result capture plan" in output
+    assert "Consensus preparation" in output
+    assert "Governance" in output
+    assert "Multi-runtime pilot is read-only" in output

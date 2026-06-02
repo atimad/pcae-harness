@@ -261,3 +261,8 @@
 
 - `pcae invocation-pilot`
 - `pcae invocation-pilot --json`
+
+## multi-runtime-pilot
+
+- `pcae multi-runtime-pilot`
+- `pcae multi-runtime-pilot --json`

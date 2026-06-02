@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44T: Controlled Runtime Invocation Pilot.
+Phase 44U: Multi-Agent Runtime Pilot.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,25 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only multi-runtime pilot (Phase 44U): `pcae multi-runtime-pilot`
+and `pcae multi-runtime-pilot --json` prototype governed orchestration of multiple
+runtime adapters (codex-local, claude-local, kimi-local) without invoking any
+runtimes; runtime_selection: selected_runtimes, selected_agents, capability_summary;
+execution plan: pilot_id (pilot-44u-preview), orchestration_strategy (parallel_review),
+four supported strategies (sequential, parallel_review, parallel_planning,
+consensus_preparation), timeout_seconds (300), writable_allowed (false); invocation
+previews per runtime: runtime_id, adapter_id, preview command, timeout, writable=false;
+result capture plan: expected_artifacts, expected_recommendations, expected_confidence,
+expected_metadata; consensus preparation: consensus_inputs, agreement_candidates,
+conflict_candidates (no consensus execution); governance: pilot may select runtimes,
+create plan, generate previews, prepare consensus; pilot may not invoke runtimes,
+submit prompts, modify files, commit, push, rollback, or bypass governance; future
+evolution: 44V Consensus Runtime Pilot, 44W Governed Execution Dry-Run, 45A
+Autonomous Roadmap Generation; `build_multi_runtime_pilot` added to `core/agent.py`;
+`run_multi_runtime_pilot` added to `commands/agent.py`; `multi-runtime-pilot [--json]`
+wired in `cli.py`; strictly read-only; advisory: "Multi-runtime pilot is read-only;
+no runtimes are invoked."; 16 new tests.
 
 PCAE exposes a read-only controlled runtime invocation pilot design (Phase 44T):
 `pcae invocation-pilot` and `pcae invocation-pilot --json` govern a pilot for

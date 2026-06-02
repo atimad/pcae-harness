@@ -8935,3 +8935,175 @@ def build_invocation_pilot() -> dict:
         "advisory": INVOCATION_PILOT_ADVISORY,
     }
 
+
+# ---------------------------------------------------------------------------
+# Phase 44U: Multi-Agent Runtime Pilot
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_PILOT_ADVISORY = (
+    "Multi-runtime pilot is read-only; no runtimes are invoked."
+)
+
+_MRPILOT_DEFAULT_RUNTIMES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_MRPILOT_RUNTIME_AGENTS: dict[str, str] = {
+    "codex-local": "codex",
+    "claude-local": "claude",
+    "kimi-local": "kimi",
+}
+
+_MRPILOT_RUNTIME_CAPABILITIES: dict[str, list[str]] = {
+    "codex-local": ["code_generation", "test_writing"],
+    "claude-local": ["documentation", "code_analysis"],
+    "kimi-local": ["code_analysis", "research"],
+}
+
+_MRPILOT_RUNTIME_ADAPTERS: dict[str, str] = {
+    "codex-local": "cli_adapter_codex",
+    "claude-local": "cli_adapter_claude",
+    "kimi-local": "cli_adapter_kimi",
+}
+
+_MRPILOT_INVOCATION_PREVIEWS: dict[str, str] = {
+    "codex-local": "codex --non-interactive --output-format json <prompt>",
+    "claude-local": "claude --non-interactive --output-format json <prompt>",
+    "kimi-local": "kimi --non-interactive --output-format json <prompt>",
+}
+
+_MRPILOT_PILOT_ID = "pilot-44u-preview"
+_MRPILOT_DEFAULT_STRATEGY = "parallel_review"
+_MRPILOT_TIMEOUT_SECONDS = 300
+
+_MRPILOT_SUPPORTED_STRATEGIES: tuple[str, ...] = (
+    "sequential",
+    "parallel_review",
+    "parallel_planning",
+    "consensus_preparation",
+)
+
+_MRPILOT_EXPECTED_ARTIFACTS: tuple[str, ...] = (
+    "structured_output",
+    "error_log",
+    "confidence_score",
+)
+
+_MRPILOT_EXPECTED_RECOMMENDATIONS: tuple[str, ...] = (
+    "approve",
+    "request_changes",
+    "inconclusive",
+)
+
+_MRPILOT_EXPECTED_METADATA: tuple[str, ...] = (
+    "runtime_id",
+    "agent_id",
+    "started_at",
+    "completed_at",
+    "duration_seconds",
+)
+
+_MRPILOT_CONSENSUS_INPUTS: tuple[str, ...] = (
+    "per_runtime_recommendation",
+    "per_runtime_confidence",
+    "per_runtime_rationale",
+)
+
+_MRPILOT_PILOT_SCOPE: tuple[str, ...] = (
+    "read_only_only",
+    "no_writable_execution",
+    "no_file_modification",
+    "no_commit",
+    "no_push",
+    "no_rollback",
+    "no_subagent_execution",
+    "no_swarm_execution",
+    "no_consensus_execution",
+)
+
+_MRPILOT_GOVERNANCE_RULES: dict = {
+    "pilot_may": [
+        "select runtimes",
+        "create execution plan",
+        "generate invocation previews",
+        "prepare consensus inputs",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "submit prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_MRPILOT_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44V", "description": "Consensus Runtime Pilot"},
+    {"phase": "44W", "description": "Governed Execution Dry-Run"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_multi_runtime_pilot() -> dict:
+    """Return a read-only multi-runtime pilot preview."""
+    selected_runtimes = list(_MRPILOT_DEFAULT_RUNTIMES)
+    selected_agents = {rid: _MRPILOT_RUNTIME_AGENTS[rid] for rid in selected_runtimes}
+
+    runtime_selection = {
+        "selected_runtimes": selected_runtimes,
+        "selected_agents": selected_agents,
+        "capability_summary": {
+            rid: list(_MRPILOT_RUNTIME_CAPABILITIES[rid]) for rid in selected_runtimes
+        },
+    }
+
+    execution_plan = {
+        "pilot_id": _MRPILOT_PILOT_ID,
+        "orchestration_strategy": _MRPILOT_DEFAULT_STRATEGY,
+        "supported_strategies": list(_MRPILOT_SUPPORTED_STRATEGIES),
+        "participating_runtimes": selected_runtimes,
+        "participating_agents": [selected_agents[rid] for rid in selected_runtimes],
+        "timeout_seconds": _MRPILOT_TIMEOUT_SECONDS,
+        "writable_allowed": False,
+    }
+
+    invocation_previews = [
+        {
+            "runtime_id": rid,
+            "adapter_id": _MRPILOT_RUNTIME_ADAPTERS[rid],
+            "invocation_preview": _MRPILOT_INVOCATION_PREVIEWS[rid],
+            "timeout_seconds": _MRPILOT_TIMEOUT_SECONDS,
+            "writable_allowed": False,
+        }
+        for rid in selected_runtimes
+    ]
+
+    result_capture_plan = {
+        "expected_artifacts": list(_MRPILOT_EXPECTED_ARTIFACTS),
+        "expected_recommendations": list(_MRPILOT_EXPECTED_RECOMMENDATIONS),
+        "expected_confidence": "per_runtime float in [0.0, 1.0]",
+        "expected_metadata": list(_MRPILOT_EXPECTED_METADATA),
+    }
+
+    consensus_preparation = {
+        "consensus_inputs": list(_MRPILOT_CONSENSUS_INPUTS),
+        "agreement_candidates": "runtimes sharing the same recommendation",
+        "conflict_candidates": "runtimes with differing recommendations",
+        "note": "Consensus execution is not performed in this pilot.",
+    }
+
+    return {
+        "runtime_selection": runtime_selection,
+        "execution_plan": execution_plan,
+        "invocation_previews": invocation_previews,
+        "result_capture_plan": result_capture_plan,
+        "consensus_preparation": consensus_preparation,
+        "governance_rules": _MRPILOT_GOVERNANCE_RULES,
+        "future_evolution": list(_MRPILOT_FUTURE_EVOLUTION),
+        "advisory": MULTI_RUNTIME_PILOT_ADVISORY,
+    }
+
