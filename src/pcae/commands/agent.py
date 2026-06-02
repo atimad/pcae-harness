@@ -34,6 +34,8 @@ from pcae.core.agent import (
     CONSENSUS_EXECUTION_DESIGN_ADVISORY,
     build_runtime_execution_prototype,
     RUNTIME_EXECUTION_PROTOTYPE_ADVISORY,
+    build_planner_adapter_prototype,
+    PLANNER_ADAPTER_PROTOTYPE_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2322,6 +2324,48 @@ def run_runtime_execution_prototype(args: argparse.Namespace) -> int:
         print("Future evolution:")
         for entry in data["future_evolution"]:
             print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_planner_adapter_prototype(args: argparse.Namespace) -> int:
+    data = build_planner_adapter_prototype()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        proto = data["planner_adapter_prototype"]
+        print("Planner adapter prototype")
+        print(f"  Planner request ID: {proto['planner_request_id']}")
+        print(f"  Selected runtime:   {proto['selected_runtime']}")
+        print(f"  Selected agent:     {proto['selected_agent']}")
+        print(f"  Capability:         {proto['capability_required']}")
+        print(f"  Execution mode:     {proto['execution_mode']}")
+        print(f"  Timeout (seconds):  {proto['timeout_seconds']}")
+        print()
+        res = data["adapter_resolution"]
+        print("Adapter resolution:")
+        print(f"  Registry lookup:    {res['registry_lookup']}")
+        print(f"  Adapter type:       {res['adapter_type']}")
+        print(f"  Health check:       {res['health_check']}")
+        print(f"  Capability:         {res['capability_verified']}")
+        print(f"  Resolution status:  {res['resolution_status']}")
+        print()
+        inv = data["invocation_preview"]
+        print("Invocation preview:")
+        print(f"  Command: {inv['invocation_command_preview']}")
+        print(f"  Mode:    {inv['execution_mode']}")
+        print(f"  Timeout: {inv['timeout_seconds']}s")
+        print(f"  Result capture fields: {', '.join(inv['result_capture_model'])}")
+        print()
+        print("Safety gates:")
+        for gate in data["safety_gates"]:
+            print(f"  - {gate}")
+        print()
+        blockers = data["blockers"]
+        print(f"Blockers ({len(blockers)}):")
+        for b in blockers:
+            print(f"  - {b}")
         print()
         print(data["advisory"])
     return 0

@@ -241,3 +241,8 @@
 
 - `pcae runtime-execution-prototype`
 - `pcae runtime-execution-prototype --json`
+
+## planner-adapter-prototype
+
+- `pcae planner-adapter-prototype`
+- `pcae planner-adapter-prototype --json`

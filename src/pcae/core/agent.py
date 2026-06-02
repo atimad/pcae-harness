@@ -8346,6 +8346,120 @@ def build_runtime_execution_prototype() -> dict:
     }
 
 
+PLANNER_ADAPTER_PROTOTYPE_ADVISORY = (
+    "Planner adapter prototype is read-only; no planner runtime is invoked."
+)
+
+_PAP_DEFAULT_RUNTIME = "codex-local"
+_PAP_DEFAULT_AGENT = "codex"
+_PAP_CAPABILITY_REQUIRED = "planning"
+_PAP_EXECUTION_MODE = "non_interactive"
+_PAP_TIMEOUT_SECONDS = 300
+
+_PAP_ADAPTER_RESOLUTION: dict = {
+    "registry_lookup": "codex-local",
+    "adapter_type": "cli",
+    "health_check": "adapter health not probed (prototype preview)",
+    "capability_verified": "planning (observed confidence)",
+    "resolution_status": "resolved (prototype only)",
+}
+
+_PAP_INVOCATION_COMMAND_PREVIEW: str = (
+    "codex --non-interactive --output-format json <prompt>"
+)
+
+_PAP_RESULT_CAPTURE_MODEL: tuple[str, ...] = (
+    "planner_request_id",
+    "status",
+    "output",
+    "proposed_phases",
+    "assumptions",
+    "risks",
+    "confidence",
+    "errors",
+    "started_at",
+    "completed_at",
+    "duration_seconds",
+)
+
+_PAP_SAFETY_GATES: tuple[str, ...] = (
+    "runtime_id present",
+    "capability_required present",
+    "planning capability at observed confidence or higher",
+    "adapter resolved and healthy",
+    "read_only mode enforced",
+    "timeout_seconds set",
+)
+
+_PAP_BLOCKERS: tuple[str, ...] = (
+    "codex-local not installed",
+    "planning capability below confidence threshold",
+    "adapter health check failed",
+    "writable execution requested (not allowed in prototype)",
+)
+
+_PAP_PROTOTYPE_SCOPE: tuple[str, ...] = (
+    "single_runtime_only",
+    "read_only_only",
+    "no_writable_execution",
+    "no_file_modification",
+    "no_child_task_persistence",
+    "no_consensus_execution",
+    "no_commit",
+    "no_push",
+)
+
+_PAP_GOVERNANCE_INTEGRATION: dict = {
+    "system_may": [
+        "preview adapter resolution",
+        "preview invocation command",
+        "show safety gates",
+        "show blockers",
+    ],
+    "system_may_not": [
+        "invoke codex-local",
+        "submit prompts",
+        "create jobs",
+        "modify files",
+        "commit",
+        "push",
+        "bypass governance",
+    ],
+}
+
+_PAP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44R", "description": "Multi-Agent Execution Prototype"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_planner_adapter_prototype() -> dict:
+    """Return a read-only planner runtime adapter prototype preview."""
+    return {
+        "planner_adapter_prototype": {
+            "planner_request_id": "proto-44q-preview",
+            "selected_runtime": _PAP_DEFAULT_RUNTIME,
+            "selected_agent": _PAP_DEFAULT_AGENT,
+            "capability_required": _PAP_CAPABILITY_REQUIRED,
+            "execution_mode": _PAP_EXECUTION_MODE,
+            "timeout_seconds": _PAP_TIMEOUT_SECONDS,
+            "prototype_scope": list(_PAP_PROTOTYPE_SCOPE),
+        },
+        "adapter_resolution": _PAP_ADAPTER_RESOLUTION,
+        "invocation_preview": {
+            "invocation_command_preview": _PAP_INVOCATION_COMMAND_PREVIEW,
+            "execution_mode": _PAP_EXECUTION_MODE,
+            "timeout_seconds": _PAP_TIMEOUT_SECONDS,
+            "result_capture_model": list(_PAP_RESULT_CAPTURE_MODEL),
+        },
+        "safety_gates": list(_PAP_SAFETY_GATES),
+        "blockers": list(_PAP_BLOCKERS),
+        "governance_integration": _PAP_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_PAP_FUTURE_EVOLUTION),
+        "advisory": PLANNER_ADAPTER_PROTOTYPE_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

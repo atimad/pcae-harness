@@ -17581,3 +17581,131 @@ def test_44p_runtime_execution_prototype_human_output_shows_sections_and_advisor
     assert "timeout" in output
     assert "adapter_unavailable" in output
     assert "Runtime execution prototype is advisory" in output
+
+
+def test_44q_planner_adapter_prototype_command_exits_zero(capsys) -> None:
+    exit_code = main(["planner-adapter-prototype"])
+    assert exit_code == 0
+
+
+def test_44q_planner_adapter_prototype_json_exits_zero(capsys) -> None:
+    exit_code = main(["planner-adapter-prototype", "--json"])
+    assert exit_code == 0
+
+
+def test_44q_planner_adapter_prototype_json_has_required_top_level_keys(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "planner_adapter_prototype" in data
+    assert "adapter_resolution" in data
+    assert "invocation_preview" in data
+    assert "safety_gates" in data
+    assert "blockers" in data
+    assert "advisory" in data
+
+
+def test_44q_planner_adapter_prototype_selects_codex_local_by_default(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proto = data["planner_adapter_prototype"]
+    assert proto["selected_runtime"] == "codex-local"
+    assert proto["selected_agent"] == "codex"
+    assert proto["capability_required"] == "planning"
+
+
+def test_44q_planner_adapter_prototype_execution_mode_non_interactive(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proto = data["planner_adapter_prototype"]
+    assert proto["execution_mode"] == "non_interactive"
+    assert isinstance(proto["timeout_seconds"], int)
+    assert proto["timeout_seconds"] > 0
+
+
+def test_44q_planner_adapter_prototype_adapter_resolution_fields(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    res = data["adapter_resolution"]
+    assert "codex-local" in res["registry_lookup"]
+    assert res["adapter_type"] == "cli"
+    assert "planning" in res["capability_verified"].lower()
+    assert "resolution_status" in res
+
+
+def test_44q_planner_adapter_prototype_invocation_preview_defined(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inv = data["invocation_preview"]
+    assert "invocation_command_preview" in inv
+    assert "codex" in inv["invocation_command_preview"].lower()
+    assert inv["execution_mode"] == "non_interactive"
+    assert isinstance(inv["timeout_seconds"], int)
+    assert "result_capture_model" in inv
+    for expected in ("planner_request_id", "status", "output", "proposed_phases", "confidence"):
+        assert expected in inv["result_capture_model"]
+
+
+def test_44q_planner_adapter_prototype_safety_gates_defined(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gates = data["safety_gates"]
+    assert len(gates) >= 4
+    combined = " ".join(gates).lower()
+    assert "runtime_id" in combined
+    assert "capability_required" in combined
+    assert "read_only" in combined
+    assert "timeout" in combined
+
+
+def test_44q_planner_adapter_prototype_blockers_defined(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) >= 2
+    combined = " ".join(blockers).lower()
+    assert "codex-local" in combined
+    assert "writable" in combined or "not installed" in combined
+
+
+def test_44q_planner_adapter_prototype_scope_read_only_single_runtime(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    scope = data["planner_adapter_prototype"]["prototype_scope"]
+    assert "read_only_only" in scope
+    assert "single_runtime_only" in scope
+    assert "no_writable_execution" in scope
+    assert "no_commit" in scope
+    assert "no_push" in scope
+    assert "no_consensus_execution" in scope
+
+
+def test_44q_planner_adapter_prototype_no_actual_execution(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    res = data["adapter_resolution"]
+    assert "prototype" in res["resolution_status"].lower()
+    assert "not probed" in res["health_check"].lower()
+
+
+def test_44q_planner_adapter_prototype_future_evolution_defined(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44R" in phases
+    assert "45A" in phases
+
+
+def test_44q_planner_adapter_prototype_advisory_is_correct(capsys) -> None:
+    main(["planner-adapter-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "read-only" in data["advisory"].lower()
+    assert "no planner runtime is invoked" in data["advisory"].lower()
+
+
+def test_44q_planner_adapter_prototype_human_output_shows_summary_and_advisory(capsys) -> None:
+    main(["planner-adapter-prototype"])
+    output = capsys.readouterr().out
+    assert "codex-local" in output
+    assert "non_interactive" in output
+    assert "Safety gates" in output
+    assert "Planner adapter prototype is read-only" in output

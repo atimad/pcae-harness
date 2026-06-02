@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44P: Controlled Runtime Execution Prototype.
+Phase 44Q: Planner Runtime Adapter Prototype.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,46 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only planner runtime adapter prototype preview (Phase 44Q):
+`pcae planner-adapter-prototype` and `pcae planner-adapter-prototype --json`
+prototype a read-only planner adapter path using codex-local as the default
+runtime; planner adapter prototype fields: planner_request_id (proto-44q-preview),
+selected_runtime (codex-local), selected_agent (codex), capability_required
+(planning), execution_mode (non_interactive), timeout_seconds (300); adapter
+resolution: registry_lookup=codex-local, adapter_type=cli, health_check=not
+probed (prototype preview), capability_verified=planning (observed confidence),
+resolution_status=resolved (prototype only); invocation command preview:
+`codex --non-interactive --output-format json <prompt>`; result capture model
+with eleven fields (planner_request_id, status, output, proposed_phases,
+assumptions, risks, confidence, errors, started_at, completed_at,
+duration_seconds); six safety gates: runtime_id present, capability_required
+present, planning capability at observed confidence or higher, adapter resolved
+and healthy, read_only mode enforced, timeout_seconds set; four blockers:
+codex-local not installed, planning capability below confidence threshold,
+adapter health check failed, writable execution requested (not allowed in
+prototype); eight prototype scope restrictions: read_only_only,
+single_runtime_only, no_writable_execution, no_file_modification,
+no_child_task_persistence, no_consensus_execution, no_commit, no_push;
+governance: system may preview adapter resolution, preview invocation command,
+show safety gates and blockers; system may not invoke codex-local, submit
+prompts, create jobs, modify files, commit, push, or bypass governance; future
+evolution: 44R Multi-Agent Execution Prototype, 45A Autonomous Roadmap
+Generation; JSON output includes `planner_adapter_prototype`,
+`adapter_resolution`, `invocation_preview`, `safety_gates`, `blockers`,
+`governance_integration`, `advisory`; `PLANNER_ADAPTER_PROTOTYPE_ADVISORY`,
+`_PAP_DEFAULT_RUNTIME`, `_PAP_DEFAULT_AGENT`, `_PAP_CAPABILITY_REQUIRED`,
+`_PAP_EXECUTION_MODE`, `_PAP_TIMEOUT_SECONDS`, `_PAP_ADAPTER_RESOLUTION`,
+`_PAP_INVOCATION_COMMAND_PREVIEW`, `_PAP_RESULT_CAPTURE_MODEL`,
+`_PAP_SAFETY_GATES`, `_PAP_BLOCKERS`, `_PAP_PROTOTYPE_SCOPE`,
+`_PAP_GOVERNANCE_INTEGRATION`, `_PAP_FUTURE_EVOLUTION`,
+`build_planner_adapter_prototype` added to `core/agent.py`;
+`run_planner_adapter_prototype` added to `commands/agent.py`;
+`planner-adapter-prototype [--json]` wired in `cli.py`;
+`planner-adapter-prototype` section added to `docs/COMMANDS.md`; strictly
+read-only — codex-local is not invoked, no prompts submitted, no jobs created,
+no files modified; advisory: "Planner adapter prototype is read-only; no planner
+runtime is invoked."; 13 new tests.
 
 PCAE exposes a read-only controlled runtime execution prototype design
 (Phase 44P): `pcae runtime-execution-prototype` and
