@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44N: Real Multi-Agent Planning Design.
+Phase 44O: Multi-Agent Consensus Execution Design.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,43 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only multi-agent consensus execution architecture design
+(Phase 44O): `pcae consensus-execution-design` and
+`pcae consensus-execution-design --json` generate a design for how PCAE
+evaluates and aggregates real outputs from multiple agents using the consensus
+framework; eight-stage consensus execution lifecycle: agent_outputs →
+result_collection → agreement_analysis → conflict_analysis → weight_calculation
+→ consensus_evaluation → decision_recommendation → human_review; consensus
+input model with eight fields (consensus_id, execution_id, agent_id, role,
+recommendation, confidence, rationale, artifacts); agreement analysis identifies:
+matching recommendations, compatible recommendations, supporting evidence;
+conflict analysis identifies: conflicting recommendations, incompatible plans,
+missing evidence, confidence discrepancies; weighting model inputs: capability
+confidence, runtime availability, successful execution history, task fit, role
+fit; five recommendation types: approve, reject, request_changes, inconclusive,
+escalate_to_human; human review required when: conflicts exceed threshold,
+confidence below threshold, recommendation inconclusive, governance-sensitive
+action proposed; governance integration: system may evaluate outputs, calculate
+weights, generate recommendations; system may not approve implementation,
+commit, push, rollback, or bypass governance; future evolution: 44P Controlled
+Runtime Execution Prototype, 44Q Planner Runtime Adapter Prototype, 44R
+Multi-Agent Execution Prototype, 45A Autonomous Roadmap Generation; JSON output
+includes `consensus_execution_design`, `execution_lifecycle`,
+`consensus_input_model`, `agreement_analysis`, `conflict_analysis`,
+`weighting_model`, `recommendation_types`, `human_review_requirements`,
+`governance_integration`, `advisory`; `CONSENSUS_EXECUTION_DESIGN_ADVISORY`,
+`_CEXEC_LIFECYCLE`, `_CEXEC_INPUT_FIELDS`, `_CEXEC_AGREEMENT_IDENTIFIES`,
+`_CEXEC_CONFLICT_IDENTIFIES`, `_CEXEC_WEIGHT_INPUTS`,
+`_CEXEC_RECOMMENDATION_TYPES`, `_CEXEC_HUMAN_REVIEW_CONDITIONS`,
+`_CEXEC_GOVERNANCE_INTEGRATION`, `_CEXEC_FUTURE_EVOLUTION`,
+`build_consensus_execution_design` added to `core/agent.py`;
+`run_consensus_execution_design` added to `commands/agent.py`;
+`consensus-execution-design [--json]` wired in `cli.py`;
+`consensus-execution-design` section added to `docs/COMMANDS.md`; strictly
+read-only — no consensus execution, no agent invocation, no file modification;
+advisory: "Consensus execution design is advisory; no consensus execution is
+performed."; 13 new tests.
 
 PCAE exposes a read-only real multi-agent planning architecture design
 (Phase 44N): `pcae real-planning-design` and `pcae real-planning-design --json`

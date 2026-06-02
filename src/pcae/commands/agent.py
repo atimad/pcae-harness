@@ -30,6 +30,8 @@ from pcae.core.agent import (
     build_invocation_design,
     build_real_planning_design,
     REAL_PLANNING_DESIGN_ADVISORY,
+    build_consensus_execution_design,
+    CONSENSUS_EXECUTION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2207,6 +2209,54 @@ def run_real_planning_design(args: argparse.Namespace) -> int:
         for action in review["actions"]:
             print(f"  - {action}")
         print(f"  Human review required: {review['human_review_required']}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  System may: {', '.join(gov['system_may'])}")
+        print(f"  System may not: {', '.join(gov['system_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_consensus_execution_design(args: argparse.Namespace) -> int:
+    data = build_consensus_execution_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent consensus execution design")
+        print()
+        print("Consensus execution lifecycle:")
+        for stage in data["execution_lifecycle"]:
+            print(f"  {stage['stage']}. {stage['name']}: {stage['description']}")
+        print()
+        print("Consensus input model fields:")
+        print(f"  {', '.join(data['consensus_input_model']['fields'])}")
+        print()
+        print("Agreement analysis identifies:")
+        for item in data["agreement_analysis"]["identifies"]:
+            print(f"  - {item}")
+        print()
+        print("Conflict analysis identifies:")
+        for item in data["conflict_analysis"]["identifies"]:
+            print(f"  - {item}")
+        print()
+        print("Weighting model inputs:")
+        for item in data["weighting_model"]["inputs"]:
+            print(f"  - {item}")
+        print()
+        print("Recommendation types:")
+        for rec in data["recommendation_types"]:
+            print(f"  {rec['type']}: {rec['description']}")
+        print()
+        review = data["human_review_requirements"]
+        print("Human review required when:")
+        for condition in review["human_required_when"]:
+            print(f"  - {condition}")
         print()
         gov = data["governance_integration"]
         print("Governance integration:")

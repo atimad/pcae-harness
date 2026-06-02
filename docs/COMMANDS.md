@@ -231,3 +231,8 @@
 
 - `pcae real-planning-design`
 - `pcae real-planning-design --json`
+
+## consensus-execution-design
+
+- `pcae consensus-execution-design`
+- `pcae consensus-execution-design --json`

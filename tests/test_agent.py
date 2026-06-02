@@ -17251,3 +17251,163 @@ def test_44n_real_planning_design_human_output_shows_lifecycle_and_advisory(caps
     assert "human_review" in output
     assert "approved_roadmap" in output
     assert "Real planning design is advisory" in output
+
+
+def test_44o_consensus_execution_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-execution-design"])
+    assert exit_code == 0
+
+
+def test_44o_consensus_execution_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-execution-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44o_consensus_execution_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "consensus_execution_design" in data
+    assert "execution_lifecycle" in data
+    assert "consensus_input_model" in data
+    assert "agreement_analysis" in data
+    assert "conflict_analysis" in data
+    assert "weighting_model" in data
+    assert "recommendation_types" in data
+    assert "human_review_requirements" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44o_consensus_execution_design_lifecycle_has_eight_stages(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["execution_lifecycle"]
+    assert len(lifecycle) == 8
+    for stage in lifecycle:
+        assert "stage" in stage
+        assert "name" in stage
+        assert "description" in stage
+        assert isinstance(stage["stage"], int)
+    names = [s["name"] for s in lifecycle]
+    assert "agent_outputs" in names
+    assert "agreement_analysis" in names
+    assert "conflict_analysis" in names
+    assert "consensus_evaluation" in names
+    assert "decision_recommendation" in names
+    assert "human_review" in names
+
+
+def test_44o_consensus_execution_design_input_model_fields(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["consensus_input_model"]["fields"]
+    for expected in (
+        "consensus_id",
+        "execution_id",
+        "agent_id",
+        "role",
+        "recommendation",
+        "confidence",
+        "rationale",
+        "artifacts",
+    ):
+        assert expected in fields
+
+
+def test_44o_consensus_execution_design_agreement_analysis_defined(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    identifies = data["agreement_analysis"]["identifies"]
+    assert len(identifies) == 3
+    combined = " ".join(identifies).lower()
+    assert "matching recommendations" in combined
+    assert "compatible recommendations" in combined
+    assert "supporting evidence" in combined
+
+
+def test_44o_consensus_execution_design_conflict_analysis_defined(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    identifies = data["conflict_analysis"]["identifies"]
+    assert len(identifies) == 4
+    combined = " ".join(identifies).lower()
+    assert "conflicting recommendations" in combined
+    assert "incompatible plans" in combined
+    assert "missing evidence" in combined
+    assert "confidence discrepancies" in combined
+
+
+def test_44o_consensus_execution_design_weighting_model_inputs(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inputs = data["weighting_model"]["inputs"]
+    assert len(inputs) == 5
+    combined = " ".join(inputs).lower()
+    assert "capability confidence" in combined
+    assert "runtime availability" in combined
+    assert "successful execution history" in combined
+    assert "task fit" in combined
+    assert "role fit" in combined
+
+
+def test_44o_consensus_execution_design_recommendation_types_defined(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    types = data["recommendation_types"]
+    assert len(types) == 5
+    type_names = [r["type"] for r in types]
+    for expected in ("approve", "reject", "request_changes", "inconclusive", "escalate_to_human"):
+        assert expected in type_names
+    for rec in types:
+        assert "description" in rec
+
+
+def test_44o_consensus_execution_design_human_review_requirements(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    conditions = data["human_review_requirements"]["human_required_when"]
+    assert len(conditions) == 4
+    combined = " ".join(conditions).lower()
+    assert "conflicts exceed threshold" in combined
+    assert "confidence below threshold" in combined
+    assert "recommendation inconclusive" in combined
+    assert "governance-sensitive" in combined
+
+
+def test_44o_consensus_execution_design_governance_may_and_may_not(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "evaluate outputs" in gov["system_may"]
+    assert "calculate weights" in gov["system_may"]
+    assert "generate recommendations" in gov["system_may"]
+    for prohibited in ("approve implementation", "commit", "push", "rollback", "bypass governance"):
+        assert prohibited in gov["system_may_not"]
+
+
+def test_44o_consensus_execution_design_future_evolution_defined(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44P" in phases
+    assert "44Q" in phases
+    assert "44R" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44o_consensus_execution_design_advisory_is_correct(capsys) -> None:
+    main(["consensus-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no consensus execution is performed" in data["advisory"].lower()
+
+
+def test_44o_consensus_execution_design_human_output_shows_lifecycle_and_advisory(capsys) -> None:
+    main(["consensus-execution-design"])
+    output = capsys.readouterr().out
+    assert "agent_outputs" in output
+    assert "human_review" in output
+    assert "decision_recommendation" in output
+    assert "Consensus execution design is advisory" in output

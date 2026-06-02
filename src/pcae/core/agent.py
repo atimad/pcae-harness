@@ -8019,6 +8019,188 @@ def build_real_planning_design() -> dict:
     }
 
 
+CONSENSUS_EXECUTION_DESIGN_ADVISORY = (
+    "Consensus execution design is advisory; no consensus execution is performed."
+)
+
+_CEXEC_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "stage": 1,
+        "name": "agent_outputs",
+        "description": "Agent execution results are received as raw outputs.",
+    },
+    {
+        "stage": 2,
+        "name": "result_collection",
+        "description": (
+            "Outputs are normalized into structured consensus input records "
+            "with identity, role, and confidence metadata."
+        ),
+    },
+    {
+        "stage": 3,
+        "name": "agreement_analysis",
+        "description": (
+            "Matching and compatible recommendations are identified across agents; "
+            "supporting evidence is aggregated."
+        ),
+    },
+    {
+        "stage": 4,
+        "name": "conflict_analysis",
+        "description": (
+            "Conflicting recommendations, incompatible plans, missing evidence, "
+            "and confidence discrepancies are surfaced."
+        ),
+    },
+    {
+        "stage": 5,
+        "name": "weight_calculation",
+        "description": (
+            "Per-agent weights are calculated from capability confidence, "
+            "availability, execution history, task fit, and role fit."
+        ),
+    },
+    {
+        "stage": 6,
+        "name": "consensus_evaluation",
+        "description": (
+            "Weighted agreement and conflict scores are evaluated against "
+            "configured consensus policy thresholds."
+        ),
+    },
+    {
+        "stage": 7,
+        "name": "decision_recommendation",
+        "description": (
+            "A governance-level recommendation is generated: approve, reject, "
+            "request_changes, inconclusive, or escalate_to_human."
+        ),
+    },
+    {
+        "stage": 8,
+        "name": "human_review",
+        "description": (
+            "Human reviewer evaluates the recommendation before any governance "
+            "action is taken."
+        ),
+    },
+)
+
+_CEXEC_INPUT_FIELDS: tuple[str, ...] = (
+    "consensus_id",
+    "execution_id",
+    "agent_id",
+    "role",
+    "recommendation",
+    "confidence",
+    "rationale",
+    "artifacts",
+)
+
+_CEXEC_AGREEMENT_IDENTIFIES: tuple[str, ...] = (
+    "matching recommendations",
+    "compatible recommendations",
+    "supporting evidence",
+)
+
+_CEXEC_CONFLICT_IDENTIFIES: tuple[str, ...] = (
+    "conflicting recommendations",
+    "incompatible plans",
+    "missing evidence",
+    "confidence discrepancies",
+)
+
+_CEXEC_WEIGHT_INPUTS: tuple[str, ...] = (
+    "capability confidence",
+    "runtime availability",
+    "successful execution history",
+    "task fit",
+    "role fit",
+)
+
+_CEXEC_RECOMMENDATION_TYPES: tuple[dict, ...] = (
+    {
+        "type": "approve",
+        "description": "Strong agreement across agents; confidence above threshold.",
+    },
+    {
+        "type": "reject",
+        "description": "Dominant agreement that proposed action should not proceed.",
+    },
+    {
+        "type": "request_changes",
+        "description": "Partial agreement with identified conflicts requiring resolution.",
+    },
+    {
+        "type": "inconclusive",
+        "description": "Insufficient agreement or confidence to produce a clear recommendation.",
+    },
+    {
+        "type": "escalate_to_human",
+        "description": "Governance-sensitive action or unresolvable conflict requires human decision.",
+    },
+)
+
+_CEXEC_HUMAN_REVIEW_CONDITIONS: tuple[str, ...] = (
+    "conflicts exceed threshold",
+    "confidence below threshold",
+    "recommendation inconclusive",
+    "governance-sensitive action proposed",
+)
+
+_CEXEC_GOVERNANCE_INTEGRATION: dict = {
+    "system_may": [
+        "evaluate outputs",
+        "calculate weights",
+        "generate recommendations",
+    ],
+    "system_may_not": [
+        "approve implementation",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_CEXEC_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44P", "description": "Controlled Runtime Execution Prototype"},
+    {"phase": "44Q", "description": "Planner Runtime Adapter Prototype"},
+    {"phase": "44R", "description": "Multi-Agent Execution Prototype"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_consensus_execution_design() -> dict:
+    """Return a read-only multi-agent consensus execution architecture design."""
+    return {
+        "consensus_execution_design": {
+            "execution_lifecycle": list(_CEXEC_LIFECYCLE),
+        },
+        "execution_lifecycle": list(_CEXEC_LIFECYCLE),
+        "consensus_input_model": {
+            "fields": list(_CEXEC_INPUT_FIELDS),
+        },
+        "agreement_analysis": {
+            "identifies": list(_CEXEC_AGREEMENT_IDENTIFIES),
+        },
+        "conflict_analysis": {
+            "identifies": list(_CEXEC_CONFLICT_IDENTIFIES),
+        },
+        "weighting_model": {
+            "inputs": list(_CEXEC_WEIGHT_INPUTS),
+        },
+        "recommendation_types": list(_CEXEC_RECOMMENDATION_TYPES),
+        "human_review_requirements": {
+            "human_required_when": list(_CEXEC_HUMAN_REVIEW_CONDITIONS),
+        },
+        "governance_integration": _CEXEC_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_CEXEC_FUTURE_EVOLUTION),
+        "advisory": CONSENSUS_EXECUTION_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 
