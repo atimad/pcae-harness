@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44J: Multi-Agent Planning Execution Design.
+Phase 44K: Agent Execution Framework Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,44 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only agent execution framework architecture design
+(Phase 44K): `pcae execution-framework-design` and
+`pcae execution-framework-design --json` generate a design for PCAE's
+runtime-neutral agent execution framework; nine-stage execution lifecycle:
+request → capability_lookup → agent_selection → execution_request_creation →
+runtime_adapter → agent_execution → result_capture → consensus → governance;
+execution request model with nine fields (execution_id, parent_task_id,
+objective, assigned_agent, required_capabilities, execution_mode,
+writable_allowed, timeout_seconds, metadata); runtime adapter contract with
+seven fields (runtime_id, availability, version, capabilities,
+supports_writable_execution, supports_subagents, supports_parallel_execution)
+and five required operations (health(), discover_capabilities(), execute(),
+cancel(), collect_results()); supported runtimes: codex-local, claude-local,
+kimi-local; future runtimes: deepseek-local, gemini-local, grok-local,
+perplexity-local, cloud runtimes; result model with nine fields (execution_id,
+agent_id, status, started_at, completed_at, artifacts, recommendations,
+confidence, errors); governance integration: framework may invoke runtimes and
+collect results; framework may not approve, commit, push, or rollback; all
+governance operations remain external; failure model covers six types
+(unavailable_runtime, timeout, execution_failure, partial_result, cancelled,
+capability_mismatch) with human escalation as default; future evolution: 44L
+Runtime Adapter Integration, 44M Controlled Agent Invocation, 44N Real
+Multi-Agent Planning, 45A Autonomous Roadmap Generation; JSON output includes
+`execution_framework_design`, `execution_lifecycle`, `runtime_adapter_contract`,
+`execution_request_model`, `result_model`, `governance_integration`,
+`failure_model`, `future_evolution`, `advisory`;
+`EXECUTION_FRAMEWORK_DESIGN_ADVISORY`, `_EXECUTION_FRAMEWORK_LIFECYCLE`,
+`_EXECUTION_REQUEST_FIELDS`, `_ADAPTER_CONTRACT_FIELDS`,
+`_ADAPTER_REQUIRED_OPERATIONS`, `_EXECUTION_SUPPORTED_RUNTIMES`,
+`_EXECUTION_FUTURE_RUNTIMES`, `_EXECUTION_RESULT_FIELDS`,
+`_EXECUTION_GOVERNANCE_INTEGRATION`, `_EXECUTION_FAILURE_TYPES`,
+`_EXECUTION_FRAMEWORK_FUTURE_EVOLUTION`, `build_execution_framework_design`
+added to `core/agent.py`; `run_execution_framework_design` added to
+`commands/agent.py`; `execution-framework-design [--json]` wired in `cli.py`;
+strictly read-only — no agent execution, no adapter implementation, no file
+modification; advisory: "Execution framework design is advisory; no agent
+execution is performed."; 14 new tests.
 
 PCAE exposes a read-only multi-agent planning execution architecture design
 (Phase 44J): `pcae planning-execution-design` and

@@ -7338,6 +7338,195 @@ def build_planning_execution_design() -> dict:
     }
 
 
+EXECUTION_FRAMEWORK_DESIGN_ADVISORY = (
+    "Execution framework design is advisory; no agent execution is performed."
+)
+
+_EXECUTION_FRAMEWORK_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "stage": 1,
+        "name": "request",
+        "description": (
+            "Coordinator receives an execution request with objective and required capabilities."
+        ),
+    },
+    {
+        "stage": 2,
+        "name": "capability_lookup",
+        "description": (
+            "Capability registry is queried to identify agents matching required capabilities."
+        ),
+    },
+    {
+        "stage": 3,
+        "name": "agent_selection",
+        "description": (
+            "Eligible agents are selected based on capability match, confidence level, "
+            "and lifecycle status."
+        ),
+    },
+    {
+        "stage": 4,
+        "name": "execution_request_creation",
+        "description": (
+            "Coordinator creates a structured execution request for each selected agent."
+        ),
+    },
+    {
+        "stage": 5,
+        "name": "runtime_adapter",
+        "description": (
+            "Execution request is dispatched to the appropriate runtime adapter "
+            "for the assigned agent."
+        ),
+    },
+    {
+        "stage": 6,
+        "name": "agent_execution",
+        "description": (
+            "Runtime adapter invokes the agent; agent executes and produces output artifacts."
+        ),
+    },
+    {
+        "stage": 7,
+        "name": "result_capture",
+        "description": (
+            "Runtime adapter captures agent output, errors, and execution metadata."
+        ),
+    },
+    {
+        "stage": 8,
+        "name": "consensus",
+        "description": (
+            "Collected results are fed into the consensus engine for agreement "
+            "and conflict analysis."
+        ),
+    },
+    {
+        "stage": 9,
+        "name": "governance",
+        "description": (
+            "Consensus output is handed off to governance for approval, commit, "
+            "push, and rollback decisions."
+        ),
+    },
+)
+
+_EXECUTION_REQUEST_FIELDS: tuple[str, ...] = (
+    "execution_id",
+    "parent_task_id",
+    "objective",
+    "assigned_agent",
+    "required_capabilities",
+    "execution_mode",
+    "writable_allowed",
+    "timeout_seconds",
+    "metadata",
+)
+
+_ADAPTER_CONTRACT_FIELDS: tuple[str, ...] = (
+    "runtime_id",
+    "availability",
+    "version",
+    "capabilities",
+    "supports_writable_execution",
+    "supports_subagents",
+    "supports_parallel_execution",
+)
+
+_ADAPTER_REQUIRED_OPERATIONS: tuple[str, ...] = (
+    "health()",
+    "discover_capabilities()",
+    "execute()",
+    "cancel()",
+    "collect_results()",
+)
+
+_EXECUTION_SUPPORTED_RUNTIMES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_EXECUTION_FUTURE_RUNTIMES: tuple[str, ...] = (
+    "deepseek-local",
+    "gemini-local",
+    "grok-local",
+    "perplexity-local",
+    "cloud runtimes",
+)
+
+_EXECUTION_RESULT_FIELDS: tuple[str, ...] = (
+    "execution_id",
+    "agent_id",
+    "status",
+    "started_at",
+    "completed_at",
+    "artifacts",
+    "recommendations",
+    "confidence",
+    "errors",
+)
+
+_EXECUTION_GOVERNANCE_INTEGRATION: dict = {
+    "framework_may": [
+        "invoke runtimes",
+        "collect results",
+    ],
+    "framework_may_not": [
+        "approve",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "note": "All governance operations remain external to the execution framework.",
+}
+
+_EXECUTION_FAILURE_TYPES: tuple[str, ...] = (
+    "unavailable_runtime",
+    "timeout",
+    "execution_failure",
+    "partial_result",
+    "cancelled",
+    "capability_mismatch",
+)
+
+_EXECUTION_FRAMEWORK_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44L", "description": "Runtime Adapter Integration"},
+    {"phase": "44M", "description": "Controlled Agent Invocation"},
+    {"phase": "44N", "description": "Real Multi-Agent Planning"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_execution_framework_design() -> dict:
+    """Return a read-only agent execution framework architecture design."""
+    return {
+        "execution_framework_design": {
+            "supported_runtimes": list(_EXECUTION_SUPPORTED_RUNTIMES),
+            "future_runtimes": list(_EXECUTION_FUTURE_RUNTIMES),
+        },
+        "execution_lifecycle": list(_EXECUTION_FRAMEWORK_LIFECYCLE),
+        "runtime_adapter_contract": {
+            "fields": list(_ADAPTER_CONTRACT_FIELDS),
+            "required_operations": list(_ADAPTER_REQUIRED_OPERATIONS),
+        },
+        "execution_request_model": {
+            "fields": list(_EXECUTION_REQUEST_FIELDS),
+        },
+        "result_model": {
+            "fields": list(_EXECUTION_RESULT_FIELDS),
+        },
+        "governance_integration": _EXECUTION_GOVERNANCE_INTEGRATION,
+        "failure_model": {
+            "failure_types": list(_EXECUTION_FAILURE_TYPES),
+            "escalation": "human escalation is default",
+        },
+        "future_evolution": list(_EXECUTION_FRAMEWORK_FUTURE_EVOLUTION),
+        "advisory": EXECUTION_FRAMEWORK_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

@@ -232,6 +232,11 @@ def render_commands_reference() -> str:
 
 - `pcae planning-execution-design`
 - `pcae planning-execution-design --json`
+
+## execution-framework-design
+
+- `pcae execution-framework-design`
+- `pcae execution-framework-design --json`
 """
 
 

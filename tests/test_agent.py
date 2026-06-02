@@ -16615,3 +16615,168 @@ def test_44j_planning_execution_design_human_output_shows_lifecycle_and_advisory
     assert "approved_roadmap" in output
     assert "human_approval_required_before" in output or "Human approval required before" in output
     assert "Planning execution design is advisory" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44K — Agent Execution Framework Design
+# ---------------------------------------------------------------------------
+
+
+def test_44k_execution_framework_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["execution-framework-design"])
+    assert exit_code == 0
+
+
+def test_44k_execution_framework_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["execution-framework-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44k_execution_framework_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "execution_framework_design" in data
+    assert "execution_lifecycle" in data
+    assert "runtime_adapter_contract" in data
+    assert "execution_request_model" in data
+    assert "result_model" in data
+    assert "governance_integration" in data
+    assert "failure_model" in data
+    assert "advisory" in data
+
+
+def test_44k_execution_framework_design_lifecycle_has_nine_stages(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["execution_lifecycle"]) == 9
+
+
+def test_44k_execution_framework_design_lifecycle_stages_have_required_fields(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for stage in data["execution_lifecycle"]:
+        assert "stage" in stage
+        assert "name" in stage
+        assert "description" in stage
+        assert isinstance(stage["stage"], int)
+    names = [s["name"] for s in data["execution_lifecycle"]]
+    assert "request" in names
+    assert "governance" in names
+
+
+def test_44k_execution_framework_design_adapter_contract_fields_defined(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["runtime_adapter_contract"]["fields"]
+    for expected in (
+        "runtime_id",
+        "availability",
+        "version",
+        "capabilities",
+        "supports_writable_execution",
+        "supports_subagents",
+        "supports_parallel_execution",
+    ):
+        assert expected in fields
+
+
+def test_44k_execution_framework_design_adapter_required_operations_defined(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ops = data["runtime_adapter_contract"]["required_operations"]
+    assert len(ops) == 5
+    combined = " ".join(ops)
+    assert "health" in combined
+    assert "execute" in combined
+    assert "cancel" in combined
+    assert "collect_results" in combined
+
+
+def test_44k_execution_framework_design_execution_request_model_has_required_fields(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["execution_request_model"]["fields"]
+    for expected in (
+        "execution_id",
+        "parent_task_id",
+        "objective",
+        "assigned_agent",
+        "required_capabilities",
+        "execution_mode",
+        "writable_allowed",
+        "timeout_seconds",
+        "metadata",
+    ):
+        assert expected in fields
+
+
+def test_44k_execution_framework_design_result_model_has_required_fields(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["result_model"]["fields"]
+    for expected in (
+        "execution_id",
+        "agent_id",
+        "status",
+        "started_at",
+        "completed_at",
+        "artifacts",
+        "recommendations",
+        "confidence",
+        "errors",
+    ):
+        assert expected in fields
+
+
+def test_44k_execution_framework_design_governance_may_and_may_not(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "invoke runtimes" in gov["framework_may"]
+    assert "collect results" in gov["framework_may"]
+    for prohibited in ("approve", "commit", "push", "rollback"):
+        assert prohibited in gov["framework_may_not"]
+    assert "note" in gov
+
+
+def test_44k_execution_framework_design_failure_model_has_required_types(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fm = data["failure_model"]
+    for expected in (
+        "unavailable_runtime",
+        "timeout",
+        "execution_failure",
+        "partial_result",
+        "cancelled",
+        "capability_mismatch",
+    ):
+        assert expected in fm["failure_types"]
+    assert "human" in fm["escalation"].lower()
+
+
+def test_44k_execution_framework_design_future_evolution_defined(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44L" in phases
+    assert "44M" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44k_execution_framework_design_advisory_is_correct(capsys) -> None:
+    main(["execution-framework-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no agent execution is performed" in data["advisory"].lower()
+
+
+def test_44k_execution_framework_design_human_output_shows_lifecycle_and_advisory(capsys) -> None:
+    main(["execution-framework-design"])
+    output = capsys.readouterr().out
+    assert "request" in output
+    assert "governance" in output
+    assert "framework_may" in output or "Framework may" in output
+    assert "Execution framework design is advisory" in output

@@ -25,6 +25,7 @@ from pcae.core.agent import (
     build_orchestration_design,
     build_parallel_execution_design,
     build_planning_dry_run,
+    build_execution_framework_design,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2113,6 +2114,57 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_framework_design(args: argparse.Namespace) -> int:
+    data = build_execution_framework_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        fwd = data["execution_framework_design"]
+        print("Agent execution framework design")
+        print()
+        print("Supported runtimes:")
+        for rt in fwd["supported_runtimes"]:
+            print(f"  - {rt}")
+        print("Future runtimes:")
+        for rt in fwd["future_runtimes"]:
+            print(f"  - {rt}")
+        print()
+        print("Execution lifecycle:")
+        for stage in data["execution_lifecycle"]:
+            print(f"  {stage['stage']}. {stage['name']}: {stage['description']}")
+        print()
+        contract = data["runtime_adapter_contract"]
+        print("Runtime adapter contract fields:")
+        print(f"  {', '.join(contract['fields'])}")
+        print("Required operations:")
+        for op in contract["required_operations"]:
+            print(f"  - {op}")
+        print()
+        print("Execution request model fields:")
+        print(f"  {', '.join(data['execution_request_model']['fields'])}")
+        print()
+        print("Result model fields:")
+        print(f"  {', '.join(data['result_model']['fields'])}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  Framework may: {', '.join(gov['framework_may'])}")
+        print(f"  Framework may not: {', '.join(gov['framework_may_not'])}")
+        print(f"  Note: {gov['note']}")
+        print()
+        fm = data["failure_model"]
+        print("Failure model:")
+        print(f"  Types: {', '.join(fm['failure_types'])}")
+        print(f"  Escalation: {fm['escalation']}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0
