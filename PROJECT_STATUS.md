@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45C: Roadmap Proposal Dry-Run.
+Phase 45D: Multi-Agent Roadmap Proposal.
 
 ## Governance Coherence Note
 
@@ -977,6 +977,26 @@ unavailable/unknown), probe_mode=on-demand; capability_synchronization: capabili
 of truth; governance: registry may discover/resolve/report; may not invoke runtimes, approve, commit,
 push, or rollback; future evolution: 45A/45B/45C; strictly design-only; advisory: "Adapter registry
 design is read-only; no adapters are implemented or invoked."; 12 new tests.
+
+PCAE generates a simulated multi-agent roadmap proposal (Phase 45D):
+`pcae multi-agent-roadmap` and `pcae multi-agent-roadmap --json` consume the Phase 45C
+dry-run and produce a read-only multi-agent proposal; 3 simulated agent perspectives:
+codex-local (recommendation=approve, confidence=0.82, 5 phases: candidate-001/002/003/45D/
+45E, defers 45F/45G), claude-local (recommendation=approve, confidence=0.88, all 7 phases,
+comprehensive view), kimi-local (recommendation=request_changes, confidence=0.71, 5 phases:
+candidate-002/003/45D/45E/45F, skips candidate-001 citing execution risk); each proposal
+has agent_id, proposal_id, recommendation, confidence, rationale, candidate_phases, risks;
+proposal_comparison: shared_recommendations (candidate-002/003/45D/45E), unique_recommendations
+(claude-local: 45G), conflicting_recommendations (candidate-001: codex/claude vs kimi; 45F:
+claude/kimi vs codex); consensus_analysis: 4 agreements, 2 conflicts, confidence_differences
+(spread=0.17), recommendation_distribution (approve=2, request_changes=1);
+consensus_recommendation: outcome=approve, basis=weighted majority 2/3, recommended_phases=
+shared only, consensus_confidence=0.80, human_review_required=true, conflict_phases=
+[candidate-001, 45F]; human_review: always required, review_reason, conflict_phases,
+reviewable_outcome/phases; governance: proposal_system_may compare/analyze/recommend; may not
+create phases, mutate roadmap, create tasks, execute work, commit, push; future_evolution:
+45E/45F/45G/45H/45I; mock data only, no runtimes invoked; advisory: "Multi-agent roadmap
+proposal is simulated; no agents are executed."; 15 new tests.
 
 PCAE generates a simulated roadmap proposal from collected evidence (Phase 45C):
 `pcae roadmap-proposal-dry-run` and `pcae roadmap-proposal-dry-run --json` produce a

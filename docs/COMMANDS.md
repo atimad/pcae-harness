@@ -306,3 +306,8 @@
 
 - `pcae roadmap-proposal-dry-run`
 - `pcae roadmap-proposal-dry-run --json`
+
+## multi-agent-roadmap
+
+- `pcae multi-agent-roadmap`
+- `pcae multi-agent-roadmap --json`

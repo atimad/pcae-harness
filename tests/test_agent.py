@@ -19802,3 +19802,199 @@ def test_45c_roadmap_proposal_dry_run_human_output_shows_all_sections(capsys) ->
     assert "Overall confidence" in output
     assert "Human review required" in output
     assert "Roadmap proposal dry-run is advisory" in output
+
+
+# Phase 45D: Multi-Agent Roadmap Proposal
+# ---------------------------------------------------------------------------
+
+
+def test_45d_multi_agent_roadmap_command_exits_zero(capsys) -> None:
+    exit_code = main(["multi-agent-roadmap"])
+    assert exit_code == 0
+
+
+def test_45d_multi_agent_roadmap_json_exits_zero(capsys) -> None:
+    exit_code = main(["multi-agent-roadmap", "--json"])
+    assert exit_code == 0
+
+
+def test_45d_multi_agent_roadmap_json_has_required_top_level_keys(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "proposal_id",
+        "generated_at",
+        "dry_run_proposal_id",
+        "evidence_package_id",
+        "agent_proposals",
+        "proposal_comparison",
+        "consensus_analysis",
+        "consensus_recommendation",
+        "human_review",
+        "governance_rules",
+        "future_evolution",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45d_multi_agent_roadmap_proposal_id_starts_with_marp(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["proposal_id"].startswith("marp-")
+    assert data["dry_run_proposal_id"].startswith("rdp-")
+    assert data["evidence_package_id"].startswith("rev-")
+
+
+def test_45d_multi_agent_roadmap_three_agent_proposals(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proposals = data["agent_proposals"]
+    assert len(proposals) == 3
+    agent_ids = [p["agent_id"] for p in proposals]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+
+
+def test_45d_multi_agent_roadmap_agent_proposal_fields(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for prop in data["agent_proposals"]:
+        assert "agent_id" in prop
+        assert "proposal_id" in prop
+        assert "candidate_phases" in prop
+        assert "rationale" in prop
+        assert "risks" in prop
+        assert "recommendation" in prop
+        assert "confidence" in prop
+        assert prop["recommendation"] in ("approve", "request_changes", "inconclusive", "escalate_to_human")
+        assert 0.0 <= prop["confidence"] <= 1.0
+        assert len(prop["candidate_phases"]) > 0
+        for phase in prop["candidate_phases"]:
+            assert "phase_id" in phase
+            assert "title" in phase
+            assert "confidence" in phase
+
+
+def test_45d_multi_agent_roadmap_kimi_recommends_request_changes(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(p for p in data["agent_proposals"] if p["agent_id"] == "kimi-local")
+    assert kimi["recommendation"] == "request_changes"
+
+
+def test_45d_multi_agent_roadmap_proposal_comparison(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cmp = data["proposal_comparison"]
+    assert "shared_recommendations" in cmp
+    assert "unique_recommendations" in cmp
+    assert "conflicting_recommendations" in cmp
+    shared = cmp["shared_recommendations"]
+    assert len(shared) >= 2
+    for phase_id in ("candidate-002", "candidate-003", "45D", "45E"):
+        assert phase_id in shared, f"expected {phase_id} in shared_recommendations"
+    assert len(cmp["conflicting_recommendations"]) > 0
+    for conflict in cmp["conflicting_recommendations"]:
+        assert "phase_id" in conflict
+        assert "recommended_by" in conflict
+        assert "not_recommended_by" in conflict
+
+
+def test_45d_multi_agent_roadmap_consensus_analysis(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ca = data["consensus_analysis"]
+    assert "agreements" in ca
+    assert "conflicts" in ca
+    assert "confidence_differences" in ca
+    assert "recommendation_distribution" in ca
+    assert ca["agreement_count"] >= 2
+    assert ca["conflict_count"] >= 1
+    cd = ca["confidence_differences"]
+    assert "max_confidence" in cd
+    assert "min_confidence" in cd
+    assert "confidence_spread" in cd
+    assert cd["max_confidence"] >= cd["min_confidence"]
+    rd = ca["recommendation_distribution"]
+    assert "approve" in rd
+    assert "request_changes" in rd
+    assert rd["approve"] >= 2
+
+
+def test_45d_multi_agent_roadmap_consensus_recommendation(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cr = data["consensus_recommendation"]
+    assert "outcome" in cr
+    assert cr["outcome"] in ("approve", "request_changes", "inconclusive", "escalate_to_human")
+    assert "recommended_phases" in cr
+    assert len(cr["recommended_phases"]) > 0
+    assert "recommended_ordering" in cr
+    assert "consensus_confidence" in cr
+    assert 0.0 <= cr["consensus_confidence"] <= 1.0
+    assert cr["human_review_required"] is True
+    assert "conflict_phases" in cr
+    assert len(cr["conflict_phases"]) > 0
+
+
+def test_45d_multi_agent_roadmap_human_review_required(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    hr = data["human_review"]
+    assert hr["human_review_required"] is True
+    assert "review_reason" in hr
+    assert "conflict_phases" in hr
+    assert len(hr["conflict_phases"]) > 0
+    assert "reviewable_outcome" in hr
+    assert "reviewable_phases" in hr
+
+
+def test_45d_multi_agent_roadmap_governance_rules(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "proposal_system_may" in gov
+    assert "proposal_system_may_not" in gov
+    may = " ".join(gov["proposal_system_may"]).lower()
+    may_not = " ".join(gov["proposal_system_may_not"]).lower()
+    assert "compare proposals" in may
+    assert "analyze agreements" in may
+    assert "generate recommendations" in may
+    assert "create roadmap phases" in may_not
+    assert "mutate roadmap" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert gov["human_decision_required"] is True
+
+
+def test_45d_multi_agent_roadmap_future_evolution(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    for expected in ("45E", "45F", "45G", "45H", "45I"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45d_multi_agent_roadmap_advisory(capsys) -> None:
+    main(["multi-agent-roadmap", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "simulated" in advisory
+    assert "no agents are executed" in advisory
+
+
+def test_45d_multi_agent_roadmap_human_output_shows_all_sections(capsys) -> None:
+    main(["multi-agent-roadmap"])
+    output = capsys.readouterr().out
+    assert "Multi-agent roadmap proposal" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Proposal comparison" in output
+    assert "Consensus analysis" in output
+    assert "Consensus recommendation" in output
+    assert "Human review" in output
+    assert "Future evolution" in output
+    assert "Multi-agent roadmap proposal is simulated" in output

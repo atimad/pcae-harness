@@ -10658,3 +10658,233 @@ def build_roadmap_proposal_dry_run(root: HarnessPath) -> dict:
         "governance_rules": dict(_RPDRUN_GOVERNANCE_RULES),
         "advisory": ROADMAP_PROPOSAL_DRY_RUN_ADVISORY,
     }
+
+
+# Phase 45D: Multi-Agent Roadmap Proposal
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_ROADMAP_ADVISORY = (
+    "Multi-agent roadmap proposal is simulated; no agents are executed."
+)
+
+# Simulated agent perspectives — mock data only, no runtimes invoked.
+_MARMAP_AGENT_PROPOSALS: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "proposal_id": "agent-prop-codex-45d",
+        "recommendation": "approve",
+        "confidence": 0.82,
+        "rationale": (
+            "Strong implementation pathway with clear technical deliverables; "
+            "defers design-heavy phases 45F/45G until implementation is stable."
+        ),
+        "candidate_phases": [
+            {"phase_id": "candidate-001", "title": "Runtime Adapter Registry Implementation", "confidence": 0.85},
+            {"phase_id": "candidate-002", "title": "Runtime Adapter Wiring", "confidence": 0.80},
+            {"phase_id": "candidate-003", "title": "Runtime Integration Validation", "confidence": 0.75},
+            {"phase_id": "45D", "title": "Multi-Agent Roadmap Proposal", "confidence": 0.82},
+            {"phase_id": "45E", "title": "Roadmap Approval Workflow", "confidence": 0.78},
+        ],
+        "risks": [
+            "Deferred 45F/45G may create design debt.",
+            "candidate-001 scope may expand under real implementation.",
+        ],
+    },
+    {
+        "agent_id": "claude-local",
+        "proposal_id": "agent-prop-claude-45d",
+        "recommendation": "approve",
+        "confidence": 0.88,
+        "rationale": (
+            "Comprehensive phasing with balanced risk across implementation and design; "
+            "recommends full roadmap execution without deferral."
+        ),
+        "candidate_phases": [
+            {"phase_id": "candidate-001", "title": "Runtime Adapter Registry Implementation", "confidence": 0.88},
+            {"phase_id": "candidate-002", "title": "Runtime Adapter Wiring", "confidence": 0.85},
+            {"phase_id": "candidate-003", "title": "Runtime Integration Validation", "confidence": 0.82},
+            {"phase_id": "45D", "title": "Multi-Agent Roadmap Proposal", "confidence": 0.90},
+            {"phase_id": "45E", "title": "Roadmap Approval Workflow", "confidence": 0.88},
+            {"phase_id": "45F", "title": "Prompt Generation Design", "confidence": 0.80},
+            {"phase_id": "45G", "title": "Adaptive Agent-Specific Prompt Generation", "confidence": 0.75},
+        ],
+        "risks": [
+            "Full roadmap scope may extend timeline.",
+            "45F/45G design quality depends on 45D/45E maturity.",
+        ],
+    },
+    {
+        "agent_id": "kimi-local",
+        "proposal_id": "agent-prop-kimi-45d",
+        "recommendation": "request_changes",
+        "confidence": 0.71,
+        "rationale": (
+            "Conservative phasing: skips candidate-001 (high execution risk without prior validation), "
+            "includes 45F to ensure prompt design precedes implementation."
+        ),
+        "candidate_phases": [
+            {"phase_id": "candidate-002", "title": "Runtime Adapter Wiring", "confidence": 0.72},
+            {"phase_id": "candidate-003", "title": "Runtime Integration Validation", "confidence": 0.75},
+            {"phase_id": "45D", "title": "Multi-Agent Roadmap Proposal", "confidence": 0.70},
+            {"phase_id": "45E", "title": "Roadmap Approval Workflow", "confidence": 0.74},
+            {"phase_id": "45F", "title": "Prompt Generation Design", "confidence": 0.68},
+        ],
+        "risks": [
+            "Skipping candidate-001 delays adapter registry implementation.",
+            "Overall confidence lower due to unresolved execution risk.",
+        ],
+    },
+)
+
+# Proposal comparison derived from the three simulated proposals.
+_MARMAP_SHARED_PHASE_IDS: tuple[str, ...] = (
+    "candidate-002",
+    "candidate-003",
+    "45D",
+    "45E",
+)
+
+_MARMAP_UNIQUE_RECOMMENDATIONS: dict = {
+    "codex-local": [],
+    "claude-local": ["45G"],
+    "kimi-local": [],
+}
+
+_MARMAP_CONFLICTING_RECOMMENDATIONS: tuple[dict, ...] = (
+    {
+        "phase_id": "candidate-001",
+        "recommended_by": ["codex-local", "claude-local"],
+        "not_recommended_by": ["kimi-local"],
+        "conflict_reason": "kimi-local excludes candidate-001 citing execution risk.",
+    },
+    {
+        "phase_id": "45F",
+        "recommended_by": ["claude-local", "kimi-local"],
+        "not_recommended_by": ["codex-local"],
+        "conflict_reason": "codex-local defers 45F as premature.",
+    },
+)
+
+# Consensus analysis.
+_MARMAP_AGREEMENTS: tuple[dict, ...] = (
+    {"phase_id": "candidate-002", "agreed_by": ["codex-local", "claude-local", "kimi-local"]},
+    {"phase_id": "candidate-003", "agreed_by": ["codex-local", "claude-local", "kimi-local"]},
+    {"phase_id": "45D", "agreed_by": ["codex-local", "claude-local", "kimi-local"]},
+    {"phase_id": "45E", "agreed_by": ["codex-local", "claude-local", "kimi-local"]},
+)
+
+_MARMAP_CONFIDENCE_DIFFERENCES: dict = {
+    "max_confidence": 0.88,
+    "min_confidence": 0.71,
+    "confidence_spread": 0.17,
+    "agents": ["codex-local (0.82)", "claude-local (0.88)", "kimi-local (0.71)"],
+}
+
+_MARMAP_RECOMMENDATION_DISTRIBUTION: dict = {
+    "approve": 2,
+    "request_changes": 1,
+    "agents_approve": ["codex-local", "claude-local"],
+    "agents_request_changes": ["kimi-local"],
+}
+
+# Consensus recommendation.
+_MARMAP_CONSENSUS_OUTCOME = "approve"
+_MARMAP_CONSENSUS_BASIS = "weighted majority 2 of 3"
+_MARMAP_CONSENSUS_CONFIDENCE = 0.80
+_MARMAP_CONSENSUS_CONFLICT_REASON = (
+    "conflict detected: kimi-local recommends request_changes vs approve majority"
+)
+
+_MARMAP_RECOMMENDED_PHASES: tuple[str, ...] = _MARMAP_SHARED_PHASE_IDS
+
+_MARMAP_VALID_OUTCOMES: tuple[str, ...] = (
+    "approve",
+    "request_changes",
+    "inconclusive",
+    "escalate_to_human",
+)
+
+_MARMAP_GOVERNANCE_RULES: dict = {
+    "proposal_system_may": [
+        "compare proposals",
+        "analyze agreements",
+        "generate recommendations",
+        "report conflicts",
+        "report confidence differences",
+    ],
+    "proposal_system_may_not": [
+        "create roadmap phases",
+        "mutate roadmap",
+        "create tasks",
+        "execute work",
+        "commit",
+        "push",
+    ],
+    "human_decision_required": True,
+    "advisory": True,
+}
+
+_MARMAP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45E", "description": "Roadmap Approval Workflow"},
+    {"phase": "45F", "description": "Prompt Generation Design"},
+    {"phase": "45G", "description": "Adaptive Agent-Specific Prompt Generation"},
+    {"phase": "45H", "description": "Prompt Validation Framework"},
+    {"phase": "45I", "description": "Prompt Governance Design"},
+)
+
+
+def build_multi_agent_roadmap(root: HarnessPath) -> dict:
+    """Generate a simulated multi-agent roadmap proposal. Read-only; no agents executed."""
+    dry_run = build_roadmap_proposal_dry_run(root)
+
+    agent_proposals = [dict(p) for p in _MARMAP_AGENT_PROPOSALS]
+
+    proposal_comparison = {
+        "shared_recommendations": list(_MARMAP_SHARED_PHASE_IDS),
+        "unique_recommendations": dict(_MARMAP_UNIQUE_RECOMMENDATIONS),
+        "conflicting_recommendations": [dict(c) for c in _MARMAP_CONFLICTING_RECOMMENDATIONS],
+    }
+
+    consensus_analysis = {
+        "agreements": [dict(a) for a in _MARMAP_AGREEMENTS],
+        "agreement_count": len(_MARMAP_AGREEMENTS),
+        "conflicts": [dict(c) for c in _MARMAP_CONFLICTING_RECOMMENDATIONS],
+        "conflict_count": len(_MARMAP_CONFLICTING_RECOMMENDATIONS),
+        "confidence_differences": dict(_MARMAP_CONFIDENCE_DIFFERENCES),
+        "recommendation_distribution": dict(_MARMAP_RECOMMENDATION_DISTRIBUTION),
+    }
+
+    consensus_recommendation = {
+        "outcome": _MARMAP_CONSENSUS_OUTCOME,
+        "valid_outcomes": list(_MARMAP_VALID_OUTCOMES),
+        "basis": _MARMAP_CONSENSUS_BASIS,
+        "recommended_phases": list(_MARMAP_RECOMMENDED_PHASES),
+        "recommended_ordering": list(_MARMAP_RECOMMENDED_PHASES),
+        "consensus_confidence": _MARMAP_CONSENSUS_CONFIDENCE,
+        "human_review_required": True,
+        "human_review_reason": _MARMAP_CONSENSUS_CONFLICT_REASON,
+        "conflict_phases": [c["phase_id"] for c in _MARMAP_CONFLICTING_RECOMMENDATIONS],
+    }
+
+    human_review = {
+        "human_review_required": True,
+        "review_reason": "Multi-agent consensus contains conflicts requiring human resolution.",
+        "conflict_phases": [c["phase_id"] for c in _MARMAP_CONFLICTING_RECOMMENDATIONS],
+        "reviewable_outcome": _MARMAP_CONSENSUS_OUTCOME,
+        "reviewable_phases": list(_MARMAP_RECOMMENDED_PHASES),
+    }
+
+    return {
+        "proposal_id": f"marp-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "dry_run_proposal_id": dry_run["proposal_id"],
+        "evidence_package_id": dry_run["evidence_package_id"],
+        "agent_proposals": agent_proposals,
+        "proposal_comparison": proposal_comparison,
+        "consensus_analysis": consensus_analysis,
+        "consensus_recommendation": consensus_recommendation,
+        "human_review": human_review,
+        "governance_rules": dict(_MARMAP_GOVERNANCE_RULES),
+        "future_evolution": [dict(e) for e in _MARMAP_FUTURE_EVOLUTION],
+        "advisory": MULTI_AGENT_ROADMAP_ADVISORY,
+    }

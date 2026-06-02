@@ -60,6 +60,8 @@ from pcae.core.agent import (
     ROADMAP_EVIDENCE_ADVISORY,
     build_roadmap_proposal_dry_run,
     ROADMAP_PROPOSAL_DRY_RUN_ADVISORY,
+    build_multi_agent_roadmap,
+    MULTI_AGENT_ROADMAP_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3441,6 +3443,69 @@ def run_roadmap_proposal_dry_run(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  May:     {', '.join(gov['proposal_may'])}")
         print(f"  May not: {', '.join(gov['proposal_may_not'])}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_multi_agent_roadmap(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_multi_agent_roadmap(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent roadmap proposal")
+        print(f"Proposal: {data['proposal_id']}  Generated: {data['generated_at']}")
+        print(f"Dry-run:  {data['dry_run_proposal_id']}")
+        print(f"Evidence: {data['evidence_package_id']}")
+        print()
+        for prop in data["agent_proposals"]:
+            print(f"{prop['agent_id']} proposal ({prop['proposal_id']}):")
+            print(f"  Recommendation: {prop['recommendation']}  Confidence: {prop['confidence']}")
+            print(f"  Rationale: {prop['rationale']}")
+            phase_ids = [p["phase_id"] for p in prop["candidate_phases"]]
+            print(f"  Phases ({len(phase_ids)}): {', '.join(phase_ids)}")
+            print(f"  Risks: {'; '.join(prop['risks'])}")
+            print()
+        cmp = data["proposal_comparison"]
+        print("Proposal comparison:")
+        print(f"  Shared recommendations:     {', '.join(cmp['shared_recommendations'])}")
+        for agent_id, phases in cmp["unique_recommendations"].items():
+            if phases:
+                print(f"  Unique to {agent_id}: {', '.join(phases)}")
+        for conflict in cmp["conflicting_recommendations"]:
+            print(
+                f"  Conflict [{conflict['phase_id']}]: "
+                f"recommended by {conflict['recommended_by']}, "
+                f"not by {conflict['not_recommended_by']}"
+            )
+        print()
+        ca = data["consensus_analysis"]
+        print(f"Consensus analysis:")
+        print(f"  Agreements ({ca['agreement_count']}): {', '.join(a['phase_id'] for a in ca['agreements'])}")
+        print(f"  Conflicts ({ca['conflict_count']}): {', '.join(c['phase_id'] for c in ca['conflicts'])}")
+        cd = ca["confidence_differences"]
+        print(f"  Confidence: min={cd['min_confidence']} max={cd['max_confidence']} spread={cd['confidence_spread']}")
+        rd = ca["recommendation_distribution"]
+        print(f"  Votes: approve={rd['approve']} request_changes={rd['request_changes']}")
+        print()
+        cr = data["consensus_recommendation"]
+        print("Consensus recommendation:")
+        print(f"  Outcome:              {cr['outcome']}")
+        print(f"  Basis:                {cr['basis']}")
+        print(f"  Recommended phases:   {', '.join(cr['recommended_phases'])}")
+        print(f"  Consensus confidence: {cr['consensus_confidence']}")
+        print(f"  Conflict phases:      {', '.join(cr['conflict_phases'])}")
+        print()
+        hr = data["human_review"]
+        print("Human review:")
+        print(f"  Required:         {hr['human_review_required']}")
+        print(f"  Reason:           {hr['review_reason']}")
+        print(f"  Reviewable phases:{', '.join(hr['reviewable_phases'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0

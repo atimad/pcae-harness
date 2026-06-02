@@ -42,6 +42,7 @@ from pcae.commands.agent import (
     run_roadmap_generation_design,
     run_roadmap_evidence,
     run_roadmap_proposal_dry_run,
+    run_multi_agent_roadmap,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1551,6 +1552,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON roadmap proposal output.",
     )
     roadmap_proposal_dry_run_parser.set_defaults(handler=run_roadmap_proposal_dry_run)
+
+    multi_agent_roadmap_parser = subparsers.add_parser(
+        "multi-agent-roadmap",
+        help="Generate a simulated multi-agent roadmap proposal (Phase 45D).",
+    )
+    multi_agent_roadmap_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON multi-agent roadmap output.",
+    )
+    multi_agent_roadmap_parser.set_defaults(handler=run_multi_agent_roadmap)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
