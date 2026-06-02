@@ -25,6 +25,7 @@ from pcae.core.agent import (
     build_orchestration_design,
     build_parallel_execution_design,
     build_planning_dry_run,
+    build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
     build_capability_discovery,
@@ -2163,6 +2164,50 @@ def run_planning_dry_run(args: argparse.Namespace) -> int:
         print("Next actions:")
         for action in data["next_actions"]:
             print(f"  - {action}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_planning_execution_design(args: argparse.Namespace) -> int:
+    data = build_planning_execution_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Multi-agent planning execution design")
+        print()
+        print("Planning execution lifecycle:")
+        for stage in data["planning_execution_design"]["lifecycle"]:
+            print(f"  {stage['stage']}. {stage['name']}: {stage['description']}")
+        print()
+        print("Planning task model fields:")
+        print(f"  {', '.join(data['planning_task_model']['fields'])}")
+        print()
+        print("Planner runtime requirements:")
+        for req in data["planner_runtime_requirements"]:
+            print(f"  - {req}")
+        print()
+        print("Execution modes:")
+        for mode in data["execution_modes"]:
+            print(f"  {mode['mode']}: {mode['description']}")
+        print()
+        print("Planning artifact collection fields:")
+        print(f"  {', '.join(data['artifact_collection']['fields'])}")
+        print()
+        print("Consensus integration (feeds into):")
+        for target in data["consensus_integration"]["feeds_into"]:
+            print(f"  - {target}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  Roadmap policy: {gov['roadmap_policy']}")
+        print("  Human approval required before:")
+        for item in gov["human_approval_required_before"]:
+            print(f"    - {item}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0

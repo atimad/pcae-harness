@@ -24,6 +24,7 @@ from pcae.commands.agent import (
     run_orchestration_design,
     run_parallel_execution_design,
     run_planning_dry_run,
+    run_planning_execution_design,
     run_planning_prototype_design,
     run_capability_registry,
     run_capability_discovery,
@@ -1311,6 +1312,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON planning dry-run output.",
     )
     planning_dry_run_parser.set_defaults(handler=run_planning_dry_run)
+
+    planning_execution_design_parser = subparsers.add_parser(
+        "planning-execution-design",
+        help="Show read-only multi-agent planning execution architecture design (Phase 44J).",
+    )
+    planning_execution_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON planning execution design output.",
+    )
+    planning_execution_design_parser.set_defaults(handler=run_planning_execution_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

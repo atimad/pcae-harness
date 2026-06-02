@@ -16466,3 +16466,152 @@ def test_44i_planning_dry_run_human_output_shows_consensus_and_advisory(capsys) 
     assert "Human review required" in output
     assert "Planning dry-run is simulated" in output
     assert "No planning agents were executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44J — Multi-Agent Planning Execution Design
+# ---------------------------------------------------------------------------
+
+
+def test_44j_planning_execution_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["planning-execution-design"])
+    assert exit_code == 0
+
+
+def test_44j_planning_execution_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["planning-execution-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44j_planning_execution_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "planning_execution_design" in data
+    assert "planning_task_model" in data
+    assert "planner_runtime_requirements" in data
+    assert "execution_modes" in data
+    assert "artifact_collection" in data
+    assert "consensus_integration" in data
+    assert "governance_integration" in data
+    assert "future_evolution" in data
+    assert "advisory" in data
+
+
+def test_44j_planning_execution_design_lifecycle_has_eight_stages(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["planning_execution_design"]["lifecycle"]
+    assert len(lifecycle) == 8
+
+
+def test_44j_planning_execution_design_lifecycle_stages_have_required_fields(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for stage in data["planning_execution_design"]["lifecycle"]:
+        assert "stage" in stage
+        assert "name" in stage
+        assert "description" in stage
+        assert isinstance(stage["stage"], int)
+
+
+def test_44j_planning_execution_design_task_model_has_required_fields(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["planning_task_model"]["fields"]
+    for expected in (
+        "planning_task_id",
+        "objective_id",
+        "assigned_agent",
+        "capability_required",
+        "execution_mode",
+        "timeout_seconds",
+        "status",
+        "artifact_ref",
+    ):
+        assert expected in fields
+
+
+def test_44j_planning_execution_design_runtime_requirements_defined(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["planner_runtime_requirements"]
+    assert len(reqs) == 4
+    combined = " ".join(reqs).lower()
+    assert "installed" in combined
+    assert "available" in combined
+    assert "planning" in combined
+    assert "confidence" in combined
+
+
+def test_44j_planning_execution_design_execution_modes_defined(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    modes = data["execution_modes"]
+    assert len(modes) == 5
+    mode_names = [m["mode"] for m in modes]
+    for expected in (
+        "single_planner",
+        "sequential_planners",
+        "parallel_planners",
+        "swarm_planners",
+        "consensus_planners",
+    ):
+        assert expected in mode_names
+    for mode in modes:
+        assert "description" in mode
+
+
+def test_44j_planning_execution_design_artifact_collection_fields_defined(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["artifact_collection"]["fields"]
+    for expected in ("phases", "dependencies", "assumptions", "risks", "recommendations", "confidence"):
+        assert expected in fields
+
+
+def test_44j_planning_execution_design_consensus_integration_defined(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    targets = data["consensus_integration"]["feeds_into"]
+    assert "consensus engine" in targets
+    assert "conflict analysis" in targets
+    assert "agreement analysis" in targets
+
+
+def test_44j_planning_execution_design_governance_requires_human_approval(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    before = gov["human_approval_required_before"]
+    assert "task creation" in before
+    assert "execution" in before
+    assert "implementation" in before
+    assert "roadmap_policy" in gov
+    assert "advisory" in gov["roadmap_policy"].lower()
+
+
+def test_44j_planning_execution_design_future_evolution_defined(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44K" in phases
+    assert "44L" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44j_planning_execution_design_advisory_is_correct(capsys) -> None:
+    main(["planning-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no planning agents are executed" in data["advisory"].lower()
+
+
+def test_44j_planning_execution_design_human_output_shows_lifecycle_and_advisory(capsys) -> None:
+    main(["planning-execution-design"])
+    output = capsys.readouterr().out
+    assert "objective" in output
+    assert "approved_roadmap" in output
+    assert "human_approval_required_before" in output or "Human approval required before" in output
+    assert "Planning execution design is advisory" in output

@@ -7161,6 +7161,183 @@ def build_coordinator_design() -> dict:
     }
 
 
+PLANNING_EXECUTION_DESIGN_ADVISORY = (
+    "Planning execution design is advisory; no planning agents are executed."
+)
+
+_PLANNING_EXECUTION_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "stage": 1,
+        "name": "objective",
+        "description": "Human submits a planning objective to the coordinator.",
+    },
+    {
+        "stage": 2,
+        "name": "planner_selection",
+        "description": (
+            "Coordinator selects eligible planning agents from the capability registry "
+            "based on capability, confidence, and lifecycle status."
+        ),
+    },
+    {
+        "stage": 3,
+        "name": "planning_task_creation",
+        "description": (
+            "Coordinator creates one read-only planning task per selected planner; "
+            "human approval required before tasks are created."
+        ),
+    },
+    {
+        "stage": 4,
+        "name": "agent_execution",
+        "description": (
+            "Selected planners execute according to the chosen execution mode; "
+            "each produces an independent planning artifact."
+        ),
+    },
+    {
+        "stage": 5,
+        "name": "planning_artifact_collection",
+        "description": "Coordinator collects all planning artifacts from completed planning tasks.",
+    },
+    {
+        "stage": 6,
+        "name": "consensus",
+        "description": (
+            "Consensus engine analyzes collected artifacts for agreements and conflicts "
+            "across planner outputs."
+        ),
+    },
+    {
+        "stage": 7,
+        "name": "human_review",
+        "description": (
+            "Human reviews consensus output, resolves conflicts, and decides whether "
+            "to approve, reject, or request changes to the proposed roadmap."
+        ),
+    },
+    {
+        "stage": 8,
+        "name": "approved_roadmap",
+        "description": (
+            "Human approves the final roadmap; no implementation begins without "
+            "explicit human approval."
+        ),
+    },
+)
+
+_PLANNING_TASK_FIELDS: tuple[str, ...] = (
+    "planning_task_id",
+    "objective_id",
+    "assigned_agent",
+    "capability_required",
+    "execution_mode",
+    "timeout_seconds",
+    "status",
+    "artifact_ref",
+)
+
+_PLANNER_RUNTIME_REQUIREMENTS: tuple[str, ...] = (
+    "agent must be installed",
+    "agent must have available lifecycle status",
+    "agent must possess planning capability at observed confidence or higher",
+    "agent must meet the configured confidence threshold",
+)
+
+_PLANNING_EXECUTION_MODES: tuple[dict, ...] = (
+    {
+        "mode": "single_planner",
+        "description": "One planner agent produces a single plan.",
+    },
+    {
+        "mode": "sequential_planners",
+        "description": (
+            "Planners execute one after another; each plan may reference prior outputs."
+        ),
+    },
+    {
+        "mode": "parallel_planners",
+        "description": (
+            "Multiple planners execute simultaneously; coordinator aggregates outputs."
+        ),
+    },
+    {
+        "mode": "swarm_planners",
+        "description": (
+            "Many planners operate on distinct planning sub-tasks simultaneously."
+        ),
+    },
+    {
+        "mode": "consensus_planners",
+        "description": (
+            "Multiple planners run in parallel; consensus engine resolves conflicts "
+            "before human review."
+        ),
+    },
+)
+
+_PLANNING_ARTIFACT_COLLECTION_FIELDS: tuple[str, ...] = (
+    "phases",
+    "dependencies",
+    "assumptions",
+    "risks",
+    "recommendations",
+    "confidence",
+)
+
+_PLANNING_CONSENSUS_INTEGRATION: tuple[str, ...] = (
+    "consensus engine",
+    "conflict analysis",
+    "agreement analysis",
+)
+
+_PLANNING_EXECUTION_GOVERNANCE: dict = {
+    "roadmap_policy": (
+        "Roadmaps produced by planning agents remain advisory until human-approved."
+    ),
+    "human_approval_required_before": [
+        "task creation",
+        "execution",
+        "implementation",
+    ],
+    "governance_notes": [
+        "Planning agents may not modify files.",
+        "Planning agents may not commit.",
+        "Planning agents may not push.",
+        "All planning output is advisory until the human approves the roadmap.",
+    ],
+}
+
+_PLANNING_EXECUTION_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44K", "description": "Agent Execution Framework"},
+    {"phase": "44L", "description": "Runtime Adapter Integration"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_planning_execution_design() -> dict:
+    """Return a read-only multi-agent planning execution architecture design."""
+    return {
+        "planning_execution_design": {
+            "lifecycle": list(_PLANNING_EXECUTION_LIFECYCLE),
+        },
+        "planning_task_model": {
+            "fields": list(_PLANNING_TASK_FIELDS),
+        },
+        "planner_runtime_requirements": list(_PLANNER_RUNTIME_REQUIREMENTS),
+        "execution_modes": list(_PLANNING_EXECUTION_MODES),
+        "artifact_collection": {
+            "fields": list(_PLANNING_ARTIFACT_COLLECTION_FIELDS),
+        },
+        "consensus_integration": {
+            "feeds_into": list(_PLANNING_CONSENSUS_INTEGRATION),
+        },
+        "governance_integration": _PLANNING_EXECUTION_GOVERNANCE,
+        "future_evolution": list(_PLANNING_EXECUTION_FUTURE_EVOLUTION),
+        "advisory": PLANNING_EXECUTION_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

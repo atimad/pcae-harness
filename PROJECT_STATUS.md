@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44I: Planning Artifact Dry-Run.
+Phase 44J: Multi-Agent Planning Execution Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,40 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only multi-agent planning execution architecture design
+(Phase 44J): `pcae planning-execution-design` and
+`pcae planning-execution-design --json` generate a design for executing real
+multi-agent planning workflows using coordinator-selected planning agents;
+eight-stage planning execution lifecycle: objective → planner_selection →
+planning_task_creation → agent_execution → planning_artifact_collection →
+consensus → human_review → approved_roadmap; planning task model with eight
+fields (planning_task_id, objective_id, assigned_agent, capability_required,
+execution_mode, timeout_seconds, status, artifact_ref); four planner runtime
+requirements (installed, available lifecycle status, planning capability at
+observed confidence or higher, configured confidence threshold); five execution
+modes (single_planner, sequential_planners, parallel_planners, swarm_planners,
+consensus_planners); planning artifact collection fields (phases, dependencies,
+assumptions, risks, recommendations, confidence); consensus integration feeds
+into consensus engine, conflict analysis, and agreement analysis; governance
+integration confirms roadmaps remain advisory until human-approved and human
+approval is required before task creation, execution, and implementation; future
+evolution path: 44K Agent Execution Framework, 44L Runtime Adapter Integration,
+45A Autonomous Roadmap Generation; JSON output includes
+`planning_execution_design`, `planning_task_model`,
+`planner_runtime_requirements`, `execution_modes`, `artifact_collection`,
+`consensus_integration`, `governance_integration`, `future_evolution`,
+`advisory`; `PLANNING_EXECUTION_DESIGN_ADVISORY`,
+`_PLANNING_EXECUTION_LIFECYCLE`, `_PLANNING_TASK_FIELDS`,
+`_PLANNER_RUNTIME_REQUIREMENTS`, `_PLANNING_EXECUTION_MODES`,
+`_PLANNING_ARTIFACT_COLLECTION_FIELDS`, `_PLANNING_CONSENSUS_INTEGRATION`,
+`_PLANNING_EXECUTION_GOVERNANCE`, `_PLANNING_EXECUTION_FUTURE_EVOLUTION`,
+`build_planning_execution_design` added to `core/agent.py`;
+`run_planning_execution_design` added to `commands/agent.py`;
+`planning-execution-design [--json]` wired in `cli.py`; strictly read-only —
+no agent execution, no child task creation, no roadmap mutation; advisory:
+"Planning execution design is advisory; no planning agents are executed.";
+14 new tests.
 
 PCAE simulates a multi-agent planning dry-run without executing agents
 (Phase 44I): `pcae planning-dry-run` and `pcae planning-dry-run --json`

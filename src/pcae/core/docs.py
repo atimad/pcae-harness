@@ -227,6 +227,11 @@ def render_commands_reference() -> str:
 - `pcae docs architecture --force`
 - `pcae docs glossary --dry-run`
 - `pcae docs glossary --force`
+
+## planning-execution-design
+
+- `pcae planning-execution-design`
+- `pcae planning-execution-design --json`
 """
 
 
