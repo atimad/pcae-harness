@@ -25,6 +25,7 @@ from pcae.commands.agent import (
     run_parallel_execution_design,
     run_adapter_design,
     run_execution_framework_design,
+    run_invocation_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1347,6 +1348,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON adapter design output.",
     )
     adapter_design_parser.set_defaults(handler=run_adapter_design)
+
+    invocation_design_parser = subparsers.add_parser(
+        "invocation-design",
+        help="Show read-only controlled agent invocation architecture design (Phase 44M).",
+    )
+    invocation_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON invocation design output.",
+    )
+    invocation_design_parser.set_defaults(handler=run_invocation_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

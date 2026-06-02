@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44L: Runtime Adapter Integration Design.
+Phase 44M: Controlled Agent Invocation Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,42 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only controlled agent invocation architecture design
+(Phase 44M): `pcae invocation-design` and `pcae invocation-design --json`
+generate a design for how PCAE safely invokes real agents through runtime
+adapters while preserving governance controls; nine-stage invocation lifecycle:
+request → capability_validation → agent_selection → adapter_resolution →
+invocation_request_creation → runtime_invocation → result_capture → consensus
+→ governance; invocation request model with nine fields (invocation_id,
+execution_id, runtime_id, agent_id, objective, capabilities_required,
+writable_allowed, timeout_seconds, metadata); five safety gates required before
+invocation (runtime available, capability present, confidence threshold met,
+governance mode valid, objective present) and four blocking conditions
+(runtime unavailable, capability mismatch, governance violation, timeout
+invalid); writable invocation rules: default is read-only; writable requires
+explicit governance approval, writable_supported runtime, and audit trail;
+runtime adapter interaction: invocation flow is coordinator → execution
+framework → adapter → runtime; result flow is runtime → adapter → execution
+framework → coordinator; result capture model with seven fields (invocation_id,
+status, artifacts, recommendations, confidence, errors, timestamps); governance
+integration: system may invoke agents and collect results; system may not
+approve, commit, push, rollback, or bypass governance; future evolution: 44N
+Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
+45A Autonomous Roadmap Generation; JSON output includes `invocation_design`,
+`invocation_lifecycle`, `invocation_request_model`, `safety_gates`,
+`writable_rules`, `result_capture_model`, `governance_integration`,
+`future_evolution`, `advisory`; `INVOCATION_DESIGN_ADVISORY`,
+`_INVOCATION_LIFECYCLE`, `_INVOCATION_REQUEST_FIELDS`,
+`_INVOCATION_SAFETY_REQUIRED`, `_INVOCATION_SAFETY_BLOCKED`,
+`_WRITABLE_INVOCATION_REQUIRES`, `_INVOCATION_FLOW`, `_RESULT_FLOW`,
+`_RESULT_CAPTURE_FIELDS`, `_INVOCATION_GOVERNANCE_INTEGRATION`,
+`_INVOCATION_FUTURE_EVOLUTION`, `build_invocation_design` added to
+`core/agent.py`; `run_invocation_design` added to `commands/agent.py`;
+`invocation-design [--json]` wired in `cli.py`; strictly read-only — no
+runtime invocation, no adapter implementation, no file modification; advisory:
+"Controlled invocation design is advisory; no agents are invoked."; 14 new
+tests.
 
 PCAE exposes a read-only runtime adapter integration architecture design
 (Phase 44L): `pcae adapter-design` and `pcae adapter-design --json` generate

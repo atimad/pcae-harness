@@ -27,6 +27,7 @@ from pcae.core.agent import (
     build_planning_dry_run,
     build_adapter_design,
     build_execution_framework_design,
+    build_invocation_design,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2115,6 +2116,58 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_design(args: argparse.Namespace) -> int:
+    data = build_invocation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        inv = data["invocation_design"]
+        print("Controlled agent invocation design")
+        print()
+        print("Invocation flow:")
+        for i, step in enumerate(inv["invocation_flow"], 1):
+            print(f"  {i}. {step}")
+        print("Result flow:")
+        for i, step in enumerate(inv["result_flow"], 1):
+            print(f"  {i}. {step}")
+        print()
+        print("Invocation lifecycle:")
+        for stage in data["invocation_lifecycle"]:
+            print(f"  {stage['stage']}. {stage['name']}: {stage['description']}")
+        print()
+        print("Invocation request model fields:")
+        print(f"  {', '.join(data['invocation_request_model']['fields'])}")
+        print()
+        gates = data["safety_gates"]
+        print("Safety gates — required before invocation:")
+        for gate in gates["required_before_invocation"]:
+            print(f"  - {gate}")
+        print("Safety gates — blocked if:")
+        for condition in gates["blocked_if"]:
+            print(f"  - {condition}")
+        print()
+        wr = data["writable_rules"]
+        print(f"Writable invocation — default: {wr['default']}")
+        print("Writable invocation requires:")
+        for req in wr["writable_requires"]:
+            print(f"  - {req}")
+        print()
+        print("Result capture model fields:")
+        print(f"  {', '.join(data['result_capture_model']['fields'])}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  System may: {', '.join(gov['system_may'])}")
+        print(f"  System may not: {', '.join(gov['system_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0

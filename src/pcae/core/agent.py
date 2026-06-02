@@ -7661,6 +7661,187 @@ def build_adapter_design() -> dict:
     }
 
 
+INVOCATION_DESIGN_ADVISORY = (
+    "Controlled invocation design is advisory; no agents are invoked."
+)
+
+_INVOCATION_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "stage": 1,
+        "name": "request",
+        "description": "Coordinator receives a controlled invocation request.",
+    },
+    {
+        "stage": 2,
+        "name": "capability_validation",
+        "description": (
+            "Required capabilities are validated against the capability registry "
+            "and confidence thresholds."
+        ),
+    },
+    {
+        "stage": 3,
+        "name": "agent_selection",
+        "description": (
+            "Eligible agents are selected based on validated capability match "
+            "and lifecycle status."
+        ),
+    },
+    {
+        "stage": 4,
+        "name": "adapter_resolution",
+        "description": (
+            "Runtime adapter registry resolves the correct adapter "
+            "for the assigned runtime."
+        ),
+    },
+    {
+        "stage": 5,
+        "name": "invocation_request_creation",
+        "description": (
+            "A structured invocation request is created with all safety gate fields "
+            "populated."
+        ),
+    },
+    {
+        "stage": 6,
+        "name": "runtime_invocation",
+        "description": (
+            "Adapter invokes the agent runtime; invocation is blocked if any "
+            "safety gate fails."
+        ),
+    },
+    {
+        "stage": 7,
+        "name": "result_capture",
+        "description": (
+            "Adapter captures agent output, artifacts, errors, and timing metadata."
+        ),
+    },
+    {
+        "stage": 8,
+        "name": "consensus",
+        "description": (
+            "Captured results are fed to the consensus engine for agreement "
+            "and conflict analysis."
+        ),
+    },
+    {
+        "stage": 9,
+        "name": "governance",
+        "description": (
+            "Consensus output is handed to governance for approval, commit, "
+            "push, and rollback decisions."
+        ),
+    },
+)
+
+_INVOCATION_REQUEST_FIELDS: tuple[str, ...] = (
+    "invocation_id",
+    "execution_id",
+    "runtime_id",
+    "agent_id",
+    "objective",
+    "capabilities_required",
+    "writable_allowed",
+    "timeout_seconds",
+    "metadata",
+)
+
+_INVOCATION_SAFETY_REQUIRED: tuple[str, ...] = (
+    "runtime available",
+    "capability present",
+    "confidence threshold met",
+    "governance mode valid",
+    "objective present",
+)
+
+_INVOCATION_SAFETY_BLOCKED: tuple[str, ...] = (
+    "runtime unavailable",
+    "capability mismatch",
+    "governance violation",
+    "timeout invalid",
+)
+
+_WRITABLE_INVOCATION_REQUIRES: tuple[str, ...] = (
+    "explicit governance approval",
+    "writable_supported runtime",
+    "audit trail",
+)
+
+_INVOCATION_FLOW: tuple[str, ...] = (
+    "coordinator",
+    "execution framework",
+    "adapter",
+    "runtime",
+)
+
+_RESULT_FLOW: tuple[str, ...] = (
+    "runtime",
+    "adapter",
+    "execution framework",
+    "coordinator",
+)
+
+_RESULT_CAPTURE_FIELDS: tuple[str, ...] = (
+    "invocation_id",
+    "status",
+    "artifacts",
+    "recommendations",
+    "confidence",
+    "errors",
+    "timestamps",
+)
+
+_INVOCATION_GOVERNANCE_INTEGRATION: dict = {
+    "system_may": [
+        "invoke agents",
+        "collect results",
+    ],
+    "system_may_not": [
+        "approve",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_INVOCATION_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44N", "description": "Real Multi-Agent Planning Design"},
+    {"phase": "44O", "description": "Multi-Agent Consensus Execution Design"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_invocation_design() -> dict:
+    """Return a read-only controlled agent invocation architecture design."""
+    return {
+        "invocation_design": {
+            "invocation_flow": list(_INVOCATION_FLOW),
+            "result_flow": list(_RESULT_FLOW),
+        },
+        "invocation_lifecycle": list(_INVOCATION_LIFECYCLE),
+        "invocation_request_model": {
+            "fields": list(_INVOCATION_REQUEST_FIELDS),
+        },
+        "safety_gates": {
+            "required_before_invocation": list(_INVOCATION_SAFETY_REQUIRED),
+            "blocked_if": list(_INVOCATION_SAFETY_BLOCKED),
+        },
+        "writable_rules": {
+            "default": "read-only",
+            "writable_requires": list(_WRITABLE_INVOCATION_REQUIRES),
+        },
+        "result_capture_model": {
+            "fields": list(_RESULT_CAPTURE_FIELDS),
+        },
+        "governance_integration": _INVOCATION_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_INVOCATION_FUTURE_EVOLUTION),
+        "advisory": INVOCATION_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

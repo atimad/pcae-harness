@@ -16937,3 +16937,166 @@ def test_44l_adapter_design_human_output_shows_architecture_and_advisory(capsys)
     assert "Agent Runtime" in output
     assert "codex-local-adapter" in output
     assert "Runtime adapter integration design is advisory" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44M — Controlled Agent Invocation Design
+# ---------------------------------------------------------------------------
+
+
+def test_44m_invocation_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-design"])
+    assert exit_code == 0
+
+
+def test_44m_invocation_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["invocation-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44m_invocation_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "invocation_design" in data
+    assert "invocation_lifecycle" in data
+    assert "invocation_request_model" in data
+    assert "safety_gates" in data
+    assert "writable_rules" in data
+    assert "result_capture_model" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44m_invocation_design_lifecycle_has_nine_stages(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["invocation_lifecycle"]
+    assert len(lifecycle) == 9
+    for stage in lifecycle:
+        assert "stage" in stage
+        assert "name" in stage
+        assert "description" in stage
+        assert isinstance(stage["stage"], int)
+    names = [s["name"] for s in lifecycle]
+    assert "request" in names
+    assert "governance" in names
+    assert "capability_validation" in names
+    assert "runtime_invocation" in names
+
+
+def test_44m_invocation_design_request_model_has_required_fields(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["invocation_request_model"]["fields"]
+    for expected in (
+        "invocation_id",
+        "execution_id",
+        "runtime_id",
+        "agent_id",
+        "objective",
+        "capabilities_required",
+        "writable_allowed",
+        "timeout_seconds",
+        "metadata",
+    ):
+        assert expected in fields
+
+
+def test_44m_invocation_design_safety_gates_required_defined(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    required = data["safety_gates"]["required_before_invocation"]
+    assert len(required) == 5
+    combined = " ".join(required).lower()
+    assert "runtime available" in combined
+    assert "capability present" in combined
+    assert "confidence threshold" in combined
+    assert "objective present" in combined
+
+
+def test_44m_invocation_design_safety_gates_blocked_defined(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blocked = data["safety_gates"]["blocked_if"]
+    assert len(blocked) == 4
+    combined = " ".join(blocked).lower()
+    assert "runtime unavailable" in combined
+    assert "capability mismatch" in combined
+    assert "governance violation" in combined
+    assert "timeout invalid" in combined
+
+
+def test_44m_invocation_design_writable_rules_default_read_only(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wr = data["writable_rules"]
+    assert wr["default"] == "read-only"
+    requires = wr["writable_requires"]
+    assert len(requires) == 3
+    combined = " ".join(requires).lower()
+    assert "governance approval" in combined
+    assert "writable_supported" in combined
+    assert "audit trail" in combined
+
+
+def test_44m_invocation_design_result_capture_model_fields(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["result_capture_model"]["fields"]
+    for expected in (
+        "invocation_id",
+        "status",
+        "artifacts",
+        "recommendations",
+        "confidence",
+        "errors",
+        "timestamps",
+    ):
+        assert expected in fields
+
+
+def test_44m_invocation_design_governance_may_and_may_not(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "invoke agents" in gov["system_may"]
+    assert "collect results" in gov["system_may"]
+    for prohibited in ("approve", "commit", "push", "rollback", "bypass governance"):
+        assert prohibited in gov["system_may_not"]
+
+
+def test_44m_invocation_design_invocation_flow_defined(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inv = data["invocation_design"]
+    assert "coordinator" in inv["invocation_flow"]
+    assert "runtime" in inv["invocation_flow"]
+    assert "runtime" in inv["result_flow"]
+    assert "coordinator" in inv["result_flow"]
+
+
+def test_44m_invocation_design_future_evolution_defined(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44N" in phases
+    assert "44O" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44m_invocation_design_advisory_is_correct(capsys) -> None:
+    main(["invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no agents are invoked" in data["advisory"].lower()
+
+
+def test_44m_invocation_design_human_output_shows_lifecycle_and_advisory(capsys) -> None:
+    main(["invocation-design"])
+    output = capsys.readouterr().out
+    assert "request" in output
+    assert "governance" in output
+    assert "read-only" in output
+    assert "Controlled invocation design is advisory" in output

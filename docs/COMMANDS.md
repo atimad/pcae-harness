@@ -221,3 +221,8 @@
 
 - `pcae adapter-design`
 - `pcae adapter-design --json`
+
+## invocation-design
+
+- `pcae invocation-design`
+- `pcae invocation-design --json`
