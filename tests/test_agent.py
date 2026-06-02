@@ -17709,3 +17709,161 @@ def test_44q_planner_adapter_prototype_human_output_shows_summary_and_advisory(c
     assert "non_interactive" in output
     assert "Safety gates" in output
     assert "Planner adapter prototype is read-only" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44R: Multi-Agent Execution Prototype
+# ---------------------------------------------------------------------------
+
+
+def test_44r_multi_agent_prototype_command_exits_zero(capsys) -> None:
+    exit_code = main(["multi-agent-prototype"])
+    assert exit_code == 0
+
+
+def test_44r_multi_agent_prototype_json_exits_zero(capsys) -> None:
+    exit_code = main(["multi-agent-prototype", "--json"])
+    assert exit_code == 0
+
+
+def test_44r_multi_agent_prototype_json_has_required_top_level_keys(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "execution_plan" in data
+    assert "selected_agents" in data
+    assert "invocation_previews" in data
+    assert "aggregation_plan" in data
+    assert "governance_rules" in data
+    assert "advisory" in data
+
+
+def test_44r_multi_agent_prototype_selects_default_agents(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = data["selected_agents"]
+    assert "codex-local" in agents
+    assert "claude-local" in agents
+    assert "kimi-local" in agents
+    assert len(agents) >= 2
+
+
+def test_44r_multi_agent_prototype_execution_plan_fields(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["execution_plan"]
+    assert "execution_id" in plan
+    assert "selected_agents" in plan
+    assert "assigned_roles" in plan
+    assert "capabilities_used" in plan
+    assert "orchestration_strategy" in plan
+    assert len(plan["selected_agents"]) >= 2
+    assert len(plan["assigned_roles"]) >= 2
+    assert len(plan["capabilities_used"]) >= 1
+
+
+def test_44r_multi_agent_prototype_orchestration_strategy_supported(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["execution_plan"]
+    supported = plan["supported_strategies"]
+    assert plan["orchestration_strategy"] in supported
+    for strategy in ("single_agent", "sequential", "parallel_review", "parallel_planning", "consensus"):
+        assert strategy in supported
+
+
+def test_44r_multi_agent_prototype_invocation_previews_per_agent(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    previews = data["invocation_previews"]
+    assert len(previews) >= 2
+    for inv in previews:
+        assert "runtime_id" in inv
+        assert "adapter_id" in inv
+        assert "invocation_preview" in inv
+        assert "timeout_seconds" in inv
+        assert "writable_allowed" in inv
+        assert isinstance(inv["timeout_seconds"], int)
+        assert inv["timeout_seconds"] > 0
+        assert inv["writable_allowed"] is False
+
+
+def test_44r_multi_agent_prototype_invocation_previews_match_selected_agents(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    selected = set(data["selected_agents"])
+    preview_ids = {inv["runtime_id"] for inv in data["invocation_previews"]}
+    assert preview_ids == selected
+
+
+def test_44r_multi_agent_prototype_aggregation_plan_sections(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agg = data["aggregation_plan"]
+    assert "result_collection_plan" in agg
+    assert "artifact_collection_plan" in agg
+    assert "consensus_input_plan" in agg
+
+
+def test_44r_multi_agent_prototype_result_collection_plan_fields(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rc = data["aggregation_plan"]["result_collection_plan"]
+    assert rc["collection_mode"] == "structured"
+    assert rc["per_agent_results"] is True
+    assert rc["partial_results_preserved"] is True
+    for field in ("agent_id", "status", "output", "artifacts", "errors"):
+        assert field in rc["result_fields"]
+
+
+def test_44r_multi_agent_prototype_artifact_collection_read_only(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ac = data["aggregation_plan"]["artifact_collection_plan"]
+    assert ac["collection_mode"] == "read_only"
+    assert "no artifacts written" in ac["persistence"].lower()
+
+
+def test_44r_multi_agent_prototype_governance_rules_defined(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "prototype_may" in gov
+    assert "prototype_may_not" in gov
+    may = " ".join(gov["prototype_may"]).lower()
+    may_not = " ".join(gov["prototype_may_not"]).lower()
+    assert "select agents" in may
+    assert "invoke runtimes" in may_not
+    assert "submit prompts" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44r_multi_agent_prototype_advisory_is_correct(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "read-only" in data["advisory"].lower()
+    assert "no runtimes are invoked" in data["advisory"].lower()
+
+
+def test_44r_multi_agent_prototype_future_evolution_defined(capsys) -> None:
+    main(["multi-agent-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44S" in phases
+    assert "44T" in phases
+    assert "45A" in phases
+
+
+def test_44r_multi_agent_prototype_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["multi-agent-prototype"])
+    output = capsys.readouterr().out
+    assert "Multi-agent execution prototype" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Invocation previews" in output
+    assert "Aggregation plan" in output
+    assert "Governance" in output
+    assert "Multi-agent execution prototype is read-only" in output

@@ -246,3 +246,8 @@
 
 - `pcae planner-adapter-prototype`
 - `pcae planner-adapter-prototype --json`
+
+## multi-agent-prototype
+
+- `pcae multi-agent-prototype`
+- `pcae multi-agent-prototype --json`

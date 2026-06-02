@@ -8506,3 +8506,155 @@ def build_capability_validation(root: HarnessPath) -> dict:
         "normalized_summary": normalized_summary,
         "advisory": CAPABILITY_VALIDATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 44R: Multi-Agent Execution Prototype
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY = (
+    "Multi-agent execution prototype is read-only; no runtimes are invoked."
+)
+
+_MAE_EXECUTION_ID = "proto-44r-preview"
+
+_MAE_DEFAULT_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_MAE_AGENT_ROLES: dict[str, str] = {
+    "codex-local": "implementation",
+    "claude-local": "documentation",
+    "kimi-local": "analysis",
+}
+
+_MAE_AGENT_ADAPTERS: dict[str, str] = {
+    "codex-local": "cli_adapter_codex",
+    "claude-local": "cli_adapter_claude",
+    "kimi-local": "cli_adapter_kimi",
+}
+
+_MAE_AGENT_INVOCATION_PREVIEWS: dict[str, str] = {
+    "codex-local": "codex --non-interactive --output-format json <prompt>",
+    "claude-local": "claude --non-interactive --output-format json <prompt>",
+    "kimi-local": "kimi --non-interactive --output-format json <prompt>",
+}
+
+_MAE_AGENT_TIMEOUTS: dict[str, int] = {
+    "codex-local": 300,
+    "claude-local": 300,
+    "kimi-local": 300,
+}
+
+_MAE_CAPABILITIES_USED: tuple[str, ...] = (
+    "code_generation",
+    "documentation",
+    "code_analysis",
+)
+
+_MAE_ORCHESTRATION_STRATEGY = "parallel_review"
+
+_MAE_SUPPORTED_STRATEGIES: tuple[str, ...] = (
+    "single_agent",
+    "sequential",
+    "parallel_review",
+    "parallel_planning",
+    "consensus",
+)
+
+_MAE_RESULT_COLLECTION_PLAN: dict = {
+    "collection_mode": "structured",
+    "per_agent_results": True,
+    "timeout_enforcement": "per_agent",
+    "partial_results_preserved": True,
+    "result_fields": [
+        "agent_id",
+        "status",
+        "output",
+        "artifacts",
+        "errors",
+        "started_at",
+        "completed_at",
+        "duration_seconds",
+    ],
+}
+
+_MAE_ARTIFACT_COLLECTION_PLAN: dict = {
+    "collection_mode": "read_only",
+    "artifact_types": ["output", "structured_json", "error_log"],
+    "persistence": "none (prototype preview; no artifacts written)",
+    "deduplication": "by agent_id",
+}
+
+_MAE_CONSENSUS_INPUT_PLAN: dict = {
+    "consensus_mode": "advisory",
+    "inputs": ["per_agent_output", "per_agent_confidence", "per_agent_status"],
+    "aggregation": "human_escalation (default policy)",
+    "note": "Consensus execution is planned for Phase 44S.",
+}
+
+_MAE_GOVERNANCE_RULES: dict = {
+    "prototype_may": [
+        "select agents from registry",
+        "build execution plan",
+        "preview invocations",
+    ],
+    "prototype_may_not": [
+        "invoke runtimes",
+        "submit prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+}
+
+_MAE_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44S", "description": "Consensus Prototype"},
+    {"phase": "44T", "description": "Controlled Runtime Invocation Pilot"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_multi_agent_execution_prototype() -> dict:
+    """Return a read-only multi-agent execution prototype preview."""
+    selected_agents = list(_MAE_DEFAULT_AGENTS)
+    assigned_roles = {aid: _MAE_AGENT_ROLES[aid] for aid in selected_agents}
+
+    execution_plan = {
+        "execution_id": _MAE_EXECUTION_ID,
+        "selected_agents": selected_agents,
+        "assigned_roles": assigned_roles,
+        "capabilities_used": list(_MAE_CAPABILITIES_USED),
+        "orchestration_strategy": _MAE_ORCHESTRATION_STRATEGY,
+        "supported_strategies": list(_MAE_SUPPORTED_STRATEGIES),
+    }
+
+    invocation_previews = [
+        {
+            "runtime_id": aid,
+            "adapter_id": _MAE_AGENT_ADAPTERS[aid],
+            "invocation_preview": _MAE_AGENT_INVOCATION_PREVIEWS[aid],
+            "timeout_seconds": _MAE_AGENT_TIMEOUTS[aid],
+            "writable_allowed": False,
+        }
+        for aid in selected_agents
+    ]
+
+    aggregation_plan = {
+        "result_collection_plan": _MAE_RESULT_COLLECTION_PLAN,
+        "artifact_collection_plan": _MAE_ARTIFACT_COLLECTION_PLAN,
+        "consensus_input_plan": _MAE_CONSENSUS_INPUT_PLAN,
+    }
+
+    return {
+        "execution_plan": execution_plan,
+        "selected_agents": selected_agents,
+        "invocation_previews": invocation_previews,
+        "aggregation_plan": aggregation_plan,
+        "governance_rules": _MAE_GOVERNANCE_RULES,
+        "future_evolution": list(_MAE_FUTURE_EVOLUTION),
+        "advisory": MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY,
+    }

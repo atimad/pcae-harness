@@ -36,6 +36,8 @@ from pcae.core.agent import (
     RUNTIME_EXECUTION_PROTOTYPE_ADVISORY,
     build_planner_adapter_prototype,
     PLANNER_ADAPTER_PROTOTYPE_ADVISORY,
+    build_multi_agent_execution_prototype,
+    MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2778,3 +2780,54 @@ def print_agent_status(status: dict[str, object]) -> None:
         print(f"Active task: {active_task.get('id')} - {active_task.get('title')}")
     else:
         print("Active task: none")
+
+
+def run_multi_agent_prototype(args: argparse.Namespace) -> int:
+    data = build_multi_agent_execution_prototype()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        plan = data["execution_plan"]
+        print("Multi-agent execution prototype")
+        print(f"  Execution ID:           {plan['execution_id']}")
+        print(f"  Orchestration strategy: {plan['orchestration_strategy']}")
+        print()
+        agents = data["selected_agents"]
+        roles = plan["assigned_roles"]
+        print(f"Selected agents ({len(agents)}):")
+        for aid in agents:
+            print(f"  {aid:<16} role={roles[aid]}")
+        print()
+        print(f"Capabilities used: {', '.join(plan['capabilities_used'])}")
+        print()
+        print("Invocation previews:")
+        for inv in data["invocation_previews"]:
+            print(f"  {inv['runtime_id']}:")
+            print(f"    adapter:  {inv['adapter_id']}")
+            print(f"    preview:  {inv['invocation_preview']}")
+            print(f"    timeout:  {inv['timeout_seconds']}s")
+            print(f"    writable: {'yes' if inv['writable_allowed'] else 'no'}")
+        print()
+        agg = data["aggregation_plan"]
+        rc = agg["result_collection_plan"]
+        ac = agg["artifact_collection_plan"]
+        ci = agg["consensus_input_plan"]
+        print("Aggregation plan:")
+        print(
+            f"  Result collection: {rc['collection_mode']}, "
+            f"per-agent, partial results preserved"
+        )
+        print(f"  Artifact collection: {ac['collection_mode']}, {ac['persistence']}")
+        print(f"  Consensus input: {ci['aggregation']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Prototype may:     {', '.join(gov['prototype_may'])}")
+        print(f"  Prototype may not: {', '.join(gov['prototype_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0

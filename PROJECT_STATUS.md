@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44Q: Planner Runtime Adapter Prototype.
+Phase 44R: Multi-Agent Execution Prototype.
 
 ## Governance Coherence Note
 
@@ -964,6 +964,30 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 `invocation-design [--json]` wired in `cli.py`; strictly read-only — no
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
+tests.
+
+PCAE exposes a read-only multi-agent execution prototype (Phase 44R):
+`pcae multi-agent-prototype` and `pcae multi-agent-prototype --json` show how
+PCAE would orchestrate multiple agents without invoking any runtimes; coordinator
+selection picks eligible agents from the registry (default: codex-local,
+claude-local, kimi-local); execution plan includes execution_id
+(proto-44r-preview), selected_agents, assigned_roles (codex-local=implementation,
+claude-local=documentation, kimi-local=analysis), capabilities_used
+(code_generation, documentation, code_analysis), orchestration_strategy
+(parallel_review), and supported_strategies (single_agent, sequential,
+parallel_review, parallel_planning, consensus); invocation preview per agent:
+runtime_id, adapter_id, invocation_preview command, timeout_seconds (300),
+writable_allowed (false); aggregation plan: result_collection_plan (structured,
+per-agent, partial results preserved), artifact_collection_plan (read_only, no
+artifacts written), consensus_input_plan (advisory, human_escalation); governance:
+prototype may select agents, build execution plan, preview invocations; prototype
+may not invoke runtimes, submit prompts, modify files, commit, push, or rollback;
+future evolution: 44S Consensus Prototype, 44T Controlled Runtime Invocation
+Pilot, 45A Autonomous Roadmap Generation; `build_multi_agent_execution_prototype`
+added to `core/agent.py`; `run_multi_agent_prototype` added to `commands/agent.py`;
+`multi-agent-prototype [--json]` wired in `cli.py`; strictly read-only — no
+runtimes invoked, no prompts submitted, no files modified; advisory:
+"Multi-agent execution prototype is read-only; no runtimes are invoked."; 15 new
 tests.
 
 PCAE exposes a read-only planner runtime adapter prototype preview (Phase 44Q):
