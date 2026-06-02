@@ -9773,3 +9773,118 @@ def build_execution_readiness() -> dict:
         "future_evolution": list(_ERDYA_FUTURE_EVOLUTION),
         "advisory": EXECUTION_READINESS_ADVISORY,
     }
+
+# Phase 44Z: Runtime Adapter Registry Design
+# ---------------------------------------------------------------------------
+
+ADAPTER_REGISTRY_DESIGN_ADVISORY = (
+    "Adapter registry design is read-only; no adapters are implemented or invoked."
+)
+
+_ARDSGN_REGISTRY_RESPONSIBILITIES: tuple[str, ...] = (
+    "register_adapter",
+    "unregister_adapter",
+    "discover_adapters",
+    "resolve_adapter",
+    "report_health",
+    "report_capabilities",
+)
+
+_ARDSGN_REGISTRATION_MODEL_FIELDS: tuple[dict, ...] = (
+    {"field": "runtime_id", "type": "str", "description": "Unique identifier for the runtime."},
+    {"field": "adapter_id", "type": "str", "description": "Unique identifier for the adapter implementation."},
+    {"field": "version", "type": "str", "description": "Semantic version of the adapter."},
+    {"field": "lifecycle_status", "type": "str", "description": "Current lifecycle state: active, deprecated, or inactive."},
+    {"field": "supported_capabilities", "type": "list[str]", "description": "Capabilities the adapter declares support for."},
+    {"field": "writable_supported", "type": "bool", "description": "Whether the adapter supports writable execution mode."},
+    {"field": "subagent_supported", "type": "bool", "description": "Whether the adapter supports subagent delegation."},
+    {"field": "swarm_supported", "type": "bool", "description": "Whether the adapter supports swarm-mode execution."},
+)
+
+_ARDSGN_ADAPTER_RESOLUTION: dict = {
+    "input": {
+        "runtime_id": "str — the runtime to resolve",
+    },
+    "output": {
+        "adapter_id": "str — resolved adapter identifier",
+        "health_status": "str — one of: available, degraded, unavailable, unknown",
+        "capabilities": "list[str] — capabilities reported by the adapter",
+    },
+    "resolution_steps": [
+        "Look up runtime_id in the registry.",
+        "Verify adapter lifecycle_status is active.",
+        "Check adapter health via report_health.",
+        "Return adapter_id, health_status, and capabilities.",
+    ],
+    "fallback": "Return health_status=unknown if runtime_id is not registered.",
+}
+
+_ARDSGN_HEALTH_STATES: tuple[str, ...] = (
+    "available",
+    "degraded",
+    "unavailable",
+    "unknown",
+)
+
+_ARDSGN_HEALTH_MODEL: dict = {
+    "states": list(_ARDSGN_HEALTH_STATES),
+    "state_descriptions": {
+        "available": "Adapter is reachable and ready to accept invocations.",
+        "degraded": "Adapter is reachable but operating with reduced capacity or errors.",
+        "unavailable": "Adapter is not reachable; invocations will fail.",
+        "unknown": "Adapter health has not been probed or runtime_id is not registered.",
+    },
+    "probe_mode": "on-demand",
+    "probe_note": "Health is not probed continuously; queried at resolution time.",
+}
+
+_ARDSGN_CAPABILITY_SYNCHRONIZATION: dict = {
+    "registry_may_receive": [
+        "runtime discovery",
+        "capability discovery",
+        "version discovery",
+    ],
+    "source_of_truth": "capability_registry",
+    "sync_note": (
+        "The capability registry remains the authoritative source of truth. "
+        "The adapter registry synchronizes declared capabilities from adapters "
+        "but does not override the capability registry."
+    ),
+}
+
+_ARDSGN_GOVERNANCE_RULES: dict = {
+    "registry_may": [
+        "discover adapters",
+        "resolve adapters",
+        "report capabilities",
+        "report health",
+    ],
+    "registry_may_not": [
+        "invoke runtimes",
+        "approve actions",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_ARDSGN_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+    {"phase": "45B", "description": "Runtime Adapter Registry Prototype"},
+    {"phase": "45C", "description": "Runtime Adapter Registry Implementation"},
+)
+
+
+def build_adapter_registry_design() -> dict:
+    """Return a read-only runtime adapter registry design."""
+    return {
+        "registry_responsibilities": list(_ARDSGN_REGISTRY_RESPONSIBILITIES),
+        "adapter_registration_model": list(_ARDSGN_REGISTRATION_MODEL_FIELDS),
+        "adapter_resolution": dict(_ARDSGN_ADAPTER_RESOLUTION),
+        "health_model": dict(_ARDSGN_HEALTH_MODEL),
+        "capability_synchronization": dict(_ARDSGN_CAPABILITY_SYNCHRONIZATION),
+        "governance_rules": _ARDSGN_GOVERNANCE_RULES,
+        "future_evolution": list(_ARDSGN_FUTURE_EVOLUTION),
+        "advisory": ADAPTER_REGISTRY_DESIGN_ADVISORY,
+    }

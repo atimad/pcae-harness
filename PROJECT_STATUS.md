@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44Y: Governed Runtime Execution Readiness Assessment.
+Phase 44Z: Runtime Adapter Registry Design.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,18 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only runtime adapter registry design (Phase 44Z): `pcae adapter-registry-design`
+and `pcae adapter-registry-design --json` define the central registry for discovering, registering,
+and resolving runtime adapters; design-only; registry_responsibilities: 6 operations
+(register/unregister/discover/resolve adapter, report health/capabilities); adapter_registration_model:
+8 fields (runtime_id, adapter_id, version, lifecycle_status, supported_capabilities, writable_supported,
+subagent_supported, swarm_supported); adapter_resolution: input=runtime_id, output=adapter_id/
+health_status/capabilities, 4 steps, fallback=unknown; health_model: 4 states (available/degraded/
+unavailable/unknown), probe_mode=on-demand; capability_synchronization: capability_registry as source
+of truth; governance: registry may discover/resolve/report; may not invoke runtimes, approve, commit,
+push, or rollback; future evolution: 45A/45B/45C; strictly design-only; advisory: "Adapter registry
+design is read-only; no adapters are implemented or invoked."; 12 new tests.
 
 PCAE exposes a governed runtime execution readiness assessment (Phase 44Y):
 `pcae execution-readiness` and `pcae execution-readiness --json` assess PCAE readiness

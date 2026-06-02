@@ -52,6 +52,8 @@ from pcae.core.agent import (
     INVOCATION_CONTRACTS_ADVISORY,
     build_execution_readiness,
     EXECUTION_READINESS_ADVISORY,
+    build_adapter_registry_design,
+    ADAPTER_REGISTRY_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3233,6 +3235,59 @@ def run_execution_readiness(args: argparse.Namespace) -> int:
         print("Recommended next steps:")
         for i, rec in enumerate(data["recommendations"], 1):
             print(f"  {i}. {rec}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_adapter_registry_design(args: argparse.Namespace) -> int:
+    data = build_adapter_registry_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Runtime adapter registry design")
+        print()
+        print("Registry responsibilities:")
+        for resp in data["registry_responsibilities"]:
+            print(f"  - {resp}")
+        print()
+        print("Adapter registration model:")
+        for field in data["adapter_registration_model"]:
+            print(f"  {field['field']} ({field['type']}): {field['description']}")
+        print()
+        res = data["adapter_resolution"]
+        print("Adapter resolution:")
+        print("  Input:")
+        for k, v in res["input"].items():
+            print(f"    {k}: {v}")
+        print("  Output:")
+        for k, v in res["output"].items():
+            print(f"    {k}: {v}")
+        print("  Resolution steps:")
+        for i, step in enumerate(res["resolution_steps"], 1):
+            print(f"    {i}. {step}")
+        print(f"  Fallback: {res['fallback']}")
+        print()
+        hm = data["health_model"]
+        print(f"Health model (probe_mode={hm['probe_mode']}):")
+        for state in hm["states"]:
+            print(f"  {state}: {hm['state_descriptions'][state]}")
+        print(f"  Note: {hm['probe_note']}")
+        print()
+        cs = data["capability_synchronization"]
+        print("Capability synchronization:")
+        print(f"  Source of truth: {cs['source_of_truth']}")
+        print(f"  Registry may receive: {', '.join(cs['registry_may_receive'])}")
+        print(f"  Note: {cs['sync_note']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Registry may:     {', '.join(gov['registry_may'])}")
+        print(f"  Registry may not: {', '.join(gov['registry_may_not'])}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

@@ -307,6 +307,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-readiness`
 - `pcae execution-readiness --json`
+
+## adapter-registry-design
+
+- `pcae adapter-registry-design`
+- `pcae adapter-registry-design --json`
 """
 
 

@@ -19055,3 +19055,157 @@ def test_44y_execution_readiness_human_output_shows_all_sections(capsys) -> None
     assert "Gap analysis" in output
     assert "Recommended next steps" in output
     assert "Execution readiness assessment is informational" in output
+
+# Phase 44Z: Runtime Adapter Registry Design
+# ---------------------------------------------------------------------------
+
+
+def test_44z_adapter_registry_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["adapter-registry-design"])
+    assert exit_code == 0
+
+
+def test_44z_adapter_registry_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["adapter-registry-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44z_adapter_registry_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "registry_responsibilities",
+        "adapter_registration_model",
+        "adapter_resolution",
+        "health_model",
+        "capability_synchronization",
+        "governance_rules",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_44z_adapter_registry_design_registry_responsibilities(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    responsibilities = data["registry_responsibilities"]
+    for expected in (
+        "register_adapter",
+        "unregister_adapter",
+        "discover_adapters",
+        "resolve_adapter",
+        "report_health",
+        "report_capabilities",
+    ):
+        assert expected in responsibilities
+
+
+def test_44z_adapter_registry_design_registration_model_fields(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["adapter_registration_model"]
+    field_names = [f["field"] for f in model]
+    for expected in (
+        "runtime_id",
+        "adapter_id",
+        "version",
+        "lifecycle_status",
+        "supported_capabilities",
+        "writable_supported",
+        "subagent_supported",
+        "swarm_supported",
+    ):
+        assert expected in field_names
+    for field in model:
+        assert "field" in field
+        assert "type" in field
+        assert "description" in field
+
+
+def test_44z_adapter_registry_design_adapter_resolution_structure(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    res = data["adapter_resolution"]
+    assert "input" in res
+    assert "output" in res
+    assert "resolution_steps" in res
+    assert "fallback" in res
+    assert "runtime_id" in res["input"]
+    assert "adapter_id" in res["output"]
+    assert "health_status" in res["output"]
+    assert "capabilities" in res["output"]
+    assert len(res["resolution_steps"]) >= 1
+
+
+def test_44z_adapter_registry_design_health_model_states(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    hm = data["health_model"]
+    assert "states" in hm
+    assert "state_descriptions" in hm
+    for state in ("available", "degraded", "unavailable", "unknown"):
+        assert state in hm["states"]
+        assert state in hm["state_descriptions"]
+
+
+def test_44z_adapter_registry_design_capability_synchronization(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cs = data["capability_synchronization"]
+    assert "registry_may_receive" in cs
+    assert "source_of_truth" in cs
+    assert cs["source_of_truth"] == "capability_registry"
+    for item in ("runtime discovery", "capability discovery", "version discovery"):
+        assert item in cs["registry_may_receive"]
+
+
+def test_44z_adapter_registry_design_governance_rules(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "registry_may" in gov
+    assert "registry_may_not" in gov
+    may = " ".join(gov["registry_may"]).lower()
+    may_not = " ".join(gov["registry_may_not"]).lower()
+    assert "discover adapters" in may
+    assert "resolve adapters" in may
+    assert "report capabilities" in may
+    assert "invoke runtimes" in may_not
+    assert "approve actions" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44z_adapter_registry_design_advisory(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "read-only" in advisory
+    assert "no adapters are implemented" in advisory
+
+
+def test_44z_adapter_registry_design_future_evolution(capsys) -> None:
+    main(["adapter-registry-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "45A" in phases
+    assert "45B" in phases
+    assert "45C" in phases
+
+
+def test_44z_adapter_registry_design_human_output_shows_all_sections(capsys) -> None:
+    main(["adapter-registry-design"])
+    output = capsys.readouterr().out
+    assert "Runtime adapter registry design" in output
+    assert "Registry responsibilities" in output
+    assert "register_adapter" in output
+    assert "Adapter registration model" in output
+    assert "writable_supported" in output
+    assert "Adapter resolution" in output
+    assert "Health model" in output
+    assert "available" in output
+    assert "Capability synchronization" in output
+    assert "capability_registry" in output
+    assert "Governance" in output
+    assert "Adapter registry design is read-only" in output
