@@ -8201,6 +8201,151 @@ def build_consensus_execution_design() -> dict:
     }
 
 
+RUNTIME_EXECUTION_PROTOTYPE_ADVISORY = (
+    "Runtime execution prototype is advisory; no agents are executed."
+)
+
+_PROTO_EXECUTION_REQUEST_FIELDS: tuple[str, ...] = (
+    "request_id",
+    "runtime_id",
+    "objective",
+    "capabilities_required",
+    "timeout_seconds",
+    "read_only",
+    "metadata",
+)
+
+_PROTO_ADAPTER_RESOLUTION_STEPS: tuple[str, ...] = (
+    "look up runtime_id in adapter registry",
+    "verify adapter health",
+    "verify capability match",
+    "resolve adapter instance",
+)
+
+_PROTO_INVOCATION_ABSTRACTION: dict = {
+    "execution_mode": "non_interactive",
+    "delivery_methods": ["stdin", "prompt_file"],
+    "output_capture": "structured",
+    "timeout_enforcement": "adapter_enforced",
+    "single_runtime": True,
+    "writable": False,
+}
+
+_PROTO_RESULT_CAPTURE_FIELDS: tuple[str, ...] = (
+    "request_id",
+    "status",
+    "output",
+    "artifacts",
+    "errors",
+    "started_at",
+    "completed_at",
+    "duration_seconds",
+)
+
+_PROTO_RESULT_STATUSES: tuple[str, ...] = (
+    "completed",
+    "timed_out",
+    "failed",
+    "adapter_unavailable",
+    "capability_mismatch",
+)
+
+_PROTO_TIMEOUT_RULES: tuple[str, ...] = (
+    "timeout_seconds set at request creation",
+    "adapter enforces timeout boundary",
+    "on timeout: status = timed_out",
+    "partial output preserved on timeout",
+    "no automatic retry without human approval",
+)
+
+_PROTO_FAILURE_TYPES: tuple[dict, ...] = (
+    {
+        "type": "adapter_unavailable",
+        "description": "Adapter registry cannot resolve a healthy adapter for runtime_id.",
+    },
+    {
+        "type": "capability_mismatch",
+        "description": "Resolved adapter does not satisfy required capabilities.",
+    },
+    {
+        "type": "timeout",
+        "description": "Execution exceeded timeout_seconds; partial output preserved.",
+    },
+    {
+        "type": "execution_error",
+        "description": "Runtime returned a non-zero exit code or fatal error.",
+    },
+    {
+        "type": "output_parse_failure",
+        "description": "Structured output could not be parsed from runtime response.",
+    },
+)
+
+_PROTO_RESTRICTIONS: tuple[str, ...] = (
+    "read_only_only",
+    "single_runtime_only",
+    "no_writable_execution",
+    "no_commit",
+    "no_push",
+    "no_rollback",
+    "no_subagents",
+    "no_swarm",
+    "no_consensus",
+)
+
+_PROTO_GOVERNANCE_INTEGRATION: dict = {
+    "system_may": [
+        "create execution requests",
+        "resolve adapters",
+        "invoke runtimes (read-only)",
+        "capture results",
+    ],
+    "system_may_not": [
+        "approve implementation",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_PROTO_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44Q", "description": "Planner Runtime Adapter Prototype"},
+    {"phase": "44R", "description": "Multi-Agent Execution Prototype"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_runtime_execution_prototype() -> dict:
+    """Return a read-only controlled runtime execution prototype design."""
+    return {
+        "runtime_execution_prototype": {
+            "restrictions": list(_PROTO_RESTRICTIONS),
+        },
+        "execution_request_model": {
+            "fields": list(_PROTO_EXECUTION_REQUEST_FIELDS),
+        },
+        "adapter_resolution_model": {
+            "steps": list(_PROTO_ADAPTER_RESOLUTION_STEPS),
+        },
+        "runtime_invocation_model": _PROTO_INVOCATION_ABSTRACTION,
+        "result_capture_model": {
+            "fields": list(_PROTO_RESULT_CAPTURE_FIELDS),
+            "statuses": list(_PROTO_RESULT_STATUSES),
+        },
+        "timeout_model": {
+            "rules": list(_PROTO_TIMEOUT_RULES),
+        },
+        "failure_model": {
+            "types": list(_PROTO_FAILURE_TYPES),
+        },
+        "prototype_restrictions": list(_PROTO_RESTRICTIONS),
+        "governance_integration": _PROTO_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_PROTO_FUTURE_EVOLUTION),
+        "advisory": RUNTIME_EXECUTION_PROTOTYPE_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

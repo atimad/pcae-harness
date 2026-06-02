@@ -17411,3 +17411,173 @@ def test_44o_consensus_execution_design_human_output_shows_lifecycle_and_advisor
     assert "human_review" in output
     assert "decision_recommendation" in output
     assert "Consensus execution design is advisory" in output
+
+
+def test_44p_runtime_execution_prototype_command_exits_zero(capsys) -> None:
+    exit_code = main(["runtime-execution-prototype"])
+    assert exit_code == 0
+
+
+def test_44p_runtime_execution_prototype_json_exits_zero(capsys) -> None:
+    exit_code = main(["runtime-execution-prototype", "--json"])
+    assert exit_code == 0
+
+
+def test_44p_runtime_execution_prototype_json_has_required_top_level_keys(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "runtime_execution_prototype" in data
+    assert "execution_request_model" in data
+    assert "adapter_resolution_model" in data
+    assert "runtime_invocation_model" in data
+    assert "result_capture_model" in data
+    assert "timeout_model" in data
+    assert "failure_model" in data
+    assert "prototype_restrictions" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44p_runtime_execution_prototype_execution_request_model_fields(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["execution_request_model"]["fields"]
+    for expected in (
+        "request_id",
+        "runtime_id",
+        "objective",
+        "capabilities_required",
+        "timeout_seconds",
+        "read_only",
+        "metadata",
+    ):
+        assert expected in fields
+
+
+def test_44p_runtime_execution_prototype_adapter_resolution_steps_defined(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    steps = data["adapter_resolution_model"]["steps"]
+    assert len(steps) == 4
+    combined = " ".join(steps).lower()
+    assert "runtime_id" in combined
+    assert "adapter health" in combined
+    assert "capability match" in combined
+    assert "resolve adapter instance" in combined
+
+
+def test_44p_runtime_execution_prototype_invocation_model_single_read_only(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inv = data["runtime_invocation_model"]
+    assert inv["execution_mode"] == "non_interactive"
+    assert inv["single_runtime"] is True
+    assert inv["writable"] is False
+    assert "structured" in inv["output_capture"]
+    assert "stdin" in inv["delivery_methods"] or "prompt_file" in inv["delivery_methods"]
+
+
+def test_44p_runtime_execution_prototype_result_capture_model_fields(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rc = data["result_capture_model"]
+    for expected in (
+        "request_id",
+        "status",
+        "output",
+        "artifacts",
+        "errors",
+        "started_at",
+        "completed_at",
+        "duration_seconds",
+    ):
+        assert expected in rc["fields"]
+    statuses = rc["statuses"]
+    assert "completed" in statuses
+    assert "timed_out" in statuses
+    assert "failed" in statuses
+
+
+def test_44p_runtime_execution_prototype_timeout_model_defined(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["timeout_model"]["rules"]
+    assert len(rules) >= 3
+    combined = " ".join(rules).lower()
+    assert "timeout_seconds" in combined
+    assert "timed_out" in combined
+    assert "partial output" in combined
+
+
+def test_44p_runtime_execution_prototype_failure_model_types_defined(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    types = [f["type"] for f in data["failure_model"]["types"]]
+    assert len(types) == 5
+    for expected in (
+        "adapter_unavailable",
+        "capability_mismatch",
+        "timeout",
+        "execution_error",
+        "output_parse_failure",
+    ):
+        assert expected in types
+    for ft in data["failure_model"]["types"]:
+        assert "description" in ft
+
+
+def test_44p_runtime_execution_prototype_restrictions_enforce_spec(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    restrictions = data["prototype_restrictions"]
+    assert len(restrictions) == 9
+    for expected in (
+        "read_only_only",
+        "single_runtime_only",
+        "no_writable_execution",
+        "no_commit",
+        "no_push",
+        "no_rollback",
+        "no_subagents",
+        "no_swarm",
+        "no_consensus",
+    ):
+        assert expected in restrictions
+
+
+def test_44p_runtime_execution_prototype_governance_may_and_may_not(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "create execution requests" in gov["system_may"]
+    assert "resolve adapters" in gov["system_may"]
+    assert "capture results" in gov["system_may"]
+    for prohibited in ("approve implementation", "commit", "push", "rollback", "bypass governance"):
+        assert prohibited in gov["system_may_not"]
+
+
+def test_44p_runtime_execution_prototype_future_evolution_defined(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44Q" in phases
+    assert "44R" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44p_runtime_execution_prototype_advisory_is_correct(capsys) -> None:
+    main(["runtime-execution-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no agents are executed" in data["advisory"].lower()
+
+
+def test_44p_runtime_execution_prototype_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["runtime-execution-prototype"])
+    output = capsys.readouterr().out
+    assert "non_interactive" in output
+    assert "timeout" in output
+    assert "adapter_unavailable" in output
+    assert "Runtime execution prototype is advisory" in output

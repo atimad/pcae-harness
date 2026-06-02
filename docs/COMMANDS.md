@@ -236,3 +236,8 @@
 
 - `pcae consensus-execution-design`
 - `pcae consensus-execution-design --json`
+
+## runtime-execution-prototype
+
+- `pcae runtime-execution-prototype`
+- `pcae runtime-execution-prototype --json`

@@ -32,6 +32,8 @@ from pcae.core.agent import (
     REAL_PLANNING_DESIGN_ADVISORY,
     build_consensus_execution_design,
     CONSENSUS_EXECUTION_DESIGN_ADVISORY,
+    build_runtime_execution_prototype,
+    RUNTIME_EXECUTION_PROTOTYPE_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2257,6 +2259,60 @@ def run_consensus_execution_design(args: argparse.Namespace) -> int:
         print("Human review required when:")
         for condition in review["human_required_when"]:
             print(f"  - {condition}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  System may: {', '.join(gov['system_may'])}")
+        print(f"  System may not: {', '.join(gov['system_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_runtime_execution_prototype(args: argparse.Namespace) -> int:
+    data = build_runtime_execution_prototype()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Controlled runtime execution prototype")
+        print()
+        print("Execution request model fields:")
+        print(f"  {', '.join(data['execution_request_model']['fields'])}")
+        print()
+        print("Adapter resolution steps:")
+        for i, step in enumerate(data["adapter_resolution_model"]["steps"], 1):
+            print(f"  {i}. {step}")
+        print()
+        inv = data["runtime_invocation_model"]
+        print("Runtime invocation abstraction:")
+        print(f"  Execution mode:     {inv['execution_mode']}")
+        print(f"  Delivery methods:   {', '.join(inv['delivery_methods'])}")
+        print(f"  Output capture:     {inv['output_capture']}")
+        print(f"  Timeout enforcement:{inv['timeout_enforcement']}")
+        print(f"  Single runtime:     {'yes' if inv['single_runtime'] else 'no'}")
+        print(f"  Writable:           {'yes' if inv['writable'] else 'no'}")
+        print()
+        rc = data["result_capture_model"]
+        print("Result capture model fields:")
+        print(f"  {', '.join(rc['fields'])}")
+        print(f"  Statuses: {', '.join(rc['statuses'])}")
+        print()
+        print("Timeout handling rules:")
+        for rule in data["timeout_model"]["rules"]:
+            print(f"  - {rule}")
+        print()
+        print("Failure types:")
+        for ft in data["failure_model"]["types"]:
+            print(f"  {ft['type']}: {ft['description']}")
+        print()
+        restrictions = data["prototype_restrictions"]
+        print(f"Prototype restrictions ({len(restrictions)}):")
+        for r in restrictions:
+            print(f"  - {r}")
         print()
         gov = data["governance_integration"]
         print("Governance integration:")

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44O: Multi-Agent Consensus Execution Design.
+Phase 44P: Controlled Runtime Execution Prototype.
 
 ## Governance Coherence Note
 
@@ -964,6 +964,47 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 `invocation-design [--json]` wired in `cli.py`; strictly read-only — no
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
+tests.
+
+PCAE exposes a read-only controlled runtime execution prototype design
+(Phase 44P): `pcae runtime-execution-prototype` and
+`pcae runtime-execution-prototype --json` generate a prototype design for
+execution request creation, adapter resolution, runtime invocation abstraction,
+result capture, timeout handling, and failure handling; execution request model
+with seven fields (request_id, runtime_id, objective, capabilities_required,
+timeout_seconds, read_only, metadata); adapter resolution in four steps: look
+up runtime_id in adapter registry → verify adapter health → verify capability
+match → resolve adapter instance; runtime invocation abstraction: non_interactive
+mode, stdin or prompt_file delivery, structured output capture, adapter-enforced
+timeout, single runtime, read-only; result capture model with eight fields
+(request_id, status, output, artifacts, errors, started_at, completed_at,
+duration_seconds) and five statuses (completed, timed_out, failed,
+adapter_unavailable, capability_mismatch); timeout model: timeout_seconds set
+at request creation, adapter enforces timeout boundary, status = timed_out on
+timeout, partial output preserved, no automatic retry without human approval;
+five failure types: adapter_unavailable, capability_mismatch, timeout,
+execution_error, output_parse_failure; nine prototype restrictions:
+read_only_only, single_runtime_only, no_writable_execution, no_commit,
+no_push, no_rollback, no_subagents, no_swarm, no_consensus; governance: system
+may create execution requests, resolve adapters, invoke runtimes (read-only),
+capture results; system may not approve implementation, commit, push, rollback,
+or bypass governance; future evolution: 44Q Planner Runtime Adapter Prototype,
+44R Multi-Agent Execution Prototype, 45A Autonomous Roadmap Generation; JSON
+output includes `runtime_execution_prototype`, `execution_request_model`,
+`adapter_resolution_model`, `runtime_invocation_model`, `result_capture_model`,
+`timeout_model`, `failure_model`, `prototype_restrictions`,
+`governance_integration`, `advisory`; `RUNTIME_EXECUTION_PROTOTYPE_ADVISORY`,
+`_PROTO_EXECUTION_REQUEST_FIELDS`, `_PROTO_ADAPTER_RESOLUTION_STEPS`,
+`_PROTO_INVOCATION_ABSTRACTION`, `_PROTO_RESULT_CAPTURE_FIELDS`,
+`_PROTO_RESULT_STATUSES`, `_PROTO_TIMEOUT_RULES`, `_PROTO_FAILURE_TYPES`,
+`_PROTO_RESTRICTIONS`, `_PROTO_GOVERNANCE_INTEGRATION`,
+`_PROTO_FUTURE_EVOLUTION`, `build_runtime_execution_prototype` added to
+`core/agent.py`; `run_runtime_execution_prototype` added to
+`commands/agent.py`; `runtime-execution-prototype [--json]` wired in
+`cli.py`; `runtime-execution-prototype` section added to `docs/COMMANDS.md`;
+strictly read-only — single runtime only, no writable execution, no commit,
+no push, no rollback, no subagents, no swarm, no consensus; advisory:
+"Runtime execution prototype is advisory; no agents are executed."; 13 new
 tests.
 
 PCAE exposes a read-only multi-agent consensus execution architecture design

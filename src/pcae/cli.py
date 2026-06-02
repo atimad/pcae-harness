@@ -28,6 +28,7 @@ from pcae.commands.agent import (
     run_invocation_design,
     run_real_planning_design,
     run_consensus_execution_design,
+    run_runtime_execution_prototype,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1383,6 +1384,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON consensus execution design output.",
     )
     consensus_execution_design_parser.set_defaults(handler=run_consensus_execution_design)
+
+    runtime_execution_prototype_parser = subparsers.add_parser(
+        "runtime-execution-prototype",
+        help="Show read-only controlled runtime execution prototype design (Phase 44P).",
+    )
+    runtime_execution_prototype_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime execution prototype output.",
+    )
+    runtime_execution_prototype_parser.set_defaults(handler=run_runtime_execution_prototype)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
