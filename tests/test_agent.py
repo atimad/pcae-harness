@@ -18539,3 +18539,211 @@ def test_44v_consensus_runtime_pilot_human_output_shows_sections_and_advisory(ca
     assert "Recommendation preview" in output
     assert "Governance" in output
     assert "Consensus runtime pilot is simulated" in output
+
+# Phase 44W: Governed Execution Dry-Run
+# ---------------------------------------------------------------------------
+
+
+def test_44w_governed_execution_dry_run_command_exits_zero(capsys) -> None:
+    exit_code = main(["governed-execution-dry-run"])
+    assert exit_code == 0
+
+
+def test_44w_governed_execution_dry_run_json_exits_zero(capsys) -> None:
+    exit_code = main(["governed-execution-dry-run", "--json"])
+    assert exit_code == 0
+
+
+def test_44w_governed_execution_dry_run_json_has_required_top_level_keys(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "dry_run_id",
+        "lifecycle",
+        "objective_intake",
+        "capability_discovery",
+        "runtime_selection",
+        "invocation_plan",
+        "simulated_result_plan",
+        "consensus_handoff",
+        "governance_checkpoints",
+        "blockers",
+        "governance_rules",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_44w_governed_execution_dry_run_lifecycle_has_eight_stages(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 8
+    names = [s["name"] for s in lifecycle]
+    for expected in (
+        "objective_intake",
+        "capability_discovery",
+        "runtime_selection",
+        "invocation_planning",
+        "simulated_result_capture",
+        "consensus_preparation",
+        "governance_decision_point",
+        "human_review",
+    ):
+        assert expected in names
+
+
+def test_44w_governed_execution_dry_run_objective_intake(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    obj = data["objective_intake"]
+    assert "objective_id" in obj
+    assert "requested_capabilities" in obj
+    assert "governance_mode" in obj
+    assert "writable_allowed" in obj
+    assert obj["writable_allowed"] is False
+    assert obj["governance_mode"] == "read_only"
+    assert len(obj["requested_capabilities"]) >= 1
+
+
+def test_44w_governed_execution_dry_run_capability_discovery(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cap = data["capability_discovery"]
+    assert "requested_capabilities" in cap
+    assert "discovered_runtimes" in cap
+    assert "coverage" in cap
+    assert "unmet_capabilities" in cap
+    assert cap["coverage"] == "full"
+    assert cap["unmet_capabilities"] == []
+    for capability in cap["requested_capabilities"]:
+        assert capability in cap["discovered_runtimes"]
+
+
+def test_44w_governed_execution_dry_run_runtime_selection(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["runtime_selection"]
+    assert "selected_runtimes" in rs
+    assert "selection_basis" in rs
+    assert len(rs["selected_runtimes"]) >= 1
+    for rid in ("codex-local", "claude-local", "kimi-local"):
+        assert rid in rs["selected_runtimes"]
+
+
+def test_44w_governed_execution_dry_run_invocation_plan_fields(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["invocation_plan"]
+    assert len(plan) >= 1
+    for step in plan:
+        assert "step" in step
+        assert "runtime_id" in step
+        assert "capability" in step
+        assert "governance_checkpoint" in step
+        assert "writable_allowed" in step
+        assert step["writable_allowed"] is False
+
+
+def test_44w_governed_execution_dry_run_simulated_result_plan(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    srp = data["simulated_result_plan"]
+    assert "collection_mode" in srp
+    assert "expected_fields" in srp
+    assert "simulated_outcomes" in srp
+    assert "writable_allowed" in srp
+    assert srp["collection_mode"] == "simulated"
+    assert srp["writable_allowed"] is False
+    assert len(srp["simulated_outcomes"]) >= 1
+    for outcome in srp["simulated_outcomes"]:
+        assert "runtime_id" in outcome
+        assert "status" in outcome
+        assert "confidence" in outcome
+
+
+def test_44w_governed_execution_dry_run_consensus_handoff(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ch = data["consensus_handoff"]
+    assert "inputs_prepared" in ch
+    assert "human_review_required" in ch
+    assert "conflict_escalation" in ch
+    assert ch["human_review_required"] is True
+    assert len(ch["inputs_prepared"]) >= 1
+    combined = " ".join(ch["inputs_prepared"]).lower()
+    assert "recommendation" in combined
+    assert "confidence" in combined
+
+
+def test_44w_governed_execution_dry_run_governance_checkpoints(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checkpoints = data["governance_checkpoints"]
+    assert len(checkpoints) >= 3
+    names = [cp["checkpoint"] for cp in checkpoints]
+    assert "objective_intake" in names
+    assert "pre_invocation_safety_gate" in names
+    assert "human_review" in names
+    for cp in checkpoints:
+        assert "description" in cp
+        assert "required" in cp
+        assert cp["required"] is True
+
+
+def test_44w_governed_execution_dry_run_blockers_present(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) >= 1
+    combined = " ".join(blockers).lower()
+    assert "no_runtime_invocation" in combined
+    assert "no_file_modification" in combined
+
+
+def test_44w_governed_execution_dry_run_governance_rules(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "dry_run_may" in gov
+    assert "dry_run_may_not" in gov
+    may = " ".join(gov["dry_run_may"]).lower()
+    may_not = " ".join(gov["dry_run_may_not"]).lower()
+    assert "intake objective" in may
+    assert "invoke runtimes" in may_not
+    assert "submit prompts" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44w_governed_execution_dry_run_advisory(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "simulated" in data["advisory"].lower()
+    assert "no runtimes are invoked" in data["advisory"].lower()
+
+
+def test_44w_governed_execution_dry_run_future_evolution(capsys) -> None:
+    main(["governed-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44X" in phases
+    assert "45A" in phases
+
+
+def test_44w_governed_execution_dry_run_human_output_shows_sections(capsys) -> None:
+    main(["governed-execution-dry-run"])
+    output = capsys.readouterr().out
+    assert "Governed execution dry-run" in output
+    assert "Lifecycle" in output
+    assert "Objective intake" in output
+    assert "Capability discovery" in output
+    assert "Invocation plan" in output
+    assert "Simulated result plan" in output
+    assert "Consensus handoff" in output
+    assert "Governance checkpoints" in output
+    assert "Blockers" in output
+    assert "Governance" in output
+    assert "Governed execution dry-run is simulated" in output

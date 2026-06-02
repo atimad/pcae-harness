@@ -9263,3 +9263,208 @@ def build_consensus_runtime_pilot() -> dict:
         "advisory": CONSENSUS_RUNTIME_PILOT_ADVISORY,
     }
 
+
+# Phase 44W: Governed Execution Dry-Run
+# ---------------------------------------------------------------------------
+
+GOVERNED_EXECUTION_DRY_RUN_ADVISORY = (
+    "Governed execution dry-run is simulated; no runtimes are invoked."
+)
+
+_GEDR_DRY_RUN_ID = "dry-run-44w-preview"
+
+_GEDR_LIFECYCLE: tuple[dict, ...] = (
+    {"step": 1, "name": "objective_intake", "description": "Validate and record the execution objective."},
+    {"step": 2, "name": "capability_discovery", "description": "Match requested capabilities to available runtimes."},
+    {"step": 3, "name": "runtime_selection", "description": "Select runtimes based on capability coverage."},
+    {"step": 4, "name": "invocation_planning", "description": "Plan invocations per runtime with governance checkpoints."},
+    {"step": 5, "name": "simulated_result_capture", "description": "Define result capture plan (no execution)."},
+    {"step": 6, "name": "consensus_preparation", "description": "Prepare inputs for consensus evaluation."},
+    {"step": 7, "name": "governance_decision_point", "description": "Evaluate governance checkpoints; surface blockers."},
+    {"step": 8, "name": "human_review", "description": "Human review is always required before any outcome is acted upon."},
+)
+
+_GEDR_OBJECTIVE: dict = {
+    "objective_id": "obj-44w-preview",
+    "description": "Review and validate implementation changes for governance compliance.",
+    "requested_capabilities": ["code_analysis", "documentation", "governance_validation"],
+    "governance_mode": "read_only",
+    "writable_allowed": False,
+}
+
+_GEDR_CAPABILITY_DISCOVERY: dict = {
+    "requested_capabilities": ["code_analysis", "documentation", "governance_validation"],
+    "discovered_runtimes": {
+        "code_analysis": ["codex-local", "claude-local", "kimi-local"],
+        "documentation": ["claude-local"],
+        "governance_validation": ["claude-local"],
+    },
+    "coverage": "full",
+    "unmet_capabilities": [],
+}
+
+_GEDR_SELECTED_RUNTIMES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_GEDR_INVOCATION_PLAN: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "runtime_id": "codex-local",
+        "capability": "code_analysis",
+        "invocation_preview": "codex --non-interactive --output-format json <prompt>",
+        "timeout_seconds": 300,
+        "writable_allowed": False,
+        "governance_checkpoint": "pre_invocation_safety_gate",
+    },
+    {
+        "step": 2,
+        "runtime_id": "kimi-local",
+        "capability": "code_analysis",
+        "invocation_preview": "kimi --non-interactive --output-format json <prompt>",
+        "timeout_seconds": 300,
+        "writable_allowed": False,
+        "governance_checkpoint": "pre_invocation_safety_gate",
+    },
+    {
+        "step": 3,
+        "runtime_id": "claude-local",
+        "capability": "documentation",
+        "invocation_preview": "claude --non-interactive --output-format json <prompt>",
+        "timeout_seconds": 300,
+        "writable_allowed": False,
+        "governance_checkpoint": "pre_invocation_safety_gate",
+    },
+    {
+        "step": 4,
+        "runtime_id": "claude-local",
+        "capability": "governance_validation",
+        "invocation_preview": "claude --non-interactive --output-format json <prompt>",
+        "timeout_seconds": 300,
+        "writable_allowed": False,
+        "governance_checkpoint": "post_execution_governance_audit",
+    },
+)
+
+_GEDR_SIMULATED_RESULT_PLAN: dict = {
+    "collection_mode": "simulated",
+    "expected_fields": [
+        "runtime_id",
+        "status",
+        "output",
+        "confidence",
+        "artifacts",
+        "duration_seconds",
+    ],
+    "simulated_outcomes": [
+        {"runtime_id": "codex-local", "status": "completed", "confidence": 0.85},
+        {"runtime_id": "kimi-local", "status": "completed", "confidence": 0.70},
+        {"runtime_id": "claude-local", "status": "completed", "confidence": 0.90},
+    ],
+    "partial_result_handling": "preserved",
+    "writable_allowed": False,
+}
+
+_GEDR_CONSENSUS_HANDOFF: dict = {
+    "inputs_prepared": [
+        "per_runtime_recommendation",
+        "per_runtime_confidence",
+        "per_runtime_rationale",
+    ],
+    "agreement_threshold": 0.67,
+    "conflict_escalation": "escalate_to_human",
+    "human_review_required": True,
+    "handoff_status": "planned",
+    "note": "Consensus execution is not performed in this dry-run.",
+}
+
+_GEDR_GOVERNANCE_CHECKPOINTS: tuple[dict, ...] = (
+    {
+        "checkpoint": "objective_intake",
+        "description": "Objective validated: governance_mode=read_only, writable_allowed=false.",
+        "command": "pcae check",
+        "required": True,
+    },
+    {
+        "checkpoint": "capability_discovery",
+        "description": "All requested capabilities covered by available runtimes.",
+        "command": "pcae orchestration capabilities",
+        "required": True,
+    },
+    {
+        "checkpoint": "pre_invocation_safety_gate",
+        "description": "Each runtime verified: read-only mode enforced, capability matched, governance valid.",
+        "command": "pcae health",
+        "required": True,
+    },
+    {
+        "checkpoint": "post_execution_governance_audit",
+        "description": "Results collected; no writable artifacts produced; audit trail complete.",
+        "command": "pcae check",
+        "required": True,
+    },
+    {
+        "checkpoint": "human_review",
+        "description": "Human review required before any outcome is acted upon.",
+        "command": None,
+        "required": True,
+    },
+)
+
+_GEDR_BLOCKERS: tuple[str, ...] = (
+    "no_runtime_invocation: runtimes are not invoked in this dry-run",
+    "no_writable_execution: writable_allowed is always false",
+    "no_file_modification: no files are modified",
+    "no_approval_mutation: governance decisions are advisory only",
+)
+
+_GEDR_GOVERNANCE_RULES: dict = {
+    "dry_run_may": [
+        "intake objective",
+        "discover capabilities",
+        "select runtimes",
+        "plan invocations",
+        "simulate result capture",
+        "prepare consensus handoff",
+        "expose governance checkpoints",
+    ],
+    "dry_run_may_not": [
+        "invoke runtimes",
+        "submit prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "mutate approvals",
+        "bypass governance",
+    ],
+}
+
+_GEDR_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44X", "description": "Runtime Invocation Validation"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_governed_execution_dry_run() -> dict:
+    """Return a read-only governed execution dry-run showing the full lifecycle."""
+    return {
+        "dry_run_id": _GEDR_DRY_RUN_ID,
+        "lifecycle": list(_GEDR_LIFECYCLE),
+        "objective_intake": dict(_GEDR_OBJECTIVE),
+        "capability_discovery": dict(_GEDR_CAPABILITY_DISCOVERY),
+        "runtime_selection": {
+            "selected_runtimes": list(_GEDR_SELECTED_RUNTIMES),
+            "selection_basis": "capability coverage",
+        },
+        "invocation_plan": list(_GEDR_INVOCATION_PLAN),
+        "simulated_result_plan": dict(_GEDR_SIMULATED_RESULT_PLAN),
+        "consensus_handoff": dict(_GEDR_CONSENSUS_HANDOFF),
+        "governance_checkpoints": list(_GEDR_GOVERNANCE_CHECKPOINTS),
+        "blockers": list(_GEDR_BLOCKERS),
+        "governance_rules": _GEDR_GOVERNANCE_RULES,
+        "future_evolution": list(_GEDR_FUTURE_EVOLUTION),
+        "advisory": GOVERNED_EXECUTION_DRY_RUN_ADVISORY,
+    }

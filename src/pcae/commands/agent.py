@@ -46,6 +46,8 @@ from pcae.core.agent import (
     MULTI_RUNTIME_PILOT_ADVISORY,
     build_consensus_runtime_pilot,
     CONSENSUS_RUNTIME_PILOT_ADVISORY,
+    build_governed_execution_dry_run,
+    GOVERNED_EXECUTION_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3063,6 +3065,80 @@ def run_consensus_runtime_pilot(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  Pilot may:     {', '.join(gov['pilot_may'])}")
         print(f"  Pilot may not: {', '.join(gov['pilot_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governed_execution_dry_run(args: argparse.Namespace) -> int:
+    data = build_governed_execution_dry_run()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Governed execution dry-run")
+        print(f"  Dry-run ID: {data['dry_run_id']}")
+        print()
+        print("Lifecycle:")
+        for stage in data["lifecycle"]:
+            print(f"  {stage['step']}. {stage['name']}: {stage['description']}")
+        print()
+        obj = data["objective_intake"]
+        print("Objective intake:")
+        print(f"  ID:           {obj['objective_id']}")
+        print(f"  Description:  {obj['description']}")
+        print(f"  Capabilities: {', '.join(obj['requested_capabilities'])}")
+        print(f"  Mode:         {obj['governance_mode']}, writable={obj['writable_allowed']}")
+        print()
+        cap = data["capability_discovery"]
+        print("Capability discovery:")
+        print(f"  Coverage:           {cap['coverage']}")
+        print(f"  Unmet capabilities: {cap['unmet_capabilities'] or 'none'}")
+        for capability, runtimes in cap["discovered_runtimes"].items():
+            print(f"  {capability}: {', '.join(runtimes)}")
+        print()
+        rs = data["runtime_selection"]
+        print(f"Runtime selection ({len(rs['selected_runtimes'])} runtimes, basis={rs['selection_basis']}):")
+        for rid in rs["selected_runtimes"]:
+            print(f"  {rid}")
+        print()
+        print(f"Invocation plan ({len(data['invocation_plan'])} steps):")
+        for step in data["invocation_plan"]:
+            print(f"  Step {step['step']}: {step['runtime_id']} [{step['capability']}]")
+            print(f"    checkpoint: {step['governance_checkpoint']}, writable={step['writable_allowed']}")
+        print()
+        srp = data["simulated_result_plan"]
+        print("Simulated result plan:")
+        print(f"  Collection mode:  {srp['collection_mode']}")
+        print(f"  Partial handling: {srp['partial_result_handling']}")
+        for outcome in srp["simulated_outcomes"]:
+            print(f"  {outcome['runtime_id']}: status={outcome['status']}, confidence={outcome['confidence']}")
+        print()
+        ch = data["consensus_handoff"]
+        print("Consensus handoff:")
+        print(f"  Inputs prepared:   {', '.join(ch['inputs_prepared'])}")
+        print(f"  Agreement threshold: {ch['agreement_threshold']}")
+        print(f"  Conflict escalation: {ch['conflict_escalation']}")
+        print(f"  Human review:      {'required' if ch['human_review_required'] else 'optional'}")
+        print(f"  Note: {ch['note']}")
+        print()
+        print("Governance checkpoints:")
+        for cp in data["governance_checkpoints"]:
+            cmd = cp["command"] or "—"
+            print(f"  [{cp['checkpoint']}] {cp['description']}")
+            print(f"    command={cmd}, required={cp['required']}")
+        print()
+        print("Blockers:")
+        for blocker in data["blockers"]:
+            print(f"  {blocker}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Dry-run may:     {', '.join(gov['dry_run_may'])}")
+        print(f"  Dry-run may not: {', '.join(gov['dry_run_may_not'])}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

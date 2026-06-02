@@ -271,3 +271,8 @@
 
 - `pcae consensus-runtime-pilot`
 - `pcae consensus-runtime-pilot --json`
+
+## governed-execution-dry-run
+
+- `pcae governed-execution-dry-run`
+- `pcae governed-execution-dry-run --json`

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44V: Consensus Runtime Pilot.
+Phase 44W: Governed Execution Dry-Run.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,21 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only governed execution dry-run (Phase 44W): `pcae governed-execution-dry-run`
+and `pcae governed-execution-dry-run --json` simulate the complete governed multi-agent
+execution lifecycle without invoking runtimes; 8 lifecycle stages from objective_intake through
+human_review; capability_discovery achieves full coverage (0 unmet); invocation_plan: 4 steps
+for codex-local, kimi-local, claude-local (documentation), claude-local (governance_validation);
+simulated_result_plan: collection_mode=simulated, writable_allowed=false; consensus_handoff:
+human_review_required=true, conflict_escalation=escalate_to_human; 5 governance_checkpoints all
+required=true; 4 blockers (no_runtime_invocation, no_writable_execution, no_file_modification,
+no_approval_mutation); governance: dry-run may intake/discover/select/plan/simulate/handoff/expose;
+dry-run may not invoke runtimes, submit prompts, modify files, commit, push, rollback, or mutate
+approvals; future evolution: 44X Runtime Invocation Validation, 45A Autonomous Roadmap Generation;
+`build_governed_execution_dry_run` in `core/agent.py`; `governed-execution-dry-run [--json]` wired;
+strictly read-only; advisory: "Governed execution dry-run is simulated; no runtimes are invoked.";
+16 new tests.
 
 PCAE exposes a read-only consensus runtime pilot (Phase 44V): `pcae consensus-runtime-pilot`
 and `pcae consensus-runtime-pilot --json` prototype how simulated multi-runtime outputs

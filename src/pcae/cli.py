@@ -35,6 +35,7 @@ from pcae.commands.agent import (
     run_invocation_pilot,
     run_multi_runtime_pilot,
     run_consensus_runtime_pilot,
+    run_governed_execution_dry_run,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1467,6 +1468,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON consensus runtime pilot output.",
     )
     consensus_runtime_pilot_parser.set_defaults(handler=run_consensus_runtime_pilot)
+
+    governed_execution_dry_run_parser = subparsers.add_parser(
+        "governed-execution-dry-run",
+        help="Show read-only governed execution dry-run simulating the full lifecycle (Phase 44W).",
+    )
+    governed_execution_dry_run_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governed execution dry-run output.",
+    )
+    governed_execution_dry_run_parser.set_defaults(handler=run_governed_execution_dry_run)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
