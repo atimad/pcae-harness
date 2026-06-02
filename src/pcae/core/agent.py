@@ -7842,6 +7842,183 @@ def build_invocation_design() -> dict:
     }
 
 
+REAL_PLANNING_DESIGN_ADVISORY = (
+    "Real planning design is advisory; no planners are executed."
+)
+
+_REAL_PLANNING_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "stage": 1,
+        "name": "objective",
+        "description": "Coordinator receives a planning objective.",
+    },
+    {
+        "stage": 2,
+        "name": "capability_discovery",
+        "description": (
+            "Available planners are discovered via the capability registry."
+        ),
+    },
+    {
+        "stage": 3,
+        "name": "planner_selection",
+        "description": (
+            "Eligible planners are selected based on capability match, "
+            "confidence threshold, and invocation safety gates."
+        ),
+    },
+    {
+        "stage": 4,
+        "name": "invocation_creation",
+        "description": (
+            "A structured invocation request is created for each selected planner."
+        ),
+    },
+    {
+        "stage": 5,
+        "name": "planner_execution",
+        "description": (
+            "Selected planners are executed through the execution framework "
+            "and runtime adapters."
+        ),
+    },
+    {
+        "stage": 6,
+        "name": "artifact_collection",
+        "description": (
+            "Planning artifacts are collected from each planner execution result."
+        ),
+    },
+    {
+        "stage": 7,
+        "name": "consensus",
+        "description": (
+            "Collected artifacts are fed to the consensus engine for agreement "
+            "and conflict analysis."
+        ),
+    },
+    {
+        "stage": 8,
+        "name": "human_review",
+        "description": (
+            "Human reviewer evaluates consensus output before any roadmap is approved."
+        ),
+    },
+    {
+        "stage": 9,
+        "name": "approved_roadmap",
+        "description": (
+            "Human-approved roadmap is recorded as a governed planning artifact."
+        ),
+    },
+)
+
+_PLANNER_ELIGIBILITY_CRITERIA: tuple[str, ...] = (
+    "be installed",
+    "be available",
+    "support planning capability",
+    "satisfy confidence threshold",
+    "pass invocation safety gates",
+)
+
+_REAL_PLANNING_EXECUTION_MODES: tuple[dict, ...] = (
+    {
+        "mode": "single_planner",
+        "description": "One planner produces a single planning artifact.",
+    },
+    {
+        "mode": "sequential_planners",
+        "description": "Planners execute in sequence; each builds on prior artifacts.",
+    },
+    {
+        "mode": "parallel_planners",
+        "description": "Planners execute concurrently; artifacts are collected independently.",
+    },
+    {
+        "mode": "swarm_planners",
+        "description": "Multiple planners execute with shared context and cross-artifact visibility.",
+    },
+    {
+        "mode": "consensus_planners",
+        "description": "Planners execute independently; consensus engine resolves conflicts.",
+    },
+)
+
+_REAL_PLANNING_ARTIFACT_FIELDS: tuple[str, ...] = (
+    "artifact_id",
+    "objective_id",
+    "planner_id",
+    "proposed_phases",
+    "dependencies",
+    "assumptions",
+    "risks",
+    "recommendations",
+    "confidence",
+)
+
+_CONSENSUS_INTEGRATION_FEEDS: tuple[str, ...] = (
+    "agreement analysis",
+    "conflict analysis",
+    "consensus summary",
+)
+
+_HUMAN_REVIEW_ACTIONS: tuple[str, ...] = (
+    "approve roadmap",
+    "reject roadmap",
+    "request changes",
+    "request additional planners",
+)
+
+_REAL_PLANNING_GOVERNANCE_INTEGRATION: dict = {
+    "system_may": [
+        "invoke planners",
+        "collect planning artifacts",
+    ],
+    "system_may_not": [
+        "approve implementation",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_REAL_PLANNING_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44O", "description": "Multi-Agent Consensus Execution Design"},
+    {"phase": "44P", "description": "Controlled Runtime Execution Prototype"},
+    {"phase": "44Q", "description": "Planner Runtime Adapter Prototype"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_real_planning_design() -> dict:
+    """Return a read-only real multi-agent planning architecture design."""
+    return {
+        "real_planning_design": {
+            "planning_lifecycle": list(_REAL_PLANNING_LIFECYCLE),
+        },
+        "planning_lifecycle": list(_REAL_PLANNING_LIFECYCLE),
+        "planner_eligibility": {
+            "criteria": list(_PLANNER_ELIGIBILITY_CRITERIA),
+            "human_review_required_before_execution": True,
+        },
+        "execution_modes": list(_REAL_PLANNING_EXECUTION_MODES),
+        "planning_artifact_model": {
+            "fields": list(_REAL_PLANNING_ARTIFACT_FIELDS),
+        },
+        "consensus_integration": {
+            "feeds_into": list(_CONSENSUS_INTEGRATION_FEEDS),
+        },
+        "human_review_model": {
+            "actions": list(_HUMAN_REVIEW_ACTIONS),
+            "human_review_required": True,
+        },
+        "governance_integration": _REAL_PLANNING_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_REAL_PLANNING_FUTURE_EVOLUTION),
+        "advisory": REAL_PLANNING_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

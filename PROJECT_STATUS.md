@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44M: Controlled Agent Invocation Design.
+Phase 44N: Real Multi-Agent Planning Design.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,40 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only real multi-agent planning architecture design
+(Phase 44N): `pcae real-planning-design` and `pcae real-planning-design --json`
+generate a design for how PCAE orchestrates real planning-capable agents through
+the execution framework to produce governed planning artifacts; nine-stage
+planning lifecycle: objective → capability_discovery → planner_selection →
+invocation_creation → planner_execution → artifact_collection → consensus →
+human_review → approved_roadmap; planner eligibility model with five criteria
+(be installed, be available, support planning capability, satisfy confidence
+threshold, pass invocation safety gates); five planning execution modes
+(single_planner, sequential_planners, parallel_planners, swarm_planners,
+consensus_planners); planning artifact model with nine fields (artifact_id,
+objective_id, planner_id, proposed_phases, dependencies, assumptions, risks,
+recommendations, confidence); consensus integration feeds into agreement
+analysis, conflict analysis, consensus summary; human review model: human may
+approve roadmap, reject roadmap, request changes, or request additional planners;
+human review required before execution; governance integration: system may invoke
+planners and collect planning artifacts; system may not approve implementation,
+commit, push, rollback, or bypass governance; future evolution: 44O Multi-Agent
+Consensus Execution Design, 44P Controlled Runtime Execution Prototype, 44Q
+Planner Runtime Adapter Prototype, 45A Autonomous Roadmap Generation; JSON
+output includes `real_planning_design`, `planning_lifecycle`,
+`planner_eligibility`, `execution_modes`, `planning_artifact_model`,
+`consensus_integration`, `human_review_model`, `governance_integration`,
+`advisory`; `REAL_PLANNING_DESIGN_ADVISORY`, `_REAL_PLANNING_LIFECYCLE`,
+`_PLANNER_ELIGIBILITY_CRITERIA`, `_REAL_PLANNING_EXECUTION_MODES`,
+`_REAL_PLANNING_ARTIFACT_FIELDS`, `_CONSENSUS_INTEGRATION_FEEDS`,
+`_HUMAN_REVIEW_ACTIONS`, `_REAL_PLANNING_GOVERNANCE_INTEGRATION`,
+`_REAL_PLANNING_FUTURE_EVOLUTION`, `build_real_planning_design` added to
+`core/agent.py`; `run_real_planning_design` added to `commands/agent.py`;
+`real-planning-design [--json]` wired in `cli.py`; strictly read-only — no
+planner execution, no runtime invocation, no adapter implementation, no file
+modification; advisory: "Real planning design is advisory; no planners are
+executed."; 13 new tests.
 
 PCAE exposes a read-only runtime adapter integration architecture design
 (Phase 44L): `pcae adapter-design` and `pcae adapter-design --json` generate

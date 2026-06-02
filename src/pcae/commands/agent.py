@@ -28,6 +28,8 @@ from pcae.core.agent import (
     build_adapter_design,
     build_execution_framework_design,
     build_invocation_design,
+    build_real_planning_design,
+    REAL_PLANNING_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2159,6 +2161,52 @@ def run_invocation_design(args: argparse.Namespace) -> int:
         print()
         print("Result capture model fields:")
         print(f"  {', '.join(data['result_capture_model']['fields'])}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  System may: {', '.join(gov['system_may'])}")
+        print(f"  System may not: {', '.join(gov['system_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_real_planning_design(args: argparse.Namespace) -> int:
+    data = build_real_planning_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Real multi-agent planning design")
+        print()
+        print("Planning lifecycle:")
+        for stage in data["planning_lifecycle"]:
+            print(f"  {stage['stage']}. {stage['name']}: {stage['description']}")
+        print()
+        elig = data["planner_eligibility"]
+        print("Planner eligibility — planner must:")
+        for criterion in elig["criteria"]:
+            print(f"  - {criterion}")
+        print()
+        print("Planning execution modes:")
+        for mode in data["execution_modes"]:
+            print(f"  {mode['mode']}: {mode['description']}")
+        print()
+        print("Planning artifact model fields:")
+        print(f"  {', '.join(data['planning_artifact_model']['fields'])}")
+        print()
+        print("Consensus integration (feeds into):")
+        for target in data["consensus_integration"]["feeds_into"]:
+            print(f"  - {target}")
+        print()
+        review = data["human_review_model"]
+        print("Human review model — human may:")
+        for action in review["actions"]:
+            print(f"  - {action}")
+        print(f"  Human review required: {review['human_review_required']}")
         print()
         gov = data["governance_integration"]
         print("Governance integration:")

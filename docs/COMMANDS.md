@@ -226,3 +226,8 @@
 
 - `pcae invocation-design`
 - `pcae invocation-design --json`
+
+## real-planning-design
+
+- `pcae real-planning-design`
+- `pcae real-planning-design --json`

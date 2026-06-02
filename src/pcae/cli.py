@@ -26,6 +26,7 @@ from pcae.commands.agent import (
     run_adapter_design,
     run_execution_framework_design,
     run_invocation_design,
+    run_real_planning_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1359,6 +1360,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON invocation design output.",
     )
     invocation_design_parser.set_defaults(handler=run_invocation_design)
+
+    real_planning_design_parser = subparsers.add_parser(
+        "real-planning-design",
+        help="Show read-only real multi-agent planning architecture design (Phase 44N).",
+    )
+    real_planning_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON real planning design output.",
+    )
+    real_planning_design_parser.set_defaults(handler=run_real_planning_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

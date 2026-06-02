@@ -17100,3 +17100,154 @@ def test_44m_invocation_design_human_output_shows_lifecycle_and_advisory(capsys)
     assert "governance" in output
     assert "read-only" in output
     assert "Controlled invocation design is advisory" in output
+
+
+def test_44n_real_planning_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["real-planning-design"])
+    assert exit_code == 0
+
+
+def test_44n_real_planning_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["real-planning-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44n_real_planning_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "real_planning_design" in data
+    assert "planning_lifecycle" in data
+    assert "planner_eligibility" in data
+    assert "execution_modes" in data
+    assert "planning_artifact_model" in data
+    assert "consensus_integration" in data
+    assert "human_review_model" in data
+    assert "governance_integration" in data
+    assert "advisory" in data
+
+
+def test_44n_real_planning_design_lifecycle_has_nine_stages(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["planning_lifecycle"]
+    assert len(lifecycle) == 9
+    for stage in lifecycle:
+        assert "stage" in stage
+        assert "name" in stage
+        assert "description" in stage
+        assert isinstance(stage["stage"], int)
+    names = [s["name"] for s in lifecycle]
+    assert "objective" in names
+    assert "planner_selection" in names
+    assert "artifact_collection" in names
+    assert "human_review" in names
+    assert "approved_roadmap" in names
+
+
+def test_44n_real_planning_design_planner_eligibility_criteria(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    criteria = data["planner_eligibility"]["criteria"]
+    assert len(criteria) == 5
+    combined = " ".join(criteria).lower()
+    assert "installed" in combined
+    assert "available" in combined
+    assert "planning capability" in combined
+    assert "confidence threshold" in combined
+    assert "invocation safety gates" in combined
+
+
+def test_44n_real_planning_design_execution_modes_defined(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    modes = data["execution_modes"]
+    assert len(modes) == 5
+    mode_names = [m["mode"] for m in modes]
+    assert "single_planner" in mode_names
+    assert "sequential_planners" in mode_names
+    assert "parallel_planners" in mode_names
+    assert "swarm_planners" in mode_names
+    assert "consensus_planners" in mode_names
+    for mode in modes:
+        assert "description" in mode
+
+
+def test_44n_real_planning_design_artifact_model_fields(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fields = data["planning_artifact_model"]["fields"]
+    for expected in (
+        "artifact_id",
+        "objective_id",
+        "planner_id",
+        "proposed_phases",
+        "dependencies",
+        "assumptions",
+        "risks",
+        "recommendations",
+        "confidence",
+    ):
+        assert expected in fields
+
+
+def test_44n_real_planning_design_consensus_integration_defined(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    feeds = data["consensus_integration"]["feeds_into"]
+    assert len(feeds) == 3
+    combined = " ".join(feeds).lower()
+    assert "agreement" in combined
+    assert "conflict" in combined
+    assert "consensus summary" in combined
+
+
+def test_44n_real_planning_design_human_review_model_defined(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    review = data["human_review_model"]
+    assert review["human_review_required"] is True
+    actions = review["actions"]
+    assert len(actions) == 4
+    combined = " ".join(actions).lower()
+    assert "approve roadmap" in combined
+    assert "reject roadmap" in combined
+    assert "request changes" in combined
+    assert "request additional planners" in combined
+
+
+def test_44n_real_planning_design_governance_may_and_may_not(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "invoke planners" in gov["system_may"]
+    assert "collect planning artifacts" in gov["system_may"]
+    for prohibited in ("approve implementation", "commit", "push", "rollback", "bypass governance"):
+        assert prohibited in gov["system_may_not"]
+
+
+def test_44n_real_planning_design_future_evolution_defined(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44O" in phases
+    assert "44P" in phases
+    assert "44Q" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44n_real_planning_design_advisory_is_correct(capsys) -> None:
+    main(["real-planning-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no planners are executed" in data["advisory"].lower()
+
+
+def test_44n_real_planning_design_human_output_shows_lifecycle_and_advisory(capsys) -> None:
+    main(["real-planning-design"])
+    output = capsys.readouterr().out
+    assert "objective" in output
+    assert "human_review" in output
+    assert "approved_roadmap" in output
+    assert "Real planning design is advisory" in output
