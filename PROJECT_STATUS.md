@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44K: Agent Execution Framework Design.
+Phase 44L: Runtime Adapter Integration Design.
 
 ## Governance Coherence Note
 
@@ -929,6 +929,45 @@ JSON output includes `capability_registry`, `discovery_summary`, and
 `advisory`. Read-only: no agents executed, no files modified, no prompts
 submitted. Advisory: "Capability registry is advisory; capabilities are
 evidence-based and should be refreshed after runtime updates." 24 new tests.
+
+PCAE exposes a read-only runtime adapter integration architecture design
+(Phase 44L): `pcae adapter-design` and `pcae adapter-design --json` generate
+a design for PCAE's runtime adapter integration architecture; five-layer
+adapter architecture: Coordinator → Execution Framework → Runtime Adapter
+Registry → Runtime Adapters → Agent Runtime; adapter registry with five
+responsibilities (register adapters, discover adapters, resolve adapter by
+runtime_id, report adapter capabilities, report adapter health) and eight
+fields (runtime_id, adapter_class, lifecycle_status, version,
+supported_capabilities, writable_supported, subagent_supported,
+parallel_supported); adapter contract with five required methods (health(),
+discover_capabilities(), execute(), cancel(), collect_results()) and five
+optional methods (discover_subagents(), discover_skills(), discover_swarm(),
+estimate_cost(), estimate_duration()); three initial runtime adapters:
+codex-local-adapter (execution, writable execution, subagents, skills),
+claude-local-adapter (execution, writable execution, agent teams),
+kimi-local-adapter (execution, writable execution, swarm); five future
+adapters: deepseek-local-adapter, gemini-local-adapter, grok-local-adapter,
+perplexity-local-adapter, cloud adapters; adapter health model with four
+states (available, degraded, unavailable, unknown) and three capability sync
+mechanisms (runtime discovery, version discovery, capability discovery);
+capability registry remains source of truth; governance integration: adapters
+may execute runtime requests and collect runtime results; adapters may not
+approve, commit, push, rollback, or bypass governance; future evolution: 44M
+Controlled Agent Invocation, 44N Real Multi-Agent Planning, 44O Multi-Agent
+Consensus Execution, 45A Autonomous Roadmap Generation; JSON output includes
+`adapter_design`, `adapter_registry`, `adapter_contract`,
+`adapter_health_model`, `governance_integration`, `future_evolution`,
+`advisory`; `ADAPTER_DESIGN_ADVISORY`, `_ADAPTER_ARCHITECTURE_LAYERS`,
+`_ADAPTER_REGISTRY_RESPONSIBILITIES`, `_ADAPTER_REGISTRY_FIELDS`,
+`_ADAPTER_CONTRACT_REQUIRED_METHODS`, `_ADAPTER_CONTRACT_OPTIONAL_METHODS`,
+`_INITIAL_RUNTIME_ADAPTERS`, `_FUTURE_RUNTIME_ADAPTERS`,
+`_ADAPTER_HEALTH_STATES`, `_ADAPTER_CAPABILITY_SYNC`,
+`_ADAPTER_GOVERNANCE_INTEGRATION`, `_ADAPTER_FUTURE_EVOLUTION`,
+`build_adapter_design` added to `core/agent.py`; `run_adapter_design` added
+to `commands/agent.py`; `adapter-design [--json]` wired in `cli.py`; strictly
+read-only — no adapter implementation, no runtime execution, no file
+modification; advisory: "Runtime adapter integration design is advisory; no
+adapters are executed."; 14 new tests.
 
 PCAE exposes a read-only agent execution framework architecture design
 (Phase 44K): `pcae execution-framework-design` and

@@ -23,6 +23,7 @@ from pcae.commands.agent import (
     run_coordinator_design,
     run_orchestration_design,
     run_parallel_execution_design,
+    run_adapter_design,
     run_execution_framework_design,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -1335,6 +1336,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON execution framework design output.",
     )
     execution_framework_design_parser.set_defaults(handler=run_execution_framework_design)
+
+    adapter_design_parser = subparsers.add_parser(
+        "adapter-design",
+        help="Show read-only runtime adapter integration architecture design (Phase 44L).",
+    )
+    adapter_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON adapter design output.",
+    )
+    adapter_design_parser.set_defaults(handler=run_adapter_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

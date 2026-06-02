@@ -25,6 +25,7 @@ from pcae.core.agent import (
     build_orchestration_design,
     build_parallel_execution_design,
     build_planning_dry_run,
+    build_adapter_design,
     build_execution_framework_design,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -2114,6 +2115,59 @@ def run_orchestration_design(args: argparse.Namespace) -> int:
         print("Future agent expansion:")
         for agent in data["future_agent_expansion"]:
             print(f"  {agent['agent_id']} [{agent['status']}]: {agent['notes']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_adapter_design(args: argparse.Namespace) -> int:
+    data = build_adapter_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ad = data["adapter_design"]
+        print("Runtime adapter integration design")
+        print()
+        print("Adapter architecture layers:")
+        for i, layer in enumerate(ad["architecture_layers"], 1):
+            print(f"  {i}. {layer}")
+        print()
+        reg = data["adapter_registry"]
+        print("Adapter registry responsibilities:")
+        for resp in reg["responsibilities"]:
+            print(f"  - {resp}")
+        print("Adapter registry fields:")
+        print(f"  {', '.join(reg['fields'])}")
+        print()
+        contract = data["adapter_contract"]
+        print("Adapter contract required methods:")
+        for method in contract["required_methods"]:
+            print(f"  - {method}")
+        print("Adapter contract optional methods:")
+        for method in contract["optional_methods"]:
+            print(f"  - {method}")
+        print()
+        print("Initial runtime adapters:")
+        for adapter in ad["initial_adapters"]:
+            supports = ", ".join(adapter["supports"])
+            print(f"  {adapter['adapter_id']}: {supports}")
+        print("Future runtime adapters:")
+        for adapter in ad["future_adapters"]:
+            print(f"  - {adapter}")
+        print()
+        health = data["adapter_health_model"]
+        print(f"Adapter health states: {', '.join(health['states'])}")
+        print(f"Capability sync: {', '.join(health['capability_sync'])}")
+        print(f"  {health['capability_registry_note']}")
+        print()
+        gov = data["governance_integration"]
+        print("Governance integration:")
+        print(f"  Adapters may: {', '.join(gov['adapters_may'])}")
+        print(f"  Adapters may not: {', '.join(gov['adapters_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])
     return 0

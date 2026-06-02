@@ -237,6 +237,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-framework-design`
 - `pcae execution-framework-design --json`
+
+## adapter-design
+
+- `pcae adapter-design`
+- `pcae adapter-design --json`
 """
 
 

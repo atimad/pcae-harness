@@ -7527,6 +7527,140 @@ def build_execution_framework_design() -> dict:
     }
 
 
+ADAPTER_DESIGN_ADVISORY = (
+    "Runtime adapter integration design is advisory; no adapters are executed."
+)
+
+_ADAPTER_ARCHITECTURE_LAYERS: tuple[str, ...] = (
+    "Coordinator",
+    "Execution Framework",
+    "Runtime Adapter Registry",
+    "Runtime Adapters",
+    "Agent Runtime",
+)
+
+_ADAPTER_REGISTRY_RESPONSIBILITIES: tuple[str, ...] = (
+    "register adapters",
+    "discover adapters",
+    "resolve adapter by runtime_id",
+    "report adapter capabilities",
+    "report adapter health",
+)
+
+_ADAPTER_REGISTRY_FIELDS: tuple[str, ...] = (
+    "runtime_id",
+    "adapter_class",
+    "lifecycle_status",
+    "version",
+    "supported_capabilities",
+    "writable_supported",
+    "subagent_supported",
+    "parallel_supported",
+)
+
+_ADAPTER_CONTRACT_REQUIRED_METHODS: tuple[str, ...] = (
+    "health()",
+    "discover_capabilities()",
+    "execute()",
+    "cancel()",
+    "collect_results()",
+)
+
+_ADAPTER_CONTRACT_OPTIONAL_METHODS: tuple[str, ...] = (
+    "discover_subagents()",
+    "discover_skills()",
+    "discover_swarm()",
+    "estimate_cost()",
+    "estimate_duration()",
+)
+
+_INITIAL_RUNTIME_ADAPTERS: tuple[dict, ...] = (
+    {
+        "adapter_id": "codex-local-adapter",
+        "supports": ["execution", "writable execution", "subagents", "skills"],
+    },
+    {
+        "adapter_id": "claude-local-adapter",
+        "supports": ["execution", "writable execution", "agent teams"],
+    },
+    {
+        "adapter_id": "kimi-local-adapter",
+        "supports": ["execution", "writable execution", "swarm"],
+    },
+)
+
+_FUTURE_RUNTIME_ADAPTERS: tuple[str, ...] = (
+    "deepseek-local-adapter",
+    "gemini-local-adapter",
+    "grok-local-adapter",
+    "perplexity-local-adapter",
+    "cloud adapters",
+)
+
+_ADAPTER_HEALTH_STATES: tuple[str, ...] = (
+    "available",
+    "degraded",
+    "unavailable",
+    "unknown",
+)
+
+_ADAPTER_CAPABILITY_SYNC: tuple[str, ...] = (
+    "runtime discovery",
+    "version discovery",
+    "capability discovery",
+)
+
+_ADAPTER_GOVERNANCE_INTEGRATION: dict = {
+    "adapters_may": [
+        "execute runtime requests",
+        "collect runtime results",
+    ],
+    "adapters_may_not": [
+        "approve",
+        "commit",
+        "push",
+        "rollback",
+        "bypass governance",
+    ],
+}
+
+_ADAPTER_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44M", "description": "Controlled Agent Invocation"},
+    {"phase": "44N", "description": "Real Multi-Agent Planning"},
+    {"phase": "44O", "description": "Multi-Agent Consensus Execution"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_adapter_design() -> dict:
+    """Return a read-only runtime adapter integration architecture design."""
+    return {
+        "adapter_design": {
+            "architecture_layers": list(_ADAPTER_ARCHITECTURE_LAYERS),
+            "initial_adapters": list(_INITIAL_RUNTIME_ADAPTERS),
+            "future_adapters": list(_FUTURE_RUNTIME_ADAPTERS),
+        },
+        "adapter_registry": {
+            "responsibilities": list(_ADAPTER_REGISTRY_RESPONSIBILITIES),
+            "fields": list(_ADAPTER_REGISTRY_FIELDS),
+        },
+        "adapter_contract": {
+            "required_methods": list(_ADAPTER_CONTRACT_REQUIRED_METHODS),
+            "optional_methods": list(_ADAPTER_CONTRACT_OPTIONAL_METHODS),
+        },
+        "adapter_health_model": {
+            "states": list(_ADAPTER_HEALTH_STATES),
+            "capability_sync": list(_ADAPTER_CAPABILITY_SYNC),
+            "capability_registry_note": (
+                "Capability registry remains source of truth."
+            ),
+        },
+        "governance_integration": _ADAPTER_GOVERNANCE_INTEGRATION,
+        "future_evolution": list(_ADAPTER_FUTURE_EVOLUTION),
+        "advisory": ADAPTER_DESIGN_ADVISORY,
+    }
+
+
 def build_capability_validation(root: HarnessPath) -> dict:
     """Return the capability validation framework. Read-only; no CLI probing.
 

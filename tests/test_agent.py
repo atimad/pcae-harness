@@ -16780,3 +16780,160 @@ def test_44k_execution_framework_design_human_output_shows_lifecycle_and_advisor
     assert "governance" in output
     assert "framework_may" in output or "Framework may" in output
     assert "Execution framework design is advisory" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44L — Runtime Adapter Integration Design
+# ---------------------------------------------------------------------------
+
+
+def test_44l_adapter_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["adapter-design"])
+    assert exit_code == 0
+
+
+def test_44l_adapter_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["adapter-design", "--json"])
+    assert exit_code == 0
+
+
+def test_44l_adapter_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "adapter_design" in data
+    assert "adapter_registry" in data
+    assert "adapter_contract" in data
+    assert "adapter_health_model" in data
+    assert "governance_integration" in data
+    assert "future_evolution" in data
+    assert "advisory" in data
+
+
+def test_44l_adapter_design_architecture_layers_defined(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    layers = data["adapter_design"]["architecture_layers"]
+    assert len(layers) == 5
+    combined = " ".join(layers).lower()
+    assert "coordinator" in combined
+    assert "execution framework" in combined
+    assert "registry" in combined
+    assert "agent runtime" in combined
+
+
+def test_44l_adapter_design_registry_responsibilities_and_fields(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reg = data["adapter_registry"]
+    assert len(reg["responsibilities"]) == 5
+    combined_resp = " ".join(reg["responsibilities"]).lower()
+    assert "register" in combined_resp
+    assert "health" in combined_resp
+    for expected in (
+        "runtime_id",
+        "adapter_class",
+        "lifecycle_status",
+        "supported_capabilities",
+        "writable_supported",
+        "subagent_supported",
+        "parallel_supported",
+    ):
+        assert expected in reg["fields"]
+
+
+def test_44l_adapter_design_contract_required_methods(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    required = data["adapter_contract"]["required_methods"]
+    assert len(required) == 5
+    combined = " ".join(required)
+    assert "health()" in combined
+    assert "execute()" in combined
+    assert "cancel()" in combined
+    assert "collect_results()" in combined
+    assert "discover_capabilities()" in combined
+
+
+def test_44l_adapter_design_contract_optional_methods(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    optional = data["adapter_contract"]["optional_methods"]
+    assert len(optional) == 5
+    combined = " ".join(optional)
+    assert "discover_subagents()" in combined
+    assert "discover_skills()" in combined
+    assert "estimate_cost()" in combined
+
+
+def test_44l_adapter_design_initial_adapters_defined(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    adapters = data["adapter_design"]["initial_adapters"]
+    assert len(adapters) == 3
+    ids = [a["adapter_id"] for a in adapters]
+    assert "codex-local-adapter" in ids
+    assert "claude-local-adapter" in ids
+    assert "kimi-local-adapter" in ids
+    for adapter in adapters:
+        assert "supports" in adapter
+        assert "execution" in adapter["supports"]
+        assert "writable execution" in adapter["supports"]
+
+
+def test_44l_adapter_design_future_adapters_defined(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    future = data["adapter_design"]["future_adapters"]
+    assert len(future) >= 4
+    combined = " ".join(future)
+    assert "deepseek" in combined
+    assert "gemini" in combined
+    assert "cloud" in combined
+
+
+def test_44l_adapter_design_health_states_defined(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    health = data["adapter_health_model"]
+    for expected in ("available", "degraded", "unavailable", "unknown"):
+        assert expected in health["states"]
+    assert len(health["capability_sync"]) == 3
+    assert "source of truth" in health["capability_registry_note"].lower()
+
+
+def test_44l_adapter_design_governance_may_and_may_not(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_integration"]
+    assert "execute runtime requests" in gov["adapters_may"]
+    assert "collect runtime results" in gov["adapters_may"]
+    for prohibited in ("approve", "commit", "push", "rollback", "bypass governance"):
+        assert prohibited in gov["adapters_may_not"]
+
+
+def test_44l_adapter_design_future_evolution_defined(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44M" in phases
+    assert "44N" in phases
+    assert "44O" in phases
+    assert "45A" in phases
+    for entry in data["future_evolution"]:
+        assert "description" in entry
+
+
+def test_44l_adapter_design_advisory_is_correct(capsys) -> None:
+    main(["adapter-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "advisory" in data["advisory"].lower()
+    assert "no adapters are executed" in data["advisory"].lower()
+
+
+def test_44l_adapter_design_human_output_shows_architecture_and_advisory(capsys) -> None:
+    main(["adapter-design"])
+    output = capsys.readouterr().out
+    assert "Coordinator" in output
+    assert "Agent Runtime" in output
+    assert "codex-local-adapter" in output
+    assert "Runtime adapter integration design is advisory" in output
