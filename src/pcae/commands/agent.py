@@ -50,6 +50,8 @@ from pcae.core.agent import (
     GOVERNED_EXECUTION_DRY_RUN_ADVISORY,
     build_invocation_contracts,
     INVOCATION_CONTRACTS_ADVISORY,
+    build_execution_readiness,
+    EXECUTION_READINESS_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3178,6 +3180,59 @@ def run_invocation_contracts(args: argparse.Namespace) -> int:
         print("Governance:")
         print(f"  Validation may:     {', '.join(gov['validation_may'])}")
         print(f"  Validation may not: {', '.join(gov['validation_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_readiness(args: argparse.Namespace) -> int:
+    data = build_execution_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        summary = data["readiness_summary"]
+        print("Execution readiness assessment")
+        print(f"  Assessment ID:  {summary['assessment_id']}")
+        print(f"  Overall status: {summary['overall_status']}")
+        print(
+            f"  Areas: {summary['total_areas']} total — "
+            f"{summary['ready']} ready, "
+            f"{summary['partially_ready']} partially_ready, "
+            f"{summary['not_ready']} not_ready"
+        )
+        print(f"  Execution safe: {'yes' if summary['execution_safe'] else 'no'}")
+        print(f"  Reason: {summary['execution_safe_reason']}")
+        print()
+        print("Subsystem readiness:")
+        for assessment in data["subsystem_assessments"]:
+            area = assessment["area"]
+            status = assessment["status"]
+            met_count = sum(1 for e in assessment["evaluated"] if e["met"])
+            total = len(assessment["evaluated"])
+            print(f"  [{status}] {area} ({met_count}/{total} criteria met)")
+            for ev in assessment["evaluated"]:
+                mark = "+" if ev["met"] else "-"
+                print(f"    {mark} {ev['criterion']}: {ev['detail']}")
+        print()
+        gap = data["gap_analysis"]
+        print("Gap analysis:")
+        print("  Missing implementations:")
+        for item in gap["missing_implementations"]:
+            print(f"    - {item}")
+        print("  Missing validations:")
+        for item in gap["missing_validations"]:
+            print(f"    - {item}")
+        print("  Missing runtime integrations:")
+        for item in gap["missing_runtime_integrations"]:
+            print(f"    - {item}")
+        print()
+        print("Recommended next steps:")
+        for i, rec in enumerate(data["recommendations"], 1):
+            print(f"  {i}. {rec}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

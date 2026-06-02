@@ -18893,3 +18893,165 @@ def test_44x_invocation_contracts_human_output_shows_all_sections(capsys) -> Non
     assert "invalid_preview_contract" in output
     assert "Governance" in output
     assert "Invocation contracts are validated references" in output
+
+# Phase 44Y: Governed Runtime Execution Readiness Assessment
+# ---------------------------------------------------------------------------
+
+
+def test_44y_execution_readiness_command_exits_zero(capsys) -> None:
+    exit_code = main(["execution-readiness"])
+    assert exit_code == 0
+
+
+def test_44y_execution_readiness_json_exits_zero(capsys) -> None:
+    exit_code = main(["execution-readiness", "--json"])
+    assert exit_code == 0
+
+
+def test_44y_execution_readiness_json_has_required_top_level_keys(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("readiness_summary", "subsystem_assessments", "gap_analysis", "recommendations", "advisory"):
+        assert key in data, f"missing key: {key}"
+
+
+def test_44y_execution_readiness_summary_fields(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["readiness_summary"]
+    assert "assessment_id" in s
+    assert "overall_status" in s
+    assert "total_areas" in s
+    assert "ready" in s
+    assert "partially_ready" in s
+    assert "not_ready" in s
+    assert "execution_safe" in s
+    assert "execution_safe_reason" in s
+    assert s["execution_safe"] is False
+    assert s["total_areas"] == s["ready"] + s["partially_ready"] + s["not_ready"]
+
+
+def test_44y_execution_readiness_six_subsystem_areas(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessments = data["subsystem_assessments"]
+    assert len(assessments) == 6
+    areas = [a["area"] for a in assessments]
+    for expected in (
+        "capability_registry",
+        "coordinator",
+        "consensus",
+        "runtime_adapters",
+        "invocation_layer",
+        "governance",
+    ):
+        assert expected in areas
+
+
+def test_44y_execution_readiness_subsystem_statuses(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    by_area = {a["area"]: a["status"] for a in data["subsystem_assessments"]}
+    assert by_area["capability_registry"] == "ready"
+    assert by_area["governance"] == "ready"
+    assert by_area["coordinator"] == "partially_ready"
+    assert by_area["consensus"] == "partially_ready"
+    assert by_area["runtime_adapters"] == "partially_ready"
+    assert by_area["invocation_layer"] == "partially_ready"
+
+
+def test_44y_execution_readiness_subsystem_evaluated_fields(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for assessment in data["subsystem_assessments"]:
+        assert "area" in assessment
+        assert "status" in assessment
+        assert "evaluated" in assessment
+        assert len(assessment["evaluated"]) >= 1
+        for ev in assessment["evaluated"]:
+            assert "criterion" in ev
+            assert "met" in ev
+            assert "detail" in ev
+            assert isinstance(ev["met"], bool)
+
+
+def test_44y_execution_readiness_capability_registry_all_met(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    by_area = {a["area"]: a for a in data["subsystem_assessments"]}
+    cap = by_area["capability_registry"]
+    criteria = [e["criterion"] for e in cap["evaluated"]]
+    assert "discovery_support" in criteria
+    assert "validation_support" in criteria
+    assert "classification_support" in criteria
+    assert all(e["met"] for e in cap["evaluated"])
+
+
+def test_44y_execution_readiness_partially_ready_have_unmet_criteria(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for assessment in data["subsystem_assessments"]:
+        if assessment["status"] == "partially_ready":
+            unmet = [e for e in assessment["evaluated"] if not e["met"]]
+            assert len(unmet) >= 1, f"{assessment['area']} is partially_ready but has no unmet criteria"
+
+
+def test_44y_execution_readiness_gap_analysis_fields(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gap = data["gap_analysis"]
+    assert "missing_implementations" in gap
+    assert "missing_validations" in gap
+    assert "missing_runtime_integrations" in gap
+    assert len(gap["missing_implementations"]) >= 1
+    assert len(gap["missing_validations"]) >= 1
+    assert len(gap["missing_runtime_integrations"]) >= 1
+
+
+def test_44y_execution_readiness_gap_covers_all_runtimes(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    integrations = " ".join(data["gap_analysis"]["missing_runtime_integrations"]).lower()
+    assert "codex-local" in integrations
+    assert "claude-local" in integrations
+    assert "kimi-local" in integrations
+
+
+def test_44y_execution_readiness_recommendations_present(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) >= 1
+    combined = " ".join(recs).lower()
+    assert "adapter" in combined
+
+
+def test_44y_execution_readiness_advisory(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtimes are invoked" in advisory
+
+
+def test_44y_execution_readiness_future_evolution(capsys) -> None:
+    main(["execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "45A" in phases
+
+
+def test_44y_execution_readiness_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-readiness"])
+    output = capsys.readouterr().out
+    assert "Execution readiness assessment" in output
+    assert "Subsystem readiness" in output
+    assert "capability_registry" in output
+    assert "coordinator" in output
+    assert "consensus" in output
+    assert "runtime_adapters" in output
+    assert "invocation_layer" in output
+    assert "governance" in output
+    assert "Gap analysis" in output
+    assert "Recommended next steps" in output
+    assert "Execution readiness assessment is informational" in output

@@ -281,3 +281,8 @@
 
 - `pcae invocation-contracts`
 - `pcae invocation-contracts --json`
+
+## execution-readiness
+
+- `pcae execution-readiness`
+- `pcae execution-readiness --json`

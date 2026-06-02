@@ -9577,3 +9577,199 @@ def build_invocation_contracts() -> dict:
         "future_evolution": list(_ICONV_FUTURE_EVOLUTION),
         "advisory": INVOCATION_CONTRACTS_ADVISORY,
     }
+
+# Phase 44Y: Governed Runtime Execution Readiness Assessment
+# ---------------------------------------------------------------------------
+
+EXECUTION_READINESS_ADVISORY = (
+    "Execution readiness assessment is informational; no runtimes are invoked."
+)
+
+_ERDYA_READINESS_SUMMARY: dict = {
+    "assessment_id": "readiness-44y-preview",
+    "overall_status": "partially_ready",
+    "total_areas": 6,
+    "ready": 2,
+    "partially_ready": 4,
+    "not_ready": 0,
+    "execution_safe": False,
+    "execution_safe_reason": (
+        "Four subsystems are partially ready; "
+        "real runtime execution requires full readiness."
+    ),
+}
+
+_ERDYA_SUBSYSTEM_ASSESSMENTS: tuple[dict, ...] = (
+    {
+        "area": "capability_registry",
+        "status": "ready",
+        "evaluated": [
+            {
+                "criterion": "discovery_support",
+                "met": True,
+                "detail": "pcae orchestration capabilities exposes capability matrix.",
+            },
+            {
+                "criterion": "validation_support",
+                "met": True,
+                "detail": "Capability validation implemented in core/orchestration.py.",
+            },
+            {
+                "criterion": "classification_support",
+                "met": True,
+                "detail": "Roles and capabilities classified in policy.toml.",
+            },
+        ],
+    },
+    {
+        "area": "coordinator",
+        "status": "partially_ready",
+        "evaluated": [
+            {
+                "criterion": "orchestration_support",
+                "met": True,
+                "detail": "Orchestration design and workflow planning implemented.",
+            },
+            {
+                "criterion": "planner_support",
+                "met": True,
+                "detail": "Planner adapter prototype validated (Phase 44Q).",
+            },
+            {
+                "criterion": "runtime_selection_support",
+                "met": False,
+                "detail": "Runtime selection is advisory only; real agent dispatch not implemented.",
+            },
+        ],
+    },
+    {
+        "area": "consensus",
+        "status": "partially_ready",
+        "evaluated": [
+            {
+                "criterion": "agreement_analysis",
+                "met": True,
+                "detail": "Agreement analysis implemented in consensus prototype (Phase 44S/44V).",
+            },
+            {
+                "criterion": "conflict_analysis",
+                "met": True,
+                "detail": "Conflict analysis with confidence spread implemented.",
+            },
+            {
+                "criterion": "recommendation_support",
+                "met": False,
+                "detail": "Consensus recommendations are simulated; real runtime outputs not wired.",
+            },
+        ],
+    },
+    {
+        "area": "runtime_adapters",
+        "status": "partially_ready",
+        "evaluated": [
+            {
+                "criterion": "adapter_architecture",
+                "met": True,
+                "detail": "Adapter architecture designed and validated through Phase 44W.",
+            },
+            {
+                "criterion": "adapter_contracts",
+                "met": True,
+                "detail": "Validated invocation contracts published (Phase 44X).",
+            },
+            {
+                "criterion": "adapter_registry",
+                "met": False,
+                "detail": "Runtime adapter registry not implemented; adapters are design-time only.",
+            },
+        ],
+    },
+    {
+        "area": "invocation_layer",
+        "status": "partially_ready",
+        "evaluated": [
+            {
+                "criterion": "invocation_contracts",
+                "met": True,
+                "detail": "Per-runtime read-only and writable contracts validated (Phase 44X).",
+            },
+            {
+                "criterion": "safety_gates",
+                "met": True,
+                "detail": "Safety gates defined in invocation pilot (Phase 44T) and dry-run (Phase 44W).",
+            },
+            {
+                "criterion": "writable_controls",
+                "met": False,
+                "detail": "Writable execution controls not enforced at runtime; always false in pilots.",
+            },
+        ],
+    },
+    {
+        "area": "governance",
+        "status": "ready",
+        "evaluated": [
+            {
+                "criterion": "modification_governance",
+                "met": True,
+                "detail": "pcae check enforces source change policies.",
+            },
+            {
+                "criterion": "commit_governance",
+                "met": True,
+                "detail": "Pre-commit hook validates governance before commit.",
+            },
+            {
+                "criterion": "push_governance",
+                "met": True,
+                "detail": "Push governance defined; no unauthorized pushes allowed.",
+            },
+            {
+                "criterion": "rollback_governance",
+                "met": True,
+                "detail": "Rollback governance implemented (pcae rollback commands).",
+            },
+        ],
+    },
+)
+
+_ERDYA_GAP_ANALYSIS: dict = {
+    "missing_implementations": [
+        "Real runtime dispatch from coordinator to adapters.",
+        "Runtime adapter registry with live health probing.",
+        "Writable execution controls enforced at runtime boundary.",
+    ],
+    "missing_validations": [
+        "End-to-end invocation test with a real runtime.",
+        "Consensus evaluation on real (non-simulated) runtime outputs.",
+        "Writable contract enforcement validated against live runtime.",
+    ],
+    "missing_runtime_integrations": [
+        "codex-local: adapter not integrated; contract validated but not wired.",
+        "claude-local: adapter not integrated; contract validated but not wired.",
+        "kimi-local: adapter not integrated; contract validated but not wired.",
+    ],
+}
+
+_ERDYA_RECOMMENDATIONS: tuple[str, ...] = (
+    "Implement runtime adapter registry with live health probing before real execution.",
+    "Wire coordinator runtime selection to a real adapter dispatch path.",
+    "Validate writable execution controls against at least one runtime before enabling.",
+    "Run end-to-end integration test with a sandboxed real runtime before 45A.",
+)
+
+_ERDYA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_execution_readiness() -> dict:
+    """Return a read-only governed runtime execution readiness assessment."""
+    return {
+        "readiness_summary": dict(_ERDYA_READINESS_SUMMARY),
+        "subsystem_assessments": list(_ERDYA_SUBSYSTEM_ASSESSMENTS),
+        "gap_analysis": dict(_ERDYA_GAP_ANALYSIS),
+        "recommendations": list(_ERDYA_RECOMMENDATIONS),
+        "future_evolution": list(_ERDYA_FUTURE_EVOLUTION),
+        "advisory": EXECUTION_READINESS_ADVISORY,
+    }
