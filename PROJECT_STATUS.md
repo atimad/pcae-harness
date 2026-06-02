@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45A: Autonomous Roadmap Generation Design.
+Phase 45B: Roadmap Evidence Collector.
 
 ## Governance Coherence Note
 
@@ -977,6 +977,23 @@ unavailable/unknown), probe_mode=on-demand; capability_synchronization: capabili
 of truth; governance: registry may discover/resolve/report; may not invoke runtimes, approve, commit,
 push, or rollback; future evolution: 45A/45B/45C; strictly design-only; advisory: "Adapter registry
 design is read-only; no adapters are implemented or invoked."; 12 new tests.
+
+PCAE collects structured repository evidence for roadmap generation (Phase 45B):
+`pcae roadmap-evidence` and `pcae roadmap-evidence --json` produce a read-only evidence
+package from live repository state; evidence_sources: PROJECT_STATUS.md, CHANGELOG.md,
+tasks/TODO.md, tasks/DONE.md, tests (via pytest --collect-only), capability_registry,
+execution_readiness, governance; package fields: package_id, generated_at,
+evidence_sources, project_summary (current_phase, status_file_lines,
+changelog_unreleased_entries, todo_entries, done_entries), test_summary (total_collected,
+executed=false, passed/failed=not_executed), capability_summary (agent_count, agent_ids,
+total_declared_capabilities, agents_installed, multi_agent_capable),
+governance_summary (governance_areas, governance_status, criteria_met, criteria_unmet),
+readiness_summary (overall_status, execution_safe, subsystems_ready/partially_ready),
+identified_gaps (synthesized from execution_readiness gap_analysis, task_tracking, and
+partially-ready subsystems), candidate_focus_areas (derived from readiness recommendations,
+task backlog, and phase_45a_design); strictly read-only; no roadmap mutation, task creation,
+or runtime execution; advisory: "Roadmap evidence collection is read-only; no roadmap
+mutation, task creation, or runtime execution occurs."; 17 new tests.
 
 PCAE exposes an autonomous roadmap generation architecture design (Phase 45A):
 `pcae roadmap-generation-design` and `pcae roadmap-generation-design --json` define how

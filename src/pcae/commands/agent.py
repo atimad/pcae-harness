@@ -56,6 +56,8 @@ from pcae.core.agent import (
     ADAPTER_REGISTRY_DESIGN_ADVISORY,
     build_roadmap_generation_design,
     ROADMAP_GENERATION_DESIGN_ADVISORY,
+    build_roadmap_evidence,
+    ROADMAP_EVIDENCE_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3332,6 +3334,61 @@ def run_roadmap_generation_design(args: argparse.Namespace) -> int:
         print("Future evolution:")
         for entry in data["future_evolution"]:
             print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_roadmap_evidence(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_roadmap_evidence(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Roadmap evidence collection")
+        print(f"Package: {data['package_id']}  Generated: {data['generated_at']}")
+        print()
+        print("Evidence sources:")
+        for src in data["evidence_sources"]:
+            print(f"  - {src}")
+        print()
+        ps = data["project_summary"]
+        print("Repository status:")
+        print(f"  Current phase:    {ps['current_phase']}")
+        print(f"  Status file:      {ps['status_file_lines']} lines")
+        print(f"  Changelog:        {ps['changelog_unreleased_entries']} unreleased entries")
+        print(f"  Pending tasks:    {ps['todo_entries']}")
+        print(f"  Completed tasks:  {ps['done_entries']}")
+        print()
+        ts = data["test_summary"]
+        print("Test status:")
+        print(f"  Total collected:  {ts['total_collected']}")
+        print(f"  Executed:         {ts['executed']}")
+        print(f"  Passed:           {ts['passed']}")
+        print(f"  Failed:           {ts['failed']}")
+        print()
+        cs = data["capability_summary"]
+        print("Capability status:")
+        print(f"  Agents:           {cs['agent_count']}")
+        print(f"  Installed:        {cs['agents_installed']}")
+        print(f"  Capabilities:     {cs['total_declared_capabilities']}")
+        print(f"  Multi-agent:      {', '.join(cs['multi_agent_capable'])}")
+        print()
+        rs = data["readiness_summary"]
+        print("Readiness status:")
+        print(f"  Overall:          {rs['overall_status']}")
+        print(f"  Execution safe:   {rs['execution_safe']}")
+        print(f"  Ready:            {rs['subsystems_ready']} / {rs['total_areas']}")
+        print(f"  Partially ready:  {rs['subsystems_partially_ready']} / {rs['total_areas']}")
+        print()
+        print("Identified gaps:")
+        for gap in data["identified_gaps"]:
+            print(f"  [{gap['gap_id']}] ({gap['category']}) {gap['description']}")
+        print()
+        print("Candidate roadmap focus areas:")
+        for area in data["candidate_focus_areas"]:
+            print(f"  [{area['area_id']}] [{area['priority']}] {area['focus_area']}")
+            print(f"    {area['rationale']}")
         print()
         print(data["advisory"])
     return 0

@@ -296,3 +296,8 @@
 
 - `pcae roadmap-generation-design`
 - `pcae roadmap-generation-design --json`
+
+## roadmap-evidence
+
+- `pcae roadmap-evidence`
+- `pcae roadmap-evidence --json`

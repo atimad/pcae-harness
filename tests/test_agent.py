@@ -19395,3 +19395,206 @@ def test_45a_roadmap_generation_design_human_output_shows_all_sections(capsys) -
     assert "Future evolution" in output
     assert "45B" in output
     assert "Roadmap generation design is read-only" in output
+
+
+# Phase 45B: Roadmap Evidence Collector
+# ---------------------------------------------------------------------------
+
+
+def test_45b_roadmap_evidence_command_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-evidence"])
+    assert exit_code == 0
+
+
+def test_45b_roadmap_evidence_json_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-evidence", "--json"])
+    assert exit_code == 0
+
+
+def test_45b_roadmap_evidence_json_has_required_top_level_keys(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "package_id",
+        "generated_at",
+        "evidence_sources",
+        "project_summary",
+        "test_summary",
+        "capability_summary",
+        "governance_summary",
+        "readiness_summary",
+        "identified_gaps",
+        "candidate_focus_areas",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45b_roadmap_evidence_package_id_is_string(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data["package_id"], str)
+    assert data["package_id"].startswith("rev-")
+
+
+def test_45b_roadmap_evidence_generated_at_is_string(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    generated_at = data["generated_at"]
+    assert isinstance(generated_at, str)
+    assert len(generated_at) > 10
+
+
+def test_45b_roadmap_evidence_sources_lists_expected_sources(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sources = data["evidence_sources"]
+    for expected in (
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md",
+        "tasks/TODO.md",
+        "tasks/DONE.md",
+        "tests",
+        "capability_registry",
+        "execution_readiness",
+        "governance",
+    ):
+        assert expected in sources, f"missing evidence source: {expected}"
+
+
+def test_45b_roadmap_evidence_project_summary_has_current_phase(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ps = data["project_summary"]
+    assert "current_phase" in ps
+    assert isinstance(ps["current_phase"], str)
+    assert ps["current_phase"] != "unknown"
+    assert "status_file_lines" in ps
+    assert ps["status_file_lines"] > 0
+    assert "changelog_unreleased_entries" in ps
+    assert ps["changelog_unreleased_entries"] > 0
+    assert "todo_entries" in ps
+    assert "done_entries" in ps
+    assert ps["done_entries"] > 0
+
+
+def test_45b_roadmap_evidence_test_summary_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ts = data["test_summary"]
+    assert "total_collected" in ts
+    assert isinstance(ts["total_collected"], int)
+    assert ts["total_collected"] > 0
+    assert "executed" in ts
+    assert ts["executed"] is False
+    assert "passed" in ts
+    assert "failed" in ts
+    assert "collection_command" in ts
+
+
+def test_45b_roadmap_evidence_capability_summary_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cs = data["capability_summary"]
+    assert "agent_count" in cs
+    assert cs["agent_count"] > 0
+    assert "agent_ids" in cs
+    assert isinstance(cs["agent_ids"], list)
+    assert "total_declared_capabilities" in cs
+    assert "agents_installed" in cs
+    assert "multi_agent_capable" in cs
+
+
+def test_45b_roadmap_evidence_readiness_summary_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["readiness_summary"]
+    assert "overall_status" in rs
+    assert rs["overall_status"] in ("ready", "partially_ready", "not_ready", "unknown")
+    assert "execution_safe" in rs
+    assert isinstance(rs["execution_safe"], bool)
+    assert "subsystems_ready" in rs
+    assert "subsystems_partially_ready" in rs
+    assert "total_areas" in rs
+    assert rs["total_areas"] > 0
+
+
+def test_45b_roadmap_evidence_governance_summary_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gs = data["governance_summary"]
+    assert "governance_areas" in gs
+    for expected in (
+        "modification_governance",
+        "commit_governance",
+        "push_governance",
+        "rollback_governance",
+    ):
+        assert expected in gs["governance_areas"], f"missing governance area: {expected}"
+    assert "governance_status" in gs
+    assert "criteria_met" in gs
+    assert "criteria_unmet" in gs
+
+
+def test_45b_roadmap_evidence_identified_gaps_is_nonempty(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gaps = data["identified_gaps"]
+    assert isinstance(gaps, list)
+    assert len(gaps) > 0
+
+
+def test_45b_roadmap_evidence_gaps_have_required_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for gap in data["identified_gaps"]:
+        assert "gap_id" in gap, f"gap missing gap_id: {gap}"
+        assert "category" in gap, f"gap missing category: {gap}"
+        assert "description" in gap, f"gap missing description: {gap}"
+        assert "source" in gap, f"gap missing source: {gap}"
+        assert gap["gap_id"].startswith("gap-")
+
+
+def test_45b_roadmap_evidence_candidate_focus_areas_is_nonempty(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["candidate_focus_areas"]
+    assert isinstance(areas, list)
+    assert len(areas) > 0
+
+
+def test_45b_roadmap_evidence_focus_areas_have_required_fields(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for area in data["candidate_focus_areas"]:
+        assert "area_id" in area, f"area missing area_id: {area}"
+        assert "focus_area" in area, f"area missing focus_area: {area}"
+        assert "priority" in area, f"area missing priority: {area}"
+        assert "rationale" in area, f"area missing rationale: {area}"
+        assert "source" in area, f"area missing source: {area}"
+        assert area["priority"] in ("high", "medium", "low")
+
+
+def test_45b_roadmap_evidence_advisory_is_read_only(capsys) -> None:
+    main(["roadmap-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "read-only" in advisory
+    assert "no roadmap mutation" in advisory
+
+
+def test_45b_roadmap_evidence_human_output_shows_all_sections(capsys) -> None:
+    main(["roadmap-evidence"])
+    output = capsys.readouterr().out
+    assert "Roadmap evidence collection" in output
+    assert "Evidence sources" in output
+    assert "PROJECT_STATUS.md" in output
+    assert "Repository status" in output
+    assert "Current phase" in output
+    assert "Test status" in output
+    assert "Total collected" in output
+    assert "Capability status" in output
+    assert "Readiness status" in output
+    assert "Identified gaps" in output
+    assert "Candidate roadmap focus areas" in output
+    assert "Roadmap evidence collection is read-only" in output

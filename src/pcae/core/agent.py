@@ -10049,3 +10049,318 @@ def build_roadmap_generation_design() -> dict:
         "future_evolution": list(_RGDSGN_FUTURE_EVOLUTION),
         "advisory": ROADMAP_GENERATION_DESIGN_ADVISORY,
     }
+
+
+# Phase 45B: Roadmap Evidence Collector
+# ---------------------------------------------------------------------------
+
+ROADMAP_EVIDENCE_ADVISORY = (
+    "Roadmap evidence collection is read-only; no roadmap mutation, "
+    "task creation, or runtime execution occurs."
+)
+
+
+def _collect_project_summary(root: HarnessPath) -> dict:
+    """Read PROJECT_STATUS.md and extract a structured summary."""
+    path = root.join(Path("PROJECT_STATUS.md"))
+    try:
+        text = path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        current_phase = "unknown"
+        for line in lines[:20]:
+            stripped = line.strip().rstrip(".")
+            if stripped.startswith("Phase "):
+                current_phase = stripped
+                break
+        return {
+            "current_phase": current_phase,
+            "status_file_lines": len(lines),
+            "status_readable": True,
+        }
+    except OSError:
+        return {
+            "current_phase": "unknown",
+            "status_file_lines": 0,
+            "status_readable": False,
+        }
+
+
+def _collect_changelog_summary(root: HarnessPath) -> dict:
+    """Count changelog entries from CHANGELOG.md."""
+    path = root.join(Path("CHANGELOG.md"))
+    try:
+        text = path.read_text(encoding="utf-8")
+        entries = sum(1 for line in text.splitlines() if line.startswith("- "))
+        return {
+            "changelog_unreleased_entries": entries,
+            "changelog_readable": True,
+        }
+    except OSError:
+        return {
+            "changelog_unreleased_entries": 0,
+            "changelog_readable": False,
+        }
+
+
+def _collect_task_counts(root: HarnessPath) -> dict:
+    """Count task entries from tasks/TODO.md and tasks/DONE.md."""
+    result: dict = {}
+    for key, rel in (
+        ("todo_entries", Path("tasks") / "TODO.md"),
+        ("done_entries", Path("tasks") / "DONE.md"),
+    ):
+        readable_key = key.replace("entries", "readable")
+        fpath = root.join(rel)
+        try:
+            text = fpath.read_text(encoding="utf-8")
+            result[key] = sum(1 for line in text.splitlines() if line.startswith("- "))
+            result[readable_key] = True
+        except OSError:
+            result[key] = 0
+            result[readable_key] = False
+    return result
+
+
+def _collect_test_evidence(root: HarnessPath) -> dict:
+    """Collect test counts via pytest --collect-only. Read-only; no tests executed."""
+    try:
+        proc = subprocess.run(
+            ["python", "-m", "pytest", "--collect-only", "-q", "--tb=no"],
+            capture_output=True,
+            text=True,
+            cwd=str(root.path),
+            timeout=30,
+        )
+        output = (proc.stdout or "") + (proc.stderr or "")
+        total_collected = 0
+        for line in output.splitlines():
+            m = re.search(r"(\d+)\s+test", line)
+            if m:
+                total_collected = int(m.group(1))
+                break
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        total_collected = 0
+    return {
+        "total_collected": total_collected,
+        "executed": False,
+        "passed": "not_executed",
+        "failed": "not_executed",
+        "collection_command": "pytest --collect-only -q --tb=no",
+    }
+
+
+def _summarize_capability_evidence(capability_data: dict) -> dict:
+    """Extract a structured summary from build_capability_registry output."""
+    registry = capability_data.get("capability_registry", [])
+    discovery = capability_data.get("discovery_summary", {})
+    return {
+        "agent_count": len(registry),
+        "agent_ids": [a.get("agent_id", "unknown") for a in registry],
+        "total_declared_capabilities": sum(
+            len(a.get("capabilities", [])) for a in registry
+        ),
+        "agents_installed": discovery.get("agents_installed", 0),
+        "agents_not_installed": discovery.get("agents_not_installed", 0),
+        "multi_agent_capable": discovery.get("multi_agent_capable_agents", []),
+    }
+
+
+def _summarize_readiness_evidence(readiness_data: dict) -> dict:
+    """Extract readiness summary from execution readiness data."""
+    summary = readiness_data.get("readiness_summary", {})
+    return {
+        "overall_status": summary.get("overall_status", "unknown"),
+        "execution_safe": summary.get("execution_safe", False),
+        "subsystems_ready": summary.get("ready", 0),
+        "subsystems_partially_ready": summary.get("partially_ready", 0),
+        "subsystems_not_ready": summary.get("not_ready", 0),
+        "total_areas": summary.get("total_areas", 0),
+    }
+
+
+def _summarize_governance_evidence(readiness_data: dict) -> dict:
+    """Extract governance evidence from execution readiness assessments."""
+    assessments = readiness_data.get("subsystem_assessments", [])
+    governance = next(
+        (a for a in assessments if a.get("area") == "governance"), None
+    )
+    if governance:
+        met = [
+            e["criterion"]
+            for e in governance.get("evaluated", [])
+            if e.get("met")
+        ]
+        unmet = [
+            e["criterion"]
+            for e in governance.get("evaluated", [])
+            if not e.get("met")
+        ]
+        status = governance.get("status", "unknown")
+    else:
+        met, unmet, status = [], [], "unknown"
+    return {
+        "governance_areas": [
+            "modification_governance",
+            "commit_governance",
+            "push_governance",
+            "rollback_governance",
+        ],
+        "governance_status": status,
+        "criteria_met": met,
+        "criteria_unmet": unmet,
+    }
+
+
+def _derive_roadmap_gaps(
+    project_summary: dict,
+    readiness_data: dict,
+) -> list[dict]:
+    """Synthesize identified gaps from collected evidence."""
+    gaps: list[dict] = []
+    n = 1
+
+    gap_analysis = readiness_data.get("gap_analysis", {})
+    for item in gap_analysis.get("missing_implementations", []):
+        gaps.append({
+            "gap_id": f"gap-{n:03d}",
+            "category": "missing_implementation",
+            "description": item,
+            "source": "execution_readiness",
+        })
+        n += 1
+    for item in gap_analysis.get("missing_validations", []):
+        gaps.append({
+            "gap_id": f"gap-{n:03d}",
+            "category": "missing_validation",
+            "description": item,
+            "source": "execution_readiness",
+        })
+        n += 1
+    for item in gap_analysis.get("missing_runtime_integrations", []):
+        gaps.append({
+            "gap_id": f"gap-{n:03d}",
+            "category": "missing_runtime_integration",
+            "description": item,
+            "source": "execution_readiness",
+        })
+        n += 1
+
+    todo_count = project_summary.get("todo_entries", 0)
+    if todo_count > 0:
+        gaps.append({
+            "gap_id": f"gap-{n:03d}",
+            "category": "pending_tasks",
+            "description": (
+                f"{todo_count} pending future exploration "
+                f"{'item' if todo_count == 1 else 'items'} in tasks/TODO.md."
+            ),
+            "source": "task_tracking",
+        })
+        n += 1
+
+    assessments = readiness_data.get("subsystem_assessments", [])
+    for assessment in assessments:
+        if assessment.get("status") == "partially_ready":
+            unmet = [
+                e["criterion"]
+                for e in assessment.get("evaluated", [])
+                if not e.get("met")
+            ]
+            if unmet:
+                gaps.append({
+                    "gap_id": f"gap-{n:03d}",
+                    "category": "subsystem_partial_readiness",
+                    "description": (
+                        f"Subsystem '{assessment['area']}' is partially ready; "
+                        f"unmet: {', '.join(unmet)}."
+                    ),
+                    "source": "execution_readiness",
+                })
+                n += 1
+
+    return gaps
+
+
+def _derive_roadmap_focus_areas(
+    gaps: list[dict],
+    readiness_data: dict,
+) -> list[dict]:
+    """Derive candidate roadmap focus areas from gaps and readiness evidence."""
+    areas: list[dict] = []
+    for i, rec in enumerate(readiness_data.get("recommendations", [])):
+        areas.append({
+            "area_id": f"area-{i + 1:03d}",
+            "focus_area": rec,
+            "priority": "high",
+            "rationale": "Derived from execution readiness assessment.",
+            "source": "execution_readiness",
+        })
+
+    task_gaps = [g for g in gaps if g["category"] == "pending_tasks"]
+    if task_gaps:
+        areas.append({
+            "area_id": f"area-{len(areas) + 1:03d}",
+            "focus_area": "Resolve pending task backlog",
+            "priority": "medium",
+            "rationale": task_gaps[0]["description"],
+            "source": "task_tracking",
+        })
+
+    areas.append({
+        "area_id": f"area-{len(areas) + 1:03d}",
+        "focus_area": "Advance roadmap generation pipeline",
+        "priority": "high",
+        "rationale": (
+            "Phase 45A defined roadmap generation architecture. "
+            "Collected evidence now supports phases 45C–45E."
+        ),
+        "source": "phase_45a_design",
+    })
+
+    return areas
+
+
+def build_roadmap_evidence(root: HarnessPath) -> dict:
+    """Collect structured repository evidence for roadmap generation. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    package_id = f"rev-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    project_summary = {
+        **_collect_project_summary(root),
+        **_collect_changelog_summary(root),
+        **_collect_task_counts(root),
+    }
+    test_summary = _collect_test_evidence(root)
+
+    capability_data = build_capability_registry(root)
+    capability_summary = _summarize_capability_evidence(capability_data)
+
+    readiness_data = build_execution_readiness()
+    readiness_summary = _summarize_readiness_evidence(readiness_data)
+    governance_summary = _summarize_governance_evidence(readiness_data)
+
+    identified_gaps = _derive_roadmap_gaps(project_summary, readiness_data)
+    candidate_focus_areas = _derive_roadmap_focus_areas(identified_gaps, readiness_data)
+
+    return {
+        "package_id": package_id,
+        "generated_at": generated_at,
+        "evidence_sources": [
+            "PROJECT_STATUS.md",
+            "CHANGELOG.md",
+            "tasks/TODO.md",
+            "tasks/DONE.md",
+            "tests",
+            "capability_registry",
+            "execution_readiness",
+            "governance",
+        ],
+        "project_summary": project_summary,
+        "test_summary": test_summary,
+        "capability_summary": capability_summary,
+        "governance_summary": governance_summary,
+        "readiness_summary": readiness_summary,
+        "identified_gaps": identified_gaps,
+        "candidate_focus_areas": candidate_focus_areas,
+        "advisory": ROADMAP_EVIDENCE_ADVISORY,
+    }
