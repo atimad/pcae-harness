@@ -272,6 +272,11 @@ def render_commands_reference() -> str:
 
 - `pcae multi-agent-prototype`
 - `pcae multi-agent-prototype --json`
+
+## consensus-prototype
+
+- `pcae consensus-prototype`
+- `pcae consensus-prototype --json`
 """
 
 

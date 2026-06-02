@@ -31,6 +31,7 @@ from pcae.commands.agent import (
     run_runtime_execution_prototype,
     run_planner_adapter_prototype,
     run_multi_agent_prototype,
+    run_consensus_prototype,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1419,6 +1420,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON multi-agent prototype output.",
     )
     multi_agent_prototype_parser.set_defaults(handler=run_multi_agent_prototype)
+
+    consensus_prototype_parser = subparsers.add_parser(
+        "consensus-prototype",
+        help="Show read-only consensus prototype with simulated multi-agent outputs (Phase 44S).",
+    )
+    consensus_prototype_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON consensus prototype output.",
+    )
+    consensus_prototype_parser.set_defaults(handler=run_consensus_prototype)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 44R: Multi-Agent Execution Prototype.
+Phase 44S: Consensus Prototype.
 
 ## Governance Coherence Note
 
@@ -965,6 +965,24 @@ Real Multi-Agent Planning Design, 44O Multi-Agent Consensus Execution Design,
 runtime invocation, no adapter implementation, no file modification; advisory:
 "Controlled invocation design is advisory; no agents are invoked."; 14 new
 tests.
+
+PCAE exposes a read-only consensus prototype using simulated multi-agent outputs
+(Phase 44S): `pcae consensus-prototype` and `pcae consensus-prototype --json`
+prototype consensus processing without invoking any runtimes; simulated inputs
+for codex-local (approve, 0.85), claude-local (approve, 0.90), kimi-local
+(request_changes, 0.70); aggregation identifies agreement_candidates
+(codex-local, claude-local) and conflict_candidates (kimi-local); agreement
+analysis: 1 agreement; conflict analysis: 1 conflict, confidence spread=0.20;
+weighting preview (no real scoring): weights 0.35/0.40/0.25; recommendation
+preview: recommended_outcome=approve (weighted majority), human_review_required
+always true; governance: prototype may aggregate, analyze, preview; prototype
+may not execute consensus, invoke runtimes, modify files, commit, push, or
+rollback; future evolution: 44T Controlled Runtime Invocation Pilot, 44U
+Multi-Agent Runtime Pilot, 45A Autonomous Roadmap Generation;
+`build_consensus_prototype` added to `core/agent.py`; `run_consensus_prototype`
+added to `commands/agent.py`; `consensus-prototype [--json]` wired in `cli.py`;
+strictly read-only; advisory: "Consensus prototype is simulated. No runtimes are
+invoked."; 15 new tests.
 
 PCAE exposes a read-only multi-agent execution prototype (Phase 44R):
 `pcae multi-agent-prototype` and `pcae multi-agent-prototype --json` show how

@@ -8658,3 +8658,168 @@ def build_multi_agent_execution_prototype() -> dict:
         "future_evolution": list(_MAE_FUTURE_EVOLUTION),
         "advisory": MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 44S: Consensus Prototype
+# ---------------------------------------------------------------------------
+
+CONSENSUS_PROTOTYPE_ADVISORY = (
+    "Consensus prototype is simulated. No runtimes are invoked."
+)
+
+_CPROTO_SIMULATED_INPUTS: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "recommendation": "approve",
+        "confidence": 0.85,
+        "rationale": "Implementation is correct and all tests pass.",
+    },
+    {
+        "agent_id": "claude-local",
+        "recommendation": "approve",
+        "confidence": 0.90,
+        "rationale": "Documentation and code analysis confirm correctness.",
+    },
+    {
+        "agent_id": "kimi-local",
+        "recommendation": "request_changes",
+        "confidence": 0.70,
+        "rationale": "Code analysis identified potential edge cases requiring review.",
+    },
+)
+
+_CPROTO_AGREEMENT_CANDIDATES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+)
+
+_CPROTO_CONFLICT_CANDIDATES: tuple[str, ...] = ("kimi-local",)
+
+_CPROTO_AGREEMENTS: tuple[str, ...] = (
+    "codex-local and claude-local both recommend approve",
+)
+
+_CPROTO_CONFLICTS: tuple[str, ...] = (
+    "kimi-local recommends request_changes vs approve from codex-local and claude-local",
+)
+
+_CPROTO_CONFIDENCE_DIFFERENCES: dict = {
+    "max": 0.90,
+    "min": 0.70,
+    "spread": 0.20,
+    "note": "Spread exceeds 0.15; human review recommended.",
+}
+
+_CPROTO_WEIGHTING_PREVIEW: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "capability_confidence": "observed",
+        "task_fit": "high",
+        "role_fit": "implementation",
+        "preview_weight": 0.35,
+    },
+    {
+        "agent_id": "claude-local",
+        "capability_confidence": "observed",
+        "task_fit": "high",
+        "role_fit": "documentation",
+        "preview_weight": 0.40,
+    },
+    {
+        "agent_id": "kimi-local",
+        "capability_confidence": "observed",
+        "task_fit": "medium",
+        "role_fit": "analysis",
+        "preview_weight": 0.25,
+    },
+)
+
+_CPROTO_VALID_OUTCOMES: tuple[str, ...] = (
+    "approve",
+    "reject",
+    "request_changes",
+    "inconclusive",
+    "escalate_to_human",
+)
+
+_CPROTO_RECOMMENDED_OUTCOME = "approve"
+
+_CPROTO_RECOMMENDATION_BASIS = (
+    "Weighted majority: 2 of 3 agents recommend approve. "
+    "kimi-local conflict flagged for human review."
+)
+
+_CPROTO_HUMAN_REVIEW_REASON = (
+    "Conflict detected: kimi-local recommendation differs from majority."
+)
+
+_CPROTO_GOVERNANCE_RULES: dict = {
+    "prototype_may": [
+        "aggregate outputs",
+        "analyze agreements",
+        "analyze conflicts",
+        "generate recommendation preview",
+    ],
+    "prototype_may_not": [
+        "execute consensus",
+        "invoke runtimes",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+}
+
+_CPROTO_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "44T", "description": "Controlled Runtime Invocation Pilot"},
+    {"phase": "44U", "description": "Multi-Agent Runtime Pilot"},
+    {"phase": "45A", "description": "Autonomous Roadmap Generation"},
+)
+
+
+def build_consensus_prototype() -> dict:
+    """Return a read-only consensus prototype with simulated multi-agent outputs."""
+    simulated_inputs = [dict(inp) for inp in _CPROTO_SIMULATED_INPUTS]
+
+    aggregation = {
+        "collected_outputs": simulated_inputs,
+        "agreement_candidates": list(_CPROTO_AGREEMENT_CANDIDATES),
+        "conflict_candidates": list(_CPROTO_CONFLICT_CANDIDATES),
+    }
+
+    agreement_analysis = {
+        "agreements": list(_CPROTO_AGREEMENTS),
+        "agreement_count": len(_CPROTO_AGREEMENTS),
+    }
+
+    conflict_analysis = {
+        "conflicts": list(_CPROTO_CONFLICTS),
+        "conflict_count": len(_CPROTO_CONFLICTS),
+        "confidence_differences": _CPROTO_CONFIDENCE_DIFFERENCES,
+    }
+
+    weighting_preview = {
+        "note": "Preview weights only; no real scoring is performed.",
+        "weights": [dict(w) for w in _CPROTO_WEIGHTING_PREVIEW],
+    }
+
+    recommendation_preview = {
+        "recommended_outcome": _CPROTO_RECOMMENDED_OUTCOME,
+        "valid_outcomes": list(_CPROTO_VALID_OUTCOMES),
+        "basis": _CPROTO_RECOMMENDATION_BASIS,
+        "human_review_required": True,
+        "human_review_reason": _CPROTO_HUMAN_REVIEW_REASON,
+    }
+
+    return {
+        "simulated_inputs": simulated_inputs,
+        "aggregation": aggregation,
+        "agreement_analysis": agreement_analysis,
+        "conflict_analysis": conflict_analysis,
+        "weighting_preview": weighting_preview,
+        "recommendation_preview": recommendation_preview,
+        "governance_rules": _CPROTO_GOVERNANCE_RULES,
+        "future_evolution": list(_CPROTO_FUTURE_EVOLUTION),
+        "advisory": CONSENSUS_PROTOTYPE_ADVISORY,
+    }

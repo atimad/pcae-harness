@@ -38,6 +38,8 @@ from pcae.core.agent import (
     PLANNER_ADAPTER_PROTOTYPE_ADVISORY,
     build_multi_agent_execution_prototype,
     MULTI_AGENT_EXECUTION_PROTOTYPE_ADVISORY,
+    build_consensus_prototype,
+    CONSENSUS_PROTOTYPE_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -2819,6 +2821,73 @@ def run_multi_agent_prototype(args: argparse.Namespace) -> int:
         )
         print(f"  Artifact collection: {ac['collection_mode']}, {ac['persistence']}")
         print(f"  Consensus input: {ci['aggregation']}")
+        print()
+        gov = data["governance_rules"]
+        print("Governance:")
+        print(f"  Prototype may:     {', '.join(gov['prototype_may'])}")
+        print(f"  Prototype may not: {', '.join(gov['prototype_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_consensus_prototype(args: argparse.Namespace) -> int:
+    data = build_consensus_prototype()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Consensus prototype (simulated)")
+        print()
+        inputs = data["simulated_inputs"]
+        print(f"Simulated inputs ({len(inputs)}):")
+        for inp in inputs:
+            print(
+                f"  {inp['agent_id']:<14} "
+                f"recommendation={inp['recommendation']:<16} "
+                f"confidence={inp['confidence']}"
+            )
+        print()
+        agg = data["aggregation"]
+        print("Aggregation:")
+        print(f"  Agreement candidates: {', '.join(agg['agreement_candidates'])}")
+        print(f"  Conflict candidates:  {', '.join(agg['conflict_candidates'])}")
+        print()
+        aa = data["agreement_analysis"]
+        print(f"Agreement analysis ({aa['agreement_count']} agreement(s)):")
+        for a in aa["agreements"]:
+            print(f"  - {a}")
+        print()
+        ca = data["conflict_analysis"]
+        cd = ca["confidence_differences"]
+        print(f"Conflict analysis ({ca['conflict_count']} conflict(s)):")
+        for c in ca["conflicts"]:
+            print(f"  - {c}")
+        print(
+            f"  Confidence spread: {cd['spread']} "
+            f"(max={cd['max']}, min={cd['min']})"
+        )
+        print()
+        wp = data["weighting_preview"]
+        print("Weighting preview (no real scoring):")
+        for w in wp["weights"]:
+            print(
+                f"  {w['agent_id']:<14} "
+                f"capability={w['capability_confidence']:<10} "
+                f"task_fit={w['task_fit']:<8} "
+                f"role={w['role_fit']:<16} "
+                f"weight={w['preview_weight']}"
+            )
+        print()
+        rp = data["recommendation_preview"]
+        print("Recommendation preview:")
+        print(f"  Recommended outcome:  {rp['recommended_outcome']}")
+        print(f"  Basis:                {rp['basis']}")
+        print(f"  Human review required: {'yes' if rp['human_review_required'] else 'no'}")
+        print(f"  Human review reason:  {rp['human_review_reason']}")
         print()
         gov = data["governance_rules"]
         print("Governance:")

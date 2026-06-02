@@ -17867,3 +17867,180 @@ def test_44r_multi_agent_prototype_human_output_shows_sections_and_advisory(caps
     assert "Aggregation plan" in output
     assert "Governance" in output
     assert "Multi-agent execution prototype is read-only" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 44S: Consensus Prototype
+# ---------------------------------------------------------------------------
+
+
+def test_44s_consensus_prototype_command_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-prototype"])
+    assert exit_code == 0
+
+
+def test_44s_consensus_prototype_json_exits_zero(capsys) -> None:
+    exit_code = main(["consensus-prototype", "--json"])
+    assert exit_code == 0
+
+
+def test_44s_consensus_prototype_json_has_required_top_level_keys(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "simulated_inputs" in data
+    assert "aggregation" in data
+    assert "agreement_analysis" in data
+    assert "conflict_analysis" in data
+    assert "weighting_preview" in data
+    assert "recommendation_preview" in data
+    assert "governance_rules" in data
+    assert "advisory" in data
+
+
+def test_44s_consensus_prototype_simulated_inputs_generated(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inputs = data["simulated_inputs"]
+    assert len(inputs) == 3
+    agent_ids = {inp["agent_id"] for inp in inputs}
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+
+
+def test_44s_consensus_prototype_simulated_inputs_have_required_fields(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for inp in data["simulated_inputs"]:
+        assert "agent_id" in inp
+        assert "recommendation" in inp
+        assert "confidence" in inp
+        assert "rationale" in inp
+        assert isinstance(inp["confidence"], float)
+        assert 0.0 < inp["confidence"] <= 1.0
+
+
+def test_44s_consensus_prototype_aggregation_fields(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agg = data["aggregation"]
+    assert "collected_outputs" in agg
+    assert "agreement_candidates" in agg
+    assert "conflict_candidates" in agg
+    assert len(agg["collected_outputs"]) == 3
+    assert len(agg["agreement_candidates"]) >= 1
+    assert len(agg["conflict_candidates"]) >= 1
+
+
+def test_44s_consensus_prototype_agreement_analysis(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    aa = data["agreement_analysis"]
+    assert "agreements" in aa
+    assert "agreement_count" in aa
+    assert aa["agreement_count"] == len(aa["agreements"])
+    assert aa["agreement_count"] >= 1
+    combined = " ".join(aa["agreements"]).lower()
+    assert "approve" in combined
+
+
+def test_44s_consensus_prototype_conflict_analysis(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ca = data["conflict_analysis"]
+    assert "conflicts" in ca
+    assert "conflict_count" in ca
+    assert "confidence_differences" in ca
+    assert ca["conflict_count"] == len(ca["conflicts"])
+    assert ca["conflict_count"] >= 1
+    cd = ca["confidence_differences"]
+    assert "max" in cd
+    assert "min" in cd
+    assert "spread" in cd
+    assert cd["spread"] == round(cd["max"] - cd["min"], 10)
+
+
+def test_44s_consensus_prototype_weighting_preview(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wp = data["weighting_preview"]
+    assert "weights" in wp
+    assert "note" in wp
+    assert len(wp["weights"]) == 3
+    for w in wp["weights"]:
+        assert "agent_id" in w
+        assert "capability_confidence" in w
+        assert "task_fit" in w
+        assert "role_fit" in w
+        assert "preview_weight" in w
+        assert isinstance(w["preview_weight"], float)
+    total = sum(w["preview_weight"] for w in wp["weights"])
+    assert abs(total - 1.0) < 0.01
+
+
+def test_44s_consensus_prototype_recommendation_preview(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rp = data["recommendation_preview"]
+    assert "recommended_outcome" in rp
+    assert "valid_outcomes" in rp
+    assert "basis" in rp
+    assert rp["recommended_outcome"] in rp["valid_outcomes"]
+    for outcome in ("approve", "reject", "request_changes", "inconclusive", "escalate_to_human"):
+        assert outcome in rp["valid_outcomes"]
+
+
+def test_44s_consensus_prototype_human_review_always_required(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rp = data["recommendation_preview"]
+    assert rp["human_review_required"] is True
+    assert "human_review_reason" in rp
+    assert len(rp["human_review_reason"]) > 0
+
+
+def test_44s_consensus_prototype_governance_rules(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_rules"]
+    assert "prototype_may" in gov
+    assert "prototype_may_not" in gov
+    may = " ".join(gov["prototype_may"]).lower()
+    may_not = " ".join(gov["prototype_may_not"]).lower()
+    assert "aggregate" in may
+    assert "analyze" in may
+    assert "execute consensus" in may_not
+    assert "invoke runtimes" in may_not
+    assert "modify files" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert "rollback" in may_not
+
+
+def test_44s_consensus_prototype_advisory_is_correct(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "simulated" in data["advisory"].lower()
+    assert "no runtimes are invoked" in data["advisory"].lower()
+
+
+def test_44s_consensus_prototype_future_evolution_defined(capsys) -> None:
+    main(["consensus-prototype", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "44T" in phases
+    assert "44U" in phases
+    assert "45A" in phases
+
+
+def test_44s_consensus_prototype_human_output_shows_sections_and_advisory(capsys) -> None:
+    main(["consensus-prototype"])
+    output = capsys.readouterr().out
+    assert "Consensus prototype" in output
+    assert "Simulated inputs" in output
+    assert "Agreement analysis" in output
+    assert "Conflict analysis" in output
+    assert "Weighting preview" in output
+    assert "Recommendation preview" in output
+    assert "Governance" in output
+    assert "Consensus prototype is simulated" in output
