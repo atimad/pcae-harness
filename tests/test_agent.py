@@ -22149,3 +22149,185 @@ def test_45p_human_agent_execution_design_human_output_shows_all_sections(capsys
     assert "Blockers" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+def test_45q_governed_execution_pilot_json_structure(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("governed_execution_pilot", "lifecycle", "governance_results",
+                "runtime_results", "authorization_results", "audit_record",
+                "blockers", "warnings", "recommendations",
+                "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45q_governed_execution_pilot_fields(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["governed_execution_pilot"]
+    for field in ("pilot_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "gate_count", "blocker_count", "warning_count",
+                  "authorization_status", "governance_status", "runtime_status",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in pilot, f"missing pilot field: {field}"
+    assert pilot["pilot_id"].startswith("gep-")
+    assert pilot["phase"] == "45Q"
+
+
+def test_45q_governed_execution_pilot_lifecycle(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("approved_prompt_artifact", "human_agent_selection",
+                     "execution_candidate", "governance_gate_validation",
+                     "runtime_resolution", "execution_authorization_review",
+                     "future_live_execution"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+
+
+def test_45q_governed_execution_pilot_governance_gates(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_results"]
+    assert "gate_results" in gov
+    assert "overall_governance_status" in gov
+    gates = gov["gate_results"]
+    assert len(gates) == 7
+    gate_names = [g["gate"] for g in gates]
+    for expected in ("prompt_approved", "validation_passed", "traceability_complete",
+                     "intent_preserved", "human_approval_present",
+                     "selected_agents_approved", "invocation_contracts_available"):
+        assert expected in gate_names, f"missing governance gate: {expected}"
+    for gate in gates:
+        for field in ("gate_id", "gate", "description", "status", "rationale", "required"):
+            assert field in gate, f"gate missing field: {field}"
+        assert gate["required"] is True
+
+
+def test_45q_governed_execution_pilot_runtime_resolution(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_results"]
+    assert "agents" in rt
+    assert "overall_runtime_status" in rt
+    agents = rt["agents"]
+    assert len(agents) == 3
+    agent_ids = [a["agent_id"] for a in agents]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in agent_ids, f"missing runtime agent: {expected}"
+    valid = {"resolved", "partially_resolved", "not_resolved"}
+    for agent in agents:
+        for field in ("agent_id", "runtime_lookup", "adapter_lookup",
+                      "invocation_contract_lookup", "overall_resolution", "notes"):
+            assert field in agent, f"runtime agent missing field: {field}"
+        assert agent["overall_resolution"] in valid
+
+
+def test_45q_governed_execution_pilot_authorization_results(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    auth = data["authorization_results"]
+    for field in ("authorization_id", "execution_candidate_id", "governance_status",
+                  "runtime_status", "authorization_status", "blockers",
+                  "warnings", "model", "human_review_required"):
+        assert field in auth, f"authorization_results missing field: {field}"
+    assert auth["authorization_id"].startswith("gepa-")
+    valid_statuses = {"authorized", "conditionally_authorized", "blocked"}
+    assert auth["authorization_status"] in valid_statuses
+    assert auth["authorization_status"] == "blocked"
+    model_fields = [f["name"] for f in auth["model"]["fields"]]
+    for expected in ("authorization_id", "execution_candidate_id", "governance_status",
+                     "runtime_status", "authorization_status", "blockers", "warnings"):
+        assert expected in model_fields, f"authorization model missing field: {expected}"
+
+
+def test_45q_governed_execution_pilot_audit_record(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ar = data["audit_record"]
+    for field in ("audit_id", "prompt_id", "selected_agents", "governance_checks",
+                  "authorization_result", "generated_at", "model", "human_review_required"):
+        assert field in ar, f"audit_record missing field: {field}"
+    assert ar["audit_id"].startswith("gepar-")
+    assert len(ar["selected_agents"]) == 3
+    assert len(ar["governance_checks"]) == 7
+    assert ar["model"]["append_only"] is True
+    assert ar["model"]["deletion_forbidden"] is True
+    model_fields = [f["name"] for f in ar["model"]["fields"]]
+    for expected in ("audit_id", "prompt_id", "selected_agents",
+                     "governance_checks", "authorization_result", "generated_at"):
+        assert expected in model_fields, f"audit model missing field: {expected}"
+
+
+def test_45q_governed_execution_pilot_blockers(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) >= 1
+    categories = {b["category"] for b in blockers}
+    for expected in ("missing_approval", "missing_invocation_contract",
+                     "unresolved_adapter", "failed_governance_gate"):
+        assert expected in categories, f"missing blocker category: {expected}"
+    for blocker in blockers:
+        for field in ("blocker_id", "category", "description", "severity", "blocks_gate"):
+            assert field in blocker, f"blocker missing field: {field}"
+
+
+def test_45q_governed_execution_pilot_recommendations(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) >= 1
+    areas = {r["area"] for r in recs}
+    for expected in ("readiness_recommendation", "required_follow_up_phases",
+                     "execution_authorization_recommendation"):
+        assert expected in areas, f"missing recommendation area: {expected}"
+    for rec in recs:
+        for field in ("recommendation_id", "area", "description", "target_phase"):
+            assert field in rec, f"recommendation missing field: {field}"
+
+
+def test_45q_governed_execution_pilot_governance_boundaries(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governed_execution_pilot"]["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45q_governed_execution_pilot_future_evolution(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["governed_execution_pilot"]["future_evolution"]]
+    for expected in ("46A", "46B", "46C", "46D"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45q_governed_execution_pilot_advisory(capsys) -> None:
+    main(["governed-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "simulated" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45q_governed_execution_pilot_human_output_shows_all_sections(capsys) -> None:
+    main(["governed-execution-pilot"])
+    output = capsys.readouterr().out
+    assert "Governed execution pilot" in output
+    assert "lifecycle" in output.lower()
+    assert "Governance gate results" in output
+    assert "Runtime resolution" in output
+    assert "Authorization results" in output
+    assert "Blockers" in output
+    assert "Audit summary" in output
+    assert "Recommendations" in output
+    assert "simulated" in output.lower()

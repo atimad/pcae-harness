@@ -397,6 +397,11 @@ def render_commands_reference() -> str:
 
 - `pcae human-agent-execution-design`
 - `pcae human-agent-execution-design --json`
+
+## governed-execution-pilot
+
+- `pcae governed-execution-pilot`
+- `pcae governed-execution-pilot --json`
 """
 
 

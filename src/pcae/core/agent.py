@@ -14065,3 +14065,550 @@ def build_human_agent_execution_design() -> dict:
         "human_review_required": True,
         "advisory": HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
     }
+
+
+GOVERNED_EXECUTION_PILOT_ADVISORY = (
+    "Governed execution pilot is simulated; no prompts are executed."
+)
+
+_GEP_INPUT_SOURCES: tuple[str, ...] = (
+    "approved_prompt_artifacts",
+    "prompt_approval_workflow",
+    "human_selected_execution_design",
+    "prompt_execution_readiness_assessment",
+    "prompt_execution_dry_run",
+    "runtime_invocation_contracts",
+    "capability_registry",
+)
+
+_GEP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": "An ApprovedPromptArtifact provides the authorized execution input.",
+    },
+    {
+        "step": 2,
+        "name": "human_agent_selection",
+        "description": (
+            "Human selects one or more agents from the ExecutionCandidate. "
+            "PCAE recommendations are advisory; human selection is authoritative."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "execution_candidate",
+        "description": (
+            "An ExecutionCandidate is assembled with selected agents, prompt variants, "
+            "compatibility results, and initial governance status."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "governance_gate_validation",
+        "description": (
+            "All governance gates are evaluated: prompt approved, validation passed, "
+            "traceability complete, intent preserved, human approval present, "
+            "selected agents approved, invocation contracts available."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "runtime_resolution",
+        "description": (
+            "Runtime, adapter, and invocation contract are resolved for each selected agent."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "execution_authorization_review",
+        "description": (
+            "Authorization model is generated with authorization_status, blockers, "
+            "and warnings. Human reviews authorization before any live execution."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "future_live_execution",
+        "description": "Authorized ExecutionCandidate passes to live execution (46D).",
+    },
+)
+
+_GEP_GOVERNANCE_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "gep-gate-001",
+        "gate": "prompt_approved",
+        "description": "ApprovedPromptArtifact exists and approval_state=approved.",
+        "status": "blocked",
+        "rationale": (
+            "No ApprovedPromptArtifact runtime store is implemented; "
+            "approval state cannot be verified."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-002",
+        "gate": "validation_passed",
+        "description": "Prompt validation result is valid or valid_with_warnings.",
+        "status": "advisory_only",
+        "rationale": (
+            "Prompt validation (45H) is advisory; no deployed validator enforces this gate."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-003",
+        "gate": "traceability_complete",
+        "description": (
+            "All required traceability references present: prompt_id, phase_id, "
+            "proposal_id, roadmap_approval_id, evidence_package_id."
+        ),
+        "status": "advisory_only",
+        "rationale": (
+            "Traceability requirements are defined (45H/45I) but not runtime-enforced."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-004",
+        "gate": "intent_preserved",
+        "description": "Intent preservation checks passed for all adapted prompt variants.",
+        "status": "advisory_only",
+        "rationale": (
+            "Intent preservation (45G/45M) is advisory; no runtime enforcement gate exists."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-005",
+        "gate": "human_approval_present",
+        "description": "Explicit human approval is recorded for the execution candidate.",
+        "status": "pending",
+        "rationale": (
+            "human_review_required=true throughout the prompt lifecycle; "
+            "no approval has been recorded for this pilot candidate."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-006",
+        "gate": "selected_agents_approved",
+        "description": "All human-selected agents are listed in the approved agent registry.",
+        "status": "partially_satisfied",
+        "rationale": (
+            "codex-local and claude-local are registered; kimi-local invocation "
+            "contract is not validated for prompt-execution workloads."
+        ),
+        "required": True,
+    },
+    {
+        "gate_id": "gep-gate-007",
+        "gate": "invocation_contracts_available",
+        "description": "Validated invocation contracts exist for all selected agents.",
+        "status": "blocked",
+        "rationale": (
+            "kimi-local invocation contract is undefined. codex-local and "
+            "claude-local contracts are not yet validated for execution workloads."
+        ),
+        "required": True,
+    },
+)
+
+_GEP_RUNTIME_RESOLUTION: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "partially_resolved",
+        "overall_resolution": "partially_resolved",
+        "notes": [
+            "Runtime and adapter present in capability registry.",
+            "Invocation contract not validated for prompt-execution workloads.",
+        ],
+    },
+    {
+        "agent_id": "claude-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "partially_resolved",
+        "overall_resolution": "partially_resolved",
+        "notes": [
+            "Runtime and adapter present in capability registry.",
+            "Invocation contract not validated for prompt-execution workloads.",
+        ],
+    },
+    {
+        "agent_id": "kimi-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "not_resolved",
+        "overall_resolution": "not_resolved",
+        "notes": [
+            "Runtime and adapter present in capability registry.",
+            "Invocation contract for kimi-local is not defined.",
+            "API-mode invocation requires a separate contract definition.",
+        ],
+    },
+)
+
+_GEP_AUTHORIZATION_MODEL: dict = {
+    "model_name": "ExecutionAuthorization",
+    "fields": [
+        {
+            "name": "authorization_id",
+            "type": "str",
+            "description": "Unique authorization identifier (gepa-*).",
+        },
+        {
+            "name": "execution_candidate_id",
+            "type": "str",
+            "description": "Reference to the ExecutionCandidate being authorized.",
+        },
+        {
+            "name": "governance_status",
+            "type": "str",
+            "description": "Aggregate governance gate outcome: passed, partial, blocked.",
+        },
+        {
+            "name": "runtime_status",
+            "type": "str",
+            "description": "Aggregate runtime resolution outcome: resolved, partially_resolved, not_resolved.",
+        },
+        {
+            "name": "authorization_status",
+            "type": "str",
+            "description": "One of: authorized, conditionally_authorized, blocked.",
+        },
+        {
+            "name": "blockers",
+            "type": "list[str]",
+            "description": "Reasons authorization cannot proceed.",
+        },
+        {
+            "name": "warnings",
+            "type": "list[str]",
+            "description": "Non-blocking concerns to review before live execution.",
+        },
+    ],
+    "authorization_status_values": ["authorized", "conditionally_authorized", "blocked"],
+    "current_status": "blocked",
+    "human_review_required": True,
+}
+
+_GEP_AUDIT_MODEL: dict = {
+    "model_name": "ExecutionAuditRecord",
+    "fields": [
+        {
+            "name": "audit_id",
+            "type": "str",
+            "description": "Unique audit record identifier (gepar-*).",
+        },
+        {
+            "name": "prompt_id",
+            "type": "str",
+            "description": "Prompt identifier from the ApprovedPromptArtifact.",
+        },
+        {
+            "name": "selected_agents",
+            "type": "list[str]",
+            "description": "Human-selected agents recorded for audit lineage.",
+        },
+        {
+            "name": "governance_checks",
+            "type": "list[dict]",
+            "description": "Snapshot of all governance gate results at authorization time.",
+        },
+        {
+            "name": "authorization_result",
+            "type": "ExecutionAuthorization",
+            "description": "Full authorization model snapshot for audit lineage.",
+        },
+        {
+            "name": "generated_at",
+            "type": "str",
+            "description": "ISO 8601 timestamp of audit record generation.",
+        },
+    ],
+    "append_only": True,
+    "deletion_forbidden": True,
+    "human_review_required": True,
+}
+
+_GEP_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "gep-blocker-001",
+        "category": "missing_approval",
+        "description": (
+            "No ApprovedPromptArtifact runtime store; approval gate cannot be satisfied."
+        ),
+        "severity": "high",
+        "blocks_gate": "prompt_approved",
+    },
+    {
+        "blocker_id": "gep-blocker-002",
+        "category": "missing_invocation_contract",
+        "description": "kimi-local invocation contract is not defined.",
+        "severity": "high",
+        "blocks_gate": "invocation_contracts_available",
+    },
+    {
+        "blocker_id": "gep-blocker-003",
+        "category": "unresolved_adapter",
+        "description": (
+            "codex-local and claude-local invocation contracts are not validated "
+            "for prompt-execution workloads."
+        ),
+        "severity": "medium",
+        "blocks_gate": "invocation_contracts_available",
+    },
+    {
+        "blocker_id": "gep-blocker-004",
+        "category": "failed_governance_gate",
+        "description": (
+            "human_approval_present gate is pending; no human approval recorded "
+            "for this pilot candidate."
+        ),
+        "severity": "high",
+        "blocks_gate": "human_approval_present",
+    },
+)
+
+_GEP_WARNINGS: tuple[dict, ...] = (
+    {
+        "warning_id": "gep-warning-001",
+        "description": (
+            "Validation and traceability gates are advisory-only; "
+            "no automated enforcement exists."
+        ),
+        "severity": "medium",
+    },
+    {
+        "warning_id": "gep-warning-002",
+        "description": (
+            "Adapter sandbox isolation not validated for prompt-execution scope; "
+            "unintended repository mutations may occur under live execution."
+        ),
+        "severity": "medium",
+    },
+    {
+        "warning_id": "gep-warning-003",
+        "description": (
+            "No consensus protocol defined for execution outcomes; "
+            "divergent multi-agent results have no resolution path."
+        ),
+        "severity": "low",
+    },
+)
+
+_GEP_RECOMMENDATIONS: tuple[dict, ...] = (
+    {
+        "recommendation_id": "gep-rec-001",
+        "area": "readiness_recommendation",
+        "description": (
+            "Implement ApprovedPromptArtifact runtime storage and wire the approval "
+            "gate before authorizing any live prompt execution."
+        ),
+        "target_phase": "46A",
+    },
+    {
+        "recommendation_id": "gep-rec-002",
+        "area": "required_follow_up_phases",
+        "description": (
+            "Define and validate all invocation contracts for codex-local, claude-local, "
+            "and kimi-local before the live execution pilot (46D)."
+        ),
+        "target_phase": "46A",
+    },
+    {
+        "recommendation_id": "gep-rec-003",
+        "area": "required_follow_up_phases",
+        "description": (
+            "Implement execution result capture (46B) and consensus framework (46C) "
+            "before authorizing multi-agent live execution."
+        ),
+        "target_phase": "46B",
+    },
+    {
+        "recommendation_id": "gep-rec-004",
+        "area": "execution_authorization_recommendation",
+        "description": (
+            "Authorization status is blocked. Do not proceed to live execution until "
+            "all governance gates pass and human authorization is explicitly recorded."
+        ),
+        "target_phase": "46D",
+    },
+)
+
+_GEP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "simulate execution governance",
+        "simulate authorization",
+        "simulate runtime resolution",
+        "generate audit records",
+    ],
+    "pilot_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_GEP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46A", "description": "Live Execution Readiness Assessment"},
+    {"phase": "46B", "description": "Runtime Execution Result Capture"},
+    {"phase": "46C", "description": "Execution Consensus Framework"},
+    {"phase": "46D", "description": "Governed Live Execution Pilot"},
+)
+
+
+def build_governed_execution_pilot() -> dict:
+    """Simulate the governed prompt execution workflow. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"gep-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    authorization_id = f"gepa-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    audit_id = f"gepar-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _GEP_LIFECYCLE]
+    governance_gate_results = [dict(g) for g in _GEP_GOVERNANCE_GATES]
+    runtime_agents = [dict(r) for r in _GEP_RUNTIME_RESOLUTION]
+    blockers = [dict(b) for b in _GEP_BLOCKERS]
+    warnings = [dict(w) for w in _GEP_WARNINGS]
+    recommendations = [dict(r) for r in _GEP_RECOMMENDATIONS]
+
+    blocked_gates = [g for g in governance_gate_results if g["status"] == "blocked"]
+    pending_gates = [g for g in governance_gate_results if g["status"] == "pending"]
+    partial_gates = [g for g in governance_gate_results if g["status"] == "partially_satisfied"]
+    advisory_gates = [g for g in governance_gate_results if g["status"] == "advisory_only"]
+
+    if blocked_gates or pending_gates:
+        governance_status = "blocked"
+        authorization_status = "blocked"
+    elif partial_gates:
+        governance_status = "partial"
+        authorization_status = "conditionally_authorized"
+    else:
+        governance_status = "passed"
+        authorization_status = "authorized"
+
+    unresolved = [a for a in runtime_agents if a["overall_resolution"] == "not_resolved"]
+    partial_rt = [a for a in runtime_agents if a["overall_resolution"] == "partially_resolved"]
+    if unresolved:
+        runtime_status = "not_resolved"
+    elif partial_rt:
+        runtime_status = "partially_resolved"
+    else:
+        runtime_status = "resolved"
+
+    authorization_results = {
+        "authorization_id": authorization_id,
+        "execution_candidate_id": "ec-dry-run-candidate",
+        "governance_status": governance_status,
+        "runtime_status": runtime_status,
+        "authorization_status": authorization_status,
+        "blocked_gate_count": len(blocked_gates),
+        "pending_gate_count": len(pending_gates),
+        "partially_satisfied_gate_count": len(partial_gates),
+        "advisory_gate_count": len(advisory_gates),
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings),
+        "blockers": [b["description"] for b in blockers],
+        "warnings": [w["description"] for w in warnings],
+        "model": {
+            k: (list(v) if isinstance(v, (list, tuple)) else v)
+            for k, v in _GEP_AUTHORIZATION_MODEL.items()
+            if k != "fields"
+        },
+        "human_review_required": True,
+    }
+    authorization_results["model"]["fields"] = [
+        dict(f) for f in _GEP_AUTHORIZATION_MODEL["fields"]
+    ]
+
+    governance_results = {
+        "gate_results": governance_gate_results,
+        "overall_governance_status": governance_status,
+        "gate_count": len(governance_gate_results),
+        "blocked_count": len(blocked_gates),
+        "pending_count": len(pending_gates),
+        "partially_satisfied_count": len(partial_gates),
+        "advisory_count": len(advisory_gates),
+        "human_review_required": True,
+    }
+
+    runtime_results = {
+        "agents": runtime_agents,
+        "overall_runtime_status": runtime_status,
+        "resolved_count": sum(
+            1 for a in runtime_agents if a["overall_resolution"] == "resolved"
+        ),
+        "partially_resolved_count": len(partial_rt),
+        "not_resolved_count": len(unresolved),
+    }
+
+    audit_record = {
+        "audit_id": audit_id,
+        "prompt_id": "appp-canonical-dry-run-candidate",
+        "selected_agents": ["codex-local", "claude-local", "kimi-local"],
+        "governance_checks": [
+            {"gate": g["gate"], "status": g["status"]}
+            for g in governance_gate_results
+        ],
+        "authorization_result": {
+            "authorization_id": authorization_id,
+            "authorization_status": authorization_status,
+            "governance_status": governance_status,
+            "runtime_status": runtime_status,
+        },
+        "generated_at": generated_at,
+        "model": {
+            k: (list(v) if isinstance(v, (list, tuple)) else v)
+            for k, v in _GEP_AUDIT_MODEL.items()
+            if k != "fields"
+        },
+        "human_review_required": True,
+    }
+    audit_record["model"]["fields"] = [dict(f) for f in _GEP_AUDIT_MODEL["fields"]]
+
+    governed_execution_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "45Q",
+        "title": "Governed Prompt Execution Pilot",
+        "summary": (
+            "Simulates the complete governed prompt execution workflow — governance gate "
+            "validation, runtime resolution, and authorization — without invoking any agents. "
+            "Authorization status is blocked pending approval store implementation and "
+            "invocation contract validation."
+        ),
+        "input_sources": list(_GEP_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "gate_count": len(governance_gate_results),
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings),
+        "authorization_status": authorization_status,
+        "governance_status": governance_status,
+        "runtime_status": runtime_status,
+        "human_review_required": True,
+        "governance_boundaries": dict(_GEP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _GEP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "governed_execution_pilot": governed_execution_pilot,
+        "lifecycle": lifecycle,
+        "governance_results": governance_results,
+        "runtime_results": runtime_results,
+        "authorization_results": authorization_results,
+        "audit_record": audit_record,
+        "blockers": blockers,
+        "warnings": warnings,
+        "recommendations": recommendations,
+        "human_review_required": True,
+        "advisory": GOVERNED_EXECUTION_PILOT_ADVISORY,
+    }

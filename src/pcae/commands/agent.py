@@ -88,6 +88,8 @@ from pcae.core.agent import (
     PROMPT_EXECUTION_DRY_RUN_ADVISORY,
     build_human_agent_execution_design,
     HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
+    build_governed_execution_pilot,
+    GOVERNED_EXECUTION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4176,6 +4178,71 @@ def run_human_agent_execution_design(args: argparse.Namespace) -> int:
         print(f"  Human selection authoritative: {gb['human_selection_authoritative']}")
         print(f"  PCAE recommendation advisory:  {gb['pcae_recommendation_advisory']}")
         print(f"  Human review required:         {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governed_execution_pilot(args: argparse.Namespace) -> int:
+    data = build_governed_execution_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["governed_execution_pilot"]
+        print("Governed execution pilot")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Governed execution lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Governance gate results:")
+        gov = data["governance_results"]
+        for gate in gov["gate_results"]:
+            print(f"  {gate['gate']}: {gate['status']}")
+            print(f"    {gate['rationale']}")
+        print(
+            f"  Overall: {gov['overall_governance_status']}"
+            f" ({gov['blocked_count']} blocked,"
+            f" {gov['pending_count']} pending,"
+            f" {gov['advisory_count']} advisory)"
+        )
+        print()
+        print("Runtime resolution:")
+        rt = data["runtime_results"]
+        for agent in rt["agents"]:
+            print(f"  {agent['agent_id']}: {agent['overall_resolution']}")
+            for note in agent["notes"]:
+                print(f"    - {note}")
+        print(f"  Overall: {rt['overall_runtime_status']}")
+        print()
+        auth = data["authorization_results"]
+        print("Authorization results:")
+        print(f"  Authorization: {auth['authorization_id']}")
+        print(f"  Status:        {auth['authorization_status']}")
+        print(f"  Governance:    {auth['governance_status']}")
+        print(f"  Runtime:       {auth['runtime_status']}")
+        print(f"  Blockers:      {auth['blocker_count']}")
+        print(f"  Warnings:      {auth['warning_count']}")
+        print()
+        print(f"Blockers ({pilot['blocker_count']}):")
+        for blocker in data["blockers"]:
+            print(f"  [{blocker['severity']}] {blocker['blocker_id']}: {blocker['description']}")
+        print()
+        print("Audit summary:")
+        ar = data["audit_record"]
+        print(f"  Audit:    {ar['audit_id']}")
+        print(f"  Prompt:   {ar['prompt_id']}")
+        print(f"  Agents:   {', '.join(ar['selected_agents'])}")
+        print(f"  Result:   {ar['authorization_result']['authorization_status']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            print(f"  [{rec['area']} → {rec['target_phase']}] {rec['description']}")
         print()
         print(data["advisory"])
     return 0

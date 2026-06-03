@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45P: Human-Selected Agent Execution Design.
+Phase 45Q: Governed Prompt Execution Pilot.
 
 ## Governance Coherence Note
 
@@ -2241,9 +2241,38 @@ pcae_recommendation_advisory=true, read_only=true, human_review_required=true;
 future_evolution: 45Q/45R/45S; advisory: "Human-selected agent execution design is
 informational; no prompts are executed."
 
+PCAE can simulate the complete governed prompt execution workflow with
+`pcae governed-execution-pilot` and `pcae governed-execution-pilot --json`
+(Phase 45Q): inputs: approved prompt artifacts, prompt approval workflow,
+human-selected execution design, prompt execution readiness assessment, prompt
+execution dry-run, runtime invocation contracts, capability registry; no prompts
+are executed; no agents are invoked; no repository modifications occur; governed
+execution lifecycle (7 steps): approved_prompt_artifact/human_agent_selection/
+execution_candidate/governance_gate_validation/runtime_resolution/
+execution_authorization_review/future_live_execution; governance gate simulation:
+seven gates (prompt_approved/validation_passed/traceability_complete/intent_preserved/
+human_approval_present/selected_agents_approved/invocation_contracts_available)
+each with gate_id/status/rationale/required=true; runtime resolution: per-agent
+runtime_lookup/adapter_lookup/invocation_contract_lookup/overall_resolution/notes
+(codex-local: partially_resolved/claude-local: partially_resolved/kimi-local:
+not_resolved); authorization model: ExecutionAuthorization with seven fields
+(authorization_id/execution_candidate_id/governance_status/runtime_status/
+authorization_status/blockers/warnings), current_status=blocked; audit model:
+ExecutionAuditRecord with six fields (audit_id/prompt_id/selected_agents/
+governance_checks/authorization_result/generated_at), append_only=true,
+deletion_forbidden=true; four blockers across four categories (missing_approval/
+missing_invocation_contract/unresolved_adapter/failed_governance_gate); three
+warnings; four recommendations across three areas (readiness_recommendation/
+required_follow_up_phases/execution_authorization_recommendation); governance_boundaries:
+may simulate execution governance/simulate authorization/simulate runtime resolution/
+generate audit records; may not execute prompts/invoke agents/modify repository/
+commit/push/rollback; read_only=true, human_review_required=true; future_evolution:
+46A/46B/46C/46D; advisory: "Governed execution pilot is simulated; no prompts
+are executed."
+
 ## Next
 
-- TBD: Future phases (45Q Governed Prompt Execution Pilot, 45R Prompt Execution Result Capture, 45S Prompt Consensus Integration).
+- TBD: Future phases (46A Live Execution Readiness Assessment, 46B Runtime Execution Result Capture, 46C Execution Consensus Framework, 46D Governed Live Execution Pilot).
 
 ## Future Explorations
 

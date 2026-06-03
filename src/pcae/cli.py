@@ -56,6 +56,7 @@ from pcae.commands.agent import (
     run_prompt_execution_readiness,
     run_prompt_execution_dry_run,
     run_human_agent_execution_design,
+    run_governed_execution_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1719,6 +1720,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON human-agent execution design output.",
     )
     human_agent_execution_design_parser.set_defaults(handler=run_human_agent_execution_design)
+
+    governed_execution_pilot_parser = subparsers.add_parser(
+        "governed-execution-pilot",
+        help="Simulate the complete governed prompt execution workflow (Phase 45Q).",
+    )
+    governed_execution_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governed execution pilot output.",
+    )
+    governed_execution_pilot_parser.set_defaults(handler=run_governed_execution_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
