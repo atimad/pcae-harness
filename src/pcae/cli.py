@@ -65,6 +65,7 @@ from pcae.commands.agent import (
     run_execution_authorization_design,
     run_read_only_invocation_pilot,
     run_execution_result_review_design,
+    run_authorization_expiration_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1827,6 +1828,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON execution result review design output.",
     )
     execution_result_review_design_parser.set_defaults(handler=run_execution_result_review_design)
+
+    authorization_expiration_design_parser = subparsers.add_parser(
+        "authorization-expiration-design",
+        help="Design governance controls for authorization expiration workflow (Phase 46I).",
+    )
+    authorization_expiration_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON authorization expiration design output.",
+    )
+    authorization_expiration_design_parser.set_defaults(handler=run_authorization_expiration_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

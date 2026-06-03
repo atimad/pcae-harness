@@ -106,6 +106,8 @@ from pcae.core.agent import (
     READ_ONLY_INVOCATION_PILOT_ADVISORY,
     build_execution_result_review_design,
     EXECUTION_RESULT_REVIEW_ADVISORY,
+    build_authorization_expiration_design,
+    AUTHORIZATION_EXPIRATION_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4718,6 +4720,63 @@ def run_execution_result_review_design(args: argparse.Namespace) -> int:
         for rule in data["escalation_rules"]:
             print(f"  [{rule['rule_id']}] {rule['trigger']} (severity={rule['severity']})")
             print(f"    {rule['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_authorization_expiration_design(args: argparse.Namespace) -> int:
+    data = build_authorization_expiration_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["authorization_expiration_design"]
+        print("Authorization expiration workflow design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Authorization lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Authorization states:")
+        for state in data["authorization_states"]:
+            terminal = "terminal" if state["terminal"] else "non-terminal"
+            exec_ok = "execution allowed" if state["allows_execution"] else "no execution"
+            print(f"  {state['state']} ({terminal}, {exec_ok})")
+            print(f"    {state['description']}")
+        print()
+        print("Expiration triggers:")
+        for trigger in data["expiration_triggers"]:
+            auto = "auto-fires" if trigger["auto_fires"] else "manual"
+            print(f"  {trigger['trigger']} ({auto}, severity={trigger['severity']}, sets_state={trigger['sets_state']})")
+            print(f"    {trigger['description']}")
+        print()
+        print("Renewal requirements:")
+        for req in data["renewal_requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking})")
+            print(f"    {req['description']}")
+        print()
+        print("Expiration record model (AuthorizationExpirationRecord):")
+        model = data["expiration_record_model"]
+        print(f"  Fields: {model['field_count']}  Required: {model['required_field_count']}")
+        print(f"  Immutable fields: {', '.join(model['immutable_fields'])}")
+        print(f"  Mutable fields:   {', '.join(model['mutable_fields'])}")
+        print()
+        print("Audit integration:")
+        for history in data["audit_integration"]:
+            print(f"  {history['history_type']} (append_only={history['append_only']}, immutable={history['immutable']})")
+            print(f"    {history['description']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

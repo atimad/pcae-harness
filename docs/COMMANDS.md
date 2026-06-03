@@ -421,3 +421,8 @@
 
 - `pcae execution-result-review-design`
 - `pcae execution-result-review-design --json`
+
+## authorization-expiration-design
+
+- `pcae authorization-expiration-design`
+- `pcae authorization-expiration-design --json`

@@ -17782,3 +17782,391 @@ def build_execution_result_review_design() -> dict:
         "governance_boundaries": dict(_ERRW_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_RESULT_REVIEW_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46I — Authorization Expiration Workflow
+# ---------------------------------------------------------------------------
+
+AUTHORIZATION_EXPIRATION_ADVISORY = (
+    "Authorization expiration workflow is informational; no authorizations are modified."
+)
+
+_AEXW_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_authorization_artifacts",
+    "prompt_approval_artifacts",
+    "execution_audit_design",
+    "execution_result_review_workflow",
+    "governed_live_execution_pilot",
+)
+
+_AEXW_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "authorization_created",
+        "description": (
+            "An ExecutionAuthorizationArtifact is created with status=pending, "
+            "capturing authorization_id, prompt_id, selected_agents, and governance metadata."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "authorization_active",
+        "description": (
+            "The artifact transitions to status=authorized after human approval. "
+            "The artifact is immutable; governance metadata is locked at creation time."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "expiration_evaluation",
+        "description": (
+            "Each authorization is periodically evaluated against expiration triggers: "
+            "age_based_expiration, prompt_superseded, approval_superseded, "
+            "governance_change, and manual_invalidation."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "authorization_expired",
+        "description": (
+            "When an expiration trigger fires, the authorization status transitions to "
+            "expired or superseded. An AuthorizationExpirationRecord is created and "
+            "appended to the expiration history. No execution may proceed."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "renewal_request",
+        "description": (
+            "The human may request renewal of an expired authorization. A renewal "
+            "request is created referencing the original authorization_id and documenting "
+            "the expiration_reason and renewal rationale."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "human_review",
+        "description": (
+            "Human review verifies traceability, prompt approval validity, and governance "
+            "compliance. Renewal may not proceed automatically; human authority is final."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "authorization_renewed",
+        "description": (
+            "When human review approves renewal, a new authorization artifact is created "
+            "with status=renewed referencing the original. The expiration record is updated "
+            "with renewed=true, renewed_by, and renewed_at."
+        ),
+    },
+)
+
+_AEXW_AUTHORIZATION_STATES: tuple[dict, ...] = (
+    {
+        "state": "pending",
+        "description": "Authorization has been created but human approval has not yet been granted.",
+        "terminal": False,
+        "allows_execution": False,
+    },
+    {
+        "state": "authorized",
+        "description": "Human approval has been granted; execution may proceed under this authorization.",
+        "terminal": False,
+        "allows_execution": True,
+    },
+    {
+        "state": "expired",
+        "description": "Authorization has exceeded its validity period or an expiration trigger has fired.",
+        "terminal": True,
+        "allows_execution": False,
+    },
+    {
+        "state": "denied",
+        "description": "Human review denied the authorization or renewal request.",
+        "terminal": True,
+        "allows_execution": False,
+    },
+    {
+        "state": "superseded",
+        "description": "The prompt or approval artifact has been superseded; authorization is no longer valid.",
+        "terminal": True,
+        "allows_execution": False,
+    },
+    {
+        "state": "renewed",
+        "description": "Authorization was expired and subsequently renewed by human review.",
+        "terminal": False,
+        "allows_execution": True,
+    },
+)
+
+_AEXW_EXPIRATION_TRIGGERS: tuple[dict, ...] = (
+    {
+        "trigger": "age_based_expiration",
+        "description": (
+            "Authorization has exceeded a policy-defined maximum age. "
+            "Age is measured from authorized_at to the current evaluation time."
+        ),
+        "sets_state": "expired",
+        "severity": "medium",
+        "auto_fires": True,
+    },
+    {
+        "trigger": "prompt_superseded",
+        "description": (
+            "The prompt artifact referenced by the authorization has been superseded "
+            "by a newer approved version. The original authorization is no longer valid."
+        ),
+        "sets_state": "superseded",
+        "severity": "high",
+        "auto_fires": True,
+    },
+    {
+        "trigger": "approval_superseded",
+        "description": (
+            "The prompt approval artifact has been superseded or revoked. "
+            "Any authorization derived from it must be immediately invalidated."
+        ),
+        "sets_state": "superseded",
+        "severity": "critical",
+        "auto_fires": True,
+    },
+    {
+        "trigger": "governance_change",
+        "description": (
+            "A governance policy change has invalidated the conditions under which "
+            "this authorization was granted. Human review determines whether renewal is possible."
+        ),
+        "sets_state": "expired",
+        "severity": "high",
+        "auto_fires": False,
+    },
+    {
+        "trigger": "manual_invalidation",
+        "description": (
+            "A human operator has explicitly invalidated the authorization outside of "
+            "the automated expiration pipeline."
+        ),
+        "sets_state": "expired",
+        "severity": "medium",
+        "auto_fires": False,
+    },
+)
+
+_AEXW_RENEWAL_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "human_review",
+        "description": "Renewal must be explicitly approved by a human reviewer. Auto-renewal is not permitted.",
+        "blocking": True,
+    },
+    {
+        "requirement": "authorization_still_traceable",
+        "description": (
+            "The original authorization_id must remain traceable through audit history. "
+            "Untraceable authorizations may not be renewed."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "prompt_approval_still_valid",
+        "description": (
+            "The prompt approval artifact associated with the authorization must still be "
+            "valid and not superseded at the time of renewal."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "governance_checks_pass",
+        "description": (
+            "All current governance policy checks must pass against the authorization "
+            "context before renewal is granted."
+        ),
+        "blocking": True,
+    },
+)
+
+_AEXW_EXPIRATION_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "expiration_id",
+        "type": "str",
+        "description": "Unique identifier for this expiration record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Identifier of the ExecutionAuthorizationArtifact that expired.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "expiration_reason",
+        "type": "str",
+        "description": "The expiration trigger that caused the state transition (e.g. age_based_expiration).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "expired_at",
+        "type": "str",
+        "description": "ISO 8601 timestamp of when the authorization expired.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "renewed",
+        "type": "bool",
+        "description": "True when this expiration record has an associated approved renewal.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "renewed_by",
+        "type": "str | None",
+        "description": "Identifier of the human reviewer who approved the renewal. Null if not renewed.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "renewed_at",
+        "type": "str | None",
+        "description": "ISO 8601 timestamp of when the renewal was approved. Null if not renewed.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "notes",
+        "type": "str | None",
+        "description": "Optional human-authored notes describing the expiration context or renewal rationale.",
+        "required": False,
+        "immutable": False,
+    },
+)
+
+_AEXW_AUDIT_INTEGRATION: tuple[dict, ...] = (
+    {
+        "history_type": "expiration_history",
+        "description": (
+            "Append-only log of all AuthorizationExpirationRecord entries. "
+            "Each expiration trigger creates one record; records are never deleted or modified."
+        ),
+        "append_only": True,
+        "immutable": True,
+        "tracked_fields": ["expiration_id", "authorization_id", "expiration_reason", "expired_at"],
+    },
+    {
+        "history_type": "renewal_history",
+        "description": (
+            "Append-only log of all renewal decisions (approved or denied). "
+            "Each human review outcome appends one entry referencing the expiration_id."
+        ),
+        "append_only": True,
+        "immutable": True,
+        "tracked_fields": ["expiration_id", "renewed", "renewed_by", "renewed_at"],
+    },
+    {
+        "history_type": "supersession_history",
+        "description": (
+            "Append-only log of all supersession events, recording which prompt or approval "
+            "artifact triggered the supersession and which authorization was affected."
+        ),
+        "append_only": True,
+        "immutable": True,
+        "tracked_fields": ["authorization_id", "trigger", "superseded_at", "superseding_artifact_id"],
+    },
+)
+
+_AEXW_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "evaluate expiration",
+        "record expiration metadata",
+        "record renewal metadata",
+    ],
+    "workflow_may_not": [
+        "auto-renew authorization",
+        "bypass human review",
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_AEXW_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46J", "description": "Read-Only Invocation Pilot Implementation"},
+    {"phase": "46K", "description": "Multi-Agent Invocation Pilot"},
+    {"phase": "46L", "description": "Execution Result Quality Framework"},
+    {"phase": "46M", "description": "Authorization Renewal Pilot"},
+)
+
+
+def build_authorization_expiration_design() -> dict:
+    """Design governance controls for authorization expiration, renewal, and supersession. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"aexw-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _AEXW_LIFECYCLE]
+    authorization_states = [dict(s) for s in _AEXW_AUTHORIZATION_STATES]
+    expiration_triggers = [dict(t) for t in _AEXW_EXPIRATION_TRIGGERS]
+    renewal_requirements = [dict(r) for r in _AEXW_RENEWAL_REQUIREMENTS]
+    expiration_record_fields = [dict(f) for f in _AEXW_EXPIRATION_RECORD_FIELDS]
+    audit_integration = [dict(a) for a in _AEXW_AUDIT_INTEGRATION]
+
+    terminal_states = [s["state"] for s in authorization_states if s["terminal"]]
+    execution_allowed_states = [s["state"] for s in authorization_states if s["allows_execution"]]
+    auto_firing_triggers = [t["trigger"] for t in expiration_triggers if t["auto_fires"]]
+
+    expiration_record_model = {
+        "model_name": "AuthorizationExpirationRecord",
+        "design_id": design_id,
+        "field_count": len(expiration_record_fields),
+        "required_field_count": sum(1 for f in expiration_record_fields if f["required"]),
+        "immutable_fields": [f["name"] for f in expiration_record_fields if f["immutable"]],
+        "mutable_fields": [f["name"] for f in expiration_record_fields if not f["immutable"]],
+        "fields": expiration_record_fields,
+    }
+
+    authorization_expiration_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46I",
+        "title": "Authorization Expiration Workflow",
+        "summary": (
+            "Designs governance controls for expiration, renewal, and supersession of "
+            "ExecutionAuthorizationArtifact objects. Authorizations transition through "
+            "pending → authorized → expired/superseded, with optional human-reviewed renewal. "
+            "No prompts are executed and no agents are invoked."
+        ),
+        "input_sources": list(_AEXW_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "authorization_state_count": len(authorization_states),
+        "terminal_states": terminal_states,
+        "execution_allowed_states": execution_allowed_states,
+        "expiration_trigger_count": len(expiration_triggers),
+        "auto_firing_trigger_count": len(auto_firing_triggers),
+        "auto_firing_triggers": auto_firing_triggers,
+        "renewal_requirement_count": len(renewal_requirements),
+        "audit_history_type_count": len(audit_integration),
+        "human_review_required": True,
+        "governance_boundaries": dict(_AEXW_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _AEXW_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "authorization_expiration_design": authorization_expiration_design,
+        "lifecycle": lifecycle,
+        "authorization_states": authorization_states,
+        "expiration_triggers": expiration_triggers,
+        "renewal_requirements": renewal_requirements,
+        "expiration_record_model": expiration_record_model,
+        "audit_integration": audit_integration,
+        "governance_boundaries": dict(_AEXW_GOVERNANCE_BOUNDARIES),
+        "advisory": AUTHORIZATION_EXPIRATION_ADVISORY,
+    }

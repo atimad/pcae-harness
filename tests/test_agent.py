@@ -23765,3 +23765,212 @@ def test_46h_execution_result_review_human_output_shows_all_sections(capsys) -> 
     assert "Escalation rules" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46I — Authorization Expiration Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_46i_authorization_expiration_design_json_structure(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "authorization_expiration_design", "lifecycle", "authorization_states",
+        "expiration_triggers", "renewal_requirements", "expiration_record_model",
+        "audit_integration", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46i_authorization_expiration_design_fields(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["authorization_expiration_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "lifecycle_step_count",
+        "authorization_state_count", "terminal_states", "execution_allowed_states",
+        "expiration_trigger_count", "auto_firing_trigger_count", "auto_firing_triggers",
+        "renewal_requirement_count", "audit_history_type_count",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("aexw-")
+    assert design["phase"] == "46I"
+    assert design["human_review_required"] is True
+    assert design["authorization_state_count"] == 6
+    assert design["expiration_trigger_count"] == 5
+
+
+def test_46i_authorization_expiration_lifecycle(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "authorization_created", "authorization_active", "expiration_evaluation",
+        "authorization_expired", "renewal_request", "human_review",
+        "authorization_renewed",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46i_authorization_expiration_states(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = data["authorization_states"]
+    assert len(states) == 6
+    state_names = [s["state"] for s in states]
+    for expected in ("pending", "authorized", "expired", "denied", "superseded", "renewed"):
+        assert expected in state_names, f"missing authorization state: {expected}"
+    for s in states:
+        for field in ("state", "description", "terminal", "allows_execution"):
+            assert field in s, f"state missing field: {field}"
+    terminal = [s["state"] for s in states if s["terminal"]]
+    assert "expired" in terminal
+    assert "denied" in terminal
+    assert "superseded" in terminal
+    assert len(terminal) == 3
+    exec_allowed = [s["state"] for s in states if s["allows_execution"]]
+    assert "authorized" in exec_allowed
+    assert "renewed" in exec_allowed
+    assert len(exec_allowed) == 2
+
+
+def test_46i_authorization_expiration_triggers(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    triggers = data["expiration_triggers"]
+    assert len(triggers) == 5
+    trigger_names = [t["trigger"] for t in triggers]
+    for expected in (
+        "age_based_expiration", "prompt_superseded", "approval_superseded",
+        "governance_change", "manual_invalidation",
+    ):
+        assert expected in trigger_names, f"missing expiration trigger: {expected}"
+    for t in triggers:
+        for field in ("trigger", "description", "sets_state", "severity", "auto_fires"):
+            assert field in t, f"trigger missing field: {field}"
+    auto_firing = [t["trigger"] for t in triggers if t["auto_fires"]]
+    assert len(auto_firing) == 3
+    assert "age_based_expiration" in auto_firing
+    assert "prompt_superseded" in auto_firing
+    assert "approval_superseded" in auto_firing
+    critical = [t for t in triggers if t["severity"] == "critical"]
+    assert len(critical) == 1
+    assert critical[0]["trigger"] == "approval_superseded"
+
+
+def test_46i_authorization_expiration_renewal_requirements(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["renewal_requirements"]
+    assert len(reqs) == 4
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "human_review", "authorization_still_traceable",
+        "prompt_approval_still_valid", "governance_checks_pass",
+    ):
+        assert expected in req_names, f"missing renewal requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+
+
+def test_46i_authorization_expiration_record_model(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["expiration_record_model"]
+    assert model["model_name"] == "AuthorizationExpirationRecord"
+    assert model["field_count"] == 8
+    assert model["required_field_count"] == 7
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "expiration_id", "authorization_id", "expiration_reason",
+        "expired_at", "renewed", "renewed_by", "renewed_at", "notes",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    immutable = model["immutable_fields"]
+    for expected in ("expiration_id", "authorization_id", "expiration_reason", "expired_at"):
+        assert expected in immutable, f"expected immutable field: {expected}"
+    mutable = model["mutable_fields"]
+    for expected in ("renewed", "renewed_by", "renewed_at", "notes"):
+        assert expected in mutable, f"expected mutable field: {expected}"
+
+
+def test_46i_authorization_expiration_audit_integration(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    audit = data["audit_integration"]
+    assert len(audit) == 3
+    history_types = [a["history_type"] for a in audit]
+    for expected in ("expiration_history", "renewal_history", "supersession_history"):
+        assert expected in history_types, f"missing audit history type: {expected}"
+    for a in audit:
+        assert a["append_only"] is True
+        assert a["immutable"] is True
+        for field in ("history_type", "description", "append_only", "immutable", "tracked_fields"):
+            assert field in a, f"audit entry missing field: {field}"
+
+
+def test_46i_authorization_expiration_governance_boundaries(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "workflow_may" in gb
+    assert "workflow_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in ("evaluate expiration", "record expiration metadata", "record renewal metadata"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "auto-renew authorization", "bypass human review", "execute prompts",
+        "invoke agents", "modify repository", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46i_authorization_expiration_future_evolution(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["authorization_expiration_design"]["future_evolution"]]
+    for expected in ("46J", "46K", "46L", "46M"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46i_authorization_expiration_advisory(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no authorizations are modified" in advisory
+
+
+def test_46i_authorization_expiration_no_auto_renewal(capsys) -> None:
+    main(["authorization-expiration-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    assert "auto-renew authorization" in may_not
+    assert "bypass human review" in may_not
+    reqs = data["renewal_requirements"]
+    req_names = [r["requirement"] for r in reqs]
+    assert "human_review" in req_names
+
+
+def test_46i_authorization_expiration_human_output_shows_all_sections(capsys) -> None:
+    main(["authorization-expiration-design"])
+    output = capsys.readouterr().out
+    assert "Authorization expiration workflow design" in output
+    assert "Authorization lifecycle" in output
+    assert "Authorization states" in output
+    assert "Expiration triggers" in output
+    assert "Renewal requirements" in output
+    assert "Expiration record model" in output
+    assert "Audit integration" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

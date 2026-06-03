@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46H: Live Execution Result Review Workflow.
+Phase 46I: Authorization Expiration Workflow.
 
 ## Governance Coherence Note
 
@@ -2468,10 +2468,34 @@ governance outcomes; workflow_may_not execute prompts/invoke agents/modify repos
 approve execution automatically/commit/push; read_only=true, human_review_required=true;
 future_evolution: 46I/46J/46K/46L;
 advisory: "Execution result review workflow is informational; no execution occurs."
+and governance controls for ExecutionAuthorizationArtifact expiration, renewal, and
+supersession are available with `pcae authorization-expiration-design` and
+`pcae authorization-expiration-design --json` (Phase 46I): inputs: execution
+authorization artifacts, prompt approval artifacts, execution audit design, execution
+result review workflow, governed live execution pilot; no prompts executed; no agents
+invoked; authorization lifecycle (7 steps): authorization_created/authorization_active/
+expiration_evaluation/authorization_expired/renewal_request/human_review/
+authorization_renewed; authorization states (6): pending (non-terminal, no execution)/
+authorized (non-terminal, execution allowed)/expired (terminal, no execution)/
+denied (terminal, no execution)/superseded (terminal, no execution)/renewed (non-terminal,
+execution allowed); expiration triggers (5): age_based_expiration (auto, medium)/
+prompt_superseded (auto, high)/approval_superseded (auto, critical)/
+governance_change (manual, high)/manual_invalidation (manual, medium); renewal
+requirements (all blocking, 4): human_review/authorization_still_traceable/
+prompt_approval_still_valid/governance_checks_pass; AuthorizationExpirationRecord model:
+8 fields (7 required, 1 optional); immutable fields: expiration_id/authorization_id/
+expiration_reason/expired_at; mutable fields: renewed/renewed_by/renewed_at/notes;
+audit integration (3 history types, all append_only=true/immutable=true):
+expiration_history/renewal_history/supersession_history; governance_boundaries:
+workflow_may evaluate expiration/record expiration metadata/record renewal metadata;
+workflow_may_not auto-renew authorization/bypass human review/execute prompts/invoke
+agents/modify repository/commit/push; read_only=true, human_review_required=true;
+future_evolution: 46J/46K/46L/46M;
+advisory: "Authorization expiration workflow is informational; no authorizations are modified."
 
 ## Next
 
-- TBD: Future phases (46I Authorization Expiration Workflow, 46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework).
+- TBD: Future phases (46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework, 46M Authorization Renewal Pilot).
 
 ## Future Explorations
 
