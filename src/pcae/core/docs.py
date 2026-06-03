@@ -377,6 +377,11 @@ def render_commands_reference() -> str:
 
 - `pcae autonomous-prompt-proposal`
 - `pcae autonomous-prompt-proposal --json`
+
+## prompt-render
+
+- `pcae prompt-render`
+- `pcae prompt-render --json`
 """
 
 

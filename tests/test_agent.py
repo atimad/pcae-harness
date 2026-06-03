@@ -21500,3 +21500,176 @@ def test_45m_autonomous_prompt_proposal_human_output_shows_all_sections(tmp_path
     assert "Intent preservation summary" in output
     assert "Human review required" in output
     assert "advisory" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 45M.1: Human-Readable Prompt Rendering
+# ---------------------------------------------------------------------------
+
+
+def test_45m1_prompt_render_json_structure(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("rendered_prompt_set", "canonical_prompt", "adapted_prompts",
+                "comparison", "intent_preservation_summary", "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45m1_prompt_render_result_model_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rps = data["rendered_prompt_set"]
+    for field in ("render_id", "prompt_id", "canonical_prompt_text",
+                  "adapted_prompt_texts", "intent_preservation_summary", "human_review_required"):
+        assert field in rps, f"missing render result field: {field}"
+    assert rps["render_id"].startswith("pr-")
+    assert rps["phase"] == "45M.1"
+    assert rps["human_review_required"] is True
+
+
+def test_45m1_prompt_render_canonical_prompt_text(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    text = data["rendered_prompt_set"]["canonical_prompt_text"]
+    assert isinstance(text, str) and len(text) > 0
+
+
+def test_45m1_prompt_render_canonical_sections_present(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    text = data["rendered_prompt_set"]["canonical_prompt_text"]
+    for section_label in ("Title:", "Goal:", "Rationale:", "Dependencies:", "Allowed files:",
+                          "Forbidden files:", "Acceptance criteria:", "Validation commands:",
+                          "Governance boundaries:"):
+        assert section_label in text, f"canonical text missing section: {section_label}"
+    sections_rendered = data["rendered_prompt_set"]["sections_rendered"]
+    for expected in ("title", "goal", "rationale", "dependencies", "allowed_files",
+                     "forbidden_files", "acceptance_criteria", "validation_commands",
+                     "governance_boundaries"):
+        assert expected in sections_rendered, f"sections_rendered missing: {expected}"
+
+
+def test_45m1_prompt_render_codex_prompt_text(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    texts = data["rendered_prompt_set"]["adapted_prompt_texts"]
+    assert "codex-local" in texts
+    text = texts["codex-local"]
+    assert isinstance(text, str) and len(text) > 0
+    assert "codex-local" in text
+    assert "Preserved sections:" in text
+    assert "Adapted sections:" in text
+
+
+def test_45m1_prompt_render_claude_prompt_text(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    texts = data["rendered_prompt_set"]["adapted_prompt_texts"]
+    assert "claude-local" in texts
+    text = texts["claude-local"]
+    assert isinstance(text, str) and len(text) > 0
+    assert "claude-local" in text
+    assert "Preserved sections:" in text
+    assert "Adapted sections:" in text
+
+
+def test_45m1_prompt_render_kimi_prompt_text(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    texts = data["rendered_prompt_set"]["adapted_prompt_texts"]
+    assert "kimi-local" in texts
+    text = texts["kimi-local"]
+    assert isinstance(text, str) and len(text) > 0
+    assert "kimi-local" in text
+    assert "Preserved sections:" in text
+    assert "Adapted sections:" in text
+
+
+def test_45m1_prompt_render_comparison(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    comp = data["comparison"]
+    for key in ("canonical_vs_codex", "canonical_vs_claude", "canonical_vs_kimi"):
+        assert key in comp, f"comparison missing key: {key}"
+        entry = comp[key]
+        assert "agent_id" in entry
+        assert "adaptation_profile" in entry
+        assert "preserved_sections" in entry
+        assert "adapted_sections" in entry
+        assert isinstance(entry["preserved_sections"], list)
+        assert isinstance(entry["adapted_sections"], list)
+
+
+def test_45m1_prompt_render_adaptation_differences(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    comp = data["comparison"]
+    for key in ("canonical_vs_codex", "canonical_vs_claude", "canonical_vs_kimi"):
+        entry = comp[key]
+        assert len(entry["preserved_sections"]) >= 1, f"{key}: no preserved sections"
+        assert len(entry["adapted_sections"]) >= 1, f"{key}: no adapted sections recorded"
+
+
+def test_45m1_prompt_render_intent_preservation_shown(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ips = data["intent_preservation_summary"]
+    assert ips.get("overall_status") == "preserved"
+    for check in ("objective_preserved", "acceptance_criteria_preserved",
+                  "governance_preserved", "allowed_files_preserved", "forbidden_files_preserved"):
+        assert ips.get(check) is True, f"intent preservation check failed: {check}"
+
+
+def test_45m1_prompt_render_human_review_required(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["rendered_prompt_set"]["human_review_required"] is True
+
+
+def test_45m1_prompt_render_advisory(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45m1_prompt_render_human_output_shows_all_sections(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["prompt-render"])
+    output = capsys.readouterr().out
+    sep = "=" * 49
+    assert sep in output
+    assert "Canonical Prompt" in output
+    assert "Codex Prompt" in output
+    assert "Claude Prompt" in output
+    assert "Kimi Prompt" in output
+    assert "Intent Preservation Summary" in output
+    assert "Human review required" in output
+    assert "no prompts are executed" in output.lower()

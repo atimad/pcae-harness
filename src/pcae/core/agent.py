@@ -12817,3 +12817,189 @@ def build_autonomous_prompt_proposal(root: HarnessPath) -> dict:
         "human_review_required": True,
         "advisory": AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45M.1: Human-Readable Prompt Rendering
+# ---------------------------------------------------------------------------
+
+PROMPT_RENDER_ADVISORY = (
+    "Prompt rendering is informational; no prompts are executed."
+)
+
+_PR_SECTION_SEPARATOR = "=" * 49
+
+_PR_CANONICAL_SECTIONS: tuple[str, ...] = (
+    "title",
+    "goal",
+    "rationale",
+    "dependencies",
+    "allowed_files",
+    "forbidden_files",
+    "acceptance_criteria",
+    "validation_commands",
+    "governance_boundaries",
+)
+
+_PR_GOVERNANCE_BOUNDARIES: dict = {
+    "renderer_may": [
+        "render prompts",
+        "compare prompts",
+        "display adaptations",
+    ],
+    "renderer_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "approve prompts",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+
+def _render_canonical_text(cp: dict) -> str:
+    """Render canonical prompt data as a structured human-readable document."""
+    lines: list[str] = []
+    lines.append(f"Title: {cp.get('title', 'Untitled')}")
+    lines.append("")
+    lines.append("Goal:")
+    lines.append(cp.get("objective", ""))
+    lines.append("")
+    lines.append("Rationale:")
+    lines.append(cp.get("rationale", ""))
+    lines.append("")
+    deps = cp.get("dependencies", [])
+    lines.append("Dependencies:")
+    if deps:
+        for d in deps:
+            lines.append(f"  - {d}")
+    else:
+        lines.append("  none")
+    lines.append("")
+    lines.append("Allowed files:")
+    for f in cp.get("allowed_files", []):
+        lines.append(f"  - {f}")
+    lines.append("")
+    lines.append("Forbidden files:")
+    forbidden = cp.get("forbidden_files", [])
+    if forbidden:
+        for f in forbidden:
+            lines.append(f"  - {f}")
+    else:
+        lines.append("  none")
+    lines.append("")
+    lines.append("Acceptance criteria:")
+    for c in cp.get("acceptance_criteria", []):
+        lines.append(f"  - {c}")
+    lines.append("")
+    lines.append("Validation commands:")
+    for cmd in cp.get("validation_commands", []):
+        lines.append(f"  - {cmd}")
+    lines.append("")
+    gb = cp.get("governance_boundaries", {})
+    lines.append("Governance boundaries:")
+    may = gb.get("proposal_prototype_may", gb.get("renderer_may", []))
+    may_not = gb.get("proposal_prototype_may_not", gb.get("renderer_may_not", []))
+    if may:
+        lines.append(f"  May:     {', '.join(may)}")
+    if may_not:
+        lines.append(f"  May not: {', '.join(may_not)}")
+    lines.append(
+        f"  Human review required: {'yes' if gb.get('human_review_required') else 'no'}"
+    )
+    return "\n".join(lines)
+
+
+def _render_adapted_text(ap: dict, cp: dict) -> str:
+    """Render an agent-adapted prompt as a structured human-readable document."""
+    lines: list[str] = []
+    lines.append(f"[{ap['agent_id']} | {ap['adaptation_profile']} profile]")
+    lines.append("")
+    lines.append(f"Title: {cp.get('title', 'Untitled')}")
+    lines.append("")
+    lines.append("Goal:")
+    lines.append(cp.get("objective", ""))
+    lines.append("")
+    lines.append("Agent-specific instructions:")
+    lines.append(ap.get("prompt_text", ""))
+    lines.append("")
+    preserved = ap.get("preserved_sections", [])
+    lines.append("Preserved sections:")
+    if preserved:
+        for s in preserved:
+            lines.append(f"  - {s}")
+    else:
+        lines.append("  none")
+    lines.append("")
+    adapted = ap.get("adapted_sections", [])
+    lines.append("Adapted sections:")
+    if adapted:
+        for s in adapted:
+            lines.append(f"  - {s}")
+    else:
+        lines.append("  none")
+    return "\n".join(lines)
+
+
+def build_prompt_render(root: HarnessPath) -> dict:
+    """Render PromptArtifact objects into human-readable prompt text. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    render_id = f"pr-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    prompt_proposal = build_autonomous_prompt_proposal(root)
+    canonical_prompt = prompt_proposal.get("canonical_prompt", {})
+    adapted_prompts = list(prompt_proposal.get("adapted_prompts", []))
+
+    canonical_prompt_text = _render_canonical_text(canonical_prompt)
+
+    adapted_prompt_texts: dict[str, str] = {}
+    for ap in adapted_prompts:
+        adapted_prompt_texts[ap["agent_id"]] = _render_adapted_text(ap, canonical_prompt)
+
+    comparison: dict[str, dict] = {}
+    for ap in adapted_prompts:
+        agent_id = ap["agent_id"]
+        key = f"canonical_vs_{agent_id.replace('-local', '')}"
+        comparison[key] = {
+            "agent_id": agent_id,
+            "adaptation_profile": ap.get("adaptation_profile", ""),
+            "preserved_sections": list(ap.get("preserved_sections", [])),
+            "adapted_sections": list(ap.get("adapted_sections", [])),
+        }
+
+    intent_preservation_summary = dict(
+        prompt_proposal.get("intent_preservation_status", {})
+    )
+
+    rendered_prompt_set = {
+        "render_id": render_id,
+        "prompt_id": canonical_prompt.get("prompt_id", "unknown"),
+        "generated_at": generated_at,
+        "phase": "45M.1",
+        "title": "Human-Readable Prompt Rendering",
+        "selected_phase_id": (
+            prompt_proposal.get("autonomous_prompt_proposal", {}).get(
+                "selected_phase_id", "unknown"
+            )
+        ),
+        "canonical_prompt_text": canonical_prompt_text,
+        "adapted_prompt_texts": adapted_prompt_texts,
+        "intent_preservation_summary": intent_preservation_summary,
+        "human_review_required": True,
+        "governance_boundaries": dict(_PR_GOVERNANCE_BOUNDARIES),
+        "sections_rendered": list(_PR_CANONICAL_SECTIONS),
+    }
+
+    return {
+        "rendered_prompt_set": rendered_prompt_set,
+        "canonical_prompt": canonical_prompt,
+        "adapted_prompts": adapted_prompts,
+        "comparison": comparison,
+        "intent_preservation_summary": intent_preservation_summary,
+        "human_review_required": True,
+        "advisory": PROMPT_RENDER_ADVISORY,
+    }

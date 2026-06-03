@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45M: Autonomous Prompt Proposal Prototype.
+Phase 45M.1: Human-Readable Prompt Rendering.
 
 ## Governance Coherence Note
 
@@ -2154,6 +2154,24 @@ may generate prompt proposals/generate adapted prompts/perform intent-preservati
 may not execute prompts/invoke agents/modify repository/approve prompts/commit/push;
 read_only=true, human_review_required=true; future_evolution: 45N/45O/45P/45Q; advisory:
 "Autonomous prompt proposal is advisory; no prompts are executed."
+
+PCAE can render PromptArtifact objects into human-readable canonical and agent-specific
+prompt text with `pcae prompt-render` and `pcae prompt-render --json` (Phase 45M.1):
+inputs: autonomous prompt proposals, PromptArtifact objects, adaptive prompt definitions,
+prompt governance artifacts; selects the highest-priority autonomous prompt proposal;
+canonical rendering with nine sections (title/goal/rationale/dependencies/allowed_files/
+forbidden_files/acceptance_criteria/validation_commands/governance_boundaries); three
+agent-specific renderings (codex-local/claude-local/kimi-local) showing agent instructions,
+preserved sections, and adapted sections; intent preservation reporting for each agent;
+prompt comparison (canonical_vs_codex/canonical_vs_claude/canonical_vs_kimi) showing
+preserved_sections and adapted_sections per agent; render result model: render_id (pr-*)/
+prompt_id/canonical_prompt_text/adapted_prompt_texts/intent_preservation_summary/
+human_review_required=true; human-readable output uses separator lines
+(=================================================) for each section; governance_boundaries:
+may render prompts/compare prompts/display adaptations; may not execute prompts/invoke
+agents/modify repository/approve prompts/commit/push; read_only=true,
+human_review_required=true; advisory: "Prompt rendering is informational; no prompts are
+executed."
 
 ## Next
 

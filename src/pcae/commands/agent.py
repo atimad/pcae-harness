@@ -80,6 +80,8 @@ from pcae.core.agent import (
     AUTONOMOUS_PHASE_PROPOSAL_ADVISORY,
     build_autonomous_prompt_proposal,
     AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY,
+    build_prompt_render,
+    PROMPT_RENDER_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3953,6 +3955,57 @@ def run_autonomous_prompt_proposal(args: argparse.Namespace) -> int:
         print(f"  Overall: {ips['overall_status']}")
         print()
         print(f"Confidence: {data['confidence']}")
+        print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_render(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_prompt_render(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        sep = "=" * 49
+        rps = data["rendered_prompt_set"]
+        print(f"Render: {rps['render_id']}  Generated: {rps['generated_at']}")
+        print(f"Phase: {rps['phase']} — {rps['title']}")
+        print(f"Selected phase: {rps['selected_phase_id']}")
+        print()
+
+        print(sep)
+        print("Canonical Prompt")
+        print(sep)
+        print()
+        print(rps["canonical_prompt_text"])
+        print()
+
+        agent_labels = {
+            "codex-local": "Codex Prompt",
+            "claude-local": "Claude Prompt",
+            "kimi-local": "Kimi Prompt",
+        }
+        for ap in data["adapted_prompts"]:
+            agent_id = ap["agent_id"]
+            label = agent_labels.get(agent_id, f"{agent_id} Prompt")
+            print(sep)
+            print(label)
+            print(sep)
+            print()
+            print(rps["adapted_prompt_texts"].get(agent_id, ""))
+            print()
+
+        print(sep)
+        print("Intent Preservation Summary")
+        print(sep)
+        print()
+        ips = data["intent_preservation_summary"]
+        for check in ips.get("checks_performed", []):
+            status = "preserved" if ips.get(check, False) else "not preserved"
+            print(f"  {check}: {status}")
+        print(f"  Overall: {ips.get('overall_status', 'unknown')}")
+        print()
         print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
         print()
         print(data["advisory"])

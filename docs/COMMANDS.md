@@ -356,3 +356,8 @@
 
 - `pcae autonomous-prompt-proposal`
 - `pcae autonomous-prompt-proposal --json`
+
+## prompt-render
+
+- `pcae prompt-render`
+- `pcae prompt-render --json`
