@@ -64,6 +64,8 @@ from pcae.core.agent import (
     MULTI_AGENT_ROADMAP_ADVISORY,
     build_roadmap_approval_design,
     ROADMAP_APPROVAL_DESIGN_ADVISORY,
+    build_prompt_generation_design,
+    PROMPT_GENERATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3553,6 +3555,50 @@ def run_roadmap_approval_design(args: argparse.Namespace) -> int:
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_generation_design(args: argparse.Namespace) -> int:
+    data = build_prompt_generation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["prompt_generation_design"]
+        print("Prompt generation design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print(f"Summary: {design['summary']}")
+        print()
+        print("Prompt generation lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        cm = data["canonical_prompt_model"]
+        field_names = ", ".join(f["name"] for f in cm["fields"])
+        print(f"Canonical prompt model: {cm['model_name']}")
+        print(f"  Fields: {field_names}")
+        print()
+        sections = design["required_sections"]
+        print(f"Required sections ({len(sections)}):")
+        for s in sections:
+            print(f"  - {s}")
+        print()
+        tm = data["traceability_model"]
+        refs = ", ".join(r["field"] for r in tm["required_references"])
+        print("Traceability model:")
+        print(f"  Required references: {refs}")
+        print(f"  Traceability required: {'yes' if tm['traceability_is_required'] else 'no'}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['prompt_generation_may'])}")
+        print(f"  May not: {', '.join(gb['prompt_generation_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in design["future_evolution"]:
             print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])

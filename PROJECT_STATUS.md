@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45E: Roadmap Approval Workflow.
+Phase 45F: Prompt Generation Design.
 
 ## Governance Coherence Note
 
@@ -1986,9 +1986,26 @@ generate prompts, commit, or push); no approval state is mutated and no
 roadmap mutation occurs; advisory: "Roadmap approval workflow is advisory;
 no roadmap approval is recorded."
 
+and the canonical prompt generation architecture can be designed with
+`pcae prompt-generation-design` and `pcae prompt-generation-design --json`,
+defining a six-step prompt generation lifecycle (approved_phase,
+phase_analysis, prompt_generation, prompt_validation, human_review,
+future_execution_candidate), a CanonicalPrompt model with thirteen fields
+(prompt_id, phase_id, title, objective, rationale, dependencies,
+allowed_files, forbidden_files, acceptance_criteria, validation_steps,
+governance_rules, confidence, human_approval_required), eight required
+prompt sections (goal, scope, constraints, allowed_files, forbidden_files,
+acceptance_criteria, validation_commands, governance_boundaries), a
+traceability model requiring references to proposal_id,
+roadmap_approval_id, and evidence_package_id, and governance boundaries
+(may generate prompts/validation guidance/governance guidance; may not
+execute prompts, invoke agents, modify repository, create commits, or push);
+no prompts are executed; advisory: "Prompt generation design is
+informational; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45F Prompt Generation Design, 45G Adaptive Agent-Specific Prompt Generation, 45H Prompt Validation Framework, 45I Prompt Governance Design).
+- TBD: Future phases (45G Adaptive Agent-Specific Prompt Generation, 45H Prompt Validation Framework, 45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
 
 ## Future Explorations
 

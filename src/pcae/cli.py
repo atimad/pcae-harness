@@ -44,6 +44,7 @@ from pcae.commands.agent import (
     run_roadmap_proposal_dry_run,
     run_multi_agent_roadmap,
     run_roadmap_approval_design,
+    run_prompt_generation_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1575,6 +1576,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON roadmap approval design output.",
     )
     roadmap_approval_design_parser.set_defaults(handler=run_roadmap_approval_design)
+
+    prompt_generation_design_parser = subparsers.add_parser(
+        "prompt-generation-design",
+        help="Design the canonical prompt generation architecture (Phase 45F).",
+    )
+    prompt_generation_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON prompt generation design output.",
+    )
+    prompt_generation_design_parser.set_defaults(handler=run_prompt_generation_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

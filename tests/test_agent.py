@@ -20147,3 +20147,148 @@ def test_45e_roadmap_approval_design_human_output_shows_all_sections(capsys) -> 
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no roadmap approval is recorded" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45F: Prompt Generation Design
+# ---------------------------------------------------------------------------
+
+
+def test_45f_prompt_generation_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-generation-design"])
+    assert exit_code == 0
+
+
+def test_45f_prompt_generation_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-generation-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45f_prompt_generation_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "prompt_generation_design",
+        "lifecycle",
+        "canonical_prompt_model",
+        "traceability_model",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45f_prompt_generation_design_id_starts_with_pgd(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["prompt_generation_design"]
+    assert design["design_id"].startswith("pgd-")
+    assert design["phase"] == "45F"
+
+
+def test_45f_prompt_generation_design_lifecycle_six_steps(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 6
+    step_names = [s["name"] for s in lifecycle]
+    assert "approved_phase" in step_names
+    assert "phase_analysis" in step_names
+    assert "prompt_generation" in step_names
+    assert "prompt_validation" in step_names
+    assert "human_review" in step_names
+    assert "future_execution_candidate" in step_names
+
+
+def test_45f_prompt_generation_design_canonical_prompt_model_fields(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["canonical_prompt_model"]
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "prompt_id",
+        "phase_id",
+        "title",
+        "objective",
+        "rationale",
+        "dependencies",
+        "allowed_files",
+        "forbidden_files",
+        "acceptance_criteria",
+        "validation_steps",
+        "governance_rules",
+        "confidence",
+        "human_approval_required",
+    ):
+        assert expected in field_names, f"missing canonical prompt field: {expected}"
+
+
+def test_45f_prompt_generation_design_required_sections(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sections = data["prompt_generation_design"]["required_sections"]
+    for expected in (
+        "goal",
+        "scope",
+        "constraints",
+        "allowed_files",
+        "forbidden_files",
+        "acceptance_criteria",
+        "validation_commands",
+        "governance_boundaries",
+    ):
+        assert expected in sections, f"missing required section: {expected}"
+
+
+def test_45f_prompt_generation_design_traceability_model(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    tm = data["traceability_model"]
+    assert tm["traceability_is_required"] is True
+    ref_fields = [r["field"] for r in tm["required_references"]]
+    assert "proposal_id" in ref_fields
+    assert "roadmap_approval_id" in ref_fields
+    assert "evidence_package_id" in ref_fields
+
+
+def test_45f_prompt_generation_design_governance_boundaries(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "prompt_generation_may" in gb
+    assert "prompt_generation_may_not" in gb
+    may_not = " ".join(gb["prompt_generation_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "create commits" in may_not
+    assert "create pushes" in may_not
+    assert gb["human_approval_required"] is True
+
+
+def test_45f_prompt_generation_design_advisory(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are executed" in advisory
+
+
+def test_45f_prompt_generation_design_future_evolution(capsys) -> None:
+    main(["prompt-generation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["prompt_generation_design"]["future_evolution"]]
+    for expected in ("45G", "45H", "45I", "45J", "45K"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45f_prompt_generation_design_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-generation-design"])
+    output = capsys.readouterr().out
+    assert "Prompt generation design" in output
+    assert "lifecycle" in output.lower()
+    assert "Canonical prompt model" in output
+    assert "Required sections" in output
+    assert "Traceability model" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are executed" in output

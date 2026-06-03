@@ -11074,3 +11074,154 @@ def build_roadmap_approval_design(root: HarnessPath) -> dict:
         "future_evolution": [dict(e) for e in _RAD_FUTURE_EVOLUTION],
         "advisory": ROADMAP_APPROVAL_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45F: Prompt Generation Design
+# ---------------------------------------------------------------------------
+
+PROMPT_GENERATION_DESIGN_ADVISORY = (
+    "Prompt generation design is informational; no prompts are executed."
+)
+
+_PGD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_phase",
+        "description": "An approved phase is selected as input to the prompt generation pipeline.",
+        "inputs": ["approved_roadmap_proposals", "approved_phases", "roadmap_approval_artifacts"],
+        "outputs": ["phase_id", "phase_context"],
+    },
+    {
+        "step": 2,
+        "name": "phase_analysis",
+        "description": "The approved phase is analysed to extract objective, scope, constraints, and dependencies.",
+        "inputs": ["phase_id", "phase_context", "roadmap_evidence"],
+        "outputs": ["phase_analysis_result", "dependency_map", "constraint_set"],
+    },
+    {
+        "step": 3,
+        "name": "prompt_generation",
+        "description": "A canonical prompt is generated from the phase analysis result.",
+        "inputs": ["phase_analysis_result", "dependency_map", "constraint_set"],
+        "outputs": ["draft_prompt", "prompt_id", "traceability_references"],
+    },
+    {
+        "step": 4,
+        "name": "prompt_validation",
+        "description": "The draft prompt is validated for completeness, section coverage, and traceability.",
+        "inputs": ["draft_prompt", "traceability_references"],
+        "outputs": ["validation_result", "validation_errors", "validated_prompt"],
+    },
+    {
+        "step": 5,
+        "name": "human_review",
+        "description": "The validated prompt is surfaced to a human for review and approval before any execution.",
+        "inputs": ["validated_prompt", "validation_result"],
+        "outputs": ["review_decision", "human_notes", "approved_prompt"],
+    },
+    {
+        "step": 6,
+        "name": "future_execution_candidate",
+        "description": "The approved prompt becomes a future execution candidate; no execution occurs in this phase.",
+        "inputs": ["approved_prompt"],
+        "outputs": ["execution_candidate_id"],
+    },
+)
+
+_PGD_CANONICAL_PROMPT_MODEL: dict = {
+    "model_name": "CanonicalPrompt",
+    "fields": [
+        {"name": "prompt_id", "type": "str", "description": "Unique prompt identifier."},
+        {"name": "phase_id", "type": "str", "description": "ID of the approved phase that generated this prompt."},
+        {"name": "title", "type": "str", "description": "Human-readable title of the prompt."},
+        {"name": "objective", "type": "str", "description": "What the prompt is intended to accomplish."},
+        {"name": "rationale", "type": "str", "description": "Why this prompt is needed; traceability to approved roadmap."},
+        {"name": "dependencies", "type": "list[str]", "description": "Other phase or prompt IDs this prompt depends on."},
+        {"name": "allowed_files", "type": "list[str]", "description": "File path patterns the agent may modify."},
+        {"name": "forbidden_files", "type": "list[str]", "description": "File path patterns the agent must not modify."},
+        {"name": "acceptance_criteria", "type": "list[str]", "description": "Conditions that must hold for the prompt to be considered complete."},
+        {"name": "validation_steps", "type": "list[str]", "description": "Commands or checks to run to verify acceptance criteria."},
+        {"name": "governance_rules", "type": "list[str]", "description": "Governance constraints that apply during execution."},
+        {"name": "confidence", "type": "float", "description": "Confidence score (0.0–1.0) for the generated prompt."},
+        {"name": "human_approval_required", "type": "bool", "description": "Whether human approval is required before execution."},
+    ],
+}
+
+_PGD_REQUIRED_SECTIONS: tuple[str, ...] = (
+    "goal",
+    "scope",
+    "constraints",
+    "allowed_files",
+    "forbidden_files",
+    "acceptance_criteria",
+    "validation_commands",
+    "governance_boundaries",
+)
+
+_PGD_TRACEABILITY_MODEL: dict = {
+    "required_references": [
+        {"field": "proposal_id", "description": "ID of the approved roadmap proposal that authorised this prompt."},
+        {"field": "roadmap_approval_id", "description": "ID of the roadmap approval artifact that recorded human approval."},
+        {"field": "evidence_package_id", "description": "ID of the evidence package that informed the roadmap proposal."},
+    ],
+    "traceability_purpose": "Prompts must be traceable to approved roadmap artifacts so governance audits can verify authorisation.",
+    "traceability_is_required": True,
+}
+
+_PGD_GOVERNANCE_BOUNDARIES: dict = {
+    "prompt_generation_may": [
+        "generate prompts",
+        "generate validation guidance",
+        "generate governance guidance",
+    ],
+    "prompt_generation_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "create commits",
+        "create pushes",
+    ],
+    "human_approval_required": True,
+    "advisory": True,
+}
+
+_PGD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45G", "description": "Adaptive Agent-Specific Prompt Generation"},
+    {"phase": "45H", "description": "Prompt Validation Framework"},
+    {"phase": "45I", "description": "Prompt Governance Design"},
+    {"phase": "45J", "description": "Prompt Artifact Model"},
+    {"phase": "45K", "description": "Prompt Approval Workflow"},
+)
+
+
+def build_prompt_generation_design() -> dict:
+    """Design the canonical prompt generation architecture. Read-only; no prompts executed."""
+    design_id = f"pgd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    prompt_generation_design = {
+        "design_id": design_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45F",
+        "title": "Prompt Generation Design",
+        "summary": (
+            "Defines the canonical prompt generation architecture used by PCAE. "
+            "Prompts are derived from approved phases and roadmap artifacts. "
+            "No prompts are executed; no agents are invoked."
+        ),
+        "lifecycle": [dict(s) for s in _PGD_LIFECYCLE],
+        "canonical_prompt_model": dict(_PGD_CANONICAL_PROMPT_MODEL),
+        "required_sections": list(_PGD_REQUIRED_SECTIONS),
+        "traceability_model": dict(_PGD_TRACEABILITY_MODEL),
+        "governance_boundaries": dict(_PGD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PGD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "prompt_generation_design": prompt_generation_design,
+        "lifecycle": [dict(s) for s in _PGD_LIFECYCLE],
+        "canonical_prompt_model": dict(_PGD_CANONICAL_PROMPT_MODEL),
+        "traceability_model": dict(_PGD_TRACEABILITY_MODEL),
+        "governance_boundaries": dict(_PGD_GOVERNANCE_BOUNDARIES),
+        "advisory": PROMPT_GENERATION_DESIGN_ADVISORY,
+    }

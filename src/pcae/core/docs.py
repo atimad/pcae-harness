@@ -337,6 +337,11 @@ def render_commands_reference() -> str:
 
 - `pcae roadmap-approval-design`
 - `pcae roadmap-approval-design --json`
+
+## prompt-generation-design
+
+- `pcae prompt-generation-design`
+- `pcae prompt-generation-design --json`
 """
 
 
