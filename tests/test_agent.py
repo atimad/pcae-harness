@@ -22494,3 +22494,164 @@ def test_46a_live_execution_readiness_human_output_shows_all_sections(capsys) ->
     assert "Recommendations" in output
     assert "Human review required" in output
     assert "informational" in output.lower()
+
+
+def test_46b_execution_audit_design_json_structure(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("execution_audit_design", "audit_lifecycle", "audit_record_model",
+                "storage_invariants", "query_model", "retention_requirements",
+                "governance_boundaries", "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46b_execution_audit_design_fields(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_audit_design"]
+    for field in ("design_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "audit_record_field_count", "storage_invariant_count",
+                  "query_field_count", "human_review_required",
+                  "governance_boundaries", "future_evolution"):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("ead-")
+    assert design["phase"] == "46B"
+
+
+def test_46b_execution_audit_design_lifecycle(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["audit_lifecycle"]
+    assert len(lifecycle) == 6
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("execution_candidate", "execution_authorization",
+                     "execution_attempt", "execution_result_capture",
+                     "audit_record_creation", "audit_storage"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46b_execution_audit_design_record_model(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["audit_record_model"]
+    assert model["model_name"] == "ExecutionAuditRecord"
+    assert model["all_fields_immutable_after_creation"] is True
+    assert "field_groups" in model
+    assert "fields_by_group" in model
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in ("audit_id", "execution_id", "authorization_id",
+                     "prompt_id", "prompt_approval_id", "phase_id",
+                     "selected_agents", "selected_prompt_variants", "runtime_contracts",
+                     "governance_status", "authorization_status",
+                     "execution_status", "result_summary", "warnings", "errors",
+                     "created_at", "created_by"):
+        assert expected in field_names, f"missing audit record field: {expected}"
+
+
+def test_46b_execution_audit_design_record_field_groups(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["audit_record_model"]
+    for group in ("identity", "prompt_references", "execution_context",
+                  "governance", "results", "metadata"):
+        assert group in model["field_groups"], f"missing field group: {group}"
+        assert group in model["fields_by_group"], f"missing fields_by_group entry: {group}"
+    for field in model["fields"]:
+        for attr in ("name", "group", "type", "description", "required", "immutable"):
+            assert attr in field, f"field '{field.get('name')}' missing attribute: {attr}"
+        assert field["immutable"] is True
+
+
+def test_46b_execution_audit_design_storage_invariants(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    invariants = data["storage_invariants"]
+    assert len(invariants) == 3
+    inv_names = {i["invariant"] for i in invariants}
+    for expected in ("append_only", "immutable", "deletion_forbidden"):
+        assert expected in inv_names, f"missing storage invariant: {expected}"
+    for inv in invariants:
+        assert inv["value"] is True
+        for field in ("invariant", "value", "description", "enforcement", "violation_severity"):
+            assert field in inv, f"invariant missing field: {field}"
+        assert inv["violation_severity"] == "error"
+
+
+def test_46b_execution_audit_design_query_model(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    queries = data["query_model"]
+    assert len(queries) == 6
+    query_fields = [q["query_field"] for q in queries]
+    for expected in ("audit_id", "execution_id", "prompt_id",
+                     "phase_id", "selected_agent", "authorization_id"):
+        assert expected in query_fields, f"missing query field: {expected}"
+    for q in queries:
+        for field in ("query_field", "description", "index_required"):
+            assert field in q, f"query entry missing field: {field}"
+
+
+def test_46b_execution_audit_design_retention_requirements(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ret = data["retention_requirements"]
+    assert ret["retention_required"] is True
+    assert ret["audit_history_required"] is True
+    assert ret["pruning_allowed"] is False
+    assert ret["archival_allowed"] is True
+    assert ret["archival_must_preserve_all_fields"] is True
+    assert ret["minimum_retention_period"] == "indefinite"
+
+
+def test_46b_execution_audit_design_governance_boundaries(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "audit_system_may" in gb
+    assert "audit_system_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["audit_system_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "delete audit records", "alter historical audit records",
+                      "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46b_execution_audit_design_future_evolution(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["execution_audit_design"]["future_evolution"]]
+    for expected in ("46C", "46D", "46E"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46b_execution_audit_design_advisory(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no execution records are created" in advisory
+
+
+def test_46b_execution_audit_design_human_review_required(capsys) -> None:
+    main(["execution-audit-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["execution_audit_design"]["human_review_required"] is True
+
+
+def test_46b_execution_audit_design_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-audit-design"])
+    output = capsys.readouterr().out
+    assert "Execution audit storage design" in output
+    assert "Audit lifecycle" in output
+    assert "Audit record model" in output
+    assert "Storage invariants" in output
+    assert "Query model" in output
+    assert "Retention requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

@@ -14996,3 +14996,369 @@ def build_live_execution_readiness() -> dict:
         "human_review_required": True,
         "advisory": LIVE_EXECUTION_READINESS_ADVISORY,
     }
+
+
+EXECUTION_AUDIT_DESIGN_ADVISORY = (
+    "Execution audit storage design is informational; no execution records are created."
+)
+
+_EAD_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_execution_pilot",
+    "live_execution_readiness_assessment",
+    "prompt_approval_artifacts",
+    "execution_authorization_model",
+)
+
+_EAD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "execution_candidate",
+        "description": (
+            "An ExecutionCandidate with selected agents and prompt variants "
+            "enters the execution pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "ExecutionAuthorization is recorded with governance_status, "
+            "runtime_status, and authorization_status before execution begins."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "execution_attempt",
+        "description": (
+            "The governed execution attempt begins. Execution status is tracked "
+            "from start through completion or failure."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "execution_result_capture",
+        "description": (
+            "Execution result is captured: status, result_summary, warnings, "
+            "and errors are recorded without mutating the prompt or governance state."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "audit_record_creation",
+        "description": (
+            "An ExecutionAuditRecord is created from the authorization, execution "
+            "context, result, and governance metadata. Record is immutable after creation."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "audit_storage",
+        "description": (
+            "Audit record is appended to the append-only audit store. "
+            "Historical records may never be altered or deleted."
+        ),
+    },
+)
+
+_EAD_AUDIT_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Unique audit record identifier (lear-*).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Identifier of the execution attempt this record covers.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorization that authorized this attempt.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Prompt identifier from the ApprovedPromptArtifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_approval_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Reference to the ApprovedPromptArtifact that authorized the prompt.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "phase_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Governance phase under which the execution was authorized.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agents",
+        "group": "execution_context",
+        "type": "list[str]",
+        "description": "Human-selected agents used for this execution attempt.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_prompt_variants",
+        "group": "execution_context",
+        "type": "dict[str, str]",
+        "description": "Mapping of agent_id to adapted prompt variant used.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_contracts",
+        "group": "execution_context",
+        "type": "dict[str, str]",
+        "description": "Mapping of agent_id to invocation contract used.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "governance_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Governance gate outcome at authorization time: passed, partial, or blocked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Final authorization decision: authorized, conditionally_authorized, or blocked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_status",
+        "group": "results",
+        "type": "str",
+        "description": "Outcome of the execution attempt: completed, failed, or timed_out.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "result_summary",
+        "group": "results",
+        "type": "str",
+        "description": "Human-readable summary of the execution outcome.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "group": "results",
+        "type": "list[str]",
+        "description": "Non-fatal issues observed during execution.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "errors",
+        "group": "results",
+        "type": "list[str]",
+        "description": "Fatal issues that caused execution failure.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "created_at",
+        "group": "metadata",
+        "type": "str",
+        "description": "ISO 8601 timestamp of audit record creation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "created_by",
+        "group": "metadata",
+        "type": "str",
+        "description": "Agent or system component that created this audit record.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_EAD_FIELD_GROUPS: tuple[str, ...] = (
+    "identity",
+    "prompt_references",
+    "execution_context",
+    "governance",
+    "results",
+    "metadata",
+)
+
+_EAD_STORAGE_INVARIANTS: tuple[dict, ...] = (
+    {
+        "invariant": "append_only",
+        "value": True,
+        "description": "New records may only be appended; existing records may not be modified.",
+        "enforcement": "storage_layer",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "immutable",
+        "value": True,
+        "description": "All fields of a created audit record are immutable after creation.",
+        "enforcement": "application_layer",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "deletion_forbidden",
+        "value": True,
+        "description": "Audit records may never be deleted, including by administrators.",
+        "enforcement": "storage_layer",
+        "violation_severity": "error",
+    },
+)
+
+_EAD_QUERY_MODEL: tuple[dict, ...] = (
+    {
+        "query_field": "audit_id",
+        "description": "Look up a single audit record by its unique identifier.",
+        "index_required": True,
+    },
+    {
+        "query_field": "execution_id",
+        "description": "Retrieve all audit records for a given execution attempt.",
+        "index_required": True,
+    },
+    {
+        "query_field": "prompt_id",
+        "description": "Retrieve all audit records for a given prompt.",
+        "index_required": True,
+    },
+    {
+        "query_field": "phase_id",
+        "description": "Retrieve all audit records for a given governance phase.",
+        "index_required": False,
+    },
+    {
+        "query_field": "selected_agent",
+        "description": "Retrieve all audit records involving a specific agent.",
+        "index_required": False,
+    },
+    {
+        "query_field": "authorization_id",
+        "description": "Retrieve all audit records for a given authorization.",
+        "index_required": True,
+    },
+)
+
+_EAD_RETENTION_REQUIREMENTS: dict = {
+    "retention_required": True,
+    "audit_history_required": True,
+    "minimum_retention_period": "indefinite",
+    "pruning_allowed": False,
+    "archival_allowed": True,
+    "archival_must_preserve_all_fields": True,
+    "rationale": (
+        "Audit records provide the permanent governance trail for all prompt "
+        "execution activity. They must be retained indefinitely to support "
+        "compliance review, incident investigation, and governance audits."
+    ),
+}
+
+_EAD_GOVERNANCE_BOUNDARIES: dict = {
+    "audit_system_may": [
+        "record audit metadata",
+        "record authorization metadata",
+        "record execution metadata",
+    ],
+    "audit_system_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "delete audit records",
+        "alter historical audit records",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_EAD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46C", "description": "Execution Consensus Framework"},
+    {"phase": "46D", "description": "Governed Live Execution Pilot"},
+    {"phase": "46E", "description": "Execution Result Review Workflow"},
+)
+
+
+def build_execution_audit_design() -> dict:
+    """Design governed runtime audit storage for prompt execution. Read-only; no records created."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"ead-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _EAD_LIFECYCLE]
+    audit_record_fields = [dict(f) for f in _EAD_AUDIT_RECORD_FIELDS]
+    storage_invariants = [dict(i) for i in _EAD_STORAGE_INVARIANTS]
+    query_model = [dict(q) for q in _EAD_QUERY_MODEL]
+
+    groups = {}
+    for field in audit_record_fields:
+        groups.setdefault(field["group"], []).append(field["name"])
+
+    audit_record_model = {
+        "model_name": "ExecutionAuditRecord",
+        "design_id": design_id,
+        "field_count": len(audit_record_fields),
+        "field_groups": list(_EAD_FIELD_GROUPS),
+        "fields": audit_record_fields,
+        "fields_by_group": groups,
+        "required_field_count": sum(1 for f in audit_record_fields if f["required"]),
+        "all_fields_immutable_after_creation": True,
+    }
+
+    execution_audit_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46B",
+        "title": "Runtime Execution Result Capture and Audit Storage",
+        "summary": (
+            "Defines the ExecutionAuditRecord model, append-only storage invariants, "
+            "query model, and retention requirements for governed prompt execution audit "
+            "trails. All audit records are immutable after creation and may never be deleted."
+        ),
+        "input_sources": list(_EAD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "audit_record_field_count": len(audit_record_fields),
+        "storage_invariant_count": len(storage_invariants),
+        "query_field_count": len(query_model),
+        "human_review_required": True,
+        "governance_boundaries": dict(_EAD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _EAD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "execution_audit_design": execution_audit_design,
+        "audit_lifecycle": lifecycle,
+        "audit_record_model": audit_record_model,
+        "storage_invariants": storage_invariants,
+        "query_model": query_model,
+        "retention_requirements": dict(_EAD_RETENTION_REQUIREMENTS),
+        "governance_boundaries": dict(_EAD_GOVERNANCE_BOUNDARIES),
+        "human_review_required": True,
+        "advisory": EXECUTION_AUDIT_DESIGN_ADVISORY,
+    }

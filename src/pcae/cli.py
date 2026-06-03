@@ -58,6 +58,7 @@ from pcae.commands.agent import (
     run_human_agent_execution_design,
     run_governed_execution_pilot,
     run_live_execution_readiness,
+    run_execution_audit_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1743,6 +1744,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON live execution readiness output.",
     )
     live_execution_readiness_parser.set_defaults(handler=run_live_execution_readiness)
+
+    execution_audit_design_parser = subparsers.add_parser(
+        "execution-audit-design",
+        help="Design governed runtime audit storage for prompt execution (Phase 46B).",
+    )
+    execution_audit_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON execution audit design output.",
+    )
+    execution_audit_design_parser.set_defaults(handler=run_execution_audit_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -407,6 +407,11 @@ def render_commands_reference() -> str:
 
 - `pcae live-execution-readiness`
 - `pcae live-execution-readiness --json`
+
+## execution-audit-design
+
+- `pcae execution-audit-design`
+- `pcae execution-audit-design --json`
 """
 
 

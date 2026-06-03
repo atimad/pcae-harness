@@ -92,6 +92,8 @@ from pcae.core.agent import (
     GOVERNED_EXECUTION_PILOT_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
+    build_execution_audit_design,
+    EXECUTION_AUDIT_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4291,6 +4293,67 @@ def run_live_execution_readiness(args: argparse.Namespace) -> int:
                 print(f"  {rec['area']} ({rec['readiness_status']}):")
                 for action in rec["recommended_actions"]:
                     print(f"    - {action}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_audit_design(args: argparse.Namespace) -> int:
+    data = build_execution_audit_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["execution_audit_design"]
+        print("Execution audit storage design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Audit lifecycle:")
+        for step in data["audit_lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Audit record model (ExecutionAuditRecord):")
+        ecm = data["audit_record_model"]
+        print(f"  Fields: {ecm['field_count']}  Required: {ecm['required_field_count']}")
+        for group in ecm["field_groups"]:
+            fields_in_group = [f for f in ecm["fields"] if f["group"] == group]
+            if fields_in_group:
+                print(f"  [{group}]")
+                for field in fields_in_group:
+                    req = "required" if field["required"] else "optional"
+                    print(f"    {field['name']} ({field['type']}, {req}): {field['description']}")
+        print(f"  All fields immutable after creation: {ecm['all_fields_immutable_after_creation']}")
+        print()
+        print("Storage invariants:")
+        for inv in data["storage_invariants"]:
+            print(f"  {inv['invariant']} = {inv['value']}")
+            print(f"    {inv['description']}")
+            print(
+                f"    enforcement={inv['enforcement']}"
+                f"  violation_severity={inv['violation_severity']}"
+            )
+        print()
+        print("Query model:")
+        for q in data["query_model"]:
+            indexed = "indexed" if q["index_required"] else "unindexed"
+            print(f"  {q['query_field']} ({indexed}): {q['description']}")
+        print()
+        print("Retention requirements:")
+        ret = data["retention_requirements"]
+        print(f"  retention_required:      {ret['retention_required']}")
+        print(f"  audit_history_required:  {ret['audit_history_required']}")
+        print(f"  minimum_retention:       {ret['minimum_retention_period']}")
+        print(f"  pruning_allowed:         {ret['pruning_allowed']}")
+        print(f"  archival_allowed:        {ret['archival_allowed']}")
+        print()
+        print("Governance boundaries:")
+        gb = data["governance_boundaries"]
+        print(f"  May:     {', '.join(gb['audit_system_may'])}")
+        print(f"  May not: {', '.join(gb['audit_system_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

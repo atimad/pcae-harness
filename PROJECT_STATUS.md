@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46A: Live Execution Readiness Assessment.
+Phase 46B: Runtime Execution Result Capture and Audit Storage.
 
 ## Governance Coherence Note
 
@@ -2295,9 +2295,32 @@ invoke agents/modify repository/commit/push; read_only=true, human_review_requir
 future_evolution: 46B/46C/46D; advisory: "Live execution readiness assessment is
 informational; no prompts are executed."
 
+PCAE can design governed runtime audit storage for prompt execution with
+`pcae execution-audit-design` and `pcae execution-audit-design --json` (Phase 46B):
+inputs: governed execution pilot, live execution readiness assessment, prompt approval
+artifacts, execution authorization model; no prompts are executed; no agents are
+invoked; execution audit lifecycle (6 steps): execution_candidate/execution_authorization/
+execution_attempt/execution_result_capture/audit_record_creation/audit_storage;
+ExecutionAuditRecord model: 17 fields across six groups (identity: audit_id/execution_id/
+authorization_id; prompt_references: prompt_id/prompt_approval_id/phase_id;
+execution_context: selected_agents/selected_prompt_variants/runtime_contracts;
+governance: governance_status/authorization_status; results: execution_status/
+result_summary/warnings/errors; metadata: created_at/created_by),
+all_fields_immutable_after_creation=true; three storage invariants (append_only/
+immutable/deletion_forbidden) all value=true/violation_severity=error; query model:
+six query fields (audit_id/execution_id/prompt_id/phase_id/selected_agent/authorization_id)
+with index_required flags; retention requirements: retention_required=true/
+audit_history_required=true/minimum_retention_period=indefinite/pruning_allowed=false/
+archival_allowed=true/archival_must_preserve_all_fields=true; governance_boundaries: may
+record audit metadata/authorization metadata/execution metadata; may not execute prompts/
+invoke agents/modify repository/delete audit records/alter historical audit records/
+commit/push; read_only=true, human_review_required=true; future_evolution: 46C/46D/46E;
+advisory: "Execution audit storage design is informational; no execution records are
+created."
+
 ## Next
 
-- TBD: Future phases (46B Runtime Execution Result Capture, 46C Execution Consensus Framework, 46D Governed Live Execution Pilot).
+- TBD: Future phases (46C Execution Consensus Framework, 46D Governed Live Execution Pilot, 46E Execution Result Review Workflow).
 
 ## Future Explorations
 
