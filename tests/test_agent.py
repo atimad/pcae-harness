@@ -20292,3 +20292,197 @@ def test_45f_prompt_generation_design_human_output_shows_all_sections(capsys) ->
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45G: Adaptive Agent-Specific Prompt Generation
+# ---------------------------------------------------------------------------
+
+
+def test_45g_adaptive_prompt_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["adaptive-prompt-design"])
+    assert exit_code == 0
+
+
+def test_45g_adaptive_prompt_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["adaptive-prompt-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45g_adaptive_prompt_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "adaptive_prompt_design",
+        "lifecycle",
+        "human_agent_selection",
+        "adaptation_profiles",
+        "intent_preservation_rules",
+        "prompt_set_model",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45g_adaptive_prompt_design_id_starts_with_apd(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["adaptive_prompt_design"]
+    assert design["design_id"].startswith("apd-")
+    assert design["phase"] == "45G"
+
+
+def test_45g_adaptive_prompt_design_lifecycle_seven_steps(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    assert "canonical_prompt" in step_names
+    assert "human_agent_selection" in step_names
+    assert "agent_profile_lookup" in step_names
+    assert "prompt_adaptation" in step_names
+    assert "intent_preservation_check" in step_names
+    assert "human_review" in step_names
+    assert "future_execution_candidate" in step_names
+
+
+def test_45g_adaptive_prompt_design_human_agent_selection(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sel = data["human_agent_selection"]
+    assert sel["selection_authority"] == "human"
+    assert sel["multi_agent_allowed"] is True
+    assert sel["pcae_recommendation"] == "advisory"
+    for agent in ("codex-local", "claude-local", "kimi-local"):
+        assert agent in sel["supported_agents"], f"missing agent: {agent}"
+
+
+def test_45g_adaptive_prompt_design_three_adaptation_profiles(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    profiles = data["adaptation_profiles"]
+    assert len(profiles) == 3
+    agent_ids = [p["agent_id"] for p in profiles]
+    assert "codex-local" in agent_ids
+    assert "claude-local" in agent_ids
+    assert "kimi-local" in agent_ids
+
+
+def test_45g_adaptive_prompt_design_codex_profile(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    profiles = {p["agent_id"]: p for p in data["adaptation_profiles"]}
+    codex = profiles["codex-local"]
+    assert codex["adaptation_focus"] == "implementation"
+    emphasis = " ".join(codex["emphasis"]).lower()
+    assert "implementation" in emphasis
+    assert "validation" in emphasis
+
+
+def test_45g_adaptive_prompt_design_claude_profile(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    profiles = {p["agent_id"]: p for p in data["adaptation_profiles"]}
+    claude = profiles["claude-local"]
+    assert claude["risk_analysis"] is True
+    assert claude["design_alternatives"] is True
+    emphasis = " ".join(claude["emphasis"]).lower()
+    assert "architecture" in emphasis or "review" in emphasis
+    assert "risk" in emphasis
+
+
+def test_45g_adaptive_prompt_design_kimi_profile(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    profiles = {p["agent_id"]: p for p in data["adaptation_profiles"]}
+    kimi = profiles["kimi-local"]
+    assert kimi["assumption_checking"] is True
+    assert kimi["edge_case_coverage"] is True
+    emphasis = " ".join(kimi["emphasis"]).lower()
+    assert "assumption" in emphasis
+    assert "edge case" in emphasis or "edge_case" in emphasis or "edge cases" in emphasis
+
+
+def test_45g_adaptive_prompt_design_intent_preservation_rules(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ipr = data["intent_preservation_rules"]
+    assert ipr["preservation_check_required"] is True
+    assert ipr["preservation_failure_blocks_execution"] is True
+    may_change = ipr["adaptation_may_change"]
+    must_not = ipr["adaptation_must_not_change"]
+    assert "style" in may_change
+    assert "focus" in may_change
+    assert "objective" in must_not
+    assert "acceptance criteria" in must_not
+    assert "governance boundaries" in must_not
+    assert "allowed files" in must_not
+    assert "forbidden files" in must_not
+    assert "safety rules" in must_not
+
+
+def test_45g_adaptive_prompt_design_prompt_set_model_fields(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ps = data["prompt_set_model"]
+    field_names = [f["name"] for f in ps["fields"]]
+    for expected in (
+        "prompt_set_id",
+        "canonical_prompt_id",
+        "selected_agents",
+        "adapted_prompts",
+        "adaptation_summary",
+        "intent_preservation_status",
+        "human_approval_required",
+    ):
+        assert expected in field_names, f"missing prompt set field: {expected}"
+    adapted_fields = [f["name"] for f in ps["adapted_prompt_fields"]]
+    for expected in ("agent_id", "adaptation_profile", "prompt_text", "preserved_sections", "adapted_sections", "warnings"):
+        assert expected in adapted_fields, f"missing adapted prompt field: {expected}"
+
+
+def test_45g_adaptive_prompt_design_governance_boundaries(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "adaptive_prompt_generation_may" in gb
+    assert "adaptive_prompt_generation_may_not" in gb
+    may_not = " ".join(gb["adaptive_prompt_generation_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "change canonical intent" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert gb["human_approval_required"] is True
+
+
+def test_45g_adaptive_prompt_design_advisory(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are executed" in advisory
+
+
+def test_45g_adaptive_prompt_design_future_evolution(capsys) -> None:
+    main(["adaptive-prompt-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["adaptive_prompt_design"]["future_evolution"]]
+    for expected in ("45H", "45I", "45J", "45K"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45g_adaptive_prompt_design_human_output_shows_all_sections(capsys) -> None:
+    main(["adaptive-prompt-design"])
+    output = capsys.readouterr().out
+    assert "Adaptive agent-specific prompt generation design" in output
+    assert "lifecycle" in output.lower()
+    assert "Human agent selection" in output
+    assert "Agent adaptation profiles" in output
+    assert "Intent preservation rules" in output
+    assert "Prompt set model" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are executed" in output

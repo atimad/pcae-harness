@@ -342,6 +342,11 @@ def render_commands_reference() -> str:
 
 - `pcae prompt-generation-design`
 - `pcae prompt-generation-design --json`
+
+## adaptive-prompt-design
+
+- `pcae adaptive-prompt-design`
+- `pcae adaptive-prompt-design --json`
 """
 
 

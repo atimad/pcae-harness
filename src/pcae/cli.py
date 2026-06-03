@@ -45,6 +45,7 @@ from pcae.commands.agent import (
     run_multi_agent_roadmap,
     run_roadmap_approval_design,
     run_prompt_generation_design,
+    run_adaptive_prompt_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1587,6 +1588,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON prompt generation design output.",
     )
     prompt_generation_design_parser.set_defaults(handler=run_prompt_generation_design)
+
+    adaptive_prompt_design_parser = subparsers.add_parser(
+        "adaptive-prompt-design",
+        help="Design adaptive agent-specific prompt generation (Phase 45G).",
+    )
+    adaptive_prompt_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON adaptive prompt design output.",
+    )
+    adaptive_prompt_design_parser.set_defaults(handler=run_adaptive_prompt_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45F: Prompt Generation Design.
+Phase 45G: Adaptive Agent-Specific Prompt Generation.
 
 ## Governance Coherence Note
 
@@ -2003,9 +2003,36 @@ execute prompts, invoke agents, modify repository, create commits, or push);
 no prompts are executed; advisory: "Prompt generation design is
 informational; no prompts are executed."
 
+and adaptive agent-specific prompt generation can be designed with
+`pcae adaptive-prompt-design` and `pcae adaptive-prompt-design --json`,
+defining a seven-step adaptive prompt lifecycle (canonical_prompt,
+human_agent_selection, agent_profile_lookup, prompt_adaptation,
+intent_preservation_check, human_review, future_execution_candidate), a
+human agent selection model with three supported agents
+(codex-local/claude-local/kimi-local), multi-agent allowed, selection
+authority=human, PCAE recommendation=advisory; three agent adaptation
+profiles: codex-local (implementation-focused, concise execution
+instructions, strong validation commands), claude-local
+(architecture/review-focused, risk analysis, design alternatives,
+governance review), kimi-local (research/challenge-focused, assumption
+checking, edge cases, alternative approaches, capability discovery); intent
+preservation rules: adaptation may change style/focus/explanation
+depth/validation emphasis/review emphasis; must not change
+objective/acceptance criteria/governance boundaries/allowed
+files/forbidden files/safety rules; AdaptedPromptSet model with seven
+fields (prompt_set_id/canonical_prompt_id/selected_agents/adapted_prompts/
+adaptation_summary/intent_preservation_status/human_approval_required) and
+six AdaptedPrompt sub-fields (agent_id/adaptation_profile/prompt_text/
+preserved_sections/adapted_sections/warnings); governance boundaries: may
+generate agent-specific variants/summarize adaptations/recommend agents;
+may not execute prompts/invoke agents/modify repository/change canonical
+intent/approve prompts/commit/push; no prompts are executed; advisory:
+"Adaptive prompt generation design is informational; no prompts are
+executed."
+
 ## Next
 
-- TBD: Future phases (45G Adaptive Agent-Specific Prompt Generation, 45H Prompt Validation Framework, 45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
+- TBD: Future phases (45H Prompt Validation Framework, 45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
 
 ## Future Explorations
 

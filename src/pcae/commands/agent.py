@@ -66,6 +66,8 @@ from pcae.core.agent import (
     ROADMAP_APPROVAL_DESIGN_ADVISORY,
     build_prompt_generation_design,
     PROMPT_GENERATION_DESIGN_ADVISORY,
+    build_adaptive_prompt_design,
+    ADAPTIVE_PROMPT_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3596,6 +3598,62 @@ def run_prompt_generation_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['prompt_generation_may'])}")
         print(f"  May not: {', '.join(gb['prompt_generation_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in design["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_adaptive_prompt_design(args: argparse.Namespace) -> int:
+    data = build_adaptive_prompt_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["adaptive_prompt_design"]
+        print("Adaptive agent-specific prompt generation design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print(f"Summary: {design['summary']}")
+        print()
+        print("Adaptive prompt lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        sel = data["human_agent_selection"]
+        agents_str = ", ".join(sel["supported_agents"])
+        print("Human agent selection:")
+        print(f"  Supported agents: {agents_str}")
+        print(f"  Multi-agent allowed: {'yes' if sel['multi_agent_allowed'] else 'no'}")
+        print(f"  Selection authority: {sel['selection_authority']}")
+        print(f"  PCAE recommendation: {sel['pcae_recommendation']}")
+        print()
+        print("Agent adaptation profiles:")
+        for profile in data["adaptation_profiles"]:
+            emphasis = ", ".join(profile["emphasis"])
+            print(f"  {profile['agent_id']} ({profile['adaptation_focus']}):")
+            print(f"    Style: {profile['style']}")
+            print(f"    Emphasis: {emphasis}")
+        print()
+        ipr = data["intent_preservation_rules"]
+        may_change = ", ".join(ipr["adaptation_may_change"])
+        must_not = ", ".join(ipr["adaptation_must_not_change"])
+        print("Intent preservation rules:")
+        print(f"  May change:      {may_change}")
+        print(f"  Must not change: {must_not}")
+        print(f"  Preservation check required: {'yes' if ipr['preservation_check_required'] else 'no'}")
+        print()
+        ps = data["prompt_set_model"]
+        field_names = ", ".join(f["name"] for f in ps["fields"])
+        print(f"Prompt set model: {ps['model_name']}")
+        print(f"  Fields: {field_names}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['adaptive_prompt_generation_may'])}")
+        print(f"  May not: {', '.join(gb['adaptive_prompt_generation_may_not'])}")
         print()
         print("Future evolution:")
         for entry in design["future_evolution"]:

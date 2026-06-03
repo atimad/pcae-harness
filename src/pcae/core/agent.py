@@ -11225,3 +11225,238 @@ def build_prompt_generation_design() -> dict:
         "governance_boundaries": dict(_PGD_GOVERNANCE_BOUNDARIES),
         "advisory": PROMPT_GENERATION_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45G: Adaptive Agent-Specific Prompt Generation
+# ---------------------------------------------------------------------------
+
+ADAPTIVE_PROMPT_DESIGN_ADVISORY = (
+    "Adaptive prompt generation design is informational; no prompts are executed."
+)
+
+_APD_SUPPORTED_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_APD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "canonical_prompt",
+        "description": "A canonical prompt artifact is received as input.",
+        "inputs": ["canonical_prompt_artifact", "approved_phase", "prompt_generation_design"],
+        "outputs": ["canonical_prompt_id", "canonical_prompt_context"],
+    },
+    {
+        "step": 2,
+        "name": "human_agent_selection",
+        "description": "A human selects one or more target agents. PCAE may recommend; human is authoritative.",
+        "inputs": ["canonical_prompt_context", "capability_registry"],
+        "outputs": ["selected_agents", "selection_rationale"],
+    },
+    {
+        "step": 3,
+        "name": "agent_profile_lookup",
+        "description": "Adaptation profiles for each selected agent are retrieved from the registry.",
+        "inputs": ["selected_agents", "capability_registry"],
+        "outputs": ["agent_profiles", "adaptation_rules"],
+    },
+    {
+        "step": 4,
+        "name": "prompt_adaptation",
+        "description": "The canonical prompt is adapted for each selected agent according to its profile.",
+        "inputs": ["canonical_prompt_context", "agent_profiles", "adaptation_rules"],
+        "outputs": ["adapted_prompts", "adaptation_summary"],
+    },
+    {
+        "step": 5,
+        "name": "intent_preservation_check",
+        "description": "Each adapted prompt is checked to confirm objective, acceptance criteria, and governance boundaries are unchanged.",
+        "inputs": ["adapted_prompts", "canonical_prompt_context"],
+        "outputs": ["intent_preservation_status", "preservation_warnings"],
+    },
+    {
+        "step": 6,
+        "name": "human_review",
+        "description": "The adapted prompt set is presented to a human for review before any execution.",
+        "inputs": ["adapted_prompts", "intent_preservation_status", "adaptation_summary"],
+        "outputs": ["review_decision", "human_notes", "approved_prompt_set"],
+    },
+    {
+        "step": 7,
+        "name": "future_execution_candidate",
+        "description": "The approved adapted prompts become future execution candidates; no execution occurs in this phase.",
+        "inputs": ["approved_prompt_set"],
+        "outputs": ["execution_candidate_ids"],
+    },
+)
+
+_APD_HUMAN_AGENT_SELECTION: dict = {
+    "supported_agents": list(_APD_SUPPORTED_AGENTS),
+    "multi_agent_allowed": True,
+    "selection_authority": "human",
+    "pcae_recommendation": "advisory",
+    "selection_notes": [
+        "Human may select a single agent or any combination of supported agents.",
+        "PCAE may recommend agents based on task type and capability registry.",
+        "Human selection overrides any PCAE recommendation.",
+        "Vendor-neutral: no agent is mandatory.",
+    ],
+}
+
+_APD_ADAPTATION_PROFILES: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "adaptation_focus": "implementation",
+        "style": "concise, execution-oriented",
+        "emphasis": [
+            "implementation-focused instructions",
+            "file and change focused scope",
+            "concise execution instructions",
+            "strong validation commands",
+        ],
+        "review_depth": "low",
+        "design_alternatives": False,
+        "risk_analysis": False,
+        "assumption_checking": False,
+        "edge_case_coverage": False,
+    },
+    {
+        "agent_id": "claude-local",
+        "adaptation_focus": "architecture and review",
+        "style": "thorough, analytical",
+        "emphasis": [
+            "architecture and review focused instructions",
+            "risk analysis",
+            "design alternatives",
+            "governance review",
+        ],
+        "review_depth": "high",
+        "design_alternatives": True,
+        "risk_analysis": True,
+        "assumption_checking": False,
+        "edge_case_coverage": False,
+    },
+    {
+        "agent_id": "kimi-local",
+        "adaptation_focus": "research and challenge",
+        "style": "exploratory, questioning",
+        "emphasis": [
+            "research and challenge focused instructions",
+            "assumption checking",
+            "edge cases",
+            "alternative approaches",
+            "capability discovery",
+        ],
+        "review_depth": "medium",
+        "design_alternatives": True,
+        "risk_analysis": False,
+        "assumption_checking": True,
+        "edge_case_coverage": True,
+    },
+)
+
+_APD_INTENT_PRESERVATION_RULES: dict = {
+    "adaptation_may_change": [
+        "style",
+        "focus",
+        "explanation depth",
+        "validation emphasis",
+        "review emphasis",
+    ],
+    "adaptation_must_not_change": [
+        "objective",
+        "acceptance criteria",
+        "governance boundaries",
+        "allowed files",
+        "forbidden files",
+        "safety rules",
+    ],
+    "preservation_check_required": True,
+    "preservation_failure_blocks_execution": True,
+}
+
+_APD_PROMPT_SET_MODEL: dict = {
+    "model_name": "AdaptedPromptSet",
+    "fields": [
+        {"name": "prompt_set_id", "type": "str", "description": "Unique identifier for the adapted prompt set."},
+        {"name": "canonical_prompt_id", "type": "str", "description": "ID of the canonical prompt this set was derived from."},
+        {"name": "selected_agents", "type": "list[str]", "description": "Agent IDs selected by the human."},
+        {"name": "adapted_prompts", "type": "list[AdaptedPrompt]", "description": "One adapted prompt per selected agent."},
+        {"name": "adaptation_summary", "type": "str", "description": "Human-readable summary of what changed across adaptations."},
+        {"name": "intent_preservation_status", "type": "str", "description": "Overall preservation check result: preserved or violated."},
+        {"name": "human_approval_required", "type": "bool", "description": "Whether human approval is required before any execution."},
+    ],
+    "adapted_prompt_fields": [
+        {"name": "agent_id", "type": "str", "description": "Target agent for this adaptation."},
+        {"name": "adaptation_profile", "type": "str", "description": "Name of the adaptation profile applied."},
+        {"name": "prompt_text", "type": "str", "description": "The adapted prompt text."},
+        {"name": "preserved_sections", "type": "list[str]", "description": "Sections kept identical to the canonical prompt."},
+        {"name": "adapted_sections", "type": "list[str]", "description": "Sections modified during adaptation."},
+        {"name": "warnings", "type": "list[str]", "description": "Any preservation warnings raised during adaptation."},
+    ],
+}
+
+_APD_GOVERNANCE_BOUNDARIES: dict = {
+    "adaptive_prompt_generation_may": [
+        "generate agent-specific prompt variants",
+        "summarize adaptations",
+        "recommend agents",
+    ],
+    "adaptive_prompt_generation_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "change canonical intent",
+        "approve prompts",
+        "commit",
+        "push",
+    ],
+    "human_approval_required": True,
+    "advisory": True,
+}
+
+_APD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45H", "description": "Prompt Validation Framework"},
+    {"phase": "45I", "description": "Prompt Governance Design"},
+    {"phase": "45J", "description": "Prompt Artifact Model"},
+    {"phase": "45K", "description": "Prompt Approval Workflow"},
+)
+
+
+def build_adaptive_prompt_design() -> dict:
+    """Design adaptive agent-specific prompt generation. Read-only; no prompts executed."""
+    design_id = f"apd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    adaptive_prompt_design = {
+        "design_id": design_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45G",
+        "title": "Adaptive Agent-Specific Prompt Generation",
+        "summary": (
+            "Defines how PCAE adapts a canonical prompt to one or more target agents. "
+            "The human selects target agents; PCAE adapts style, focus, and emphasis "
+            "without changing objective, acceptance criteria, or governance boundaries. "
+            "No prompts are executed; no agents are invoked."
+        ),
+        "lifecycle": [dict(s) for s in _APD_LIFECYCLE],
+        "human_agent_selection": dict(_APD_HUMAN_AGENT_SELECTION),
+        "adaptation_profiles": [dict(p) for p in _APD_ADAPTATION_PROFILES],
+        "intent_preservation_rules": dict(_APD_INTENT_PRESERVATION_RULES),
+        "prompt_set_model": dict(_APD_PROMPT_SET_MODEL),
+        "governance_boundaries": dict(_APD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _APD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "adaptive_prompt_design": adaptive_prompt_design,
+        "lifecycle": [dict(s) for s in _APD_LIFECYCLE],
+        "human_agent_selection": dict(_APD_HUMAN_AGENT_SELECTION),
+        "adaptation_profiles": [dict(p) for p in _APD_ADAPTATION_PROFILES],
+        "intent_preservation_rules": dict(_APD_INTENT_PRESERVATION_RULES),
+        "prompt_set_model": dict(_APD_PROMPT_SET_MODEL),
+        "governance_boundaries": dict(_APD_GOVERNANCE_BOUNDARIES),
+        "advisory": ADAPTIVE_PROMPT_DESIGN_ADVISORY,
+    }
