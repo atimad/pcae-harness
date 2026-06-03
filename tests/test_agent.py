@@ -20833,3 +20833,170 @@ def test_45i_prompt_governance_design_human_output_shows_all_sections(capsys) ->
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are approved or executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45J: Prompt Artifact Model
+# ---------------------------------------------------------------------------
+
+
+def test_45j_prompt_artifact_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-artifact-design"])
+    assert exit_code == 0
+
+
+def test_45j_prompt_artifact_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-artifact-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45j_prompt_artifact_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "prompt_artifact_design",
+        "lifecycle",
+        "artifact_model",
+        "adapted_prompt_model",
+        "invariants",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45j_prompt_artifact_design_id_starts_with_pad(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["prompt_artifact_design"]
+    assert design["design_id"].startswith("pad-")
+    assert design["phase"] == "45J"
+
+
+def test_45j_prompt_artifact_design_lifecycle_five_steps(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 5
+    step_names = [s["name"] for s in lifecycle]
+    assert "canonical_prompt" in step_names
+    assert "adapted_prompt" in step_names
+    assert "validated_prompt" in step_names
+    assert "approved_prompt" in step_names
+    assert "future_execution_candidate" in step_names
+
+
+def test_45j_prompt_artifact_design_artifact_model_field_groups(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["artifact_model"]
+    assert am["model_name"] == "PromptArtifact"
+    groups = am["field_groups"]
+    for expected_group in ("identity", "traceability", "metadata", "content", "validation", "governance", "lineage"):
+        assert expected_group in groups, f"missing field group: {expected_group}"
+
+
+def test_45j_prompt_artifact_design_identity_fields(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    identity = [f["name"] for f in data["artifact_model"]["field_groups"]["identity"]]
+    assert "prompt_id" in identity
+    assert "prompt_set_id" in identity
+    assert "phase_id" in identity
+
+
+def test_45j_prompt_artifact_design_traceability_fields(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    trace = [f["name"] for f in data["artifact_model"]["field_groups"]["traceability"]]
+    assert "proposal_id" in trace
+    assert "roadmap_approval_id" in trace
+    assert "evidence_package_id" in trace
+
+
+def test_45j_prompt_artifact_design_lineage_fields(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lineage = [f["name"] for f in data["artifact_model"]["field_groups"]["lineage"]]
+    assert "source_prompt_id" in lineage
+    assert "adaptation_history" in lineage
+    assert "validation_history" in lineage
+    assert "approval_history" in lineage
+
+
+def test_45j_prompt_artifact_design_adapted_prompt_model(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    apm = data["adapted_prompt_model"]
+    assert apm["model_name"] == "AdaptedPromptEntry"
+    field_names = [f["name"] for f in apm["fields"]]
+    for expected in ("agent_id", "adaptation_profile", "prompt_text",
+                     "preserved_sections", "adapted_sections", "warnings"):
+        assert expected in field_names, f"missing adapted prompt field: {expected}"
+
+
+def test_45j_prompt_artifact_design_artifact_states(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = data["prompt_artifact_design"]["artifact_states"]
+    for expected in ("draft", "validated", "pending_approval", "approved", "rejected", "superseded"):
+        assert expected in states, f"missing artifact state: {expected}"
+    assert len(states) == 6
+
+
+def test_45j_prompt_artifact_design_invariants(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inv = data["invariants"]
+    for field in ("prompt_id", "phase_id", "proposal_id"):
+        assert field in inv["must_always_have"], f"missing invariant must_always_have: {field}"
+    must_not = " ".join(inv["must_never_allow"]).lower()
+    assert "lineage deletion" in must_not
+    assert "traceability removal" in must_not
+    assert "approval bypass" in must_not
+
+
+def test_45j_prompt_artifact_design_governance_boundaries(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "artifact_model_may" in gb
+    assert "artifact_model_may_not" in gb
+    assert gb["read_only"] is True
+    assert gb["human_approval_required"] is True
+    may_not = " ".join(gb["artifact_model_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "auto-approve" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_45j_prompt_artifact_design_advisory(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are executed or approved" in advisory
+
+
+def test_45j_prompt_artifact_design_future_evolution(capsys) -> None:
+    main(["prompt-artifact-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["prompt_artifact_design"]["future_evolution"]]
+    for expected in ("45K", "45L", "45M"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45j_prompt_artifact_design_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-artifact-design"])
+    output = capsys.readouterr().out
+    assert "Prompt artifact design" in output
+    assert "lifecycle" in output.lower()
+    assert "Artifact model" in output
+    assert "Adapted prompt model" in output
+    assert "Artifact states" in output
+    assert "Invariants" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are executed or approved" in output

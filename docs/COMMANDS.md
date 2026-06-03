@@ -336,3 +336,8 @@
 
 - `pcae prompt-governance-design`
 - `pcae prompt-governance-design --json`
+
+## prompt-artifact-design
+
+- `pcae prompt-artifact-design`
+- `pcae prompt-artifact-design --json`

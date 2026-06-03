@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45I: Prompt Governance Design.
+Phase 45J: Prompt Artifact Model.
 
 ## Governance Coherence Note
 
@@ -2075,9 +2075,30 @@ may not execute prompts/invoke agents/modify repository/bypass approval/
 auto-approve/commit/push; read_only=true); advisory: "Prompt governance
 design is informational; no prompts are approved or executed."
 
+and the canonical governed PromptArtifact model can be designed with
+`pcae prompt-artifact-design` and `pcae prompt-artifact-design --json`,
+defining a five-step artifact lifecycle (canonical_prompt, adapted_prompt,
+validated_prompt, approved_prompt, future_execution_candidate), the
+PromptArtifact model with seven field groups — identity (prompt_id,
+prompt_set_id, phase_id), traceability (proposal_id, roadmap_approval_id,
+evidence_package_id), metadata (title, objective, rationale, confidence),
+content (canonical_prompt_text, adapted_prompts), validation
+(validation_status, validation_results), governance (governance_state,
+approval_state), lineage (source_prompt_id, adaptation_history,
+validation_history, approval_history) — the AdaptedPromptEntry sub-model
+with six fields (agent_id, adaptation_profile, prompt_text,
+preserved_sections, adapted_sections, warnings), six artifact states
+(draft/validated/pending_approval/approved/rejected/superseded), invariants
+(must always have: prompt_id/phase_id/proposal_id; must never allow: lineage
+deletion/traceability removal/approval bypass), and governance boundaries
+(may represent prompts/validation/approvals/lineage; may not execute
+prompts/invoke agents/modify repository/auto-approve/commit/push;
+read_only=true); advisory: "Prompt artifact design is informational;
+no prompts are executed or approved."
+
 ## Next
 
-- TBD: Future phases (45J Prompt Artifact Model, 45K Prompt Approval Workflow, 45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype).
+- TBD: Future phases (45K Prompt Approval Workflow, 45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype).
 
 ## Future Explorations
 

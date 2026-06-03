@@ -11907,3 +11907,195 @@ def build_prompt_governance_design() -> dict:
         "governance_boundaries": dict(_PGV_GOVERNANCE_BOUNDARIES),
         "advisory": PROMPT_GOVERNANCE_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45J: Prompt Artifact Model
+# ---------------------------------------------------------------------------
+
+PROMPT_ARTIFACT_DESIGN_ADVISORY = (
+    "Prompt artifact design is informational; no prompts are executed or approved."
+)
+
+_PAD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "canonical_prompt",
+        "description": "A canonical prompt artifact is created from an approved phase.",
+        "inputs": ["approved_phase", "roadmap_approval_artifact", "prompt_generation_design"],
+        "outputs": ["prompt_artifact", "prompt_id"],
+    },
+    {
+        "step": 2,
+        "name": "adapted_prompt",
+        "description": "Agent-specific adaptations are generated and attached to the artifact.",
+        "inputs": ["prompt_artifact", "adaptive_prompt_design", "selected_agents"],
+        "outputs": ["adapted_prompt_entries", "adaptation_history"],
+    },
+    {
+        "step": 3,
+        "name": "validated_prompt",
+        "description": "The artifact is validated; validation results are recorded in the artifact.",
+        "inputs": ["prompt_artifact", "prompt_validation_framework"],
+        "outputs": ["validation_status", "validation_results", "validation_history"],
+    },
+    {
+        "step": 4,
+        "name": "approved_prompt",
+        "description": "Human approval is recorded; governance state transitions to approved.",
+        "inputs": ["prompt_artifact", "prompt_governance_design"],
+        "outputs": ["approval_state", "approval_history", "governance_state"],
+    },
+    {
+        "step": 5,
+        "name": "future_execution_candidate",
+        "description": "The approved artifact becomes a future execution candidate; no execution in this phase.",
+        "inputs": ["prompt_artifact"],
+        "outputs": ["execution_candidate_id"],
+    },
+)
+
+_PAD_ARTIFACT_MODEL: dict = {
+    "model_name": "PromptArtifact",
+    "field_groups": {
+        "identity": [
+            {"name": "prompt_id", "type": "str", "description": "Unique identifier for this prompt artifact."},
+            {"name": "prompt_set_id", "type": "str", "description": "ID of the adapted prompt set this artifact belongs to."},
+            {"name": "phase_id", "type": "str", "description": "ID of the approved phase that generated this prompt."},
+        ],
+        "traceability": [
+            {"name": "proposal_id", "type": "str", "description": "ID of the approved roadmap proposal."},
+            {"name": "roadmap_approval_id", "type": "str", "description": "ID of the roadmap approval artifact."},
+            {"name": "evidence_package_id", "type": "str", "description": "ID of the evidence package."},
+        ],
+        "metadata": [
+            {"name": "title", "type": "str", "description": "Human-readable title of the prompt."},
+            {"name": "objective", "type": "str", "description": "What the prompt is intended to accomplish."},
+            {"name": "rationale", "type": "str", "description": "Why this prompt is needed; traceability to approved roadmap."},
+            {"name": "confidence", "type": "float", "description": "Confidence score (0.0–1.0) for this artifact."},
+        ],
+        "content": [
+            {"name": "canonical_prompt_text", "type": "str", "description": "The canonical prompt text."},
+            {"name": "adapted_prompts", "type": "list[AdaptedPromptEntry]", "description": "Agent-specific adaptations."},
+        ],
+        "validation": [
+            {"name": "validation_status", "type": "str", "description": "Overall validation result: valid, valid_with_warnings, or invalid."},
+            {"name": "validation_results", "type": "list[PromptValidationResult]", "description": "Detailed validation result records."},
+        ],
+        "governance": [
+            {"name": "governance_state", "type": "str", "description": "Current governance state: draft, validated, pending_approval, approved, rejected, or superseded."},
+            {"name": "approval_state", "type": "str", "description": "Current approval state: pending, approved, rejected, or changes_requested."},
+        ],
+        "lineage": [
+            {"name": "source_prompt_id", "type": "str | None", "description": "ID of the prompt this was derived from, if any."},
+            {"name": "adaptation_history", "type": "list[dict]", "description": "Ordered record of adaptation events."},
+            {"name": "validation_history", "type": "list[dict]", "description": "Ordered record of validation runs."},
+            {"name": "approval_history", "type": "list[dict]", "description": "Ordered record of approval decisions."},
+        ],
+    },
+}
+
+_PAD_ADAPTED_PROMPT_MODEL: dict = {
+    "model_name": "AdaptedPromptEntry",
+    "fields": [
+        {"name": "agent_id", "type": "str", "description": "Target agent for this adaptation."},
+        {"name": "adaptation_profile", "type": "str", "description": "Name of the adaptation profile applied."},
+        {"name": "prompt_text", "type": "str", "description": "The adapted prompt text."},
+        {"name": "preserved_sections", "type": "list[str]", "description": "Sections kept identical to the canonical prompt."},
+        {"name": "adapted_sections", "type": "list[str]", "description": "Sections modified during adaptation."},
+        {"name": "warnings", "type": "list[str]", "description": "Preservation warnings raised during adaptation."},
+    ],
+}
+
+_PAD_ARTIFACT_STATES: tuple[str, ...] = (
+    "draft",
+    "validated",
+    "pending_approval",
+    "approved",
+    "rejected",
+    "superseded",
+)
+
+_PAD_INVARIANTS: dict = {
+    "must_always_have": [
+        "prompt_id",
+        "phase_id",
+        "proposal_id",
+    ],
+    "must_never_allow": [
+        "lineage deletion",
+        "traceability removal",
+        "approval bypass",
+    ],
+    "invariant_enforcement": "governance",
+    "invariant_violation_severity": "error",
+}
+
+_PAD_GOVERNANCE_BOUNDARIES: dict = {
+    "artifact_model_may": [
+        "represent prompts",
+        "represent validation",
+        "represent approvals",
+        "represent lineage",
+    ],
+    "artifact_model_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "auto-approve",
+        "commit",
+        "push",
+    ],
+    "read_only": True,
+    "human_approval_required": True,
+    "advisory": True,
+}
+
+_PAD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45K", "description": "Prompt Approval Workflow"},
+    {"phase": "45L", "description": "Autonomous Phase Proposal Prototype"},
+    {"phase": "45M", "description": "Autonomous Prompt Proposal Prototype"},
+)
+
+
+def build_prompt_artifact_design() -> dict:
+    """Define the canonical PromptArtifact model. Read-only; no prompts executed or approved."""
+    design_id = f"pad-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    all_fields = [
+        f for group in _PAD_ARTIFACT_MODEL["field_groups"].values() for f in group
+    ]
+
+    prompt_artifact_design = {
+        "design_id": design_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45J",
+        "title": "Prompt Artifact Model",
+        "summary": (
+            "Defines the canonical governed PromptArtifact model used throughout PCAE. "
+            "Consolidates identity, traceability, content, validation, governance, and "
+            "lineage into a single versioned artifact. No prompts are executed or approved."
+        ),
+        "lifecycle": [dict(s) for s in _PAD_LIFECYCLE],
+        "artifact_model": {
+            "model_name": _PAD_ARTIFACT_MODEL["model_name"],
+            "field_groups": {k: list(v) for k, v in _PAD_ARTIFACT_MODEL["field_groups"].items()},
+            "all_fields": all_fields,
+            "field_count": len(all_fields),
+        },
+        "adapted_prompt_model": dict(_PAD_ADAPTED_PROMPT_MODEL),
+        "artifact_states": list(_PAD_ARTIFACT_STATES),
+        "invariants": dict(_PAD_INVARIANTS),
+        "governance_boundaries": dict(_PAD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PAD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "prompt_artifact_design": prompt_artifact_design,
+        "lifecycle": [dict(s) for s in _PAD_LIFECYCLE],
+        "artifact_model": prompt_artifact_design["artifact_model"],
+        "adapted_prompt_model": dict(_PAD_ADAPTED_PROMPT_MODEL),
+        "invariants": dict(_PAD_INVARIANTS),
+        "governance_boundaries": dict(_PAD_GOVERNANCE_BOUNDARIES),
+        "advisory": PROMPT_ARTIFACT_DESIGN_ADVISORY,
+    }

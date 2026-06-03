@@ -72,6 +72,8 @@ from pcae.core.agent import (
     PROMPT_VALIDATION_DESIGN_ADVISORY,
     build_prompt_governance_design,
     PROMPT_GOVERNANCE_DESIGN_ADVISORY,
+    build_prompt_artifact_design,
+    PROMPT_ARTIFACT_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3759,6 +3761,53 @@ def run_prompt_governance_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['prompt_governance_may'])}")
         print(f"  May not: {', '.join(gb['prompt_governance_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in design["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_artifact_design(args: argparse.Namespace) -> int:
+    data = build_prompt_artifact_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["prompt_artifact_design"]
+        print("Prompt artifact design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print(f"Summary: {design['summary']}")
+        print()
+        print("Prompt artifact lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        am = data["artifact_model"]
+        print(f"Artifact model: {am['model_name']} ({am['field_count']} fields)")
+        for group, fields in am["field_groups"].items():
+            names = ", ".join(f["name"] for f in fields)
+            print(f"  {group}: {names}")
+        print()
+        apm = data["adapted_prompt_model"]
+        field_names = ", ".join(f["name"] for f in apm["fields"])
+        print(f"Adapted prompt model: {apm['model_name']}")
+        print(f"  Fields: {field_names}")
+        print()
+        states = design["artifact_states"]
+        print(f"Artifact states ({len(states)}): {', '.join(states)}")
+        print()
+        inv = data["invariants"]
+        print("Invariants:")
+        print(f"  Must always have: {', '.join(inv['must_always_have'])}")
+        print(f"  Must never allow: {', '.join(inv['must_never_allow'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['artifact_model_may'])}")
+        print(f"  May not: {', '.join(gb['artifact_model_may_not'])}")
         print()
         print("Future evolution:")
         for entry in design["future_evolution"]:
