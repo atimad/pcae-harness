@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45D: Multi-Agent Roadmap Proposal.
+Phase 45E: Roadmap Approval Workflow.
 
 ## Governance Coherence Note
 
@@ -1969,9 +1969,26 @@ executed, no jobs created, no runtime state mutated; advisory:
 "Controlled benchmarks measure end-to-end runtime execution, not pure model
 performance."
 
+and a governed read-only roadmap approval workflow can be designed with
+`pcae roadmap-approval-design` and `pcae roadmap-approval-design --json`,
+consuming the multi-agent roadmap proposal and defining a six-step approval
+lifecycle (proposal_generated, proposal_reviewed, conflicts_identified,
+human_decision_required, approval_state_recorded,
+approved_roadmap_informs_phase_generation), four approval states (pending,
+approved, denied, changes_requested), a human-authoritative decision model,
+conflict resolution requirements (strategies: human_override,
+defer_conflict_phase, re_elicit), an ApprovedRoadmapArtifact model with nine
+fields (roadmap_approval_id, proposal_id, approved_phases, denied_phases,
+changes_requested, conflicts_resolved, approved_by, approved_at,
+human_notes), and governance boundaries (may describe/define workflow; may
+not record approval state, mutate roadmap, create tasks, execute work,
+generate prompts, commit, or push); no approval state is mutated and no
+roadmap mutation occurs; advisory: "Roadmap approval workflow is advisory;
+no roadmap approval is recorded."
+
 ## Next
 
-- TBD: Future Remote Coding phases (commit governance, controlled benchmark execution, multi-job reporting).
+- TBD: Future phases (45F Prompt Generation Design, 45G Adaptive Agent-Specific Prompt Generation, 45H Prompt Validation Framework, 45I Prompt Governance Design).
 
 ## Future Explorations
 

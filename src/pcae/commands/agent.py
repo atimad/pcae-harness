@@ -62,6 +62,8 @@ from pcae.core.agent import (
     ROADMAP_PROPOSAL_DRY_RUN_ADVISORY,
     build_multi_agent_roadmap,
     MULTI_AGENT_ROADMAP_ADVISORY,
+    build_roadmap_approval_design,
+    ROADMAP_APPROVAL_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3502,6 +3504,52 @@ def run_multi_agent_roadmap(args: argparse.Namespace) -> int:
         print(f"  Required:         {hr['human_review_required']}")
         print(f"  Reason:           {hr['review_reason']}")
         print(f"  Reviewable phases:{', '.join(hr['reviewable_phases'])}")
+        print()
+        print("Future evolution:")
+        for entry in data["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_roadmap_approval_design(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_roadmap_approval_design(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        wf = data["roadmap_approval_workflow"]
+        print("Roadmap approval workflow")
+        print(f"Workflow: {wf['workflow_id']}  Generated: {wf['generated_at']}")
+        print(f"Proposal: {wf['proposal_id']}")
+        print(f"Current approval state: {wf['current_approval_state']}")
+        print()
+        print("Approval lifecycle:")
+        for step in wf["approval_lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        print("Approval states:")
+        for state in data["approval_states"]:
+            terminal = "terminal" if state["terminal"] else "non-terminal"
+            print(f"  {state['state']} ({terminal}): {state['description']}")
+        print()
+        dm = data["decision_model"]
+        print("Decision model:")
+        print(f"  Authority:  {dm['decision_authority']}")
+        print(f"  Valid:      {', '.join(dm['valid_decisions'])}")
+        print(f"  Advisory:   {dm['advisory']}")
+        print()
+        am = data["artifact_model"]
+        print(f"Artifact model: {am['artifact_name']}")
+        fields = [f["name"] for f in am["fields"]]
+        print(f"  Fields: {', '.join(fields)}")
+        print(f"  Creation: {am['artifact_creation']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['approval_workflow_may'])}")
+        print(f"  May not: {', '.join(gb['approval_workflow_may_not'])}")
         print()
         print("Future evolution:")
         for entry in data["future_evolution"]:

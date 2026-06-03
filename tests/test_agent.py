@@ -19998,3 +19998,152 @@ def test_45d_multi_agent_roadmap_human_output_shows_all_sections(capsys) -> None
     assert "Human review" in output
     assert "Future evolution" in output
     assert "Multi-agent roadmap proposal is simulated" in output
+
+
+# Phase 45E: Roadmap Approval Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_45e_roadmap_approval_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-approval-design"])
+    assert exit_code == 0
+
+
+def test_45e_roadmap_approval_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["roadmap-approval-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45e_roadmap_approval_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "roadmap_approval_workflow",
+        "approval_states",
+        "decision_model",
+        "conflict_resolution_requirements",
+        "artifact_model",
+        "governance_boundaries",
+        "future_evolution",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45e_roadmap_approval_design_workflow_id_starts_with_rad(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wf = data["roadmap_approval_workflow"]
+    assert wf["workflow_id"].startswith("rad-")
+    assert wf["proposal_id"].startswith("marp-")
+    assert wf["dry_run_proposal_id"].startswith("rdp-")
+    assert wf["evidence_package_id"].startswith("rev-")
+
+
+def test_45e_roadmap_approval_design_approval_lifecycle_six_steps(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["roadmap_approval_workflow"]["approval_lifecycle"]
+    assert len(lifecycle) == 6
+    step_names = [s["name"] for s in lifecycle]
+    assert "proposal_generated" in step_names
+    assert "proposal_reviewed" in step_names
+    assert "conflicts_identified" in step_names
+    assert "human_decision_required" in step_names
+    assert "approval_state_recorded" in step_names
+    assert "approved_roadmap_informs_phase_generation" in step_names
+
+
+def test_45e_roadmap_approval_design_four_approval_states(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = [s["state"] for s in data["approval_states"]]
+    assert "pending" in states
+    assert "approved" in states
+    assert "denied" in states
+    assert "changes_requested" in states
+    assert len(states) == 4
+
+
+def test_45e_roadmap_approval_design_approval_state_fields(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for state in data["approval_states"]:
+        assert "state" in state
+        assert "description" in state
+        assert "terminal" in state
+        assert "requires_human_action" in state
+        assert isinstance(state["terminal"], bool)
+
+
+def test_45e_roadmap_approval_design_decision_model(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    dm = data["decision_model"]
+    assert dm["decision_authority"] == "human"
+    assert "approved" in dm["valid_decisions"]
+    assert "denied" in dm["valid_decisions"]
+    assert "changes_requested" in dm["valid_decisions"]
+    assert "advisory" in dm
+
+
+def test_45e_roadmap_approval_design_artifact_model_fields(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["artifact_model"]
+    field_names = [f["name"] for f in am["fields"]]
+    for expected in (
+        "roadmap_approval_id",
+        "proposal_id",
+        "approved_phases",
+        "denied_phases",
+        "changes_requested",
+        "conflicts_resolved",
+        "approved_by",
+        "approved_at",
+        "human_notes",
+    ):
+        assert expected in field_names, f"missing artifact field: {expected}"
+
+
+def test_45e_roadmap_approval_design_governance_boundaries(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "approval_workflow_may" in gb
+    assert "approval_workflow_may_not" in gb
+    may_not = " ".join(gb["approval_workflow_may_not"]).lower()
+    assert "record approval state" in may_not
+    assert "mutate roadmap" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+    assert gb["human_decision_required"] is True
+
+
+def test_45e_roadmap_approval_design_future_evolution(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    for expected in ("45F", "45G", "45H", "45I"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45e_roadmap_approval_design_advisory(capsys) -> None:
+    main(["roadmap-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "advisory" in advisory
+    assert "no roadmap approval is recorded" in advisory
+
+
+def test_45e_roadmap_approval_design_human_output_shows_all_sections(capsys) -> None:
+    main(["roadmap-approval-design"])
+    output = capsys.readouterr().out
+    assert "Roadmap approval workflow" in output
+    assert "Approval lifecycle" in output
+    assert "Approval states" in output
+    assert "Decision model" in output
+    assert "Artifact model" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no roadmap approval is recorded" in output

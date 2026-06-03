@@ -332,6 +332,11 @@ def render_commands_reference() -> str:
 
 - `pcae multi-agent-roadmap`
 - `pcae multi-agent-roadmap --json`
+
+## roadmap-approval-design
+
+- `pcae roadmap-approval-design`
+- `pcae roadmap-approval-design --json`
 """
 
 

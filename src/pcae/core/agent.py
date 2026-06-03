@@ -10888,3 +10888,189 @@ def build_multi_agent_roadmap(root: HarnessPath) -> dict:
         "future_evolution": [dict(e) for e in _MARMAP_FUTURE_EVOLUTION],
         "advisory": MULTI_AGENT_ROADMAP_ADVISORY,
     }
+
+
+# Phase 45E: Roadmap Approval Workflow
+# ---------------------------------------------------------------------------
+
+ROADMAP_APPROVAL_DESIGN_ADVISORY = (
+    "Roadmap approval workflow is advisory; no roadmap approval is recorded."
+)
+
+_RAD_APPROVAL_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "proposal_generated",
+        "description": "A roadmap proposal is generated from evidence and multi-agent review.",
+        "inputs": ["roadmap_evidence_package", "roadmap_proposal_dry_run", "multi_agent_roadmap_proposal"],
+        "outputs": ["proposal_id", "agent_proposals", "consensus_recommendation"],
+    },
+    {
+        "step": 2,
+        "name": "proposal_reviewed",
+        "description": "The proposal and agent perspectives are reviewed for completeness and conflicts.",
+        "inputs": ["proposal_id", "agent_proposals"],
+        "outputs": ["review_summary", "identified_conflicts", "confidence_assessment"],
+    },
+    {
+        "step": 3,
+        "name": "conflicts_identified",
+        "description": "Conflicting agent recommendations are surfaced for human resolution.",
+        "inputs": ["conflicting_recommendations", "confidence_differences"],
+        "outputs": ["conflict_list", "conflict_resolution_requirements"],
+    },
+    {
+        "step": 4,
+        "name": "human_decision_required",
+        "description": "A human reviews the proposal and conflict list, then records an approval decision.",
+        "inputs": ["proposal_id", "conflict_list", "consensus_recommendation"],
+        "outputs": ["approval_state", "human_notes", "approved_phases", "denied_phases"],
+    },
+    {
+        "step": 5,
+        "name": "approval_state_recorded",
+        "description": "The approval decision is recorded in a governed approval artifact (future artifact; not yet mutated).",
+        "inputs": ["approval_state", "approved_phases", "denied_phases", "human_notes"],
+        "outputs": ["roadmap_approval_id", "approved_roadmap_artifact"],
+    },
+    {
+        "step": 6,
+        "name": "approved_roadmap_informs_phase_generation",
+        "description": "The approved roadmap artifact informs future governed phase generation.",
+        "inputs": ["approved_roadmap_artifact"],
+        "outputs": ["next_phase_candidates", "phase_generation_context"],
+    },
+)
+
+_RAD_APPROVAL_STATES: tuple[dict, ...] = (
+    {
+        "state": "pending",
+        "description": "Proposal has been generated; human decision not yet recorded.",
+        "terminal": False,
+        "requires_human_action": True,
+    },
+    {
+        "state": "approved",
+        "description": "Human has approved the roadmap proposal; approved phases may inform future phase generation.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "denied",
+        "description": "Human has denied the roadmap proposal; no phases are promoted.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "changes_requested",
+        "description": "Human has requested changes; proposal returns to generation with revised inputs.",
+        "terminal": False,
+        "requires_human_action": True,
+    },
+)
+
+_RAD_DECISION_MODEL: dict = {
+    "decision_authority": "human",
+    "decision_inputs": [
+        "multi_agent_roadmap_proposal",
+        "consensus_recommendation",
+        "conflict_list",
+        "agent_rationales",
+        "confidence_assessments",
+    ],
+    "valid_decisions": ["approved", "denied", "changes_requested"],
+    "decision_is_final": False,
+    "human_notes_required": False,
+    "conflict_resolution_required_before_approve": False,
+    "advisory": "Human decision is authoritative; governance system recommendations are advisory.",
+    "escalation": "If consensus_confidence is below threshold or conflicts are unresolved, human review is mandatory.",
+}
+
+_RAD_CONFLICT_RESOLUTION_REQUIREMENTS: dict = {
+    "conflict_sources": [
+        "agent recommendation disagreements",
+        "confidence spread exceeding threshold",
+        "phase exclusion by one or more agents",
+    ],
+    "resolution_strategies": [
+        {"strategy": "human_override", "description": "Human selects final approved or denied phases."},
+        {"strategy": "defer_conflict_phase", "description": "Move conflicting phase to denied or changes_requested bucket."},
+        {"strategy": "re_elicit", "description": "Request new agent proposal with additional constraints."},
+    ],
+    "resolution_authority": "human",
+    "resolution_must_be_recorded": True,
+    "unresolved_conflicts_block_approve": False,
+}
+
+_RAD_ARTIFACT_MODEL: dict = {
+    "artifact_name": "ApprovedRoadmapArtifact",
+    "fields": [
+        {"name": "roadmap_approval_id", "type": "str", "description": "Unique approval artifact identifier."},
+        {"name": "proposal_id", "type": "str", "description": "ID of the approved/denied multi-agent roadmap proposal."},
+        {"name": "approved_phases", "type": "list[str]", "description": "Phase IDs approved by the human."},
+        {"name": "denied_phases", "type": "list[str]", "description": "Phase IDs denied by the human."},
+        {"name": "changes_requested", "type": "list[dict]", "description": "Phases with requested changes and notes."},
+        {"name": "conflicts_resolved", "type": "list[dict]", "description": "Conflicts and how each was resolved."},
+        {"name": "approved_by", "type": "str", "description": "Identifier of the human approver."},
+        {"name": "approved_at", "type": "str", "description": "ISO 8601 timestamp of the approval decision."},
+        {"name": "human_notes", "type": "str", "description": "Free-text human notes on the decision."},
+    ],
+    "artifact_is_mutable": False,
+    "artifact_creation": "future — not yet implemented; no approval mutation in this phase.",
+}
+
+_RAD_GOVERNANCE_BOUNDARIES: dict = {
+    "approval_workflow_may": [
+        "describe approval lifecycle",
+        "define approval states",
+        "define human decision model",
+        "define conflict resolution requirements",
+        "define approved roadmap artifact model",
+        "define governance boundaries",
+    ],
+    "approval_workflow_may_not": [
+        "record approval state",
+        "mutate roadmap",
+        "create tasks",
+        "execute work",
+        "generate prompts",
+        "commit",
+        "push",
+    ],
+    "human_decision_required": True,
+    "advisory": True,
+}
+
+_RAD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45F", "description": "Prompt Generation Design"},
+    {"phase": "45G", "description": "Adaptive Agent-Specific Prompt Generation"},
+    {"phase": "45H", "description": "Prompt Validation Framework"},
+    {"phase": "45I", "description": "Prompt Governance Design"},
+)
+
+
+def build_roadmap_approval_design(root: HarnessPath) -> dict:
+    """Design a governed roadmap approval workflow. Read-only; no approval state mutated."""
+    multi_agent = build_multi_agent_roadmap(root)
+
+    roadmap_approval_workflow = {
+        "workflow_id": f"rad-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "proposal_id": multi_agent["proposal_id"],
+        "dry_run_proposal_id": multi_agent["dry_run_proposal_id"],
+        "evidence_package_id": multi_agent["evidence_package_id"],
+        "approval_lifecycle": [dict(s) for s in _RAD_APPROVAL_LIFECYCLE],
+        "human_decision_required": True,
+        "current_approval_state": "pending",
+    }
+
+    return {
+        "roadmap_approval_workflow": roadmap_approval_workflow,
+        "approval_states": [dict(s) for s in _RAD_APPROVAL_STATES],
+        "decision_model": dict(_RAD_DECISION_MODEL),
+        "conflict_resolution_requirements": dict(_RAD_CONFLICT_RESOLUTION_REQUIREMENTS),
+        "artifact_model": dict(_RAD_ARTIFACT_MODEL),
+        "governance_boundaries": dict(_RAD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RAD_FUTURE_EVOLUTION],
+        "advisory": ROADMAP_APPROVAL_DESIGN_ADVISORY,
+    }
