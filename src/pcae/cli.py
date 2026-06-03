@@ -61,6 +61,7 @@ from pcae.commands.agent import (
     run_execution_audit_design,
     run_execution_consensus_framework,
     run_live_execution_pilot,
+    run_invocation_workload_validation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1779,6 +1780,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON live execution pilot output.",
     )
     live_execution_pilot_parser.set_defaults(handler=run_live_execution_pilot)
+
+    invocation_workload_validation_parser = subparsers.add_parser(
+        "invocation-workload-validation",
+        help="Validate runtime invocation contracts against prompt-execution workloads (Phase 46E).",
+    )
+    invocation_workload_validation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON invocation workload validation output.",
+    )
+    invocation_workload_validation_parser.set_defaults(handler=run_invocation_workload_validation)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

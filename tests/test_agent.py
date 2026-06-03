@@ -23005,3 +23005,176 @@ def test_46d_live_execution_pilot_human_output_shows_all_sections(capsys) -> Non
     assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46E — Runtime Invocation Workload Validation
+# ---------------------------------------------------------------------------
+
+
+def test_46e_invocation_workload_validation_json_structure(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("invocation_workload_validation", "workload_types", "known_contracts",
+                "runtime_matrix", "blockers", "warnings", "recommendations",
+                "governance_boundaries", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46e_invocation_workload_validation_design_fields(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    val = data["invocation_workload_validation"]
+    for field in ("validation_id", "phase", "title", "summary", "workload_type_count",
+                  "runtime_count", "matrix_row_count", "ready_count",
+                  "partially_ready_count", "not_ready_count", "blocker_count",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in val, f"missing validation field: {field}"
+    assert val["validation_id"].startswith("riwv-")
+    assert val["phase"] == "46E"
+    assert val["runtime_count"] == 3
+
+
+def test_46e_invocation_workload_validation_workload_types(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wts = data["workload_types"]
+    assert len(wts) == 5
+    wt_names = [w["workload_type"] for w in wts]
+    for expected in ("read_only_prompt_execution", "planning_prompt_execution",
+                     "review_prompt_execution", "validation_prompt_execution",
+                     "documentation_prompt_execution"):
+        assert expected in wt_names, f"missing workload type: {expected}"
+    for wt in wts:
+        assert wt["write_allowed"] is False
+
+
+def test_46e_invocation_workload_validation_runtime_matrix(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    matrix = data["runtime_matrix"]
+    assert len(matrix) == 15  # 5 workloads × 3 runtimes
+    runtimes = {row["runtime_id"] for row in matrix}
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtimes, f"missing runtime in matrix: {expected}"
+    for row in matrix:
+        for field in ("runtime_id", "workload_type", "contract_status",
+                      "sandbox_status", "output_capture_status", "timeout_status",
+                      "readiness_status", "blockers", "warnings"):
+            assert field in row, f"matrix row missing field: {field}"
+
+
+def test_46e_invocation_workload_validation_codex_ready(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    codex_rows = [r for r in data["runtime_matrix"] if r["runtime_id"] == "codex-local"]
+    assert len(codex_rows) == 5
+    for row in codex_rows:
+        assert row["readiness_status"] == "ready", (
+            f"codex-local not ready for {row['workload_type']}: {row['readiness_status']}"
+        )
+        assert row["blockers"] == []
+
+
+def test_46e_invocation_workload_validation_claude_ready(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    claude_rows = [r for r in data["runtime_matrix"] if r["runtime_id"] == "claude-local"]
+    assert len(claude_rows) == 5
+    for row in claude_rows:
+        assert row["readiness_status"] == "ready", (
+            f"claude-local not ready for {row['workload_type']}: {row['readiness_status']}"
+        )
+        assert row["blockers"] == []
+
+
+def test_46e_invocation_workload_validation_kimi_partial(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi_rows = [r for r in data["runtime_matrix"] if r["runtime_id"] == "kimi-local"]
+    assert len(kimi_rows) == 5
+    for row in kimi_rows:
+        assert row["readiness_status"] == "partially_ready", (
+            f"kimi-local expected partially_ready for {row['workload_type']}"
+        )
+        assert "missing_sandbox_strategy" in row["blockers"]
+        assert "missing_timeout_strategy" in row["blockers"]
+
+
+def test_46e_invocation_workload_validation_known_contracts(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    contracts = data["known_contracts"]
+    runtimes = {c["runtime"] for c in contracts}
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtimes, f"missing contract for runtime: {expected}"
+    for contract in contracts:
+        for field in ("runtime", "mode", "contract", "sandbox_defined",
+                      "output_capture_defined", "timeout_defined"):
+            assert field in contract, f"contract missing field: {field}"
+
+
+def test_46e_invocation_workload_validation_blockers(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) == 2
+    blocker_ids = [b["blocker_id"] for b in blockers]
+    for expected in ("riwv-b1", "riwv-b2"):
+        assert expected in blocker_ids, f"missing blocker: {expected}"
+    for b in blockers:
+        assert b["runtime"] == "kimi-local"
+        assert b["severity"] == "high"
+
+
+def test_46e_invocation_workload_validation_governance_boundaries(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "validation_may" in gb
+    assert "validation_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["validation_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46e_invocation_workload_validation_readiness_counts(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    val = data["invocation_workload_validation"]
+    assert val["ready_count"] == 10       # 5 workloads × 2 ready runtimes
+    assert val["partially_ready_count"] == 5   # 5 workloads × 1 partial runtime
+    assert val["not_ready_count"] == 0
+    assert val["matrix_row_count"] == 15
+
+
+def test_46e_invocation_workload_validation_future_evolution(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["invocation_workload_validation"]["future_evolution"]]
+    for expected in ("46F", "46G", "46H"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46e_invocation_workload_validation_advisory(capsys) -> None:
+    main(["invocation-workload-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtimes are invoked" in advisory
+
+
+def test_46e_invocation_workload_validation_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-workload-validation"])
+    output = capsys.readouterr().out
+    assert "Invocation workload validation" in output
+    assert "Workload types" in output
+    assert "Runtime matrix" in output
+    assert "Blockers" in output
+    assert "Warnings" in output
+    assert "Recommendations" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

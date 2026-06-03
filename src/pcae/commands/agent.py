@@ -98,6 +98,8 @@ from pcae.core.agent import (
     EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY,
     build_live_execution_pilot,
     LIVE_EXECUTION_PILOT_ADVISORY,
+    build_invocation_workload_validation,
+    INVOCATION_WORKLOAD_VALIDATION_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4468,6 +4470,67 @@ def run_live_execution_pilot(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_workload_validation(args: argparse.Namespace) -> int:
+    data = build_invocation_workload_validation()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        val = data["invocation_workload_validation"]
+        print("Invocation workload validation")
+        print(f"Validation: {val['validation_id']}  Generated: {val['generated_at']}")
+        print(f"Phase: {val['phase']} — {val['title']}")
+        print()
+        print(val["summary"])
+        print()
+        print("Workload types:")
+        for wt in data["workload_types"]:
+            write = "write_allowed" if wt["write_allowed"] else "read_only"
+            print(f"  {wt['workload_type']} ({write})")
+            print(f"    {wt['description']}")
+        print()
+        print("Runtime matrix:")
+        runtimes_seen: list[str] = []
+        rows_by_runtime: dict[str, list[dict]] = {}
+        for row in data["runtime_matrix"]:
+            rt = row["runtime_id"]
+            if rt not in rows_by_runtime:
+                runtimes_seen.append(rt)
+                rows_by_runtime[rt] = []
+            rows_by_runtime[rt].append(row)
+        for rt in runtimes_seen:
+            print(f"  [{rt}]")
+            for row in rows_by_runtime[rt]:
+                status = row["readiness_status"]
+                print(f"    {row['workload_type']}: {status}")
+                if row["blockers"]:
+                    print(f"      blockers: {', '.join(row['blockers'])}")
+                if row["warnings"]:
+                    for w in row["warnings"]:
+                        print(f"      warning: {w}")
+        print()
+        print("Blockers:")
+        for b in data["blockers"]:
+            print(f"  [{b['blocker_id']}] {b['category']} — {b['runtime']} (severity={b['severity']})")
+            print(f"    {b['description']}")
+        print()
+        print("Warnings:")
+        for w in data["warnings"]:
+            print(f"  - {w}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            print(f"  - {rec}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['validation_may'])}")
+        print(f"  May not: {', '.join(gb['validation_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

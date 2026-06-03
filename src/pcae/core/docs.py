@@ -422,6 +422,11 @@ def render_commands_reference() -> str:
 
 - `pcae live-execution-pilot`
 - `pcae live-execution-pilot --json`
+
+## invocation-workload-validation
+
+- `pcae invocation-workload-validation`
+- `pcae invocation-workload-validation --json`
 """
 
 

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46D: Governed Live Execution Pilot.
+Phase 46E: Runtime Invocation Workload Validation.
 
 ## Governance Coherence Note
 
@@ -2366,9 +2366,33 @@ consensus model; may not execute prompts/invoke agents/modify files/commit/push/
 bypass approval; read_only=true, human_review_required=true; future_evolution: 46E/46F/46G/46H;
 advisory: "Governed live execution pilot is informational; no prompts are executed."
 
+PCAE can validate runtime invocation contracts against prompt-execution workloads with
+`pcae invocation-workload-validation` and `pcae invocation-workload-validation --json`
+(Phase 46E): inputs: runtime invocation contracts, governed live execution pilot, prompt
+execution dry-run, capability registry, human selected execution design; no prompts are
+executed; no agents are invoked; workload types (5, all read-only):
+read_only_prompt_execution/planning_prompt_execution/review_prompt_execution/
+validation_prompt_execution/documentation_prompt_execution; runtimes: codex-local/
+claude-local/kimi-local; contract validation matrix: 15 rows (5 workloads × 3 runtimes),
+each with runtime_id/workload_type/invocation_contract/contract_status/sandbox_status/
+output_capture_status/timeout_status/readiness_status/blockers/warnings; known contracts:
+codex read_only='codex exec --sandbox read-only "<prompt>"'/
+writable='codex exec --sandbox workspace-write "<prompt>"';
+claude read_only='claude -p "<prompt>"'/
+writable='claude -p --permission-mode acceptEdits "<prompt>"';
+kimi read_only='kimi -p "<prompt>"'/writable='kimi -p "<prompt>"';
+readiness: codex-local ready (10 rows)/claude-local ready (10 rows)/
+kimi-local partially_ready (5 rows, blockers: missing_sandbox_strategy/missing_timeout_strategy);
+blockers: riwv-b1 (kimi sandbox, high)/riwv-b2 (kimi timeout, high);
+readiness counts: ready=10/partially_ready=5/not_ready=0;
+governance_boundaries: may assess contracts/assess workload readiness/report blockers;
+may not execute prompts/invoke agents/modify repository/approve execution/commit/push/rollback;
+read_only=true, human_review_required=true; future_evolution: 46F/46G/46H;
+advisory: "Invocation workload validation is informational; no runtimes are invoked."
+
 ## Next
 
-- TBD: Future phases (46E Runtime Invocation Workload Validation, 46F Execution Authorization Artifact Model, 46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow).
+- TBD: Future phases (46F Execution Authorization Artifact Model, 46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow).
 
 ## Future Explorations
 

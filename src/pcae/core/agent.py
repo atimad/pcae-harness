@@ -16199,3 +16199,291 @@ def build_live_execution_pilot() -> dict:
         "governance_boundaries": dict(_LEPD_GOVERNANCE_BOUNDARIES),
         "advisory": LIVE_EXECUTION_PILOT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46E — Runtime Invocation Workload Validation
+# ---------------------------------------------------------------------------
+
+INVOCATION_WORKLOAD_VALIDATION_ADVISORY = (
+    "Invocation workload validation is informational; no runtimes are invoked."
+)
+
+_RIWV_INPUT_SOURCES: tuple[str, ...] = (
+    "runtime_invocation_contracts",
+    "governed_live_execution_pilot",
+    "prompt_execution_dry_run",
+    "capability_registry",
+    "human_selected_execution_design",
+)
+
+_RIWV_WORKLOAD_TYPES: tuple[dict, ...] = (
+    {
+        "workload_type": "read_only_prompt_execution",
+        "description": "Execute a prompt in read-only mode; no files may be written.",
+        "write_allowed": False,
+    },
+    {
+        "workload_type": "planning_prompt_execution",
+        "description": "Execute a planning prompt that produces a plan artifact; no direct file writes.",
+        "write_allowed": False,
+    },
+    {
+        "workload_type": "review_prompt_execution",
+        "description": "Execute a review prompt that inspects artifacts; no file modifications.",
+        "write_allowed": False,
+    },
+    {
+        "workload_type": "validation_prompt_execution",
+        "description": "Execute a validation prompt that checks governance or code quality; no file writes.",
+        "write_allowed": False,
+    },
+    {
+        "workload_type": "documentation_prompt_execution",
+        "description": "Execute a documentation prompt that generates or reviews docs; no direct commits.",
+        "write_allowed": False,
+    },
+)
+
+_RIWV_KNOWN_CONTRACTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "mode": "read_only",
+        "contract": 'codex exec --sandbox read-only "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+    },
+    {
+        "runtime": "codex-local",
+        "mode": "writable",
+        "contract": 'codex exec --sandbox workspace-write "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+    },
+    {
+        "runtime": "claude-local",
+        "mode": "read_only",
+        "contract": 'claude -p "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+    },
+    {
+        "runtime": "claude-local",
+        "mode": "writable",
+        "contract": 'claude -p --permission-mode acceptEdits "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+    },
+    {
+        "runtime": "kimi-local",
+        "mode": "read_only",
+        "contract": 'kimi -p "<prompt>"',
+        "sandbox_defined": False,
+        "output_capture_defined": True,
+        "timeout_defined": False,
+    },
+    {
+        "runtime": "kimi-local",
+        "mode": "writable",
+        "contract": 'kimi -p "<prompt>"',
+        "sandbox_defined": False,
+        "output_capture_defined": True,
+        "timeout_defined": False,
+    },
+)
+
+_RIWV_READINESS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "partially_ready",
+    "not_ready",
+)
+
+# Derive the validation matrix from known contracts × workload types.
+# All current workload types are read-only so we use the read_only contract row.
+def _build_riwv_matrix() -> list[dict]:
+    contracts_by_runtime: dict[str, dict] = {}
+    for c in _RIWV_KNOWN_CONTRACTS:
+        if c["mode"] == "read_only":
+            contracts_by_runtime[c["runtime"]] = c
+
+    rows = []
+    for wl in _RIWV_WORKLOAD_TYPES:
+        for runtime_id in ("codex-local", "claude-local", "kimi-local"):
+            contract = contracts_by_runtime.get(runtime_id)
+            if contract is None:
+                rows.append({
+                    "runtime_id": runtime_id,
+                    "workload_type": wl["workload_type"],
+                    "invocation_contract": None,
+                    "contract_status": "not_ready",
+                    "sandbox_status": "not_ready",
+                    "output_capture_status": "not_ready",
+                    "timeout_status": "not_ready",
+                    "readiness_status": "not_ready",
+                    "blockers": ["missing_invocation_contract"],
+                    "warnings": [],
+                })
+                continue
+
+            sandbox_ok = contract["sandbox_defined"]
+            output_ok = contract["output_capture_defined"]
+            timeout_ok = contract["timeout_defined"]
+
+            contract_status = "ready"
+            sandbox_status = "ready" if sandbox_ok else "not_ready"
+            output_status = "ready" if output_ok else "not_ready"
+            timeout_status = "ready" if timeout_ok else "not_ready"
+
+            blockers = []
+            warnings = []
+
+            if not sandbox_ok:
+                blockers.append("missing_sandbox_strategy")
+            if not output_ok:
+                blockers.append("missing_output_capture_strategy")
+            if not timeout_ok:
+                blockers.append("missing_timeout_strategy")
+
+            if runtime_id == "kimi-local":
+                warnings.append("sandbox isolation not explicitly documented for kimi-local")
+                warnings.append("timeout behavior not explicitly documented for kimi-local")
+
+            if blockers:
+                readiness = "partially_ready" if output_ok else "not_ready"
+                contract_status = "partially_ready"
+            else:
+                readiness = "ready"
+
+            rows.append({
+                "runtime_id": runtime_id,
+                "workload_type": wl["workload_type"],
+                "invocation_contract": contract["contract"],
+                "contract_status": contract_status,
+                "sandbox_status": sandbox_status,
+                "output_capture_status": output_status,
+                "timeout_status": timeout_status,
+                "readiness_status": readiness,
+                "blockers": blockers,
+                "warnings": warnings,
+            })
+    return rows
+
+
+_RIWV_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "riwv-b1",
+        "category": "contract_blocker",
+        "runtime": "kimi-local",
+        "description": "kimi-local read-only sandbox isolation is not explicitly documented.",
+        "severity": "high",
+        "affects": "sandbox_status",
+    },
+    {
+        "blocker_id": "riwv-b2",
+        "category": "contract_blocker",
+        "runtime": "kimi-local",
+        "description": "kimi-local timeout behavior is not explicitly documented.",
+        "severity": "high",
+        "affects": "timeout_status",
+    },
+)
+
+_RIWV_WARNINGS: tuple[str, ...] = (
+    "kimi-local read-only and writable contracts share the same invocation form; sandbox distinction is implicit.",
+    "Timeout handling for kimi-local must be validated before live workload execution.",
+    "All current workload types are read-only; writable workload readiness is not assessed in this phase.",
+)
+
+_RIWV_RECOMMENDATIONS: tuple[str, ...] = (
+    "Document explicit sandbox isolation strategy for kimi-local before piloting any workload.",
+    "Define timeout behavior for kimi-local invocations before live execution.",
+    "Validate codex-local and claude-local contracts against a real prompt artifact before Phase 46G.",
+    "Restrict initial live pilot to codex-local or claude-local where sandbox is explicitly defined.",
+    "Do not use legacy preview commands (pcae governed-execution-pilot) as a substitute for live invocation.",
+)
+
+_RIWV_GOVERNANCE_BOUNDARIES: dict = {
+    "validation_may": [
+        "assess contracts",
+        "assess workload readiness",
+        "report blockers",
+    ],
+    "validation_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_RIWV_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46F", "description": "Execution Authorization Artifact Model"},
+    {"phase": "46G", "description": "Read-Only Live Invocation Pilot"},
+    {"phase": "46H", "description": "Live Execution Result Review Workflow"},
+)
+
+
+def build_invocation_workload_validation() -> dict:
+    """Validate runtime invocation contracts against prompt-execution workloads. Read-only; no runtimes invoked."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    validation_id = f"riwv-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    workload_types = [dict(w) for w in _RIWV_WORKLOAD_TYPES]
+    known_contracts = [dict(c) for c in _RIWV_KNOWN_CONTRACTS]
+    runtime_matrix = _build_riwv_matrix()
+    blockers = [dict(b) for b in _RIWV_BLOCKERS]
+    warnings = list(_RIWV_WARNINGS)
+    recommendations = list(_RIWV_RECOMMENDATIONS)
+
+    ready_count = sum(1 for r in runtime_matrix if r["readiness_status"] == "ready")
+    partial_count = sum(1 for r in runtime_matrix if r["readiness_status"] == "partially_ready")
+    not_ready_count = sum(1 for r in runtime_matrix if r["readiness_status"] == "not_ready")
+
+    invocation_workload_validation = {
+        "validation_id": validation_id,
+        "generated_at": generated_at,
+        "phase": "46E",
+        "title": "Runtime Invocation Workload Validation",
+        "summary": (
+            "Validates runtime invocation contracts for codex-local, claude-local, and "
+            "kimi-local against five read-only workload types. codex-local and claude-local "
+            "are ready for all assessed workloads; kimi-local is partially_ready pending "
+            "explicit sandbox and timeout documentation. No prompts are executed and no "
+            "agents are invoked."
+        ),
+        "input_sources": list(_RIWV_INPUT_SOURCES),
+        "workload_type_count": len(workload_types),
+        "runtime_count": 3,
+        "matrix_row_count": len(runtime_matrix),
+        "ready_count": ready_count,
+        "partially_ready_count": partial_count,
+        "not_ready_count": not_ready_count,
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings),
+        "readiness_statuses": list(_RIWV_READINESS_STATUSES),
+        "human_review_required": True,
+        "governance_boundaries": dict(_RIWV_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RIWV_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "invocation_workload_validation": invocation_workload_validation,
+        "workload_types": workload_types,
+        "known_contracts": known_contracts,
+        "runtime_matrix": runtime_matrix,
+        "blockers": blockers,
+        "warnings": warnings,
+        "recommendations": recommendations,
+        "governance_boundaries": dict(_RIWV_GOVERNANCE_BOUNDARIES),
+        "advisory": INVOCATION_WORKLOAD_VALIDATION_ADVISORY,
+    }
