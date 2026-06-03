@@ -346,3 +346,8 @@
 
 - `pcae prompt-approval-design`
 - `pcae prompt-approval-design --json`
+
+## autonomous-phase-proposal
+
+- `pcae autonomous-phase-proposal`
+- `pcae autonomous-phase-proposal --json`

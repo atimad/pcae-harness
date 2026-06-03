@@ -76,6 +76,8 @@ from pcae.core.agent import (
     PROMPT_ARTIFACT_DESIGN_ADVISORY,
     build_prompt_approval_workflow,
     PROMPT_APPROVAL_WORKFLOW_ADVISORY,
+    build_autonomous_phase_proposal,
+    AUTONOMOUS_PHASE_PROPOSAL_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3858,6 +3860,50 @@ def run_prompt_approval_workflow(args: argparse.Namespace) -> int:
         print("Future evolution:")
         for entry in wf["future_evolution"]:
             print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_autonomous_phase_proposal(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_autonomous_phase_proposal(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        proposal = data["autonomous_phase_proposal"]
+        print("Autonomous phase proposal")
+        print(f"Proposal: {proposal['proposal_id']}  Generated: {proposal['generated_at']}")
+        print(f"Phase: {proposal['phase']} — {proposal['title']}")
+        print(f"Evidence package: {proposal['evidence_package_id']}")
+        print()
+        print("Candidate phases:")
+        for phase in data["candidate_phases"]:
+            deps = ", ".join(phase["dependencies"]) if phase["dependencies"] else "none"
+            print(f"  {phase['phase_id']}: {phase['title']}")
+            print(f"    Rationale: {phase['rationale']}")
+            print(f"    Confidence: {phase['confidence']}")
+            print(f"    Dependencies: {deps}")
+        print()
+        print("Priorities:")
+        for p in data["priorities"]:
+            print(
+                f"  {p['priority']}. {p['phase_id']}:"
+                f" impact={p['impact_estimate']},"
+                f" complexity={p['implementation_complexity']}"
+            )
+        print()
+        print("Dependency analysis:")
+        for dep in data["dependencies"]:
+            prereqs = ", ".join(dep["prerequisite_phases"]) if dep["prerequisite_phases"] else "none"
+            print(f"  {dep['phase_id']}: prerequisites={prereqs}, order={dep['recommended_ordering']}")
+        print()
+        print(f"Risks ({len(data['risks'])}):")
+        for risk in data["risks"]:
+            print(f"  - {risk}")
+        print()
+        print(f"Overall confidence: {data['confidence']}")
+        print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
         print()
         print(data["advisory"])
     return 0

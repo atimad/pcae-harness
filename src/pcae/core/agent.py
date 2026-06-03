@@ -12281,3 +12281,261 @@ def build_prompt_approval_workflow() -> dict:
         "governance_boundaries": dict(_PAW_GOVERNANCE_BOUNDARIES),
         "advisory": PROMPT_APPROVAL_WORKFLOW_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45L: Autonomous Phase Proposal Prototype
+# ---------------------------------------------------------------------------
+
+AUTONOMOUS_PHASE_PROPOSAL_ADVISORY = (
+    "Autonomous phase proposal is advisory; no roadmap changes are performed."
+)
+
+_APP_EVIDENCE_SOURCES: tuple[str, ...] = (
+    "roadmap_evidence_package",
+    "roadmap_proposals",
+    "roadmap_approval_artifacts",
+    "readiness_assessments",
+    "capability_registry",
+    "prompt_governance_artifacts",
+)
+
+_APP_EVIDENCE_ANALYSIS_DIMENSIONS: tuple[str, ...] = (
+    "identified_gaps",
+    "candidate_focus_areas",
+    "readiness_findings",
+    "governance_findings",
+    "capability_findings",
+)
+
+_APP_CANDIDATE_PHASES: tuple[dict, ...] = (
+    {
+        "phase_id": "candidate-45M",
+        "title": "Autonomous Prompt Proposal Prototype",
+        "rationale": (
+            "Natural successor to 45L; generates governed prompt proposals from approved "
+            "phase candidates. Requires 45L candidate approval before prompts are proposed."
+        ),
+        "evidence_references": [
+            "prompt_governance_design",
+            "prompt_artifact_model",
+            "prompt_approval_workflow",
+        ],
+        "dependencies": ["45L"],
+        "risks": [
+            "Prompt proposal scope may overlap with prompt generation design (45F/45G).",
+            "Phase candidates from 45L must be approved before prompts can be proposed.",
+        ],
+        "confidence": 0.88,
+    },
+    {
+        "phase_id": "candidate-45N",
+        "title": "Prompt Execution Readiness Assessment",
+        "rationale": (
+            "Assesses whether prompt execution is safe given current governance state; "
+            "prerequisite for any future execution dry-run or live execution phase."
+        ),
+        "evidence_references": [
+            "capability_registry",
+            "readiness_assessments",
+            "roadmap_approval_artifacts",
+        ],
+        "dependencies": ["45L", "candidate-45M"],
+        "risks": [
+            "Readiness criteria may not be finalized before the assessment runs.",
+            "Capability gaps detected may block execution readiness indefinitely.",
+        ],
+        "confidence": 0.82,
+    },
+    {
+        "phase_id": "candidate-45O",
+        "title": "Prompt Execution Dry-Run",
+        "rationale": (
+            "Exercises the approved prompt execution pipeline in a simulated, non-mutating "
+            "context before real execution is authorized."
+        ),
+        "evidence_references": [
+            "capability_registry",
+            "prompt_approval_workflow",
+            "readiness_assessments",
+        ],
+        "dependencies": ["45L", "candidate-45M", "candidate-45N"],
+        "risks": [
+            "Dry-run scope must be tightly constrained to prevent accidental state mutation.",
+            "Isolation guarantees must be verified before the dry-run is authorized.",
+        ],
+        "confidence": 0.75,
+    },
+    {
+        "phase_id": "candidate-governance-coherence",
+        "title": "Governance Artifact Synchronization",
+        "rationale": (
+            "Automated detection and repair of drift between PROJECT_STATUS.md, CHANGELOG.md, "
+            "and DONE.md. Addresses a known gap in governance coherence tooling identified "
+            "in the roadmap evidence package."
+        ),
+        "evidence_references": [
+            "identified_gaps",
+            "candidate_focus_areas",
+        ],
+        "dependencies": [],
+        "risks": [
+            "Automated repair logic may introduce unintended changes if too aggressive.",
+        ],
+        "confidence": 0.70,
+    },
+)
+
+_APP_PRIORITIES: tuple[dict, ...] = (
+    {
+        "phase_id": "candidate-45M",
+        "priority": 1,
+        "impact_estimate": "high",
+        "implementation_complexity": "medium",
+    },
+    {
+        "phase_id": "candidate-45N",
+        "priority": 2,
+        "impact_estimate": "high",
+        "implementation_complexity": "medium",
+    },
+    {
+        "phase_id": "candidate-45O",
+        "priority": 3,
+        "impact_estimate": "high",
+        "implementation_complexity": "high",
+    },
+    {
+        "phase_id": "candidate-governance-coherence",
+        "priority": 4,
+        "impact_estimate": "medium",
+        "implementation_complexity": "low",
+    },
+)
+
+_APP_DEPENDENCY_GRAPH: tuple[dict, ...] = (
+    {
+        "phase_id": "candidate-45M",
+        "prerequisite_phases": ["45L"],
+        "recommended_ordering": 1,
+    },
+    {
+        "phase_id": "candidate-45N",
+        "prerequisite_phases": ["45L", "candidate-45M"],
+        "recommended_ordering": 2,
+    },
+    {
+        "phase_id": "candidate-45O",
+        "prerequisite_phases": ["45L", "candidate-45M", "candidate-45N"],
+        "recommended_ordering": 3,
+    },
+    {
+        "phase_id": "candidate-governance-coherence",
+        "prerequisite_phases": [],
+        "recommended_ordering": 4,
+    },
+)
+
+_APP_GOVERNANCE_BOUNDARIES: dict = {
+    "proposal_prototype_may": [
+        "analyze evidence",
+        "propose phases",
+        "recommend ordering",
+    ],
+    "proposal_prototype_may_not": [
+        "create roadmap phases",
+        "mutate roadmap",
+        "create tasks",
+        "execute work",
+        "generate prompts",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_APP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45M", "description": "Autonomous Prompt Proposal Prototype"},
+    {"phase": "45N", "description": "Prompt Execution Readiness Assessment"},
+    {"phase": "45O", "description": "Prompt Execution Dry-Run"},
+)
+
+
+def build_autonomous_phase_proposal(root: HarnessPath) -> dict:
+    """Generate candidate future PCAE phases from repository evidence. Read-only; no roadmap changes."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    proposal_id = f"app-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    evidence = build_roadmap_evidence(root)
+    identified_gaps = evidence.get("identified_gaps", [])
+    candidate_focus_areas = evidence.get("candidate_focus_areas", [])
+    readiness_summary = evidence.get("readiness_summary", {})
+    governance_summary = evidence.get("governance_summary", {})
+    capability_summary = evidence.get("capability_summary", {})
+
+    evidence_analysis = {
+        "evidence_sources": list(_APP_EVIDENCE_SOURCES),
+        "analysis_dimensions": list(_APP_EVIDENCE_ANALYSIS_DIMENSIONS),
+        "identified_gaps": identified_gaps,
+        "candidate_focus_areas": candidate_focus_areas,
+        "readiness_findings": readiness_summary,
+        "governance_findings": governance_summary,
+        "capability_findings": capability_summary,
+    }
+
+    candidate_phases = [dict(p) for p in _APP_CANDIDATE_PHASES]
+    priorities = [dict(p) for p in _APP_PRIORITIES]
+    dependencies = [dict(d) for d in _APP_DEPENDENCY_GRAPH]
+
+    confidence = round(
+        sum(p["confidence"] for p in _APP_CANDIDATE_PHASES) / len(_APP_CANDIDATE_PHASES),
+        2,
+    )
+
+    risks = [
+        "Candidate phases are generated from evidence snapshots; fresh evidence may alter recommendations.",
+        "Roadmap approval artifacts may be stale; verify before acting on candidate phases.",
+        "Capability registry findings may not reflect all deployed agent capabilities.",
+        "Phase ordering is recommended, not enforced; human review is required before roadmap mutation.",
+        "Prompt governance artifacts may evolve between proposal generation and execution.",
+    ]
+
+    assumptions = [
+        "Roadmap evidence package reflects current repository state at generation time.",
+        "Capability registry is up-to-date with deployed agent capabilities.",
+        "Prompt governance design (45I) and prompt approval workflow (45K) are finalized.",
+        "Human review will be performed before any roadmap mutation is authorized.",
+        "Phase IDs are advisory labels; final IDs are assigned at roadmap commit time.",
+    ]
+
+    autonomous_phase_proposal = {
+        "proposal_id": proposal_id,
+        "generated_at": generated_at,
+        "phase": "45L",
+        "title": "Autonomous Phase Proposal Prototype",
+        "evidence_package_id": evidence.get("package_id", "unknown"),
+        "evidence_analysis": evidence_analysis,
+        "candidate_phases": candidate_phases,
+        "priorities": priorities,
+        "dependencies": dependencies,
+        "risks": risks,
+        "assumptions": assumptions,
+        "confidence": confidence,
+        "human_review_required": True,
+        "governance_boundaries": dict(_APP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _APP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "autonomous_phase_proposal": autonomous_phase_proposal,
+        "candidate_phases": candidate_phases,
+        "priorities": priorities,
+        "dependencies": dependencies,
+        "risks": risks,
+        "assumptions": assumptions,
+        "confidence": confidence,
+        "human_review_required": True,
+        "advisory": AUTONOMOUS_PHASE_PROPOSAL_ADVISORY,
+    }

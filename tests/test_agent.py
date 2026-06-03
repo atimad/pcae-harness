@@ -21157,3 +21157,171 @@ def test_45k_prompt_approval_workflow_human_output_shows_all_sections(capsys) ->
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are approved or executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45L: Autonomous Phase Proposal Prototype
+# ---------------------------------------------------------------------------
+
+
+def test_45l_autonomous_phase_proposal_json_structure(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("autonomous_phase_proposal", "candidate_phases", "priorities", "dependencies",
+                "risks", "assumptions", "confidence", "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45l_autonomous_phase_proposal_result_model_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proposal = data["autonomous_phase_proposal"]
+    for field in ("proposal_id", "generated_at", "candidate_phases", "priorities",
+                  "dependencies", "risks", "assumptions", "confidence", "human_review_required"):
+        assert field in proposal, f"missing proposal field: {field}"
+    assert proposal["proposal_id"].startswith("app-")
+    assert proposal["phase"] == "45L"
+
+
+def test_45l_autonomous_phase_proposal_candidate_phases(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = data["candidate_phases"]
+    assert len(phases) >= 1
+    for phase in phases:
+        for field in ("phase_id", "title", "rationale", "evidence_references", "dependencies", "risks", "confidence"):
+            assert field in phase, f"candidate phase missing field: {field}"
+    phase_ids = [p["phase_id"] for p in phases]
+    assert "candidate-45M" in phase_ids
+    assert "candidate-45N" in phase_ids
+    assert "candidate-45O" in phase_ids
+
+
+def test_45l_autonomous_phase_proposal_priorities(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    priorities = data["priorities"]
+    assert len(priorities) >= 1
+    for p in priorities:
+        assert "phase_id" in p
+        assert "priority" in p
+        assert "impact_estimate" in p
+        assert "implementation_complexity" in p
+    priority_values = [p["priority"] for p in priorities]
+    assert 1 in priority_values
+
+
+def test_45l_autonomous_phase_proposal_dependency_analysis(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    deps = data["dependencies"]
+    assert len(deps) >= 1
+    for dep in deps:
+        assert "phase_id" in dep
+        assert "prerequisite_phases" in dep
+        assert "recommended_ordering" in dep
+        assert isinstance(dep["prerequisite_phases"], list)
+
+
+def test_45l_autonomous_phase_proposal_human_review_required(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["autonomous_phase_proposal"]["human_review_required"] is True
+
+
+def test_45l_autonomous_phase_proposal_governance_boundaries(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["autonomous_phase_proposal"]["governance_boundaries"]
+    assert "proposal_prototype_may" in gb
+    assert "proposal_prototype_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["proposal_prototype_may_not"]).lower()
+    for forbidden in ("create roadmap phases", "mutate roadmap", "create tasks",
+                      "execute work", "generate prompts", "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45l_autonomous_phase_proposal_advisory(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "advisory" in advisory
+    assert "no roadmap changes" in advisory
+
+
+def test_45l_autonomous_phase_proposal_future_evolution(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["autonomous_phase_proposal"]["future_evolution"]]
+    for expected in ("45M", "45N", "45O"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45l_autonomous_phase_proposal_risks_and_assumptions(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert isinstance(data["risks"], list) and len(data["risks"]) >= 1
+    assert isinstance(data["assumptions"], list) and len(data["assumptions"]) >= 1
+    risks_text = " ".join(data["risks"]).lower()
+    assert "human review" in risks_text
+
+
+def test_45l_autonomous_phase_proposal_confidence(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    confidence = data["confidence"]
+    assert isinstance(confidence, float)
+    assert 0.0 < confidence <= 1.0
+
+
+def test_45l_autonomous_phase_proposal_evidence_package_referenced(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proposal = data["autonomous_phase_proposal"]
+    assert "evidence_package_id" in proposal
+    assert proposal["evidence_package_id"]
+    assert "evidence_analysis" in proposal
+    analysis = proposal["evidence_analysis"]
+    assert "evidence_sources" in analysis
+    assert "analysis_dimensions" in analysis
+
+
+def test_45l_autonomous_phase_proposal_human_output_shows_all_sections(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-phase-proposal"])
+    output = capsys.readouterr().out
+    assert "Autonomous phase proposal" in output
+    assert "Candidate phases" in output
+    assert "Priorities" in output
+    assert "Dependency analysis" in output
+    assert "Risks" in output
+    assert "Human review required" in output
+    assert "advisory" in output.lower()

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45K: Prompt Approval Workflow.
+Phase 45L: Autonomous Phase Proposal Prototype.
 
 ## Governance Coherence Note
 
@@ -2115,9 +2115,28 @@ approve automatically/execute prompts/invoke agents/modify repository/commit/
 push; read_only=true, human_decision_required=true); advisory: "Prompt
 approval workflow is informational; no prompts are approved or executed."
 
+PCAE can generate candidate future phases from repository evidence and
+governance-approved roadmap artifacts with `pcae autonomous-phase-proposal`
+and `pcae autonomous-phase-proposal --json` (Phase 45L): analyzing a roadmap
+evidence package, roadmap proposals, roadmap approval artifacts, readiness
+assessments, capability registry, and prompt governance artifacts across five
+evidence dimensions (identified_gaps, candidate_focus_areas, readiness_findings,
+governance_findings, capability_findings); generating four candidate phases
+(candidate-45M Autonomous Prompt Proposal Prototype, candidate-45N Prompt
+Execution Readiness Assessment, candidate-45O Prompt Execution Dry-Run,
+candidate-governance-coherence Governance Artifact Synchronization), each with
+phase_id/title/rationale/evidence_references/dependencies/risks/confidence;
+generating priorities with impact_estimate and implementation_complexity;
+generating a dependency analysis with prerequisite_phases and
+recommended_ordering; human_review_required=true at all times; governance
+boundaries (may analyze evidence/propose phases/recommend ordering; may not
+create roadmap phases/mutate roadmap/create tasks/execute work/generate
+prompts/commit/push; read_only=true); advisory: "Autonomous phase proposal is
+advisory; no roadmap changes are performed."
+
 ## Next
 
-- TBD: Future phases (45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype, 45N Prompt Execution Readiness Assessment).
+- TBD: Future phases (45M Autonomous Prompt Proposal Prototype, 45N Prompt Execution Readiness Assessment, 45O Prompt Execution Dry-Run).
 
 ## Future Explorations
 
