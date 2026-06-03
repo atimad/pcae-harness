@@ -21325,3 +21325,178 @@ def test_45l_autonomous_phase_proposal_human_output_shows_all_sections(tmp_path:
     assert "Risks" in output
     assert "Human review required" in output
     assert "advisory" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 45M: Autonomous Prompt Proposal Prototype
+# ---------------------------------------------------------------------------
+
+
+def test_45m_autonomous_prompt_proposal_json_structure(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("autonomous_prompt_proposal", "canonical_prompt", "adapted_prompts",
+                "validation_summary", "intent_preservation_status", "confidence",
+                "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45m_autonomous_prompt_proposal_result_model_fields(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    proposal = data["autonomous_prompt_proposal"]
+    for field in ("proposal_id", "canonical_prompt", "adapted_prompts", "validation_summary",
+                  "intent_preservation_status", "confidence", "human_review_required"):
+        assert field in proposal, f"missing proposal field: {field}"
+    assert proposal["proposal_id"].startswith("appp-")
+    assert proposal["phase"] == "45M"
+
+
+def test_45m_autonomous_prompt_proposal_canonical_prompt(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cp = data["canonical_prompt"]
+    for field in ("prompt_id", "phase_id", "title", "objective", "rationale", "dependencies",
+                  "allowed_files", "forbidden_files", "acceptance_criteria",
+                  "validation_commands", "governance_boundaries"):
+        assert field in cp, f"canonical prompt missing field: {field}"
+    assert cp["prompt_id"].startswith("appp-canonical-")
+    assert isinstance(cp["allowed_files"], list) and len(cp["allowed_files"]) >= 1
+    assert isinstance(cp["acceptance_criteria"], list) and len(cp["acceptance_criteria"]) >= 1
+
+
+def test_45m_autonomous_prompt_proposal_adapted_prompt_codex(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = {ap["agent_id"]: ap for ap in data["adapted_prompts"]}
+    assert "codex-local" in agents
+    ap = agents["codex-local"]
+    assert ap["adaptation_profile"] == "implementation"
+    assert isinstance(ap["prompt_text"], str) and len(ap["prompt_text"]) > 0
+    assert "preserved_sections" in ap
+    assert "adapted_sections" in ap
+    assert "codex-local" in ap["prompt_text"]
+
+
+def test_45m_autonomous_prompt_proposal_adapted_prompt_claude(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = {ap["agent_id"]: ap for ap in data["adapted_prompts"]}
+    assert "claude-local" in agents
+    ap = agents["claude-local"]
+    assert ap["adaptation_profile"] == "architecture and review"
+    assert isinstance(ap["prompt_text"], str) and len(ap["prompt_text"]) > 0
+    assert "claude-local" in ap["prompt_text"]
+
+
+def test_45m_autonomous_prompt_proposal_adapted_prompt_kimi(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    agents = {ap["agent_id"]: ap for ap in data["adapted_prompts"]}
+    assert "kimi-local" in agents
+    ap = agents["kimi-local"]
+    assert ap["adaptation_profile"] == "research and challenge"
+    assert isinstance(ap["prompt_text"], str) and len(ap["prompt_text"]) > 0
+    assert "kimi-local" in ap["prompt_text"]
+
+
+def test_45m_autonomous_prompt_proposal_intent_preservation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ips = data["intent_preservation_status"]
+    assert ips["objective_preserved"] is True
+    assert ips["acceptance_criteria_preserved"] is True
+    assert ips["governance_preserved"] is True
+    assert ips["allowed_files_preserved"] is True
+    assert ips["forbidden_files_preserved"] is True
+    assert ips["overall_status"] == "preserved"
+    assert isinstance(ips["checks_performed"], list) and len(ips["checks_performed"]) >= 5
+
+
+def test_45m_autonomous_prompt_proposal_validation_summary(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    vs = data["validation_summary"]
+    assert vs["validation_status"] == "valid"
+    assert vs["canonical_prompt_valid"] is True
+    assert vs["adapted_prompts_valid"] is True
+    assert vs["intent_preservation_valid"] is True
+    assert vs["governance_valid"] is True
+    assert isinstance(vs["input_sources_consulted"], list) and len(vs["input_sources_consulted"]) >= 1
+
+
+def test_45m_autonomous_prompt_proposal_human_review_required(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["autonomous_prompt_proposal"]["human_review_required"] is True
+
+
+def test_45m_autonomous_prompt_proposal_governance_boundaries(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["autonomous_prompt_proposal"]["governance_boundaries"]
+    assert "proposal_prototype_may" in gb
+    assert "proposal_prototype_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["proposal_prototype_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "approve prompts", "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45m_autonomous_prompt_proposal_advisory(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "advisory" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45m_autonomous_prompt_proposal_future_evolution(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["autonomous_prompt_proposal"]["future_evolution"]]
+    for expected in ("45N", "45O", "45P", "45Q"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45m_autonomous_prompt_proposal_human_output_shows_all_sections(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_agent_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["autonomous-prompt-proposal"])
+    output = capsys.readouterr().out
+    assert "Autonomous prompt proposal" in output
+    assert "Canonical prompt" in output
+    assert "codex-local" in output
+    assert "claude-local" in output
+    assert "kimi-local" in output
+    assert "Validation summary" in output
+    assert "Intent preservation summary" in output
+    assert "Human review required" in output
+    assert "advisory" in output.lower()

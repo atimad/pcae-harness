@@ -78,6 +78,8 @@ from pcae.core.agent import (
     PROMPT_APPROVAL_WORKFLOW_ADVISORY,
     build_autonomous_phase_proposal,
     AUTONOMOUS_PHASE_PROPOSAL_ADVISORY,
+    build_autonomous_prompt_proposal,
+    AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3903,6 +3905,54 @@ def run_autonomous_phase_proposal(args: argparse.Namespace) -> int:
             print(f"  - {risk}")
         print()
         print(f"Overall confidence: {data['confidence']}")
+        print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_autonomous_prompt_proposal(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = build_autonomous_prompt_proposal(root)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        proposal = data["autonomous_prompt_proposal"]
+        print("Autonomous prompt proposal")
+        print(f"Proposal: {proposal['proposal_id']}  Generated: {proposal['generated_at']}")
+        print(f"Phase: {proposal['phase']} — {proposal['title']}")
+        print(f"Selected phase: {proposal['selected_phase_id']}")
+        print()
+        cp = data["canonical_prompt"]
+        print("Canonical prompt:")
+        print(f"  ID: {cp['prompt_id']}")
+        print(f"  Phase: {cp['phase_id']}")
+        print(f"  Title: {cp['title']}")
+        objective_preview = cp["objective"][:80] + "..." if len(cp["objective"]) > 80 else cp["objective"]
+        print(f"  Objective: {objective_preview}")
+        deps = ", ".join(cp["dependencies"]) if cp["dependencies"] else "none"
+        print(f"  Dependencies: {deps}")
+        print(f"  Acceptance criteria: {len(cp['acceptance_criteria'])} items")
+        print()
+        print("Adapted prompts:")
+        for ap in data["adapted_prompts"]:
+            preview = ap["prompt_text"][:60] + "..." if len(ap["prompt_text"]) > 60 else ap["prompt_text"]
+            print(f"  {ap['agent_id']} ({ap['adaptation_profile']}): {preview}")
+        print()
+        vs = data["validation_summary"]
+        print(f"Validation summary: status={vs['validation_status']}")
+        print(f"  Canonical prompt valid: {'yes' if vs['canonical_prompt_valid'] else 'no'}")
+        print(f"  Adapted prompts valid: {'yes' if vs['adapted_prompts_valid'] else 'no'}")
+        print(f"  Intent preservation valid: {'yes' if vs['intent_preservation_valid'] else 'no'}")
+        print()
+        ips = data["intent_preservation_status"]
+        print("Intent preservation summary:")
+        for check in ips["checks_performed"]:
+            status = "preserved" if ips.get(check, False) else "not preserved"
+            print(f"  {check}: {status}")
+        print(f"  Overall: {ips['overall_status']}")
+        print()
+        print(f"Confidence: {data['confidence']}")
         print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
         print()
         print(data["advisory"])

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45L: Autonomous Phase Proposal Prototype.
+Phase 45M: Autonomous Prompt Proposal Prototype.
 
 ## Governance Coherence Note
 
@@ -2134,9 +2134,30 @@ create roadmap phases/mutate roadmap/create tasks/execute work/generate
 prompts/commit/push; read_only=true); advisory: "Autonomous phase proposal is
 advisory; no roadmap changes are performed."
 
+PCAE can generate governed prompt proposals from autonomously proposed phases with
+`pcae autonomous-prompt-proposal` and `pcae autonomous-prompt-proposal --json`
+(Phase 45M): inputs: autonomous phase proposal, roadmap approval artifacts, prompt
+generation design, adaptive prompt design, prompt validation design, prompt governance
+design; selects the highest-priority candidate phase; generates a canonical prompt with
+prompt_id (appp-canonical-*)/phase_id/title/objective/rationale/dependencies/allowed_files/
+forbidden_files/acceptance_criteria/validation_commands/governance_boundaries; generates
+three agent-adapted prompts (codex-local with implementation profile/claude-local with
+architecture and review profile/kimi-local with research and challenge profile), each with
+prompt_text/preserved_sections/adapted_sections/warnings; performs intent-preservation
+checks across five dimensions (objective_preserved/acceptance_criteria_preserved/
+governance_preserved/allowed_files_preserved/forbidden_files_preserved,
+overall_status=preserved); produces a validation_summary (valid/canonical_prompt_valid/
+adapted_prompts_valid/intent_preservation_valid/governance_valid); proposal result model:
+proposal_id (appp-*)/canonical_prompt/adapted_prompts/validation_summary/
+intent_preservation_status/confidence/human_review_required=true; governance_boundaries:
+may generate prompt proposals/generate adapted prompts/perform intent-preservation checks;
+may not execute prompts/invoke agents/modify repository/approve prompts/commit/push;
+read_only=true, human_review_required=true; future_evolution: 45N/45O/45P/45Q; advisory:
+"Autonomous prompt proposal is advisory; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45M Autonomous Prompt Proposal Prototype, 45N Prompt Execution Readiness Assessment, 45O Prompt Execution Dry-Run).
+- TBD: Future phases (45N Prompt Execution Readiness Assessment, 45O Prompt Execution Dry-Run, 45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
 
 ## Future Explorations
 

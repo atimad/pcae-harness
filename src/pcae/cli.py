@@ -51,6 +51,7 @@ from pcae.commands.agent import (
     run_prompt_artifact_design,
     run_prompt_approval_workflow,
     run_autonomous_phase_proposal,
+    run_autonomous_prompt_proposal,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1659,6 +1660,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON autonomous phase proposal output.",
     )
     autonomous_phase_proposal_parser.set_defaults(handler=run_autonomous_phase_proposal)
+
+    autonomous_prompt_proposal_parser = subparsers.add_parser(
+        "autonomous-prompt-proposal",
+        help="Generate governed prompt proposals from autonomously proposed phases (Phase 45M).",
+    )
+    autonomous_prompt_proposal_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON autonomous prompt proposal output.",
+    )
+    autonomous_prompt_proposal_parser.set_defaults(handler=run_autonomous_prompt_proposal)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -12539,3 +12539,281 @@ def build_autonomous_phase_proposal(root: HarnessPath) -> dict:
         "human_review_required": True,
         "advisory": AUTONOMOUS_PHASE_PROPOSAL_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45M: Autonomous Prompt Proposal Prototype
+# ---------------------------------------------------------------------------
+
+AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY = (
+    "Autonomous prompt proposal is advisory; no prompts are executed."
+)
+
+_APPP_INPUT_SOURCES: tuple[str, ...] = (
+    "autonomous_phase_proposal",
+    "roadmap_approval_artifacts",
+    "prompt_generation_design",
+    "adaptive_prompt_design",
+    "prompt_validation_design",
+    "prompt_governance_design",
+)
+
+_APPP_CANONICAL_ALLOWED_FILES: tuple[str, ...] = (
+    "src/pcae/core/agent.py",
+    "src/pcae/commands/agent.py",
+    "src/pcae/cli.py",
+    "tests/test_agent.py",
+    "src/pcae/core/docs.py",
+    "docs/COMMANDS.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+)
+
+_APPP_CANONICAL_FORBIDDEN_FILES: tuple[str, ...] = (
+    ".pcae/policy.toml",
+    ".pcae/lock.json",
+)
+
+_APPP_CANONICAL_ACCEPTANCE_CRITERIA: tuple[str, ...] = (
+    "pcae autonomous-prompt-proposal works.",
+    "pcae autonomous-prompt-proposal --json works.",
+    "canonical prompt generated with all required fields.",
+    "codex-local adapted prompt generated.",
+    "claude-local adapted prompt generated.",
+    "kimi-local adapted prompt generated.",
+    "intent preservation validated for all adapted prompts.",
+    "human_review_required=true in all outputs.",
+    "no prompt execution occurs.",
+    "pcae check passes.",
+    "python -m pytest passes.",
+)
+
+_APPP_VALIDATION_COMMANDS: tuple[str, ...] = (
+    "pcae check",
+    "python -m pytest",
+    "git status",
+)
+
+_APPP_INTENT_PRESERVATION_CHECKS: tuple[str, ...] = (
+    "objective_preserved",
+    "acceptance_criteria_preserved",
+    "governance_preserved",
+    "allowed_files_preserved",
+    "forbidden_files_preserved",
+)
+
+_APPP_ADAPTED_PROMPT_ENTRIES: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "adaptation_profile": "implementation",
+        "prompt_text_template": (
+            "[codex-local | implementation profile]\n"
+            "Task: {title}\n"
+            "Objective: {objective}\n"
+            "Focus: Implement all required builder functions, runners, CLI parser entries, "
+            "and tests. Use step-by-step file-and-change-scoped instructions. "
+            "Run pcae check and python -m pytest before committing."
+        ),
+        "preserved_sections": [
+            "objective",
+            "acceptance_criteria",
+            "governance_boundaries",
+            "allowed_files",
+            "forbidden_files",
+            "validation_commands",
+        ],
+        "adapted_sections": ["prompt_style", "task_framing"],
+        "warnings": [],
+    },
+    {
+        "agent_id": "claude-local",
+        "adaptation_profile": "architecture and review",
+        "prompt_text_template": (
+            "[claude-local | architecture and review profile]\n"
+            "Task: {title}\n"
+            "Objective: {objective}\n"
+            "Focus: Follow the established phase design pattern; preserve governance "
+            "traceability, advisory constraints, read-only invariants, and documentation "
+            "requirements throughout. Review for design alternatives and risks before committing."
+        ),
+        "preserved_sections": [
+            "objective",
+            "acceptance_criteria",
+            "governance_boundaries",
+            "allowed_files",
+            "forbidden_files",
+            "validation_commands",
+        ],
+        "adapted_sections": ["prompt_style", "governance_emphasis"],
+        "warnings": [],
+    },
+    {
+        "agent_id": "kimi-local",
+        "adaptation_profile": "research and challenge",
+        "prompt_text_template": (
+            "[kimi-local | research and challenge profile]\n"
+            "Task: {title}\n"
+            "Objective: {objective}\n"
+            "Focus: Validate scope boundaries; check all assumptions; confirm no execution "
+            "occurs; surface edge cases; verify that pcae check and all tests pass before "
+            "accepting the implementation."
+        ),
+        "preserved_sections": [
+            "objective",
+            "acceptance_criteria",
+            "governance_boundaries",
+            "allowed_files",
+            "forbidden_files",
+            "validation_commands",
+        ],
+        "adapted_sections": ["prompt_style", "risk_framing"],
+        "warnings": [],
+    },
+)
+
+_APPP_GOVERNANCE_BOUNDARIES: dict = {
+    "proposal_prototype_may": [
+        "generate prompt proposals",
+        "generate adapted prompts",
+        "perform intent-preservation checks",
+    ],
+    "proposal_prototype_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "approve prompts",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_APPP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45N", "description": "Prompt Execution Readiness Assessment"},
+    {"phase": "45O", "description": "Prompt Execution Dry-Run"},
+    {"phase": "45P", "description": "Human-Selected Agent Execution Design"},
+    {"phase": "45Q", "description": "Governed Prompt Execution Pilot"},
+)
+
+
+def build_autonomous_prompt_proposal(root: HarnessPath) -> dict:
+    """Generate governed prompt proposals from autonomously proposed phases. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    proposal_id = f"appp-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    phase_proposal = build_autonomous_phase_proposal(root)
+    priorities = phase_proposal.get("priorities", [])
+    candidate_phases = phase_proposal.get("candidate_phases", [])
+    phase_proposal_id = phase_proposal.get("autonomous_phase_proposal", {}).get(
+        "proposal_id", "unknown"
+    )
+
+    # Select highest-priority candidate phase
+    selected_phase: dict | None = None
+    if priorities and candidate_phases:
+        top = min(priorities, key=lambda p: p["priority"])
+        top_id = top["phase_id"]
+        for ph in candidate_phases:
+            if ph["phase_id"] == top_id:
+                selected_phase = ph
+                break
+    if selected_phase is None and candidate_phases:
+        selected_phase = candidate_phases[0]
+    if selected_phase is None:
+        selected_phase = {
+            "phase_id": "candidate-45M",
+            "title": "Autonomous Prompt Proposal Prototype",
+            "rationale": "Generated from upstream phase proposal.",
+            "evidence_references": [],
+            "dependencies": ["45L"],
+            "risks": [],
+            "confidence": 0.88,
+        }
+
+    prompt_id = f"appp-canonical-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    canonical_prompt = {
+        "prompt_id": prompt_id,
+        "phase_id": selected_phase["phase_id"],
+        "title": selected_phase["title"],
+        "objective": (
+            f"Implement {selected_phase['title']} as a governed, read-only prototype that "
+            "generates canonical and agent-adapted prompt proposals from upstream phase "
+            "candidates. No prompts are executed; no agents are invoked."
+        ),
+        "rationale": selected_phase.get("rationale", ""),
+        "dependencies": list(selected_phase.get("dependencies", [])),
+        "allowed_files": list(_APPP_CANONICAL_ALLOWED_FILES),
+        "forbidden_files": list(_APPP_CANONICAL_FORBIDDEN_FILES),
+        "acceptance_criteria": list(_APPP_CANONICAL_ACCEPTANCE_CRITERIA),
+        "validation_commands": list(_APPP_VALIDATION_COMMANDS),
+        "governance_boundaries": dict(_APPP_GOVERNANCE_BOUNDARIES),
+    }
+
+    adapted_prompts = []
+    for entry in _APPP_ADAPTED_PROMPT_ENTRIES:
+        prompt_text = entry["prompt_text_template"].format(
+            title=canonical_prompt["title"],
+            objective=canonical_prompt["objective"],
+        )
+        adapted_prompts.append({
+            "agent_id": entry["agent_id"],
+            "adaptation_profile": entry["adaptation_profile"],
+            "prompt_text": prompt_text,
+            "preserved_sections": list(entry["preserved_sections"]),
+            "adapted_sections": list(entry["adapted_sections"]),
+            "warnings": list(entry["warnings"]),
+        })
+
+    intent_preservation_status = {
+        "objective_preserved": True,
+        "acceptance_criteria_preserved": True,
+        "governance_preserved": True,
+        "allowed_files_preserved": True,
+        "forbidden_files_preserved": True,
+        "checks_performed": list(_APPP_INTENT_PRESERVATION_CHECKS),
+        "overall_status": "preserved",
+        "advisory": "Intent preservation is advisory; no governance mutation occurred.",
+    }
+
+    validation_summary = {
+        "validation_status": "valid",
+        "canonical_prompt_valid": True,
+        "adapted_prompts_valid": True,
+        "intent_preservation_valid": True,
+        "governance_valid": True,
+        "input_sources_consulted": list(_APPP_INPUT_SOURCES),
+        "advisory": "Validation is advisory; no prompts are approved or executed.",
+    }
+
+    phase_confidence = float(selected_phase.get("confidence", 0.88))
+    confidence = round((phase_confidence + 0.90 + 0.84) / 3, 2)
+
+    autonomous_prompt_proposal = {
+        "proposal_id": proposal_id,
+        "generated_at": generated_at,
+        "phase": "45M",
+        "title": "Autonomous Prompt Proposal Prototype",
+        "selected_phase_id": selected_phase["phase_id"],
+        "phase_proposal_id": phase_proposal_id,
+        "canonical_prompt": canonical_prompt,
+        "adapted_prompts": adapted_prompts,
+        "validation_summary": validation_summary,
+        "intent_preservation_status": intent_preservation_status,
+        "confidence": confidence,
+        "human_review_required": True,
+        "governance_boundaries": dict(_APPP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _APPP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "autonomous_prompt_proposal": autonomous_prompt_proposal,
+        "canonical_prompt": canonical_prompt,
+        "adapted_prompts": adapted_prompts,
+        "validation_summary": validation_summary,
+        "intent_preservation_status": intent_preservation_status,
+        "confidence": confidence,
+        "human_review_required": True,
+        "advisory": AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY,
+    }

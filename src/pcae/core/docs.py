@@ -372,6 +372,11 @@ def render_commands_reference() -> str:
 
 - `pcae autonomous-phase-proposal`
 - `pcae autonomous-phase-proposal --json`
+
+## autonomous-prompt-proposal
+
+- `pcae autonomous-prompt-proposal`
+- `pcae autonomous-prompt-proposal --json`
 """
 
 
