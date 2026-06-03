@@ -54,6 +54,7 @@ from pcae.commands.agent import (
     run_autonomous_prompt_proposal,
     run_prompt_render,
     run_prompt_execution_readiness,
+    run_prompt_execution_dry_run,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1695,6 +1696,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON prompt execution readiness output.",
     )
     prompt_execution_readiness_parser.set_defaults(handler=run_prompt_execution_readiness)
+
+    prompt_execution_dry_run_parser = subparsers.add_parser(
+        "prompt-execution-dry-run",
+        help="Simulate governed prompt execution pipeline without invoking agents (Phase 45O).",
+    )
+    prompt_execution_dry_run_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON prompt execution dry-run output.",
+    )
+    prompt_execution_dry_run_parser.set_defaults(handler=run_prompt_execution_dry_run)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

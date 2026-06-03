@@ -13295,6 +13295,368 @@ _PER_FUTURE_EVOLUTION: tuple[dict, ...] = (
 )
 
 
+PROMPT_EXECUTION_DRY_RUN_ADVISORY = (
+    "Execution dry-run is simulated; no prompts are executed."
+)
+
+_PEDR_INPUT_SOURCES: tuple[str, ...] = (
+    "approved_prompt_artifacts",
+    "prompt_approval_workflow",
+    "prompt_execution_readiness_assessment",
+    "runtime_invocation_contracts",
+    "capability_registry",
+)
+
+_PEDR_EXECUTION_CANDIDATE: dict = {
+    "prompt_id": "appp-canonical-dry-run-candidate",
+    "phase_id": "45O",
+    "title": "Prompt Execution Dry-Run Candidate",
+    "source": "autonomous_prompt_proposal",
+    "selection_basis": "highest_priority_approved_prompt",
+    "approval_state": "pending",
+    "note": "Simulated candidate; no ApprovedPromptArtifact store is implemented.",
+}
+
+_PEDR_TARGET_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_PEDR_INVOCATION_PLAN: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "invocation_mode": "cli",
+        "runtime": "codex-cli",
+        "adapter": "codex-local-adapter",
+        "contract": "codex-invocation-contract",
+        "simulated": True,
+    },
+    {
+        "agent_id": "claude-local",
+        "invocation_mode": "cli",
+        "runtime": "claude-code-cli",
+        "adapter": "claude-local-adapter",
+        "contract": "claude-invocation-contract",
+        "simulated": True,
+    },
+    {
+        "agent_id": "kimi-local",
+        "invocation_mode": "api",
+        "runtime": "kimi-api",
+        "adapter": "kimi-local-adapter",
+        "contract": "kimi-invocation-contract",
+        "simulated": True,
+    },
+)
+
+_PEDR_APPROVAL_SNAPSHOT: dict = {
+    "approval_state": "pending",
+    "artifact_creation": "future",
+    "approval_store": "not_implemented",
+    "human_approval_required": True,
+    "note": (
+        "ApprovedPromptArtifact runtime storage is not yet implemented. "
+        "Approval snapshot is simulated from design artifacts only."
+    ),
+}
+
+_PEDR_RUNTIME_RESOLUTION: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "partially_resolved",
+        "resolution_status": "partially_resolved",
+        "notes": [
+            "Runtime and adapter entries exist in capability registry.",
+            "Invocation contract not validated for prompt-execution workloads.",
+        ],
+    },
+    {
+        "agent_id": "claude-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "partially_resolved",
+        "resolution_status": "partially_resolved",
+        "notes": [
+            "Runtime and adapter entries exist in capability registry.",
+            "Invocation contract not validated for prompt-execution workloads.",
+        ],
+    },
+    {
+        "agent_id": "kimi-local",
+        "runtime_lookup": "resolved",
+        "adapter_lookup": "resolved",
+        "invocation_contract_lookup": "not_resolved",
+        "resolution_status": "not_resolved",
+        "notes": [
+            "Runtime and adapter entries exist in capability registry.",
+            "Invocation contract for kimi-local is not defined.",
+            "API-mode invocation requires separate contract definition.",
+        ],
+    },
+)
+
+_PEDR_GOVERNANCE_GATE_RESULTS: tuple[dict, ...] = (
+    {
+        "gate": "approval_check",
+        "description": "Verify an ApprovedPromptArtifact exists for the selected prompt.",
+        "status": "blocked",
+        "rationale": (
+            "No ApprovedPromptArtifact runtime store is implemented. "
+            "Approval state is pending; no approved prompt can be retrieved."
+        ),
+        "required_for_execution": True,
+    },
+    {
+        "gate": "validation_check",
+        "description": "Verify prompt validation has passed.",
+        "status": "advisory_only",
+        "rationale": (
+            "Prompt validation framework (45H) is advisory; no automated validator "
+            "is deployed. Validation gate cannot be enforced programmatically."
+        ),
+        "required_for_execution": True,
+    },
+    {
+        "gate": "intent_check",
+        "description": "Verify intent preservation across all adapted prompts.",
+        "status": "advisory_only",
+        "rationale": (
+            "Intent preservation checks are advisory (45G/45M). No runtime enforcement "
+            "gate blocks prompts with failed intent checks."
+        ),
+        "required_for_execution": True,
+    },
+    {
+        "gate": "human_approval_check",
+        "description": "Verify explicit human approval for execution.",
+        "status": "pending",
+        "rationale": (
+            "human_review_required=true throughout the prompt lifecycle. "
+            "No human approval has been recorded for this dry-run candidate."
+        ),
+        "required_for_execution": True,
+    },
+)
+
+_PEDR_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "blocker-001",
+        "category": "missing_approval",
+        "description": (
+            "No ApprovedPromptArtifact runtime store is implemented; "
+            "approved prompts cannot be retrieved or verified."
+        ),
+        "severity": "high",
+        "blocks_gate": "approval_check",
+        "recommended_resolution": "Implement ApprovedPromptArtifact storage before live execution.",
+    },
+    {
+        "blocker_id": "blocker-002",
+        "category": "missing_integration",
+        "description": "No live invocation pipeline is connected to the prompt proposal system.",
+        "severity": "high",
+        "blocks_gate": "approval_check",
+        "recommended_resolution": (
+            "Complete human-selected agent execution design (45P) to define the "
+            "invocation pipeline before authorizing live execution."
+        ),
+    },
+    {
+        "blocker_id": "blocker-003",
+        "category": "missing_runtime_capability",
+        "description": (
+            "Invocation contracts are not validated for prompt-execution workloads; "
+            "kimi-local contract is undefined."
+        ),
+        "severity": "medium",
+        "blocks_gate": "validation_check",
+        "recommended_resolution": (
+            "Validate each agent invocation contract against the dry-run scenario "
+            "and define the kimi-local API-mode contract."
+        ),
+    },
+    {
+        "blocker_id": "blocker-004",
+        "category": "governance_blocker",
+        "description": (
+            "Consensus mechanism is not integrated with the execution pipeline; "
+            "divergent agent results have no resolution path."
+        ),
+        "severity": "medium",
+        "blocks_gate": "human_approval_check",
+        "recommended_resolution": "Define consensus requirements in 45P or a future governance phase.",
+    },
+)
+
+_PEDR_WARNINGS: tuple[dict, ...] = (
+    {
+        "warning_id": "warning-001",
+        "description": (
+            "Validation is advisory-only; prompts with validation warnings are not "
+            "blocked from proceeding in the current design."
+        ),
+        "severity": "medium",
+    },
+    {
+        "warning_id": "warning-002",
+        "description": (
+            "Adapter sandbox isolation has not been validated for prompt-execution scope; "
+            "unintended file writes may be possible under live execution."
+        ),
+        "severity": "medium",
+    },
+)
+
+_PEDR_RECOMMENDATIONS: tuple[dict, ...] = (
+    {
+        "recommendation_id": "rec-001",
+        "area": "Approval Store",
+        "recommended_next_steps": [
+            "Implement ApprovedPromptArtifact runtime storage.",
+            "Wire approval state checks into the execution pipeline gate.",
+        ],
+        "target_phase": "45P",
+    },
+    {
+        "recommendation_id": "rec-002",
+        "area": "Runtime Adapters",
+        "recommended_next_steps": [
+            "Validate each agent adapter against the dry-run scenario.",
+            "Define and validate the kimi-local API-mode invocation contract.",
+        ],
+        "target_phase": "45P",
+    },
+    {
+        "recommendation_id": "rec-003",
+        "area": "Consensus Integration",
+        "recommended_next_steps": [
+            "Define consensus requirements for execution outcomes.",
+            "Integrate consensus review into the execution approval gate.",
+        ],
+        "target_phase": "45Q",
+    },
+    {
+        "recommendation_id": "rec-004",
+        "area": "Execution Authorization",
+        "recommended_next_steps": [
+            "Complete human-selected agent execution design (45P) before authorizing live execution.",
+            "Maintain human_review_required=true in all future execution phases.",
+        ],
+        "target_phase": "45P",
+    },
+)
+
+_PEDR_GOVERNANCE_BOUNDARIES: dict = {
+    "dry_run_may": [
+        "simulate execution",
+        "simulate runtime selection",
+        "simulate governance gates",
+    ],
+    "dry_run_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "create commits",
+        "create pushes",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_PEDR_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45P", "description": "Human-Selected Agent Execution Design"},
+    {"phase": "45Q", "description": "Governed Prompt Execution Pilot"},
+)
+
+
+def build_prompt_execution_dry_run() -> dict:
+    """Simulate governed prompt execution pipeline without invoking agents. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    execution_id = f"pedr-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    target_agents = list(_PEDR_TARGET_AGENTS)
+    invocation_plan = [dict(e) for e in _PEDR_INVOCATION_PLAN]
+    runtime_agents = [dict(r) for r in _PEDR_RUNTIME_RESOLUTION]
+    gate_results = [dict(g) for g in _PEDR_GOVERNANCE_GATE_RESULTS]
+    blockers = [dict(b) for b in _PEDR_BLOCKERS]
+    warnings = [dict(w) for w in _PEDR_WARNINGS]
+    recommendations = [dict(r) for r in _PEDR_RECOMMENDATIONS]
+
+    blocked_gates = [g for g in gate_results if g["status"] == "blocked"]
+    pending_gates = [g for g in gate_results if g["status"] == "pending"]
+    execution_status = (
+        "execution_blocked" if (blocked_gates or pending_gates) else "execution_ready"
+    )
+
+    unresolved = [a for a in runtime_agents if a["resolution_status"] == "not_resolved"]
+    partial = [a for a in runtime_agents if a["resolution_status"] == "partially_resolved"]
+    if unresolved:
+        runtime_status = "not_resolved"
+    elif partial:
+        runtime_status = "partially_resolved"
+    else:
+        runtime_status = "resolved"
+
+    execution_plan = {
+        "execution_id": execution_id,
+        "selected_prompt": dict(_PEDR_EXECUTION_CANDIDATE),
+        "target_agents": target_agents,
+        "invocation_plan": invocation_plan,
+        "approval_snapshot": dict(_PEDR_APPROVAL_SNAPSHOT),
+    }
+
+    governance_results = {
+        "gate_results": gate_results,
+        "overall_governance_status": "governance_compliant",
+        "blocked_gate_count": len(blocked_gates),
+        "pending_gate_count": len(pending_gates),
+        "human_review_required": True,
+    }
+
+    runtime_results = {
+        "agents": runtime_agents,
+        "overall_runtime_status": runtime_status,
+        "resolved_count": sum(
+            1 for a in runtime_agents if a["resolution_status"] == "resolved"
+        ),
+        "partially_resolved_count": len(partial),
+        "not_resolved_count": len(unresolved),
+    }
+
+    dry_run_result = {
+        "execution_id": execution_id,
+        "generated_at": generated_at,
+        "phase": "45O",
+        "title": "Prompt Execution Dry-Run",
+        "execution_status": execution_status,
+        "governance_status": "governance_compliant",
+        "runtime_status": runtime_status,
+        "readiness_status": "not_ready",
+        "human_review_required": True,
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings),
+        "input_sources": list(_PEDR_INPUT_SOURCES),
+        "governance_boundaries": dict(_PEDR_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PEDR_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "dry_run_result": dry_run_result,
+        "execution_plan": execution_plan,
+        "governance_results": governance_results,
+        "runtime_results": runtime_results,
+        "blockers": blockers,
+        "warnings": warnings,
+        "recommendations": recommendations,
+        "human_review_required": True,
+        "advisory": PROMPT_EXECUTION_DRY_RUN_ADVISORY,
+    }
+
+
 def build_prompt_execution_readiness() -> dict:
     """Assess PCAE readiness for future governed prompt execution. Read-only; no prompts executed."""
     generated_at = datetime.now(timezone.utc).isoformat()

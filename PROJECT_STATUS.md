@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45N: Prompt Execution Readiness Assessment.
+Phase 45O: Prompt Execution Dry-Run.
 
 ## Governance Coherence Note
 
@@ -2192,9 +2192,32 @@ recommendations; may not execute prompts/invoke agents/modify repository/commit/
 read_only=true, human_review_required=true; advisory: "Prompt execution readiness
 assessment is informational; no prompts are executed."
 
+PCAE can simulate the complete governed prompt execution pipeline without invoking
+any agents with `pcae prompt-execution-dry-run` and
+`pcae prompt-execution-dry-run --json` (Phase 45O): inputs: approved prompt
+artifacts, prompt approval workflow, prompt execution readiness assessment, runtime
+invocation contracts, capability registry; no prompts are executed; no agents are
+invoked; execution candidate selection: selects highest-priority approved prompt
+(simulated); execution planning: execution_id (pedr-*)/selected_prompt/target_agents
+(codex-local/claude-local/kimi-local)/invocation_plan/approval_snapshot; runtime
+resolution: per-agent runtime_lookup/adapter_lookup/invocation_contract_lookup/
+resolution_status/notes (codex-local: partially_resolved/claude-local: partially_resolved/
+kimi-local: not_resolved); governance gate simulation: four gates (approval_check/
+validation_check/intent_check/human_approval_check) each with status/rationale/
+required_for_execution; dry-run result model: execution_id/execution_status=execution_blocked/
+governance_status=governance_compliant/runtime_status=not_resolved/readiness_status=not_ready/
+blocker_count/warning_count/governance_boundaries/future_evolution; blocker analysis: four
+blockers across four categories (missing_approval/missing_integration/missing_runtime_capability/
+governance_blocker) each with blocker_id/category/description/severity/blocks_gate/
+recommended_resolution; two warnings; four recommendations with area/recommended_next_steps/
+target_phase; governance_boundaries: may simulate execution/simulate runtime selection/
+simulate governance gates; may not execute prompts/invoke agents/modify repository/create
+commits/create pushes; read_only=true, human_review_required=true; advisory: "Execution
+dry-run is simulated; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45O Prompt Execution Dry-Run, 45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
+- TBD: Future phases (45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
 
 ## Future Explorations
 

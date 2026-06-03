@@ -21819,3 +21819,160 @@ def test_45n_prompt_execution_readiness_human_output_shows_all_sections(capsys) 
     assert "Recommendations" in output
     assert "Human review required" in output
     assert "informational" in output.lower()
+
+
+def test_45o_prompt_execution_dry_run_json_structure(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("dry_run_result", "execution_plan", "governance_results",
+                "runtime_results", "blockers", "warnings", "recommendations",
+                "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45o_prompt_execution_dry_run_result_fields(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    result = data["dry_run_result"]
+    for field in ("execution_id", "execution_status", "governance_status",
+                  "runtime_status", "readiness_status", "human_review_required",
+                  "blocker_count", "warning_count", "governance_boundaries",
+                  "future_evolution"):
+        assert field in result, f"missing dry_run_result field: {field}"
+    assert result["execution_id"].startswith("pedr-")
+    assert result["phase"] == "45O"
+
+
+def test_45o_prompt_execution_dry_run_execution_status(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    result = data["dry_run_result"]
+    valid_statuses = {"execution_ready", "execution_blocked", "execution_not_ready"}
+    assert result["execution_status"] in valid_statuses
+    assert result["execution_status"] == "execution_blocked"
+
+
+def test_45o_prompt_execution_dry_run_execution_plan(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["execution_plan"]
+    for field in ("execution_id", "selected_prompt", "target_agents",
+                  "invocation_plan", "approval_snapshot"):
+        assert field in plan, f"missing execution_plan field: {field}"
+    assert len(plan["target_agents"]) == 3
+    assert set(plan["target_agents"]) == {"codex-local", "claude-local", "kimi-local"}
+
+
+def test_45o_prompt_execution_dry_run_governance_gates(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gov = data["governance_results"]
+    assert "gate_results" in gov
+    assert "overall_governance_status" in gov
+    gates = gov["gate_results"]
+    assert len(gates) == 4
+    gate_names = [g["gate"] for g in gates]
+    for expected in ("approval_check", "validation_check", "intent_check", "human_approval_check"):
+        assert expected in gate_names, f"missing gate: {expected}"
+    for gate in gates:
+        for field in ("gate", "status", "rationale", "required_for_execution"):
+            assert field in gate, f"gate '{gate.get('gate')}' missing field: {field}"
+
+
+def test_45o_prompt_execution_dry_run_runtime_resolution(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_results"]
+    assert "agents" in rt
+    assert "overall_runtime_status" in rt
+    agents = rt["agents"]
+    assert len(agents) == 3
+    agent_ids = [a["agent_id"] for a in agents]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in agent_ids, f"missing runtime agent: {expected}"
+    valid_statuses = {"resolved", "partially_resolved", "not_resolved"}
+    for agent in agents:
+        for field in ("agent_id", "runtime_lookup", "adapter_lookup",
+                      "invocation_contract_lookup", "resolution_status", "notes"):
+            assert field in agent, f"runtime agent '{agent.get('agent_id')}' missing field: {field}"
+        assert agent["resolution_status"] in valid_statuses
+
+
+def test_45o_prompt_execution_dry_run_blockers(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) >= 1
+    categories = {b["category"] for b in blockers}
+    for expected_cat in ("missing_approval", "missing_integration",
+                         "missing_runtime_capability", "governance_blocker"):
+        assert expected_cat in categories, f"missing blocker category: {expected_cat}"
+    for blocker in blockers:
+        for field in ("blocker_id", "category", "description", "severity",
+                      "blocks_gate", "recommended_resolution"):
+            assert field in blocker, f"blocker missing field: {field}"
+
+
+def test_45o_prompt_execution_dry_run_warnings(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    warnings = data["warnings"]
+    assert len(warnings) >= 1
+    for warning in warnings:
+        for field in ("warning_id", "description", "severity"):
+            assert field in warning, f"warning missing field: {field}"
+
+
+def test_45o_prompt_execution_dry_run_recommendations(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) >= 1
+    for rec in recs:
+        for field in ("recommendation_id", "area", "recommended_next_steps", "target_phase"):
+            assert field in rec, f"recommendation missing field: {field}"
+        assert len(rec["recommended_next_steps"]) >= 1
+
+
+def test_45o_prompt_execution_dry_run_governance_boundaries(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["dry_run_result"]["governance_boundaries"]
+    assert "dry_run_may" in gb
+    assert "dry_run_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["dry_run_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "create commits", "create pushes"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45o_prompt_execution_dry_run_human_review_required(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["dry_run_result"]["human_review_required"] is True
+    assert data["governance_results"]["human_review_required"] is True
+
+
+def test_45o_prompt_execution_dry_run_advisory(capsys) -> None:
+    main(["prompt-execution-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "simulated" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45o_prompt_execution_dry_run_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-execution-dry-run"])
+    output = capsys.readouterr().out
+    assert "Prompt execution dry-run" in output
+    assert "Execution status" in output
+    assert "Execution plan" in output
+    assert "Governance gate results" in output
+    assert "Runtime resolution" in output
+    assert "Blockers" in output
+    assert "Warnings" in output
+    assert "Recommendations" in output
+    assert "simulated" in output.lower()

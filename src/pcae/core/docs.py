@@ -387,6 +387,11 @@ def render_commands_reference() -> str:
 
 - `pcae prompt-execution-readiness`
 - `pcae prompt-execution-readiness --json`
+
+## prompt-execution-dry-run
+
+- `pcae prompt-execution-dry-run`
+- `pcae prompt-execution-dry-run --json`
 """
 
 

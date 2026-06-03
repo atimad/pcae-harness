@@ -84,6 +84,8 @@ from pcae.core.agent import (
     PROMPT_RENDER_ADVISORY,
     build_prompt_execution_readiness,
     PROMPT_EXECUTION_READINESS_ADVISORY,
+    build_prompt_execution_dry_run,
+    PROMPT_EXECUTION_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4056,6 +4058,61 @@ def run_prompt_execution_readiness(args: argparse.Namespace) -> int:
                 print(f"  {rec['area']} ({rec['readiness_status']}):")
                 for step in rec["recommended_next_steps"]:
                     print(f"    - {step}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_execution_dry_run(args: argparse.Namespace) -> int:
+    data = build_prompt_execution_dry_run()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        result = data["dry_run_result"]
+        plan = data["execution_plan"]
+        print("Prompt execution dry-run")
+        print(f"Execution: {result['execution_id']}  Generated: {result['generated_at']}")
+        print(f"Phase: {result['phase']} — {result['title']}")
+        print()
+        print(f"Execution status:  {result['execution_status']}")
+        print(f"Governance status: {result['governance_status']}")
+        print(f"Runtime status:    {result['runtime_status']}")
+        print(f"Readiness status:  {result['readiness_status']}")
+        print(f"Human review required: {'yes' if result['human_review_required'] else 'no'}")
+        print()
+        print("Execution plan:")
+        print(f"  Selected prompt: {plan['selected_prompt']['prompt_id']}")
+        print(f"  Target agents:   {', '.join(plan['target_agents'])}")
+        for step in plan["invocation_plan"]:
+            print(
+                f"  [{step['agent_id']}] runtime={step['runtime']}"
+                f" adapter={step['adapter']} simulated={step['simulated']}"
+            )
+        print()
+        print("Governance gate results:")
+        for gate in data["governance_results"]["gate_results"]:
+            print(f"  {gate['gate']}: {gate['status']}")
+            print(f"    {gate['rationale']}")
+        print()
+        print("Runtime resolution:")
+        for agent in data["runtime_results"]["agents"]:
+            print(f"  {agent['agent_id']}: {agent['resolution_status']}")
+            for note in agent["notes"]:
+                print(f"    - {note}")
+        print()
+        print(f"Blockers ({result['blocker_count']}):")
+        for blocker in data["blockers"]:
+            print(f"  [{blocker['severity']}] {blocker['blocker_id']}: {blocker['description']}")
+        print()
+        print(f"Warnings ({result['warning_count']}):")
+        for warning in data["warnings"]:
+            print(f"  [{warning['severity']}] {warning['warning_id']}: {warning['description']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            print(f"  {rec['area']} (→ {rec['target_phase']}):")
+            for step in rec["recommended_next_steps"]:
+                print(f"    - {step}")
         print()
         print(data["advisory"])
     return 0
