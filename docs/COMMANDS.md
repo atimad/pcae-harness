@@ -396,3 +396,8 @@
 
 - `pcae execution-consensus-design`
 - `pcae execution-consensus-design --json`
+
+## live-execution-pilot
+
+- `pcae live-execution-pilot`
+- `pcae live-execution-pilot --json`

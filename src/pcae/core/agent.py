@@ -15755,3 +15755,447 @@ def build_execution_consensus_framework() -> dict:
         "governance_boundaries": dict(_ECFD_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46D — Governed Live Execution Pilot
+# ---------------------------------------------------------------------------
+
+LIVE_EXECUTION_PILOT_ADVISORY = (
+    "Governed live execution pilot is informational; no prompts are executed."
+)
+
+_LEPD_INPUT_SOURCES: tuple[str, ...] = (
+    "live_execution_readiness_assessment",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "governed_execution_pilot",
+    "runtime_invocation_contracts",
+    "capability_registry",
+)
+
+_LEPD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact with governance provenance enters the "
+            "live execution pilot pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "Pilot authorization is evaluated: prompt approval, selected agent, "
+            "readiness gates, and human authorization are verified before proceeding."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "runtime_contract_validation",
+        "description": (
+            "The invocation contract for the selected agent runtime is validated "
+            "against declared capabilities and sandbox constraints."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "execution_audit_preparation",
+        "description": (
+            "ExecutionAuditRecord and ConsensusAuditRecord templates are prepared "
+            "with authorization and runtime metadata before invocation begins."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "controlled_runtime_invocation",
+        "description": (
+            "Read-only invocation is attempted under sandbox constraints. "
+            "No files are written, no commits are made, no pushes occur."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "result_capture",
+        "description": (
+            "Execution result is captured: status, result_summary, warnings, "
+            "and errors are recorded without mutating prompt or governance state."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "consensus_review",
+        "description": (
+            "For single-agent pilots a trivial consensus is recorded. "
+            "Multi-agent future pilots will route through the full consensus framework."
+        ),
+    },
+    {
+        "step": 8,
+        "name": "human_review",
+        "description": (
+            "Captured result, consensus outcome, and audit record are presented "
+            "to the human for review before any downstream action proceeds."
+        ),
+    },
+    {
+        "step": 9,
+        "name": "execution_audit_record",
+        "description": (
+            "Final ExecutionAuditRecord is written to the append-only audit store "
+            "and marked immutable."
+        ),
+    },
+)
+
+_LEPD_REQUIRED_GATES: tuple[dict, ...] = (
+    {
+        "gate": "prompt_approved",
+        "description": "Prompt artifact must carry a valid approval record before pilot can proceed.",
+        "blocking": True,
+    },
+    {
+        "gate": "validation_passed",
+        "description": "Prompt must have passed all governance validation checks.",
+        "blocking": True,
+    },
+    {
+        "gate": "traceability_complete",
+        "description": "Full provenance chain from prompt origin to approval must be traceable.",
+        "blocking": True,
+    },
+    {
+        "gate": "human_authorization_present",
+        "description": "Explicit human authorization must be recorded before live invocation.",
+        "blocking": True,
+    },
+    {
+        "gate": "selected_agent_approved",
+        "description": "The selected agent must be registered and approved in the capability registry.",
+        "blocking": True,
+    },
+    {
+        "gate": "invocation_contract_validated",
+        "description": "The runtime invocation contract for the selected agent must be validated.",
+        "blocking": True,
+    },
+    {
+        "gate": "audit_record_prepared",
+        "description": "Audit record templates must be prepared before invocation begins.",
+        "blocking": True,
+    },
+    {
+        "gate": "consensus_path_available",
+        "description": "A consensus evaluation path (single-agent or multi-agent) must be available.",
+        "blocking": True,
+    },
+)
+
+_LEPD_AUTHORIZATION_STATUSES: tuple[str, ...] = (
+    "authorized",
+    "conditionally_authorized",
+    "blocked",
+)
+
+_LEPD_AUTHORIZATION_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this live execution pilot authorization.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Reference to the approved prompt artifact being piloted.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Identifier of the human-selected agent approved for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "description": "Outcome of authorization evaluation: authorized, conditionally_authorized, or blocked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "description": "Overall readiness status derived from required gate evaluations.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[dict]",
+        "description": "List of blocking gate failures that prevent authorization.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "Non-blocking warnings surfaced during authorization evaluation.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always true; human review is required before any live invocation proceeds.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_LEPD_PILOT_SCOPE: dict = {
+    "prompt_scope": "single approved prompt",
+    "agent_scope": "human-selected agent",
+    "execution_mode": "read-only execution first",
+    "write_execution_allowed": False,
+    "commit_allowed": False,
+    "push_allowed": False,
+    "rollback_allowed": False,
+}
+
+_LEPD_RUNTIME_PILOT_PLAN: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "invocation_contract_status": "defined",
+        "adapter_status": "designed",
+        "sandbox_status": "read_only_enforced",
+        "execution_workload_readiness": "pending_human_authorization",
+    },
+    {
+        "runtime": "claude-local",
+        "invocation_contract_status": "defined",
+        "adapter_status": "designed",
+        "sandbox_status": "read_only_enforced",
+        "execution_workload_readiness": "pending_human_authorization",
+    },
+    {
+        "runtime": "kimi-local",
+        "invocation_contract_status": "defined",
+        "adapter_status": "designed",
+        "sandbox_status": "read_only_enforced",
+        "execution_workload_readiness": "pending_human_authorization",
+    },
+)
+
+_LEPD_AUDIT_INTEGRATION: tuple[dict, ...] = (
+    {
+        "artifact": "ExecutionAuditRecord",
+        "description": (
+            "Prepared before invocation; captures authorization, runtime contract, "
+            "result, and governance metadata; immutable after creation."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "ConsensusAuditRecord",
+        "description": (
+            "Prepared before invocation; captures consensus mode, agreement status, "
+            "and conflicts; immutable after creation."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "authorization_snapshot",
+        "description": (
+            "Point-in-time snapshot of the pilot authorization state including "
+            "gates evaluated, statuses, and human authorization metadata."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "runtime_contract_snapshot",
+        "description": (
+            "Point-in-time snapshot of the validated invocation contract for the "
+            "selected agent runtime."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+)
+
+_LEPD_CONSENSUS_INTEGRATION: tuple[dict, ...] = (
+    {
+        "path": "single_agent_result_review",
+        "description": (
+            "For single-agent pilots, a trivial consensus is recorded with "
+            "consensus_mode=single_agent and agreement_status=consensus_reached."
+        ),
+        "agents_required": 1,
+        "human_escalation": False,
+    },
+    {
+        "path": "multi_agent_future_consensus",
+        "description": (
+            "Future multi-agent pilots will route all results through the full "
+            "execution consensus framework (Phase 46C) for majority or unanimous "
+            "agreement evaluation."
+        ),
+        "agents_required": 2,
+        "human_escalation": True,
+    },
+    {
+        "path": "human_escalation_path",
+        "description": (
+            "When consensus cannot be reached algorithmically or any gate fails, "
+            "the pilot escalates to human review before any further action."
+        ),
+        "agents_required": 1,
+        "human_escalation": True,
+    },
+)
+
+_LEPD_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "lep-b1",
+        "category": "authorization_blocker",
+        "description": "No live execution may proceed without explicit human authorization.",
+        "severity": "critical",
+        "blocks_gate": "human_authorization_present",
+    },
+    {
+        "blocker_id": "lep-b2",
+        "category": "approval_blocker",
+        "description": "Prompt artifact must carry a valid governance approval before pilot proceeds.",
+        "severity": "critical",
+        "blocks_gate": "prompt_approved",
+    },
+    {
+        "blocker_id": "lep-b3",
+        "category": "invocation_blocker",
+        "description": "Runtime invocation contract must be validated before controlled invocation.",
+        "severity": "high",
+        "blocks_gate": "invocation_contract_validated",
+    },
+    {
+        "blocker_id": "lep-b4",
+        "category": "audit_blocker",
+        "description": "Audit record templates must be prepared before invocation begins.",
+        "severity": "high",
+        "blocks_gate": "audit_record_prepared",
+    },
+)
+
+_LEPD_RECOMMENDATIONS: tuple[str, ...] = (
+    "Complete live execution readiness assessment before authorizing any pilot run.",
+    "Require human authorization for every pilot invocation, regardless of prior approvals.",
+    "Validate invocation contracts for each runtime independently before piloting.",
+    "Prepare audit record templates before initiating controlled invocation.",
+    "Begin with a single approved read-only prompt before introducing write-capable workloads.",
+    "Ensure consensus path is defined before proceeding to multi-agent pilots.",
+)
+
+_LEPD_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "assess live execution readiness",
+        "simulate authorization",
+        "prepare audit model",
+        "prepare consensus model",
+    ],
+    "pilot_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+        "bypass approval",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_LEPD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46E", "description": "Runtime Invocation Workload Validation"},
+    {"phase": "46F", "description": "Execution Authorization Artifact Model"},
+    {"phase": "46G", "description": "Read-Only Live Invocation Pilot"},
+    {"phase": "46H", "description": "Live Execution Result Review Workflow"},
+)
+
+
+def build_live_execution_pilot() -> dict:
+    """Design governed live execution pilot architecture. Read-only; no prompts are executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"lepd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _LEPD_LIFECYCLE]
+    required_gates = [dict(g) for g in _LEPD_REQUIRED_GATES]
+    authorization_fields = [dict(f) for f in _LEPD_AUTHORIZATION_FIELDS]
+    runtime_pilot_plan = [dict(r) for r in _LEPD_RUNTIME_PILOT_PLAN]
+    audit_integration = [dict(a) for a in _LEPD_AUDIT_INTEGRATION]
+    consensus_integration = [dict(c) for c in _LEPD_CONSENSUS_INTEGRATION]
+    blockers = [dict(b) for b in _LEPD_BLOCKERS]
+    recommendations = list(_LEPD_RECOMMENDATIONS)
+
+    pilot_authorization = {
+        "model_name": "PilotAuthorization",
+        "pilot_id": pilot_id,
+        "field_count": len(authorization_fields),
+        "fields": authorization_fields,
+        "required_field_count": sum(1 for f in authorization_fields if f["required"]),
+        "authorization_statuses": list(_LEPD_AUTHORIZATION_STATUSES),
+        "all_fields_immutable_after_creation": True,
+        "simulated_status": "blocked",
+        "simulated_blockers": [b["blocker_id"] for b in blockers],
+        "simulation_note": (
+            "Authorization is simulated as blocked because this is a design phase only. "
+            "No live execution is authorized."
+        ),
+    }
+
+    live_execution_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "46D",
+        "title": "Governed Live Execution Pilot",
+        "summary": (
+            "Defines the lifecycle, required gates, pilot authorization model, runtime "
+            "pilot plan, audit integration, consensus integration, blockers, and governance "
+            "boundaries for the first governed live execution pilot. No prompts are executed "
+            "and no agents are invoked."
+        ),
+        "input_sources": list(_LEPD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "required_gate_count": len(required_gates),
+        "blocking_gate_count": sum(1 for g in required_gates if g["blocking"]),
+        "runtime_count": len(runtime_pilot_plan),
+        "audit_artifact_count": len(audit_integration),
+        "consensus_path_count": len(consensus_integration),
+        "blocker_count": len(blockers),
+        "pilot_scope": dict(_LEPD_PILOT_SCOPE),
+        "authorization_statuses": list(_LEPD_AUTHORIZATION_STATUSES),
+        "human_review_required": True,
+        "governance_boundaries": dict(_LEPD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LEPD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "live_execution_pilot": live_execution_pilot,
+        "lifecycle": lifecycle,
+        "required_gates": required_gates,
+        "pilot_authorization": pilot_authorization,
+        "runtime_pilot_plan": runtime_pilot_plan,
+        "audit_integration": audit_integration,
+        "consensus_integration": consensus_integration,
+        "blockers": blockers,
+        "recommendations": recommendations,
+        "governance_boundaries": dict(_LEPD_GOVERNANCE_BOUNDARIES),
+        "advisory": LIVE_EXECUTION_PILOT_ADVISORY,
+    }

@@ -60,6 +60,7 @@ from pcae.commands.agent import (
     run_live_execution_readiness,
     run_execution_audit_design,
     run_execution_consensus_framework,
+    run_live_execution_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1767,6 +1768,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON execution consensus framework output.",
     )
     execution_consensus_framework_parser.set_defaults(handler=run_execution_consensus_framework)
+
+    live_execution_pilot_parser = subparsers.add_parser(
+        "live-execution-pilot",
+        help="Design governed live execution pilot architecture (Phase 46D).",
+    )
+    live_execution_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON live execution pilot output.",
+    )
+    live_execution_pilot_parser.set_defaults(handler=run_live_execution_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -96,6 +96,8 @@ from pcae.core.agent import (
     EXECUTION_AUDIT_DESIGN_ADVISORY,
     build_execution_consensus_framework,
     EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY,
+    build_live_execution_pilot,
+    LIVE_EXECUTION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4405,6 +4407,67 @@ def run_execution_consensus_framework(args: argparse.Namespace) -> int:
         gb = data["governance_boundaries"]
         print(f"  May:     {', '.join(gb['framework_may'])}")
         print(f"  May not: {', '.join(gb['framework_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_live_execution_pilot(args: argparse.Namespace) -> int:
+    data = build_live_execution_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["live_execution_pilot"]
+        print("Governed live execution pilot design")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Pilot lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Required gates:")
+        for gate in data["required_gates"]:
+            blocking = "blocking" if gate["blocking"] else "advisory"
+            print(f"  {gate['gate']} ({blocking})")
+            print(f"    {gate['description']}")
+        print()
+        print("Runtime pilot plan:")
+        for runtime in data["runtime_pilot_plan"]:
+            print(f"  {runtime['runtime']}")
+            print(f"    invocation_contract: {runtime['invocation_contract_status']}")
+            print(f"    adapter:             {runtime['adapter_status']}")
+            print(f"    sandbox:             {runtime['sandbox_status']}")
+            print(f"    workload_readiness:  {runtime['execution_workload_readiness']}")
+        print()
+        print("Audit integration:")
+        for artifact in data["audit_integration"]:
+            print(f"  {artifact['artifact']}")
+            print(f"    {artifact['description']}")
+        print()
+        print("Consensus integration:")
+        for path in data["consensus_integration"]:
+            escalation = "human escalation" if path["human_escalation"] else "no human escalation"
+            print(f"  {path['path']} ({escalation})")
+            print(f"    {path['description']}")
+        print()
+        print("Blockers:")
+        for blocker in data["blockers"]:
+            print(f"  [{blocker['blocker_id']}] {blocker['category']} (severity={blocker['severity']})")
+            print(f"    {blocker['description']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            print(f"  - {rec}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['pilot_may'])}")
+        print(f"  May not: {', '.join(gb['pilot_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

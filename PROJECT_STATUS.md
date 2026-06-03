@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46C: Execution Consensus Framework.
+Phase 46D: Governed Live Execution Pilot.
 
 ## Governance Coherence Note
 
@@ -2339,9 +2339,36 @@ execution/commit/push/rollback; read_only=true, human_review_required=true;
 future_evolution: 46D/46E/46F; advisory: "Execution consensus framework is informational;
 no execution occurs."
 
+PCAE can design the governed live execution pilot architecture with
+`pcae live-execution-pilot` and `pcae live-execution-pilot --json` (Phase 46D):
+inputs: live execution readiness assessment, execution audit design, execution consensus
+design, governed execution pilot, runtime invocation contracts, capability registry;
+no prompts are executed; no agents are invoked; pilot lifecycle (9 steps):
+approved_prompt_artifact/execution_authorization/runtime_contract_validation/
+execution_audit_preparation/controlled_runtime_invocation/result_capture/consensus_review/
+human_review/execution_audit_record; required gates (all blocking, 8 total):
+prompt_approved/validation_passed/traceability_complete/human_authorization_present/
+selected_agent_approved/invocation_contract_validated/audit_record_prepared/
+consensus_path_available; PilotAuthorization model: 8 fields (pilot_id/prompt_id/
+selected_agent/authorization_status/readiness_status/blockers/warnings/human_review_required),
+authorization_statuses: authorized/conditionally_authorized/blocked, simulated_status=blocked;
+pilot scope: single approved prompt, human-selected agent, read-only execution first,
+write_execution_allowed=false/commit_allowed=false/push_allowed=false/rollback_allowed=false;
+runtime pilot plan: codex-local/claude-local/kimi-local, all sandbox=read_only_enforced/
+workload_readiness=pending_human_authorization; audit integration: ExecutionAuditRecord/
+ConsensusAuditRecord/authorization_snapshot/runtime_contract_snapshot, all
+prepared_before_invocation=true/immutable_after_creation=true; consensus integration:
+single_agent_result_review/multi_agent_future_consensus/human_escalation_path; blockers:
+lep-b1 (authorization_blocker, critical)/lep-b2 (approval_blocker, critical)/
+lep-b3 (invocation_blocker, high)/lep-b4 (audit_blocker, high); governance_boundaries:
+may assess live execution readiness/simulate authorization/prepare audit model/prepare
+consensus model; may not execute prompts/invoke agents/modify files/commit/push/rollback/
+bypass approval; read_only=true, human_review_required=true; future_evolution: 46E/46F/46G/46H;
+advisory: "Governed live execution pilot is informational; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (46D Governed Live Execution Pilot, 46E Execution Result Review Workflow, 46F Multi-Agent Execution Consensus Pilot).
+- TBD: Future phases (46E Runtime Invocation Workload Validation, 46F Execution Authorization Artifact Model, 46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow).
 
 ## Future Explorations
 

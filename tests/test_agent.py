@@ -22819,3 +22819,189 @@ def test_46c_execution_consensus_framework_human_output_shows_all_sections(capsy
     assert "Consensus record model" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46D — Governed Live Execution Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_46d_live_execution_pilot_json_structure(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("live_execution_pilot", "lifecycle", "required_gates",
+                "pilot_authorization", "runtime_pilot_plan", "audit_integration",
+                "consensus_integration", "blockers", "recommendations",
+                "governance_boundaries", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46d_live_execution_pilot_design_fields(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["live_execution_pilot"]
+    for field in ("pilot_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "required_gate_count", "blocking_gate_count", "runtime_count",
+                  "audit_artifact_count", "consensus_path_count", "blocker_count",
+                  "pilot_scope", "authorization_statuses",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in pilot, f"missing pilot field: {field}"
+    assert pilot["pilot_id"].startswith("lepd-")
+    assert pilot["phase"] == "46D"
+
+
+def test_46d_live_execution_pilot_lifecycle(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 9
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("approved_prompt_artifact", "execution_authorization",
+                     "runtime_contract_validation", "execution_audit_preparation",
+                     "controlled_runtime_invocation", "result_capture",
+                     "consensus_review", "human_review", "execution_audit_record"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46d_live_execution_pilot_required_gates(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gates = data["required_gates"]
+    assert len(gates) == 8
+    gate_names = [g["gate"] for g in gates]
+    for expected in ("prompt_approved", "validation_passed", "traceability_complete",
+                     "human_authorization_present", "selected_agent_approved",
+                     "invocation_contract_validated", "audit_record_prepared",
+                     "consensus_path_available"):
+        assert expected in gate_names, f"missing required gate: {expected}"
+    assert all(g["blocking"] is True for g in gates)
+
+
+def test_46d_live_execution_pilot_authorization_model(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    auth = data["pilot_authorization"]
+    assert auth["model_name"] == "PilotAuthorization"
+    assert auth["all_fields_immutable_after_creation"] is True
+    assert auth["simulated_status"] == "blocked"
+    field_names = [f["name"] for f in auth["fields"]]
+    for expected in ("pilot_id", "prompt_id", "selected_agent", "authorization_status",
+                     "readiness_status", "blockers", "warnings", "human_review_required"):
+        assert expected in field_names, f"missing authorization field: {expected}"
+    for status in ("authorized", "conditionally_authorized", "blocked"):
+        assert status in auth["authorization_statuses"], f"missing authorization status: {status}"
+
+
+def test_46d_live_execution_pilot_runtime_plan(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    runtimes = data["runtime_pilot_plan"]
+    assert len(runtimes) == 3
+    runtime_names = [r["runtime"] for r in runtimes]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_names, f"missing runtime: {expected}"
+    for runtime in runtimes:
+        for field in ("runtime", "invocation_contract_status", "adapter_status",
+                      "sandbox_status", "execution_workload_readiness"):
+            assert field in runtime, f"runtime missing field: {field}"
+        assert runtime["sandbox_status"] == "read_only_enforced"
+
+
+def test_46d_live_execution_pilot_audit_integration(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    artifacts = data["audit_integration"]
+    assert len(artifacts) == 4
+    artifact_names = [a["artifact"] for a in artifacts]
+    for expected in ("ExecutionAuditRecord", "ConsensusAuditRecord",
+                     "authorization_snapshot", "runtime_contract_snapshot"):
+        assert expected in artifact_names, f"missing audit artifact: {expected}"
+    for artifact in artifacts:
+        assert artifact["prepared_before_invocation"] is True
+        assert artifact["immutable_after_creation"] is True
+
+
+def test_46d_live_execution_pilot_consensus_integration(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    paths = data["consensus_integration"]
+    assert len(paths) == 3
+    path_names = [p["path"] for p in paths]
+    for expected in ("single_agent_result_review", "multi_agent_future_consensus",
+                     "human_escalation_path"):
+        assert expected in path_names, f"missing consensus path: {expected}"
+    for path in paths:
+        for field in ("path", "description", "agents_required", "human_escalation"):
+            assert field in path, f"consensus path missing field: {field}"
+
+
+def test_46d_live_execution_pilot_blockers(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) == 4
+    blocker_ids = [b["blocker_id"] for b in blockers]
+    for expected in ("lep-b1", "lep-b2", "lep-b3", "lep-b4"):
+        assert expected in blocker_ids, f"missing blocker: {expected}"
+    categories = [b["category"] for b in blockers]
+    for expected in ("authorization_blocker", "approval_blocker",
+                     "invocation_blocker", "audit_blocker"):
+        assert expected in categories, f"missing blocker category: {expected}"
+
+
+def test_46d_live_execution_pilot_governance_boundaries(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify files",
+                      "commit", "push", "rollback", "bypass approval"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46d_live_execution_pilot_pilot_scope(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    scope = data["live_execution_pilot"]["pilot_scope"]
+    assert scope["write_execution_allowed"] is False
+    assert scope["commit_allowed"] is False
+    assert scope["push_allowed"] is False
+    assert scope["rollback_allowed"] is False
+
+
+def test_46d_live_execution_pilot_future_evolution(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["live_execution_pilot"]["future_evolution"]]
+    for expected in ("46E", "46F", "46G", "46H"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46d_live_execution_pilot_advisory(capsys) -> None:
+    main(["live-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_46d_live_execution_pilot_human_output_shows_all_sections(capsys) -> None:
+    main(["live-execution-pilot"])
+    output = capsys.readouterr().out
+    assert "Governed live execution pilot design" in output
+    assert "Pilot lifecycle" in output
+    assert "Required gates" in output
+    assert "Runtime pilot plan" in output
+    assert "Audit integration" in output
+    assert "Consensus integration" in output
+    assert "Blockers" in output
+    assert "Recommendations" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
