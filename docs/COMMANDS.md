@@ -341,3 +341,8 @@
 
 - `pcae prompt-artifact-design`
 - `pcae prompt-artifact-design --json`
+
+## prompt-approval-design
+
+- `pcae prompt-approval-design`
+- `pcae prompt-approval-design --json`

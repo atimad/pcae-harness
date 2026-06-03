@@ -49,6 +49,7 @@ from pcae.commands.agent import (
     run_prompt_validation_design,
     run_prompt_governance_design,
     run_prompt_artifact_design,
+    run_prompt_approval_workflow,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1635,6 +1636,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON prompt artifact design output.",
     )
     prompt_artifact_design_parser.set_defaults(handler=run_prompt_artifact_design)
+
+    prompt_approval_workflow_parser = subparsers.add_parser(
+        "prompt-approval-design",
+        help="Design the governed prompt approval workflow (Phase 45K).",
+    )
+    prompt_approval_workflow_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON prompt approval workflow output.",
+    )
+    prompt_approval_workflow_parser.set_defaults(handler=run_prompt_approval_workflow)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

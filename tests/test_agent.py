@@ -21000,3 +21000,160 @@ def test_45j_prompt_artifact_design_human_output_shows_all_sections(capsys) -> N
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are executed or approved" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45K: Prompt Approval Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_45k_prompt_approval_workflow_command_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-approval-design"])
+    assert exit_code == 0
+
+
+def test_45k_prompt_approval_workflow_json_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-approval-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45k_prompt_approval_workflow_json_has_required_top_level_keys(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "prompt_approval_workflow",
+        "approval_lifecycle",
+        "approval_states",
+        "approval_requirements",
+        "approved_artifact_model",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45k_prompt_approval_workflow_id_starts_with_paw(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wf = data["prompt_approval_workflow"]
+    assert wf["workflow_id"].startswith("paw-")
+    assert wf["phase"] == "45K"
+
+
+def test_45k_prompt_approval_workflow_lifecycle_six_steps(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["approval_lifecycle"]
+    assert len(lifecycle) == 6
+    step_names = [s["name"] for s in lifecycle]
+    assert "draft_prompt_artifact" in step_names
+    assert "validation_review" in step_names
+    assert "governance_review" in step_names
+    assert "human_decision" in step_names
+    assert "approved_prompt_artifact" in step_names
+    assert "future_execution_candidate" in step_names
+
+
+def test_45k_prompt_approval_workflow_five_approval_states(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = {s["state"] for s in data["approval_states"]}
+    assert "pending" in states
+    assert "approved" in states
+    assert "denied" in states
+    assert "changes_requested" in states
+    assert "superseded" in states
+    assert len(states) == 5
+
+
+def test_45k_prompt_approval_workflow_state_terminal_flags(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    state_map = {s["state"]: s for s in data["approval_states"]}
+    assert state_map["approved"]["terminal"] is True
+    assert state_map["denied"]["terminal"] is True
+    assert state_map["superseded"]["terminal"] is True
+    assert state_map["pending"]["terminal"] is False
+    assert state_map["changes_requested"]["terminal"] is False
+    assert state_map["pending"]["requires_human_action"] is True
+
+
+def test_45k_prompt_approval_workflow_approval_requirements(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = " ".join(data["approval_requirements"]).lower()
+    assert "validation_status" in reqs
+    assert "traceability" in reqs
+    assert "intent preservation" in reqs
+    assert "safety validation" in reqs
+    assert "governance_state" in reqs
+    assert "human approval" in reqs
+    assert len(data["approval_requirements"]) == 6
+
+
+def test_45k_prompt_approval_workflow_approved_artifact_model_fields(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["approved_artifact_model"]
+    assert am["model_name"] == "ApprovedPromptArtifact"
+    assert am["artifact_is_immutable_after_approval"] is True
+    field_names = [f["name"] for f in am["fields"]]
+    for expected in (
+        "prompt_approval_id",
+        "prompt_id",
+        "prompt_set_id",
+        "phase_id",
+        "approved_agents",
+        "approval_state",
+        "approved_by",
+        "approved_at",
+        "human_notes",
+        "validation_snapshot",
+        "governance_snapshot",
+    ):
+        assert expected in field_names, f"missing artifact field: {expected}"
+
+
+def test_45k_prompt_approval_workflow_governance_boundaries(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "approval_workflow_may" in gb
+    assert "approval_workflow_may_not" in gb
+    assert gb["human_decision_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["approval_workflow_may_not"]).lower()
+    assert "approve prompts automatically" in may_not
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_45k_prompt_approval_workflow_advisory(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are approved or executed" in advisory
+
+
+def test_45k_prompt_approval_workflow_future_evolution(capsys) -> None:
+    main(["prompt-approval-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["prompt_approval_workflow"]["future_evolution"]]
+    for expected in ("45L", "45M", "45N"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45k_prompt_approval_workflow_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-approval-design"])
+    output = capsys.readouterr().out
+    assert "Prompt approval workflow" in output
+    assert "Approval lifecycle" in output
+    assert "Approval states" in output
+    assert "Approval requirements" in output
+    assert "Approved artifact model" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are approved or executed" in output

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45J: Prompt Artifact Model.
+Phase 45K: Prompt Approval Workflow.
 
 ## Governance Coherence Note
 
@@ -2096,9 +2096,28 @@ prompts/invoke agents/modify repository/auto-approve/commit/push;
 read_only=true); advisory: "Prompt artifact design is informational;
 no prompts are executed or approved."
 
+and the governed approval workflow for PromptArtifact objects can be designed
+with `pcae prompt-approval-design` and `pcae prompt-approval-design --json`,
+defining a six-step approval lifecycle (draft_prompt_artifact,
+validation_review, governance_review, human_decision, approved_prompt_artifact,
+future_execution_candidate), five approval states (pending/approved/denied/
+changes_requested/superseded — with terminal flags and human action
+requirements), six approval requirements (validation_status valid or
+valid_with_warnings, traceability complete, intent preservation passed, safety
+passed, governance_state=pending_approval, human approval granted), four
+denial/change-request rules (deny/request changes/supersede/approve with
+notes), an ApprovedPromptArtifact model with eleven fields
+(prompt_approval_id/prompt_id/prompt_set_id/phase_id/approved_agents/
+approval_state/approved_by/approved_at/human_notes/validation_snapshot/
+governance_snapshot, immutable after approval), and governance boundaries (may
+represent approval states/define requirements/define artifact metadata; may not
+approve automatically/execute prompts/invoke agents/modify repository/commit/
+push; read_only=true, human_decision_required=true); advisory: "Prompt
+approval workflow is informational; no prompts are approved or executed."
+
 ## Next
 
-- TBD: Future phases (45K Prompt Approval Workflow, 45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype).
+- TBD: Future phases (45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype, 45N Prompt Execution Readiness Assessment).
 
 ## Future Explorations
 

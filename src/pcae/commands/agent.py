@@ -74,6 +74,8 @@ from pcae.core.agent import (
     PROMPT_GOVERNANCE_DESIGN_ADVISORY,
     build_prompt_artifact_design,
     PROMPT_ARTIFACT_DESIGN_ADVISORY,
+    build_prompt_approval_workflow,
+    PROMPT_APPROVAL_WORKFLOW_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3811,6 +3813,50 @@ def run_prompt_artifact_design(args: argparse.Namespace) -> int:
         print()
         print("Future evolution:")
         for entry in design["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_approval_workflow(args: argparse.Namespace) -> int:
+    data = build_prompt_approval_workflow()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        wf = data["prompt_approval_workflow"]
+        print("Prompt approval workflow")
+        print(f"Workflow: {wf['workflow_id']}  Generated: {wf['generated_at']}")
+        print(f"Phase: {wf['phase']} — {wf['title']}")
+        print(f"Summary: {wf['summary']}")
+        print()
+        print("Approval lifecycle:")
+        for step in data["approval_lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        print("Approval states:")
+        for state in data["approval_states"]:
+            terminal = "terminal" if state["terminal"] else "non-terminal"
+            print(f"  {state['state']} ({terminal}): {state['description']}")
+        print()
+        reqs = data["approval_requirements"]
+        print(f"Approval requirements ({len(reqs)}):")
+        for req in reqs:
+            print(f"  - {req}")
+        print()
+        am = data["approved_artifact_model"]
+        field_names = ", ".join(f["name"] for f in am["fields"])
+        print(f"Approved artifact model: {am['model_name']}")
+        print(f"  Fields: {field_names}")
+        print(f"  Immutable after approval: {'yes' if am['artifact_is_immutable_after_approval'] else 'no'}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['approval_workflow_may'])}")
+        print(f"  May not: {', '.join(gb['approval_workflow_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in wf["future_evolution"]:
             print(f"  {entry['phase']}: {entry['description']}")
         print()
         print(data["advisory"])

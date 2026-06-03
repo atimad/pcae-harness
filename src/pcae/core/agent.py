@@ -12099,3 +12099,185 @@ def build_prompt_artifact_design() -> dict:
         "governance_boundaries": dict(_PAD_GOVERNANCE_BOUNDARIES),
         "advisory": PROMPT_ARTIFACT_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45K: Prompt Approval Workflow
+# ---------------------------------------------------------------------------
+
+PROMPT_APPROVAL_WORKFLOW_ADVISORY = (
+    "Prompt approval workflow is informational; no prompts are approved or executed."
+)
+
+_PAW_APPROVAL_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "draft_prompt_artifact",
+        "description": "A PromptArtifact in draft state enters the approval pipeline.",
+        "inputs": ["prompt_artifact", "roadmap_approval_artifact"],
+        "outputs": ["prompt_id", "approval_context"],
+    },
+    {
+        "step": 2,
+        "name": "validation_review",
+        "description": "Validation results are reviewed; artifact must be valid or valid_with_warnings.",
+        "inputs": ["prompt_artifact", "prompt_validation_results"],
+        "outputs": ["validation_gate_passed", "validation_summary"],
+    },
+    {
+        "step": 3,
+        "name": "governance_review",
+        "description": "Governance requirements are checked: traceability, intent preservation, safety.",
+        "inputs": ["prompt_artifact", "prompt_governance_design"],
+        "outputs": ["governance_gate_passed", "governance_summary"],
+    },
+    {
+        "step": 4,
+        "name": "human_decision",
+        "description": "A human reviews the artifact and records an approval decision.",
+        "inputs": ["prompt_artifact", "validation_summary", "governance_summary"],
+        "outputs": ["approval_state", "human_notes", "approved_agents"],
+    },
+    {
+        "step": 5,
+        "name": "approved_prompt_artifact",
+        "description": "The approval decision is recorded; artifact transitions to approved state.",
+        "inputs": ["approval_state", "human_notes", "approved_agents"],
+        "outputs": ["prompt_approval_id", "approved_prompt_artifact"],
+    },
+    {
+        "step": 6,
+        "name": "future_execution_candidate",
+        "description": "The approved artifact is a future execution candidate; no execution in this phase.",
+        "inputs": ["approved_prompt_artifact"],
+        "outputs": ["execution_candidate_id"],
+    },
+)
+
+_PAW_APPROVAL_STATES: tuple[dict, ...] = (
+    {
+        "state": "pending",
+        "description": "Artifact has entered the approval pipeline; human decision not yet recorded.",
+        "terminal": False,
+        "requires_human_action": True,
+    },
+    {
+        "state": "approved",
+        "description": "Human has approved the artifact; it is a future execution candidate.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "denied",
+        "description": "Human has denied the artifact; it cannot become an execution candidate.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "changes_requested",
+        "description": "Human has requested changes; artifact returns to draft for revision.",
+        "terminal": False,
+        "requires_human_action": True,
+    },
+    {
+        "state": "superseded",
+        "description": "A newer version of the artifact has been approved; this one is retained for audit.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+)
+
+_PAW_APPROVAL_REQUIREMENTS: tuple[str, ...] = (
+    "validation_status must be valid or valid_with_warnings.",
+    "Traceability must be complete (all required references present).",
+    "Intent preservation must have passed.",
+    "Safety validation must have passed.",
+    "governance_state must be pending_approval.",
+    "Human approval must be explicitly granted.",
+)
+
+_PAW_DENIAL_RULES: tuple[str, ...] = (
+    "Human may deny the prompt; denied prompts may not be re-submitted without revision.",
+    "Human may request changes; the artifact returns to draft state for revision.",
+    "Human may supersede the prompt if a newer version replaces it.",
+    "Human may approve the prompt with notes; notes are recorded in the approval artifact.",
+)
+
+_PAW_APPROVED_ARTIFACT_MODEL: dict = {
+    "model_name": "ApprovedPromptArtifact",
+    "fields": [
+        {"name": "prompt_approval_id", "type": "str", "description": "Unique identifier for this approval record."},
+        {"name": "prompt_id", "type": "str", "description": "ID of the PromptArtifact that was approved."},
+        {"name": "prompt_set_id", "type": "str", "description": "ID of the prompt set this artifact belongs to."},
+        {"name": "phase_id", "type": "str", "description": "ID of the approved phase that generated the prompt."},
+        {"name": "approved_agents", "type": "list[str]", "description": "Agent IDs approved to execute this prompt."},
+        {"name": "approval_state", "type": "str", "description": "Final approval state: approved, denied, changes_requested, or superseded."},
+        {"name": "approved_by", "type": "str", "description": "Identifier of the human who made the approval decision."},
+        {"name": "approved_at", "type": "str", "description": "ISO 8601 timestamp of the approval decision."},
+        {"name": "human_notes", "type": "str", "description": "Free-text notes from the human reviewer."},
+        {"name": "validation_snapshot", "type": "dict", "description": "Snapshot of the validation result at approval time."},
+        {"name": "governance_snapshot", "type": "dict", "description": "Snapshot of the governance state at approval time."},
+    ],
+    "artifact_is_immutable_after_approval": True,
+    "artifact_creation": "future — not yet implemented; no approval mutation in this phase.",
+}
+
+_PAW_GOVERNANCE_BOUNDARIES: dict = {
+    "approval_workflow_may": [
+        "represent approval states",
+        "define approval requirements",
+        "define approved artifact metadata",
+    ],
+    "approval_workflow_may_not": [
+        "approve prompts automatically",
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "human_decision_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_PAW_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45L", "description": "Autonomous Phase Proposal Prototype"},
+    {"phase": "45M", "description": "Autonomous Prompt Proposal Prototype"},
+    {"phase": "45N", "description": "Prompt Execution Readiness Assessment"},
+)
+
+
+def build_prompt_approval_workflow() -> dict:
+    """Design the governed approval workflow for PromptArtifact objects. Read-only; no prompts approved or executed."""
+    workflow_id = f"paw-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    prompt_approval_workflow = {
+        "workflow_id": workflow_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45K",
+        "title": "Prompt Approval Workflow",
+        "summary": (
+            "Defines the governed approval workflow for PromptArtifact objects before "
+            "they become execution candidates. Covers the approval lifecycle, states, "
+            "requirements, denial rules, and the ApprovedPromptArtifact model. "
+            "No prompts are approved or executed."
+        ),
+        "approval_lifecycle": [dict(s) for s in _PAW_APPROVAL_LIFECYCLE],
+        "approval_states": [dict(s) for s in _PAW_APPROVAL_STATES],
+        "approval_requirements": list(_PAW_APPROVAL_REQUIREMENTS),
+        "denial_rules": list(_PAW_DENIAL_RULES),
+        "approved_artifact_model": dict(_PAW_APPROVED_ARTIFACT_MODEL),
+        "governance_boundaries": dict(_PAW_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PAW_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "prompt_approval_workflow": prompt_approval_workflow,
+        "approval_lifecycle": [dict(s) for s in _PAW_APPROVAL_LIFECYCLE],
+        "approval_states": [dict(s) for s in _PAW_APPROVAL_STATES],
+        "approval_requirements": list(_PAW_APPROVAL_REQUIREMENTS),
+        "approved_artifact_model": dict(_PAW_APPROVED_ARTIFACT_MODEL),
+        "governance_boundaries": dict(_PAW_GOVERNANCE_BOUNDARIES),
+        "advisory": PROMPT_APPROVAL_WORKFLOW_ADVISORY,
+    }
