@@ -22331,3 +22331,166 @@ def test_45q_governed_execution_pilot_human_output_shows_all_sections(capsys) ->
     assert "Audit summary" in output
     assert "Recommendations" in output
     assert "simulated" in output.lower()
+
+
+def test_46a_live_execution_readiness_json_structure(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("readiness_summary", "readiness_areas", "blockers", "risks",
+                "recommendations", "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46a_live_execution_readiness_summary_fields(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["readiness_summary"]
+    for field in ("assessment_id", "phase", "title", "overall_status",
+                  "live_execution_recommended", "human_review_required",
+                  "area_count", "ready_count", "partially_ready_count",
+                  "not_ready_count", "blocker_count", "risk_count",
+                  "live_execution_requirements", "governance_boundaries",
+                  "future_evolution"):
+        assert field in summary, f"missing summary field: {field}"
+    assert summary["assessment_id"].startswith("ler-")
+    assert summary["phase"] == "46A"
+    assert summary["live_execution_recommended"] is False
+
+
+def test_46a_live_execution_readiness_nine_areas(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["readiness_areas"]
+    assert len(areas) == 9
+    area_names = [a["area"] for a in areas]
+    for expected in ("Prompt Approval Infrastructure", "Prompt Governance",
+                     "Prompt Validation", "Runtime Invocation Contracts",
+                     "Runtime Adapters", "Execution Authorization",
+                     "Audit Trail Support", "Consensus Support", "Human Oversight"):
+        assert expected in area_names, f"missing readiness area: {expected}"
+
+
+def test_46a_live_execution_readiness_area_fields(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    valid_statuses = {"ready", "partially_ready", "not_ready"}
+    for area in data["readiness_areas"]:
+        for field in ("area", "readiness_status", "rationale",
+                      "blockers", "recommended_actions"):
+            assert field in area, f"area '{area.get('area')}' missing field: {field}"
+        assert area["readiness_status"] in valid_statuses
+
+
+def test_46a_live_execution_readiness_status_distribution(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["readiness_summary"]
+    assert summary["ready_count"] >= 1
+    assert summary["partially_ready_count"] >= 1
+    assert summary["not_ready_count"] >= 1
+    assert summary["area_count"] == (
+        summary["ready_count"]
+        + summary["partially_ready_count"]
+        + summary["not_ready_count"]
+    )
+    assert summary["overall_status"] == "not_ready"
+
+
+def test_46a_live_execution_readiness_blockers(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) >= 1
+    categories = {b["category"] for b in blockers}
+    for expected in ("approval_blocker", "invocation_blocker",
+                     "adapter_blocker", "consensus_blocker", "governance_blocker"):
+        assert expected in categories, f"missing blocker category: {expected}"
+    for blocker in blockers:
+        for field in ("blocker_id", "category", "description", "severity", "blocks_area"):
+            assert field in blocker, f"blocker missing field: {field}"
+
+
+def test_46a_live_execution_readiness_risks(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    risks = data["risks"]
+    assert len(risks) >= 1
+    categories = {r["category"] for r in risks}
+    for expected in ("execution_risk", "governance_risk",
+                     "authorization_risk", "runtime_risk"):
+        assert expected in categories, f"missing risk category: {expected}"
+    for risk in risks:
+        for field in ("risk_id", "category", "description", "severity", "mitigation"):
+            assert field in risk, f"risk missing field: {field}"
+
+
+def test_46a_live_execution_readiness_live_execution_requirements(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["readiness_summary"]["live_execution_requirements"]
+    for expected in ("approved_prompt_storage", "validated_invocation_contracts",
+                     "execution_authorization_recording", "audit_trail_recording",
+                     "human_authorization_recording"):
+        assert expected in reqs, f"missing live execution requirement: {expected}"
+
+
+def test_46a_live_execution_readiness_recommendations(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) == 9
+    for rec in recs:
+        for field in ("area", "readiness_status", "rationale",
+                      "blockers", "recommended_actions"):
+            assert field in rec, f"recommendation missing field: {field}"
+        assert len(rec["recommended_actions"]) >= 1
+
+
+def test_46a_live_execution_readiness_human_review_required(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["readiness_summary"]["human_review_required"] is True
+
+
+def test_46a_live_execution_readiness_governance_boundaries(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["readiness_summary"]["governance_boundaries"]
+    assert "assessment_may" in gb
+    assert "assessment_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["assessment_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository",
+                      "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46a_live_execution_readiness_future_evolution(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["readiness_summary"]["future_evolution"]]
+    for expected in ("46B", "46C", "46D"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46a_live_execution_readiness_advisory(capsys) -> None:
+    main(["live-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_46a_live_execution_readiness_human_output_shows_all_sections(capsys) -> None:
+    main(["live-execution-readiness"])
+    output = capsys.readouterr().out
+    assert "Live execution readiness assessment" in output
+    assert "Overall status" in output
+    assert "Readiness by area" in output
+    assert "Blockers" in output
+    assert "Risks" in output
+    assert "Recommendations" in output
+    assert "Human review required" in output
+    assert "informational" in output.lower()

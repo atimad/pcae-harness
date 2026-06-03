@@ -14612,3 +14612,387 @@ def build_governed_execution_pilot() -> dict:
         "human_review_required": True,
         "advisory": GOVERNED_EXECUTION_PILOT_ADVISORY,
     }
+
+
+LIVE_EXECUTION_READINESS_ADVISORY = (
+    "Live execution readiness assessment is informational; no prompts are executed."
+)
+
+_LER_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_execution_pilot",
+    "prompt_execution_readiness_assessment",
+    "prompt_approval_artifacts",
+    "runtime_invocation_validation",
+    "capability_registry",
+    "governance_artifacts",
+)
+
+_LER_READINESS_AREAS: tuple[dict, ...] = (
+    {
+        "area": "Prompt Approval Infrastructure",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "ApprovedPromptArtifact runtime storage is not implemented. "
+            "Approval state cannot be persisted, queried, or verified at execution time. "
+            "Governance gate 'prompt_approved' was blocked in the 45Q pilot."
+        ),
+        "blockers": [
+            "No runtime approval store implemented.",
+            "ApprovedPromptArtifact creation is deferred (artifact_creation=future).",
+            "Approval gate cannot be satisfied without a queryable approval store.",
+        ],
+        "recommended_actions": [
+            "Implement ApprovedPromptArtifact persistent storage.",
+            "Wire approval store lookup into the execution pipeline gate.",
+        ],
+    },
+    {
+        "area": "Prompt Governance",
+        "readiness_status": "ready",
+        "rationale": (
+            "Prompt governance design (45I) is complete with lineage, intent protection, "
+            "and approval requirements. Governance boundaries have been enforced throughout "
+            "phases 45F–45Q without violation."
+        ),
+        "blockers": [],
+        "recommended_actions": [
+            "Verify governance boundaries hold under live execution conditions.",
+            "Maintain human_review_required=true in all 46-series phases.",
+        ],
+    },
+    {
+        "area": "Prompt Validation",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Prompt validation framework (45H) defines rules and result statuses. "
+            "Validation is advisory-only; no deployed automated validator blocks execution."
+        ),
+        "blockers": [
+            "No deployed automated prompt validator.",
+            "Validation gate is advisory; prompts with warnings are not blocked.",
+        ],
+        "recommended_actions": [
+            "Deploy an automated prompt validator before enabling live execution.",
+            "Enforce validation as a hard gate in the live execution pipeline.",
+        ],
+    },
+    {
+        "area": "Runtime Invocation Contracts",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "kimi-local invocation contract is undefined. codex-local and claude-local "
+            "contracts exist but have not been validated for prompt-execution workloads. "
+            "The 'invocation_contracts_available' gate was blocked in the 45Q pilot."
+        ),
+        "blockers": [
+            "kimi-local invocation contract is not defined.",
+            "codex-local and claude-local contracts not validated for execution workloads.",
+        ],
+        "recommended_actions": [
+            "Define and validate the kimi-local API-mode invocation contract.",
+            "Validate codex-local and claude-local contracts against live execution scenarios.",
+        ],
+    },
+    {
+        "area": "Runtime Adapters",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Adapters for codex-local, claude-local, and kimi-local are registered in "
+            "the capability registry. No adapter has been validated for prompt-execution "
+            "workloads or sandbox isolation reviewed."
+        ),
+        "blockers": [
+            "Adapter sandbox isolation not validated for prompt-execution scope.",
+            "No adapter validated against a live execution scenario.",
+        ],
+        "recommended_actions": [
+            "Validate each adapter against the live execution scenario.",
+            "Review and tighten sandbox settings for each adapter.",
+        ],
+    },
+    {
+        "area": "Execution Authorization",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "ExecutionAuthorization model is designed (45Q) but no runtime recording "
+            "mechanism is implemented. Authorization status was 'blocked' in the 45Q pilot. "
+            "No human authorization can be recorded without an authorization store."
+        ),
+        "blockers": [
+            "No authorization recording mechanism implemented.",
+            "Human authorization cannot be persisted or queried.",
+            "Authorization status was blocked in the 45Q pilot.",
+        ],
+        "recommended_actions": [
+            "Implement ExecutionAuthorization persistent storage.",
+            "Wire authorization recording into the execution pipeline.",
+        ],
+    },
+    {
+        "area": "Audit Trail Support",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "ExecutionAuditRecord model is designed (45Q) with append_only=true and "
+            "deletion_forbidden=true. No runtime audit storage is implemented; "
+            "audit records cannot be persisted or queried."
+        ),
+        "blockers": [
+            "No runtime audit store implemented.",
+            "ExecutionAuditRecord persistence is deferred.",
+        ],
+        "recommended_actions": [
+            "Implement append-only ExecutionAuditRecord storage (46B).",
+            "Verify deletion_forbidden invariant is enforced at the storage layer.",
+        ],
+    },
+    {
+        "area": "Consensus Support",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "No consensus protocol is defined for multi-agent execution outcomes. "
+            "Divergent results from codex-local, claude-local, and kimi-local have "
+            "no resolution path under the current design."
+        ),
+        "blockers": [
+            "No consensus protocol defined for prompt execution outcomes.",
+            "Divergent multi-agent results have no resolution path.",
+        ],
+        "recommended_actions": [
+            "Define consensus requirements for execution outcomes (46C).",
+            "Integrate consensus review into the execution authorization gate.",
+        ],
+    },
+    {
+        "area": "Human Oversight",
+        "readiness_status": "ready",
+        "rationale": (
+            "human_review_required=true has been enforced in all prompt phases (45F–45Q). "
+            "Human escalation paths for governance failures are defined."
+        ),
+        "blockers": [],
+        "recommended_actions": [
+            "Maintain human_review_required=true in all 46-series live execution phases.",
+            "Define explicit human escalation paths for live execution failures.",
+        ],
+    },
+)
+
+_LER_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "ler-blocker-001",
+        "category": "approval_blocker",
+        "description": (
+            "No ApprovedPromptArtifact runtime store; approval gate cannot be satisfied."
+        ),
+        "severity": "high",
+        "blocks_area": "Prompt Approval Infrastructure",
+    },
+    {
+        "blocker_id": "ler-blocker-002",
+        "category": "invocation_blocker",
+        "description": "kimi-local invocation contract is not defined.",
+        "severity": "high",
+        "blocks_area": "Runtime Invocation Contracts",
+    },
+    {
+        "blocker_id": "ler-blocker-003",
+        "category": "invocation_blocker",
+        "description": (
+            "codex-local and claude-local invocation contracts not validated "
+            "for prompt-execution workloads."
+        ),
+        "severity": "high",
+        "blocks_area": "Runtime Invocation Contracts",
+    },
+    {
+        "blocker_id": "ler-blocker-004",
+        "category": "adapter_blocker",
+        "description": (
+            "No adapter validated against a live execution scenario; "
+            "sandbox isolation not reviewed."
+        ),
+        "severity": "medium",
+        "blocks_area": "Runtime Adapters",
+    },
+    {
+        "blocker_id": "ler-blocker-005",
+        "category": "consensus_blocker",
+        "description": (
+            "No consensus protocol defined; divergent multi-agent results "
+            "cannot be resolved."
+        ),
+        "severity": "medium",
+        "blocks_area": "Consensus Support",
+    },
+    {
+        "blocker_id": "ler-blocker-006",
+        "category": "governance_blocker",
+        "description": (
+            "No ExecutionAuthorization or ExecutionAuditRecord runtime storage; "
+            "authorization and audit trail cannot be recorded."
+        ),
+        "severity": "high",
+        "blocks_area": "Execution Authorization",
+    },
+)
+
+_LER_LIVE_EXECUTION_REQUIREMENTS: tuple[str, ...] = (
+    "approved_prompt_storage",
+    "validated_invocation_contracts",
+    "execution_authorization_recording",
+    "audit_trail_recording",
+    "human_authorization_recording",
+)
+
+_LER_RISKS: tuple[dict, ...] = (
+    {
+        "risk_id": "ler-risk-001",
+        "category": "execution_risk",
+        "description": (
+            "Premature live execution without satisfying all readiness requirements "
+            "may violate governance boundaries established in phases 45F–45Q."
+        ),
+        "severity": "high",
+        "mitigation": (
+            "Complete all not_ready areas before authorizing any live execution. "
+            "Run 46A–46C assessments before the 46D live pilot."
+        ),
+    },
+    {
+        "risk_id": "ler-risk-002",
+        "category": "governance_risk",
+        "description": (
+            "Advisory-only validation allows prompts with warnings to proceed; "
+            "no hard enforcement gate exists in the current pipeline."
+        ),
+        "severity": "high",
+        "mitigation": (
+            "Enforce prompt validation as a hard gate before enabling live execution."
+        ),
+    },
+    {
+        "risk_id": "ler-risk-003",
+        "category": "authorization_risk",
+        "description": (
+            "Without ExecutionAuthorization and ExecutionAuditRecord storage, "
+            "live execution would leave no auditable trail."
+        ),
+        "severity": "high",
+        "mitigation": (
+            "Implement both authorization recording (46A) and audit trail storage (46B) "
+            "before any live execution attempt."
+        ),
+    },
+    {
+        "risk_id": "ler-risk-004",
+        "category": "runtime_risk",
+        "description": (
+            "Adapter sandbox isolation has not been validated for live execution scope; "
+            "unintended repository mutations may occur."
+        ),
+        "severity": "medium",
+        "mitigation": (
+            "Review and tighten sandbox settings for each agent adapter "
+            "before live execution."
+        ),
+    },
+    {
+        "risk_id": "ler-risk-005",
+        "category": "governance_risk",
+        "description": (
+            "No consensus protocol means divergent multi-agent results have no "
+            "resolution path, risking conflicting repository changes."
+        ),
+        "severity": "medium",
+        "mitigation": "Define consensus requirements in 46C before multi-agent live execution.",
+    },
+)
+
+_LER_GOVERNANCE_BOUNDARIES: dict = {
+    "assessment_may": [
+        "assess readiness areas",
+        "identify blockers",
+        "generate risks",
+        "generate recommendations",
+        "identify live execution requirements",
+    ],
+    "assessment_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_LER_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46B", "description": "Runtime Execution Result Capture"},
+    {"phase": "46C", "description": "Execution Consensus Framework"},
+    {"phase": "46D", "description": "Governed Live Execution Pilot"},
+)
+
+
+def build_live_execution_readiness() -> dict:
+    """Assess PCAE readiness for future governed live execution. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"ler-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    readiness_areas = [dict(a) for a in _LER_READINESS_AREAS]
+    blockers = [dict(b) for b in _LER_BLOCKERS]
+    risks = [dict(r) for r in _LER_RISKS]
+
+    recommendations = [
+        {
+            "area": a["area"],
+            "readiness_status": a["readiness_status"],
+            "rationale": a["rationale"],
+            "blockers": list(a["blockers"]),
+            "recommended_actions": list(a["recommended_actions"]),
+        }
+        for a in _LER_READINESS_AREAS
+    ]
+
+    ready_count = sum(1 for a in readiness_areas if a["readiness_status"] == "ready")
+    partial_count = sum(
+        1 for a in readiness_areas if a["readiness_status"] == "partially_ready"
+    )
+    not_ready_count = sum(
+        1 for a in readiness_areas if a["readiness_status"] == "not_ready"
+    )
+    overall_status = (
+        "not_ready" if not_ready_count > 0
+        else ("partially_ready" if partial_count > 0 else "ready")
+    )
+
+    readiness_summary = {
+        "assessment_id": assessment_id,
+        "generated_at": generated_at,
+        "phase": "46A",
+        "title": "Live Execution Readiness Assessment",
+        "overall_status": overall_status,
+        "live_execution_recommended": False,
+        "human_review_required": True,
+        "area_count": len(readiness_areas),
+        "ready_count": ready_count,
+        "partially_ready_count": partial_count,
+        "not_ready_count": not_ready_count,
+        "blocker_count": len(blockers),
+        "risk_count": len(risks),
+        "live_execution_requirements": list(_LER_LIVE_EXECUTION_REQUIREMENTS),
+        "input_sources": list(_LER_INPUT_SOURCES),
+        "governance_boundaries": dict(_LER_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LER_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "readiness_summary": readiness_summary,
+        "readiness_areas": readiness_areas,
+        "blockers": blockers,
+        "risks": risks,
+        "recommendations": recommendations,
+        "human_review_required": True,
+        "advisory": LIVE_EXECUTION_READINESS_ADVISORY,
+    }

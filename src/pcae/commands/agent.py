@@ -90,6 +90,8 @@ from pcae.core.agent import (
     HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
     build_governed_execution_pilot,
     GOVERNED_EXECUTION_PILOT_ADVISORY,
+    build_live_execution_readiness,
+    LIVE_EXECUTION_READINESS_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4243,6 +4245,52 @@ def run_governed_execution_pilot(args: argparse.Namespace) -> int:
         print("Recommendations:")
         for rec in data["recommendations"]:
             print(f"  [{rec['area']} → {rec['target_phase']}] {rec['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_live_execution_readiness(args: argparse.Namespace) -> int:
+    data = build_live_execution_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        summary = data["readiness_summary"]
+        print("Live execution readiness assessment")
+        print(f"Assessment: {summary['assessment_id']}  Generated: {summary['generated_at']}")
+        print(f"Phase: {summary['phase']} — {summary['title']}")
+        print()
+        print(f"Overall status:              {summary['overall_status']}")
+        print(f"Live execution recommended:  {'yes' if summary['live_execution_recommended'] else 'no'}")
+        print(f"Human review required:       {'yes' if summary['human_review_required'] else 'no'}")
+        print(
+            f"Areas: {summary['area_count']} total"
+            f" ({summary['ready_count']} ready,"
+            f" {summary['partially_ready_count']} partially_ready,"
+            f" {summary['not_ready_count']} not_ready)"
+        )
+        print()
+        print("Readiness by area:")
+        for area in data["readiness_areas"]:
+            print(f"  {area['area']}: {area['readiness_status']}")
+            for blocker in area["blockers"]:
+                print(f"    ! {blocker}")
+        print()
+        print(f"Blockers ({summary['blocker_count']}):")
+        for blocker in data["blockers"]:
+            print(f"  [{blocker['severity']}] {blocker['blocker_id']}: {blocker['description']}")
+            print(f"    Category: {blocker['category']}  Blocks: {blocker['blocks_area']}")
+        print()
+        print(f"Risks ({summary['risk_count']}):")
+        for risk in data["risks"]:
+            print(f"  [{risk['severity']}] {risk['risk_id']}: {risk['description']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            if rec["recommended_actions"]:
+                print(f"  {rec['area']} ({rec['readiness_status']}):")
+                for action in rec["recommended_actions"]:
+                    print(f"    - {action}")
         print()
         print(data["advisory"])
     return 0

@@ -57,6 +57,7 @@ from pcae.commands.agent import (
     run_prompt_execution_dry_run,
     run_human_agent_execution_design,
     run_governed_execution_pilot,
+    run_live_execution_readiness,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1731,6 +1732,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governed execution pilot output.",
     )
     governed_execution_pilot_parser.set_defaults(handler=run_governed_execution_pilot)
+
+    live_execution_readiness_parser = subparsers.add_parser(
+        "live-execution-readiness",
+        help="Assess PCAE readiness for future governed live prompt execution (Phase 46A).",
+    )
+    live_execution_readiness_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON live execution readiness output.",
+    )
+    live_execution_readiness_parser.set_defaults(handler=run_live_execution_readiness)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

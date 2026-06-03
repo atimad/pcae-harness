@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45Q: Governed Prompt Execution Pilot.
+Phase 46A: Live Execution Readiness Assessment.
 
 ## Governance Coherence Note
 
@@ -2270,9 +2270,34 @@ commit/push/rollback; read_only=true, human_review_required=true; future_evoluti
 46A/46B/46C/46D; advisory: "Governed execution pilot is simulated; no prompts
 are executed."
 
+PCAE can assess readiness for future governed live prompt execution with
+`pcae live-execution-readiness` and `pcae live-execution-readiness --json`
+(Phase 46A): inputs: governed execution pilot, prompt execution readiness
+assessment, prompt approval artifacts, runtime invocation validation, capability
+registry, governance artifacts; no prompts are executed; nine readiness areas
+(Prompt Approval Infrastructure/Prompt Governance/Prompt Validation/Runtime
+Invocation Contracts/Runtime Adapters/Execution Authorization/Audit Trail Support/
+Consensus Support/Human Oversight) each with readiness_status (ready/partially_ready/
+not_ready)/rationale/blockers/recommended_actions; six blockers across five categories
+(approval_blocker/invocation_blocker/adapter_blocker/consensus_blocker/governance_blocker)
+each with blocker_id/category/description/severity/blocks_area; five live execution
+requirements (approved_prompt_storage/validated_invocation_contracts/
+execution_authorization_recording/audit_trail_recording/human_authorization_recording);
+five risks across four categories (execution_risk/governance_risk/authorization_risk/
+runtime_risk) each with risk_id/description/severity/mitigation; nine recommendations
+(one per area) with area/readiness_status/rationale/blockers/recommended_actions;
+overall assessment: assessment_id (ler-*)/overall_status=not_ready/
+live_execution_recommended=false/human_review_required=true/area_count=9/
+ready_count=2/partially_ready_count=2/not_ready_count=5/blocker_count=6/risk_count=5;
+governance_boundaries: may assess readiness areas/identify blockers/generate risks/
+generate recommendations/identify live execution requirements; may not execute prompts/
+invoke agents/modify repository/commit/push; read_only=true, human_review_required=true;
+future_evolution: 46B/46C/46D; advisory: "Live execution readiness assessment is
+informational; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (46A Live Execution Readiness Assessment, 46B Runtime Execution Result Capture, 46C Execution Consensus Framework, 46D Governed Live Execution Pilot).
+- TBD: Future phases (46B Runtime Execution Result Capture, 46C Execution Consensus Framework, 46D Governed Live Execution Pilot).
 
 ## Future Explorations
 

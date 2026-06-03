@@ -381,3 +381,8 @@
 
 - `pcae governed-execution-pilot`
 - `pcae governed-execution-pilot --json`
+
+## live-execution-readiness
+
+- `pcae live-execution-readiness`
+- `pcae live-execution-readiness --json`
