@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46B: Runtime Execution Result Capture and Audit Storage.
+Phase 46C: Execution Consensus Framework.
 
 ## Governance Coherence Note
 
@@ -2318,9 +2318,30 @@ commit/push; read_only=true, human_review_required=true; future_evolution: 46C/4
 advisory: "Execution audit storage design is informational; no execution records are
 created."
 
+PCAE can design the consensus framework for reconciling multi-agent execution outcomes
+with `pcae execution-consensus-design` and `pcae execution-consensus-design --json`
+(Phase 46C): inputs: governed execution pilot, execution audit design, prompt approval
+artifacts, human selected execution design, capability registry; no prompts are executed;
+no agents are invoked; consensus lifecycle (7 steps): execution_results/result_collection/
+consensus_evaluation/conflict_detection/resolution_recommendation/human_review/
+consensus_record; consensus modes: single_agent/majority_agreement/unanimous_agreement/
+human_decision_required; conflict detection: differing_recommendations/differing_file_scopes/
+differing_governance_outcomes/differing_validation_outcomes/incompatible_execution_plans
+(severities: high/critical); resolution rules: may recommend majority outcome/unanimous
+outcome/escalate to human review; may not override governance/bypass approval/authorize
+execution/modify repository; agreement statuses: consensus_reached/consensus_not_reached/
+human_resolution_required; ConsensusAuditRecord model: 7 fields (consensus_id/execution_id/
+participating_agents/agreement_status/conflicts/resolution_recommendation/created_at),
+all_fields_immutable_after_creation=true; storage invariants: append_only/immutable,
+both value=true/violation_severity=error; governance_boundaries: may evaluate agreement/
+detect conflicts/recommend resolutions; may not execute prompts/invoke agents/authorize
+execution/commit/push/rollback; read_only=true, human_review_required=true;
+future_evolution: 46D/46E/46F; advisory: "Execution consensus framework is informational;
+no execution occurs."
+
 ## Next
 
-- TBD: Future phases (46C Execution Consensus Framework, 46D Governed Live Execution Pilot, 46E Execution Result Review Workflow).
+- TBD: Future phases (46D Governed Live Execution Pilot, 46E Execution Result Review Workflow, 46F Multi-Agent Execution Consensus Pilot).
 
 ## Future Explorations
 

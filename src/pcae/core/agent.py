@@ -15362,3 +15362,396 @@ def build_execution_audit_design() -> dict:
         "human_review_required": True,
         "advisory": EXECUTION_AUDIT_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46C — Execution Consensus Framework
+# ---------------------------------------------------------------------------
+
+EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY = (
+    "Execution consensus framework is informational; no execution occurs."
+)
+
+_ECFD_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_execution_pilot",
+    "execution_audit_design",
+    "prompt_approval_artifacts",
+    "human_selected_execution_design",
+    "capability_registry",
+)
+
+_ECFD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "execution_results",
+        "description": (
+            "Execution results from one or more agents are available as inputs "
+            "to the consensus pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "result_collection",
+        "description": (
+            "All agent execution results are collected and normalized into a "
+            "common representation for evaluation."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "consensus_evaluation",
+        "description": (
+            "Collected results are evaluated for agreement using the configured "
+            "consensus mode (single_agent, majority_agreement, unanimous_agreement, "
+            "or human_decision_required)."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "conflict_detection",
+        "description": (
+            "Conflicts are detected across differing recommendations, file scopes, "
+            "governance outcomes, validation outcomes, and execution plans."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "resolution_recommendation",
+        "description": (
+            "A resolution recommendation is produced: majority outcome, unanimous "
+            "outcome, or escalation to human review. The framework may not authorize "
+            "execution or override governance."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "human_review",
+        "description": (
+            "The consensus result and any conflicts are presented to the human for "
+            "review. Human review is required before any downstream action."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "consensus_record",
+        "description": (
+            "A ConsensusAuditRecord is created and appended to the append-only "
+            "consensus audit store. Records are immutable after creation."
+        ),
+    },
+)
+
+_ECFD_CONSENSUS_MODES: tuple[dict, ...] = (
+    {
+        "mode": "single_agent",
+        "description": (
+            "Only one agent participated. Agreement is determined from a single result; "
+            "no conflict detection is needed."
+        ),
+        "min_agents": 1,
+        "max_agents": 1,
+    },
+    {
+        "mode": "majority_agreement",
+        "description": (
+            "More than half of participating agents must agree on the recommended "
+            "resolution for consensus to be reached."
+        ),
+        "min_agents": 2,
+        "max_agents": None,
+    },
+    {
+        "mode": "unanimous_agreement",
+        "description": (
+            "All participating agents must agree on the recommended resolution. "
+            "Any dissent triggers human_decision_required escalation."
+        ),
+        "min_agents": 2,
+        "max_agents": None,
+    },
+    {
+        "mode": "human_decision_required",
+        "description": (
+            "Consensus cannot be reached algorithmically. The human is authoritative "
+            "and must resolve the conflict before any downstream action proceeds."
+        ),
+        "min_agents": 1,
+        "max_agents": None,
+    },
+)
+
+_ECFD_CONFLICT_DETECTION_RULES: tuple[dict, ...] = (
+    {
+        "conflict_type": "differing_recommendations",
+        "description": (
+            "Agents produced different top-level recommendations for the governed task."
+        ),
+        "severity": "high",
+    },
+    {
+        "conflict_type": "differing_file_scopes",
+        "description": (
+            "Agents proposed different sets of files to be modified or created."
+        ),
+        "severity": "high",
+    },
+    {
+        "conflict_type": "differing_governance_outcomes",
+        "description": (
+            "Agents reported different governance statuses or policy compliance results."
+        ),
+        "severity": "critical",
+    },
+    {
+        "conflict_type": "differing_validation_outcomes",
+        "description": (
+            "Agents reported different validation results for the same prompt or task."
+        ),
+        "severity": "high",
+    },
+    {
+        "conflict_type": "incompatible_execution_plans",
+        "description": (
+            "Agents produced execution plans that cannot be reconciled or applied "
+            "simultaneously without conflict."
+        ),
+        "severity": "critical",
+    },
+)
+
+_ECFD_AGREEMENT_STATUSES: tuple[str, ...] = (
+    "consensus_reached",
+    "consensus_not_reached",
+    "human_resolution_required",
+)
+
+_ECFD_CONSENSUS_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "description": "Unique identifier for this consensus evaluation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the governed execution this consensus evaluates.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "description": "Identifiers of all agents whose results were included.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_mode",
+        "type": "str",
+        "description": (
+            "Mode used to evaluate consensus: single_agent, majority_agreement, "
+            "unanimous_agreement, or human_decision_required."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "agreement_status",
+        "type": "str",
+        "description": (
+            "Outcome of consensus evaluation: consensus_reached, consensus_not_reached, "
+            "or human_resolution_required."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "conflicts",
+        "type": "list[dict]",
+        "description": "List of detected conflicts, each with conflict_type and description.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "recommended_resolution",
+        "type": "str",
+        "description": (
+            "Advisory resolution recommended by the framework. May not authorize "
+            "execution or override governance."
+        ),
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "True when the agreement_status requires human resolution.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_ECFD_RESOLUTION_RULES: dict = {
+    "framework_may": [
+        "recommend majority outcome",
+        "recommend unanimous outcome",
+        "escalate to human review",
+    ],
+    "framework_may_not": [
+        "override governance",
+        "bypass approval",
+        "authorize execution",
+        "modify repository",
+    ],
+}
+
+_ECFD_AUDIT_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "description": "Unique identifier for this consensus audit record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the governed execution this record covers.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "description": "Identifiers of all agents whose results were evaluated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "agreement_status",
+        "type": "str",
+        "description": "Outcome of consensus evaluation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "conflicts",
+        "type": "list[dict]",
+        "description": "List of detected conflicts.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "resolution_recommendation",
+        "type": "str",
+        "description": "Advisory resolution recommendation produced by the framework.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "description": "ISO 8601 timestamp when this audit record was created.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_ECFD_AUDIT_STORAGE_INVARIANTS: tuple[dict, ...] = (
+    {
+        "invariant": "append_only",
+        "value": True,
+        "description": "Consensus audit records may only be appended; existing records may not be altered.",
+        "enforcement": "storage_layer",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "immutable",
+        "value": True,
+        "description": "All fields in a consensus audit record are immutable after creation.",
+        "enforcement": "application_layer",
+        "violation_severity": "error",
+    },
+)
+
+_ECFD_GOVERNANCE_BOUNDARIES: dict = {
+    "framework_may": [
+        "evaluate agreement",
+        "detect conflicts",
+        "recommend resolutions",
+    ],
+    "framework_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "authorize execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_ECFD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46D", "description": "Governed Live Execution Pilot"},
+    {"phase": "46E", "description": "Execution Result Review Workflow"},
+    {"phase": "46F", "description": "Multi-Agent Execution Consensus Pilot"},
+)
+
+
+def build_execution_consensus_framework() -> dict:
+    """Design consensus framework for reconciling multi-agent execution outcomes. Read-only; no execution occurs."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"ecfd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _ECFD_LIFECYCLE]
+    consensus_modes = [dict(m) for m in _ECFD_CONSENSUS_MODES]
+    conflict_detection_rules = [dict(r) for r in _ECFD_CONFLICT_DETECTION_RULES]
+    consensus_result_fields = [dict(f) for f in _ECFD_CONSENSUS_RESULT_FIELDS]
+    audit_record_fields = [dict(f) for f in _ECFD_AUDIT_RECORD_FIELDS]
+
+    consensus_record_model = {
+        "model_name": "ConsensusAuditRecord",
+        "design_id": design_id,
+        "field_count": len(audit_record_fields),
+        "fields": audit_record_fields,
+        "required_field_count": sum(1 for f in audit_record_fields if f["required"]),
+        "all_fields_immutable_after_creation": True,
+        "storage_invariants": [dict(i) for i in _ECFD_AUDIT_STORAGE_INVARIANTS],
+    }
+
+    execution_consensus_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46C",
+        "title": "Execution Consensus Framework",
+        "summary": (
+            "Defines the consensus lifecycle, consensus modes, conflict detection rules, "
+            "resolution rules, ConsensusAuditRecord model, and governance boundaries for "
+            "evaluating and reconciling execution outcomes from multiple agents. "
+            "No prompts are executed and no agents are invoked."
+        ),
+        "input_sources": list(_ECFD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "consensus_mode_count": len(consensus_modes),
+        "conflict_type_count": len(conflict_detection_rules),
+        "consensus_result_field_count": len(consensus_result_fields),
+        "agreement_statuses": list(_ECFD_AGREEMENT_STATUSES),
+        "human_review_required": True,
+        "governance_boundaries": dict(_ECFD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _ECFD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "execution_consensus_design": execution_consensus_design,
+        "lifecycle": lifecycle,
+        "consensus_modes": consensus_modes,
+        "conflict_detection_rules": conflict_detection_rules,
+        "resolution_rules": dict(_ECFD_RESOLUTION_RULES),
+        "consensus_record_model": consensus_record_model,
+        "governance_boundaries": dict(_ECFD_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY,
+    }

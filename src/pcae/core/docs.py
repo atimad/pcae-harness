@@ -412,6 +412,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-audit-design`
 - `pcae execution-audit-design --json`
+
+## execution-consensus-design
+
+- `pcae execution-consensus-design`
+- `pcae execution-consensus-design --json`
 """
 
 

@@ -94,6 +94,8 @@ from pcae.core.agent import (
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
     EXECUTION_AUDIT_DESIGN_ADVISORY,
+    build_execution_consensus_framework,
+    EXECUTION_CONSENSUS_FRAMEWORK_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4353,6 +4355,56 @@ def run_execution_audit_design(args: argparse.Namespace) -> int:
         gb = data["governance_boundaries"]
         print(f"  May:     {', '.join(gb['audit_system_may'])}")
         print(f"  May not: {', '.join(gb['audit_system_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_consensus_framework(args: argparse.Namespace) -> int:
+    data = build_execution_consensus_framework()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["execution_consensus_design"]
+        print("Execution consensus framework design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Consensus lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Consensus modes:")
+        for mode in data["consensus_modes"]:
+            print(f"  {mode['mode']}")
+            print(f"    {mode['description']}")
+        print()
+        print("Conflict detection rules:")
+        for rule in data["conflict_detection_rules"]:
+            print(f"  {rule['conflict_type']} (severity={rule['severity']})")
+            print(f"    {rule['description']}")
+        print()
+        print("Resolution rules:")
+        rr = data["resolution_rules"]
+        print(f"  May:     {', '.join(rr['framework_may'])}")
+        print(f"  May not: {', '.join(rr['framework_may_not'])}")
+        print()
+        print("Consensus record model (ConsensusAuditRecord):")
+        crm = data["consensus_record_model"]
+        print(f"  Fields: {crm['field_count']}  Required: {crm['required_field_count']}")
+        for field in crm["fields"]:
+            req = "required" if field["required"] else "optional"
+            print(f"    {field['name']} ({field['type']}, {req}): {field['description']}")
+        print(f"  All fields immutable after creation: {crm['all_fields_immutable_after_creation']}")
+        print()
+        print("Governance boundaries:")
+        gb = data["governance_boundaries"]
+        print(f"  May:     {', '.join(gb['framework_may'])}")
+        print(f"  May not: {', '.join(gb['framework_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

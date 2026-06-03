@@ -22655,3 +22655,167 @@ def test_46b_execution_audit_design_human_output_shows_all_sections(capsys) -> N
     assert "Retention requirements" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46C — Execution Consensus Framework
+# ---------------------------------------------------------------------------
+
+
+def test_46c_execution_consensus_framework_json_structure(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("execution_consensus_design", "lifecycle", "consensus_modes",
+                "conflict_detection_rules", "resolution_rules",
+                "consensus_record_model", "governance_boundaries", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46c_execution_consensus_framework_design_fields(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_consensus_design"]
+    for field in ("design_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "consensus_mode_count", "conflict_type_count",
+                  "agreement_statuses", "human_review_required",
+                  "governance_boundaries", "future_evolution"):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("ecfd-")
+    assert design["phase"] == "46C"
+
+
+def test_46c_execution_consensus_framework_lifecycle(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("execution_results", "result_collection", "consensus_evaluation",
+                     "conflict_detection", "resolution_recommendation",
+                     "human_review", "consensus_record"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46c_execution_consensus_framework_consensus_modes(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    modes = data["consensus_modes"]
+    assert len(modes) == 4
+    mode_names = [m["mode"] for m in modes]
+    for expected in ("single_agent", "majority_agreement",
+                     "unanimous_agreement", "human_decision_required"):
+        assert expected in mode_names, f"missing consensus mode: {expected}"
+    for mode in modes:
+        for field in ("mode", "description", "min_agents"):
+            assert field in mode, f"mode missing field: {field}"
+
+
+def test_46c_execution_consensus_framework_conflict_detection(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["conflict_detection_rules"]
+    assert len(rules) == 5
+    conflict_types = [r["conflict_type"] for r in rules]
+    for expected in ("differing_recommendations", "differing_file_scopes",
+                     "differing_governance_outcomes", "differing_validation_outcomes",
+                     "incompatible_execution_plans"):
+        assert expected in conflict_types, f"missing conflict type: {expected}"
+    for rule in rules:
+        for field in ("conflict_type", "description", "severity"):
+            assert field in rule, f"conflict rule missing field: {field}"
+
+
+def test_46c_execution_consensus_framework_resolution_rules(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rr = data["resolution_rules"]
+    assert "framework_may" in rr
+    assert "framework_may_not" in rr
+    may = " ".join(rr["framework_may"]).lower()
+    for expected in ("majority outcome", "unanimous outcome", "human review"):
+        assert expected in may, f"missing resolution may: {expected}"
+    may_not = " ".join(rr["framework_may_not"]).lower()
+    for forbidden in ("override governance", "bypass approval",
+                      "authorize execution", "modify repository"):
+        assert forbidden in may_not, f"missing resolution may_not: {forbidden}"
+
+
+def test_46c_execution_consensus_framework_consensus_record_model(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["consensus_record_model"]
+    assert model["model_name"] == "ConsensusAuditRecord"
+    assert model["all_fields_immutable_after_creation"] is True
+    assert "storage_invariants" in model
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in ("consensus_id", "execution_id", "participating_agents",
+                     "agreement_status", "conflicts", "resolution_recommendation",
+                     "created_at"):
+        assert expected in field_names, f"missing audit record field: {expected}"
+
+
+def test_46c_execution_consensus_framework_storage_invariants(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    invariants = data["consensus_record_model"]["storage_invariants"]
+    inv_names = {i["invariant"] for i in invariants}
+    for expected in ("append_only", "immutable"):
+        assert expected in inv_names, f"missing storage invariant: {expected}"
+    for inv in invariants:
+        assert inv["value"] is True
+        assert inv["violation_severity"] == "error"
+
+
+def test_46c_execution_consensus_framework_governance_boundaries(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "framework_may" in gb
+    assert "framework_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["framework_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "authorize execution",
+                      "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46c_execution_consensus_framework_agreement_statuses(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    statuses = data["execution_consensus_design"]["agreement_statuses"]
+    for expected in ("consensus_reached", "consensus_not_reached",
+                     "human_resolution_required"):
+        assert expected in statuses, f"missing agreement status: {expected}"
+
+
+def test_46c_execution_consensus_framework_future_evolution(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["execution_consensus_design"]["future_evolution"]]
+    for expected in ("46D", "46E", "46F"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46c_execution_consensus_framework_advisory(capsys) -> None:
+    main(["execution-consensus-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no execution occurs" in advisory
+
+
+def test_46c_execution_consensus_framework_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-consensus-design"])
+    output = capsys.readouterr().out
+    assert "Execution consensus framework design" in output
+    assert "Consensus lifecycle" in output
+    assert "Consensus modes" in output
+    assert "Conflict detection rules" in output
+    assert "Resolution rules" in output
+    assert "Consensus record model" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
