@@ -16922,3 +16922,425 @@ def build_execution_authorization_design() -> dict:
         "governance_boundaries": dict(_EAAD_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_AUTHORIZATION_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46G — Read-Only Live Invocation Pilot
+# ---------------------------------------------------------------------------
+
+READ_ONLY_INVOCATION_PILOT_ADVISORY = (
+    "Read-only invocation pilot is informational; no runtimes are invoked."
+)
+
+_ROIP_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_authorization_artifact",
+    "governed_live_execution_pilot",
+    "runtime_invocation_workload_validation",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "capability_registry",
+)
+
+_ROIP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt",
+        "description": (
+            "An approved prompt artifact with governance provenance enters the "
+            "read-only invocation pilot pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "The ExecutionAuthorizationArtifact is retrieved and validated. "
+            "Pilot may not proceed without an authorized artifact."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "runtime_selection",
+        "description": (
+            "The human selects the target runtime from validated candidates "
+            "(codex-local, claude-local, kimi-local). kimi-local requires additional "
+            "sandbox documentation before selection."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "read_only_invocation_plan",
+        "description": (
+            "A read-only InvocationPlan is prepared: runtime, prompt, sandbox mode, "
+            "output capture mode, timeout strategy, and authorization reference are recorded."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "output_capture_plan",
+        "description": (
+            "Output capture strategy is defined: stdout, stderr, structured outputs, "
+            "and runtime metadata capture targets are specified before invocation."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "audit_record_preparation",
+        "description": (
+            "ExecutionAuditRecord, runtime snapshot, authorization snapshot, and output "
+            "summary templates are prepared before invocation begins."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "consensus_review_path",
+        "description": (
+            "The consensus review path is selected: single-agent, multi-agent future, "
+            "or human escalation. Path is recorded in the invocation plan."
+        ),
+    },
+    {
+        "step": 8,
+        "name": "future_read_only_execution",
+        "description": (
+            "The prepared plan is passed to the Phase 46J live invocation implementation "
+            "as the authoritative design artifact."
+        ),
+    },
+)
+
+_ROIP_SUPPORTED_RUNTIMES: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "read_only_contract": 'codex exec --sandbox read-only "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+        "pilot_readiness": "ready",
+        "blockers": [],
+    },
+    {
+        "runtime": "claude-local",
+        "read_only_contract": 'claude -p "<prompt>"',
+        "sandbox_defined": True,
+        "output_capture_defined": True,
+        "timeout_defined": True,
+        "pilot_readiness": "ready",
+        "blockers": [],
+    },
+    {
+        "runtime": "kimi-local",
+        "read_only_contract": 'kimi -p "<prompt>"',
+        "sandbox_defined": False,
+        "output_capture_defined": True,
+        "timeout_defined": False,
+        "pilot_readiness": "blocked",
+        "blockers": ["missing_sandbox_strategy", "missing_timeout_strategy"],
+    },
+)
+
+_ROIP_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "execution_authorization_artifact",
+        "description": "A valid ExecutionAuthorizationArtifact must be present before plan preparation.",
+        "blocking": True,
+    },
+    {
+        "requirement": "approved_prompt_artifact",
+        "description": "The prompt must carry a valid approval record.",
+        "blocking": True,
+    },
+    {
+        "requirement": "read_only_sandbox_mode",
+        "description": "The selected runtime must support an explicitly documented read-only sandbox mode.",
+        "blocking": True,
+    },
+    {
+        "requirement": "output_capture_strategy",
+        "description": "An output capture strategy must be defined before the invocation plan is finalized.",
+        "blocking": True,
+    },
+    {
+        "requirement": "audit_record_strategy",
+        "description": "Audit record templates must be prepared before invocation.",
+        "blocking": True,
+    },
+    {
+        "requirement": "timeout_strategy",
+        "description": "A timeout strategy must be defined for the selected runtime.",
+        "blocking": True,
+    },
+)
+
+_ROIP_INVOCATION_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "invocation_plan_id",
+        "type": "str",
+        "description": "Unique identifier for this read-only invocation plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Identifier of the human-selected runtime for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_prompt",
+        "type": "str",
+        "description": "Identifier of the approved prompt artifact to be invoked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "sandbox_mode",
+        "type": "str",
+        "description": "Sandbox mode for the invocation (must be read_only for this pilot).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "output_capture_mode",
+        "type": "str",
+        "description": "Output capture strategy: stdout, stderr, structured, or combined.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "timeout_strategy",
+        "type": "str",
+        "description": "Timeout policy for the runtime invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_reference",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact authorizing this plan.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_ROIP_OUTPUT_CAPTURE_DESIGN: tuple[dict, ...] = (
+    {
+        "capture_target": "stdout",
+        "description": "Standard output of the runtime invocation.",
+        "required": True,
+    },
+    {
+        "capture_target": "stderr",
+        "description": "Standard error output; captured separately to surface warnings and errors.",
+        "required": True,
+    },
+    {
+        "capture_target": "structured_outputs",
+        "description": "Structured artifacts produced by the runtime (JSON, YAML, or typed outputs).",
+        "required": False,
+    },
+    {
+        "capture_target": "runtime_metadata",
+        "description": "Runtime invocation metadata: exit code, duration, runtime version, sandbox mode.",
+        "required": True,
+    },
+)
+
+_ROIP_AUDIT_INTEGRATION: tuple[dict, ...] = (
+    {
+        "artifact": "execution_audit_record",
+        "description": (
+            "ExecutionAuditRecord template prepared before invocation; captures "
+            "authorization reference, runtime, prompt, and governance metadata."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "runtime_snapshot",
+        "description": (
+            "Point-in-time snapshot of the runtime state at plan preparation time."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "authorization_snapshot",
+        "description": (
+            "Point-in-time snapshot of the ExecutionAuthorizationArtifact at plan "
+            "preparation time."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+    {
+        "artifact": "output_summary",
+        "description": (
+            "Output summary template prepared before invocation; populated with "
+            "stdout, stderr, structured outputs, and runtime metadata after execution."
+        ),
+        "prepared_before_invocation": True,
+        "immutable_after_creation": True,
+    },
+)
+
+_ROIP_CONSENSUS_INTEGRATION: tuple[dict, ...] = (
+    {
+        "path": "single_agent_review_path",
+        "description": (
+            "For single-runtime pilots, a trivial consensus is recorded with "
+            "consensus_mode=single_agent and agreement_status=consensus_reached."
+        ),
+        "agents_required": 1,
+        "human_escalation": False,
+    },
+    {
+        "path": "multi_agent_future_path",
+        "description": (
+            "Future multi-runtime pilots will route all results through the full "
+            "consensus framework (Phase 46C) for majority or unanimous agreement evaluation."
+        ),
+        "agents_required": 2,
+        "human_escalation": True,
+    },
+    {
+        "path": "human_escalation_path",
+        "description": (
+            "When any requirement gate fails or consensus cannot be reached, the "
+            "pilot escalates to human review before any further action."
+        ),
+        "agents_required": 1,
+        "human_escalation": True,
+    },
+)
+
+_ROIP_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "roip-b1",
+        "category": "authorization_blocker",
+        "description": "No invocation plan may be prepared without a valid ExecutionAuthorizationArtifact.",
+        "severity": "critical",
+        "blocks_requirement": "execution_authorization_artifact",
+    },
+    {
+        "blocker_id": "roip-b2",
+        "category": "runtime_blocker",
+        "runtime": "kimi-local",
+        "description": "kimi-local sandbox isolation is not explicitly documented; blocked from pilot selection.",
+        "severity": "high",
+        "blocks_requirement": "read_only_sandbox_mode",
+    },
+    {
+        "blocker_id": "roip-b3",
+        "category": "runtime_blocker",
+        "runtime": "kimi-local",
+        "description": "kimi-local timeout strategy is not explicitly documented; blocked from pilot selection.",
+        "severity": "high",
+        "blocks_requirement": "timeout_strategy",
+    },
+)
+
+_ROIP_RECOMMENDATIONS: tuple[str, ...] = (
+    "Begin with codex-local or claude-local where sandbox and timeout are explicitly documented.",
+    "Prepare all four audit artifacts before finalizing the invocation plan.",
+    "Define output capture mode explicitly in the plan before submitting for human authorization.",
+    "Document kimi-local sandbox and timeout strategies before including it in any pilot.",
+    "Restrict this pilot to a single runtime and single approved prompt.",
+    "Record the consensus review path in the invocation plan before authorization.",
+)
+
+_ROIP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "assess invocation readiness",
+        "prepare invocation plans",
+        "prepare output capture plans",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_ROIP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46H", "description": "Live Execution Result Review Workflow"},
+    {"phase": "46I", "description": "Authorization Expiration Workflow"},
+    {"phase": "46J", "description": "Read-Only Invocation Pilot Implementation"},
+    {"phase": "46K", "description": "Multi-Agent Invocation Pilot"},
+)
+
+
+def build_read_only_invocation_pilot() -> dict:
+    """Design governed read-only runtime invocation pilot architecture. Read-only; no runtimes invoked."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"roip-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _ROIP_LIFECYCLE]
+    supported_runtimes = [dict(r) for r in _ROIP_SUPPORTED_RUNTIMES]
+    requirements = [dict(r) for r in _ROIP_REQUIREMENTS]
+    invocation_plan_fields = [dict(f) for f in _ROIP_INVOCATION_PLAN_FIELDS]
+    output_capture_design = [dict(c) for c in _ROIP_OUTPUT_CAPTURE_DESIGN]
+    audit_integration = [dict(a) for a in _ROIP_AUDIT_INTEGRATION]
+    consensus_integration = [dict(c) for c in _ROIP_CONSENSUS_INTEGRATION]
+    blockers = [dict(b) for b in _ROIP_BLOCKERS]
+    recommendations = list(_ROIP_RECOMMENDATIONS)
+
+    invocation_plan_model = {
+        "model_name": "InvocationPlan",
+        "pilot_id": pilot_id,
+        "field_count": len(invocation_plan_fields),
+        "fields": invocation_plan_fields,
+        "required_field_count": sum(1 for f in invocation_plan_fields if f["required"]),
+        "all_fields_immutable_after_creation": True,
+        "sandbox_mode_constraint": "read_only",
+    }
+
+    ready_runtimes = [r["runtime"] for r in supported_runtimes if r["pilot_readiness"] == "ready"]
+    blocked_runtimes = [r["runtime"] for r in supported_runtimes if r["pilot_readiness"] == "blocked"]
+
+    read_only_invocation_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "46G",
+        "title": "Read-Only Live Invocation Pilot",
+        "summary": (
+            "Designs the first governed read-only runtime invocation pilot. "
+            "codex-local and claude-local are ready for pilot selection; "
+            "kimi-local is blocked pending explicit sandbox and timeout documentation. "
+            "No runtimes are invoked and no prompts are executed."
+        ),
+        "input_sources": list(_ROIP_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "supported_runtime_count": len(supported_runtimes),
+        "ready_runtime_count": len(ready_runtimes),
+        "blocked_runtime_count": len(blocked_runtimes),
+        "ready_runtimes": ready_runtimes,
+        "blocked_runtimes": blocked_runtimes,
+        "requirement_count": len(requirements),
+        "blocker_count": len(blockers),
+        "human_review_required": True,
+        "governance_boundaries": dict(_ROIP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _ROIP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "read_only_invocation_pilot": read_only_invocation_pilot,
+        "lifecycle": lifecycle,
+        "supported_runtimes": supported_runtimes,
+        "requirements": requirements,
+        "invocation_plan_model": invocation_plan_model,
+        "output_capture_design": output_capture_design,
+        "audit_integration": audit_integration,
+        "consensus_integration": consensus_integration,
+        "blockers": blockers,
+        "recommendations": recommendations,
+        "governance_boundaries": dict(_ROIP_GOVERNANCE_BOUNDARIES),
+        "advisory": READ_ONLY_INVOCATION_PILOT_ADVISORY,
+    }

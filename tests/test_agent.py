@@ -23186,6 +23186,7 @@ def test_46e_invocation_workload_validation_human_output_shows_all_sections(caps
 # ---------------------------------------------------------------------------
 
 
+
 def test_46f_execution_authorization_design_json_structure(capsys) -> None:
     main(["execution-authorization-design", "--json"])
     data = json.loads(capsys.readouterr().out)
@@ -23359,5 +23360,199 @@ def test_46f_execution_authorization_design_human_output_shows_all_sections(caps
     assert "Authorization requirements" in output
     assert "Artifact invariants" in output
     assert "Lineage model" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46G — Read-Only Live Invocation Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_46g_read_only_invocation_pilot_json_structure(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("read_only_invocation_pilot", "lifecycle", "supported_runtimes",
+                "requirements", "invocation_plan_model", "output_capture_design",
+                "audit_integration", "consensus_integration", "blockers",
+                "recommendations", "governance_boundaries", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46g_read_only_invocation_pilot_design_fields(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["read_only_invocation_pilot"]
+    for field in ("pilot_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "supported_runtime_count", "ready_runtime_count", "blocked_runtime_count",
+                  "ready_runtimes", "blocked_runtimes", "requirement_count", "blocker_count",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in pilot, f"missing pilot field: {field}"
+    assert pilot["pilot_id"].startswith("roip-")
+    assert pilot["phase"] == "46G"
+    assert pilot["supported_runtime_count"] == 3
+    assert pilot["ready_runtime_count"] == 2
+    assert pilot["blocked_runtime_count"] == 1
+
+
+def test_46g_read_only_invocation_pilot_lifecycle(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 8
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("approved_prompt", "execution_authorization", "runtime_selection",
+                     "read_only_invocation_plan", "output_capture_plan",
+                     "audit_record_preparation", "consensus_review_path",
+                     "future_read_only_execution"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46g_read_only_invocation_pilot_supported_runtimes(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    runtimes = data["supported_runtimes"]
+    assert len(runtimes) == 3
+    runtime_names = [r["runtime"] for r in runtimes]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_names, f"missing runtime: {expected}"
+    for rt in runtimes:
+        for field in ("runtime", "read_only_contract", "sandbox_defined",
+                      "output_capture_defined", "timeout_defined",
+                      "pilot_readiness", "blockers"):
+            assert field in rt, f"runtime missing field: {field}"
+    ready = [r for r in runtimes if r["pilot_readiness"] == "ready"]
+    blocked = [r for r in runtimes if r["pilot_readiness"] == "blocked"]
+    assert len(ready) == 2
+    assert len(blocked) == 1
+    assert blocked[0]["runtime"] == "kimi-local"
+
+
+def test_46g_read_only_invocation_pilot_requirements(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["requirements"]
+    assert len(reqs) == 6
+    req_names = [r["requirement"] for r in reqs]
+    for expected in ("execution_authorization_artifact", "approved_prompt_artifact",
+                     "read_only_sandbox_mode", "output_capture_strategy",
+                     "audit_record_strategy", "timeout_strategy"):
+        assert expected in req_names, f"missing requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+
+
+def test_46g_read_only_invocation_pilot_invocation_plan_model(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["invocation_plan_model"]
+    assert model["model_name"] == "InvocationPlan"
+    assert model["all_fields_immutable_after_creation"] is True
+    assert model["sandbox_mode_constraint"] == "read_only"
+    assert model["field_count"] == 7
+    assert model["required_field_count"] == 7
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in ("invocation_plan_id", "selected_runtime", "selected_prompt",
+                     "sandbox_mode", "output_capture_mode",
+                     "timeout_strategy", "authorization_reference"):
+        assert expected in field_names, f"missing plan field: {expected}"
+
+
+def test_46g_read_only_invocation_pilot_output_capture_design(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    capture = data["output_capture_design"]
+    assert len(capture) == 4
+    targets = [c["capture_target"] for c in capture]
+    for expected in ("stdout", "stderr", "structured_outputs", "runtime_metadata"):
+        assert expected in targets, f"missing capture target: {expected}"
+    for c in capture:
+        for field in ("capture_target", "description", "required"):
+            assert field in c, f"capture entry missing field: {field}"
+
+
+def test_46g_read_only_invocation_pilot_audit_integration(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    artifacts = data["audit_integration"]
+    assert len(artifacts) == 4
+    artifact_names = [a["artifact"] for a in artifacts]
+    for expected in ("execution_audit_record", "runtime_snapshot",
+                     "authorization_snapshot", "output_summary"):
+        assert expected in artifact_names, f"missing audit artifact: {expected}"
+    for a in artifacts:
+        assert a["prepared_before_invocation"] is True
+        assert a["immutable_after_creation"] is True
+
+
+def test_46g_read_only_invocation_pilot_consensus_integration(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    paths = data["consensus_integration"]
+    assert len(paths) == 3
+    path_names = [p["path"] for p in paths]
+    for expected in ("single_agent_review_path", "multi_agent_future_path",
+                     "human_escalation_path"):
+        assert expected in path_names, f"missing consensus path: {expected}"
+
+
+def test_46g_read_only_invocation_pilot_blockers(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) == 3
+    ids = [b["blocker_id"] for b in blockers]
+    for expected in ("roip-b1", "roip-b2", "roip-b3"):
+        assert expected in ids, f"missing blocker: {expected}"
+    auth_blocker = next(b for b in blockers if b["blocker_id"] == "roip-b1")
+    assert auth_blocker["severity"] == "critical"
+    kimi_blockers = [b for b in blockers if b.get("runtime") == "kimi-local"]
+    assert len(kimi_blockers) == 2
+
+
+def test_46g_read_only_invocation_pilot_governance_boundaries(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46g_read_only_invocation_pilot_future_evolution(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["read_only_invocation_pilot"]["future_evolution"]]
+    for expected in ("46H", "46I", "46J", "46K"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46g_read_only_invocation_pilot_advisory(capsys) -> None:
+    main(["read-only-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtimes are invoked" in advisory
+
+
+def test_46g_read_only_invocation_pilot_human_output_shows_all_sections(capsys) -> None:
+    main(["read-only-invocation-pilot"])
+    output = capsys.readouterr().out
+    assert "Read-only invocation pilot design" in output
+    assert "Pilot lifecycle" in output
+    assert "Supported runtimes" in output
+    assert "Invocation plan model" in output
+    assert "Output capture design" in output
+    assert "Audit integration" in output
+    assert "Consensus integration" in output
+    assert "Blockers" in output
+    assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()

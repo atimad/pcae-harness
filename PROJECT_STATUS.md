@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46F: Execution Authorization Artifact Model.
+Phase 46G: Read-Only Live Invocation Pilot.
 
 ## Governance Coherence Note
 
@@ -2419,9 +2419,35 @@ may not execute prompts/invoke agents/authorize automatically/modify repository/
 read_only=true, human_review_required=true; future_evolution: 46G/46H/46I;
 advisory: "Execution authorization design is informational; no execution is authorized."
 
+PCAE can design the governed read-only runtime invocation pilot architecture with
+`pcae read-only-invocation-pilot` and `pcae read-only-invocation-pilot --json`
+(Phase 46G): inputs: execution authorization artifact, governed live execution pilot,
+runtime invocation workload validation, execution audit design, execution consensus design,
+capability registry; no runtimes are invoked; no prompts are executed; pilot lifecycle
+(8 steps): approved_prompt/execution_authorization/runtime_selection/
+read_only_invocation_plan/output_capture_plan/audit_record_preparation/
+consensus_review_path/future_read_only_execution; supported runtimes (3):
+codex-local (ready)/claude-local (ready)/kimi-local (blocked: missing_sandbox_strategy,
+missing_timeout_strategy); requirements (all blocking, 6):
+execution_authorization_artifact/approved_prompt_artifact/read_only_sandbox_mode/
+output_capture_strategy/audit_record_strategy/timeout_strategy;
+InvocationPlan model: 7 fields, all required, all immutable, sandbox_mode_constraint=read_only
+(invocation_plan_id/selected_runtime/selected_prompt/sandbox_mode/output_capture_mode/
+timeout_strategy/authorization_reference); output capture: stdout/stderr/
+structured_outputs/runtime_metadata; audit integration: execution_audit_record/
+runtime_snapshot/authorization_snapshot/output_summary, all
+prepared_before_invocation=true/immutable_after_creation=true; consensus integration:
+single_agent_review_path/multi_agent_future_path/human_escalation_path; blockers:
+roip-b1 (authorization_blocker, critical)/roip-b2 (kimi sandbox, high)/
+roip-b3 (kimi timeout, high); governance_boundaries: may assess invocation readiness/
+prepare invocation plans/prepare output capture plans; may not invoke runtimes/
+execute prompts/modify repository/commit/push/rollback; read_only=true,
+human_review_required=true; future_evolution: 46H/46I/46J/46K;
+advisory: "Read-only invocation pilot is informational; no runtimes are invoked."
+
 ## Next
 
-- TBD: Future phases (46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow, 46I Authorization Expiration Workflow).
+- TBD: Future phases (46H Live Execution Result Review Workflow, 46I Authorization Expiration Workflow, 46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot).
 
 ## Future Explorations
 

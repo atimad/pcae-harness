@@ -102,6 +102,8 @@ from pcae.core.agent import (
     INVOCATION_WORKLOAD_VALIDATION_ADVISORY,
     build_execution_authorization_design,
     EXECUTION_AUTHORIZATION_DESIGN_ADVISORY,
+    build_read_only_invocation_pilot,
+    READ_ONLY_INVOCATION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4595,6 +4597,74 @@ def run_execution_authorization_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['artifact_may'])}")
         print(f"  May not: {', '.join(gb['artifact_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_read_only_invocation_pilot(args: argparse.Namespace) -> int:
+    data = build_read_only_invocation_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["read_only_invocation_pilot"]
+        print("Read-only invocation pilot design")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Pilot lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Supported runtimes:")
+        for rt in data["supported_runtimes"]:
+            print(f"  {rt['runtime']} — {rt['pilot_readiness']}")
+            print(f"    contract: {rt['read_only_contract']}")
+            if rt["blockers"]:
+                print(f"    blockers: {', '.join(rt['blockers'])}")
+        print()
+        print("Invocation plan model (InvocationPlan):")
+        model = data["invocation_plan_model"]
+        print(f"  Fields: {model['field_count']}  Required: {model['required_field_count']}")
+        print(f"  sandbox_mode_constraint: {model['sandbox_mode_constraint']}")
+        for field in model["fields"]:
+            req = "required" if field["required"] else "optional"
+            print(f"    {field['name']} ({field['type']}, {req}): {field['description']}")
+        print()
+        print("Output capture design:")
+        for capture in data["output_capture_design"]:
+            req = "required" if capture["required"] else "optional"
+            print(f"  {capture['capture_target']} ({req}): {capture['description']}")
+        print()
+        print("Audit integration:")
+        for artifact in data["audit_integration"]:
+            print(f"  {artifact['artifact']}")
+            print(f"    {artifact['description']}")
+        print()
+        print("Consensus integration:")
+        for path in data["consensus_integration"]:
+            escalation = "human escalation" if path["human_escalation"] else "no human escalation"
+            print(f"  {path['path']} ({escalation})")
+            print(f"    {path['description']}")
+        print()
+        print("Blockers:")
+        for b in data["blockers"]:
+            rt = f" — {b['runtime']}" if "runtime" in b else ""
+            print(f"  [{b['blocker_id']}] {b['category']}{rt} (severity={b['severity']})")
+            print(f"    {b['description']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            print(f"  - {rec}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['pilot_may'])}")
+        print(f"  May not: {', '.join(gb['pilot_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])
