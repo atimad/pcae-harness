@@ -17344,3 +17344,441 @@ def build_read_only_invocation_pilot() -> dict:
         "governance_boundaries": dict(_ROIP_GOVERNANCE_BOUNDARIES),
         "advisory": READ_ONLY_INVOCATION_PILOT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46H — Live Execution Result Review Workflow
+# ---------------------------------------------------------------------------
+
+EXECUTION_RESULT_REVIEW_ADVISORY = (
+    "Execution result review workflow is informational; no execution occurs."
+)
+
+_ERRW_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_authorization_artifact",
+    "read_only_invocation_pilot",
+    "capability_registry",
+)
+
+_ERRW_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "execution_result",
+        "description": (
+            "A captured execution result from a governed runtime invocation enters "
+            "the review pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "result_capture",
+        "description": (
+            "The execution output (stdout, stderr, exit code, duration, runtime metadata) "
+            "is retrieved from the persisted result artifact."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "result_validation",
+        "description": (
+            "The result is validated against the invocation plan: authorization reference, "
+            "selected agents, prompt identity, and output completeness are checked."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "governance_review",
+        "description": (
+            "Governance compliance is assessed: governance metadata presence, audit record "
+            "completeness, and authorization artifact match are verified."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "consensus_review",
+        "description": (
+            "Consensus status is evaluated: single-agent or multi-agent consensus outcome "
+            "is recorded. Conflicts or absent consensus escalate to human review."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "human_review",
+        "description": (
+            "The human reviewer receives the full review summary and approves, accepts with "
+            "warnings, rejects, or escalates the result. Human authority is final."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "review_record",
+        "description": (
+            "A ResultReviewRecord is produced capturing review_id, execution_id, "
+            "authorization_id, review_status, findings, warnings, errors, and governance "
+            "outcomes. The record is immutable after creation."
+        ),
+    },
+)
+
+_ERRW_REVIEW_CATEGORIES: tuple[dict, ...] = (
+    {
+        "category": "execution_success",
+        "description": "Confirms the execution completed with exit code 0 and non-empty output.",
+        "blocking_on_failure": False,
+    },
+    {
+        "category": "execution_failure",
+        "description": "Records non-zero exit codes, empty outputs, or subprocess errors.",
+        "blocking_on_failure": True,
+    },
+    {
+        "category": "governance_compliance",
+        "description": (
+            "Verifies governance metadata is present, authorization artifact matches, "
+            "and no governance boundaries were violated."
+        ),
+        "blocking_on_failure": True,
+    },
+    {
+        "category": "output_quality",
+        "description": (
+            "Assesses normalized output classification (clean_stdout, stderr_with_status_text, "
+            "empty_output, execution_error) and summarizes output completeness."
+        ),
+        "blocking_on_failure": False,
+    },
+    {
+        "category": "audit_completeness",
+        "description": (
+            "Checks that an execution audit record exists, all required audit fields are "
+            "populated, and the audit artifact is immutable."
+        ),
+        "blocking_on_failure": True,
+    },
+    {
+        "category": "consensus_status",
+        "description": (
+            "Records whether consensus was reached, the consensus recommendation, and "
+            "whether any conflict requires human escalation."
+        ),
+        "blocking_on_failure": False,
+    },
+)
+
+_ERRW_REVIEW_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "accepted",
+        "description": (
+            "All review categories passed with no warnings. The result is accepted "
+            "without conditions."
+        ),
+        "terminal": True,
+        "requires_human_approval": True,
+    },
+    {
+        "status": "accepted_with_warnings",
+        "description": (
+            "Review passed but non-blocking warnings were recorded (e.g. output quality "
+            "issues or output_quality degradation). Human acknowledges the warnings."
+        ),
+        "terminal": True,
+        "requires_human_approval": True,
+    },
+    {
+        "status": "rejected",
+        "description": (
+            "One or more blocking review categories failed. The result is rejected and "
+            "no further action is taken without a new authorized execution."
+        ),
+        "terminal": True,
+        "requires_human_approval": True,
+    },
+    {
+        "status": "escalation_required",
+        "description": (
+            "A governance violation, consensus conflict, incomplete audit, or authorization "
+            "mismatch was detected. Human review must resolve the escalation before a "
+            "terminal status can be assigned."
+        ),
+        "terminal": False,
+        "requires_human_approval": True,
+    },
+)
+
+_ERRW_REVIEW_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Unique identifier for this review record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Identifier of the execution result being reviewed.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Identifier of the ExecutionAuthorizationArtifact that authorized the execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "group": "execution_context",
+        "type": "str",
+        "description": "Identifier of the approved prompt artifact that was executed.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agents",
+        "group": "execution_context",
+        "type": "list[str]",
+        "description": "List of agent identifiers that participated in the execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "review_status",
+        "group": "review_results",
+        "type": "str",
+        "description": "Terminal or non-terminal review outcome (accepted, accepted_with_warnings, rejected, escalation_required).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "findings",
+        "group": "review_results",
+        "type": "list[str]",
+        "description": "Ordered list of factual findings from all review categories.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "group": "review_results",
+        "type": "list[str]",
+        "description": "Non-blocking warnings recorded during the review.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "errors",
+        "group": "review_results",
+        "type": "list[str]",
+        "description": "Blocking errors that caused a rejected or escalation_required status.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "governance_compliance",
+        "group": "governance",
+        "type": "bool",
+        "description": "True when governance metadata is present and no boundaries were violated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_completeness",
+        "group": "governance",
+        "type": "bool",
+        "description": "True when the execution audit record exists and all required fields are populated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Consensus outcome: consensus_reached, conflict_detected, or not_applicable.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "reviewed_by",
+        "group": "metadata",
+        "type": "str",
+        "description": "Identifier of the human reviewer who approved the final review status.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "reviewed_at",
+        "group": "metadata",
+        "type": "str",
+        "description": "ISO 8601 timestamp of when the review record was finalized.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_ERRW_REVIEW_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "execution_audit_exists",
+        "description": "An execution audit record must exist for the target execution_id before review may proceed.",
+        "blocking": True,
+    },
+    {
+        "requirement": "authorization_exists",
+        "description": "A valid ExecutionAuthorizationArtifact must be retrievable for the authorization_id.",
+        "blocking": True,
+    },
+    {
+        "requirement": "output_captured",
+        "description": "Execution output (stdout, stderr, exit code) must be present in the result artifact.",
+        "blocking": True,
+    },
+    {
+        "requirement": "governance_metadata_present",
+        "description": "The result artifact must carry governance metadata (phase, agent_id, prompt_id).",
+        "blocking": True,
+    },
+)
+
+_ERRW_ESCALATION_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "errw-e1",
+        "trigger": "governance_violation_detected",
+        "description": (
+            "A governance boundary violation is detected in the result or its metadata. "
+            "Review status is set to escalation_required; human must resolve before closure."
+        ),
+        "severity": "critical",
+        "sets_status": "escalation_required",
+    },
+    {
+        "rule_id": "errw-e2",
+        "trigger": "consensus_conflict_detected",
+        "description": (
+            "Multi-agent consensus produced a conflict that could not be resolved automatically. "
+            "Review status is set to escalation_required; human must adjudicate."
+        ),
+        "severity": "high",
+        "sets_status": "escalation_required",
+    },
+    {
+        "rule_id": "errw-e3",
+        "trigger": "audit_incomplete",
+        "description": (
+            "The execution audit record is missing required fields or does not exist. "
+            "Review cannot proceed; status is set to escalation_required."
+        ),
+        "severity": "high",
+        "sets_status": "escalation_required",
+    },
+    {
+        "rule_id": "errw-e4",
+        "trigger": "authorization_mismatch",
+        "description": (
+            "The authorization_id in the result artifact does not match the retrieved "
+            "ExecutionAuthorizationArtifact. Review status is set to escalation_required."
+        ),
+        "severity": "critical",
+        "sets_status": "escalation_required",
+    },
+)
+
+_ERRW_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "review execution results",
+        "record findings",
+        "record governance outcomes",
+    ],
+    "workflow_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "approve execution automatically",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_ERRW_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46I", "description": "Authorization Expiration Workflow"},
+    {"phase": "46J", "description": "Read-Only Invocation Pilot Implementation"},
+    {"phase": "46K", "description": "Multi-Agent Invocation Pilot"},
+    {"phase": "46L", "description": "Execution Result Quality Framework"},
+)
+
+
+def build_execution_result_review_design() -> dict:
+    """Design governed live execution result review workflow. Read-only; no execution occurs."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"errw-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _ERRW_LIFECYCLE]
+    review_categories = [dict(c) for c in _ERRW_REVIEW_CATEGORIES]
+    review_statuses = [dict(s) for s in _ERRW_REVIEW_STATUSES]
+    review_record_fields = [dict(f) for f in _ERRW_REVIEW_RECORD_FIELDS]
+    review_requirements = [dict(r) for r in _ERRW_REVIEW_REQUIREMENTS]
+    escalation_rules = [dict(e) for e in _ERRW_ESCALATION_RULES]
+
+    groups = {}
+    for field in review_record_fields:
+        groups.setdefault(field["group"], []).append(field["name"])
+
+    review_record_model = {
+        "model_name": "ResultReviewRecord",
+        "design_id": design_id,
+        "field_count": len(review_record_fields),
+        "required_field_count": sum(1 for f in review_record_fields if f["required"]),
+        "all_fields_immutable_after_creation": True,
+        "field_groups": groups,
+        "fields": review_record_fields,
+    }
+
+    terminal_statuses = [s["status"] for s in review_statuses if s["terminal"]]
+    non_terminal_statuses = [s["status"] for s in review_statuses if not s["terminal"]]
+    blocking_categories = [c["category"] for c in review_categories if c["blocking_on_failure"]]
+
+    execution_result_review_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46H",
+        "title": "Live Execution Result Review Workflow",
+        "summary": (
+            "Designs the governed workflow for reviewing future runtime execution results. "
+            "Results flow through result capture, validation, governance review, consensus "
+            "review, and human review before a ResultReviewRecord is produced. "
+            "No prompts are executed and no agents are invoked."
+        ),
+        "input_sources": list(_ERRW_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "review_category_count": len(review_categories),
+        "blocking_category_count": len(blocking_categories),
+        "blocking_categories": blocking_categories,
+        "review_status_count": len(review_statuses),
+        "terminal_statuses": terminal_statuses,
+        "non_terminal_statuses": non_terminal_statuses,
+        "review_requirement_count": len(review_requirements),
+        "escalation_rule_count": len(escalation_rules),
+        "human_review_required": True,
+        "governance_boundaries": dict(_ERRW_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _ERRW_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "execution_result_review_design": execution_result_review_design,
+        "lifecycle": lifecycle,
+        "review_categories": review_categories,
+        "review_statuses": review_statuses,
+        "review_record_model": review_record_model,
+        "review_requirements": review_requirements,
+        "escalation_rules": escalation_rules,
+        "governance_boundaries": dict(_ERRW_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_RESULT_REVIEW_ADVISORY,
+    }

@@ -416,3 +416,8 @@
 
 - `pcae read-only-invocation-pilot`
 - `pcae read-only-invocation-pilot --json`
+
+## execution-result-review-design
+
+- `pcae execution-result-review-design`
+- `pcae execution-result-review-design --json`

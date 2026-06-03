@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46G: Read-Only Live Invocation Pilot.
+Phase 46H: Live Execution Result Review Workflow.
 
 ## Governance Coherence Note
 
@@ -2444,10 +2444,34 @@ prepare invocation plans/prepare output capture plans; may not invoke runtimes/
 execute prompts/modify repository/commit/push/rollback; read_only=true,
 human_review_required=true; future_evolution: 46H/46I/46J/46K;
 advisory: "Read-only invocation pilot is informational; no runtimes are invoked."
+and the governed live execution result review workflow design is available with
+`pcae execution-result-review-design` and `pcae execution-result-review-design --json`
+(Phase 46H): inputs: execution audit design, execution consensus design,
+execution authorization artifact, read-only invocation pilot, capability registry;
+no prompts executed; no agents invoked; review lifecycle (7 steps):
+execution_result/result_capture/result_validation/governance_review/consensus_review/
+human_review/review_record; review categories (6): execution_success (non-blocking)/
+execution_failure (blocking)/governance_compliance (blocking)/output_quality (non-blocking)/
+audit_completeness (blocking)/consensus_status (non-blocking); review statuses (4):
+accepted/accepted_with_warnings/rejected (all terminal)/escalation_required (non-terminal);
+all statuses require_human_approval=true; ResultReviewRecord model: 14 fields, all
+required/immutable, grouped into identity (review_id/execution_id/authorization_id),
+execution_context (prompt_id/selected_agents), review_results (review_status/findings/
+warnings/errors), governance (governance_compliance/audit_completeness/consensus_status),
+metadata (reviewed_by/reviewed_at); review requirements (all blocking, 4):
+execution_audit_exists/authorization_exists/output_captured/governance_metadata_present;
+escalation rules (4): errw-e1 governance_violation_detected (critical)/errw-e2
+consensus_conflict_detected (high)/errw-e3 audit_incomplete (high)/errw-e4
+authorization_mismatch (critical); all escalation rules set status=escalation_required;
+governance_boundaries: workflow_may review execution results/record findings/record
+governance outcomes; workflow_may_not execute prompts/invoke agents/modify repository/
+approve execution automatically/commit/push; read_only=true, human_review_required=true;
+future_evolution: 46I/46J/46K/46L;
+advisory: "Execution result review workflow is informational; no execution occurs."
 
 ## Next
 
-- TBD: Future phases (46H Live Execution Result Review Workflow, 46I Authorization Expiration Workflow, 46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot).
+- TBD: Future phases (46I Authorization Expiration Workflow, 46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework).
 
 ## Future Explorations
 

@@ -104,6 +104,8 @@ from pcae.core.agent import (
     EXECUTION_AUTHORIZATION_DESIGN_ADVISORY,
     build_read_only_invocation_pilot,
     READ_ONLY_INVOCATION_PILOT_ADVISORY,
+    build_execution_result_review_design,
+    EXECUTION_RESULT_REVIEW_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4665,6 +4667,62 @@ def run_read_only_invocation_pilot(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_result_review_design(args: argparse.Namespace) -> int:
+    data = build_execution_result_review_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["execution_result_review_design"]
+        print("Execution result review workflow design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Review lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Review categories:")
+        for cat in data["review_categories"]:
+            blocking = "blocking" if cat["blocking_on_failure"] else "non-blocking"
+            print(f"  {cat['category']} ({blocking})")
+            print(f"    {cat['description']}")
+        print()
+        print("Review statuses:")
+        for status in data["review_statuses"]:
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            print(f"  {status['status']} ({terminal})")
+            print(f"    {status['description']}")
+        print()
+        print("Review record model (ResultReviewRecord):")
+        model = data["review_record_model"]
+        print(f"  Fields: {model['field_count']}  Required: {model['required_field_count']}")
+        for group, names in model["field_groups"].items():
+            print(f"  Group '{group}': {', '.join(names)}")
+        print()
+        print("Review requirements:")
+        for req in data["review_requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking})")
+            print(f"    {req['description']}")
+        print()
+        print("Escalation rules:")
+        for rule in data["escalation_rules"]:
+            print(f"  [{rule['rule_id']}] {rule['trigger']} (severity={rule['severity']})")
+            print(f"    {rule['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

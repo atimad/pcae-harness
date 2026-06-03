@@ -64,6 +64,7 @@ from pcae.commands.agent import (
     run_invocation_workload_validation,
     run_execution_authorization_design,
     run_read_only_invocation_pilot,
+    run_execution_result_review_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1815,6 +1816,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON read-only invocation pilot output.",
     )
     read_only_invocation_pilot_parser.set_defaults(handler=run_read_only_invocation_pilot)
+
+    execution_result_review_design_parser = subparsers.add_parser(
+        "execution-result-review-design",
+        help="Design governed live execution result review workflow (Phase 46H).",
+    )
+    execution_result_review_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON execution result review design output.",
+    )
+    execution_result_review_design_parser.set_defaults(handler=run_execution_result_review_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

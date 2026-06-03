@@ -23556,3 +23556,212 @@ def test_46g_read_only_invocation_pilot_human_output_shows_all_sections(capsys) 
     assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46H — Live Execution Result Review Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_46h_execution_result_review_design_json_structure(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "execution_result_review_design", "lifecycle", "review_categories",
+        "review_statuses", "review_record_model", "review_requirements",
+        "escalation_rules", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46h_execution_result_review_design_fields(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_result_review_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "lifecycle_step_count",
+        "review_category_count", "blocking_category_count", "blocking_categories",
+        "review_status_count", "terminal_statuses", "non_terminal_statuses",
+        "review_requirement_count", "escalation_rule_count",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("errw-")
+    assert design["phase"] == "46H"
+    assert design["human_review_required"] is True
+    assert design["review_category_count"] == 6
+    assert design["review_status_count"] == 4
+
+
+def test_46h_execution_result_review_lifecycle(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "execution_result", "result_capture", "result_validation",
+        "governance_review", "consensus_review", "human_review", "review_record",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46h_execution_result_review_categories(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cats = data["review_categories"]
+    assert len(cats) == 6
+    cat_names = [c["category"] for c in cats]
+    for expected in (
+        "execution_success", "execution_failure", "governance_compliance",
+        "output_quality", "audit_completeness", "consensus_status",
+    ):
+        assert expected in cat_names, f"missing review category: {expected}"
+    for cat in cats:
+        for field in ("category", "description", "blocking_on_failure"):
+            assert field in cat, f"category missing field: {field}"
+    blocking = [c["category"] for c in cats if c["blocking_on_failure"]]
+    assert "execution_failure" in blocking
+    assert "governance_compliance" in blocking
+    assert "audit_completeness" in blocking
+
+
+def test_46h_execution_result_review_statuses(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    statuses = data["review_statuses"]
+    assert len(statuses) == 4
+    status_names = [s["status"] for s in statuses]
+    for expected in ("accepted", "accepted_with_warnings", "rejected", "escalation_required"):
+        assert expected in status_names, f"missing review status: {expected}"
+    for s in statuses:
+        for field in ("status", "description", "terminal", "requires_human_approval"):
+            assert field in s, f"status missing field: {field}"
+        assert s["requires_human_approval"] is True
+    terminal = [s["status"] for s in statuses if s["terminal"]]
+    non_terminal = [s["status"] for s in statuses if not s["terminal"]]
+    assert len(terminal) == 3
+    assert len(non_terminal) == 1
+    assert "escalation_required" in non_terminal
+
+
+def test_46h_execution_result_review_record_model(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["review_record_model"]
+    assert model["model_name"] == "ResultReviewRecord"
+    assert model["all_fields_immutable_after_creation"] is True
+    assert model["field_count"] == 14
+    assert model["required_field_count"] == 14
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "review_id", "execution_id", "authorization_id",
+        "prompt_id", "selected_agents",
+        "review_status", "findings", "warnings", "errors",
+        "governance_compliance", "audit_completeness", "consensus_status",
+        "reviewed_by", "reviewed_at",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    groups = model["field_groups"]
+    for expected_group in ("identity", "execution_context", "review_results", "governance", "metadata"):
+        assert expected_group in groups, f"missing field group: {expected_group}"
+
+
+def test_46h_execution_result_review_requirements(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["review_requirements"]
+    assert len(reqs) == 4
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "execution_audit_exists", "authorization_exists",
+        "output_captured", "governance_metadata_present",
+    ):
+        assert expected in req_names, f"missing requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+
+
+def test_46h_execution_result_review_escalation_rules(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rules = data["escalation_rules"]
+    assert len(rules) == 4
+    rule_ids = [r["rule_id"] for r in rules]
+    for expected in ("errw-e1", "errw-e2", "errw-e3", "errw-e4"):
+        assert expected in rule_ids, f"missing escalation rule: {expected}"
+    for rule in rules:
+        for field in ("rule_id", "trigger", "description", "severity", "sets_status"):
+            assert field in rule, f"rule missing field: {field}"
+        assert rule["sets_status"] == "escalation_required"
+    triggers = [r["trigger"] for r in rules]
+    for expected in (
+        "governance_violation_detected", "consensus_conflict_detected",
+        "audit_incomplete", "authorization_mismatch",
+    ):
+        assert expected in triggers, f"missing escalation trigger: {expected}"
+    critical_rules = [r for r in rules if r["severity"] == "critical"]
+    assert len(critical_rules) == 2
+
+
+def test_46h_execution_result_review_governance_boundaries(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "workflow_may" in gb
+    assert "workflow_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in ("review execution results", "record findings", "record governance outcomes"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "execute prompts", "invoke agents", "modify repository",
+        "approve execution automatically", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46h_execution_result_review_future_evolution(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["execution_result_review_design"]["future_evolution"]]
+    for expected in ("46I", "46J", "46K", "46L"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46h_execution_result_review_advisory(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no execution occurs" in advisory
+
+
+def test_46h_execution_result_review_design_no_execution(capsys) -> None:
+    main(["execution-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_result_review_design"]
+    gb = design["governance_boundaries"]
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_46h_execution_result_review_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-result-review-design"])
+    output = capsys.readouterr().out
+    assert "Execution result review workflow design" in output
+    assert "Review lifecycle" in output
+    assert "Review categories" in output
+    assert "Review statuses" in output
+    assert "Review record model" in output
+    assert "Review requirements" in output
+    assert "Escalation rules" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
