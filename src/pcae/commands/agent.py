@@ -68,6 +68,8 @@ from pcae.core.agent import (
     PROMPT_GENERATION_DESIGN_ADVISORY,
     build_adaptive_prompt_design,
     ADAPTIVE_PROMPT_DESIGN_ADVISORY,
+    build_prompt_validation_design,
+    PROMPT_VALIDATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3654,6 +3656,59 @@ def run_adaptive_prompt_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['adaptive_prompt_generation_may'])}")
         print(f"  May not: {', '.join(gb['adaptive_prompt_generation_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in design["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_validation_design(args: argparse.Namespace) -> int:
+    data = build_prompt_validation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["prompt_validation_design"]
+        print("Prompt validation framework")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print(f"Summary: {design['summary']}")
+        print()
+        print(f"Validation categories ({len(data['validation_categories'])}):")
+        for cat in data["validation_categories"]:
+            print(f"  {cat['category']} (severity: {cat['failure_severity']}): {cat['description']}")
+            for rule in cat["rules"]:
+                print(f"    - {rule}")
+        print()
+        sections = data["required_sections"]
+        print(f"Required sections ({len(sections)}):")
+        for s in sections:
+            print(f"  - {s}")
+        print()
+        tr = data["traceability_requirements"]
+        refs = ", ".join(r["field"] for r in tr["required_references"])
+        print("Traceability requirements:")
+        print(f"  Required references: {refs}")
+        print(f"  Traceability required: {'yes' if tr['traceability_is_required'] else 'no'}")
+        print(f"  Missing reference severity: {tr['missing_reference_severity']}")
+        print()
+        print(f"Safety rules ({len(data['safety_rules'])}):")
+        for rule in data["safety_rules"]:
+            print(f"  - {rule}")
+        print()
+        vrm = data["validation_result_model"]
+        field_names = ", ".join(f["name"] for f in vrm["fields"])
+        statuses = ", ".join(vrm["validation_statuses"])
+        print(f"Validation result model: {vrm['model_name']}")
+        print(f"  Fields: {field_names}")
+        print(f"  Statuses: {statuses}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['prompt_validation_may'])}")
+        print(f"  May not: {', '.join(gb['prompt_validation_may_not'])}")
         print()
         print("Future evolution:")
         for entry in design["future_evolution"]:

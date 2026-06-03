@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45G: Adaptive Agent-Specific Prompt Generation.
+Phase 45H: Prompt Validation Framework.
 
 ## Governance Coherence Note
 
@@ -2030,9 +2030,31 @@ intent/approve prompts/commit/push; no prompts are executed; advisory:
 "Adaptive prompt generation design is informational; no prompts are
 executed."
 
+and the prompt validation framework can be designed with
+`pcae prompt-validation-design` and `pcae prompt-validation-design --json`,
+defining five validation categories (completeness, traceability,
+intent_preservation, safety, agent_compatibility — each with failure
+severity and rules), eight required sections (goal, scope, constraints,
+allowed_files, forbidden_files, acceptance_criteria, validation_commands,
+governance_boundaries), traceability requirements referencing five fields
+(prompt_id, phase_id, proposal_id, roadmap_approval_id,
+evidence_package_id), intent preservation rules checking six fields
+(objective, acceptance_criteria, governance_boundaries, allowed_files,
+forbidden_files, safety_rules), six safety rules (no bypass
+governance/auto-approve/auto-commit/auto-push/auto-rollback/silent scope
+expansion), a PromptValidationResult model with ten fields
+(validation_id/prompt_id/validation_status/errors/warnings/missing_sections/
+traceability_status/intent_preservation_status/safety_status/
+human_review_required) and three statuses (valid/valid_with_warnings/
+invalid), and governance boundaries (may validate completeness/traceability/
+intent preservation/safety/agent compatibility/report results; may not
+execute prompts/invoke agents/modify repository/auto-approve/commit/push);
+read_only=true; advisory: "Prompt validation design is informational;
+no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45H Prompt Validation Framework, 45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
+- TBD: Future phases (45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
 
 ## Future Explorations
 

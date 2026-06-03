@@ -11460,3 +11460,209 @@ def build_adaptive_prompt_design() -> dict:
         "governance_boundaries": dict(_APD_GOVERNANCE_BOUNDARIES),
         "advisory": ADAPTIVE_PROMPT_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45H: Prompt Validation Framework
+# ---------------------------------------------------------------------------
+
+PROMPT_VALIDATION_DESIGN_ADVISORY = (
+    "Prompt validation design is informational; no prompts are executed."
+)
+
+_PVD_REQUIRED_SECTIONS: tuple[str, ...] = (
+    "goal",
+    "scope",
+    "constraints",
+    "allowed_files",
+    "forbidden_files",
+    "acceptance_criteria",
+    "validation_commands",
+    "governance_boundaries",
+)
+
+_PVD_VALIDATION_CATEGORIES: tuple[dict, ...] = (
+    {
+        "category": "completeness",
+        "description": "Verifies all required sections are present in the prompt.",
+        "rules": [
+            f"Section '{s}' must be present and non-empty."
+            for s in _PVD_REQUIRED_SECTIONS
+        ],
+        "failure_severity": "error",
+    },
+    {
+        "category": "traceability",
+        "description": "Verifies the prompt references required governance artifacts.",
+        "rules": [
+            "prompt_id must be present.",
+            "phase_id must reference an approved phase.",
+            "proposal_id must reference an approved roadmap proposal.",
+            "roadmap_approval_id must reference a recorded approval artifact.",
+            "evidence_package_id must reference an evidence package.",
+        ],
+        "failure_severity": "error",
+    },
+    {
+        "category": "intent_preservation",
+        "description": "Verifies agent-specific prompts do not alter objective, acceptance criteria, or governance boundaries.",
+        "rules": [
+            "objective must be identical to the canonical prompt.",
+            "acceptance_criteria must be identical to the canonical prompt.",
+            "governance_boundaries must be identical to the canonical prompt.",
+            "allowed_files must be identical to the canonical prompt.",
+            "forbidden_files must be identical to the canonical prompt.",
+            "safety_rules must be identical to the canonical prompt.",
+        ],
+        "failure_severity": "error",
+        "applies_to": "agent_specific_prompts",
+    },
+    {
+        "category": "safety",
+        "description": "Verifies the prompt does not contain instructions that bypass governance.",
+        "rules": [
+            "Prompt must not instruct agent to bypass governance.",
+            "Prompt must not instruct agent to auto-approve.",
+            "Prompt must not instruct agent to auto-commit.",
+            "Prompt must not instruct agent to auto-push.",
+            "Prompt must not instruct agent to auto-rollback.",
+            "Prompt must not silently expand allowed scope.",
+        ],
+        "failure_severity": "error",
+    },
+    {
+        "category": "agent_compatibility",
+        "description": "Verifies the target agent exists and is compatible with the prompt.",
+        "rules": [
+            "Target agent must exist in the capability registry.",
+            "Target agent capability must be suitable for the prompt task type.",
+            "Selected agent must match the adaptation profile used.",
+        ],
+        "failure_severity": "warning",
+    },
+)
+
+_PVD_TRACEABILITY_REQUIREMENTS: dict = {
+    "required_references": [
+        {"field": "prompt_id", "description": "Unique identifier for this prompt."},
+        {"field": "phase_id", "description": "ID of the approved phase that generated this prompt."},
+        {"field": "proposal_id", "description": "ID of the approved roadmap proposal."},
+        {"field": "roadmap_approval_id", "description": "ID of the recorded roadmap approval artifact."},
+        {"field": "evidence_package_id", "description": "ID of the evidence package informing the roadmap."},
+    ],
+    "traceability_is_required": True,
+    "missing_reference_severity": "error",
+}
+
+_PVD_INTENT_PRESERVATION_RULES: dict = {
+    "applies_to": "agent_specific_prompts",
+    "preserved_fields": [
+        "objective",
+        "acceptance_criteria",
+        "governance_boundaries",
+        "allowed_files",
+        "forbidden_files",
+        "safety_rules",
+    ],
+    "check_method": "field_equality_against_canonical",
+    "failure_severity": "error",
+    "preservation_check_required": True,
+}
+
+_PVD_SAFETY_RULES: tuple[str, ...] = (
+    "Prompt must not instruct agent to bypass governance.",
+    "Prompt must not instruct agent to auto-approve.",
+    "Prompt must not instruct agent to auto-commit.",
+    "Prompt must not instruct agent to auto-push.",
+    "Prompt must not instruct agent to auto-rollback.",
+    "Prompt must not silently expand allowed scope.",
+)
+
+_PVD_VALIDATION_STATUSES: tuple[str, ...] = (
+    "valid",
+    "valid_with_warnings",
+    "invalid",
+)
+
+_PVD_VALIDATION_RESULT_MODEL: dict = {
+    "model_name": "PromptValidationResult",
+    "fields": [
+        {"name": "validation_id", "type": "str", "description": "Unique identifier for this validation run."},
+        {"name": "prompt_id", "type": "str", "description": "ID of the prompt being validated."},
+        {"name": "validation_status", "type": "str", "description": f"Overall status: {', '.join(_PVD_VALIDATION_STATUSES)}."},
+        {"name": "errors", "type": "list[str]", "description": "Validation errors that must be resolved before approval."},
+        {"name": "warnings", "type": "list[str]", "description": "Non-blocking issues that should be reviewed."},
+        {"name": "missing_sections", "type": "list[str]", "description": "Required sections absent from the prompt."},
+        {"name": "traceability_status", "type": "str", "description": "Result of traceability check: complete or incomplete."},
+        {"name": "intent_preservation_status", "type": "str", "description": "Result of intent preservation check: preserved or violated."},
+        {"name": "safety_status", "type": "str", "description": "Result of safety check: safe or unsafe."},
+        {"name": "human_review_required", "type": "bool", "description": "Whether human review is required before approval."},
+    ],
+    "validation_statuses": list(_PVD_VALIDATION_STATUSES),
+}
+
+_PVD_GOVERNANCE_BOUNDARIES: dict = {
+    "prompt_validation_may": [
+        "validate prompt completeness",
+        "validate prompt traceability",
+        "validate intent preservation",
+        "validate safety rules",
+        "validate agent compatibility",
+        "report validation results",
+    ],
+    "prompt_validation_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "auto-approve prompts",
+        "commit",
+        "push",
+    ],
+    "read_only": True,
+    "human_review_required": True,
+    "advisory": True,
+}
+
+_PVD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45I", "description": "Prompt Governance Design"},
+    {"phase": "45J", "description": "Prompt Artifact Model"},
+    {"phase": "45K", "description": "Prompt Approval Workflow"},
+)
+
+
+def build_prompt_validation_design() -> dict:
+    """Design the prompt validation framework. Read-only; no prompts executed."""
+    design_id = f"pvd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    prompt_validation_design = {
+        "design_id": design_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45H",
+        "title": "Prompt Validation Framework",
+        "summary": (
+            "Defines validation rules for generated canonical and agent-specific prompts "
+            "before approval or execution. Covers completeness, traceability, intent "
+            "preservation, safety, and agent compatibility. No prompts are executed; "
+            "no agents are invoked."
+        ),
+        "validation_categories": [dict(c) for c in _PVD_VALIDATION_CATEGORIES],
+        "required_sections": list(_PVD_REQUIRED_SECTIONS),
+        "traceability_requirements": dict(_PVD_TRACEABILITY_REQUIREMENTS),
+        "intent_preservation_rules": dict(_PVD_INTENT_PRESERVATION_RULES),
+        "safety_rules": list(_PVD_SAFETY_RULES),
+        "validation_result_model": dict(_PVD_VALIDATION_RESULT_MODEL),
+        "governance_boundaries": dict(_PVD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PVD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "prompt_validation_design": prompt_validation_design,
+        "validation_categories": [dict(c) for c in _PVD_VALIDATION_CATEGORIES],
+        "required_sections": list(_PVD_REQUIRED_SECTIONS),
+        "traceability_requirements": dict(_PVD_TRACEABILITY_REQUIREMENTS),
+        "intent_preservation_rules": dict(_PVD_INTENT_PRESERVATION_RULES),
+        "safety_rules": list(_PVD_SAFETY_RULES),
+        "validation_result_model": dict(_PVD_VALIDATION_RESULT_MODEL),
+        "governance_boundaries": dict(_PVD_GOVERNANCE_BOUNDARIES),
+        "advisory": PROMPT_VALIDATION_DESIGN_ADVISORY,
+    }

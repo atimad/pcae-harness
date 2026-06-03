@@ -20486,3 +20486,178 @@ def test_45g_adaptive_prompt_design_human_output_shows_all_sections(capsys) -> N
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45H: Prompt Validation Framework
+# ---------------------------------------------------------------------------
+
+
+def test_45h_prompt_validation_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-validation-design"])
+    assert exit_code == 0
+
+
+def test_45h_prompt_validation_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-validation-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45h_prompt_validation_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "prompt_validation_design",
+        "validation_categories",
+        "required_sections",
+        "traceability_requirements",
+        "intent_preservation_rules",
+        "safety_rules",
+        "validation_result_model",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45h_prompt_validation_design_id_starts_with_pvd(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["prompt_validation_design"]
+    assert design["design_id"].startswith("pvd-")
+    assert design["phase"] == "45H"
+
+
+def test_45h_prompt_validation_design_five_categories(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cats = data["validation_categories"]
+    assert len(cats) == 5
+    names = [c["category"] for c in cats]
+    assert "completeness" in names
+    assert "traceability" in names
+    assert "intent_preservation" in names
+    assert "safety" in names
+    assert "agent_compatibility" in names
+
+
+def test_45h_prompt_validation_design_completeness_rules(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sections = data["required_sections"]
+    for expected in (
+        "goal",
+        "scope",
+        "constraints",
+        "allowed_files",
+        "forbidden_files",
+        "acceptance_criteria",
+        "validation_commands",
+        "governance_boundaries",
+    ):
+        assert expected in sections, f"missing required section: {expected}"
+    cats = {c["category"]: c for c in data["validation_categories"]}
+    assert cats["completeness"]["failure_severity"] == "error"
+
+
+def test_45h_prompt_validation_design_traceability_requirements(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    tr = data["traceability_requirements"]
+    assert tr["traceability_is_required"] is True
+    assert tr["missing_reference_severity"] == "error"
+    ref_fields = [r["field"] for r in tr["required_references"]]
+    for expected in ("prompt_id", "phase_id", "proposal_id", "roadmap_approval_id", "evidence_package_id"):
+        assert expected in ref_fields, f"missing traceability field: {expected}"
+
+
+def test_45h_prompt_validation_design_intent_preservation_rules(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ipr = data["intent_preservation_rules"]
+    assert ipr["preservation_check_required"] is True
+    assert ipr["failure_severity"] == "error"
+    for field in ("objective", "acceptance_criteria", "governance_boundaries",
+                  "allowed_files", "forbidden_files", "safety_rules"):
+        assert field in ipr["preserved_fields"], f"missing preserved field: {field}"
+
+
+def test_45h_prompt_validation_design_safety_rules(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    safety = " ".join(data["safety_rules"]).lower()
+    assert "bypass governance" in safety
+    assert "auto-approve" in safety
+    assert "auto-commit" in safety
+    assert "auto-push" in safety
+    assert "auto-rollback" in safety
+    assert "expand allowed scope" in safety
+
+
+def test_45h_prompt_validation_design_validation_result_model(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    vrm = data["validation_result_model"]
+    field_names = [f["name"] for f in vrm["fields"]]
+    for expected in (
+        "validation_id",
+        "prompt_id",
+        "validation_status",
+        "errors",
+        "warnings",
+        "missing_sections",
+        "traceability_status",
+        "intent_preservation_status",
+        "safety_status",
+        "human_review_required",
+    ):
+        assert expected in field_names, f"missing result model field: {expected}"
+    statuses = vrm["validation_statuses"]
+    assert "valid" in statuses
+    assert "valid_with_warnings" in statuses
+    assert "invalid" in statuses
+
+
+def test_45h_prompt_validation_design_governance_boundaries(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "prompt_validation_may" in gb
+    assert "prompt_validation_may_not" in gb
+    assert gb["read_only"] is True
+    assert gb["human_review_required"] is True
+    may_not = " ".join(gb["prompt_validation_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_45h_prompt_validation_design_advisory(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are executed" in advisory
+
+
+def test_45h_prompt_validation_design_future_evolution(capsys) -> None:
+    main(["prompt-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["prompt_validation_design"]["future_evolution"]]
+    for expected in ("45I", "45J", "45K"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45h_prompt_validation_design_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-validation-design"])
+    output = capsys.readouterr().out
+    assert "Prompt validation framework" in output
+    assert "Validation categories" in output
+    assert "Required sections" in output
+    assert "Traceability requirements" in output
+    assert "Safety rules" in output
+    assert "Validation result model" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are executed" in output

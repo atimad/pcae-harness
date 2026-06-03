@@ -326,3 +326,8 @@
 
 - `pcae adaptive-prompt-design`
 - `pcae adaptive-prompt-design --json`
+
+## prompt-validation-design
+
+- `pcae prompt-validation-design`
+- `pcae prompt-validation-design --json`
