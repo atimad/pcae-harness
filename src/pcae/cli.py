@@ -53,6 +53,7 @@ from pcae.commands.agent import (
     run_autonomous_phase_proposal,
     run_autonomous_prompt_proposal,
     run_prompt_render,
+    run_prompt_execution_readiness,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1683,6 +1684,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON prompt render output.",
     )
     prompt_render_parser.set_defaults(handler=run_prompt_render)
+
+    prompt_execution_readiness_parser = subparsers.add_parser(
+        "prompt-execution-readiness",
+        help="Assess PCAE readiness for future governed prompt execution (Phase 45N).",
+    )
+    prompt_execution_readiness_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON prompt execution readiness output.",
+    )
+    prompt_execution_readiness_parser.set_defaults(handler=run_prompt_execution_readiness)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

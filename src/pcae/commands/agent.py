@@ -82,6 +82,8 @@ from pcae.core.agent import (
     AUTONOMOUS_PROMPT_PROPOSAL_ADVISORY,
     build_prompt_render,
     PROMPT_RENDER_ADVISORY,
+    build_prompt_execution_readiness,
+    PROMPT_EXECUTION_READINESS_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4007,6 +4009,53 @@ def run_prompt_render(args: argparse.Namespace) -> int:
         print(f"  Overall: {ips.get('overall_status', 'unknown')}")
         print()
         print(f"Human review required: {'yes' if data['human_review_required'] else 'no'}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_execution_readiness(args: argparse.Namespace) -> int:
+    data = build_prompt_execution_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        summary = data["readiness_summary"]
+        print("Prompt execution readiness assessment")
+        print(f"Assessment: {summary['assessment_id']}  Generated: {summary['generated_at']}")
+        print(f"Phase: {summary['phase']} — {summary['title']}")
+        print()
+        print(f"Overall status: {summary['overall_status']}")
+        print(f"Execution recommended: {'yes' if summary['execution_recommended'] else 'no'}")
+        print(f"Human review required: {'yes' if summary['human_review_required'] else 'no'}")
+        print(
+            f"Areas: {summary['area_count']} total"
+            f" ({summary['ready_count']} ready,"
+            f" {summary['partially_ready_count']} partially_ready,"
+            f" {summary['not_ready_count']} not_ready)"
+        )
+        print()
+        print("Readiness by area:")
+        for area in data["readiness_areas"]:
+            print(f"  {area['area']}: {area['readiness_status']}")
+            for blocker in area["blockers"]:
+                print(f"    ! {blocker}")
+        print()
+        print(f"Gaps ({summary['gap_count']}):")
+        for gap in data["gaps"]:
+            areas_str = ", ".join(gap["affected_areas"])
+            print(f"  [{gap['severity']}] {gap['gap_id']}: {gap['description']}")
+            print(f"    Affected: {areas_str}")
+        print()
+        print(f"Risks ({summary['risk_count']}):")
+        for risk in data["risks"]:
+            print(f"  [{risk['severity']}] {risk['risk_id']}: {risk['description']}")
+        print()
+        print("Recommendations:")
+        for rec in data["recommendations"]:
+            if rec["recommended_next_steps"]:
+                print(f"  {rec['area']} ({rec['readiness_status']}):")
+                for step in rec["recommended_next_steps"]:
+                    print(f"    - {step}")
         print()
         print(data["advisory"])
     return 0

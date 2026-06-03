@@ -21673,3 +21673,149 @@ def test_45m1_prompt_render_human_output_shows_all_sections(tmp_path: Path, monk
     assert "Intent Preservation Summary" in output
     assert "Human review required" in output
     assert "no prompts are executed" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 45N: Prompt Execution Readiness Assessment
+# ---------------------------------------------------------------------------
+
+
+def test_45n_prompt_execution_readiness_json_structure(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("readiness_summary", "readiness_areas", "gaps", "risks",
+                "recommendations", "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45n_prompt_execution_readiness_summary_fields(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["readiness_summary"]
+    for field in ("assessment_id", "overall_status", "execution_recommended",
+                  "human_review_required", "area_count", "ready_count",
+                  "partially_ready_count", "not_ready_count", "gap_count", "risk_count"):
+        assert field in summary, f"missing summary field: {field}"
+    assert summary["assessment_id"].startswith("per-")
+    assert summary["phase"] == "45N"
+
+
+def test_45n_prompt_execution_readiness_nine_areas(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["readiness_areas"]
+    assert len(areas) == 9
+    area_names = [a["area"] for a in areas]
+    for expected in ("Prompt Generation", "Prompt Adaptation", "Prompt Validation",
+                     "Prompt Governance", "Prompt Approval", "Runtime Invocation",
+                     "Runtime Adapters", "Consensus Integration", "Human Oversight"):
+        assert expected in area_names, f"missing readiness area: {expected}"
+
+
+def test_45n_prompt_execution_readiness_area_fields(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    valid_statuses = {"ready", "partially_ready", "not_ready"}
+    for area in data["readiness_areas"]:
+        for field in ("area", "readiness_status", "rationale", "blockers", "recommended_next_steps"):
+            assert field in area, f"area '{area.get('area')}' missing field: {field}"
+        assert area["readiness_status"] in valid_statuses, (
+            f"invalid status '{area['readiness_status']}' for area '{area['area']}'"
+        )
+
+
+def test_45n_prompt_execution_readiness_status_distribution(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summary = data["readiness_summary"]
+    assert summary["ready_count"] >= 1
+    assert summary["partially_ready_count"] >= 1
+    assert summary["not_ready_count"] >= 1
+    assert summary["area_count"] == (
+        summary["ready_count"] + summary["partially_ready_count"] + summary["not_ready_count"]
+    )
+
+
+def test_45n_prompt_execution_readiness_gap_analysis(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gaps = data["gaps"]
+    assert len(gaps) >= 1
+    categories = {g["category"] for g in gaps}
+    for expected_cat in ("missing_implementation", "missing_validation",
+                         "missing_integration", "governance_gap"):
+        assert expected_cat in categories, f"missing gap category: {expected_cat}"
+    for gap in gaps:
+        for field in ("gap_id", "category", "description", "severity", "affected_areas"):
+            assert field in gap, f"gap missing field: {field}"
+
+
+def test_45n_prompt_execution_readiness_risks(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    risks = data["risks"]
+    assert len(risks) >= 1
+    risk_categories = {r["category"] for r in risks}
+    for expected_cat in ("execution_risk", "approval_risk", "governance_risk"):
+        assert expected_cat in risk_categories, f"missing risk category: {expected_cat}"
+    for risk in risks:
+        for field in ("risk_id", "category", "description", "severity", "mitigation"):
+            assert field in risk, f"risk missing field: {field}"
+
+
+def test_45n_prompt_execution_readiness_recommendations(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) == 9
+    for rec in recs:
+        for field in ("area", "readiness_status", "rationale", "blockers", "recommended_next_steps"):
+            assert field in rec, f"recommendation missing field: {field}"
+
+
+def test_45n_prompt_execution_readiness_human_review_required(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["human_review_required"] is True
+    assert data["readiness_summary"]["human_review_required"] is True
+
+
+def test_45n_prompt_execution_readiness_execution_not_recommended(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["readiness_summary"]["execution_recommended"] is False
+    assert data["readiness_summary"]["overall_status"] in ("not_ready", "partially_ready")
+
+
+def test_45n_prompt_execution_readiness_governance_boundaries(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["readiness_summary"]["governance_boundaries"]
+    assert "assessment_may" in gb
+    assert "assessment_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["assessment_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45n_prompt_execution_readiness_advisory(capsys) -> None:
+    main(["prompt-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45n_prompt_execution_readiness_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-execution-readiness"])
+    output = capsys.readouterr().out
+    assert "Prompt execution readiness assessment" in output
+    assert "Overall status" in output
+    assert "Readiness by area" in output
+    assert "Gaps" in output
+    assert "Risks" in output
+    assert "Recommendations" in output
+    assert "Human review required" in output
+    assert "informational" in output.lower()

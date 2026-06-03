@@ -382,6 +382,11 @@ def render_commands_reference() -> str:
 
 - `pcae prompt-render`
 - `pcae prompt-render --json`
+
+## prompt-execution-readiness
+
+- `pcae prompt-execution-readiness`
+- `pcae prompt-execution-readiness --json`
 """
 
 

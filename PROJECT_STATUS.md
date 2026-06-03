@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45M.1: Human-Readable Prompt Rendering.
+Phase 45N: Prompt Execution Readiness Assessment.
 
 ## Governance Coherence Note
 
@@ -2173,9 +2173,28 @@ agents/modify repository/approve prompts/commit/push; read_only=true,
 human_review_required=true; advisory: "Prompt rendering is informational; no prompts are
 executed."
 
+PCAE can assess readiness for future governed prompt execution with
+`pcae prompt-execution-readiness` and `pcae prompt-execution-readiness --json` (Phase 45N):
+inputs: prompt governance artifacts, prompt approval artifacts, prompt rendering artifacts,
+execution readiness assessment, runtime invocation validation, capability registry; assesses
+nine readiness areas (Prompt Generation/Prompt Adaptation/Prompt Validation/Prompt
+Governance/Prompt Approval/Runtime Invocation/Runtime Adapters/Consensus Integration/Human
+Oversight) each with readiness_status (ready/partially_ready/not_ready), rationale,
+blockers, and recommended_next_steps; gap analysis with six gaps across four categories
+(missing_implementation/missing_validation/missing_integration/governance_gap); risk analysis
+with five risks across three categories (execution_risk/approval_risk/governance_risk) each
+with severity and mitigation; nine recommendations (one per area) with readiness_status/
+rationale/blockers/recommended_next_steps; overall assessment: assessment_id (per-*)/
+overall_status=not_ready/execution_recommended=false/human_review_required=true/
+area_count=9/ready_count/partially_ready_count/not_ready_count/gap_count/risk_count;
+governance_boundaries: may assess readiness areas/identify gaps/generate risks/generate
+recommendations; may not execute prompts/invoke agents/modify repository/commit/push;
+read_only=true, human_review_required=true; advisory: "Prompt execution readiness
+assessment is informational; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45N Prompt Execution Readiness Assessment, 45O Prompt Execution Dry-Run, 45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
+- TBD: Future phases (45O Prompt Execution Dry-Run, 45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
 
 ## Future Explorations
 

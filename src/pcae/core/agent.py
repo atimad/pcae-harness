@@ -13003,3 +13003,355 @@ def build_prompt_render(root: HarnessPath) -> dict:
         "human_review_required": True,
         "advisory": PROMPT_RENDER_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45N: Prompt Execution Readiness Assessment
+# ---------------------------------------------------------------------------
+
+PROMPT_EXECUTION_READINESS_ADVISORY = (
+    "Prompt execution readiness assessment is informational; no prompts are executed."
+)
+
+_PER_INPUT_SOURCES: tuple[str, ...] = (
+    "prompt_governance_artifacts",
+    "prompt_approval_artifacts",
+    "prompt_rendering_artifacts",
+    "execution_readiness_assessment",
+    "runtime_invocation_validation",
+    "capability_registry",
+)
+
+_PER_READINESS_AREAS: tuple[dict, ...] = (
+    {
+        "area": "Prompt Generation",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Prompt generation design (45F) and adaptive prompt design (45G) are complete. "
+            "No runtime prompt generation pipeline is deployed."
+        ),
+        "blockers": [
+            "Prompt generation pipeline not yet wired to a live execution runtime.",
+            "Agent-specific prompt adaptation not yet validated end-to-end.",
+        ],
+        "recommended_next_steps": [
+            "Wire prompt generation design to the execution runtime in a future phase.",
+            "Validate adaptive prompt output against agent acceptance criteria.",
+        ],
+    },
+    {
+        "area": "Prompt Adaptation",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Adaptive prompt design (45G) defines profiles for codex-local, claude-local, "
+            "and kimi-local. Adaptation is prototyped but not runtime-validated."
+        ),
+        "blockers": [
+            "Adaptation profiles are design artifacts; no runtime validation performed.",
+            "Intent preservation is advisory only; no automated enforcement exists.",
+        ],
+        "recommended_next_steps": [
+            "Implement runtime intent-preservation enforcement in a future phase.",
+            "Validate adaptation profiles against each agent's live acceptance behavior.",
+        ],
+    },
+    {
+        "area": "Prompt Validation",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Prompt validation framework (45H) defines validation rules and status values. "
+            "Validation is design-phase only; no automated validator is deployed."
+        ),
+        "blockers": [
+            "No deployed automated prompt validator.",
+            "Validation results are advisory; they do not block execution in current design.",
+        ],
+        "recommended_next_steps": [
+            "Implement a runtime prompt validator before enabling execution.",
+            "Enforce validation gates in the approval workflow.",
+        ],
+    },
+    {
+        "area": "Prompt Governance",
+        "readiness_status": "ready",
+        "rationale": (
+            "Prompt governance design (45I) is complete with lineage, intent protection "
+            "rules, and approval requirements defined. Governance boundaries are enforced "
+            "throughout the design pipeline."
+        ),
+        "blockers": [],
+        "recommended_next_steps": [
+            "Verify governance boundaries hold under execution conditions in the 45O dry-run.",
+        ],
+    },
+    {
+        "area": "Prompt Approval",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Prompt approval workflow (45K) and ApprovedPromptArtifact model are designed. "
+            "No runtime approval store or mutation mechanism is implemented."
+        ),
+        "blockers": [
+            "ApprovedPromptArtifact creation is deferred (artifact_creation=future).",
+            "No runtime approval store; approved prompts cannot be persisted or queried.",
+        ],
+        "recommended_next_steps": [
+            "Implement runtime ApprovedPromptArtifact storage before enabling execution.",
+            "Wire approval state checks into the execution pipeline gate.",
+        ],
+    },
+    {
+        "area": "Runtime Invocation",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "Runtime invocation contracts exist but no live invocation pipeline is connected "
+            "to the prompt proposal system. Execution is explicitly blocked by all current "
+            "governance boundaries."
+        ),
+        "blockers": [
+            "No live invocation pipeline connected to prompt proposals.",
+            "Execution blocked by governance boundaries in all prompt phases (45F–45M.1).",
+            "No execution dry-run performed (45O is future).",
+        ],
+        "recommended_next_steps": [
+            "Complete prompt execution dry-run (45O) before authorizing live invocation.",
+            "Validate invocation contracts against current agent adapter versions.",
+        ],
+    },
+    {
+        "area": "Runtime Adapters",
+        "readiness_status": "partially_ready",
+        "rationale": (
+            "Agent adapters for codex-local, claude-local, and kimi-local are defined "
+            "in the adapter registry. No adapter has been validated for prompt-execution workloads."
+        ),
+        "blockers": [
+            "Adapter validation for prompt-execution workloads is pending.",
+            "Sandbox and permission-mode settings require review for prompt execution scope.",
+        ],
+        "recommended_next_steps": [
+            "Validate each agent adapter against the prompt execution dry-run scenario.",
+            "Review sandbox and permission-mode settings for execution safety.",
+        ],
+    },
+    {
+        "area": "Consensus Integration",
+        "readiness_status": "not_ready",
+        "rationale": (
+            "Consensus design exists for multi-agent proposal review but is not yet "
+            "integrated with the prompt execution pipeline."
+        ),
+        "blockers": [
+            "Consensus mechanism not wired to the prompt execution pipeline.",
+            "No consensus protocol defined for prompt execution outcomes.",
+        ],
+        "recommended_next_steps": [
+            "Define consensus requirements for prompt execution approval in a future phase.",
+            "Integrate consensus review into the execution approval gate.",
+        ],
+    },
+    {
+        "area": "Human Oversight",
+        "readiness_status": "ready",
+        "rationale": (
+            "Human review is required throughout the prompt lifecycle (generation, adaptation, "
+            "validation, approval, rendering). human_review_required=true is enforced in all "
+            "prompt phases."
+        ),
+        "blockers": [],
+        "recommended_next_steps": [
+            "Maintain human_review_required=true in all future execution phases.",
+            "Define human escalation paths for execution failures.",
+        ],
+    },
+)
+
+_PER_GAPS: tuple[dict, ...] = (
+    {
+        "gap_id": "gap-001",
+        "category": "missing_implementation",
+        "description": "Runtime prompt generation pipeline not yet implemented.",
+        "severity": "high",
+        "affected_areas": ["Prompt Generation", "Runtime Invocation"],
+    },
+    {
+        "gap_id": "gap-002",
+        "category": "missing_validation",
+        "description": "No automated prompt validator deployed; validation is advisory-only.",
+        "severity": "high",
+        "affected_areas": ["Prompt Validation", "Prompt Approval"],
+    },
+    {
+        "gap_id": "gap-003",
+        "category": "missing_implementation",
+        "description": "ApprovedPromptArtifact runtime storage not yet implemented.",
+        "severity": "high",
+        "affected_areas": ["Prompt Approval", "Runtime Invocation"],
+    },
+    {
+        "gap_id": "gap-004",
+        "category": "missing_integration",
+        "description": "Agent adapters not validated for prompt-execution workloads.",
+        "severity": "medium",
+        "affected_areas": ["Runtime Adapters", "Runtime Invocation"],
+    },
+    {
+        "gap_id": "gap-005",
+        "category": "missing_integration",
+        "description": "Consensus mechanism not integrated with the prompt execution pipeline.",
+        "severity": "medium",
+        "affected_areas": ["Consensus Integration"],
+    },
+    {
+        "gap_id": "gap-006",
+        "category": "governance_gap",
+        "description": (
+            "No execution dry-run performed to validate governance boundaries "
+            "under execution conditions."
+        ),
+        "severity": "high",
+        "affected_areas": ["Runtime Invocation", "Prompt Governance"],
+    },
+)
+
+_PER_RISKS: tuple[dict, ...] = (
+    {
+        "risk_id": "risk-001",
+        "category": "execution_risk",
+        "description": (
+            "Premature execution without dry-run validation may violate "
+            "governance boundaries."
+        ),
+        "severity": "high",
+        "mitigation": (
+            "Complete execution dry-run (45O) before authorizing any live prompt execution."
+        ),
+    },
+    {
+        "risk_id": "risk-002",
+        "category": "approval_risk",
+        "description": (
+            "Execution without an implemented ApprovedPromptArtifact store risks "
+            "bypassing the approval workflow."
+        ),
+        "severity": "high",
+        "mitigation": "Implement and validate the approval store before enabling execution.",
+    },
+    {
+        "risk_id": "risk-003",
+        "category": "governance_risk",
+        "description": (
+            "Advisory-only validation allows prompts with warnings to proceed; "
+            "no hard enforcement gate exists."
+        ),
+        "severity": "medium",
+        "mitigation": "Enforce validation gates before the execution pipeline in a future phase.",
+    },
+    {
+        "risk_id": "risk-004",
+        "category": "execution_risk",
+        "description": (
+            "Adapter sandbox isolation not validated for prompt execution scope; "
+            "may allow unintended file writes."
+        ),
+        "severity": "medium",
+        "mitigation": "Review and tighten sandbox settings for each adapter before execution.",
+    },
+    {
+        "risk_id": "risk-005",
+        "category": "governance_risk",
+        "description": (
+            "No consensus protocol for execution outcomes; divergent agent results "
+            "have no resolution path."
+        ),
+        "severity": "low",
+        "mitigation": "Define consensus requirements in 45P or a future execution governance phase.",
+    },
+)
+
+_PER_GOVERNANCE_BOUNDARIES: dict = {
+    "assessment_may": [
+        "assess readiness areas",
+        "identify gaps",
+        "generate risks",
+        "generate recommendations",
+    ],
+    "assessment_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "advisory": True,
+}
+
+_PER_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45O", "description": "Prompt Execution Dry-Run"},
+    {"phase": "45P", "description": "Human-Selected Agent Execution Design"},
+    {"phase": "45Q", "description": "Governed Prompt Execution Pilot"},
+)
+
+
+def build_prompt_execution_readiness() -> dict:
+    """Assess PCAE readiness for future governed prompt execution. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"per-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    readiness_areas = [dict(a) for a in _PER_READINESS_AREAS]
+    gaps = [dict(g) for g in _PER_GAPS]
+    risks = [dict(r) for r in _PER_RISKS]
+
+    recommendations = [
+        {
+            "area": a["area"],
+            "readiness_status": a["readiness_status"],
+            "rationale": a["rationale"],
+            "blockers": list(a["blockers"]),
+            "recommended_next_steps": list(a["recommended_next_steps"]),
+        }
+        for a in _PER_READINESS_AREAS
+    ]
+
+    ready_count = sum(1 for a in readiness_areas if a["readiness_status"] == "ready")
+    partial_count = sum(
+        1 for a in readiness_areas if a["readiness_status"] == "partially_ready"
+    )
+    not_ready_count = sum(
+        1 for a in readiness_areas if a["readiness_status"] == "not_ready"
+    )
+    overall_status = (
+        "not_ready" if not_ready_count > 0
+        else ("partially_ready" if partial_count > 0 else "ready")
+    )
+
+    readiness_summary = {
+        "assessment_id": assessment_id,
+        "generated_at": generated_at,
+        "phase": "45N",
+        "title": "Prompt Execution Readiness Assessment",
+        "overall_status": overall_status,
+        "execution_recommended": False,
+        "human_review_required": True,
+        "area_count": len(readiness_areas),
+        "ready_count": ready_count,
+        "partially_ready_count": partial_count,
+        "not_ready_count": not_ready_count,
+        "gap_count": len(gaps),
+        "risk_count": len(risks),
+        "input_sources": list(_PER_INPUT_SOURCES),
+        "governance_boundaries": dict(_PER_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PER_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "readiness_summary": readiness_summary,
+        "readiness_areas": readiness_areas,
+        "gaps": gaps,
+        "risks": risks,
+        "recommendations": recommendations,
+        "human_review_required": True,
+        "advisory": PROMPT_EXECUTION_READINESS_ADVISORY,
+    }
