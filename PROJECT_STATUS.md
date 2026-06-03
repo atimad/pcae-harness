@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45H: Prompt Validation Framework.
+Phase 45I: Prompt Governance Design.
 
 ## Governance Coherence Note
 
@@ -2052,9 +2052,32 @@ execute prompts/invoke agents/modify repository/auto-approve/commit/push);
 read_only=true; advisory: "Prompt validation design is informational;
 no prompts are executed."
 
+and prompt governance controls can be designed with
+`pcae prompt-governance-design` and `pcae prompt-governance-design --json`,
+defining a six-step governance lifecycle (canonical_prompt, validation,
+governance_review, human_approval, approved_prompt,
+future_execution_candidate), five governed prompt types
+(canonical_prompt/adapted_prompt/approved_prompt/rejected_prompt/
+superseded_prompt), governance requirements (five required fields:
+prompt_id/phase_id/proposal_id/roadmap_approval_id/evidence_package_id;
+three required properties: traceable/auditable/reviewable), a PromptLineage
+model tracking source_prompt_id/adaptation_history/validation_history/
+approval_history (append-only, deletion forbidden), intent protection rules
+enforcing six protected fields (objective/acceptance_criteria/
+governance_boundaries/allowed_files/forbidden_files/safety_rules —
+may not change during adaptation, violation_blocks_approval=true), four
+approval requirements (validation passed, traceability complete, intent
+preserved, human approval granted), six governance states
+(draft/validated/pending_approval/approved/rejected/superseded — with
+terminal flags and human action requirements), and governance boundaries
+(may validate prompts/record lineage/record approvals/record audit history;
+may not execute prompts/invoke agents/modify repository/bypass approval/
+auto-approve/commit/push; read_only=true); advisory: "Prompt governance
+design is informational; no prompts are approved or executed."
+
 ## Next
 
-- TBD: Future phases (45I Prompt Governance Design, 45J Prompt Artifact Model, 45K Prompt Approval Workflow).
+- TBD: Future phases (45J Prompt Artifact Model, 45K Prompt Approval Workflow, 45L Autonomous Phase Proposal Prototype, 45M Autonomous Prompt Proposal Prototype).
 
 ## Future Explorations
 

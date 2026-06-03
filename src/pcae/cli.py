@@ -47,6 +47,7 @@ from pcae.commands.agent import (
     run_prompt_generation_design,
     run_adaptive_prompt_design,
     run_prompt_validation_design,
+    run_prompt_governance_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1611,6 +1612,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON prompt validation design output.",
     )
     prompt_validation_design_parser.set_defaults(handler=run_prompt_validation_design)
+
+    prompt_governance_design_parser = subparsers.add_parser(
+        "prompt-governance-design",
+        help="Design governance controls for canonical and adapted prompts (Phase 45I).",
+    )
+    prompt_governance_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON prompt governance design output.",
+    )
+    prompt_governance_design_parser.set_defaults(handler=run_prompt_governance_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

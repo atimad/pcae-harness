@@ -70,6 +70,8 @@ from pcae.core.agent import (
     ADAPTIVE_PROMPT_DESIGN_ADVISORY,
     build_prompt_validation_design,
     PROMPT_VALIDATION_DESIGN_ADVISORY,
+    build_prompt_governance_design,
+    PROMPT_GOVERNANCE_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -3709,6 +3711,54 @@ def run_prompt_validation_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['prompt_validation_may'])}")
         print(f"  May not: {', '.join(gb['prompt_validation_may_not'])}")
+        print()
+        print("Future evolution:")
+        for entry in design["future_evolution"]:
+            print(f"  {entry['phase']}: {entry['description']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_prompt_governance_design(args: argparse.Namespace) -> int:
+    data = build_prompt_governance_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["prompt_governance_design"]
+        print("Prompt governance design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print(f"Summary: {design['summary']}")
+        print()
+        print("Governance lifecycle:")
+        for step in data["governance_lifecycle"]:
+            print(f"  {step['step']}. {step['name']}: {step['description']}")
+        print()
+        print(f"Governed prompt types ({len(data['governed_prompt_types'])}):")
+        for pt in data["governed_prompt_types"]:
+            req = "requires approval" if pt["requires_approval"] else "no approval required"
+            print(f"  {pt['type']}: {pt['description']} ({req})")
+        print()
+        lm = data["lineage_model"]
+        fields = ", ".join(f["name"] for f in lm["tracked_fields"])
+        print(f"Lineage model: {lm['model_name']}")
+        print(f"  Tracked fields: {fields}")
+        print(f"  Append-only: {'yes' if lm['lineage_is_append_only'] else 'no'}")
+        print()
+        print(f"Approval requirements ({len(data['approval_requirements'])}):")
+        for req in data["approval_requirements"]:
+            print(f"  - {req}")
+        print()
+        print(f"Governance states ({len(data['governance_states'])}):")
+        for gs in data["governance_states"]:
+            terminal = "terminal" if gs["terminal"] else "non-terminal"
+            print(f"  {gs['state']} ({terminal}): {gs['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['prompt_governance_may'])}")
+        print(f"  May not: {', '.join(gb['prompt_governance_may_not'])}")
         print()
         print("Future evolution:")
         for entry in design["future_evolution"]:

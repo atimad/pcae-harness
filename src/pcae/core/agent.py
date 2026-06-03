@@ -11666,3 +11666,244 @@ def build_prompt_validation_design() -> dict:
         "governance_boundaries": dict(_PVD_GOVERNANCE_BOUNDARIES),
         "advisory": PROMPT_VALIDATION_DESIGN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 45I: Prompt Governance Design
+# ---------------------------------------------------------------------------
+
+PROMPT_GOVERNANCE_DESIGN_ADVISORY = (
+    "Prompt governance design is informational; no prompts are approved or executed."
+)
+
+_PGV_GOVERNANCE_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "canonical_prompt",
+        "description": "A canonical prompt artifact enters the governance pipeline.",
+        "inputs": ["canonical_prompt_artifact", "roadmap_approval_artifact"],
+        "outputs": ["prompt_id", "governance_context"],
+    },
+    {
+        "step": 2,
+        "name": "validation",
+        "description": "The prompt is validated for completeness, traceability, intent preservation, and safety.",
+        "inputs": ["prompt_id", "prompt_validation_results"],
+        "outputs": ["validation_status", "validation_errors", "validation_warnings"],
+    },
+    {
+        "step": 3,
+        "name": "governance_review",
+        "description": "Governance lineage, audit history, and approval requirements are checked.",
+        "inputs": ["prompt_id", "validation_status", "lineage_record"],
+        "outputs": ["governance_review_result", "approval_requirements_met"],
+    },
+    {
+        "step": 4,
+        "name": "human_approval",
+        "description": "A human reviews the governance review result and grants or denies approval.",
+        "inputs": ["prompt_id", "governance_review_result"],
+        "outputs": ["approval_decision", "human_notes", "governance_state"],
+    },
+    {
+        "step": 5,
+        "name": "approved_prompt",
+        "description": "The prompt is recorded as approved and its lineage is updated.",
+        "inputs": ["approval_decision", "governance_state"],
+        "outputs": ["approved_prompt_id", "updated_lineage"],
+    },
+    {
+        "step": 6,
+        "name": "future_execution_candidate",
+        "description": "The approved prompt becomes a future execution candidate; no execution occurs in this phase.",
+        "inputs": ["approved_prompt_id"],
+        "outputs": ["execution_candidate_id"],
+    },
+)
+
+_PGV_GOVERNED_PROMPT_TYPES: tuple[dict, ...] = (
+    {
+        "type": "canonical_prompt",
+        "description": "The original prompt derived from an approved phase. Source of truth for intent.",
+        "mutable": False,
+        "requires_approval": True,
+    },
+    {
+        "type": "adapted_prompt",
+        "description": "An agent-specific variant of a canonical prompt. Intent must be preserved.",
+        "mutable": False,
+        "requires_approval": True,
+    },
+    {
+        "type": "approved_prompt",
+        "description": "A canonical or adapted prompt that has passed validation and received human approval.",
+        "mutable": False,
+        "requires_approval": False,
+    },
+    {
+        "type": "rejected_prompt",
+        "description": "A prompt that failed validation or was denied by a human reviewer.",
+        "mutable": False,
+        "requires_approval": False,
+    },
+    {
+        "type": "superseded_prompt",
+        "description": "A prompt that has been replaced by a newer version. Retained for audit history.",
+        "mutable": False,
+        "requires_approval": False,
+    },
+)
+
+_PGV_GOVERNANCE_REQUIREMENTS: dict = {
+    "required_fields": [
+        "prompt_id",
+        "phase_id",
+        "proposal_id",
+        "roadmap_approval_id",
+        "evidence_package_id",
+    ],
+    "required_properties": [
+        "traceable",
+        "auditable",
+        "reviewable",
+    ],
+}
+
+_PGV_LINEAGE_MODEL: dict = {
+    "model_name": "PromptLineage",
+    "tracked_fields": [
+        {"name": "source_prompt_id", "description": "ID of the canonical prompt this prompt derives from."},
+        {"name": "adaptation_history", "description": "Ordered list of adaptation events with agent_id, timestamp, and changes."},
+        {"name": "validation_history", "description": "Ordered list of validation runs with validation_id, status, and timestamp."},
+        {"name": "approval_history", "description": "Ordered list of approval decisions with decision, approver, timestamp, and notes."},
+    ],
+    "lineage_is_append_only": True,
+    "lineage_deletion_forbidden": True,
+}
+
+_PGV_INTENT_PROTECTION_RULES: dict = {
+    "protected_fields": [
+        "objective",
+        "acceptance_criteria",
+        "governance_boundaries",
+        "allowed_files",
+        "forbidden_files",
+        "safety_rules",
+    ],
+    "protection_rule": "Protected fields may not change during adaptation.",
+    "enforcement": "governance",
+    "violation_severity": "error",
+    "violation_blocks_approval": True,
+}
+
+_PGV_APPROVAL_REQUIREMENTS: tuple[str, ...] = (
+    "Validation must have passed (status: valid or valid_with_warnings).",
+    "Traceability must be complete (all required references present).",
+    "Intent must be preserved (no protected fields changed).",
+    "Human approval must be explicitly granted.",
+)
+
+_PGV_GOVERNANCE_STATES: tuple[dict, ...] = (
+    {
+        "state": "draft",
+        "description": "Prompt has been generated but not yet submitted for validation.",
+        "terminal": False,
+        "requires_human_action": False,
+    },
+    {
+        "state": "validated",
+        "description": "Prompt has passed validation checks.",
+        "terminal": False,
+        "requires_human_action": False,
+    },
+    {
+        "state": "pending_approval",
+        "description": "Prompt has passed validation and is awaiting human approval.",
+        "terminal": False,
+        "requires_human_action": True,
+    },
+    {
+        "state": "approved",
+        "description": "Human has granted approval; prompt is a future execution candidate.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "rejected",
+        "description": "Human has denied approval or validation failed irrecoverably.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+    {
+        "state": "superseded",
+        "description": "Prompt has been replaced by a newer version; retained for audit.",
+        "terminal": True,
+        "requires_human_action": False,
+    },
+)
+
+_PGV_GOVERNANCE_BOUNDARIES: dict = {
+    "prompt_governance_may": [
+        "validate prompts",
+        "record lineage",
+        "record approvals",
+        "record audit history",
+    ],
+    "prompt_governance_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "modify repository",
+        "bypass approval",
+        "auto-approve prompts",
+        "commit",
+        "push",
+    ],
+    "read_only": True,
+    "human_approval_required": True,
+    "advisory": True,
+}
+
+_PGV_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45J", "description": "Prompt Artifact Model"},
+    {"phase": "45K", "description": "Prompt Approval Workflow"},
+    {"phase": "45L", "description": "Autonomous Phase Proposal Prototype"},
+    {"phase": "45M", "description": "Autonomous Prompt Proposal Prototype"},
+)
+
+
+def build_prompt_governance_design() -> dict:
+    """Design governance controls for canonical and adapted prompts. Read-only; no prompts approved or executed."""
+    design_id = f"pgv-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    prompt_governance_design = {
+        "design_id": design_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "phase": "45I",
+        "title": "Prompt Governance Design",
+        "summary": (
+            "Defines governance controls for canonical prompts and adapted prompts "
+            "within PCAE. Covers lifecycle, governed prompt types, lineage tracking, "
+            "intent protection, approval requirements, and governance states. "
+            "No prompts are approved or executed."
+        ),
+        "governance_lifecycle": [dict(s) for s in _PGV_GOVERNANCE_LIFECYCLE],
+        "governed_prompt_types": [dict(t) for t in _PGV_GOVERNED_PROMPT_TYPES],
+        "governance_requirements": dict(_PGV_GOVERNANCE_REQUIREMENTS),
+        "lineage_model": dict(_PGV_LINEAGE_MODEL),
+        "intent_protection_rules": dict(_PGV_INTENT_PROTECTION_RULES),
+        "approval_requirements": list(_PGV_APPROVAL_REQUIREMENTS),
+        "governance_states": [dict(s) for s in _PGV_GOVERNANCE_STATES],
+        "governance_boundaries": dict(_PGV_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _PGV_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "prompt_governance_design": prompt_governance_design,
+        "governance_lifecycle": [dict(s) for s in _PGV_GOVERNANCE_LIFECYCLE],
+        "governed_prompt_types": [dict(t) for t in _PGV_GOVERNED_PROMPT_TYPES],
+        "lineage_model": dict(_PGV_LINEAGE_MODEL),
+        "approval_requirements": list(_PGV_APPROVAL_REQUIREMENTS),
+        "governance_states": [dict(s) for s in _PGV_GOVERNANCE_STATES],
+        "governance_boundaries": dict(_PGV_GOVERNANCE_BOUNDARIES),
+        "advisory": PROMPT_GOVERNANCE_DESIGN_ADVISORY,
+    }

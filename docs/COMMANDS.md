@@ -331,3 +331,8 @@
 
 - `pcae prompt-validation-design`
 - `pcae prompt-validation-design --json`
+
+## prompt-governance-design
+
+- `pcae prompt-governance-design`
+- `pcae prompt-governance-design --json`

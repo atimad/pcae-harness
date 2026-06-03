@@ -20661,3 +20661,175 @@ def test_45h_prompt_validation_design_human_output_shows_all_sections(capsys) ->
     assert "Governance boundaries" in output
     assert "Future evolution" in output
     assert "no prompts are executed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 45I: Prompt Governance Design
+# ---------------------------------------------------------------------------
+
+
+def test_45i_prompt_governance_design_command_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-governance-design"])
+    assert exit_code == 0
+
+
+def test_45i_prompt_governance_design_json_exits_zero(capsys) -> None:
+    exit_code = main(["prompt-governance-design", "--json"])
+    assert exit_code == 0
+
+
+def test_45i_prompt_governance_design_json_has_required_top_level_keys(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "prompt_governance_design",
+        "governance_lifecycle",
+        "governed_prompt_types",
+        "lineage_model",
+        "approval_requirements",
+        "governance_states",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"missing key: {key}"
+
+
+def test_45i_prompt_governance_design_id_starts_with_pgv(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["prompt_governance_design"]
+    assert design["design_id"].startswith("pgv-")
+    assert design["phase"] == "45I"
+
+
+def test_45i_prompt_governance_design_lifecycle_six_steps(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["governance_lifecycle"]
+    assert len(lifecycle) == 6
+    step_names = [s["name"] for s in lifecycle]
+    assert "canonical_prompt" in step_names
+    assert "validation" in step_names
+    assert "governance_review" in step_names
+    assert "human_approval" in step_names
+    assert "approved_prompt" in step_names
+    assert "future_execution_candidate" in step_names
+
+
+def test_45i_prompt_governance_design_governed_prompt_types(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    types = {t["type"] for t in data["governed_prompt_types"]}
+    assert "canonical_prompt" in types
+    assert "adapted_prompt" in types
+    assert "approved_prompt" in types
+    assert "rejected_prompt" in types
+    assert "superseded_prompt" in types
+    assert len(types) == 5
+
+
+def test_45i_prompt_governance_design_governance_requirements(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gr = data["prompt_governance_design"]["governance_requirements"]
+    for field in ("prompt_id", "phase_id", "proposal_id", "roadmap_approval_id", "evidence_package_id"):
+        assert field in gr["required_fields"], f"missing required field: {field}"
+    for prop in ("traceable", "auditable", "reviewable"):
+        assert prop in gr["required_properties"], f"missing required property: {prop}"
+
+
+def test_45i_prompt_governance_design_lineage_model(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lm = data["lineage_model"]
+    assert lm["lineage_is_append_only"] is True
+    assert lm["lineage_deletion_forbidden"] is True
+    tracked = {f["name"] for f in lm["tracked_fields"]}
+    assert "source_prompt_id" in tracked
+    assert "adaptation_history" in tracked
+    assert "validation_history" in tracked
+    assert "approval_history" in tracked
+
+
+def test_45i_prompt_governance_design_intent_protection_rules(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ipr = data["prompt_governance_design"]["intent_protection_rules"]
+    assert ipr["violation_blocks_approval"] is True
+    assert ipr["violation_severity"] == "error"
+    for field in ("objective", "acceptance_criteria", "governance_boundaries",
+                  "allowed_files", "forbidden_files", "safety_rules"):
+        assert field in ipr["protected_fields"], f"missing protected field: {field}"
+
+
+def test_45i_prompt_governance_design_approval_requirements(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = " ".join(data["approval_requirements"]).lower()
+    assert "validation" in reqs
+    assert "traceability" in reqs
+    assert "intent" in reqs
+    assert "human approval" in reqs
+    assert len(data["approval_requirements"]) == 4
+
+
+def test_45i_prompt_governance_design_governance_states(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = {s["state"] for s in data["governance_states"]}
+    for expected in ("draft", "validated", "pending_approval", "approved", "rejected", "superseded"):
+        assert expected in states, f"missing governance state: {expected}"
+    assert len(states) == 6
+    state_map = {s["state"]: s for s in data["governance_states"]}
+    assert state_map["approved"]["terminal"] is True
+    assert state_map["rejected"]["terminal"] is True
+    assert state_map["superseded"]["terminal"] is True
+    assert state_map["draft"]["terminal"] is False
+    assert state_map["pending_approval"]["requires_human_action"] is True
+
+
+def test_45i_prompt_governance_design_governance_boundaries(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "prompt_governance_may" in gb
+    assert "prompt_governance_may_not" in gb
+    assert gb["read_only"] is True
+    assert gb["human_approval_required"] is True
+    may_not = " ".join(gb["prompt_governance_may_not"]).lower()
+    assert "execute prompts" in may_not
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "bypass approval" in may_not
+    assert "auto-approve" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_45i_prompt_governance_design_advisory(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "no prompts are approved or executed" in advisory
+
+
+def test_45i_prompt_governance_design_future_evolution(capsys) -> None:
+    main(["prompt-governance-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["prompt_governance_design"]["future_evolution"]]
+    for expected in ("45J", "45K", "45L", "45M"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_45i_prompt_governance_design_human_output_shows_all_sections(capsys) -> None:
+    main(["prompt-governance-design"])
+    output = capsys.readouterr().out
+    assert "Prompt governance design" in output
+    assert "Governance lifecycle" in output
+    assert "Governed prompt types" in output
+    assert "Lineage model" in output
+    assert "Approval requirements" in output
+    assert "Governance states" in output
+    assert "Governance boundaries" in output
+    assert "Future evolution" in output
+    assert "no prompts are approved or executed" in output
