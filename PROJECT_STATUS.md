@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 45O: Prompt Execution Dry-Run.
+Phase 45P: Human-Selected Agent Execution Design.
 
 ## Governance Coherence Note
 
@@ -2215,9 +2215,35 @@ simulate governance gates; may not execute prompts/invoke agents/modify reposito
 commits/create pushes; read_only=true, human_review_required=true; advisory: "Execution
 dry-run is simulated; no prompts are executed."
 
+PCAE can design human-selected agent execution for governed prompts with
+`pcae human-agent-execution-design` and `pcae human-agent-execution-design --json`
+(Phase 45P): inputs: rendered prompt set, approved prompt artifact, prompt execution
+dry-run, capability registry, runtime invocation contracts; no prompts are executed;
+no agents are invoked; human agent selection lifecycle (7 steps):
+approved_prompt_artifact/available_agent_listing/human_agent_selection/
+agent_compatibility_check/prompt_variant_selection/execution_candidate_creation/
+future_governed_execution; human selection options: codex-local/claude-local/kimi-local
+each with selectable/prompt_variant/invocation_mode/recommended_for/multi_agent_compatible;
+PCAE may recommend agents but human selection is authoritative; six compatibility checks:
+agent_exists/agent_installed/agent_has_required_capabilities/valid_invocation_contract/
+prompt_variant_exists/writable_mode_not_allowed (all required, failure=block); prompt
+variant selection: codex→codex_adapted_prompt/claude→claude_adapted_prompt/kimi→kimi_adapted_prompt,
+canonical prompt is source of truth; ExecutionCandidate model: execution_candidate_id/
+prompt_approval_id/selected_agents/selected_prompt_variants/compatibility_results/
+invocation_contracts/governance_status/blockers/human_review_required,
+creation_triggers_execution=false, human_authorization_required=true; six blocker conditions
+(no_human_selected_agent/selected_agent_unavailable/selected_prompt_variant_missing/
+invocation_contract_missing/approval_artifact_missing/governance_status_not_approved);
+governance_boundaries: may list selectable agents/recommend agents/validate compatibility/
+create execution candidate model; may not execute prompts/invoke agents/approve execution/
+modify repository/commit/push/rollback; human_selection_authoritative=true,
+pcae_recommendation_advisory=true, read_only=true, human_review_required=true;
+future_evolution: 45Q/45R/45S; advisory: "Human-selected agent execution design is
+informational; no prompts are executed."
+
 ## Next
 
-- TBD: Future phases (45P Human-Selected Agent Execution Design, 45Q Governed Prompt Execution Pilot).
+- TBD: Future phases (45Q Governed Prompt Execution Pilot, 45R Prompt Execution Result Capture, 45S Prompt Consensus Integration).
 
 ## Future Explorations
 

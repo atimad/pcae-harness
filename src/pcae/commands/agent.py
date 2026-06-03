@@ -86,6 +86,8 @@ from pcae.core.agent import (
     PROMPT_EXECUTION_READINESS_ADVISORY,
     build_prompt_execution_dry_run,
     PROMPT_EXECUTION_DRY_RUN_ADVISORY,
+    build_human_agent_execution_design,
+    HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4113,6 +4115,67 @@ def run_prompt_execution_dry_run(args: argparse.Namespace) -> int:
             print(f"  {rec['area']} (→ {rec['target_phase']}):")
             for step in rec["recommended_next_steps"]:
                 print(f"    - {step}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_human_agent_execution_design(args: argparse.Namespace) -> int:
+    data = build_human_agent_execution_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["human_agent_execution_design"]
+        print("Human-selected agent execution design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Human agent selection lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Human selection options:")
+        for opt in data["selection_options"]:
+            roles = ", ".join(opt["recommended_for"])
+            print(
+                f"  {opt['agent_id']}: variant={opt['prompt_variant']}"
+                f" mode={opt['invocation_mode']} recommended_for=[{roles}]"
+            )
+        print()
+        print("Agent compatibility checks:")
+        for chk in data["compatibility_checks"]:
+            print(f"  {chk['check_id']}: {chk['check']}")
+            print(f"    {chk['description']}")
+            print(f"    required={chk['required']}  failure_action={chk['failure_action']}")
+        print()
+        print("Prompt variant selection rules:")
+        for rule in data["prompt_variant_selection"]:
+            print(
+                f"  {rule['agent_id']}: variant={rule['variant']}"
+                f" profile={rule['adaptation_profile']}"
+            )
+        print()
+        print("Execution candidate model:")
+        ecm = data["execution_candidate_model"]
+        for field in ecm["fields"]:
+            print(f"  {field['name']} ({field['type']}): {field['description']}")
+        print(f"  creation_triggers_execution: {ecm['creation_triggers_execution']}")
+        print(f"  human_authorization_required: {ecm['human_authorization_required']}")
+        print()
+        print(f"Blockers ({design['blocker_count']}):")
+        for blocker in data["blockers"]:
+            print(f"  [{blocker['severity']}] {blocker['blocker_id']}: {blocker['description']}")
+        print()
+        print("Governance boundaries:")
+        gb = data["governance_boundaries"]
+        print(f"  May:     {', '.join(gb['design_may'])}")
+        print(f"  May not: {', '.join(gb['design_may_not'])}")
+        print(f"  Human selection authoritative: {gb['human_selection_authoritative']}")
+        print(f"  PCAE recommendation advisory:  {gb['pcae_recommendation_advisory']}")
+        print(f"  Human review required:         {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

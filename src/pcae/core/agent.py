@@ -13717,3 +13717,351 @@ def build_prompt_execution_readiness() -> dict:
         "human_review_required": True,
         "advisory": PROMPT_EXECUTION_READINESS_ADVISORY,
     }
+
+
+HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY = (
+    "Human-selected agent execution design is informational; no prompts are executed."
+)
+
+_HAED_INPUT_SOURCES: tuple[str, ...] = (
+    "rendered_prompt_set",
+    "approved_prompt_artifact",
+    "prompt_execution_dry_run",
+    "capability_registry",
+    "runtime_invocation_contracts",
+)
+
+_HAED_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": "An ApprovedPromptArtifact is available as the execution input.",
+    },
+    {
+        "step": 2,
+        "name": "available_agent_listing",
+        "description": (
+            "PCAE lists available agents from the capability registry "
+            "and may recommend agents based on work type."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "human_agent_selection",
+        "description": (
+            "The human selects one or more agents. PCAE recommendations are advisory; "
+            "human selection is authoritative."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "agent_compatibility_check",
+        "description": (
+            "PCAE validates that each selected agent exists, is installed, has required "
+            "capabilities, and has a valid invocation contract."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "prompt_variant_selection",
+        "description": (
+            "The adapted prompt variant for each selected agent is resolved. "
+            "Canonical prompt remains the source of truth."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "execution_candidate_creation",
+        "description": (
+            "An ExecutionCandidate is created with selected agents, prompt variants, "
+            "compatibility results, and governance status."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "future_governed_execution",
+        "description": "ExecutionCandidate passes to the governed execution pilot (45Q).",
+    },
+)
+
+_HAED_SELECTION_OPTIONS: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "selectable": True,
+        "prompt_variant": "codex_adapted_prompt",
+        "invocation_mode": "cli",
+        "recommended_for": ["implementation", "execution"],
+        "multi_agent_compatible": True,
+    },
+    {
+        "agent_id": "claude-local",
+        "selectable": True,
+        "prompt_variant": "claude_adapted_prompt",
+        "invocation_mode": "cli",
+        "recommended_for": ["architecture", "review", "governance"],
+        "multi_agent_compatible": True,
+    },
+    {
+        "agent_id": "kimi-local",
+        "selectable": True,
+        "prompt_variant": "kimi_adapted_prompt",
+        "invocation_mode": "api",
+        "recommended_for": ["research", "challenge", "exploration"],
+        "multi_agent_compatible": True,
+    },
+)
+
+_HAED_COMPATIBILITY_CHECKS: tuple[dict, ...] = (
+    {
+        "check_id": "compat-001",
+        "check": "agent_exists",
+        "description": "Selected agent is registered in the capability registry.",
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+    {
+        "check_id": "compat-002",
+        "check": "agent_installed",
+        "description": "Selected agent runtime is installed and reachable.",
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+    {
+        "check_id": "compat-003",
+        "check": "agent_has_required_capabilities",
+        "description": "Selected agent declares capabilities matching the prompt work type.",
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+    {
+        "check_id": "compat-004",
+        "check": "valid_invocation_contract",
+        "description": "A validated invocation contract exists for the selected agent.",
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+    {
+        "check_id": "compat-005",
+        "check": "prompt_variant_exists",
+        "description": "The adapted prompt variant for the selected agent exists in the prompt set.",
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+    {
+        "check_id": "compat-006",
+        "check": "writable_mode_not_allowed",
+        "description": (
+            "Writable (repository-mutating) invocation mode is not permitted unless "
+            "separately approved in a future governance phase."
+        ),
+        "required": True,
+        "failure_action": "block_execution_candidate",
+    },
+)
+
+_HAED_PROMPT_VARIANT_RULES: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "variant": "codex_adapted_prompt",
+        "source": "autonomous_prompt_proposal",
+        "adaptation_profile": "implementation",
+        "canonical_source_of_truth": True,
+    },
+    {
+        "agent_id": "claude-local",
+        "variant": "claude_adapted_prompt",
+        "source": "autonomous_prompt_proposal",
+        "adaptation_profile": "architecture_and_review",
+        "canonical_source_of_truth": True,
+    },
+    {
+        "agent_id": "kimi-local",
+        "variant": "kimi_adapted_prompt",
+        "source": "autonomous_prompt_proposal",
+        "adaptation_profile": "research_and_challenge",
+        "canonical_source_of_truth": True,
+    },
+)
+
+_HAED_EXECUTION_CANDIDATE_MODEL: dict = {
+    "model_name": "ExecutionCandidate",
+    "fields": [
+        {
+            "name": "execution_candidate_id",
+            "type": "str",
+            "description": "Unique identifier for this execution candidate (ec-*).",
+            "required": True,
+        },
+        {
+            "name": "prompt_approval_id",
+            "type": "str",
+            "description": "Reference to the ApprovedPromptArtifact that authorizes execution.",
+            "required": True,
+        },
+        {
+            "name": "selected_agents",
+            "type": "list[str]",
+            "description": "Human-selected agent IDs; non-empty, authoritative.",
+            "required": True,
+        },
+        {
+            "name": "selected_prompt_variants",
+            "type": "dict[str, str]",
+            "description": "Mapping of agent_id to resolved adapted prompt variant.",
+            "required": True,
+        },
+        {
+            "name": "compatibility_results",
+            "type": "list[CompatibilityResult]",
+            "description": "Per-agent compatibility check outcomes.",
+            "required": True,
+        },
+        {
+            "name": "invocation_contracts",
+            "type": "dict[str, str]",
+            "description": "Mapping of agent_id to validated invocation contract identifier.",
+            "required": True,
+        },
+        {
+            "name": "governance_status",
+            "type": "str",
+            "description": "One of: pending, approved, blocked.",
+            "required": True,
+        },
+        {
+            "name": "blockers",
+            "type": "list[str]",
+            "description": "Reasons the candidate cannot proceed to execution.",
+            "required": True,
+        },
+        {
+            "name": "human_review_required",
+            "type": "bool",
+            "description": "Always true; human must authorize before execution proceeds.",
+            "required": True,
+        },
+    ],
+    "governance_status_values": ["pending", "approved", "blocked"],
+    "creation_triggers_execution": False,
+    "human_authorization_required": True,
+}
+
+_HAED_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker_id": "haed-blocker-001",
+        "condition": "no_human_selected_agent",
+        "description": "No agent has been selected by a human; PCAE cannot select agents autonomously.",
+        "severity": "high",
+    },
+    {
+        "blocker_id": "haed-blocker-002",
+        "condition": "selected_agent_unavailable",
+        "description": "The selected agent is not installed or not reachable.",
+        "severity": "high",
+    },
+    {
+        "blocker_id": "haed-blocker-003",
+        "condition": "selected_prompt_variant_missing",
+        "description": "The adapted prompt variant for the selected agent does not exist.",
+        "severity": "high",
+    },
+    {
+        "blocker_id": "haed-blocker-004",
+        "condition": "invocation_contract_missing",
+        "description": "No validated invocation contract exists for the selected agent.",
+        "severity": "high",
+    },
+    {
+        "blocker_id": "haed-blocker-005",
+        "condition": "approval_artifact_missing",
+        "description": "No ApprovedPromptArtifact can be retrieved; approval store not implemented.",
+        "severity": "high",
+    },
+    {
+        "blocker_id": "haed-blocker-006",
+        "condition": "governance_status_not_approved",
+        "description": "Execution candidate governance_status is not 'approved'.",
+        "severity": "high",
+    },
+)
+
+_HAED_GOVERNANCE_BOUNDARIES: dict = {
+    "design_may": [
+        "list selectable agents",
+        "recommend agents",
+        "validate compatibility",
+        "create execution candidate model",
+    ],
+    "design_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "approve execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_selection_authoritative": True,
+    "pcae_recommendation_advisory": True,
+    "human_review_required": True,
+    "read_only": True,
+}
+
+_HAED_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "45Q", "description": "Governed Prompt Execution Pilot"},
+    {"phase": "45R", "description": "Prompt Execution Result Capture"},
+    {"phase": "45S", "description": "Prompt Consensus Integration"},
+)
+
+
+def build_human_agent_execution_design() -> dict:
+    """Design human-selected agent execution for governed prompts. Read-only; no prompts executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"haed-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _HAED_LIFECYCLE]
+    selection_options = [dict(o) for o in _HAED_SELECTION_OPTIONS]
+    compatibility_checks = [dict(c) for c in _HAED_COMPATIBILITY_CHECKS]
+    prompt_variant_selection = [dict(r) for r in _HAED_PROMPT_VARIANT_RULES]
+    execution_candidate_model = {
+        k: (list(v) if isinstance(v, (list, tuple)) else v)
+        for k, v in _HAED_EXECUTION_CANDIDATE_MODEL.items()
+        if k != "fields"
+    }
+    execution_candidate_model["fields"] = [dict(f) for f in _HAED_EXECUTION_CANDIDATE_MODEL["fields"]]
+    blockers = [dict(b) for b in _HAED_BLOCKERS]
+
+    human_agent_execution_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "45P",
+        "title": "Human-Selected Agent Execution Design",
+        "summary": (
+            "Defines how a human operator selects one or more agents to execute an approved "
+            "prompt, with PCAE performing compatibility validation and execution candidate "
+            "creation while preserving full human authority over agent selection."
+        ),
+        "input_sources": list(_HAED_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "selectable_agent_count": len(selection_options),
+        "compatibility_check_count": len(compatibility_checks),
+        "blocker_count": len(blockers),
+        "human_selection_authoritative": True,
+        "pcae_recommendation_advisory": True,
+        "human_review_required": True,
+        "governance_boundaries": dict(_HAED_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _HAED_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "human_agent_execution_design": human_agent_execution_design,
+        "lifecycle": lifecycle,
+        "selection_options": selection_options,
+        "compatibility_checks": compatibility_checks,
+        "prompt_variant_selection": prompt_variant_selection,
+        "execution_candidate_model": execution_candidate_model,
+        "blockers": blockers,
+        "governance_boundaries": dict(_HAED_GOVERNANCE_BOUNDARIES),
+        "human_review_required": True,
+        "advisory": HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
+    }

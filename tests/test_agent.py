@@ -21976,3 +21976,176 @@ def test_45o_prompt_execution_dry_run_human_output_shows_all_sections(capsys) ->
     assert "Warnings" in output
     assert "Recommendations" in output
     assert "simulated" in output.lower()
+
+
+def test_45p_human_agent_execution_design_json_structure(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("human_agent_execution_design", "lifecycle", "selection_options",
+                "compatibility_checks", "prompt_variant_selection",
+                "execution_candidate_model", "blockers", "governance_boundaries",
+                "human_review_required", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_45p_human_agent_execution_design_fields(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["human_agent_execution_design"]
+    for field in ("design_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "selectable_agent_count", "compatibility_check_count", "blocker_count",
+                  "human_selection_authoritative", "pcae_recommendation_advisory",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("haed-")
+    assert design["phase"] == "45P"
+
+
+def test_45p_human_agent_execution_design_lifecycle(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("approved_prompt_artifact", "available_agent_listing",
+                     "human_agent_selection", "agent_compatibility_check",
+                     "prompt_variant_selection", "execution_candidate_creation",
+                     "future_governed_execution"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_45p_human_agent_execution_design_selection_options(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    options = data["selection_options"]
+    assert len(options) == 3
+    agent_ids = [o["agent_id"] for o in options]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in agent_ids, f"missing selection option: {expected}"
+    for opt in options:
+        for field in ("agent_id", "selectable", "prompt_variant",
+                      "invocation_mode", "recommended_for", "multi_agent_compatible"):
+            assert field in opt, f"selection option missing field: {field}"
+        assert opt["selectable"] is True
+        assert opt["multi_agent_compatible"] is True
+
+
+def test_45p_human_agent_execution_design_compatibility_checks(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checks = data["compatibility_checks"]
+    assert len(checks) == 6
+    check_names = [c["check"] for c in checks]
+    for expected in ("agent_exists", "agent_installed", "agent_has_required_capabilities",
+                     "valid_invocation_contract", "prompt_variant_exists",
+                     "writable_mode_not_allowed"):
+        assert expected in check_names, f"missing compatibility check: {expected}"
+    for chk in checks:
+        for field in ("check_id", "check", "description", "required", "failure_action"):
+            assert field in chk, f"compatibility check missing field: {field}"
+        assert chk["required"] is True
+        assert chk["failure_action"] == "block_execution_candidate"
+
+
+def test_45p_human_agent_execution_design_prompt_variant_selection(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    variants = data["prompt_variant_selection"]
+    assert len(variants) == 3
+    agent_ids = [v["agent_id"] for v in variants]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in agent_ids, f"missing variant rule for: {expected}"
+    for rule in variants:
+        for field in ("agent_id", "variant", "source", "adaptation_profile",
+                      "canonical_source_of_truth"):
+            assert field in rule, f"variant rule missing field: {field}"
+        assert rule["canonical_source_of_truth"] is True
+
+
+def test_45p_human_agent_execution_design_execution_candidate_model(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ecm = data["execution_candidate_model"]
+    assert "fields" in ecm
+    field_names = [f["name"] for f in ecm["fields"]]
+    for expected in ("execution_candidate_id", "prompt_approval_id", "selected_agents",
+                     "selected_prompt_variants", "compatibility_results",
+                     "invocation_contracts", "governance_status", "blockers",
+                     "human_review_required"):
+        assert expected in field_names, f"missing execution candidate field: {expected}"
+    assert ecm["creation_triggers_execution"] is False
+    assert ecm["human_authorization_required"] is True
+
+
+def test_45p_human_agent_execution_design_blockers(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    blockers = data["blockers"]
+    assert len(blockers) == 6
+    conditions = {b["condition"] for b in blockers}
+    for expected in ("no_human_selected_agent", "selected_agent_unavailable",
+                     "selected_prompt_variant_missing", "invocation_contract_missing",
+                     "approval_artifact_missing", "governance_status_not_approved"):
+        assert expected in conditions, f"missing blocker condition: {expected}"
+    for blocker in blockers:
+        for field in ("blocker_id", "condition", "description", "severity"):
+            assert field in blocker, f"blocker missing field: {field}"
+
+
+def test_45p_human_agent_execution_design_governance_boundaries(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "design_may" in gb
+    assert "design_may_not" in gb
+    assert gb["human_selection_authoritative"] is True
+    assert gb["pcae_recommendation_advisory"] is True
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["design_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "approve execution",
+                      "modify repository", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_45p_human_agent_execution_design_human_selection_authoritative(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["human_agent_execution_design"]
+    assert design["human_selection_authoritative"] is True
+    assert design["pcae_recommendation_advisory"] is True
+    assert design["human_review_required"] is True
+
+
+def test_45p_human_agent_execution_design_future_evolution(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["human_agent_execution_design"]["future_evolution"]]
+    assert "45Q" in phases
+    assert "45R" in phases
+    assert "45S" in phases
+
+
+def test_45p_human_agent_execution_design_advisory(capsys) -> None:
+    main(["human-agent-execution-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no prompts are executed" in advisory
+
+
+def test_45p_human_agent_execution_design_human_output_shows_all_sections(capsys) -> None:
+    main(["human-agent-execution-design"])
+    output = capsys.readouterr().out
+    assert "Human-selected agent execution design" in output
+    assert "lifecycle" in output.lower()
+    assert "Human selection options" in output
+    assert "compatibility checks" in output.lower()
+    assert "Prompt variant selection" in output
+    assert "Execution candidate model" in output
+    assert "Blockers" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

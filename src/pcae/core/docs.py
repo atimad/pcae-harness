@@ -392,6 +392,11 @@ def render_commands_reference() -> str:
 
 - `pcae prompt-execution-dry-run`
 - `pcae prompt-execution-dry-run --json`
+
+## human-agent-execution-design
+
+- `pcae human-agent-execution-design`
+- `pcae human-agent-execution-design --json`
 """
 
 
