@@ -16487,3 +16487,438 @@ def build_invocation_workload_validation() -> dict:
         "governance_boundaries": dict(_RIWV_GOVERNANCE_BOUNDARIES),
         "advisory": INVOCATION_WORKLOAD_VALIDATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46F — Execution Authorization Artifact Model
+# ---------------------------------------------------------------------------
+
+EXECUTION_AUTHORIZATION_DESIGN_ADVISORY = (
+    "Execution authorization design is informational; no execution is authorized."
+)
+
+_EAAD_INPUT_SOURCES: tuple[str, ...] = (
+    "prompt_approval_artifacts",
+    "human_selected_execution_design",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "live_execution_readiness_assessment",
+)
+
+_EAAD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact with governance provenance enters the "
+            "authorization pipeline."
+        ),
+    },
+    {
+        "step": 2,
+        "name": "agent_selection",
+        "description": (
+            "The human selects the target agent(s) and prompt variants to be "
+            "authorized for execution."
+        ),
+    },
+    {
+        "step": 3,
+        "name": "authorization_request",
+        "description": (
+            "An authorization request is created, capturing the prompt, selected "
+            "agents, and execution context."
+        ),
+    },
+    {
+        "step": 4,
+        "name": "governance_validation",
+        "description": (
+            "All governance checks are run: prompt approval status, validation "
+            "status, traceability, and invocation contract availability."
+        ),
+    },
+    {
+        "step": 5,
+        "name": "human_authorization",
+        "description": (
+            "The human explicitly grants or denies authorization. No automatic "
+            "authorization is permitted."
+        ),
+    },
+    {
+        "step": 6,
+        "name": "execution_authorization_artifact",
+        "description": (
+            "The ExecutionAuthorizationArtifact is created with all identity, "
+            "prompt reference, agent reference, governance, authorization, and "
+            "metadata fields populated. The artifact is immutable after creation."
+        ),
+    },
+    {
+        "step": 7,
+        "name": "future_live_execution",
+        "description": (
+            "The artifact is passed to the live execution pipeline (Phase 46G+) "
+            "as the authoritative authorization record."
+        ),
+    },
+)
+
+_EAAD_FIELD_GROUPS: tuple[str, ...] = (
+    "identity",
+    "prompt_references",
+    "agent_references",
+    "governance",
+    "authorization",
+    "metadata",
+)
+
+_EAAD_ARTIFACT_FIELDS: tuple[dict, ...] = (
+    # identity
+    {
+        "name": "authorization_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Unique identifier for this authorization artifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_candidate_id",
+        "group": "identity",
+        "type": "str",
+        "description": "Reference to the execution candidate this authorization covers.",
+        "required": True,
+        "immutable": True,
+    },
+    # prompt references
+    {
+        "name": "prompt_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Reference to the approved prompt artifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_approval_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Reference to the prompt approval record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "phase_id",
+        "group": "prompt_references",
+        "type": "str",
+        "description": "Governance phase identifier under which this authorization was granted.",
+        "required": True,
+        "immutable": True,
+    },
+    # agent references
+    {
+        "name": "selected_agents",
+        "group": "agent_references",
+        "type": "list[str]",
+        "description": "Identifiers of agents selected and authorized for execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_prompt_variants",
+        "group": "agent_references",
+        "type": "list[str]",
+        "description": "Identifiers of prompt variants authorized for execution.",
+        "required": True,
+        "immutable": True,
+    },
+    # governance
+    {
+        "name": "governance_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Overall governance validation status at time of authorization.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "validation_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Prompt validation status at time of authorization.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "traceability_status",
+        "group": "governance",
+        "type": "str",
+        "description": "Provenance traceability status at time of authorization.",
+        "required": True,
+        "immutable": True,
+    },
+    # authorization
+    {
+        "name": "authorization_status",
+        "group": "authorization",
+        "type": "str",
+        "description": "Current authorization state: pending, authorized, denied, superseded, or expired.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorized_by",
+        "group": "authorization",
+        "type": "str",
+        "description": "Identity of the human who granted or denied authorization.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorized_at",
+        "group": "authorization",
+        "type": "str",
+        "description": "ISO 8601 timestamp when authorization decision was recorded.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_notes",
+        "group": "authorization",
+        "type": "str",
+        "description": "Optional human-provided notes accompanying the authorization decision.",
+        "required": False,
+        "immutable": True,
+    },
+    # metadata
+    {
+        "name": "created_at",
+        "group": "metadata",
+        "type": "str",
+        "description": "ISO 8601 timestamp when this artifact was created.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "created_by",
+        "group": "metadata",
+        "type": "str",
+        "description": "Identity of the system or agent that created this artifact.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_EAAD_AUTHORIZATION_STATES: tuple[dict, ...] = (
+    {
+        "state": "pending",
+        "description": "Authorization request created; human decision not yet recorded.",
+        "terminal": False,
+    },
+    {
+        "state": "authorized",
+        "description": "Human explicitly granted authorization for this execution.",
+        "terminal": True,
+    },
+    {
+        "state": "denied",
+        "description": "Human explicitly denied authorization; execution may not proceed.",
+        "terminal": True,
+    },
+    {
+        "state": "superseded",
+        "description": "A newer authorization artifact has replaced this one.",
+        "terminal": True,
+    },
+    {
+        "state": "expired",
+        "description": "Authorization window has passed; re-authorization required before execution.",
+        "terminal": True,
+    },
+)
+
+_EAAD_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "prompt_approved",
+        "description": "Prompt artifact must carry a valid approval record.",
+        "blocking": True,
+    },
+    {
+        "requirement": "validation_passed",
+        "description": "Prompt must have passed all governance validation checks.",
+        "blocking": True,
+    },
+    {
+        "requirement": "traceability_complete",
+        "description": "Full provenance chain from prompt origin to approval must be traceable.",
+        "blocking": True,
+    },
+    {
+        "requirement": "human_authorization_granted",
+        "description": "Explicit human authorization must be recorded; no automatic authorization permitted.",
+        "blocking": True,
+    },
+    {
+        "requirement": "invocation_contract_available",
+        "description": "A validated invocation contract must exist for the selected agent runtime.",
+        "blocking": True,
+    },
+    {
+        "requirement": "governance_checks_passed",
+        "description": "All governance boundary checks must pass before artifact creation.",
+        "blocking": True,
+    },
+)
+
+_EAAD_INVARIANTS: tuple[dict, ...] = (
+    {
+        "invariant": "authorization_id_required",
+        "description": "Every artifact must have a non-null authorization_id.",
+        "must_have": True,
+        "field": "authorization_id",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "prompt_id_required",
+        "description": "Every artifact must reference a specific prompt_id.",
+        "must_have": True,
+        "field": "prompt_id",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "authorization_status_required",
+        "description": "Every artifact must have a valid authorization_status.",
+        "must_have": True,
+        "field": "authorization_status",
+        "violation_severity": "error",
+    },
+    {
+        "invariant": "no_authorization_bypass",
+        "description": "Authorization may never be granted without an explicit human decision.",
+        "must_never": True,
+        "prohibition": "authorization_bypass",
+        "violation_severity": "critical",
+    },
+    {
+        "invariant": "no_traceability_removal",
+        "description": "Traceability links (prompt_id, prompt_approval_id) may never be removed.",
+        "must_never": True,
+        "prohibition": "traceability_removal",
+        "violation_severity": "critical",
+    },
+    {
+        "invariant": "no_approval_removal",
+        "description": "The prompt_approval_id reference may never be nulled or removed.",
+        "must_never": True,
+        "prohibition": "approval_removal",
+        "violation_severity": "critical",
+    },
+)
+
+_EAAD_LINEAGE_MODEL: dict = {
+    "tracked_fields": [
+        "source_prompt_id",
+        "prompt_approval_id",
+        "authorization_history",
+    ],
+    "source_prompt_id": (
+        "Identifier of the original prompt from which this authorization derives."
+    ),
+    "prompt_approval_id": (
+        "Identifier of the approval record that authorized the underlying prompt."
+    ),
+    "authorization_history": (
+        "Ordered list of prior authorization artifacts for the same execution candidate, "
+        "enabling audit of superseded or expired authorizations."
+    ),
+    "lineage_immutable": True,
+    "lineage_append_only": True,
+}
+
+_EAAD_GOVERNANCE_BOUNDARIES: dict = {
+    "artifact_may": [
+        "record authorization state",
+        "record authorization metadata",
+        "record lineage",
+    ],
+    "artifact_may_not": [
+        "execute prompts",
+        "invoke agents",
+        "authorize automatically",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase_only": True,
+}
+
+_EAAD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46G", "description": "Read-Only Live Invocation Pilot"},
+    {"phase": "46H", "description": "Live Execution Result Review Workflow"},
+    {"phase": "46I", "description": "Authorization Expiration Workflow"},
+)
+
+
+def build_execution_authorization_design() -> dict:
+    """Define the ExecutionAuthorizationArtifact model for governed prompt execution. Read-only; no execution authorized."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"eaad-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _EAAD_LIFECYCLE]
+    artifact_fields = [dict(f) for f in _EAAD_ARTIFACT_FIELDS]
+    authorization_states = [dict(s) for s in _EAAD_AUTHORIZATION_STATES]
+    requirements = [dict(r) for r in _EAAD_REQUIREMENTS]
+    invariants = [dict(i) for i in _EAAD_INVARIANTS]
+
+    groups: dict[str, list[str]] = {}
+    for field in artifact_fields:
+        groups.setdefault(field["group"], []).append(field["name"])
+
+    artifact_model = {
+        "model_name": "ExecutionAuthorizationArtifact",
+        "design_id": design_id,
+        "field_count": len(artifact_fields),
+        "field_groups": list(_EAAD_FIELD_GROUPS),
+        "fields": artifact_fields,
+        "fields_by_group": groups,
+        "required_field_count": sum(1 for f in artifact_fields if f["required"]),
+        "all_fields_immutable_after_creation": True,
+    }
+
+    execution_authorization_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46F",
+        "title": "Execution Authorization Artifact Model",
+        "summary": (
+            "Defines the ExecutionAuthorizationArtifact model used to authorize future "
+            "prompt execution. Covers the authorization lifecycle, artifact fields across "
+            "six groups, five authorization states, six blocking requirements, six invariants, "
+            "and lineage tracking. No prompts are executed and no execution is authorized."
+        ),
+        "input_sources": list(_EAAD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "artifact_field_count": len(artifact_fields),
+        "authorization_state_count": len(authorization_states),
+        "requirement_count": len(requirements),
+        "invariant_count": len(invariants),
+        "human_review_required": True,
+        "governance_boundaries": dict(_EAAD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _EAAD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "execution_authorization_design": execution_authorization_design,
+        "lifecycle": lifecycle,
+        "artifact_model": artifact_model,
+        "authorization_states": authorization_states,
+        "requirements": requirements,
+        "invariants": invariants,
+        "lineage_model": dict(_EAAD_LINEAGE_MODEL),
+        "governance_boundaries": dict(_EAAD_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_AUTHORIZATION_DESIGN_ADVISORY,
+    }

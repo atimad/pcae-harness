@@ -100,6 +100,8 @@ from pcae.core.agent import (
     LIVE_EXECUTION_PILOT_ADVISORY,
     build_invocation_workload_validation,
     INVOCATION_WORKLOAD_VALIDATION_ADVISORY,
+    build_execution_authorization_design,
+    EXECUTION_AUTHORIZATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4531,6 +4533,68 @@ def run_invocation_workload_validation(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['validation_may'])}")
         print(f"  May not: {', '.join(gb['validation_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_authorization_design(args: argparse.Namespace) -> int:
+    data = build_execution_authorization_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["execution_authorization_design"]
+        print("Execution authorization artifact design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Authorization lifecycle:")
+        for step in data["lifecycle"]:
+            print(f"  {step['step']}. {step['name']}")
+            print(f"     {step['description']}")
+        print()
+        print("Authorization artifact model (ExecutionAuthorizationArtifact):")
+        model = data["artifact_model"]
+        print(f"  Fields: {model['field_count']}  Required: {model['required_field_count']}")
+        for group in model["field_groups"]:
+            fields_in_group = [f for f in model["fields"] if f["group"] == group]
+            if fields_in_group:
+                print(f"  [{group}]")
+                for field in fields_in_group:
+                    req = "required" if field["required"] else "optional"
+                    print(f"    {field['name']} ({field['type']}, {req}): {field['description']}")
+        print(f"  All fields immutable after creation: {model['all_fields_immutable_after_creation']}")
+        print()
+        print("Authorization states:")
+        for state in data["authorization_states"]:
+            terminal = "terminal" if state["terminal"] else "non-terminal"
+            print(f"  {state['state']} ({terminal}): {state['description']}")
+        print()
+        print("Authorization requirements (all blocking):")
+        for req in data["requirements"]:
+            print(f"  {req['requirement']}: {req['description']}")
+        print()
+        print("Artifact invariants:")
+        for inv in data["invariants"]:
+            if inv.get("must_have"):
+                print(f"  must_have  [{inv['violation_severity']}] {inv['invariant']}: {inv['description']}")
+            else:
+                print(f"  must_never [{inv['violation_severity']}] {inv['invariant']}: {inv['description']}")
+        print()
+        print("Lineage model:")
+        lm = data["lineage_model"]
+        for field in lm["tracked_fields"]:
+            print(f"  {field}: {lm[field]}")
+        print(f"  lineage_immutable:    {lm['lineage_immutable']}")
+        print(f"  lineage_append_only:  {lm['lineage_append_only']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['artifact_may'])}")
+        print(f"  May not: {', '.join(gb['artifact_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

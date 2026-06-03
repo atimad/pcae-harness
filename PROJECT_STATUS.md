@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46E: Runtime Invocation Workload Validation.
+Phase 46F: Execution Authorization Artifact Model.
 
 ## Governance Coherence Note
 
@@ -2390,9 +2390,38 @@ may not execute prompts/invoke agents/modify repository/approve execution/commit
 read_only=true, human_review_required=true; future_evolution: 46F/46G/46H;
 advisory: "Invocation workload validation is informational; no runtimes are invoked."
 
+PCAE can define the ExecutionAuthorizationArtifact model with
+`pcae execution-authorization-design` and `pcae execution-authorization-design --json`
+(Phase 46F): inputs: prompt approval artifacts, human selected execution design, execution
+audit design, execution consensus design, live execution readiness assessment; no prompts
+are executed; no execution is authorized; authorization lifecycle (7 steps):
+approved_prompt_artifact/agent_selection/authorization_request/governance_validation/
+human_authorization/execution_authorization_artifact/future_live_execution;
+ExecutionAuthorizationArtifact model: 16 fields across six groups
+(identity: authorization_id/execution_candidate_id;
+prompt_references: prompt_id/prompt_approval_id/phase_id;
+agent_references: selected_agents/selected_prompt_variants;
+governance: governance_status/validation_status/traceability_status;
+authorization: authorization_status/authorized_by/authorized_at/authorization_notes;
+metadata: created_at/created_by), required=15/optional=1,
+all_fields_immutable_after_creation=true;
+authorization states: pending (non-terminal)/authorized/denied/superseded/expired (all terminal);
+authorization requirements (all blocking, 6): prompt_approved/validation_passed/
+traceability_complete/human_authorization_granted/invocation_contract_available/
+governance_checks_passed;
+invariants (6): 3 must_have (authorization_id_required/prompt_id_required/
+authorization_status_required, severity=error) + 3 must_never
+(no_authorization_bypass/no_traceability_removal/no_approval_removal, severity=critical);
+lineage model: source_prompt_id/prompt_approval_id/authorization_history,
+lineage_immutable=true/lineage_append_only=true;
+governance_boundaries: may record authorization state/authorization metadata/lineage;
+may not execute prompts/invoke agents/authorize automatically/modify repository/commit/push;
+read_only=true, human_review_required=true; future_evolution: 46G/46H/46I;
+advisory: "Execution authorization design is informational; no execution is authorized."
+
 ## Next
 
-- TBD: Future phases (46F Execution Authorization Artifact Model, 46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow).
+- TBD: Future phases (46G Read-Only Live Invocation Pilot, 46H Live Execution Result Review Workflow, 46I Authorization Expiration Workflow).
 
 ## Future Explorations
 

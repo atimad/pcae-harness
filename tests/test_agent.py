@@ -23012,6 +23012,7 @@ def test_46d_live_execution_pilot_human_output_shows_all_sections(capsys) -> Non
 # ---------------------------------------------------------------------------
 
 
+
 def test_46e_invocation_workload_validation_json_structure(capsys) -> None:
     main(["invocation-workload-validation", "--json"])
     data = json.loads(capsys.readouterr().out)
@@ -23176,5 +23177,187 @@ def test_46e_invocation_workload_validation_human_output_shows_all_sections(caps
     assert "Blockers" in output
     assert "Warnings" in output
     assert "Recommendations" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46F — Execution Authorization Artifact Model
+# ---------------------------------------------------------------------------
+
+
+def test_46f_execution_authorization_design_json_structure(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in ("execution_authorization_design", "lifecycle", "artifact_model",
+                "authorization_states", "requirements", "invariants",
+                "lineage_model", "governance_boundaries", "advisory"):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46f_execution_authorization_design_fields(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_authorization_design"]
+    for field in ("design_id", "phase", "title", "summary", "lifecycle_step_count",
+                  "artifact_field_count", "authorization_state_count",
+                  "requirement_count", "invariant_count",
+                  "human_review_required", "governance_boundaries", "future_evolution"):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("eaad-")
+    assert design["phase"] == "46F"
+
+
+def test_46f_execution_authorization_design_lifecycle(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in ("approved_prompt_artifact", "agent_selection",
+                     "authorization_request", "governance_validation",
+                     "human_authorization", "execution_authorization_artifact",
+                     "future_live_execution"):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description"):
+            assert field in step, f"lifecycle step missing field: {field}"
+
+
+def test_46f_execution_authorization_design_artifact_model(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["artifact_model"]
+    assert model["model_name"] == "ExecutionAuthorizationArtifact"
+    assert model["all_fields_immutable_after_creation"] is True
+    assert "field_groups" in model
+    assert "fields_by_group" in model
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in ("authorization_id", "execution_candidate_id",
+                     "prompt_id", "prompt_approval_id", "phase_id",
+                     "selected_agents", "selected_prompt_variants",
+                     "governance_status", "validation_status", "traceability_status",
+                     "authorization_status", "authorized_by", "authorized_at",
+                     "authorization_notes", "created_at", "created_by"):
+        assert expected in field_names, f"missing artifact field: {expected}"
+    assert model["field_count"] == 16
+    assert model["required_field_count"] == 15
+
+
+def test_46f_execution_authorization_design_field_groups(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["artifact_model"]
+    for group in ("identity", "prompt_references", "agent_references",
+                  "governance", "authorization", "metadata"):
+        assert group in model["field_groups"], f"missing field group: {group}"
+        assert group in model["fields_by_group"], f"missing fields_by_group entry: {group}"
+    for field in model["fields"]:
+        for attr in ("name", "group", "type", "description", "required", "immutable"):
+            assert attr in field, f"field '{field.get('name')}' missing attribute: {attr}"
+        assert field["immutable"] is True
+
+
+def test_46f_execution_authorization_design_authorization_states(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    states = data["authorization_states"]
+    assert len(states) == 5
+    state_names = [s["state"] for s in states]
+    for expected in ("pending", "authorized", "denied", "superseded", "expired"):
+        assert expected in state_names, f"missing authorization state: {expected}"
+    for state in states:
+        for field in ("state", "description", "terminal"):
+            assert field in state, f"state missing field: {field}"
+    pending = next(s for s in states if s["state"] == "pending")
+    assert pending["terminal"] is False
+    for terminal_state in ("authorized", "denied", "superseded", "expired"):
+        s = next(s for s in states if s["state"] == terminal_state)
+        assert s["terminal"] is True
+
+
+def test_46f_execution_authorization_design_requirements(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["requirements"]
+    assert len(reqs) == 6
+    req_names = [r["requirement"] for r in reqs]
+    for expected in ("prompt_approved", "validation_passed", "traceability_complete",
+                     "human_authorization_granted", "invocation_contract_available",
+                     "governance_checks_passed"):
+        assert expected in req_names, f"missing requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+
+
+def test_46f_execution_authorization_design_invariants(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    invs = data["invariants"]
+    assert len(invs) == 6
+    inv_names = [i["invariant"] for i in invs]
+    for expected in ("authorization_id_required", "prompt_id_required",
+                     "authorization_status_required", "no_authorization_bypass",
+                     "no_traceability_removal", "no_approval_removal"):
+        assert expected in inv_names, f"missing invariant: {expected}"
+    must_have = [i for i in invs if i.get("must_have")]
+    must_never = [i for i in invs if i.get("must_never")]
+    assert len(must_have) == 3
+    assert len(must_never) == 3
+    for inv in must_never:
+        assert inv["violation_severity"] == "critical"
+
+
+def test_46f_execution_authorization_design_lineage_model(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lm = data["lineage_model"]
+    assert "tracked_fields" in lm
+    for expected in ("source_prompt_id", "prompt_approval_id", "authorization_history"):
+        assert expected in lm["tracked_fields"], f"missing lineage field: {expected}"
+        assert expected in lm, f"lineage model missing description for: {expected}"
+    assert lm["lineage_immutable"] is True
+    assert lm["lineage_append_only"] is True
+
+
+def test_46f_execution_authorization_design_governance_boundaries(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "artifact_may" in gb
+    assert "artifact_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may_not = " ".join(gb["artifact_may_not"]).lower()
+    for forbidden in ("execute prompts", "invoke agents", "authorize automatically",
+                      "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing governance boundary: {forbidden}"
+
+
+def test_46f_execution_authorization_design_future_evolution(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["execution_authorization_design"]["future_evolution"]]
+    for expected in ("46G", "46H", "46I"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46f_execution_authorization_design_advisory(capsys) -> None:
+    main(["execution-authorization-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no execution is authorized" in advisory
+
+
+def test_46f_execution_authorization_design_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-authorization-design"])
+    output = capsys.readouterr().out
+    assert "Execution authorization artifact design" in output
+    assert "Authorization lifecycle" in output
+    assert "Authorization artifact model" in output
+    assert "Authorization states" in output
+    assert "Authorization requirements" in output
+    assert "Artifact invariants" in output
+    assert "Lineage model" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()

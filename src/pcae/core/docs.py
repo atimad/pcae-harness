@@ -427,6 +427,11 @@ def render_commands_reference() -> str:
 
 - `pcae invocation-workload-validation`
 - `pcae invocation-workload-validation --json`
+
+## execution-authorization-design
+
+- `pcae execution-authorization-design`
+- `pcae execution-authorization-design --json`
 """
 
 
