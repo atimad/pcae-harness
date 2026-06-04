@@ -118,6 +118,8 @@ from pcae.core.agent import (
     READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
     build_write_invocation_design,
     WRITE_INVOCATION_DESIGN_ADVISORY,
+    build_write_preflight_dry_run,
+    WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5126,6 +5128,60 @@ def run_write_invocation_design(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['design_may'])}")
         print(f"  May not: {', '.join(gb['design_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_preflight_dry_run(args: argparse.Namespace) -> int:
+    data = build_write_preflight_dry_run()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_preflight_dry_run"]
+        print("Write invocation preflight dry-run")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Dry-run lifecycle:")
+        for step in data["dry_run_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("Preflight gates:")
+        pg = data["preflight_gates"]
+        print(f"  Gate count: {pg['gate_count']}  All blocking: {pg['all_gates_blocking']}")
+        print(f"  Human approval gate simulated result: {pg['human_approval_gate_simulated_result']}")
+        for gate in pg["gates"]:
+            blocking = "blocking" if gate["blocking"] else "non-blocking"
+            print(f"  {gate['gate_id']} {gate['gate']} ({blocking}, simulated: {gate['simulated_result']})")
+            print(f"    {gate['description']}")
+            for check in gate["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Dry-run result model (WritePreflightDryRunResult):")
+        rm = data["dry_run_result_model"]
+        print(f"  Fields: {rm['field_count']}  Required: {rm['required_field_count']}")
+        print(f"  write_execution_allowed always False: {rm['write_execution_allowed_always_false']}")
+        for field in rm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("File scope simulation (FileScopeSimulation):")
+        fsm = data["file_scope_simulation"]
+        print(f"  Fields: {fsm['field_count']}  All required: {fsm['all_fields_required']}")
+        for field in fsm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['dry_run_may'])}")
+        print(f"  May not: {', '.join(gb['dry_run_may_not'])}")
+        print(f"  Write execution allowed: {gb['write_execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

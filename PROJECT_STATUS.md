@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46N: Governed Write Invocation Design.
+Phase 46O: Write Invocation Preflight Dry-Run.
 
 ## Governance Coherence Note
 
@@ -2621,10 +2621,39 @@ runtimes/execute prompts/modify files/approve writes automatically/commit/push/
 rollback; execution_allowed=False, human_review_required=True; future_evolution:
 46O/46P/46Q; advisory: "Write invocation design is informational; no runtime
 invocation, prompt execution, or file modification occurs."
+and the governed write invocation preflight process is simulated with
+`pcae write-preflight-dry-run` and `pcae write-preflight-dry-run --json`
+(Phase 46O): inputs: governed_write_invocation_design,
+execution_authorization_artifact_model, prompt_approval_artifacts,
+execution_audit_design, execution_consensus_design,
+execution_result_review_workflow, execution_quality_framework,
+controlled_file_modification_governance; no runtime invocation; no prompt
+execution; no file modification; write_execution_allowed=False always;
+dry_run_lifecycle (9 steps, all required): approved_prompt_artifact/
+write_authorization_request/file_scope_declaration/rollback_plan_check/
+audit_plan_check/runtime_writable_support_check/governance_preflight/
+human_write_approval_required/write_candidate_result; preflight gates (10,
+all blocking, ids wdpr-g01 through wdpr-g10): prompt_approved/
+authorization_valid/write_permission_explicit/file_scope_declared/
+allowed_files_defined/forbidden_files_defined/rollback_plan_present/
+audit_record_prepared/runtime_supports_writable_execution/
+human_write_approval_present (simulated: blocked); WritePreflightDryRunResult
+model: 12 fields (all required, all immutable): dry_run_id/write_candidate_id/
+selected_runtime/selected_agent/file_scope_status/rollback_status/audit_status/
+runtime_writable_status/governance_status/blockers/warnings/
+write_execution_allowed (always False); FileScopeSimulation model: 6 fields
+(all required): allowed_files/forbidden_files/max_files_changed/
+allowed_operations/forbidden_operations/scope_validation_result;
+governance_boundaries: dry_run_may simulate write preflight/evaluate scope/
+report blockers/report warnings; dry_run_may_not invoke runtimes/execute
+prompts/modify files/create commits/push/rollback/approve writes automatically;
+write_execution_allowed=False, human_review_required=True; future_evolution:
+46P/46Q/46R; advisory: "Write invocation preflight dry-run is a simulation;
+no runtime invocation, prompt execution, or file modification occurs."
 
 ## Next
 
-- TBD: Future phases (46O Write Invocation Preflight Dry-Run).
+- TBD: Future phases (46P Governed Write Candidate Artifact).
 
 ## Future Explorations
 

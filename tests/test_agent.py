@@ -25055,3 +25055,206 @@ def test_46n_human_output_shows_all_sections(capsys) -> None:
     assert "Safety constraints" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46O — Write Invocation Preflight Dry-Run
+# ---------------------------------------------------------------------------
+
+
+def test_46o_json_structure(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_preflight_dry_run", "dry_run_lifecycle",
+        "preflight_gates", "dry_run_result_model",
+        "file_scope_simulation", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46o_design_fields(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_preflight_dry_run"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "preflight_gate_count",
+        "result_field_count", "file_scope_simulation_field_count",
+        "write_execution_allowed", "human_review_required",
+        "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("wdpr-")
+    assert design["phase"] == "46O"
+    assert design["write_execution_allowed"] is False
+    assert design["human_review_required"] is True
+    assert design["lifecycle_step_count"] == 9
+    assert design["preflight_gate_count"] == 10
+    assert design["result_field_count"] == 12
+    assert design["file_scope_simulation_field_count"] == 6
+
+
+def test_46o_lifecycle_steps(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["dry_run_lifecycle"]
+    assert len(lifecycle) == 9
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "approved_prompt_artifact", "write_authorization_request",
+        "file_scope_declaration", "rollback_plan_check",
+        "audit_plan_check", "runtime_writable_support_check",
+        "governance_preflight", "human_write_approval_required",
+        "write_candidate_result",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 10))
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+
+
+def test_46o_preflight_gates(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["preflight_gates"]
+    assert pg["gate_count"] == 10
+    assert pg["all_gates_blocking"] is True
+    assert pg["human_approval_gate_simulated_result"] == "blocked"
+    gate_names = [g["gate"] for g in pg["gates"]]
+    for expected in (
+        "prompt_approved", "authorization_valid", "write_permission_explicit",
+        "file_scope_declared", "allowed_files_defined", "forbidden_files_defined",
+        "rollback_plan_present", "audit_record_prepared",
+        "runtime_supports_writable_execution", "human_write_approval_present",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    gate_ids = pg["gate_ids"]
+    for expected in (f"wdpr-g{i:02d}" for i in range(1, 11)):
+        assert expected in gate_ids, f"missing gate id: {expected}"
+    human_gate = next(g for g in pg["gates"] if g["gate"] == "human_write_approval_present")
+    assert human_gate["simulated_result"] == "blocked"
+
+
+def test_46o_gate_structure(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for gate in data["preflight_gates"]["gates"]:
+        for field in ("gate_id", "gate", "description", "blocking", "simulated_result", "checks"):
+            assert field in gate, f"gate missing field: {field}"
+        assert gate["blocking"] is True
+        assert len(gate["checks"]) >= 2
+
+
+def test_46o_dry_run_result_model(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["dry_run_result_model"]
+    assert rm["model_name"] == "WritePreflightDryRunResult"
+    assert rm["field_count"] == 12
+    assert rm["required_field_count"] == 12
+    assert rm["write_execution_allowed_always_false"] is True
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "dry_run_id", "write_candidate_id", "selected_runtime", "selected_agent",
+        "file_scope_status", "rollback_status", "audit_status",
+        "runtime_writable_status", "governance_status",
+        "blockers", "warnings", "write_execution_allowed",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    exec_field = next(f for f in rm["fields"] if f["name"] == "write_execution_allowed")
+    assert "Always False" in exec_field["description"]
+
+
+def test_46o_file_scope_simulation(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fsm = data["file_scope_simulation"]
+    assert fsm["model_name"] == "FileScopeSimulation"
+    assert fsm["field_count"] == 6
+    assert fsm["all_fields_required"] is True
+    field_names = [f["name"] for f in fsm["fields"]]
+    for expected in (
+        "allowed_files", "forbidden_files", "max_files_changed",
+        "allowed_operations", "forbidden_operations", "scope_validation_result",
+    ):
+        assert expected in field_names, f"missing file scope field: {expected}"
+    for field in fsm["fields"]:
+        assert field["required"] is True
+
+
+def test_46o_governance_boundaries(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "dry_run_may" in gb
+    assert "dry_run_may_not" in gb
+    assert gb["write_execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["dry_run_may"]).lower()
+    for allowed in (
+        "simulate write preflight", "evaluate scope",
+        "report blockers", "report warnings",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["dry_run_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "create commits", "push", "rollback", "approve writes automatically",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46o_write_execution_always_false(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_preflight_dry_run"]
+    assert design["write_execution_allowed"] is False
+    rm = data["dry_run_result_model"]
+    assert rm["write_execution_allowed_always_false"] is True
+    gb = data["governance_boundaries"]
+    assert gb["write_execution_allowed"] is False
+
+
+def test_46o_human_approval_always_blocked(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["preflight_gates"]
+    assert pg["human_approval_gate_simulated_result"] == "blocked"
+    human_gate = next(
+        g for g in pg["gates"] if g["gate"] == "human_write_approval_present"
+    )
+    assert human_gate["simulated_result"] == "blocked"
+
+
+def test_46o_future_evolution(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["write_preflight_dry_run"]["future_evolution"]]
+    assert "46P" in phases
+    assert "46Q" in phases
+    assert "46R" in phases
+
+
+def test_46o_advisory(capsys) -> None:
+    main(["write-preflight-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "simulation" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_46o_human_output_shows_all_sections(capsys) -> None:
+    main(["write-preflight-dry-run"])
+    output = capsys.readouterr().out
+    assert "Write invocation preflight dry-run" in output
+    assert "Dry-run lifecycle" in output
+    assert "Preflight gates" in output
+    assert "Dry-run result model" in output
+    assert "File scope simulation" in output
+    assert "Governance boundaries" in output
+    assert "simulation" in output.lower()

@@ -451,3 +451,8 @@
 
 - `pcae write-invocation-design`
 - `pcae write-invocation-design --json`
+
+## write-preflight-dry-run
+
+- `pcae write-preflight-dry-run`
+- `pcae write-preflight-dry-run --json`

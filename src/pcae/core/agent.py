@@ -20538,3 +20538,496 @@ def build_read_only_invocation_execution_pilot() -> dict:
         "governance_boundaries": dict(_ROIEP_GOVERNANCE_BOUNDARIES),
         "advisory": READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
     }
+
+
+# Phase 46O — Write Invocation Preflight Dry-Run
+# ---------------------------------------------------------------------------
+
+WRITE_PREFLIGHT_DRY_RUN_ADVISORY = (
+    "Write invocation preflight dry-run is a simulation; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_WDPR_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_write_invocation_design",
+    "execution_authorization_artifact_model",
+    "prompt_approval_artifacts",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+    "controlled_file_modification_governance",
+)
+
+_WDPR_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact is located and validated for the dry-run."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "write_authorization_request",
+        "description": (
+            "A write authorization request is simulated, linking the approved "
+            "prompt artifact and execution authorization artifact."
+        ),
+        "required": True,
+        "completed_by": "write_authorization_request_artifact",
+    },
+    {
+        "step": 3,
+        "name": "file_scope_declaration",
+        "description": (
+            "File scope is declared and validated: allowed_files, forbidden_files, "
+            "max_files_changed, allowed_operations, forbidden_operations."
+        ),
+        "required": True,
+        "completed_by": "file_scope_artifact",
+    },
+    {
+        "step": 4,
+        "name": "rollback_plan_check",
+        "description": (
+            "The rollback plan is checked for presence and completeness before "
+            "any write candidate may be prepared."
+        ),
+        "required": True,
+        "completed_by": "rollback_plan_artifact",
+    },
+    {
+        "step": 5,
+        "name": "audit_plan_check",
+        "description": (
+            "The audit plan is checked for presence and completeness before "
+            "any write candidate may be prepared."
+        ),
+        "required": True,
+        "completed_by": "audit_plan_artifact",
+    },
+    {
+        "step": 6,
+        "name": "runtime_writable_support_check",
+        "description": (
+            "The selected runtime is checked to confirm it supports governed "
+            "write execution with scope enforcement."
+        ),
+        "required": True,
+        "completed_by": "runtime_writable_support_confirmed",
+    },
+    {
+        "step": 7,
+        "name": "governance_preflight",
+        "description": (
+            "All ten preflight gates are evaluated against the simulated write "
+            "authorization request, file scope, and runtime selection."
+        ),
+        "required": True,
+        "completed_by": "all_preflight_gates_evaluated",
+    },
+    {
+        "step": 8,
+        "name": "human_write_approval_required",
+        "description": (
+            "Human write approval is required before any write invocation candidate "
+            "may proceed. This gate is pending/missing in dry-run; no approval is "
+            "granted automatically."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+    },
+    {
+        "step": 9,
+        "name": "write_candidate_result",
+        "description": (
+            "The dry-run produces a WritePreflightDryRunResult reporting blockers, "
+            "warnings, and write_execution_allowed=False."
+        ),
+        "required": True,
+        "completed_by": "write_preflight_dry_run_result",
+    },
+)
+
+_WDPR_PREFLIGHT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "wdpr-g01",
+        "gate": "prompt_approved",
+        "description": "The selected prompt has a valid prompt approval artifact.",
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "prompt_id resolves to known prompt artifact",
+            "prompt approval status is approved",
+            "prompt approval artifact is valid",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g02",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state "
+            "and has not expired."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+            "authorization is not expired",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g03",
+        "gate": "write_permission_explicit",
+        "description": (
+            "Write permission is explicitly granted in the authorization artifact; "
+            "read-only is the default."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "write_permission field is present in authorization artifact",
+            "write_permission is explicitly True",
+            "permission was not inherited from a read-only authorization",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g04",
+        "gate": "file_scope_declared",
+        "description": (
+            "A file scope artifact is declared and linked to the write "
+            "authorization request."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "file_scope_id present in write authorization request",
+            "allowed_files is a non-empty list",
+            "forbidden_files is declared",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g05",
+        "gate": "allowed_files_defined",
+        "description": (
+            "allowed_files is explicitly and non-emptily declared in the file scope."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "allowed_files is present in file_scope_artifact",
+            "allowed_files is a non-empty list",
+            "each allowed file resolves to a known path pattern",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g06",
+        "gate": "forbidden_files_defined",
+        "description": (
+            "forbidden_files is explicitly declared in the file scope."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "forbidden_files is present in file_scope_artifact",
+            "forbidden_files list is declared (may be empty but must be present)",
+            "no overlap between allowed_files and forbidden_files",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g07",
+        "gate": "rollback_plan_present",
+        "description": (
+            "A rollback plan is present and linked to the write authorization request."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "rollback_plan_id present in write authorization request",
+            "rollback plan describes recovery steps",
+            "rollback_required is True on candidate",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g08",
+        "gate": "audit_record_prepared",
+        "description": (
+            "An audit record is prepared and linked to the write authorization "
+            "request before any write execution may proceed."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "audit_record_id present in write authorization request",
+            "audit record links to authorization and prompt",
+            "audit_required is True on candidate",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g09",
+        "gate": "runtime_supports_writable_execution",
+        "description": (
+            "The selected runtime is confirmed to support governed write execution "
+            "with scope enforcement."
+        ),
+        "blocking": True,
+        "simulated_result": "pending",
+        "checks": [
+            "selected_runtime in validated_contracts",
+            "write_contract defined for selected_runtime",
+            "scope enforcement confirmed for runtime",
+        ],
+    },
+    {
+        "gate_id": "wdpr-g10",
+        "gate": "human_write_approval_present",
+        "description": (
+            "Explicit human write approval is recorded. In dry-run this gate is "
+            "always pending/missing; no approval is granted automatically."
+        ),
+        "blocking": True,
+        "simulated_result": "blocked",
+        "checks": [
+            "human_write_approval_id present in write authorization request",
+            "approval timestamp recorded",
+            "approver identity recorded",
+        ],
+    },
+)
+
+_WDPR_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "dry_run_id",
+        "type": "str",
+        "description": "Unique identifier for this dry-run result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Simulated write invocation candidate identifier.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this dry-run simulation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this dry-run simulation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "file_scope_status",
+        "type": "str",
+        "description": "Result of file scope validation: pending, passed, or blocked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_status",
+        "type": "str",
+        "description": "Result of rollback plan check: pending, present, or missing.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "description": "Result of audit plan check: pending, present, or missing.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_writable_status",
+        "type": "str",
+        "description": (
+            "Result of runtime writability check: pending, supported, or unsupported."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "governance_status",
+        "type": "str",
+        "description": (
+            "Overall governance preflight status: pending, passed, or blocked."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed or are pending in the dry-run.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during the dry-run.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_execution_allowed",
+        "type": "bool",
+        "description": (
+            "Whether write execution is permitted. Always False in this dry-run phase; "
+            "real write execution requires explicit human approval in a future phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_WDPR_FILE_SCOPE_SIMULATION_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "allowed_files",
+        "type": "list[str]",
+        "description": "Simulated list of files permitted to be modified.",
+        "required": True,
+    },
+    {
+        "name": "forbidden_files",
+        "type": "list[str]",
+        "description": "Simulated list of files that must not be modified.",
+        "required": True,
+    },
+    {
+        "name": "max_files_changed",
+        "type": "int",
+        "description": "Simulated maximum number of files the write invocation may change.",
+        "required": True,
+    },
+    {
+        "name": "allowed_operations",
+        "type": "list[str]",
+        "description": "Simulated list of permitted file operations.",
+        "required": True,
+    },
+    {
+        "name": "forbidden_operations",
+        "type": "list[str]",
+        "description": "Simulated list of forbidden file operations.",
+        "required": True,
+    },
+    {
+        "name": "scope_validation_result",
+        "type": "str",
+        "description": (
+            "Result of scope validation simulation: pending, passed, or blocked."
+        ),
+        "required": True,
+    },
+)
+
+_WDPR_GOVERNANCE_BOUNDARIES: dict = {
+    "dry_run_may": [
+        "simulate write preflight",
+        "evaluate scope",
+        "report blockers",
+        "report warnings",
+    ],
+    "dry_run_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "create commits",
+        "push",
+        "rollback",
+        "approve writes automatically",
+    ],
+    "human_review_required": True,
+    "write_execution_allowed": False,
+    "read_only": True,
+    "dry_run_phase": True,
+}
+
+_WDPR_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46P", "description": "Governed Write Candidate Artifact"},
+    {"phase": "46Q", "description": "Controlled Write Invocation Pilot"},
+    {"phase": "46R", "description": "Write Result Review Workflow"},
+)
+
+
+def build_write_preflight_dry_run() -> dict:
+    """Simulate the governed write invocation preflight process. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"wdpr-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WDPR_LIFECYCLE]
+    preflight_gates = [dict(g) for g in _WDPR_PREFLIGHT_GATES]
+    result_fields = [dict(f) for f in _WDPR_RESULT_FIELDS]
+    file_scope_fields = [dict(f) for f in _WDPR_FILE_SCOPE_SIMULATION_FIELDS]
+
+    preflight_gate_model = {
+        "gate_count": len(preflight_gates),
+        "all_gates_blocking": all(g["blocking"] for g in preflight_gates),
+        "gate_ids": [g["gate_id"] for g in preflight_gates],
+        "human_approval_gate_simulated_result": "blocked",
+        "gates": preflight_gates,
+    }
+
+    dry_run_result_model = {
+        "model_name": "WritePreflightDryRunResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "write_execution_allowed_always_false": True,
+        "fields": result_fields,
+    }
+
+    file_scope_simulation_model = {
+        "model_name": "FileScopeSimulation",
+        "field_count": len(file_scope_fields),
+        "all_fields_required": all(f["required"] for f in file_scope_fields),
+        "fields": file_scope_fields,
+    }
+
+    write_preflight_dry_run = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46O",
+        "title": "Write Invocation Preflight Dry-Run",
+        "summary": (
+            "Simulates the complete governed write invocation preflight process "
+            "without invoking runtimes or modifying files. Defines the nine-step "
+            "dry-run lifecycle, ten blocking preflight gates, WritePreflightDryRunResult "
+            "model, and FileScopeSimulation model. write_execution_allowed is always "
+            "False; human_write_approval_present is always pending/blocked in dry-run. "
+            "The dry-run identifies blockers and reports warnings without authorizing "
+            "execution. No runtime invocation, no prompt execution, and no file "
+            "modification by agents."
+        ),
+        "input_sources": list(_WDPR_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "preflight_gate_count": len(preflight_gates),
+        "result_field_count": len(result_fields),
+        "file_scope_simulation_field_count": len(file_scope_fields),
+        "write_execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_WDPR_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WDPR_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_preflight_dry_run": write_preflight_dry_run,
+        "dry_run_lifecycle": lifecycle,
+        "preflight_gates": preflight_gate_model,
+        "dry_run_result_model": dry_run_result_model,
+        "file_scope_simulation": file_scope_simulation_model,
+        "governance_boundaries": dict(_WDPR_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
+    }
