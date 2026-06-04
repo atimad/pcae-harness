@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46I: Authorization Expiration Workflow.
+Phase 46J: Read-Only Invocation Pilot Implementation.
 
 ## Governance Coherence Note
 
@@ -2492,10 +2492,30 @@ workflow_may_not auto-renew authorization/bypass human review/execute prompts/in
 agents/modify repository/commit/push; read_only=true, human_review_required=true;
 future_evolution: 46J/46K/46L/46M;
 advisory: "Authorization expiration workflow is informational; no authorizations are modified."
+and the governed internal structures for future read-only runtime invocation pilots are
+exposed with `pcae invocation-pilot-status` and `pcae invocation-pilot-status --json`
+(Phase 46J): inputs: execution authorization artifacts, read-only invocation pilot design,
+execution audit design, execution consensus design; no runtime invocation; no prompt
+execution; no repository modification by agents; InvocationCandidate model: 6 fields (all
+required), immutable: invocation_candidate_id/authorization_id/prompt_id/selected_runtime/
+sandbox_mode, mutable: invocation_status; statuses (4): pending/prepared/blocked/completed
+(completed is terminal; only prepared allows plan preparation); sandbox_mode_constraint=read_only;
+InvocationPlan model: 6 fields, all required/immutable
+(invocation_plan_id/invocation_candidate_id/runtime_id/output_capture_strategy/
+timeout_strategy/governance_snapshot); OutputCaptureArtifact model: 5 fields (2 required,
+3 optional), all immutable (output_capture_id/invocation_candidate_id required;
+stdout_reference/stderr_reference/metadata optional); readiness evaluation (3 areas, all
+blocking): candidate_readiness (5 checks)/authorization_readiness (5 checks)/
+runtime_readiness (4 checks); governance requirements (4, all blocking):
+authorization_valid/authorization_not_expired/runtime_supported/
+governance_snapshot_present; governance_boundaries: pilot_may define models/evaluate
+readiness; pilot_may_not invoke runtimes/execute prompts/modify repository/commit/push/
+rollback; read_only=true, human_review_required=true; future_evolution: 46K/46L/46M/46N;
+advisory: "Invocation pilot status is informational; no runtime invocation occurs."
 
 ## Next
 
-- TBD: Future phases (46J Read-Only Invocation Pilot Implementation, 46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework, 46M Authorization Renewal Pilot).
+- TBD: Future phases (46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework, 46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
 
 ## Future Explorations
 

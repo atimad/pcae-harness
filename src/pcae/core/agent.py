@@ -18170,3 +18170,369 @@ def build_authorization_expiration_design() -> dict:
         "governance_boundaries": dict(_AEXW_GOVERNANCE_BOUNDARIES),
         "advisory": AUTHORIZATION_EXPIRATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 46J — Read-Only Invocation Pilot Implementation
+# ---------------------------------------------------------------------------
+
+INVOCATION_PILOT_STATUS_ADVISORY = (
+    "Invocation pilot status is informational; no runtime invocation occurs."
+)
+
+_IPST_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_authorization_artifacts",
+    "read_only_invocation_pilot_design",
+    "execution_audit_design",
+    "execution_consensus_design",
+)
+
+_IPST_INVOCATION_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "invocation_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this invocation candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact authorizing this candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Identifier of the approved prompt artifact to be invoked.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Human-selected runtime identifier (e.g. codex-local, claude-local).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "sandbox_mode",
+        "type": "str",
+        "description": "Sandbox mode constraint; must be read_only for this pilot phase.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_status",
+        "type": "str",
+        "description": "Current status of the candidate (pending, prepared, blocked, completed).",
+        "required": True,
+        "immutable": False,
+    },
+)
+
+_IPST_INVOCATION_CANDIDATE_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "pending",
+        "description": "Candidate has been created; governance requirements have not yet been evaluated.",
+        "terminal": False,
+        "allows_plan_preparation": False,
+    },
+    {
+        "status": "prepared",
+        "description": "All governance requirements passed; an InvocationPlan has been prepared.",
+        "terminal": False,
+        "allows_plan_preparation": True,
+    },
+    {
+        "status": "blocked",
+        "description": "One or more governance requirements failed; candidate cannot proceed without remediation.",
+        "terminal": False,
+        "allows_plan_preparation": False,
+    },
+    {
+        "status": "completed",
+        "description": "Candidate processing is complete (plan prepared and handed off for future execution).",
+        "terminal": True,
+        "allows_plan_preparation": False,
+    },
+)
+
+_IPST_INVOCATION_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "invocation_plan_id",
+        "type": "str",
+        "description": "Unique identifier for this invocation plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_candidate_id",
+        "type": "str",
+        "description": "Reference to the InvocationCandidate this plan was prepared for.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "description": "Runtime identifier; must match the candidate's selected_runtime.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "output_capture_strategy",
+        "type": "str",
+        "description": "Output capture mode: stdout, stderr, structured, or combined.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "timeout_strategy",
+        "type": "str",
+        "description": "Timeout policy for the runtime invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "governance_snapshot",
+        "type": "str",
+        "description": "Reference to the governance snapshot captured at plan preparation time.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_IPST_OUTPUT_CAPTURE_ARTIFACT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "output_capture_id",
+        "type": "str",
+        "description": "Unique identifier for this output capture artifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_candidate_id",
+        "type": "str",
+        "description": "Reference to the InvocationCandidate whose output was captured.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "stdout_reference",
+        "type": "str | None",
+        "description": "Path or reference to captured standard output. Null before output is captured.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "stderr_reference",
+        "type": "str | None",
+        "description": "Path or reference to captured standard error. Null before output is captured.",
+        "required": False,
+        "immutable": True,
+    },
+    {
+        "name": "metadata",
+        "type": "dict | None",
+        "description": "Runtime metadata (exit code, duration, runtime version, sandbox mode). Null before capture.",
+        "required": False,
+        "immutable": True,
+    },
+)
+
+_IPST_READINESS_CHECKS: tuple[dict, ...] = (
+    {
+        "area": "candidate_readiness",
+        "description": "Verifies all required InvocationCandidate fields are present and non-empty.",
+        "checks": [
+            "invocation_candidate_id present",
+            "authorization_id present",
+            "prompt_id present",
+            "selected_runtime present",
+            "sandbox_mode is read_only",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "authorization_readiness",
+        "description": (
+            "Verifies the referenced ExecutionAuthorizationArtifact is valid, "
+            "not expired, not denied, and not superseded."
+        ),
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+            "authorization is not expired",
+            "authorization is not denied",
+            "authorization is not superseded",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "runtime_readiness",
+        "description": (
+            "Verifies the selected runtime is in the validated invocation contracts "
+            "and supports read-only sandbox execution."
+        ),
+        "checks": [
+            "selected_runtime in validated_contracts",
+            "read_only_contract defined for runtime",
+            "sandbox_mode documented for runtime",
+            "timeout_strategy documented for runtime",
+        ],
+        "blocking": True,
+    },
+)
+
+_IPST_GOVERNANCE_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "authorization_valid",
+        "description": (
+            "The authorization_id must reference a known ExecutionAuthorizationArtifact "
+            "in authorized or renewed state."
+        ),
+        "blocking": True,
+        "checked_in": "authorization_readiness",
+    },
+    {
+        "requirement": "authorization_not_expired",
+        "description": (
+            "The authorization must not be in expired, denied, or superseded state. "
+            "Expired authorizations require renewal before a candidate may be prepared."
+        ),
+        "blocking": True,
+        "checked_in": "authorization_readiness",
+    },
+    {
+        "requirement": "runtime_supported",
+        "description": (
+            "The selected_runtime must appear in the validated invocation contracts "
+            "with a documented read-only sandbox mode."
+        ),
+        "blocking": True,
+        "checked_in": "runtime_readiness",
+    },
+    {
+        "requirement": "governance_snapshot_present",
+        "description": (
+            "A governance snapshot must be captured at plan preparation time. "
+            "Candidates without a governance snapshot may not transition to prepared."
+        ),
+        "blocking": True,
+        "checked_in": "candidate_readiness",
+    },
+)
+
+_IPST_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "define invocation candidate model",
+        "define invocation plan model",
+        "define output capture artifact model",
+        "evaluate candidate readiness",
+        "evaluate authorization readiness",
+        "evaluate runtime readiness",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "implementation_phase": True,
+}
+
+_IPST_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46K", "description": "Multi-Agent Invocation Pilot"},
+    {"phase": "46L", "description": "Execution Result Quality Framework"},
+    {"phase": "46M", "description": "Authorization Renewal Pilot"},
+    {"phase": "46N", "description": "Governed Write Invocation Design"},
+)
+
+
+def build_invocation_pilot_status() -> dict:
+    """Implement governed internal structures for read-only runtime invocation pilots. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    status_id = f"ipst-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    candidate_fields = [dict(f) for f in _IPST_INVOCATION_CANDIDATE_FIELDS]
+    candidate_statuses = [dict(s) for s in _IPST_INVOCATION_CANDIDATE_STATUSES]
+    plan_fields = [dict(f) for f in _IPST_INVOCATION_PLAN_FIELDS]
+    capture_fields = [dict(f) for f in _IPST_OUTPUT_CAPTURE_ARTIFACT_FIELDS]
+    readiness_checks = [dict(r) for r in _IPST_READINESS_CHECKS]
+    governance_requirements = [dict(g) for g in _IPST_GOVERNANCE_REQUIREMENTS]
+
+    terminal_statuses = [s["status"] for s in candidate_statuses if s["terminal"]]
+    plan_allowed_statuses = [s["status"] for s in candidate_statuses if s["allows_plan_preparation"]]
+
+    invocation_candidate_model = {
+        "model_name": "InvocationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "immutable_fields": [f["name"] for f in candidate_fields if f["immutable"]],
+        "mutable_fields": [f["name"] for f in candidate_fields if not f["immutable"]],
+        "status_count": len(candidate_statuses),
+        "terminal_statuses": terminal_statuses,
+        "plan_allowed_statuses": plan_allowed_statuses,
+        "sandbox_mode_constraint": "read_only",
+        "fields": candidate_fields,
+        "statuses": candidate_statuses,
+    }
+
+    invocation_plan_model = {
+        "model_name": "InvocationPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in plan_fields),
+        "fields": plan_fields,
+    }
+
+    output_capture_artifact_model = {
+        "model_name": "OutputCaptureArtifact",
+        "field_count": len(capture_fields),
+        "required_field_count": sum(1 for f in capture_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in capture_fields),
+        "fields": capture_fields,
+    }
+
+    readiness_evaluation = {
+        "area_count": len(readiness_checks),
+        "areas": readiness_checks,
+        "all_areas_blocking": all(r["blocking"] for r in readiness_checks),
+    }
+
+    invocation_pilot_status = {
+        "status_id": status_id,
+        "generated_at": generated_at,
+        "phase": "46J",
+        "title": "Read-Only Invocation Pilot Implementation",
+        "summary": (
+            "Implements the governed internal structures required for future read-only "
+            "runtime invocation pilots. Defines InvocationCandidate, InvocationPlan, and "
+            "OutputCaptureArtifact models with readiness evaluation and governance requirements. "
+            "No runtime invocation, no prompt execution, and no repository modification by agents."
+        ),
+        "input_sources": list(_IPST_INPUT_SOURCES),
+        "model_count": 3,
+        "readiness_area_count": len(readiness_checks),
+        "governance_requirement_count": len(governance_requirements),
+        "human_review_required": True,
+        "governance_boundaries": dict(_IPST_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _IPST_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "invocation_pilot_status": invocation_pilot_status,
+        "invocation_candidate_model": invocation_candidate_model,
+        "invocation_plan_model": invocation_plan_model,
+        "output_capture_artifact_model": output_capture_artifact_model,
+        "readiness_evaluation": readiness_evaluation,
+        "governance_requirements": governance_requirements,
+        "governance_boundaries": dict(_IPST_GOVERNANCE_BOUNDARIES),
+        "advisory": INVOCATION_PILOT_STATUS_ADVISORY,
+    }

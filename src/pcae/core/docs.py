@@ -447,6 +447,11 @@ def render_commands_reference() -> str:
 
 - `pcae authorization-expiration-design`
 - `pcae authorization-expiration-design --json`
+
+## invocation-pilot-status
+
+- `pcae invocation-pilot-status`
+- `pcae invocation-pilot-status --json`
 """
 
 

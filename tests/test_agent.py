@@ -23974,3 +23974,197 @@ def test_46i_authorization_expiration_human_output_shows_all_sections(capsys) ->
     assert "Audit integration" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 46J — Read-Only Invocation Pilot Implementation
+# ---------------------------------------------------------------------------
+
+
+def test_46j_invocation_pilot_status_json_structure(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "invocation_pilot_status", "invocation_candidate_model", "invocation_plan_model",
+        "output_capture_artifact_model", "readiness_evaluation",
+        "governance_requirements", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46j_invocation_pilot_status_design_fields(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    status = data["invocation_pilot_status"]
+    for field in (
+        "status_id", "phase", "title", "summary", "input_sources",
+        "model_count", "readiness_area_count", "governance_requirement_count",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in status, f"missing status field: {field}"
+    assert status["status_id"].startswith("ipst-")
+    assert status["phase"] == "46J"
+    assert status["human_review_required"] is True
+    assert status["model_count"] == 3
+    assert status["readiness_area_count"] == 3
+    assert status["governance_requirement_count"] == 4
+
+
+def test_46j_invocation_candidate_model(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["invocation_candidate_model"]
+    assert model["model_name"] == "InvocationCandidate"
+    assert model["field_count"] == 6
+    assert model["required_field_count"] == 6
+    assert model["sandbox_mode_constraint"] == "read_only"
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "invocation_candidate_id", "authorization_id", "prompt_id",
+        "selected_runtime", "sandbox_mode", "invocation_status",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    immutable = model["immutable_fields"]
+    for expected in ("invocation_candidate_id", "authorization_id", "prompt_id",
+                     "selected_runtime", "sandbox_mode"):
+        assert expected in immutable, f"expected immutable: {expected}"
+    mutable = model["mutable_fields"]
+    assert "invocation_status" in mutable
+    # statuses
+    statuses = [s["status"] for s in model["statuses"]]
+    for expected in ("pending", "prepared", "blocked", "completed"):
+        assert expected in statuses, f"missing candidate status: {expected}"
+    terminal = [s["status"] for s in model["statuses"] if s["terminal"]]
+    assert terminal == ["completed"]
+    plan_allowed = model["plan_allowed_statuses"]
+    assert plan_allowed == ["prepared"]
+
+
+def test_46j_invocation_plan_model(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["invocation_plan_model"]
+    assert model["model_name"] == "InvocationPlan"
+    assert model["field_count"] == 6
+    assert model["required_field_count"] == 6
+    assert model["all_fields_immutable"] is True
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "invocation_plan_id", "invocation_candidate_id", "runtime_id",
+        "output_capture_strategy", "timeout_strategy", "governance_snapshot",
+    ):
+        assert expected in field_names, f"missing plan field: {expected}"
+
+
+def test_46j_output_capture_artifact_model(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["output_capture_artifact_model"]
+    assert model["model_name"] == "OutputCaptureArtifact"
+    assert model["field_count"] == 5
+    assert model["required_field_count"] == 2
+    assert model["all_fields_immutable"] is True
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "output_capture_id", "invocation_candidate_id",
+        "stdout_reference", "stderr_reference", "metadata",
+    ):
+        assert expected in field_names, f"missing capture field: {expected}"
+    required_fields = [f["name"] for f in model["fields"] if f["required"]]
+    assert "output_capture_id" in required_fields
+    assert "invocation_candidate_id" in required_fields
+    optional_fields = [f["name"] for f in model["fields"] if not f["required"]]
+    for expected in ("stdout_reference", "stderr_reference", "metadata"):
+        assert expected in optional_fields, f"expected optional: {expected}"
+
+
+def test_46j_readiness_evaluation(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    re_ = data["readiness_evaluation"]
+    assert re_["area_count"] == 3
+    assert re_["all_areas_blocking"] is True
+    area_names = [a["area"] for a in re_["areas"]]
+    for expected in ("candidate_readiness", "authorization_readiness", "runtime_readiness"):
+        assert expected in area_names, f"missing readiness area: {expected}"
+    for area in re_["areas"]:
+        assert area["blocking"] is True
+        assert len(area["checks"]) > 0
+        for field in ("area", "description", "checks", "blocking"):
+            assert field in area, f"area missing field: {field}"
+
+
+def test_46j_governance_requirements(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["governance_requirements"]
+    assert len(reqs) == 4
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "authorization_valid", "authorization_not_expired",
+        "runtime_supported", "governance_snapshot_present",
+    ):
+        assert expected in req_names, f"missing governance requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+    for req in reqs:
+        for field in ("requirement", "description", "blocking", "checked_in"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46j_governance_boundaries(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["pilot_may"]).lower()
+    for allowed in (
+        "define invocation candidate model", "define invocation plan model",
+        "define output capture artifact model",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46j_future_evolution(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["invocation_pilot_status"]["future_evolution"]]
+    for expected in ("46K", "46L", "46M", "46N"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46j_advisory(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation occurs" in advisory
+
+
+def test_46j_no_runtime_invocation(capsys) -> None:
+    main(["invocation-pilot-status", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    assert "invoke runtimes" in may_not
+    assert "execute prompts" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_46j_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-pilot-status"])
+    output = capsys.readouterr().out
+    assert "Invocation pilot status" in output
+    assert "InvocationCandidate model" in output
+    assert "InvocationPlan model" in output
+    assert "OutputCaptureArtifact model" in output
+    assert "Readiness evaluation" in output
+    assert "Governance requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

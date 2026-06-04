@@ -66,6 +66,7 @@ from pcae.commands.agent import (
     run_read_only_invocation_pilot,
     run_execution_result_review_design,
     run_authorization_expiration_design,
+    run_invocation_pilot_status,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1839,6 +1840,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON authorization expiration design output.",
     )
     authorization_expiration_design_parser.set_defaults(handler=run_authorization_expiration_design)
+
+    invocation_pilot_status_parser = subparsers.add_parser(
+        "invocation-pilot-status",
+        help="Show read-only invocation pilot infrastructure status (Phase 46J).",
+    )
+    invocation_pilot_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON invocation pilot status output.",
+    )
+    invocation_pilot_status_parser.set_defaults(handler=run_invocation_pilot_status)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
