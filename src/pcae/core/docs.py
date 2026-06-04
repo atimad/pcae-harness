@@ -547,6 +547,11 @@ def render_commands_reference() -> str:
 
 - `pcae runtime-trust`
 - `pcae runtime-trust --json`
+
+## governance-maturity
+
+- `pcae governance-maturity`
+- `pcae governance-maturity --json`
 """
 
 

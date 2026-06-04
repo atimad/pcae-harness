@@ -147,6 +147,8 @@ from pcae.core.agent import (
     GOVERNANCE_AUDIT_ADVISORY,
     build_runtime_trust,
     RUNTIME_TRUST_ADVISORY,
+    build_governance_maturity,
+    GOVERNANCE_MATURITY_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6178,6 +6180,55 @@ def run_runtime_trust(args: argparse.Namespace) -> int:
             if rec["warnings"]:
                 print(f"    Warnings: {', '.join(rec['warnings'])}")
             print(f"    Recommendations: {', '.join(rec['recommendations'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['assessment_may'])}")
+        print(f"  May not:             {', '.join(gb['assessment_may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_maturity(args: argparse.Namespace) -> int:
+    data = build_governance_maturity()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rec = data["maturity_record"]
+        print("Governance maturity assessment")
+        print(f"Assessment: {rec['maturity_id']}  Generated at: {data['maturity_record_model']['model_name']}")
+        print(f"Phase: 47I — Governance Maturity Assessment")
+        print(f"Overall maturity: {rec['overall_maturity']}")
+        print(f"Human review required: {'yes' if rec['human_review_required'] else 'no'}")
+        print()
+        ml = data["maturity_levels"]
+        print(f"Maturity levels ({ml['level_count']}):")
+        for lvl in ml["levels"]:
+            print(f"  {lvl['level']}: {lvl['description']}")
+        print()
+        print(f"Domain assessments ({len(data['domain_assessments'])}):")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['maturity_level']}] {d['domain']}")
+            if d["blockers"]:
+                print(f"    Blockers: {', '.join(d['blockers'])}")
+            if d["warnings"]:
+                print(f"    Warnings: {', '.join(d['warnings'])}")
+        print()
+        if rec["blockers"]:
+            print(f"Global blockers ({len(rec['blockers'])}):")
+            for b in rec["blockers"]:
+                print(f"  - {b}")
+            print()
+        if rec["warnings"]:
+            print(f"Global warnings ({len(rec['warnings'])}):")
+            for w in rec["warnings"]:
+                print(f"  - {w}")
+            print()
+        print("Execution readiness recommendation:")
+        print(f"  {rec['execution_readiness_recommendation']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

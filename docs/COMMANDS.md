@@ -526,3 +526,8 @@
 
 - `pcae runtime-trust`
 - `pcae runtime-trust --json`
+
+## governance-maturity
+
+- `pcae governance-maturity`
+- `pcae governance-maturity --json`

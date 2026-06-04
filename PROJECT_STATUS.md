@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47H: Runtime Trust Assessment.
+Phase 47I: Governance Maturity Assessment.
 
 ## Governance Coherence Note
 
@@ -2938,10 +2938,31 @@ for all records; execution_allowed=False; governance_boundaries:
 assessment_may assess trust/identify blockers/generate recommendations;
 assessment_may_not invoke runtimes/execute prompts/approve execution/
 modify repository/commit/push; future_evolution: 47I/48A
+and PCAE assesses overall governance maturity with `pcae governance-maturity`
+and `pcae governance-maturity --json` (Phase 47I): GovernanceMaturityRecord
+model (8 required fields: maturity_id/overall_maturity/domain_maturity/
+blockers/warnings/recommendations/execution_readiness_recommendation/
+human_review_required); 5 maturity levels:
+foundational/defined/governed/verified/execution_ready; 9 domains assessed:
+change_governance (governed), rollback_governance (governed),
+prompt_governance (governed), execution_governance (governed),
+runtime_governance (governed), audit_governance (verified),
+consensus_governance (defined), quality_governance (governed),
+live_pilot_governance (governed); overall_maturity=defined (minimum across
+domains); inputs: live_execution_governance_audit/runtime_trust_assessment/
+runtime_contract_verification/live_read_only_pilot/live_write_pilot/
+rollback_execution_pilot/prompt_governance_artifacts/
+execution_governance_artifacts/rollback_governance_artifacts;
+overall_maturity must not exceed governed until real execution evidence exists;
+execution_readiness_recommendation cautious (blockers in execution_governance
+and runtime_governance); human_review_required=True; execution_allowed=False;
+governance_boundaries: assessment_may assess maturity/identify blockers/
+generate recommendations; assessment_may_not invoke runtimes/execute prompts/
+approve execution/modify repository/commit/push; future_evolution: 48A/48B/48C
 
 ## Next
 
-- TBD: Future phases (47I Governance Maturity Assessment, 48A Controlled Read-Only Runtime Invocation Implementation).
+- TBD: Future phases (48A Controlled Read-Only Runtime Invocation Implementation, 48B Invocation Result Capture Implementation, 48C Runtime Contract Enforcement).
 
 ## Future Explorations
 

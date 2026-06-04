@@ -28353,6 +28353,339 @@ _RTA_FUTURE_EVOLUTION: tuple[dict, ...] = (
 )
 
 
+# Phase 47I — Governance Maturity Assessment
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_MATURITY_ADVISORY = (
+    "Governance maturity assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs."
+)
+
+_GMA_MATURITY_LEVELS: tuple[dict, ...] = (
+    {
+        "level": "foundational",
+        "description": (
+            "Basic governance artifacts and structures are in place. "
+            "Policies and models are defined but not yet operationally verified."
+        ),
+    },
+    {
+        "level": "defined",
+        "description": (
+            "Governance processes are formally defined, documented, and "
+            "consistently applied across the harness lifecycle."
+        ),
+    },
+    {
+        "level": "governed",
+        "description": (
+            "Governance controls are actively enforced with audit trails, "
+            "human review gates, and advisory constraint propagation."
+        ),
+    },
+    {
+        "level": "verified",
+        "description": (
+            "Governance controls have been validated through live pilots, "
+            "contract verification, and audit-based evidence."
+        ),
+    },
+    {
+        "level": "execution_ready",
+        "description": (
+            "Full controlled runtime execution is supported with verified "
+            "contracts, audited pilots, and governance-enforced invocation gates."
+        ),
+    },
+)
+
+_GMA_DOMAIN_ASSESSMENTS: tuple[dict, ...] = (
+    {
+        "domain": "change_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "live_write_pilot_completed",
+            "write_rollback_dry_run_validated",
+            "rollback_execution_pilot_completed",
+        ],
+        "blockers": [],
+        "warnings": ["no_real_execution_evidence_beyond_pilot"],
+        "recommendations": ["advance_to_verified_via_controlled_live_write_execution"],
+    },
+    {
+        "domain": "rollback_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "rollback_execution_pilot_completed",
+            "write_rollback_dry_run_validated",
+            "rollback_governance_artifacts_present",
+        ],
+        "blockers": [],
+        "warnings": ["no_real_rollback_execution_history"],
+        "recommendations": ["perform_controlled_live_rollback_to_advance_to_verified"],
+    },
+    {
+        "domain": "prompt_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "prompt_governance_artifacts_present",
+            "prompt_execution_dry_run_validated",
+            "prompt_approval_design_completed",
+        ],
+        "blockers": [],
+        "warnings": ["no_live_prompt_execution_history"],
+        "recommendations": ["perform_controlled_prompt_execution_to_establish_evidence"],
+    },
+    {
+        "domain": "execution_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "execution_governance_artifacts_present",
+            "live_execution_governance_audit_completed",
+            "execution_authorization_design_defined",
+        ],
+        "blockers": ["no_controlled_live_invocation_implementation"],
+        "warnings": ["execution_governance_verified_only_via_audit_not_live_execution"],
+        "recommendations": [
+            "implement_48A_controlled_read_only_invocation_to_advance_to_verified"
+        ],
+    },
+    {
+        "domain": "runtime_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "runtime_trust_assessment_completed",
+            "runtime_contract_verification_completed",
+            "runtime_adapters_defined",
+        ],
+        "blockers": [
+            "sandbox_contract_unverified_for_codex_and_claude",
+            "kimi_local_not_confirmed_installed",
+        ],
+        "warnings": ["runtime_trust_partially_trusted_not_verified"],
+        "recommendations": [
+            "verify_sandbox_and_timeout_contracts_to_advance_trust",
+            "confirm_kimi_installation_and_reassess",
+        ],
+    },
+    {
+        "domain": "audit_governance",
+        "maturity_level": "verified",
+        "evidence": [
+            "live_execution_governance_audit_completed",
+            "governance_audit_command_operational",
+            "audit_checks_pass_nine_of_nine",
+        ],
+        "blockers": [],
+        "warnings": [],
+        "recommendations": ["maintain_audit_coverage_as_new_phases_are_implemented"],
+    },
+    {
+        "domain": "consensus_governance",
+        "maturity_level": "defined",
+        "evidence": [
+            "consensus_prototype_completed",
+            "consensus_runtime_pilot_completed",
+            "multi_agent_roadmap_proposal_completed",
+        ],
+        "blockers": ["no_live_consensus_execution"],
+        "warnings": ["consensus_governance_remains_simulated"],
+        "recommendations": [
+            "implement_live_consensus_execution_after_48A_invocation_implementation"
+        ],
+    },
+    {
+        "domain": "quality_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "pcae_check_enforced_in_ci",
+            "test_suite_passing",
+            "governance_coherence_audited",
+        ],
+        "blockers": [],
+        "warnings": [],
+        "recommendations": ["maintain_test_coverage_and_check_compliance_across_phases"],
+    },
+    {
+        "domain": "live_pilot_governance",
+        "maturity_level": "governed",
+        "evidence": [
+            "live_readonly_pilot_completed",
+            "live_write_pilot_completed",
+            "rollback_execution_pilot_completed",
+        ],
+        "blockers": ["pilots_remain_advisory_not_execution_authorized"],
+        "warnings": ["live_pilots_governance_only_not_production_execution"],
+        "recommendations": [
+            "advance_to_verified_via_48A_controlled_invocation_implementation"
+        ],
+    },
+)
+
+_GMA_GOVERNANCE_BOUNDARIES: dict = {
+    "assessment_may": [
+        "assess maturity",
+        "identify blockers",
+        "generate recommendations",
+    ],
+    "assessment_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "approve execution",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+}
+
+_GMA_INPUT_SOURCES: tuple[str, ...] = (
+    "live_execution_governance_audit",
+    "runtime_trust_assessment",
+    "runtime_contract_verification",
+    "live_read_only_pilot",
+    "live_write_pilot",
+    "rollback_execution_pilot",
+    "prompt_governance_artifacts",
+    "execution_governance_artifacts",
+    "rollback_governance_artifacts",
+)
+
+_GMA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "48A", "description": "Controlled Read-Only Runtime Invocation Implementation"},
+    {"phase": "48B", "description": "Invocation Result Capture Implementation"},
+    {"phase": "48C", "description": "Runtime Contract Enforcement"},
+)
+
+_GMA_MATURITY_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "maturity_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance maturity record.",
+    },
+    {
+        "name": "overall_maturity",
+        "type": "str",
+        "required": True,
+        "description": "Overall maturity level across all assessed domains.",
+    },
+    {
+        "name": "domain_maturity",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-domain maturity assessments with evidence, blockers, and recommendations.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Global blockers preventing advancement to the next maturity level.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking governance warnings surfaced during assessment.",
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Prioritized recommendations for advancing governance maturity.",
+    },
+    {
+        "name": "execution_readiness_recommendation",
+        "type": "str",
+        "required": True,
+        "description": "Advisory recommendation on readiness for controlled runtime execution.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required before any execution advance.",
+    },
+)
+
+
+def build_governance_maturity() -> dict:
+    """Assess overall PCAE governance maturity. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    maturity_id = f"gma-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    maturity_levels = [dict(l) for l in _GMA_MATURITY_LEVELS]
+    domain_assessments = [dict(d) for d in _GMA_DOMAIN_ASSESSMENTS]
+    record_fields = [dict(f) for f in _GMA_MATURITY_RECORD_FIELDS]
+
+    level_order = {
+        lvl["level"]: i for i, lvl in enumerate(_GMA_MATURITY_LEVELS)
+    }
+
+    min_level = min(
+        (d["maturity_level"] for d in domain_assessments),
+        key=lambda l: level_order.get(l, 0),
+    )
+
+    global_blockers = [
+        b
+        for d in domain_assessments
+        for b in d["blockers"]
+    ]
+    global_warnings = [
+        w
+        for d in domain_assessments
+        for w in d["warnings"]
+    ]
+    global_recommendations = [
+        r
+        for d in domain_assessments
+        for r in d["recommendations"]
+    ]
+
+    execution_readiness_recommendation = (
+        "Overall governance maturity has not yet reached 'verified' across all domains. "
+        "execution_governance and runtime_governance domains have open blockers. "
+        "Proceed to Phase 48A (Controlled Read-Only Runtime Invocation Implementation) "
+        "only after human review confirms blockers are resolved."
+    )
+
+    maturity_record = {
+        "maturity_id": maturity_id,
+        "overall_maturity": min_level,
+        "domain_maturity": domain_assessments,
+        "blockers": global_blockers,
+        "warnings": global_warnings,
+        "recommendations": global_recommendations,
+        "execution_readiness_recommendation": execution_readiness_recommendation,
+        "human_review_required": True,
+    }
+
+    maturity_record_model = {
+        "model_name": "GovernanceMaturityRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "human_review_required_always_true": True,
+        "fields": record_fields,
+    }
+
+    return {
+        "maturity_record": maturity_record,
+        "maturity_record_model": maturity_record_model,
+        "maturity_levels": {
+            "level_count": len(maturity_levels),
+            "levels": maturity_levels,
+        },
+        "domain_assessments": domain_assessments,
+        "governance_boundaries": dict(_GMA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GMA_INPUT_SOURCES),
+        "future_evolution": [dict(e) for e in _GMA_FUTURE_EVOLUTION],
+        "advisory": GOVERNANCE_MATURITY_ADVISORY,
+    }
+
+
 def build_runtime_trust() -> dict:
     """Assess trust levels for PCAE runtimes. Read-only."""
     generated_at = datetime.now(timezone.utc).isoformat()

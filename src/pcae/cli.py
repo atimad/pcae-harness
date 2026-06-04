@@ -86,6 +86,7 @@ from pcae.commands.agent import (
     run_runtime_contracts,
     run_execution_governance_audit,
     run_runtime_trust,
+    run_governance_maturity,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2083,6 +2084,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON runtime trust assessment output.",
     )
     runtime_trust_parser.set_defaults(handler=run_runtime_trust)
+
+    governance_maturity_parser = subparsers.add_parser(
+        "governance-maturity",
+        help="Assess overall PCAE governance maturity (Phase 47I).",
+    )
+    governance_maturity_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance maturity assessment output.",
+    )
+    governance_maturity_parser.set_defaults(handler=run_governance_maturity)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

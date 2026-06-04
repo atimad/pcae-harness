@@ -28266,3 +28266,162 @@ def test_47h_human_output_shows_all_sections(capsys) -> None:
     assert "Trust records" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 47I — Governance Maturity Assessment
+# ---------------------------------------------------------------------------
+
+
+def test_47i_json_structure(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "maturity_record", "maturity_record_model", "maturity_levels",
+        "domain_assessments", "governance_boundaries",
+        "input_sources", "future_evolution", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47i_maturity_record_fields(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["maturity_record"]
+    for field in (
+        "maturity_id", "overall_maturity", "domain_maturity",
+        "blockers", "warnings", "recommendations",
+        "execution_readiness_recommendation", "human_review_required",
+    ):
+        assert field in rec, f"missing maturity_record field: {field}"
+    assert rec["maturity_id"].startswith("gma-")
+    assert rec["human_review_required"] is True
+
+
+def test_47i_human_review_required(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["maturity_record"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["maturity_record_model"]["human_review_required_always_true"] is True
+
+
+def test_47i_execution_not_allowed(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_47i_overall_maturity_not_execution_ready(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overall = data["maturity_record"]["overall_maturity"]
+    assert overall != "execution_ready", (
+        "overall_maturity must not reach execution_ready until real execution evidence exists"
+    )
+    assert overall != "verified", (
+        "overall_maturity must not reach verified while blockers exist"
+    )
+
+
+def test_47i_maturity_levels(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ml = data["maturity_levels"]
+    assert ml["level_count"] == 5
+    level_names = [l["level"] for l in ml["levels"]]
+    for expected in ("foundational", "defined", "governed", "verified", "execution_ready"):
+        assert expected in level_names, f"missing maturity level: {expected}"
+    for lvl in ml["levels"]:
+        assert "level" in lvl
+        assert "description" in lvl
+
+
+def test_47i_nine_domains_assessed(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = data["domain_assessments"]
+    assert len(domains) == 9
+    domain_names = [d["domain"] for d in domains]
+    for expected in (
+        "change_governance", "rollback_governance", "prompt_governance",
+        "execution_governance", "runtime_governance", "audit_governance",
+        "consensus_governance", "quality_governance", "live_pilot_governance",
+    ):
+        assert expected in domain_names, f"missing domain: {expected}"
+
+
+def test_47i_domain_fields(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "maturity_level", "evidence", "blockers", "warnings", "recommendations"):
+            assert field in d, f"domain {d.get('domain')} missing field: {field}"
+
+
+def test_47i_execution_readiness_recommendation_cautious(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["maturity_record"]["execution_readiness_recommendation"].lower()
+    assert "human review" in rec
+    assert "blockers" in rec or "48a" in rec
+
+
+def test_47i_governance_boundaries(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["assessment_may"]).lower()
+    for allowed in ("assess maturity", "identify blockers", "generate recommendations"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["assessment_may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "approve execution",
+                      "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47i_maturity_record_model(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["maturity_record_model"]
+    assert m["model_name"] == "GovernanceMaturityRecord"
+    assert m["field_count"] == 8
+    assert m["required_field_count"] == 8
+    assert m["human_review_required_always_true"] is True
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "maturity_id", "overall_maturity", "domain_maturity",
+        "blockers", "warnings", "recommendations",
+        "execution_readiness_recommendation", "human_review_required",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+
+
+def test_47i_future_evolution(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "48A" in phases
+    assert "48B" in phases
+    assert "48C" in phases
+
+
+def test_47i_advisory(capsys) -> None:
+    main(["governance-maturity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "repository modification" in advisory
+
+
+def test_47i_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-maturity"])
+    output = capsys.readouterr().out
+    assert "Governance maturity assessment" in output
+    assert "Maturity levels" in output
+    assert "Domain assessments" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
