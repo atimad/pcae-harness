@@ -26310,3 +26310,569 @@ def build_rollback_execution_pilot() -> dict:
         "governance_boundaries": dict(_RREP_GOVERNANCE_BOUNDARIES),
         "advisory": ROLLBACK_EXECUTION_PILOT_ADVISORY,
     }
+
+
+# Phase 47E — Governed Live Write Pilot
+# ---------------------------------------------------------------------------
+
+LIVE_WRITE_PILOT_ADVISORY = (
+    "Governed live write pilot is a design-phase definition; no runtime invocation, "
+    "prompt execution, file modification, commit, push, rollback, or git reset occurs."
+)
+
+_LWP_INPUT_SOURCES: tuple[str, ...] = (
+    "live_write_execution_readiness_assessment",
+    "governed_write_candidate_artifact",
+    "controlled_write_invocation_pilot",
+    "write_result_review_workflow",
+    "write_rollback_validation_workflow",
+    "write_rollback_dry_run",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_quality_framework",
+    "rollback_governance_artifacts",
+)
+
+_LWP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact is selected for the live write pilot execution."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "An ExecutionAuthorizationArtifact authorizing write execution is prepared "
+            "and linked to the approved prompt."
+        ),
+        "required": True,
+        "completed_by": "execution_authorization_artifact",
+    },
+    {
+        "step": 3,
+        "name": "governed_write_candidate",
+        "description": (
+            "A GovernedWriteCandidate is prepared, defining file scope, rollback plan, "
+            "audit plan, consensus plan, quality review plan, and result review plan."
+        ),
+        "required": True,
+        "completed_by": "governed_write_candidate_artifact",
+    },
+    {
+        "step": 4,
+        "name": "write_preflight",
+        "description": (
+            "All pilot gates are evaluated: prompt approval, authorization, write "
+            "candidate, file scope, rollback plan, audit plan, consensus path, quality "
+            "review, result review, runtime writable contract, and human write approval."
+        ),
+        "required": True,
+        "completed_by": "all_pilot_gates_pass",
+    },
+    {
+        "step": 5,
+        "name": "human_write_approval",
+        "description": (
+            "Explicit human approval is required before any live write execution may "
+            "proceed. This gate is never bypassed regardless of pilot readiness."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+    },
+    {
+        "step": 6,
+        "name": "runtime_writable_contract_validation",
+        "description": (
+            "The runtime writable contract is validated for the selected runtime, "
+            "confirming write execution boundaries and rollback capability."
+        ),
+        "required": True,
+        "completed_by": "runtime_writable_contract_artifact",
+    },
+    {
+        "step": 7,
+        "name": "future_live_write_execution",
+        "description": (
+            "Placeholder for the future governed live write execution step. "
+            "Execution is deferred to a future live invocation phase. "
+            "No execution occurs in this design phase."
+        ),
+        "required": True,
+        "completed_by": "future_governed_live_write_invocation",
+    },
+    {
+        "step": 8,
+        "name": "result_capture",
+        "description": (
+            "Execution outputs are captured, classified, and persisted according "
+            "to the result review plan defined in the pilot candidate."
+        ),
+        "required": True,
+        "completed_by": "write_result_capture_artifact",
+    },
+    {
+        "step": 9,
+        "name": "write_result_review",
+        "description": (
+            "Write result review workflow is applied to the captured execution output "
+            "before any further action, including rollback assessment."
+        ),
+        "required": True,
+        "completed_by": "write_result_review_completion",
+    },
+    {
+        "step": 10,
+        "name": "rollback_validation",
+        "description": (
+            "Rollback validation is performed to confirm rollback capability and "
+            "that the rollback plan remains valid after write execution."
+        ),
+        "required": True,
+        "completed_by": "rollback_validation_completion",
+    },
+)
+
+_LWP_PILOT_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "live_write_pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this live write pilot candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "ID of the linked GovernedWriteCandidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "ID of the linked ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "ID of the approved prompt artifact selected for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this pilot execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this pilot execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "file_scope",
+        "type": "list[str]",
+        "description": "List of files in scope for write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_plan",
+        "type": "str",
+        "description": "ID of the validated rollback plan for this write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_plan",
+        "type": "str",
+        "description": "Strategy for producing the write execution audit record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_plan",
+        "type": "str",
+        "description": "Strategy for applying multi-agent consensus governance.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "quality_review_plan",
+        "type": "str",
+        "description": "Strategy for applying the quality review framework.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "result_review_plan",
+        "type": "str",
+        "description": "Strategy for applying the write result review workflow.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; write execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every write pilot candidate.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_LWP_PILOT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "lwp-g01",
+        "gate": "prompt_approved",
+        "description": (
+            "The prompt artifact has been approved and is linked to a valid "
+            "ExecutionAuthorizationArtifact."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g02",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state "
+            "and has not expired, been denied, or been superseded."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g03",
+        "gate": "write_candidate_valid",
+        "description": (
+            "A valid GovernedWriteCandidate exists, with all required fields populated "
+            "and within the authorized write scope."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g04",
+        "gate": "file_scope_valid",
+        "description": (
+            "The file scope is non-empty, within the authorized write scope, does not "
+            "touch forbidden files, and is within the maximum files limit."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g05",
+        "gate": "rollback_plan_valid",
+        "description": (
+            "A validated rollback plan exists for this write execution, with an "
+            "allowed rollback mode and confirmed rollback target."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g06",
+        "gate": "audit_plan_ready",
+        "description": (
+            "An audit plan is established and an audit record is prepared "
+            "prior to any live write execution."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g07",
+        "gate": "consensus_path_ready",
+        "description": (
+            "Multi-agent consensus governance is in place and a consensus review "
+            "path has been validated for this pilot candidate."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g08",
+        "gate": "quality_review_ready",
+        "description": (
+            "The quality review framework is available and configured for evaluating "
+            "this pilot's write execution outputs."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g09",
+        "gate": "result_review_ready",
+        "description": (
+            "The write result review workflow is available and configured for this "
+            "pilot's execution outputs."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g10",
+        "gate": "runtime_writable_contract_valid",
+        "description": (
+            "The selected runtime passes the writable contract validation: write "
+            "execution boundaries are confirmed and rollback capability is verified."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lwp-g11",
+        "gate": "human_write_approval_present",
+        "description": (
+            "Explicit human write approval is present. This gate is never bypassed "
+            "regardless of pilot readiness or other gate results."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+)
+
+_LWP_RUNTIME_RESULTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "status": "partially_ready",
+        "rationale": (
+            "codex-local supports non-interactive execution and has been adapter-inspected. "
+            "Governed live write execution and writable contract validation have not been "
+            "validated end-to-end."
+        ),
+        "adapter_type": "cli",
+        "write_validated": False,
+    },
+    {
+        "runtime": "claude-local",
+        "status": "partially_ready",
+        "rationale": (
+            "claude-local supports non-interactive execution and has been adapter-inspected. "
+            "Governed live write execution and writable contract validation have not been "
+            "validated end-to-end."
+        ),
+        "adapter_type": "cli",
+        "write_validated": False,
+    },
+    {
+        "runtime": "kimi-local",
+        "status": "not_ready",
+        "rationale": (
+            "kimi-local has not been confirmed installed or validated for "
+            "governed write execution."
+        ),
+        "adapter_type": "cli",
+        "write_validated": False,
+    },
+)
+
+_LWP_PILOT_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this live write pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "description": "Pilot readiness status: ready, blocked, or pending.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed pilot preflight validation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during pilot preflight.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of governance recommendations to advance pilot readiness.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; write execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every write pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_LWP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "define live write pilot",
+        "assess gates",
+        "identify blockers",
+        "generate recommendations",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+        "reset history",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "git_reset_forbidden": True,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_LWP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47F", "description": "Runtime Contract Verification"},
+    {"phase": "47G", "description": "Live Execution Governance Audit"},
+    {"phase": "47H", "description": "Live Write Pilot Readiness Reassessment"},
+    {"phase": "48A", "description": "Controlled Read-Only Runtime Invocation Implementation"},
+)
+
+
+def build_live_write_pilot() -> dict:
+    """Define the first governed live write execution pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"lwp-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _LWP_LIFECYCLE]
+    pilot_candidate_fields = [dict(f) for f in _LWP_PILOT_CANDIDATE_FIELDS]
+    pilot_gates = [dict(g) for g in _LWP_PILOT_GATES]
+    runtime_results = [dict(r) for r in _LWP_RUNTIME_RESULTS]
+    pilot_result_fields = [dict(f) for f in _LWP_PILOT_RESULT_FIELDS]
+
+    gates_met = sum(1 for g in pilot_gates if g["status"] == "met")
+    gates_not_met = sum(1 for g in pilot_gates if g["status"] == "not_met")
+    readiness_status = "blocked" if gates_not_met > 0 else "ready"
+
+    pilot_candidate_model = {
+        "model_name": "LiveWritePilotCandidate",
+        "field_count": len(pilot_candidate_fields),
+        "required_field_count": sum(1 for f in pilot_candidate_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in pilot_candidate_fields if f["immutable"]),
+        "execution_allowed_always_false": True,
+        "human_review_required_always_true": True,
+        "fields": pilot_candidate_fields,
+    }
+
+    pilot_gate_model = {
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "all_gates_required": all(g["required"] for g in pilot_gates),
+        "all_gates_blocking": all(g["blocking"] for g in pilot_gates),
+        "gate_ids": [g["gate_id"] for g in pilot_gates],
+        "gates": pilot_gates,
+    }
+
+    runtime_assessment_model = {
+        "runtime_count": len(runtime_results),
+        "ready_count": sum(1 for r in runtime_results if r["status"] == "ready"),
+        "partially_ready_count": sum(
+            1 for r in runtime_results if r["status"] == "partially_ready"
+        ),
+        "not_ready_count": sum(1 for r in runtime_results if r["status"] == "not_ready"),
+        "runtimes": runtime_results,
+    }
+
+    pilot_result_model = {
+        "model_name": "PilotResult",
+        "field_count": len(pilot_result_fields),
+        "required_field_count": sum(1 for f in pilot_result_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in pilot_result_fields),
+        "execution_allowed_always_false": True,
+        "human_review_required_always_true": True,
+        "fields": pilot_result_fields,
+    }
+
+    live_write_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "47E",
+        "title": "Governed Live Write Pilot",
+        "summary": (
+            "Defines the first governed live write execution pilot. Specifies the "
+            "ten-step pilot lifecycle (approved_prompt_artifact through rollback_validation), "
+            "the LiveWritePilotCandidate model (14 fields, all immutable), eleven required "
+            "pilot gates (all not_met in this design phase), and the PilotResult model "
+            "(7 fields, all immutable). Assesses three target runtimes for writable contract "
+            "validation. Write execution is deferred to a future phase requiring explicit "
+            "human approval. git_reset remains forbidden. No execution, file modification, "
+            "commit, push, or rollback occurs."
+        ),
+        "readiness_status": readiness_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "git_reset_forbidden": True,
+        "lifecycle_step_count": len(lifecycle),
+        "pilot_candidate_field_count": len(pilot_candidate_fields),
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "runtime_count": len(runtime_results),
+        "input_sources": list(_LWP_INPUT_SOURCES),
+        "governance_boundaries": dict(_LWP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LWP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "live_write_pilot": live_write_pilot,
+        "pilot_lifecycle": lifecycle,
+        "pilot_candidate_model": pilot_candidate_model,
+        "pilot_gates": pilot_gate_model,
+        "runtime_assessment": runtime_assessment_model,
+        "pilot_result_model": pilot_result_model,
+        "governance_boundaries": dict(_LWP_GOVERNANCE_BOUNDARIES),
+        "advisory": LIVE_WRITE_PILOT_ADVISORY,
+    }

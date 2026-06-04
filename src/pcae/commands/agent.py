@@ -139,6 +139,8 @@ from pcae.core.agent import (
     LIVE_READONLY_PILOT_ADVISORY,
     build_rollback_execution_pilot,
     ROLLBACK_EXECUTION_PILOT_ADVISORY,
+    build_live_write_pilot,
+    LIVE_WRITE_PILOT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -5869,6 +5871,86 @@ def run_rollback_execution_pilot(args: argparse.Namespace) -> int:
         print(f"  execution_allowed always False: {pr['execution_allowed_always_false']}")
         print(f"  human_review_required always True: {pr['human_review_required_always_true']}")
         for field in pr["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['pilot_may'])}")
+        print(f"  May not:               {', '.join(gb['pilot_may_not'])}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  git_reset forbidden:   {gb['git_reset_forbidden']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_live_write_pilot(args: argparse.Namespace) -> int:
+    data = build_live_write_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["live_write_pilot"]
+        print("Governed live write pilot")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Pilot status:")
+        print(f"  Readiness status:      {pilot['readiness_status']}")
+        print(f"  Execution allowed:     {'yes' if pilot['execution_allowed'] else 'no'}")
+        print(f"  Human review required: {'yes' if pilot['human_review_required'] else 'no'}")
+        print(f"  git_reset forbidden:   {'yes' if pilot['git_reset_forbidden'] else 'no'}")
+        print(f"  Lifecycle steps:       {pilot['lifecycle_step_count']}")
+        print(f"  Gates met:             {pilot['gates_met']} of {pilot['gate_count']}")
+        print(f"  Runtime count:         {pilot['runtime_count']}")
+        print()
+        print(f"Pilot lifecycle ({len(data['pilot_lifecycle'])} steps):")
+        for step in data["pilot_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("LiveWritePilotCandidate model:")
+        m = data["pilot_candidate_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}")
+        print(f"  execution_allowed always False: {m['execution_allowed_always_false']}")
+        print(f"  human_review_required always True: {m['human_review_required_always_true']}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        pg = data["pilot_gates"]
+        print(f"Pilot gates ({pg['gates_met']} met, {pg['gates_not_met']} not met):")
+        print(
+            f"  All required: {pg['all_gates_required']}"
+            f"  All blocking: {pg['all_gates_blocking']}"
+        )
+        for gate in pg["gates"]:
+            print(f"  [{gate['status']}] {gate['gate_id']} {gate['gate']}")
+            print(f"    {gate['description']}")
+        print()
+        rt = data["runtime_assessment"]
+        print(f"Runtime writable assessment ({rt['runtime_count']} runtimes):")
+        for runtime in rt["runtimes"]:
+            print(f"  [{runtime['status']}] {runtime['runtime']} ({runtime['adapter_type']})")
+            print(f"    Rationale: {runtime['rationale']}")
+            print(
+                f"    Write validated: {'yes' if runtime['write_validated'] else 'no'}"
+            )
+        print()
+        print("PilotResult model:")
+        rm = data["pilot_result_model"]
+        print(f"  Model: {rm['model_name']}")
+        print(f"  Fields: {rm['field_count']}  Required: {rm['required_field_count']}")
+        print(f"  All fields immutable: {rm['all_fields_immutable']}")
+        print(f"  execution_allowed always False: {rm['execution_allowed_always_false']}")
+        print(f"  human_review_required always True: {rm['human_review_required_always_true']}")
+        for field in rm["fields"]:
             print(f"    {field['name']} ({field['type']}): {field['description']}")
         print()
         gb = data["governance_boundaries"]

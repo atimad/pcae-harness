@@ -82,6 +82,7 @@ from pcae.commands.agent import (
     run_live_write_readiness,
     run_live_readonly_pilot,
     run_rollback_execution_pilot,
+    run_live_write_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2035,6 +2036,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON rollback execution pilot output.",
     )
     rollback_execution_pilot_parser.set_defaults(handler=run_rollback_execution_pilot)
+
+    live_write_pilot_parser = subparsers.add_parser(
+        "live-write-pilot",
+        help="Define the first governed live write execution pilot (Phase 47E).",
+    )
+    live_write_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON live write pilot output.",
+    )
+    live_write_pilot_parser.set_defaults(handler=run_live_write_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

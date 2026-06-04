@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47D: Governed Rollback Execution Pilot.
+Phase 47E: Governed Live Write Pilot.
 
 ## Governance Coherence Note
 
@@ -2841,9 +2841,41 @@ workflow_may_not execute rollback/invoke runtimes/modify files/approve
 rollback automatically/commit/push/reset; execution_allowed=False,
 human_review_required=True; future_evolution: 46T/46U/47A/47B
 
+and the first governed live write execution pilot is defined with
+`pcae live-write-pilot` and `pcae live-write-pilot --json` (Phase 47E):
+inputs: 10 sources (live_write_execution_readiness_assessment,
+governed_write_candidate_artifact, controlled_write_invocation_pilot,
+write_result_review_workflow, write_rollback_validation_workflow,
+write_rollback_dry_run, execution_audit_design, execution_consensus_design,
+execution_quality_framework, rollback_governance_artifacts); no runtime
+invocation; no prompt execution; no file modification; no commit; no push;
+no rollback; no git reset; pilot lifecycle (10 steps, all required):
+approved_prompt_artifact/execution_authorization/governed_write_candidate/
+write_preflight/human_write_approval/runtime_writable_contract_validation/
+future_live_write_execution/result_capture/write_result_review/
+rollback_validation; LiveWritePilotCandidate model: 14 fields (all required,
+all immutable): live_write_pilot_id/write_candidate_id/authorization_id/
+prompt_id/selected_runtime/selected_agent/file_scope/rollback_plan/
+audit_plan/consensus_plan/quality_review_plan/result_review_plan/
+execution_allowed (always False)/human_review_required (always True);
+11 pilot gates (all required, all blocking, all not_met in design phase):
+prompt_approved/authorization_valid/write_candidate_valid/file_scope_valid/
+rollback_plan_valid/audit_plan_ready/consensus_path_ready/quality_review_ready/
+result_review_ready/runtime_writable_contract_valid/human_write_approval_present;
+runtime writable assessment: 3 runtimes (codex-local/claude-local:
+partially_ready; kimi-local: not_ready); readiness_status=blocked;
+PilotResult model: 7 fields (all required, all immutable): pilot_id/
+readiness_status/blockers/warnings/recommendations/execution_allowed (always
+False)/human_review_required (always True); git_reset_forbidden=True;
+execution_allowed=False; human_review_required=True; governance_boundaries:
+pilot_may define live write pilot/assess gates/identify blockers/generate
+recommendations; pilot_may_not invoke runtimes/execute prompts/modify files/
+approve writes/commit/push/rollback/reset history; future_evolution:
+47F/47G/47H/48A
+
 ## Next
 
-- TBD: Future phases (47E Governed Live Write Pilot, 47F Runtime Contract Verification, 47G Live Execution Governance Audit).
+- TBD: Future phases (47F Runtime Contract Verification, 47G Live Execution Governance Audit, 47H Live Write Pilot Readiness Reassessment, 48A Controlled Read-Only Runtime Invocation Implementation).
 
 ## Future Explorations
 
