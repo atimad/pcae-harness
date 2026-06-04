@@ -126,6 +126,8 @@ from pcae.core.agent import (
     WRITE_INVOCATION_PILOT_ADVISORY,
     build_write_result_review_design,
     WRITE_RESULT_REVIEW_DESIGN_ADVISORY,
+    build_write_rollback_validation_design,
+    WRITE_ROLLBACK_VALIDATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5399,6 +5401,81 @@ def run_write_result_review_design(args: argparse.Namespace) -> int:
         for rule in er["rules"]:
             print(f"  {rule['condition']} → {rule['escalation_status']}")
             print(f"    {rule['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_rollback_validation_design(args: argparse.Namespace) -> int:
+    data = build_write_rollback_validation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_rollback_validation_design"]
+        print("Write rollback validation workflow design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Rollback validation lifecycle:")
+        for step in data["rollback_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("RollbackValidationRecord model:")
+        m = data["rollback_validation_record_model"]
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}  Groups: {', '.join(m['groups'])}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    [{field['group']}] {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        print("Validation statuses:")
+        vs = data["validation_statuses"]
+        print(f"  Status count: {vs['status_count']}")
+        print(f"  Terminal: {', '.join(vs['terminal_statuses'])}")
+        print(f"  Escalation: {', '.join(vs['escalation_statuses'])}")
+        for status in vs["statuses"]:
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            print(f"  {status['status']} ({terminal})")
+            print(f"    {status['description']}")
+        print()
+        print("Rollback scope validation rules:")
+        sr = data["rollback_scope_validation_rules"]
+        print(f"  Rule count: {sr['rule_count']}  All violations trigger escalation: {sr['all_violations_trigger_escalation']}")
+        for rule in sr["rules"]:
+            print(f"  {rule['rule']} → {rule['violation_triggers']}")
+            print(f"    {rule['description']}")
+        print()
+        print("Rollback target validation rules:")
+        tr = data["rollback_target_validation_rules"]
+        print(f"  Rule count: {tr['rule_count']}  All violations trigger escalation: {tr['all_violations_trigger_escalation']}")
+        for rule in tr["rules"]:
+            print(f"  {rule['rule']} → {rule['violation_triggers']}")
+            print(f"    {rule['description']}")
+        print()
+        print("Rollback risk assessment:")
+        ra = data["rollback_risk_assessment"]
+        print(f"  Risk dimensions: {ra['risk_count']}")
+        for risk in ra["risks"]:
+            print(f"  {risk['risk']} (severity: {risk['severity']})")
+            print(f"    {risk['description']}")
+        print()
+        print("Governance requirements:")
+        gr = data["governance_requirements"]
+        print(f"  Requirement count: {gr['requirement_count']}  All required: {gr['all_required']}")
+        for req in gr["requirements"]:
+            print(f"  {req['requirement']}: {req['description']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

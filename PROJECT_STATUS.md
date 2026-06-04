@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46R: Write Result Review Workflow.
+Phase 46S: Write Rollback Validation Workflow.
 
 ## Governance Coherence Note
 
@@ -2757,10 +2757,45 @@ automatically/commit/push/rollback; execution_allowed=False,
 human_review_required=True; future_evolution: 46S/46T/47A/47B; advisory:
 "Write result review workflow design is informational; no runtime
 invocation, prompt execution, or file modification occurs."
+and the write rollback validation governance workflow is designed with
+`pcae write-rollback-validation-design` and
+`pcae write-rollback-validation-design --json` (Phase 46S): inputs:
+write_result_review_workflow, controlled_write_invocation_pilot,
+governed_write_candidate_artifact, rollback_governance_phases_43A_43E,
+execution_audit_design, execution_consensus_design,
+execution_quality_framework; no rollback execution; no runtime invocation;
+no file modification; rollback_lifecycle (8 steps, all required):
+write_review_record/rollback_plan_lookup/rollback_scope_validation/
+rollback_target_validation/rollback_risk_assessment/
+rollback_governance_review/human_rollback_review/rollback_validation_record;
+RollbackValidationRecord model: 17 fields (all required), 8 immutable:
+rollback_validation_id/write_review_id/execution_id/authorization_id/
+write_candidate_id/rollback_plan_id (identity) + human_review_required/
+created_at (metadata); validation group (7 mutable):
+rollback_target/rollback_mode/rollback_scope_status/rollback_target_status/
+rollback_risk_status/rollback_governance_status/validation_status; findings:
+blockers/warnings; validation statuses (5): rollback_ready/
+rollback_ready_with_warnings/rollback_blocked/rollback_not_required
+(terminal), escalation_required (non-terminal); rollback scope validation
+rules (4, all → rollback_scope_violation):
+rollback_scope_within_write_scope/rollback_does_not_touch_forbidden_files/
+rollback_file_count_within_limit/rollback_operation_type_permitted; rollback
+target validation rules (4, all → rollback_target_invalid):
+rollback_target_exists/rollback_target_is_reachable/
+rollback_target_matches_audited_result/rollback_target_not_superseded;
+rollback risk assessment (5): data_loss_risk/partial_rollback_risk/
+audit_gap_risk (high), conflict_risk/dependency_risk (medium); governance
+requirements (5, all required): rollback_plan_exists/write_review_exists/
+execution_audit_exists/rollback_approval_path_exists/
+human_rollback_review_required; governance_boundaries: workflow_may validate
+rollback readiness/assess rollback risks/record rollback validation findings;
+workflow_may_not execute rollback/invoke runtimes/modify files/approve
+rollback automatically/commit/push/reset; execution_allowed=False,
+human_review_required=True; future_evolution: 46T/46U/47A/47B
 
 ## Next
 
-- TBD: Future phases (46S Write Rollback Validation Workflow).
+- TBD: Future phases (46T Write Execution Readiness Assessment).
 
 ## Future Explorations
 

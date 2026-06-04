@@ -22787,3 +22787,582 @@ def build_write_result_review_design() -> dict:
         "governance_boundaries": dict(_WRRD_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_RESULT_REVIEW_DESIGN_ADVISORY,
     }
+
+
+# Phase 46S — Write Rollback Validation Workflow
+# ---------------------------------------------------------------------------
+
+WRITE_ROLLBACK_VALIDATION_DESIGN_ADVISORY = (
+    "Write rollback validation workflow design is informational; no rollback "
+    "execution, runtime invocation, prompt execution, or file modification occurs."
+)
+
+_WRVD_INPUT_SOURCES: tuple[str, ...] = (
+    "write_result_review_workflow",
+    "controlled_write_invocation_pilot",
+    "governed_write_candidate_artifact",
+    "rollback_governance_phases_43A_43E",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_quality_framework",
+)
+
+_WRVD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "write_review_record",
+        "description": (
+            "The WriteReviewRecord artifact from Phase 46R is received and "
+            "linked to the write candidate, authorization, and execution records."
+        ),
+        "required": True,
+        "completed_by": "write_review_record_artifact",
+    },
+    {
+        "step": 2,
+        "name": "rollback_plan_lookup",
+        "description": (
+            "The rollback plan linked to the write candidate is located and "
+            "its rollback_plan_id, rollback_target, and rollback_mode are extracted."
+        ),
+        "required": True,
+        "completed_by": "rollback_plan_artifact",
+    },
+    {
+        "step": 3,
+        "name": "rollback_scope_validation",
+        "description": (
+            "The rollback scope is validated: rollback scope is within the "
+            "original write scope, forbidden_files are untouched, file count "
+            "is within max_files_changed, and operation type is permitted."
+        ),
+        "required": True,
+        "completed_by": "rollback_scope_validation_result",
+    },
+    {
+        "step": 4,
+        "name": "rollback_target_validation",
+        "description": (
+            "The rollback target is validated: it exists, is reachable, "
+            "matches the audited execution result, and has not been superseded."
+        ),
+        "required": True,
+        "completed_by": "rollback_target_validation_result",
+    },
+    {
+        "step": 5,
+        "name": "rollback_risk_assessment",
+        "description": (
+            "Rollback risks are assessed across five dimensions: data_loss_risk, "
+            "conflict_risk, dependency_risk, partial_rollback_risk, and audit_gap_risk."
+        ),
+        "required": True,
+        "completed_by": "rollback_risk_assessment_result",
+    },
+    {
+        "step": 6,
+        "name": "rollback_governance_review",
+        "description": (
+            "Governance compliance is reviewed: rollback plan exists, write review "
+            "exists, execution audit exists, and rollback approval path is defined."
+        ),
+        "required": True,
+        "completed_by": "rollback_governance_review_result",
+    },
+    {
+        "step": 7,
+        "name": "human_rollback_review",
+        "description": (
+            "A human reviewer evaluates all rollback validation findings, scope "
+            "status, target status, risk assessment, and governance compliance "
+            "before determining validation_status. This step is never bypassed."
+        ),
+        "required": True,
+        "completed_by": "human_rollback_review_decision",
+    },
+    {
+        "step": 8,
+        "name": "rollback_validation_record",
+        "description": (
+            "A RollbackValidationRecord artifact is produced capturing all "
+            "validation outcomes, risk findings, blockers, warnings, and the "
+            "final validation_status."
+        ),
+        "required": True,
+        "completed_by": "rollback_validation_record_artifact",
+    },
+)
+
+_WRVD_MODEL_FIELDS: tuple[dict, ...] = (
+    # Identity
+    {
+        "name": "rollback_validation_id",
+        "type": "str",
+        "description": "Unique identifier for this rollback validation record.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "write_review_id",
+        "type": "str",
+        "description": "Reference to the WriteReviewRecord from Phase 46R.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the write execution result artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Reference to the GovernedWriteCandidate artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "description": "Reference to the rollback plan linked to the write candidate.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    # Validation
+    {
+        "name": "rollback_target",
+        "type": "str",
+        "description": "The resolved rollback target (e.g., git ref or snapshot identifier).",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "rollback_mode",
+        "type": "str",
+        "description": "The rollback mode declared in the rollback plan (e.g., git_revert, snapshot_restore).",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "rollback_scope_status",
+        "type": "str",
+        "description": "Result of rollback scope validation: valid, violation, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "rollback_target_status",
+        "type": "str",
+        "description": "Result of rollback target validation: valid, invalid, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "rollback_risk_status",
+        "type": "str",
+        "description": "Aggregate risk level for rollback execution: low, medium, high, or critical.",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "rollback_governance_status",
+        "type": "str",
+        "description": "Result of rollback governance review: compliant, violation, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    {
+        "name": "validation_status",
+        "type": "str",
+        "description": (
+            "Final validation status: rollback_ready, rollback_ready_with_warnings, "
+            "rollback_blocked, rollback_not_required, or escalation_required."
+        ),
+        "required": True,
+        "immutable": False,
+        "group": "validation",
+    },
+    # Findings
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blocking issues that prevent rollback from proceeding.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during rollback validation.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    # Metadata
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every rollback validation.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "description": "ISO-8601 timestamp when the rollback validation record was created.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+)
+
+_WRVD_VALIDATION_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "rollback_ready",
+        "description": (
+            "All rollback validation checks passed and human reviewer approved. "
+            "Rollback may proceed if authorized."
+        ),
+        "terminal": True,
+        "requires_escalation": False,
+    },
+    {
+        "status": "rollback_ready_with_warnings",
+        "description": (
+            "Rollback validation passed with non-blocking warnings. Human reviewer "
+            "accepted the warnings; rollback may proceed with caution."
+        ),
+        "terminal": True,
+        "requires_escalation": False,
+    },
+    {
+        "status": "rollback_blocked",
+        "description": (
+            "One or more blocking validation checks failed. Rollback may not "
+            "proceed until blockers are resolved."
+        ),
+        "terminal": True,
+        "requires_escalation": False,
+    },
+    {
+        "status": "rollback_not_required",
+        "description": (
+            "The write result review determined that rollback is not required; "
+            "rollback validation is complete and no rollback action is needed."
+        ),
+        "terminal": True,
+        "requires_escalation": False,
+    },
+    {
+        "status": "escalation_required",
+        "description": (
+            "A critical validation condition was detected that requires escalation "
+            "before any rollback decision may be made."
+        ),
+        "terminal": False,
+        "requires_escalation": True,
+    },
+)
+
+_WRVD_SCOPE_VALIDATION_RULES: tuple[dict, ...] = (
+    {
+        "rule": "rollback_scope_within_write_scope",
+        "description": (
+            "The rollback scope must be entirely contained within the original "
+            "write scope declared in the GovernedWriteCandidate."
+        ),
+        "violation_triggers": "rollback_scope_violation",
+    },
+    {
+        "rule": "rollback_does_not_touch_forbidden_files",
+        "description": (
+            "The rollback operation must not touch any file listed in the "
+            "forbidden_files set of the write candidate."
+        ),
+        "violation_triggers": "rollback_scope_violation",
+    },
+    {
+        "rule": "rollback_file_count_within_limit",
+        "description": (
+            "The number of files affected by the rollback must not exceed "
+            "max_files_changed declared in the write candidate file scope."
+        ),
+        "violation_triggers": "rollback_scope_violation",
+    },
+    {
+        "rule": "rollback_operation_type_permitted",
+        "description": (
+            "The rollback operation type (e.g., git_revert, snapshot_restore) must "
+            "be listed as a permitted operation in the rollback plan."
+        ),
+        "violation_triggers": "rollback_scope_violation",
+    },
+)
+
+_WRVD_TARGET_VALIDATION_RULES: tuple[dict, ...] = (
+    {
+        "rule": "rollback_target_exists",
+        "description": (
+            "The rollback target (git ref, snapshot, or state identifier) must "
+            "exist and be locatable in the repository."
+        ),
+        "violation_triggers": "rollback_target_invalid",
+    },
+    {
+        "rule": "rollback_target_is_reachable",
+        "description": (
+            "The rollback target must be reachable from the current repository "
+            "state without requiring manual intervention."
+        ),
+        "violation_triggers": "rollback_target_invalid",
+    },
+    {
+        "rule": "rollback_target_matches_audited_result",
+        "description": (
+            "The rollback target must correspond to the pre-execution state "
+            "recorded in the execution audit for this write candidate."
+        ),
+        "violation_triggers": "rollback_target_invalid",
+    },
+    {
+        "rule": "rollback_target_not_superseded",
+        "description": (
+            "The rollback target must not have been superseded by a later "
+            "write execution or governance action since the execution audit."
+        ),
+        "violation_triggers": "rollback_target_invalid",
+    },
+)
+
+_WRVD_RISK_ASSESSMENT: tuple[dict, ...] = (
+    {
+        "risk": "data_loss_risk",
+        "description": (
+            "Risk that rollback will permanently destroy data produced during "
+            "write execution that cannot be recovered after rollback completes."
+        ),
+        "severity": "high",
+    },
+    {
+        "risk": "conflict_risk",
+        "description": (
+            "Risk that rollback will conflict with changes made by other "
+            "processes or agents after the write execution completed."
+        ),
+        "severity": "medium",
+    },
+    {
+        "risk": "dependency_risk",
+        "description": (
+            "Risk that downstream artifacts, pipeline stages, or governance "
+            "records depend on the write result and will become inconsistent "
+            "after rollback."
+        ),
+        "severity": "medium",
+    },
+    {
+        "risk": "partial_rollback_risk",
+        "description": (
+            "Risk that the rollback will only partially restore the pre-execution "
+            "state, leaving the repository in an inconsistent or hybrid state."
+        ),
+        "severity": "high",
+    },
+    {
+        "risk": "audit_gap_risk",
+        "description": (
+            "Risk that the rollback will create a gap in the execution audit "
+            "trail, making it impossible to reconstruct the full change history."
+        ),
+        "severity": "high",
+    },
+)
+
+_WRVD_GOVERNANCE_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "rollback_plan_exists",
+        "description": (
+            "A rollback plan must be present and linked to the write candidate "
+            "before rollback validation may proceed."
+        ),
+        "required": True,
+    },
+    {
+        "requirement": "write_review_exists",
+        "description": (
+            "A completed WriteReviewRecord from Phase 46R must exist and be "
+            "linked to the execution being rolled back."
+        ),
+        "required": True,
+    },
+    {
+        "requirement": "execution_audit_exists",
+        "description": (
+            "An execution audit record must exist for the write execution "
+            "being considered for rollback."
+        ),
+        "required": True,
+    },
+    {
+        "requirement": "rollback_approval_path_exists",
+        "description": (
+            "An approval path for rollback execution must be defined and "
+            "accessible in the governance configuration."
+        ),
+        "required": True,
+    },
+    {
+        "requirement": "human_rollback_review_required",
+        "description": (
+            "Human review is required for every rollback validation outcome; "
+            "no rollback may proceed without explicit human approval."
+        ),
+        "required": True,
+    },
+)
+
+_WRVD_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "validate rollback readiness",
+        "assess rollback risks",
+        "record rollback validation findings",
+    ],
+    "workflow_may_not": [
+        "execute rollback",
+        "invoke runtimes",
+        "modify files",
+        "approve rollback automatically",
+        "commit",
+        "push",
+        "reset",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_WRVD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46T", "description": "Write Execution Readiness Assessment"},
+    {"phase": "46U", "description": "Write Rollback Dry-Run"},
+    {"phase": "47A", "description": "Governed Live Read-Only Execution"},
+    {"phase": "47B", "description": "Governed Live Write Execution Readiness"},
+)
+
+
+def build_write_rollback_validation_design() -> dict:
+    """Design the write rollback validation governance workflow. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"wrvd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WRVD_LIFECYCLE]
+    model_fields = [dict(f) for f in _WRVD_MODEL_FIELDS]
+    validation_statuses = [dict(s) for s in _WRVD_VALIDATION_STATUSES]
+    scope_rules = [dict(r) for r in _WRVD_SCOPE_VALIDATION_RULES]
+    target_rules = [dict(r) for r in _WRVD_TARGET_VALIDATION_RULES]
+    risks = [dict(r) for r in _WRVD_RISK_ASSESSMENT]
+    gov_requirements = [dict(r) for r in _WRVD_GOVERNANCE_REQUIREMENTS]
+
+    rollback_validation_record_model = {
+        "model_name": "RollbackValidationRecord",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "groups": sorted({f["group"] for f in model_fields}),
+        "fields": model_fields,
+    }
+
+    validation_statuses_model = {
+        "status_count": len(validation_statuses),
+        "terminal_statuses": [s["status"] for s in validation_statuses if s["terminal"]],
+        "escalation_statuses": [s["status"] for s in validation_statuses if s["requires_escalation"]],
+        "statuses": validation_statuses,
+    }
+
+    rollback_scope_rules_model = {
+        "rule_count": len(scope_rules),
+        "all_violations_trigger_escalation": True,
+        "rules": scope_rules,
+    }
+
+    rollback_target_rules_model = {
+        "rule_count": len(target_rules),
+        "all_violations_trigger_escalation": True,
+        "rules": target_rules,
+    }
+
+    risk_assessment_model = {
+        "risk_count": len(risks),
+        "risks": risks,
+    }
+
+    governance_requirements_model = {
+        "requirement_count": len(gov_requirements),
+        "all_required": all(r["required"] for r in gov_requirements),
+        "requirements": gov_requirements,
+    }
+
+    write_rollback_validation_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46S",
+        "title": "Write Rollback Validation Workflow",
+        "summary": (
+            "Designs the governance workflow for validating whether future write "
+            "execution results can be safely rolled back. Defines the eight-step "
+            "rollback validation lifecycle, RollbackValidationRecord model (17 fields, "
+            "8 immutable), five validation statuses (4 terminal), four rollback scope "
+            "validation rules, four rollback target validation rules, five rollback risk "
+            "assessment dimensions, and five governance requirements. Human review is "
+            "always required; no rollback execution, runtime invocation, or file "
+            "modification occurs."
+        ),
+        "input_sources": list(_WRVD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "model_field_count": len(model_fields),
+        "validation_status_count": len(validation_statuses),
+        "scope_rule_count": len(scope_rules),
+        "target_rule_count": len(target_rules),
+        "risk_count": len(risks),
+        "governance_requirement_count": len(gov_requirements),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_WRVD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WRVD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_rollback_validation_design": write_rollback_validation_design,
+        "rollback_lifecycle": lifecycle,
+        "rollback_validation_record_model": rollback_validation_record_model,
+        "validation_statuses": validation_statuses_model,
+        "rollback_scope_validation_rules": rollback_scope_rules_model,
+        "rollback_target_validation_rules": rollback_target_rules_model,
+        "rollback_risk_assessment": risk_assessment_model,
+        "governance_requirements": governance_requirements_model,
+        "governance_boundaries": dict(_WRVD_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_ROLLBACK_VALIDATION_DESIGN_ADVISORY,
+    }

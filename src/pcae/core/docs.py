@@ -492,6 +492,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-result-review-design`
 - `pcae write-result-review-design --json`
+
+## write-rollback-validation-design
+
+- `pcae write-rollback-validation-design`
+- `pcae write-rollback-validation-design --json`
 """
 
 

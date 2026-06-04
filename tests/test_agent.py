@@ -25965,3 +25965,245 @@ def test_46r_human_output_shows_all_sections(capsys) -> None:
     assert "Escalation rules" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46S — Write Rollback Validation Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_46s_json_structure(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_rollback_validation_design", "rollback_lifecycle",
+        "rollback_validation_record_model", "validation_statuses",
+        "rollback_scope_validation_rules", "rollback_target_validation_rules",
+        "rollback_risk_assessment", "governance_requirements",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46s_design_fields(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_rollback_validation_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "model_field_count", "validation_status_count",
+        "scope_rule_count", "target_rule_count", "risk_count",
+        "governance_requirement_count", "execution_allowed",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("wrvd-")
+    assert design["phase"] == "46S"
+    assert design["execution_allowed"] is False
+    assert design["human_review_required"] is True
+    assert design["lifecycle_step_count"] == 8
+    assert design["model_field_count"] == 17
+    assert design["validation_status_count"] == 5
+    assert design["scope_rule_count"] == 4
+    assert design["target_rule_count"] == 4
+    assert design["risk_count"] == 5
+    assert design["governance_requirement_count"] == 5
+
+
+def test_46s_lifecycle_steps(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["rollback_lifecycle"]
+    assert len(lifecycle) == 8
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "write_review_record", "rollback_plan_lookup",
+        "rollback_scope_validation", "rollback_target_validation",
+        "rollback_risk_assessment", "rollback_governance_review",
+        "human_rollback_review", "rollback_validation_record",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 9))
+
+
+def test_46s_rollback_validation_record_model(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["rollback_validation_record_model"]
+    assert m["model_name"] == "RollbackValidationRecord"
+    assert m["field_count"] == 17
+    assert m["required_field_count"] == 17
+    assert m["immutable_field_count"] == 8
+    assert set(m["groups"]) == {"identity", "validation", "findings", "metadata"}
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "rollback_validation_id", "write_review_id", "execution_id",
+        "authorization_id", "write_candidate_id", "rollback_plan_id",
+        "rollback_target", "rollback_mode", "rollback_scope_status",
+        "rollback_target_status", "rollback_risk_status",
+        "rollback_governance_status", "validation_status",
+        "blockers", "warnings", "human_review_required", "created_at",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+    identity_fields = [f for f in m["fields"] if f["group"] == "identity"]
+    assert all(f["immutable"] for f in identity_fields)
+    metadata_fields = [f for f in m["fields"] if f["group"] == "metadata"]
+    assert all(f["immutable"] for f in metadata_fields)
+    validation_fields = [f for f in m["fields"] if f["group"] == "validation"]
+    assert all(not f["immutable"] for f in validation_fields)
+
+
+def test_46s_validation_statuses(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    vs = data["validation_statuses"]
+    assert vs["status_count"] == 5
+    assert set(vs["terminal_statuses"]) == {
+        "rollback_ready", "rollback_ready_with_warnings",
+        "rollback_blocked", "rollback_not_required",
+    }
+    assert set(vs["escalation_statuses"]) == {"escalation_required"}
+    status_names = [s["status"] for s in vs["statuses"]]
+    for expected in (
+        "rollback_ready", "rollback_ready_with_warnings",
+        "rollback_blocked", "rollback_not_required", "escalation_required",
+    ):
+        assert expected in status_names, f"missing status: {expected}"
+    for s in vs["statuses"]:
+        for field in ("status", "description", "terminal", "requires_escalation"):
+            assert field in s, f"status missing field: {field}"
+
+
+def test_46s_rollback_scope_validation_rules(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["rollback_scope_validation_rules"]
+    assert sr["rule_count"] == 4
+    assert sr["all_violations_trigger_escalation"] is True
+    rule_names = [r["rule"] for r in sr["rules"]]
+    for expected in (
+        "rollback_scope_within_write_scope",
+        "rollback_does_not_touch_forbidden_files",
+        "rollback_file_count_within_limit",
+        "rollback_operation_type_permitted",
+    ):
+        assert expected in rule_names, f"missing scope rule: {expected}"
+    for rule in sr["rules"]:
+        assert rule["violation_triggers"] == "rollback_scope_violation"
+        for field in ("rule", "description", "violation_triggers"):
+            assert field in rule, f"rule missing field: {field}"
+
+
+def test_46s_rollback_target_validation_rules(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    tr = data["rollback_target_validation_rules"]
+    assert tr["rule_count"] == 4
+    assert tr["all_violations_trigger_escalation"] is True
+    rule_names = [r["rule"] for r in tr["rules"]]
+    for expected in (
+        "rollback_target_exists",
+        "rollback_target_is_reachable",
+        "rollback_target_matches_audited_result",
+        "rollback_target_not_superseded",
+    ):
+        assert expected in rule_names, f"missing target rule: {expected}"
+    for rule in tr["rules"]:
+        assert rule["violation_triggers"] == "rollback_target_invalid"
+
+
+def test_46s_rollback_risk_assessment(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ra = data["rollback_risk_assessment"]
+    assert ra["risk_count"] == 5
+    risk_names = [r["risk"] for r in ra["risks"]]
+    for expected in (
+        "data_loss_risk", "conflict_risk", "dependency_risk",
+        "partial_rollback_risk", "audit_gap_risk",
+    ):
+        assert expected in risk_names, f"missing risk: {expected}"
+    for risk in ra["risks"]:
+        for field in ("risk", "description", "severity"):
+            assert field in risk, f"risk missing field: {field}"
+    high_risks = [r["risk"] for r in ra["risks"] if r["severity"] == "high"]
+    for expected in ("data_loss_risk", "partial_rollback_risk", "audit_gap_risk"):
+        assert expected in high_risks, f"expected high severity: {expected}"
+
+
+def test_46s_governance_requirements(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gr = data["governance_requirements"]
+    assert gr["requirement_count"] == 5
+    assert gr["all_required"] is True
+    req_names = [r["requirement"] for r in gr["requirements"]]
+    for expected in (
+        "rollback_plan_exists", "write_review_exists",
+        "execution_audit_exists", "rollback_approval_path_exists",
+        "human_rollback_review_required",
+    ):
+        assert expected in req_names, f"missing requirement: {expected}"
+    for req in gr["requirements"]:
+        assert req["required"] is True
+        for field in ("requirement", "description", "required"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46s_governance_boundaries(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "workflow_may" in gb
+    assert "workflow_may_not" in gb
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in (
+        "validate rollback readiness",
+        "assess rollback risks",
+        "record rollback validation findings",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "execute rollback", "invoke runtimes", "modify files",
+        "approve rollback automatically", "commit", "push", "reset",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46s_future_evolution(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["write_rollback_validation_design"]["future_evolution"]]
+    assert "46T" in phases
+    assert "46U" in phases
+    assert "47A" in phases
+    assert "47B" in phases
+
+
+def test_46s_advisory(capsys) -> None:
+    main(["write-rollback-validation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no rollback execution" in advisory
+    assert "file modification" in advisory
+
+
+def test_46s_human_output_shows_all_sections(capsys) -> None:
+    main(["write-rollback-validation-design"])
+    output = capsys.readouterr().out
+    assert "Write rollback validation workflow design" in output
+    assert "Rollback validation lifecycle" in output
+    assert "RollbackValidationRecord model" in output
+    assert "Validation statuses" in output
+    assert "Rollback scope validation rules" in output
+    assert "Rollback target validation rules" in output
+    assert "Rollback risk assessment" in output
+    assert "Governance requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

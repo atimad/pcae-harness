@@ -471,3 +471,8 @@
 
 - `pcae write-result-review-design`
 - `pcae write-result-review-design --json`
+
+## write-rollback-validation-design
+
+- `pcae write-rollback-validation-design`
+- `pcae write-rollback-validation-design --json`

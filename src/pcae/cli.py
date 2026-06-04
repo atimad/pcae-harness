@@ -75,6 +75,7 @@ from pcae.commands.agent import (
     run_write_candidate_design,
     run_write_invocation_pilot,
     run_write_result_review_design,
+    run_write_rollback_validation_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1949,6 +1950,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON write result review design output.",
     )
     write_result_review_design_parser.set_defaults(handler=run_write_result_review_design)
+
+    write_rollback_validation_design_parser = subparsers.add_parser(
+        "write-rollback-validation-design",
+        help="Design write rollback validation governance workflow (Phase 46S).",
+    )
+    write_rollback_validation_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON write rollback validation design output.",
+    )
+    write_rollback_validation_design_parser.set_defaults(
+        handler=run_write_rollback_validation_design
+    )
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
