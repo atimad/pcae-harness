@@ -26396,3 +26396,209 @@ def test_46t_human_output_shows_all_sections(capsys) -> None:
     assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46U — Write Rollback Dry-Run
+# ---------------------------------------------------------------------------
+
+
+def test_46u_json_structure(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_rollback_dry_run", "dry_run_lifecycle",
+        "rollback_dry_run_result_model", "rollback_modes",
+        "dry_run_gates", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46u_dry_run_fields(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    r = data["write_rollback_dry_run"]
+    for field in (
+        "dry_run_id", "phase", "title", "summary", "dry_run_result",
+        "rollback_execution_allowed", "human_review_required",
+        "lifecycle_step_count", "model_field_count", "gate_count",
+        "gates_met", "gates_not_met", "allowed_mode_count",
+        "forbidden_mode_count", "input_sources", "execution_allowed",
+        "governance_boundaries", "future_evolution",
+    ):
+        assert field in r, f"missing dry-run field: {field}"
+    assert r["dry_run_id"].startswith("wrdr-")
+    assert r["phase"] == "46U"
+    assert r["lifecycle_step_count"] == 9
+    assert r["model_field_count"] == 18
+    assert r["gate_count"] == 7
+    assert r["allowed_mode_count"] == 3
+    assert r["forbidden_mode_count"] == 2
+    assert r["execution_allowed"] is False
+
+
+def test_46u_rollback_execution_blocked(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    r = data["write_rollback_dry_run"]
+    assert r["rollback_execution_allowed"] is False
+    assert r["dry_run_result"] == "dry_run_blocked"
+    assert r["gates_not_met"] > 0
+    assert data["governance_boundaries"]["rollback_execution_allowed"] is False
+
+
+def test_46u_human_review_required(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_rollback_dry_run"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_46u_lifecycle_steps(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["dry_run_lifecycle"]
+    assert len(lifecycle) == 9
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "write_review_record", "rollback_validation_record",
+        "rollback_plan_resolution", "rollback_target_resolution",
+        "rollback_scope_check", "rollback_risk_check",
+        "governance_gate_check", "human_rollback_approval_required",
+        "rollback_dry_run_result",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    assert [s["step"] for s in lifecycle] == list(range(1, 10))
+
+
+def test_46u_rollback_dry_run_result_model(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["rollback_dry_run_result_model"]
+    assert m["model_name"] == "RollbackDryRunResult"
+    assert m["field_count"] == 18
+    assert m["required_field_count"] == 18
+    assert m["immutable_field_count"] == 9
+    assert set(m["groups"]) == {"identity", "simulation", "findings", "metadata"}
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "dry_run_id", "rollback_validation_id", "write_review_id",
+        "execution_id", "authorization_id", "write_candidate_id",
+        "rollback_plan_id", "rollback_target", "rollback_mode",
+        "rollback_scope_status", "rollback_target_status",
+        "rollback_risk_status", "governance_status",
+        "rollback_execution_allowed", "blockers", "warnings",
+        "human_review_required", "created_at",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+    identity_fields = [f for f in m["fields"] if f["group"] == "identity"]
+    assert len(identity_fields) == 7
+    assert all(f["immutable"] for f in identity_fields)
+    metadata_fields = [f for f in m["fields"] if f["group"] == "metadata"]
+    assert all(f["immutable"] for f in metadata_fields)
+
+
+def test_46u_rollback_modes(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["rollback_modes"]
+    assert rm["allowed_mode_count"] == 3
+    assert rm["forbidden_mode_count"] == 2
+    allowed_names = [m["mode"] for m in rm["allowed_modes"]]
+    for expected in ("git_revert", "patch_reverse", "manual_repair"):
+        assert expected in allowed_names, f"missing allowed mode: {expected}"
+    for mode in rm["allowed_modes"]:
+        assert mode["allowed"] is True
+        for field in ("mode", "description", "allowed", "reversible"):
+            assert field in mode, f"mode missing field: {field}"
+
+
+def test_46u_forbidden_modes(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["rollback_modes"]
+    forbidden_names = [m["mode"] for m in rm["forbidden_modes"]]
+    assert "git_reset" in forbidden_names, "git_reset must be forbidden"
+    assert "destructive_history_rewrite" in forbidden_names
+    for mode in rm["forbidden_modes"]:
+        assert mode["allowed"] is False
+        assert "reason" in mode
+        for field in ("mode", "description", "allowed", "reason"):
+            assert field in mode, f"forbidden mode missing field: {field}"
+
+
+def test_46u_dry_run_gates(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gm = data["dry_run_gates"]
+    assert gm["gate_count"] == 7
+    assert gm["all_gates_required"] is True
+    gate_names = [g["gate"] for g in gm["gates"]]
+    for expected in (
+        "rollback_plan_exists", "rollback_target_resolved",
+        "rollback_scope_valid", "rollback_risk_acceptable",
+        "rollback_governance_valid", "rollback_audit_ready",
+        "human_rollback_approval_present",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    for gate in gm["gates"]:
+        for field in ("gate", "description", "status", "required", "blocker_if_not_met", "rationale"):
+            assert field in gate, f"gate missing field: {field}"
+        assert gate["required"] is True
+        assert gate["blocker_if_not_met"] is True
+
+
+def test_46u_all_gates_not_met(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gm = data["dry_run_gates"]
+    assert gm["gates_met"] == 0
+    assert gm["gates_not_met"] == 7
+    assert all(g["status"] == "not_met" for g in gm["gates"])
+
+
+def test_46u_governance_boundaries(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["rollback_execution_allowed"] is False
+    assert gb["git_reset_forbidden"] is True
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in (
+        "simulate rollback resolution", "evaluate rollback gates",
+        "report blockers", "report warnings",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "execute rollback", "invoke runtimes", "modify files",
+        "commit", "push", "reset", "rewrite history",
+        "approve rollback automatically",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46u_advisory(capsys) -> None:
+    main(["write-rollback-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "simulation" in advisory
+    assert "no rollback execution" in advisory
+    assert "git reset" in advisory
+    assert "file modification" in advisory
+
+
+def test_46u_human_output_shows_all_sections(capsys) -> None:
+    main(["write-rollback-dry-run"])
+    output = capsys.readouterr().out
+    assert "Write rollback dry-run simulation" in output
+    assert "Dry-run results" in output
+    assert "Dry-run lifecycle" in output
+    assert "RollbackDryRunResult model" in output
+    assert "Rollback modes" in output
+    assert "Governance gates" in output
+    assert "Governance boundaries" in output
+    assert "simulation" in output.lower()

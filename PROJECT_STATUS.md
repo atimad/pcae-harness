@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46T: Write Execution Readiness Assessment.
+Phase 46U: Write Rollback Dry-Run.
 
 ## Governance Coherence Note
 
@@ -2757,6 +2757,29 @@ automatically/commit/push/rollback; execution_allowed=False,
 human_review_required=True; future_evolution: 46S/46T/47A/47B; advisory:
 "Write result review workflow design is informational; no runtime
 invocation, prompt execution, or file modification occurs."
+and the governed rollback path is simulated with `pcae write-rollback-dry-run`
+and `pcae write-rollback-dry-run --json` (Phase 46U): inputs: 7 sources
+(write_rollback_validation_workflow, write_result_review_workflow,
+controlled_write_invocation_pilot, governed_write_candidate_artifact,
+execution_audit_design, execution_consensus_design,
+rollback_governance_phases_43A_43E); no rollback execution; no git reset;
+no file modification; dry_run_lifecycle (9 steps, all required):
+write_review_record/rollback_validation_record/rollback_plan_resolution/
+rollback_target_resolution/rollback_scope_check/rollback_risk_check/
+governance_gate_check/human_rollback_approval_required/rollback_dry_run_result;
+RollbackDryRunResult model: 18 fields (all required), 9 immutable (7 identity +
+2 metadata), 4 groups (identity/simulation/findings/metadata); 3 allowed modes:
+git_revert/patch_reverse/manual_repair; 2 forbidden modes: git_reset/
+destructive_history_rewrite; 7 governance gates (all required, all blocker_if_not_met,
+all not_met in design phase): rollback_plan_exists/rollback_target_resolved/
+rollback_scope_valid/rollback_risk_acceptable/rollback_governance_valid/
+rollback_audit_ready/human_rollback_approval_present; gates_met=0, gates_not_met=7;
+dry_run_result=dry_run_blocked; rollback_execution_allowed=False;
+human_review_required=True; git_reset_forbidden=True; governance_boundaries:
+workflow_may simulate rollback resolution/evaluate rollback gates/report blockers/
+report warnings; workflow_may_not execute rollback/invoke runtimes/modify files/
+commit/push/reset/rewrite history/approve rollback automatically;
+execution_allowed=False; future_evolution: 47A/47B/47C/47D
 and write execution readiness is assessed with `pcae write-execution-readiness`
 and `pcae write-execution-readiness --json` (Phase 46T): inputs: 11 sources
 (governed_write_invocation_design, write_invocation_preflight_dry_run,
@@ -2820,7 +2843,7 @@ human_review_required=True; future_evolution: 46T/46U/47A/47B
 
 ## Next
 
-- TBD: Future phases (46U Write Rollback Dry-Run).
+- TBD: Future phases (47A Governed Live Read-Only Execution).
 
 ## Future Explorations
 

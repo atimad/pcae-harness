@@ -23856,3 +23856,544 @@ def build_write_execution_readiness() -> dict:
         "governance_boundaries": dict(_WERA_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_EXECUTION_READINESS_ADVISORY,
     }
+
+
+# Phase 46U — Write Rollback Dry-Run
+# ---------------------------------------------------------------------------
+
+WRITE_ROLLBACK_DRY_RUN_ADVISORY = (
+    "Write rollback dry-run is a simulation; no rollback execution, runtime "
+    "invocation, prompt execution, file modification, git reset, or history "
+    "rewrite occurs."
+)
+
+_WRDR_INPUT_SOURCES: tuple[str, ...] = (
+    "write_rollback_validation_workflow",
+    "write_result_review_workflow",
+    "controlled_write_invocation_pilot",
+    "governed_write_candidate_artifact",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "rollback_governance_phases_43A_43E",
+)
+
+_WRDR_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "write_review_record",
+        "description": (
+            "The WriteReviewRecord from Phase 46R is located and confirmed as "
+            "the basis for this rollback dry-run simulation."
+        ),
+        "required": True,
+        "completed_by": "write_review_record_artifact",
+    },
+    {
+        "step": 2,
+        "name": "rollback_validation_record",
+        "description": (
+            "The RollbackValidationRecord from Phase 46S is located and its "
+            "rollback_plan_id, rollback_target, and validation_status are extracted."
+        ),
+        "required": True,
+        "completed_by": "rollback_validation_record_artifact",
+    },
+    {
+        "step": 3,
+        "name": "rollback_plan_resolution",
+        "description": (
+            "The rollback plan is resolved: plan existence is confirmed, rollback "
+            "mode is identified, and the plan is verified to be linked to the "
+            "write candidate."
+        ),
+        "required": True,
+        "completed_by": "rollback_plan_resolution_result",
+    },
+    {
+        "step": 4,
+        "name": "rollback_target_resolution",
+        "description": (
+            "The rollback target is resolved: target existence is confirmed, "
+            "reachability is checked, and the target is verified against the "
+            "execution audit record."
+        ),
+        "required": True,
+        "completed_by": "rollback_target_resolution_result",
+    },
+    {
+        "step": 5,
+        "name": "rollback_scope_check",
+        "description": (
+            "The rollback scope is checked against the original write scope: "
+            "file count, forbidden files, and permitted operation types are "
+            "validated."
+        ),
+        "required": True,
+        "completed_by": "rollback_scope_check_result",
+    },
+    {
+        "step": 6,
+        "name": "rollback_risk_check",
+        "description": (
+            "Rollback risks are evaluated: data_loss_risk, conflict_risk, "
+            "dependency_risk, partial_rollback_risk, and audit_gap_risk are "
+            "assessed for the simulated rollback path."
+        ),
+        "required": True,
+        "completed_by": "rollback_risk_check_result",
+    },
+    {
+        "step": 7,
+        "name": "governance_gate_check",
+        "description": (
+            "All seven governance gates are evaluated: rollback_plan_exists, "
+            "rollback_target_resolved, rollback_scope_valid, rollback_risk_acceptable, "
+            "rollback_governance_valid, rollback_audit_ready, and "
+            "human_rollback_approval_present."
+        ),
+        "required": True,
+        "completed_by": "governance_gate_check_result",
+    },
+    {
+        "step": 8,
+        "name": "human_rollback_approval_required",
+        "description": (
+            "Human approval is required before any rollback may proceed. This "
+            "step is never bypassed; no automatic approval path exists."
+        ),
+        "required": True,
+        "completed_by": "human_rollback_approval_decision",
+    },
+    {
+        "step": 9,
+        "name": "rollback_dry_run_result",
+        "description": (
+            "A RollbackDryRunResult artifact is produced capturing the simulation "
+            "outcome, gate statuses, blockers, warnings, and confirming that "
+            "rollback_execution_allowed is False."
+        ),
+        "required": True,
+        "completed_by": "rollback_dry_run_result_artifact",
+    },
+)
+
+_WRDR_MODEL_FIELDS: tuple[dict, ...] = (
+    # Identity
+    {
+        "name": "dry_run_id",
+        "type": "str",
+        "description": "Unique identifier for this rollback dry-run simulation.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "rollback_validation_id",
+        "type": "str",
+        "description": "Reference to the RollbackValidationRecord from Phase 46S.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "write_review_id",
+        "type": "str",
+        "description": "Reference to the WriteReviewRecord from Phase 46R.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the write execution result artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Reference to the GovernedWriteCandidate artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "description": "Reference to the rollback plan simulated in this dry-run.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    # Simulation
+    {
+        "name": "rollback_target",
+        "type": "str",
+        "description": "The rollback target resolved during the simulation.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "rollback_mode",
+        "type": "str",
+        "description": "The rollback mode from the plan: git_revert, patch_reverse, or manual_repair.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "rollback_scope_status",
+        "type": "str",
+        "description": "Result of rollback scope check: valid, violation, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "rollback_target_status",
+        "type": "str",
+        "description": "Result of rollback target resolution: valid, invalid, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "rollback_risk_status",
+        "type": "str",
+        "description": "Aggregate risk level from the simulation: low, medium, high, or critical.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "governance_status",
+        "type": "str",
+        "description": "Result of governance gate check: all_met, partial, or blocked.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    {
+        "name": "rollback_execution_allowed",
+        "type": "bool",
+        "description": "Always False; this dry-run never authorizes rollback execution.",
+        "required": True,
+        "immutable": False,
+        "group": "simulation",
+    },
+    # Findings
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blockers identified during the dry-run simulation.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings from the dry-run simulation.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    # Metadata
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every dry-run result.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "description": "ISO-8601 timestamp when the dry-run result was created.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+)
+
+_WRDR_ROLLBACK_MODES: tuple[dict, ...] = (
+    {
+        "mode": "git_revert",
+        "description": (
+            "Creates a new commit that reverses the changes introduced by the "
+            "write execution, preserving full history."
+        ),
+        "allowed": True,
+        "reversible": True,
+    },
+    {
+        "mode": "patch_reverse",
+        "description": (
+            "Applies the reverse of a recorded patch diff to restore the "
+            "pre-execution file state without rewriting git history."
+        ),
+        "allowed": True,
+        "reversible": True,
+    },
+    {
+        "mode": "manual_repair",
+        "description": (
+            "A human operator manually restores affected files to their "
+            "pre-execution state, guided by the execution audit record."
+        ),
+        "allowed": True,
+        "reversible": True,
+    },
+)
+
+_WRDR_FORBIDDEN_MODES: tuple[dict, ...] = (
+    {
+        "mode": "git_reset",
+        "description": (
+            "Hard or soft reset of the git HEAD pointer, which can permanently "
+            "discard commits and destroy audit history."
+        ),
+        "allowed": False,
+        "reason": (
+            "git_reset destroys audit history and cannot be safely undone. "
+            "It is permanently forbidden in the rollback governance policy."
+        ),
+    },
+    {
+        "mode": "destructive_history_rewrite",
+        "description": (
+            "Any operation that rewrites, squashes, or removes commits from "
+            "the repository history (e.g., rebase --onto, filter-branch)."
+        ),
+        "allowed": False,
+        "reason": (
+            "History rewrite operations destroy the audit trail required by "
+            "governance policy and cannot be reviewed or reversed."
+        ),
+    },
+)
+
+_WRDR_DRY_RUN_GATES: tuple[dict, ...] = (
+    {
+        "gate": "rollback_plan_exists",
+        "description": (
+            "A rollback plan must be present and linked to the write candidate "
+            "before the dry-run may proceed."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live rollback plan exists in this design-phase simulation. "
+            "Gate will be evaluated against a real rollback plan in a live context."
+        ),
+    },
+    {
+        "gate": "rollback_target_resolved",
+        "description": (
+            "The rollback target must resolve to an existing, reachable state "
+            "that matches the execution audit record."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live rollback target exists in this design-phase simulation. "
+            "Gate requires a real execution audit record to evaluate."
+        ),
+    },
+    {
+        "gate": "rollback_scope_valid",
+        "description": (
+            "The rollback scope must be within the original write scope, must "
+            "not touch forbidden files, and must use only permitted operation types."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live file scope exists in this design-phase simulation. "
+            "Gate requires a real write candidate scope to evaluate."
+        ),
+    },
+    {
+        "gate": "rollback_risk_acceptable",
+        "description": (
+            "The aggregate rollback risk level must not exceed the threshold "
+            "defined in the rollback governance policy."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live risk assessment exists in this design-phase simulation. "
+            "Gate requires a real rollback risk assessment to evaluate."
+        ),
+    },
+    {
+        "gate": "rollback_governance_valid",
+        "description": (
+            "The rollback plan must comply with all governance rules: no "
+            "forbidden modes, approval path present, and audit path present."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live governance compliance record exists in this design-phase "
+            "simulation. Gate requires a real rollback validation record."
+        ),
+    },
+    {
+        "gate": "rollback_audit_ready",
+        "description": (
+            "An execution audit record must exist and be linked to the write "
+            "candidate so that rollback can be traced."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "No live audit record exists in this design-phase simulation. "
+            "Gate requires a real execution audit record to evaluate."
+        ),
+    },
+    {
+        "gate": "human_rollback_approval_present",
+        "description": (
+            "A human approval decision for the rollback must be present before "
+            "any rollback execution may proceed."
+        ),
+        "status": "not_met",
+        "required": True,
+        "blocker_if_not_met": True,
+        "rationale": (
+            "Human approval has not been given in this design-phase simulation. "
+            "This gate is never bypassed; human approval is always required."
+        ),
+    },
+)
+
+_WRDR_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "simulate rollback resolution",
+        "evaluate rollback gates",
+        "report blockers",
+        "report warnings",
+    ],
+    "workflow_may_not": [
+        "execute rollback",
+        "invoke runtimes",
+        "modify files",
+        "commit",
+        "push",
+        "reset",
+        "rewrite history",
+        "approve rollback automatically",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "rollback_execution_allowed": False,
+    "git_reset_forbidden": True,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_WRDR_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47A", "description": "Governed Live Read-Only Execution"},
+    {"phase": "47B", "description": "Governed Live Write Execution Readiness"},
+    {"phase": "47C", "description": "Governed Live Write Pilot"},
+    {"phase": "47D", "description": "Governed Rollback Execution Pilot"},
+)
+
+
+def build_write_rollback_dry_run() -> dict:
+    """Simulate the governed rollback dry-run path. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    dry_run_id = f"wrdr-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WRDR_LIFECYCLE]
+    model_fields = [dict(f) for f in _WRDR_MODEL_FIELDS]
+    allowed_modes = [dict(m) for m in _WRDR_ROLLBACK_MODES]
+    forbidden_modes = [dict(m) for m in _WRDR_FORBIDDEN_MODES]
+    gates = [dict(g) for g in _WRDR_DRY_RUN_GATES]
+
+    rollback_dry_run_result_model = {
+        "model_name": "RollbackDryRunResult",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "groups": sorted({f["group"] for f in model_fields}),
+        "fields": model_fields,
+    }
+
+    gates_met = sum(1 for g in gates if g["status"] == "met")
+    gates_not_met = sum(1 for g in gates if g["status"] == "not_met")
+    dry_run_result = "dry_run_blocked" if gates_not_met > 0 else "dry_run_passed"
+
+    rollback_modes_model = {
+        "allowed_mode_count": len(allowed_modes),
+        "forbidden_mode_count": len(forbidden_modes),
+        "allowed_modes": allowed_modes,
+        "forbidden_modes": forbidden_modes,
+    }
+
+    dry_run_gates_model = {
+        "gate_count": len(gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "all_gates_required": all(g["required"] for g in gates),
+        "gates": gates,
+    }
+
+    write_rollback_dry_run = {
+        "dry_run_id": dry_run_id,
+        "generated_at": generated_at,
+        "phase": "46U",
+        "title": "Write Rollback Dry-Run",
+        "summary": (
+            "Simulates the complete governed rollback path for a future write "
+            "execution result without executing rollback or modifying files. "
+            "Defines the nine-step dry-run lifecycle, RollbackDryRunResult model "
+            "(18 fields, 9 immutable), three allowed rollback modes, two forbidden "
+            "modes (including git_reset), and seven governance gates. "
+            "All gates are not_met in this design-phase simulation. "
+            "rollback_execution_allowed is always False; human review is always required."
+        ),
+        "dry_run_result": dry_run_result,
+        "rollback_execution_allowed": False,
+        "human_review_required": True,
+        "lifecycle_step_count": len(lifecycle),
+        "model_field_count": len(model_fields),
+        "gate_count": len(gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "allowed_mode_count": len(allowed_modes),
+        "forbidden_mode_count": len(forbidden_modes),
+        "input_sources": list(_WRDR_INPUT_SOURCES),
+        "execution_allowed": False,
+        "governance_boundaries": dict(_WRDR_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WRDR_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_rollback_dry_run": write_rollback_dry_run,
+        "dry_run_lifecycle": lifecycle,
+        "rollback_dry_run_result_model": rollback_dry_run_result_model,
+        "rollback_modes": rollback_modes_model,
+        "dry_run_gates": dry_run_gates_model,
+        "governance_boundaries": dict(_WRDR_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_ROLLBACK_DRY_RUN_ADVISORY,
+    }

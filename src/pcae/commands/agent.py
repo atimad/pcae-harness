@@ -130,6 +130,8 @@ from pcae.core.agent import (
     WRITE_ROLLBACK_VALIDATION_DESIGN_ADVISORY,
     build_write_execution_readiness,
     WRITE_EXECUTION_READINESS_ADVISORY,
+    build_write_rollback_dry_run,
+    WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5479,6 +5481,70 @@ def run_write_execution_readiness(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['workflow_may'])}")
         print(f"  May not: {', '.join(gb['workflow_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_rollback_dry_run(args: argparse.Namespace) -> int:
+    data = build_write_rollback_dry_run()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        r = data["write_rollback_dry_run"]
+        print("Write rollback dry-run simulation")
+        print(f"Dry-run: {r['dry_run_id']}  Generated: {r['generated_at']}")
+        print(f"Phase: {r['phase']} — {r['title']}")
+        print()
+        print(r["summary"])
+        print()
+        print("Dry-run results:")
+        print(f"  Dry-run result:              {r['dry_run_result']}")
+        print(f"  Rollback execution allowed:  {'yes' if r['rollback_execution_allowed'] else 'no'}")
+        print(f"  Human review required:       {'yes' if r['human_review_required'] else 'no'}")
+        print(f"  Gates met:                   {r['gates_met']} of {r['gate_count']}")
+        print(f"  Allowed modes:               {r['allowed_mode_count']}")
+        print(f"  Forbidden modes:             {r['forbidden_mode_count']}")
+        print()
+        print(f"Dry-run lifecycle ({len(data['dry_run_lifecycle'])} steps):")
+        for step in data["dry_run_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("RollbackDryRunResult model:")
+        m = data["rollback_dry_run_result_model"]
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}  Groups: {', '.join(m['groups'])}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    [{field['group']}] {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        rm = data["rollback_modes"]
+        print(f"Rollback modes ({rm['allowed_mode_count']} allowed, {rm['forbidden_mode_count']} forbidden):")
+        for mode in rm["allowed_modes"]:
+            print(f"  [allowed]  {mode['mode']}: {mode['description']}")
+        for mode in rm["forbidden_modes"]:
+            print(f"  [FORBIDDEN] {mode['mode']}: {mode['description']}")
+            print(f"    Reason: {mode['reason']}")
+        print()
+        gm = data["dry_run_gates"]
+        print(f"Governance gates ({gm['gates_met']} met, {gm['gates_not_met']} not met):")
+        for gate in gm["gates"]:
+            blocker = "blocker" if gate["blocker_if_not_met"] else "warning"
+            print(f"  [{gate['status']}] {gate['gate']} ({blocker} if not met)")
+            print(f"    {gate['description']}")
+            print(f"    Rationale: {gate['rationale']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['workflow_may'])}")
+        print(f"  May not:               {', '.join(gb['workflow_may_not'])}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Rollback allowed:      {gb['rollback_execution_allowed']}")
+        print(f"  git reset forbidden:   {gb['git_reset_forbidden']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])
