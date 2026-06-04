@@ -79,6 +79,7 @@ from pcae.commands.agent import (
     run_write_execution_readiness,
     run_write_rollback_dry_run,
     run_live_readonly_readiness,
+    run_live_write_readiness,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1999,6 +2000,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON live read-only readiness output.",
     )
     live_readonly_readiness_parser.set_defaults(handler=run_live_readonly_readiness)
+
+    live_write_readiness_parser = subparsers.add_parser(
+        "live-write-readiness",
+        help="Assess governed live write execution readiness (Phase 47B).",
+    )
+    live_write_readiness_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON live write readiness output.",
+    )
+    live_write_readiness_parser.set_defaults(handler=run_live_write_readiness)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

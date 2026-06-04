@@ -512,6 +512,11 @@ def render_commands_reference() -> str:
 
 - `pcae live-readonly-readiness`
 - `pcae live-readonly-readiness --json`
+
+## live-write-readiness
+
+- `pcae live-write-readiness`
+- `pcae live-write-readiness --json`
 """
 
 

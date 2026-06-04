@@ -24849,3 +24849,558 @@ def build_live_readonly_readiness() -> dict:
         "governance_boundaries": dict(_LRORA_GOVERNANCE_BOUNDARIES),
         "advisory": LIVE_READONLY_READINESS_ADVISORY,
     }
+
+
+# Phase 47B — Governed Live Write Execution Readiness
+# ---------------------------------------------------------------------------
+
+LIVE_WRITE_READINESS_ADVISORY = (
+    "Live write execution readiness assessment is informational; no runtime invocation, "
+    "prompt execution, file modification, write authorization, commit, push, or rollback occurs."
+)
+
+_LWRA_INPUT_SOURCES: tuple[str, ...] = (
+    "write_execution_readiness_assessment",
+    "governed_write_candidate_artifact",
+    "controlled_write_invocation_pilot",
+    "write_result_review_workflow",
+    "write_rollback_validation_workflow",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_quality_framework",
+    "rollback_governance_artifacts",
+)
+
+_LWRA_READINESS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "partially_ready",
+    "not_ready",
+)
+
+_LWRA_READINESS_AREAS: tuple[dict, ...] = (
+    {
+        "area": "write_authorization_readiness",
+        "description": (
+            "Governance controls ensuring that a valid ExecutionAuthorizationArtifact "
+            "authorizing write operations is in place before any live write proceeds."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Write authorization design and expiration governance were established "
+            "in Phase 46J. No live write authorization artifact has been issued or "
+            "tested against a real write execution candidate."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46J",
+    },
+    {
+        "area": "file_scope_readiness",
+        "description": (
+            "Governance controls defining which files may be written, operation types "
+            "permitted, and maximum files changed per write execution."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "File scope governance was designed across Phases 46N, 46O, and 46P. "
+            "No live file scope validation has been performed against a real write "
+            "execution candidate."
+        ),
+        "critical": True,
+        "governance_source": "Phases 46N, 46O, 46P",
+    },
+    {
+        "area": "rollback_readiness",
+        "description": (
+            "Governance controls ensuring a rollback plan exists, has been validated, "
+            "and is linked to the write candidate before execution proceeds."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Rollback governance was established in Phases 43A–43E and the rollback "
+            "validation workflow was designed in Phase 46S. No live rollback plan "
+            "has been linked and validated for a write candidate."
+        ),
+        "critical": True,
+        "governance_source": "Phases 43A–43E, 46S",
+    },
+    {
+        "area": "audit_readiness",
+        "description": (
+            "Governance controls ensuring every live write execution produces a complete "
+            "and linked execution audit record."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Execution audit design was established in Phase 46K. No live audit path "
+            "has been established or tested for a write execution."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46K",
+    },
+    {
+        "area": "consensus_readiness",
+        "description": (
+            "Governance controls ensuring multi-agent consensus is reached when required "
+            "before a live write execution proceeds."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The execution consensus framework was established in Phase 46L. No live "
+            "consensus review has been conducted for a write execution candidate."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46L",
+    },
+    {
+        "area": "quality_review_readiness",
+        "description": (
+            "Governance controls ensuring write execution results are evaluated "
+            "against the quality framework before acceptance."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The execution quality framework was established in Phase 46M. No live "
+            "quality review has been performed on a write execution result."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46M",
+    },
+    {
+        "area": "result_review_readiness",
+        "description": (
+            "Governance controls ensuring write execution results pass the full result "
+            "review workflow before any commit or push."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The write result review workflow was designed in Phase 46R. No live "
+            "write result review has been conducted."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46R",
+    },
+    {
+        "area": "runtime_writable_readiness",
+        "description": (
+            "Assessment of whether target runtimes (codex-local, claude-local, kimi-local) "
+            "support governed writable contracts and can execute file modifications "
+            "within declared scope."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Runtime writable contracts were defined in Phase 46Q for codex-local, "
+            "claude-local, and kimi-local. No live writable contract has been "
+            "validated against a real write execution."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46Q",
+    },
+    {
+        "area": "human_write_approval_readiness",
+        "description": (
+            "Governance controls ensuring human approval is required and enforced "
+            "at every mandatory checkpoint before live write execution proceeds."
+        ),
+        "status": "not_ready",
+        "rationale": (
+            "Human write approval controls are designed but not yet wired into a live "
+            "write execution pipeline. No live human write approval checkpoint has "
+            "been exercised."
+        ),
+        "critical": True,
+        "governance_source": "Phases 46N–46S",
+    },
+)
+
+_LWRA_RUNTIME_RESULTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "status": "partially_ready",
+        "rationale": (
+            "codex-local supports workspace-write writable contract and has been "
+            "inspected. Live governed write execution has not been validated."
+        ),
+        "adapter_type": "cli",
+        "writable_contract": "workspace-write",
+        "contract_verified": False,
+        "live_write_tested": False,
+    },
+    {
+        "runtime": "claude-local",
+        "status": "partially_ready",
+        "rationale": (
+            "claude-local supports acceptEdits writable contract and has been "
+            "inspected. Live governed write execution has not been validated."
+        ),
+        "adapter_type": "cli",
+        "writable_contract": "acceptEdits",
+        "contract_verified": False,
+        "live_write_tested": False,
+    },
+    {
+        "runtime": "kimi-local",
+        "status": "not_ready",
+        "rationale": (
+            "kimi-local writable contract has not been confirmed installed or validated. "
+            "No governed write execution has been attempted."
+        ),
+        "adapter_type": "cli",
+        "writable_contract": "default",
+        "contract_verified": False,
+        "live_write_tested": False,
+    },
+)
+
+_LWRA_MODEL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "description": "Unique identifier for this readiness assessment.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "overall_status",
+        "type": "str",
+        "description": "Overall readiness status: ready, partially_ready, or not_ready.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "live_write_recommended",
+        "type": "bool",
+        "description": (
+            "True only when all critical governance gates are ready. "
+            "False in all design-phase assessments."
+        ),
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every readiness assessment.",
+        "required": True,
+        "immutable": True,
+        "group": "result",
+    },
+    {
+        "name": "runtime_results",
+        "type": "list[dict]",
+        "description": "List of per-runtime writable readiness assessment results.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "readiness_areas",
+        "type": "list[dict]",
+        "description": "List of individual readiness area assessments.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of active blockers preventing live write execution.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings to address before live write execution.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of governance recommendations for achieving live write readiness.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+)
+
+_LWRA_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker": "missing_write_authorization",
+        "description": (
+            "No live write authorization artifact has been issued. A valid "
+            "ExecutionAuthorizationArtifact authorizing write operations must exist "
+            "before live write execution proceeds."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_rollback_readiness",
+        "description": (
+            "No live rollback plan has been linked and validated for a write candidate. "
+            "A validated rollback plan must be in place before write execution proceeds."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_runtime_writable_support",
+        "description": (
+            "No target runtime has been validated for governed live write execution. "
+            "At least one runtime must pass a live writable contract verification."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_audit_path",
+        "description": (
+            "No live execution audit path has been established for write execution. "
+            "An audit path must be configured and tested before writes proceed."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_consensus_path",
+        "description": (
+            "No live consensus review path has been exercised for a write candidate. "
+            "Consensus governance must be validated in a live context."
+        ),
+        "active": True,
+        "severity": "high",
+    },
+    {
+        "blocker": "missing_quality_review",
+        "description": (
+            "No live quality review has been performed on a write execution result. "
+            "Quality review controls must be validated before write execution."
+        ),
+        "active": True,
+        "severity": "high",
+    },
+    {
+        "blocker": "missing_result_review",
+        "description": (
+            "No live write result review has been conducted. The result review "
+            "workflow must be validated against a real write execution output."
+        ),
+        "active": True,
+        "severity": "high",
+    },
+    {
+        "blocker": "unresolved_file_scope_governance",
+        "description": (
+            "Live file scope governance has not been validated against a real write "
+            "execution. Scope enforcement must be confirmed in a live context."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+)
+
+_LWRA_RISKS: tuple[dict, ...] = (
+    {
+        "risk": "unauthorized_write_risk",
+        "description": (
+            "Risk that a write execution proceeds without a valid "
+            "ExecutionAuthorizationArtifact or human write approval checkpoint."
+        ),
+        "severity": "critical",
+        "mitigated_by": "write_authorization_readiness",
+    },
+    {
+        "risk": "scope_violation_risk",
+        "description": (
+            "Risk that a write execution modifies files outside the declared scope, "
+            "touches forbidden files, or exceeds max_files_changed."
+        ),
+        "severity": "critical",
+        "mitigated_by": "file_scope_readiness",
+    },
+    {
+        "risk": "rollback_failure_risk",
+        "description": (
+            "Risk that a write execution cannot be rolled back if the result is "
+            "rejected, due to a missing or invalid rollback plan."
+        ),
+        "severity": "critical",
+        "mitigated_by": "rollback_readiness",
+    },
+    {
+        "risk": "audit_gap_risk",
+        "description": (
+            "Risk that a write execution produces no audit record or an incomplete "
+            "audit record, making the execution untraceable."
+        ),
+        "severity": "high",
+        "mitigated_by": "audit_readiness",
+    },
+    {
+        "risk": "consensus_gap_risk",
+        "description": (
+            "Risk that a write candidate proceeds to execution without required "
+            "multi-agent consensus, bypassing the consensus governance path."
+        ),
+        "severity": "high",
+        "mitigated_by": "consensus_readiness",
+    },
+    {
+        "risk": "quality_gap_risk",
+        "description": (
+            "Risk that a write execution result is accepted without quality review, "
+            "allowing low-quality or non-compliant output to be committed."
+        ),
+        "severity": "high",
+        "mitigated_by": "quality_review_readiness",
+    },
+)
+
+_LWRA_RECOMMENDATIONS: dict = {
+    "readiness_recommendation": (
+        "Complete all prerequisite governance phases before attempting live write "
+        "execution. All nine readiness areas must achieve 'ready' status, with "
+        "priority on wiring human write approval controls into the live execution pipeline."
+    ),
+    "required_follow_up_phases": ["47C", "47D", "47E"],
+    "execution_authorization_recommendation": (
+        "Defer live write execution until all critical governance gates are satisfied, "
+        "human write approval controls are wired for live execution, at least one "
+        "runtime has passed a live writable contract verification, and a validated "
+        "rollback plan is linked to a write candidate."
+    ),
+}
+
+_LWRA_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "assess readiness",
+        "identify blockers",
+        "generate recommendations",
+    ],
+    "workflow_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "file_modification_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_LWRA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47C", "description": "Governed Live Read-Only Pilot"},
+    {"phase": "47D", "description": "Governed Rollback Execution Pilot"},
+    {"phase": "47E", "description": "Governed Live Write Pilot"},
+)
+
+
+def build_live_write_readiness() -> dict:
+    """Assess governed live write execution readiness. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    readiness_id = f"lwra-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    areas = [dict(a) for a in _LWRA_READINESS_AREAS]
+    model_fields = [dict(f) for f in _LWRA_MODEL_FIELDS]
+    blockers = [dict(b) for b in _LWRA_BLOCKERS]
+    risks = [dict(r) for r in _LWRA_RISKS]
+    runtime_results = [dict(r) for r in _LWRA_RUNTIME_RESULTS]
+
+    not_ready_count = sum(1 for a in areas if a["status"] == "not_ready")
+    partially_ready_count = sum(1 for a in areas if a["status"] == "partially_ready")
+    ready_count = sum(1 for a in areas if a["status"] == "ready")
+
+    critical_not_ready = any(
+        a["status"] == "not_ready" and a["critical"] for a in areas
+    )
+    overall_status = (
+        "not_ready"
+        if critical_not_ready or not_ready_count > 0
+        else ("partially_ready" if partially_ready_count > 0 else "ready")
+    )
+    live_write_recommended = overall_status == "ready"
+
+    readiness_result_model = {
+        "model_name": "LiveWriteReadinessResult",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "groups": sorted({f["group"] for f in model_fields}),
+        "fields": model_fields,
+    }
+
+    blockers_model = {
+        "blocker_count": len(blockers),
+        "active_blocker_count": sum(1 for b in blockers if b["active"]),
+        "blockers": blockers,
+    }
+
+    risks_model = {
+        "risk_count": len(risks),
+        "risks": risks,
+    }
+
+    runtime_readiness_model = {
+        "runtime_count": len(runtime_results),
+        "ready_count": sum(1 for r in runtime_results if r["status"] == "ready"),
+        "partially_ready_count": sum(
+            1 for r in runtime_results if r["status"] == "partially_ready"
+        ),
+        "not_ready_count": sum(1 for r in runtime_results if r["status"] == "not_ready"),
+        "runtimes": runtime_results,
+    }
+
+    live_write_readiness = {
+        "readiness_id": readiness_id,
+        "generated_at": generated_at,
+        "phase": "47B",
+        "title": "Governed Live Write Execution Readiness",
+        "summary": (
+            "Assesses whether PCAE is ready for a future governed live write execution "
+            "pilot. Evaluates nine readiness areas against governance designs from "
+            "Phases 43A–43E, 46J–46S. Assesses three target runtimes with writable "
+            "contracts (codex-local, claude-local, kimi-local). Identifies eight active "
+            "blockers, assesses six risk dimensions, and produces recommendations. "
+            "Live write execution is not recommended until all critical governance "
+            "gates are satisfied. Human review is always required."
+        ),
+        "overall_status": overall_status,
+        "live_write_recommended": live_write_recommended,
+        "human_review_required": True,
+        "area_count": len(areas),
+        "not_ready_area_count": not_ready_count,
+        "partially_ready_area_count": partially_ready_count,
+        "ready_area_count": ready_count,
+        "active_blocker_count": sum(1 for b in blockers if b["active"]),
+        "risk_count": len(risks),
+        "runtime_count": len(runtime_results),
+        "readiness_statuses": list(_LWRA_READINESS_STATUSES),
+        "input_sources": list(_LWRA_INPUT_SOURCES),
+        "execution_allowed": False,
+        "file_modification_allowed": False,
+        "governance_boundaries": dict(_LWRA_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LWRA_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "live_write_readiness": live_write_readiness,
+        "readiness_areas": areas,
+        "runtime_results": runtime_readiness_model,
+        "readiness_result_model": readiness_result_model,
+        "blockers": blockers_model,
+        "risks": risks_model,
+        "recommendations": dict(_LWRA_RECOMMENDATIONS),
+        "governance_boundaries": dict(_LWRA_GOVERNANCE_BOUNDARIES),
+        "advisory": LIVE_WRITE_READINESS_ADVISORY,
+    }

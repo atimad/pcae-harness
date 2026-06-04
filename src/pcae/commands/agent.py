@@ -133,6 +133,8 @@ from pcae.core.agent import (
     build_write_rollback_dry_run,
     build_live_readonly_readiness,
     LIVE_READONLY_READINESS_ADVISORY,
+    build_live_write_readiness,
+    LIVE_WRITE_READINESS_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -5628,6 +5630,92 @@ def run_live_readonly_readiness(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['workflow_may'])}")
         print(f"  May not: {', '.join(gb['workflow_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_live_write_readiness(args: argparse.Namespace) -> int:
+    data = build_live_write_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        r = data["live_write_readiness"]
+        print("Live write execution readiness assessment")
+        print(f"Assessment: {r['readiness_id']}  Generated: {r['generated_at']}")
+        print(f"Phase: {r['phase']} — {r['title']}")
+        print()
+        print(r["summary"])
+        print()
+        print("Assessment results:")
+        print(f"  Overall status:           {r['overall_status']}")
+        print(f"  Live write recommended:   {'yes' if r['live_write_recommended'] else 'no'}")
+        print(f"  Human review required:    {'yes' if r['human_review_required'] else 'no'}")
+        print(f"  Areas assessed:           {r['area_count']}")
+        print(f"  Not ready:                {r['not_ready_area_count']}")
+        print(f"  Partially ready:          {r['partially_ready_area_count']}")
+        print(f"  Ready:                    {r['ready_area_count']}")
+        print(f"  Active blockers:          {r['active_blocker_count']}")
+        print(f"  Risk count:               {r['risk_count']}")
+        print(f"  Runtime count:            {r['runtime_count']}")
+        print()
+        print(f"Readiness areas ({len(data['readiness_areas'])}):")
+        for area in data["readiness_areas"]:
+            critical = "critical" if area["critical"] else "non-critical"
+            print(f"  [{area['status']}] {area['area']} ({critical})")
+            print(f"    {area['description']}")
+            print(f"    Rationale: {area['rationale']}")
+            print(f"    Governance source: {area['governance_source']}")
+        print()
+        rt = data["runtime_results"]
+        print(f"Runtime writable assessment ({rt['runtime_count']} runtimes):")
+        for runtime in rt["runtimes"]:
+            print(f"  [{runtime['status']}] {runtime['runtime']} ({runtime['adapter_type']})")
+            print(f"    Writable contract: {runtime['writable_contract']}")
+            print(f"    Rationale: {runtime['rationale']}")
+            print(f"    Contract verified: {'yes' if runtime['contract_verified'] else 'no'}")
+            print(f"    Live write tested: {'yes' if runtime['live_write_tested'] else 'no'}")
+        print()
+        print("LiveWriteReadinessResult model:")
+        m = data["readiness_result_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}  Groups: {', '.join(m['groups'])}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(
+                f"    [{field['group']}] {field['name']} ({field['type']}, {imm}):"
+                f" {field['description']}"
+            )
+        print()
+        bl = data["blockers"]
+        print(f"Blockers ({bl['active_blocker_count']} active of {bl['blocker_count']}):")
+        for b in bl["blockers"]:
+            active = "active" if b["active"] else "inactive"
+            print(f"  [{active}] {b['blocker']} (severity: {b['severity']})")
+            print(f"    {b['description']}")
+        print()
+        ri = data["risks"]
+        print(f"Risks ({ri['risk_count']}):")
+        for risk in ri["risks"]:
+            print(f"  {risk['risk']} (severity: {risk['severity']})")
+            print(f"    {risk['description']}")
+            print(f"    Mitigated by: {risk['mitigated_by']}")
+        print()
+        rec = data["recommendations"]
+        print("Recommendations:")
+        print(f"  Readiness: {rec['readiness_recommendation']}")
+        phases = ", ".join(rec["required_follow_up_phases"])
+        print(f"  Required follow-up phases: {phases}")
+        print(f"  Authorization: {rec['execution_authorization_recommendation']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  File modification allowed: {gb['file_modification_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

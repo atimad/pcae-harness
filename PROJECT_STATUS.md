@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47A: Governed Live Read-Only Execution Readiness.
+Phase 47B: Governed Live Write Execution Readiness.
 
 ## Governance Coherence Note
 
@@ -2843,7 +2843,7 @@ human_review_required=True; future_evolution: 46T/46U/47A/47B
 
 ## Next
 
-- TBD: Future phases (47B Governed Live Write Execution Readiness, 47C Governed Live Read-Only Pilot, 47D Governed Rollback Execution Pilot).
+- TBD: Future phases (47C Governed Live Read-Only Pilot, 47D Governed Rollback Execution Pilot, 47E Governed Live Write Pilot).
 
 ## Future Explorations
 
