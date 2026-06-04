@@ -556,3 +556,8 @@
 
 - `pcae invocation-audit`
 - `pcae invocation-audit --json`
+
+## readonly-runtime-pilot
+
+- `pcae readonly-runtime-pilot`
+- `pcae readonly-runtime-pilot --json`

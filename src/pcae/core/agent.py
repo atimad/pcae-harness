@@ -30404,3 +30404,332 @@ def build_invocation_audit_trail() -> dict:
         "input_sources": list(_IAT_INPUT_SOURCES),
         "advisory": INVOCATION_AUDIT_TRAIL_ADVISORY,
     }
+
+
+# Phase 48F — Controlled Read-Only Runtime Invocation Pilot
+# ---------------------------------------------------------------------------
+
+READONLY_RUNTIME_PILOT_ADVISORY = (
+    "Controlled read-only runtime invocation pilot assessment is informational; "
+    "no runtime invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48F."
+)
+
+_RRP_LIFECYCLE_STEPS: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "request_created",
+        "description": "A ReadOnlyInvocationRequest record is created for the pilot.",
+        "input": "ReadOnlyInvocationRequest",
+    },
+    {
+        "step": 2,
+        "name": "authorization_enforcement_checked",
+        "description": "InvocationAuthorizationEnforcementResult is evaluated for the request.",
+        "input": "InvocationAuthorizationEnforcementResult",
+    },
+    {
+        "step": 3,
+        "name": "runtime_contract_enforcement_checked",
+        "description": "RuntimeContractEnforcementResult is evaluated for the target runtime.",
+        "input": "RuntimeContractEnforcementResult",
+    },
+    {
+        "step": 4,
+        "name": "preflight_checked",
+        "description": "ReadOnlyInvocationPreflight reports no blocking conditions.",
+        "input": "ReadOnlyInvocationPreflight",
+    },
+    {
+        "step": 5,
+        "name": "audit_trail_checked",
+        "description": "InvocationAuditRecord is present and not in a blocked state.",
+        "input": "InvocationAuditRecord",
+    },
+    {
+        "step": 6,
+        "name": "result_capture_path_checked",
+        "description": "InvocationResultCapture path is configured and ready.",
+        "input": "InvocationResultCapture",
+    },
+    {
+        "step": 7,
+        "name": "human_approval_checked",
+        "description": "Human approval has been explicitly recorded for this pilot.",
+        "input": "human_approval_artifact",
+    },
+    {
+        "step": 8,
+        "name": "pilot_result_produced",
+        "description": "Pilot result is produced reflecting the outcome of all readiness gates.",
+        "input": "ReadOnlyRuntimePilotResult",
+    },
+)
+
+_RRP_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this pilot result.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request under pilot evaluation.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this pilot.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Authorization enforcement gate outcome (passed, blocked).",
+    },
+    {
+        "name": "contract_status",
+        "type": "str",
+        "required": True,
+        "description": "Runtime contract enforcement gate outcome (passed, blocked).",
+    },
+    {
+        "name": "preflight_status",
+        "type": "str",
+        "required": True,
+        "description": "Invocation preflight gate outcome (passed, blocked).",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Audit trail gate outcome (present, blocked).",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Result capture path gate outcome (ready, not_ready).",
+    },
+    {
+        "name": "human_approval_status",
+        "type": "str",
+        "required": True,
+        "description": "Human approval gate outcome (approved, missing).",
+    },
+    {
+        "name": "pilot_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall pilot outcome: eligible, blocked, or blocked_with_warnings.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Gate names that are blocking this pilot from proceeding.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during pilot evaluation.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48F; no execution is authorized.",
+    },
+)
+
+_RRP_PILOT_STATUSES: tuple[str, ...] = (
+    "eligible",
+    "blocked",
+    "blocked_with_warnings",
+)
+
+_RRP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct pilot result",
+        "evaluate readiness gates",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48F",
+}
+
+_RRP_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "RuntimeContractEnforcementResult",
+    "InvocationAuthorizationEnforcementResult",
+    "InvocationAuditRecord",
+    "InvocationResultCapture",
+)
+
+# Per-runtime sample gate state in Phase 48F.
+# All runtimes are blocked because:
+#   - authorization enforcement is blocked (artifacts missing, from 48D)
+#   - contract enforcement is blocked (from 48C)
+#   - preflight execution_allowed is False (from 48A)
+#   - audit trail is blocked (from 48E)
+#   - capture path is not ready (from 48B)
+#   - human approval is missing (not yet provided)
+_RRP_SAMPLE_GATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "authorization_enforcement_passed": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "audit_trail_present": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "claude-local",
+        "authorization_enforcement_passed": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "audit_trail_present": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "kimi-local",
+        "authorization_enforcement_passed": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "audit_trail_present": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+)
+
+
+def _evaluate_pilot_gates(gate_data: dict, request_id: str) -> dict:
+    """Derive a pilot result from a per-runtime gate evaluation record."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    authorization_status = "passed" if gate_data["authorization_enforcement_passed"] else "blocked"
+    contract_status = "passed" if gate_data["contract_enforcement_passed"] else "blocked"
+    preflight_status = "passed" if gate_data["preflight_passed"] else "blocked"
+    audit_status = "present" if gate_data["audit_trail_present"] else "blocked"
+    capture_status = "ready" if gate_data["capture_path_ready"] else "not_ready"
+    human_approval_status = "approved" if gate_data["human_approval_present"] else "missing"
+
+    if not gate_data["authorization_enforcement_passed"]:
+        blockers.append("authorization_enforcement_blocked")
+    if not gate_data["contract_enforcement_passed"]:
+        blockers.append("contract_enforcement_blocked")
+    if not gate_data["preflight_passed"]:
+        blockers.append("preflight_blocked")
+    if not gate_data["audit_trail_present"]:
+        blockers.append("audit_trail_blocked")
+    if not gate_data["capture_path_ready"]:
+        blockers.append("capture_path_not_ready")
+    if not gate_data["human_approval_present"]:
+        blockers.append("human_approval_missing")
+
+    if blockers:
+        pilot_status = "blocked_with_warnings" if warnings else "blocked"
+    else:
+        pilot_status = "eligible" if not warnings else "blocked_with_warnings"
+
+    return {
+        "pilot_id": f"rrp-{gate_data['runtime_id']}-{ts}",
+        "request_id": request_id,
+        "runtime_id": gate_data["runtime_id"],
+        "authorization_status": authorization_status,
+        "contract_status": contract_status,
+        "preflight_status": preflight_status,
+        "audit_status": audit_status,
+        "capture_status": capture_status,
+        "human_approval_status": human_approval_status,
+        "pilot_status": pilot_status,
+        "blockers": blockers,
+        "warnings": warnings,
+        "execution_allowed": False,
+    }
+
+
+def build_readonly_runtime_pilot() -> dict:
+    """Evaluate controlled read-only runtime invocation pilot gates. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48f"
+
+    result_fields = [dict(f) for f in _RRP_RESULT_FIELDS]
+    lifecycle = [dict(s) for s in _RRP_LIFECYCLE_STEPS]
+
+    pilot_results = [
+        _evaluate_pilot_gates(dict(g), request_id_ref)
+        for g in _RRP_SAMPLE_GATES
+    ]
+
+    blocked_count = sum(
+        1 for r in pilot_results
+        if r["pilot_status"] in ("blocked", "blocked_with_warnings")
+    )
+    eligible_count = sum(
+        1 for r in pilot_results if r["pilot_status"] == "eligible"
+    )
+
+    result_model = {
+        "model_name": "ReadOnlyRuntimePilotResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "supported_statuses": list(_RRP_PILOT_STATUSES),
+        "execution_allowed_always_false_in_48f": True,
+        "fields": result_fields,
+    }
+
+    pilot_summary = {
+        "summary_id": f"48f-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48F",
+        "title": "Controlled Read-Only Runtime Invocation Pilot",
+        "summary": (
+            "Defines the first controlled read-only runtime invocation pilot by "
+            "evaluating a structured 8-step lifecycle across all known runtimes. "
+            "All three runtimes are blocked in Phase 48F: authorization enforcement "
+            "is blocked (artifacts missing from 48D), runtime contract enforcement "
+            "remains blocked from Phase 48C, preflight execution_allowed is False "
+            "from Phase 48A, audit trail is blocked from Phase 48E, output capture "
+            "is not wired from Phase 48B, and human approval has not been recorded. "
+            "execution_allowed=False for all runtimes. No runtime is invoked, "
+            "no prompt is submitted, and no repository modification occurs."
+        ),
+        "runtime_count": len(pilot_results),
+        "blocked_count": blocked_count,
+        "eligible_count": eligible_count,
+        "lifecycle_steps": len(lifecycle),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "pilot_summary": pilot_summary,
+        "result_model": result_model,
+        "pilot_lifecycle": lifecycle,
+        "pilot_results": pilot_results,
+        "governance_boundaries": dict(_RRP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RRP_INPUT_SOURCES),
+        "advisory": READONLY_RUNTIME_PILOT_ADVISORY,
+    }

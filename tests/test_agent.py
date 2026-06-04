@@ -29263,3 +29263,179 @@ def test_48e_human_output_shows_all_sections(capsys) -> None:
     assert "Audit summaries" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48F — Controlled Read-Only Runtime Invocation Pilot
+
+
+def test_48f_json_structure(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "pilot_summary", "result_model", "pilot_lifecycle",
+        "pilot_results", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48f_pilot_summary_fields(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ps = data["pilot_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "blocked_count", "eligible_count",
+        "lifecycle_steps", "execution_allowed", "human_review_required",
+    ):
+        assert field in ps, f"missing pilot_summary field: {field}"
+    assert ps["phase"] == "48F"
+    assert ps["execution_allowed"] is False
+    assert ps["human_review_required"] is True
+    assert ps["runtime_count"] == 3
+    assert ps["blocked_count"] == 3
+    assert ps["eligible_count"] == 0
+    assert ps["lifecycle_steps"] == 8
+
+
+def test_48f_execution_always_blocked(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["pilot_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["result_model"]["execution_allowed_always_false_in_48f"] is True
+    for res in data["pilot_results"]:
+        assert res["execution_allowed"] is False, (
+            f"runtime {res['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48f_result_model(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["result_model"]
+    assert rm["model_name"] == "ReadOnlyRuntimePilotResult"
+    assert rm["field_count"] == 13
+    assert rm["required_field_count"] == 13
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "pilot_id", "request_id", "runtime_id", "authorization_status",
+        "contract_status", "preflight_status", "audit_status", "capture_status",
+        "human_approval_status", "pilot_status", "blockers", "warnings",
+        "execution_allowed",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    for status in ("eligible", "blocked", "blocked_with_warnings"):
+        assert status in rm["supported_statuses"], f"missing status: {status}"
+
+
+def test_48f_eight_step_lifecycle(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert len(lifecycle) == 8
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "request_created", "authorization_enforcement_checked",
+        "runtime_contract_enforcement_checked", "preflight_checked",
+        "audit_trail_checked", "result_capture_path_checked",
+        "human_approval_checked", "pilot_result_produced",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    steps = [s["step"] for s in lifecycle]
+    assert steps == list(range(1, 9)), "lifecycle steps must be 1-8 in order"
+
+
+def test_48f_missing_human_approval_blocks(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["pilot_results"]:
+        assert res["human_approval_status"] == "missing", (
+            f"{res['runtime_id']} human_approval_status must be missing"
+        )
+        assert "human_approval_missing" in res["blockers"], (
+            f"{res['runtime_id']} must have human_approval_missing blocker"
+        )
+
+
+def test_48f_failed_contract_enforcement_blocks(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["pilot_results"]:
+        assert res["contract_status"] == "blocked", (
+            f"{res['runtime_id']} contract_status must be blocked"
+        )
+        assert "contract_enforcement_blocked" in res["blockers"], (
+            f"{res['runtime_id']} must have contract_enforcement_blocked blocker"
+        )
+
+
+def test_48f_failed_authorization_enforcement_blocks(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["pilot_results"]:
+        assert res["authorization_status"] == "blocked", (
+            f"{res['runtime_id']} authorization_status must be blocked"
+        )
+        assert "authorization_enforcement_blocked" in res["blockers"], (
+            f"{res['runtime_id']} must have authorization_enforcement_blocked blocker"
+        )
+
+
+def test_48f_pilot_id_prefixes(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["pilot_results"]:
+        assert res["pilot_id"].startswith(f"rrp-{res['runtime_id']}-"), (
+            f"pilot_id must start with rrp-<runtime_id>-"
+        )
+
+
+def test_48f_governance_boundaries(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48F"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "construct pilot result", "evaluate readiness gates", "report blockers",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48f_input_sources(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ReadOnlyInvocationRequest", "ReadOnlyInvocationPreflight",
+        "RuntimeContractEnforcementResult",
+        "InvocationAuthorizationEnforcementResult",
+        "InvocationAuditRecord", "InvocationResultCapture",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_48f_advisory(capsys) -> None:
+    main(["readonly-runtime-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48f_human_output_shows_all_sections(capsys) -> None:
+    main(["readonly-runtime-pilot"])
+    output = capsys.readouterr().out
+    assert "Controlled read-only runtime invocation pilot" in output
+    assert "Result model" in output
+    assert "Pilot lifecycle" in output
+    assert "Pilot results" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

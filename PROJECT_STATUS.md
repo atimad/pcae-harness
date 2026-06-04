@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48E: Invocation Audit Trail.
+Phase 48F: Controlled Read-Only Runtime Invocation Pilot.
 
 ## Governance Coherence Note
 
@@ -3059,6 +3059,24 @@ human_review_required=True; governance_boundaries: may construct
 invocation audit models/evaluate audit readiness/report blockers;
 may_not invoke runtimes/execute prompts/modify repository/approve
 execution/commit/push/rollback; inputs: 5 sources
+and PCAE defines the first controlled read-only runtime invocation pilot with
+`pcae readonly-runtime-pilot` and `pcae readonly-runtime-pilot --json` (Phase 48F):
+ReadOnlyRuntimePilotResult model (13 required fields:
+pilot_id/request_id/runtime_id/authorization_status/contract_status/
+preflight_status/audit_status/capture_status/human_approval_status/
+pilot_status/blockers/warnings/execution_allowed);
+8-step pilot lifecycle: request_created/authorization_enforcement_checked/
+runtime_contract_enforcement_checked/preflight_checked/audit_trail_checked/
+result_capture_path_checked/human_approval_checked/pilot_result_produced;
+3 statuses: eligible/blocked/blocked_with_warnings;
+all 3 runtimes blocked (authorization=blocked, contract=blocked,
+preflight=blocked, audit=blocked, capture=not_ready, human_approval=missing);
+6 blockers per runtime; blocked_count=3, eligible_count=0;
+execution_allowed=False for all; no runtime invoked; no prompt submitted;
+no repository modification; human_review_required=True;
+governance_boundaries: may construct pilot result/evaluate readiness
+gates/report blockers; may_not invoke runtimes/execute prompts/modify
+repository/approve execution/commit/push/rollback; inputs: 6 sources
 
 ## Next
 

@@ -92,6 +92,7 @@ from pcae.commands.agent import (
     run_runtime_contract_enforcement,
     run_invocation_authorization_enforcement,
     run_invocation_audit_trail,
+    run_readonly_runtime_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2157,6 +2158,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     invocation_audit_trail_parser.set_defaults(handler=run_invocation_audit_trail)
+
+    readonly_runtime_pilot_parser = subparsers.add_parser(
+        "readonly-runtime-pilot",
+        help="Evaluate controlled read-only runtime invocation pilot gates (Phase 48F).",
+    )
+    readonly_runtime_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    readonly_runtime_pilot_parser.set_defaults(handler=run_readonly_runtime_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

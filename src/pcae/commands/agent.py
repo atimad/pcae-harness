@@ -159,6 +159,8 @@ from pcae.core.agent import (
     INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY,
     build_invocation_audit_trail,
     INVOCATION_AUDIT_TRAIL_ADVISORY,
+    build_readonly_runtime_pilot,
+    READONLY_RUNTIME_PILOT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6498,6 +6500,58 @@ def run_invocation_audit_trail(args: argparse.Namespace) -> int:
         for s in data["audit_summaries"]:
             print(f"  [{s['runtime_id']}] execution_allowed: {s['execution_allowed']}, "
                   f"audit_ready: {s['audit_ready']}, human_review_required: {s['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_readonly_runtime_pilot(args: argparse.Namespace) -> int:
+    data = build_readonly_runtime_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ps = data["pilot_summary"]
+        print("Controlled read-only runtime invocation pilot")
+        print(f"Assessment: {ps['summary_id']}  Generated: {ps['generated_at']}")
+        print(f"Phase: {ps['phase']} — {ps['title']}")
+        print()
+        print(ps["summary"])
+        print()
+        print(f"Runtimes evaluated:  {ps['runtime_count']}")
+        print(f"Blocked:             {ps['blocked_count']}")
+        print(f"Eligible:            {ps['eligible_count']}")
+        print(f"Lifecycle steps:     {ps['lifecycle_steps']}")
+        print(f"Execution allowed:   {'yes' if ps['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if ps['human_review_required'] else 'no'}")
+        print()
+        rm = data["result_model"]
+        print(f"Result model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(rm['supported_statuses'])}")
+        print(f"  execution_allowed always False in 48F: {rm['execution_allowed_always_false_in_48f']}")
+        print()
+        print(f"Pilot lifecycle ({len(data['pilot_lifecycle'])} steps):")
+        for step in data["pilot_lifecycle"]:
+            print(f"  {step['step']}. [{step['input']}] {step['name']}: {step['description']}")
+        print()
+        print(f"Pilot results ({len(data['pilot_results'])} runtimes):")
+        for res in data["pilot_results"]:
+            print(f"  [{res['pilot_status']}] {res['runtime_id']}")
+            print(f"    execution_allowed:    {res['execution_allowed']}")
+            print(f"    authorization_status: {res['authorization_status']}")
+            print(f"    contract_status:      {res['contract_status']}")
+            print(f"    preflight_status:     {res['preflight_status']}")
+            print(f"    audit_status:         {res['audit_status']}")
+            print(f"    capture_status:       {res['capture_status']}")
+            print(f"    human_approval:       {res['human_approval_status']}")
+            if res["blockers"]:
+                print(f"    Blockers ({len(res['blockers'])}): {', '.join(res['blockers'])}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")
