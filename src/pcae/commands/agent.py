@@ -124,6 +124,8 @@ from pcae.core.agent import (
     WRITE_CANDIDATE_DESIGN_ADVISORY,
     build_write_invocation_pilot,
     WRITE_INVOCATION_PILOT_ADVISORY,
+    build_write_result_review_design,
+    WRITE_RESULT_REVIEW_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5327,6 +5329,82 @@ def run_write_invocation_pilot(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
         print(f"  Write execution allowed: {gb['write_execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_result_review_design(args: argparse.Namespace) -> int:
+    data = build_write_result_review_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_result_review_design"]
+        print("Write result review workflow design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Review lifecycle:")
+        for step in data["review_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("Review categories:")
+        for cat in data["review_categories"]:
+            blocking = "blocking" if cat["blocking"] else "non-blocking"
+            print(f"  {cat['category']} ({blocking})")
+            print(f"    {cat['description']}")
+        print()
+        print("WriteReviewRecord model:")
+        m = data["write_review_record_model"]
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}  Groups: {', '.join(m['groups'])}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    [{field['group']}] {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        print("Review statuses:")
+        rs = data["review_statuses"]
+        print(f"  Status count: {rs['status_count']}")
+        print(f"  Terminal: {', '.join(rs['terminal_statuses'])}")
+        print(f"  Requires rollback: {', '.join(rs['rollback_statuses'])}")
+        print(f"  Escalation: {', '.join(rs['escalation_statuses'])}")
+        for status in rs["statuses"]:
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            print(f"  {status['status']} ({terminal})")
+            print(f"    {status['description']}")
+        print()
+        print("Scope compliance rules:")
+        sc = data["scope_compliance_rules"]
+        print(f"  Rule count: {sc['rule_count']}  All violations trigger escalation: {sc['all_violations_trigger_escalation']}")
+        for rule in sc["rules"]:
+            print(f"  {rule['rule']} → {rule['violation_triggers']}")
+            print(f"    {rule['description']}")
+        print()
+        print("Rollback validation rules:")
+        rv = data["rollback_validation_rules"]
+        print(f"  Rule count: {rv['rule_count']}  All violations trigger escalation: {rv['all_violations_trigger_escalation']}")
+        for rule in rv["rules"]:
+            print(f"  {rule['rule']} → {rule['violation_triggers']}")
+            print(f"    {rule['description']}")
+        print()
+        print("Escalation rules:")
+        er = data["escalation_rules"]
+        print(f"  Rule count: {er['rule_count']}  All escalate to: {er['all_escalate_to']}")
+        for rule in er["rules"]:
+            print(f"  {rule['condition']} → {rule['escalation_status']}")
+            print(f"    {rule['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

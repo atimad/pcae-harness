@@ -25726,3 +25726,242 @@ def test_46q_human_output_shows_all_sections(capsys) -> None:
     assert "Pilot result model" in output
     assert "Governance boundaries" in output
     assert "simulation" in output.lower()
+
+
+# Phase 46R — Write Result Review Workflow
+# ---------------------------------------------------------------------------
+
+
+def test_46r_json_structure(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_result_review_design", "review_lifecycle",
+        "review_categories", "write_review_record_model",
+        "review_statuses", "scope_compliance_rules",
+        "rollback_validation_rules", "escalation_rules",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46r_design_fields(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_result_review_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "review_category_count", "model_field_count",
+        "review_status_count", "scope_rule_count", "rollback_rule_count",
+        "escalation_rule_count", "execution_allowed", "human_review_required",
+        "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("wrrd-")
+    assert design["phase"] == "46R"
+    assert design["execution_allowed"] is False
+    assert design["human_review_required"] is True
+    assert design["lifecycle_step_count"] == 10
+    assert design["review_category_count"] == 7
+    assert design["model_field_count"] == 16
+    assert design["review_status_count"] == 5
+    assert design["scope_rule_count"] == 5
+    assert design["rollback_rule_count"] == 4
+    assert design["escalation_rule_count"] == 5
+
+
+def test_46r_lifecycle_steps(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["review_lifecycle"]
+    assert len(lifecycle) == 10
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "write_execution_result", "result_capture",
+        "file_change_review", "scope_compliance_review",
+        "rollback_review", "audit_review", "quality_review",
+        "consensus_review", "human_review", "write_review_record",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 11))
+
+
+def test_46r_review_categories(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cats = data["review_categories"]
+    assert len(cats) == 7
+    cat_names = [c["category"] for c in cats]
+    for expected in (
+        "file_changes", "scope_compliance", "rollback_readiness",
+        "governance_compliance", "audit_completeness",
+        "quality_assessment", "consensus_status",
+    ):
+        assert expected in cat_names, f"missing category: {expected}"
+    for cat in cats:
+        for field in ("category", "description", "blocking"):
+            assert field in cat, f"category missing field: {field}"
+    blocking_cats = [c["category"] for c in cats if c["blocking"]]
+    for expected in (
+        "file_changes", "scope_compliance", "rollback_readiness",
+        "governance_compliance", "audit_completeness",
+    ):
+        assert expected in blocking_cats, f"should be blocking: {expected}"
+
+
+def test_46r_write_review_record_model(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["write_review_record_model"]
+    assert m["model_name"] == "WriteReviewRecord"
+    assert m["field_count"] == 16
+    assert m["required_field_count"] == 16
+    assert m["immutable_field_count"] == 6
+    assert set(m["groups"]) == {"identity", "results", "findings", "metadata"}
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "write_review_id", "execution_id", "authorization_id", "write_candidate_id",
+        "review_status", "changed_file_count", "scope_compliance_status",
+        "rollback_readiness_status", "governance_status", "quality_status",
+        "consensus_status", "findings", "warnings", "errors",
+        "reviewed_by", "reviewed_at",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+    identity_fields = [f for f in m["fields"] if f["group"] == "identity"]
+    assert all(f["immutable"] for f in identity_fields)
+    metadata_fields = [f for f in m["fields"] if f["group"] == "metadata"]
+    assert all(f["immutable"] for f in metadata_fields)
+
+
+def test_46r_review_statuses(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["review_statuses"]
+    assert rs["status_count"] == 5
+    assert set(rs["terminal_statuses"]) == {"accepted", "accepted_with_warnings", "rejected"}
+    assert set(rs["rollback_statuses"]) == {"rejected", "rollback_recommended"}
+    assert set(rs["escalation_statuses"]) == {"escalation_required"}
+    status_names = [s["status"] for s in rs["statuses"]]
+    for expected in (
+        "accepted", "accepted_with_warnings", "rejected",
+        "rollback_recommended", "escalation_required",
+    ):
+        assert expected in status_names, f"missing status: {expected}"
+    for s in rs["statuses"]:
+        for field in ("status", "description", "terminal", "requires_rollback", "escalation_required"):
+            assert field in s, f"status missing field: {field}"
+
+
+def test_46r_scope_compliance_rules(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["scope_compliance_rules"]
+    assert sc["rule_count"] == 5
+    assert sc["all_violations_trigger_escalation"] is True
+    rule_names = [r["rule"] for r in sc["rules"]]
+    for expected in (
+        "changed_files_within_allowed_files",
+        "forbidden_files_untouched",
+        "max_files_changed_respected",
+        "allowed_operations_respected",
+        "forbidden_operations_absent",
+    ):
+        assert expected in rule_names, f"missing scope rule: {expected}"
+    for rule in sc["rules"]:
+        assert rule["violation_triggers"] == "scope_violation"
+        for field in ("rule", "description", "violation_triggers"):
+            assert field in rule, f"rule missing field: {field}"
+
+
+def test_46r_rollback_validation_rules(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rv = data["rollback_validation_rules"]
+    assert rv["rule_count"] == 4
+    assert rv["all_violations_trigger_escalation"] is True
+    rule_names = [r["rule"] for r in rv["rules"]]
+    for expected in (
+        "rollback_plan_exists", "rollback_target_valid",
+        "rollback_approval_path_exists", "rollback_audit_path_exists",
+    ):
+        assert expected in rule_names, f"missing rollback rule: {expected}"
+    for rule in rv["rules"]:
+        assert rule["violation_triggers"] == "rollback_invalid"
+
+
+def test_46r_escalation_rules(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    er = data["escalation_rules"]
+    assert er["rule_count"] == 5
+    assert er["all_escalate_to"] == "escalation_required"
+    conditions = [r["condition"] for r in er["rules"]]
+    for expected in (
+        "scope_violation_detected", "rollback_invalid",
+        "governance_violation_detected", "consensus_conflict_detected",
+        "audit_incomplete",
+    ):
+        assert expected in conditions, f"missing escalation condition: {expected}"
+    for rule in er["rules"]:
+        assert rule["escalation_status"] == "escalation_required"
+        for field in ("condition", "description", "escalation_status"):
+            assert field in rule, f"escalation rule missing field: {field}"
+
+
+def test_46r_governance_boundaries(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "workflow_may" in gb
+    assert "workflow_may_not" in gb
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in (
+        "review write results", "review scope compliance",
+        "review rollback readiness", "record findings",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "execute prompts", "invoke runtimes", "modify repository",
+        "approve writes automatically", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46r_future_evolution(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["write_result_review_design"]["future_evolution"]]
+    assert "46S" in phases
+    assert "46T" in phases
+    assert "47A" in phases
+    assert "47B" in phases
+
+
+def test_46r_advisory(capsys) -> None:
+    main(["write-result-review-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_46r_human_output_shows_all_sections(capsys) -> None:
+    main(["write-result-review-design"])
+    output = capsys.readouterr().out
+    assert "Write result review workflow design" in output
+    assert "Review lifecycle" in output
+    assert "Review categories" in output
+    assert "WriteReviewRecord model" in output
+    assert "Review statuses" in output
+    assert "Scope compliance rules" in output
+    assert "Rollback validation rules" in output
+    assert "Escalation rules" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

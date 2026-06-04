@@ -22176,3 +22176,614 @@ def build_write_invocation_pilot() -> dict:
         "governance_boundaries": dict(_CWIP_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_INVOCATION_PILOT_ADVISORY,
     }
+
+
+# Phase 46R — Write Result Review Workflow
+# ---------------------------------------------------------------------------
+
+WRITE_RESULT_REVIEW_DESIGN_ADVISORY = (
+    "Write result review workflow design is informational; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_WRRD_INPUT_SOURCES: tuple[str, ...] = (
+    "controlled_write_invocation_pilot",
+    "governed_write_candidate_artifact",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+    "rollback_governance_artifacts",
+)
+
+_WRRD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "write_execution_result",
+        "description": (
+            "A future write execution result is received, containing changed files, "
+            "runtime output, and execution metadata."
+        ),
+        "required": True,
+        "completed_by": "write_execution_result_artifact",
+    },
+    {
+        "step": 2,
+        "name": "result_capture",
+        "description": (
+            "The execution result is captured and linked to the write candidate, "
+            "authorization, and audit record."
+        ),
+        "required": True,
+        "completed_by": "result_capture_artifact",
+    },
+    {
+        "step": 3,
+        "name": "file_change_review",
+        "description": (
+            "All changed files are enumerated and compared against the declared "
+            "file scope for the write candidate."
+        ),
+        "required": True,
+        "completed_by": "file_change_review_result",
+    },
+    {
+        "step": 4,
+        "name": "scope_compliance_review",
+        "description": (
+            "Scope compliance is evaluated: changed files within allowed_files, "
+            "forbidden_files untouched, max_files_changed respected, and only "
+            "allowed_operations performed."
+        ),
+        "required": True,
+        "completed_by": "scope_compliance_result",
+    },
+    {
+        "step": 5,
+        "name": "rollback_review",
+        "description": (
+            "The rollback plan is validated: rollback target valid, approval path "
+            "exists, and audit path exists."
+        ),
+        "required": True,
+        "completed_by": "rollback_review_result",
+    },
+    {
+        "step": 6,
+        "name": "audit_review",
+        "description": (
+            "The audit record is reviewed for completeness: all required fields "
+            "present and linked to the write candidate."
+        ),
+        "required": True,
+        "completed_by": "audit_review_result",
+    },
+    {
+        "step": 7,
+        "name": "quality_review",
+        "description": (
+            "The execution result is evaluated against the quality framework "
+            "if quality_review_required is True on the write candidate."
+        ),
+        "required": True,
+        "completed_by": "quality_review_result",
+    },
+    {
+        "step": 8,
+        "name": "consensus_review",
+        "description": (
+            "Consensus review is performed if consensus_required is True on "
+            "the write candidate."
+        ),
+        "required": True,
+        "completed_by": "consensus_review_result",
+    },
+    {
+        "step": 9,
+        "name": "human_review",
+        "description": (
+            "A human reviewer evaluates all review findings and determines the "
+            "final review_status. This step is never bypassed."
+        ),
+        "required": True,
+        "completed_by": "human_review_decision",
+    },
+    {
+        "step": 10,
+        "name": "write_review_record",
+        "description": (
+            "A WriteReviewRecord artifact is produced capturing all review "
+            "outcomes, findings, warnings, and the final review_status."
+        ),
+        "required": True,
+        "completed_by": "write_review_record_artifact",
+    },
+)
+
+_WRRD_REVIEW_CATEGORIES: tuple[dict, ...] = (
+    {
+        "category": "file_changes",
+        "description": (
+            "Review of all files changed during write execution against the "
+            "declared file scope."
+        ),
+        "blocking": True,
+    },
+    {
+        "category": "scope_compliance",
+        "description": (
+            "Validation that changed files, operations, and file counts are "
+            "within the declared scope."
+        ),
+        "blocking": True,
+    },
+    {
+        "category": "rollback_readiness",
+        "description": (
+            "Validation that the rollback plan is present, the target is valid, "
+            "and approval and audit paths exist."
+        ),
+        "blocking": True,
+    },
+    {
+        "category": "governance_compliance",
+        "description": (
+            "Validation that all governance rules were followed during write "
+            "execution."
+        ),
+        "blocking": True,
+    },
+    {
+        "category": "audit_completeness",
+        "description": (
+            "Validation that the audit record is complete and all required "
+            "fields are present."
+        ),
+        "blocking": True,
+    },
+    {
+        "category": "quality_assessment",
+        "description": (
+            "Evaluation of execution result quality against the quality "
+            "framework dimensions."
+        ),
+        "blocking": False,
+    },
+    {
+        "category": "consensus_status",
+        "description": (
+            "Review of consensus outcome if consensus was required for the "
+            "write candidate."
+        ),
+        "blocking": False,
+    },
+)
+
+_WRRD_MODEL_FIELDS: tuple[dict, ...] = (
+    # Identity
+    {
+        "name": "write_review_id",
+        "type": "str",
+        "description": "Unique identifier for this write review record.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the write execution result artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Reference to the GovernedWriteCandidate artifact.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    # Results
+    {
+        "name": "review_status",
+        "type": "str",
+        "description": (
+            "Final review status: accepted, accepted_with_warnings, rejected, "
+            "rollback_recommended, or escalation_required."
+        ),
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "changed_file_count",
+        "type": "int",
+        "description": "Number of files changed during write execution.",
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "scope_compliance_status",
+        "type": "str",
+        "description": "Result of scope compliance review: compliant, violation, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "rollback_readiness_status",
+        "type": "str",
+        "description": "Result of rollback readiness review: ready, invalid, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "governance_status",
+        "type": "str",
+        "description": "Result of governance compliance review: compliant, violation, or pending.",
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "quality_status",
+        "type": "str",
+        "description": (
+            "Result of quality review: acceptable, acceptable_with_warnings, "
+            "rejected, escalation_required, or not_required."
+        ),
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    {
+        "name": "consensus_status",
+        "type": "str",
+        "description": "Result of consensus review: accepted, rejected, conflict, or not_required.",
+        "required": True,
+        "immutable": False,
+        "group": "results",
+    },
+    # Findings
+    {
+        "name": "findings",
+        "type": "list[str]",
+        "description": "List of review findings recorded during the workflow.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during review.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "errors",
+        "type": "list[str]",
+        "description": "List of blocking errors that prevent acceptance.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    # Metadata
+    {
+        "name": "reviewed_by",
+        "type": "str",
+        "description": "Identity of the human reviewer who made the final decision.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+    {
+        "name": "reviewed_at",
+        "type": "str",
+        "description": "ISO-8601 timestamp when the review was completed.",
+        "required": True,
+        "immutable": True,
+        "group": "metadata",
+    },
+)
+
+_WRRD_REVIEW_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "accepted",
+        "description": (
+            "All review categories passed and human reviewer approved. "
+            "Write result is accepted."
+        ),
+        "terminal": True,
+        "requires_rollback": False,
+        "escalation_required": False,
+    },
+    {
+        "status": "accepted_with_warnings",
+        "description": (
+            "Review passed with non-blocking warnings. Human reviewer accepted "
+            "despite warnings."
+        ),
+        "terminal": True,
+        "requires_rollback": False,
+        "escalation_required": False,
+    },
+    {
+        "status": "rejected",
+        "description": (
+            "One or more blocking review categories failed. Write result is "
+            "rejected; rollback may be required."
+        ),
+        "terminal": True,
+        "requires_rollback": True,
+        "escalation_required": False,
+    },
+    {
+        "status": "rollback_recommended",
+        "description": (
+            "Review identified conditions requiring rollback before the result "
+            "may be reconsidered."
+        ),
+        "terminal": False,
+        "requires_rollback": True,
+        "escalation_required": False,
+    },
+    {
+        "status": "escalation_required",
+        "description": (
+            "A critical review condition was detected that requires escalation "
+            "before any decision may be made."
+        ),
+        "terminal": False,
+        "requires_rollback": False,
+        "escalation_required": True,
+    },
+)
+
+_WRRD_SCOPE_COMPLIANCE_RULES: tuple[dict, ...] = (
+    {
+        "rule": "changed_files_within_allowed_files",
+        "description": (
+            "All files changed during execution must be in the allowed_files "
+            "list of the declared file scope."
+        ),
+        "violation_triggers": "scope_violation",
+    },
+    {
+        "rule": "forbidden_files_untouched",
+        "description": (
+            "No file in the forbidden_files list may have been modified, "
+            "created, or deleted."
+        ),
+        "violation_triggers": "scope_violation",
+    },
+    {
+        "rule": "max_files_changed_respected",
+        "description": (
+            "The number of changed files must not exceed max_files_changed "
+            "declared in the file scope."
+        ),
+        "violation_triggers": "scope_violation",
+    },
+    {
+        "rule": "allowed_operations_respected",
+        "description": (
+            "Only operations listed in allowed_operations may have been performed."
+        ),
+        "violation_triggers": "scope_violation",
+    },
+    {
+        "rule": "forbidden_operations_absent",
+        "description": (
+            "No operation listed in forbidden_operations may have been performed."
+        ),
+        "violation_triggers": "scope_violation",
+    },
+)
+
+_WRRD_ROLLBACK_VALIDATION_RULES: tuple[dict, ...] = (
+    {
+        "rule": "rollback_plan_exists",
+        "description": (
+            "A rollback plan must be present and linked to the write candidate."
+        ),
+        "violation_triggers": "rollback_invalid",
+    },
+    {
+        "rule": "rollback_target_valid",
+        "description": (
+            "The rollback target must resolve to a valid restorable state."
+        ),
+        "violation_triggers": "rollback_invalid",
+    },
+    {
+        "rule": "rollback_approval_path_exists",
+        "description": (
+            "An approval path for rollback execution must be defined and accessible."
+        ),
+        "violation_triggers": "rollback_invalid",
+    },
+    {
+        "rule": "rollback_audit_path_exists",
+        "description": (
+            "An audit path for rollback execution must be defined and accessible."
+        ),
+        "violation_triggers": "rollback_invalid",
+    },
+)
+
+_WRRD_ESCALATION_RULES: tuple[dict, ...] = (
+    {
+        "condition": "scope_violation_detected",
+        "description": (
+            "Any scope violation triggers escalation_required; the result must "
+            "not be accepted until the violation is investigated."
+        ),
+        "escalation_status": "escalation_required",
+    },
+    {
+        "condition": "rollback_invalid",
+        "description": (
+            "If the rollback plan is invalid or the rollback target cannot be "
+            "resolved, escalation is required."
+        ),
+        "escalation_status": "escalation_required",
+    },
+    {
+        "condition": "governance_violation_detected",
+        "description": (
+            "Any governance compliance failure triggers escalation_required."
+        ),
+        "escalation_status": "escalation_required",
+    },
+    {
+        "condition": "consensus_conflict_detected",
+        "description": (
+            "If consensus review produced a conflict that cannot be resolved "
+            "automatically, escalation is required."
+        ),
+        "escalation_status": "escalation_required",
+    },
+    {
+        "condition": "audit_incomplete",
+        "description": (
+            "If the audit record is missing required fields or cannot be linked "
+            "to the write candidate, escalation is required."
+        ),
+        "escalation_status": "escalation_required",
+    },
+)
+
+_WRRD_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "review write results",
+        "review scope compliance",
+        "review rollback readiness",
+        "record findings",
+        "record warnings",
+        "record errors",
+    ],
+    "workflow_may_not": [
+        "execute prompts",
+        "invoke runtimes",
+        "modify repository",
+        "approve writes automatically",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_WRRD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46S", "description": "Write Rollback Validation Workflow"},
+    {"phase": "46T", "description": "Write Execution Readiness Assessment"},
+    {"phase": "47A", "description": "Governed Live Read-Only Execution"},
+    {"phase": "47B", "description": "Governed Live Write Execution Readiness"},
+)
+
+
+def build_write_result_review_design() -> dict:
+    """Design the write result review governance workflow. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"wrrd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WRRD_LIFECYCLE]
+    review_categories = [dict(c) for c in _WRRD_REVIEW_CATEGORIES]
+    model_fields = [dict(f) for f in _WRRD_MODEL_FIELDS]
+    review_statuses = [dict(s) for s in _WRRD_REVIEW_STATUSES]
+    scope_rules = [dict(r) for r in _WRRD_SCOPE_COMPLIANCE_RULES]
+    rollback_rules = [dict(r) for r in _WRRD_ROLLBACK_VALIDATION_RULES]
+    escalation_rules = [dict(r) for r in _WRRD_ESCALATION_RULES]
+
+    write_review_record_model = {
+        "model_name": "WriteReviewRecord",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "groups": sorted({f["group"] for f in model_fields}),
+        "fields": model_fields,
+    }
+
+    review_statuses_model = {
+        "status_count": len(review_statuses),
+        "terminal_statuses": [s["status"] for s in review_statuses if s["terminal"]],
+        "rollback_statuses": [s["status"] for s in review_statuses if s["requires_rollback"]],
+        "escalation_statuses": [s["status"] for s in review_statuses if s["escalation_required"]],
+        "statuses": review_statuses,
+    }
+
+    scope_compliance_model = {
+        "rule_count": len(scope_rules),
+        "all_violations_trigger_escalation": True,
+        "rules": scope_rules,
+    }
+
+    rollback_validation_model = {
+        "rule_count": len(rollback_rules),
+        "all_violations_trigger_escalation": True,
+        "rules": rollback_rules,
+    }
+
+    escalation_model = {
+        "rule_count": len(escalation_rules),
+        "all_escalate_to": "escalation_required",
+        "rules": escalation_rules,
+    }
+
+    write_result_review_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46R",
+        "title": "Write Result Review Workflow",
+        "summary": (
+            "Designs the governance workflow for reviewing, validating, and approving "
+            "future write execution results. Defines the ten-step review lifecycle, "
+            "seven review categories, WriteReviewRecord model, five review statuses, "
+            "five scope compliance rules, four rollback validation rules, and five "
+            "escalation rules. Human review is always required; scope violations, "
+            "rollback failures, and governance violations all trigger escalation_required. "
+            "No runtime invocation, no prompt execution, and no file modification."
+        ),
+        "input_sources": list(_WRRD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "review_category_count": len(review_categories),
+        "model_field_count": len(model_fields),
+        "review_status_count": len(review_statuses),
+        "scope_rule_count": len(scope_rules),
+        "rollback_rule_count": len(rollback_rules),
+        "escalation_rule_count": len(escalation_rules),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_WRRD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WRRD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_result_review_design": write_result_review_design,
+        "review_lifecycle": lifecycle,
+        "review_categories": review_categories,
+        "write_review_record_model": write_review_record_model,
+        "review_statuses": review_statuses_model,
+        "scope_compliance_rules": scope_compliance_model,
+        "rollback_validation_rules": rollback_validation_model,
+        "escalation_rules": escalation_model,
+        "governance_boundaries": dict(_WRRD_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_RESULT_REVIEW_DESIGN_ADVISORY,
+    }

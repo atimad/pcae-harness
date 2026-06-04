@@ -487,6 +487,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-invocation-pilot`
 - `pcae write-invocation-pilot --json`
+
+## write-result-review-design
+
+- `pcae write-result-review-design`
+- `pcae write-result-review-design --json`
 """
 
 
