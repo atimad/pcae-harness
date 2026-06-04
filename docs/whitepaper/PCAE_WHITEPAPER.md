@@ -298,7 +298,7 @@ As of Phase 48X.2, PCAE has completed the following governance infrastructure:
 |-------|--------|-------------|
 | Documentation program | Active | Architecture, commands, glossary, white paper, architecture diagrams generated and validated |
 | Controlled read-only invocation | Active — Phase 48H complete | Full evidence model implemented; all gates scaffolded; execution still blocked |
-| Parallel test execution | Planned — 48X.T | Standardize `pytest-xdist` across CI; enforce parallel-safe test isolation; foundation for faster governed CI |
+| Parallel test execution | Complete — 48X.T | `pytest-xdist` standardized; three execution profiles documented (fast, battery, release); see [Test Execution Guide](../testing/TEST_EXECUTION.md) |
 | Invocation execution gate | Planned — 49A | Implement the gate that conditionally clears `execution_allowed` when all 8 lifecycle gates pass |
 | Multi-agent read-only pilot | Planned | Extend the pilot scaffold to multi-agent workflows; validate orchestration handoff |
 | Controlled write pilot | Planned | Introduce write execution with explicit rollback planning as a precondition |
@@ -331,7 +331,10 @@ must pass before beginning work.
 **Parallel test execution.** The preferred validation path is
 `python -m pytest -n auto`, which distributes the test suite across available
 CPU cores using `pytest-xdist`. This is the standard for CI and local
-pre-commit validation. Tests must be written to be parallel-safe.
+pre-commit validation. Tests must be written to be parallel-safe. For all
+execution profiles (fast validation, battery mode, release verification) and
+parallel safety requirements, see the
+[Test Execution Guide](../testing/TEST_EXECUTION.md).
 
 **Documentation.** Every behavior-visible change requires corresponding
 updates to `CHANGELOG.md` and `PROJECT_STATUS.md` at minimum. Architecture

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.6: Governance Handbook (documentation only).
+Phase 48X.T: Parallel Test Execution Standardization (documentation only).
 
 ## Governance Coherence Note
 
@@ -3213,6 +3213,25 @@ README.md updated with Governance Handbook link;
 VISION.md section 7 updated with forward reference to handbook;
 CONTRIBUTING.md documentation requirements table updated to handbook path;
 whitepaper section 15 updated with Governance Handbook link;
+no source logic changes; documentation only
+and PCAE Parallel Test Execution Standardization completed (Phase 48X.T):
+docs/testing/TEST_EXECUTION.md — 6-section test execution guide covering
+fast validation mode (`python -m pytest -n auto`, benchmark: 3429 tests
+in ~64s, ~4× faster than serial), balanced battery mode (`python -m pytest
+-n 4` or `-n 6`, lower CPU/thermal pressure, better battery life),
+release verification mode (`python -m pytest`, serial baseline, detects
+hidden order assumptions), slow test discovery (`python -m pytest
+--durations=25`), recommended workflow table, and safety notes (parallel safe
+because serial and parallel counts match; test count is integrity signal;
+flaky/shared-state tests break parallel safety; serial remains the final
+conservative baseline);
+README.md updated with Test Execution Guide link;
+CONTRIBUTING.md section 5 updated with reference and link to guide;
+whitepaper roadmap 48X.T row updated to Complete with guide link;
+whitepaper section 15 parallel test execution paragraph updated with guide
+link;
+governance handbook roadmap 48X.T row updated to complete with guide link;
+governance handbook remaining milestones updated to reflect 48X.T complete;
 no source logic changes; documentation only
 
 ## Next

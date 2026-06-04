@@ -370,8 +370,9 @@ validated first.
 
 - Phase 49A: Invocation execution gate — clear `execution_allowed` when all
   8 lifecycle gates pass; first live runtime invocation
-- Phase 48X.T: Parallel test execution standardization — enforce
-  `pytest-xdist` and parallel-safe test isolation across CI
+- Phase 48X.T: Parallel test execution standardization — complete; three
+  execution profiles documented in the
+  [Test Execution Guide](../testing/TEST_EXECUTION.md)
 - Phase 50A: Controlled write authorization — introduce write execution with
   rollback planning as a precondition
 - Phase 51A: Goal-based planning — governed roadmap and prompt generation
@@ -385,7 +386,7 @@ soundness before the next phase introduces new execution capability.
 
 | Phase | Track | Description |
 |---|---|---|
-| 48X.T | Test infrastructure | Parallel Test Execution Standardization — standardize `pytest-xdist` across CI; enforce parallel-safe test isolation; foundation for faster governed CI |
+| 48X.T | Test infrastructure | Parallel Test Execution Standardization — complete; three profiles (fast: `-n auto`, battery: `-n 4`/`-n 6`, release: serial); see [Test Execution Guide](../testing/TEST_EXECUTION.md) |
 | 49A | Execution gate | Multi-Agent Read-Only Pilot — implement the invocation execution gate that conditionally clears `execution_allowed`; first live governed read-only runtime invocation |
 | 50A | Write authorization | Controlled Write Authorization — introduce write execution with explicit rollback planning as a precondition; no write without a validated rollback artifact |
 | 51A | Planning | Goal-Based Planning — governed roadmap and prompt generation; proposals are artifacts subject to human approval before execution |

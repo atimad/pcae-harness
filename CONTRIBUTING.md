@@ -146,6 +146,10 @@ execution shortcuts around this chain are not accepted.
 
 ## 5. Testing Requirements
 
+For the complete testing guide covering all validation profiles, benchmark
+numbers, battery-mode options, slow test discovery, and parallel safety
+requirements, see [docs/testing/TEST_EXECUTION.md](docs/testing/TEST_EXECUTION.md).
+
 **Required before every commit**
 
 ```
