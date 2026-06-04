@@ -24379,3 +24379,220 @@ def test_46k_human_output_shows_all_sections(capsys) -> None:
     assert "Governance requirements" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46L — Execution Result Quality Framework
+# ---------------------------------------------------------------------------
+
+
+def test_46l_execution_quality_design_json_structure(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "execution_quality_design", "quality_dimensions", "quality_statuses",
+        "result_quality_record", "evaluation_model",
+        "governance_requirements", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46l_execution_quality_design_fields(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["execution_quality_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "dimension_count", "status_count", "model_count",
+        "evaluation_area_count", "governance_requirement_count",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("eqd-")
+    assert design["phase"] == "46L"
+    assert design["human_review_required"] is True
+    assert design["dimension_count"] == 8
+    assert design["status_count"] == 4
+    assert design["model_count"] == 1
+    assert design["evaluation_area_count"] == 4
+    assert design["governance_requirement_count"] == 5
+
+
+def test_46l_quality_dimensions(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    qdm = data["quality_dimensions"]
+    assert qdm["dimension_count"] == 8
+    dim_names = [d["name"] for d in qdm["dimensions"]]
+    for expected in (
+        "completeness", "correctness", "governance_compliance", "traceability",
+        "output_structure", "evidence_support", "reproducibility", "safety",
+    ):
+        assert expected in dim_names, f"missing dimension: {expected}"
+    for dim in qdm["dimensions"]:
+        for field in ("name", "description", "blocking", "escalation_on_failure"):
+            assert field in dim, f"dimension missing field: {field}"
+
+
+def test_46l_blocking_and_escalation_dimensions(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    qdm = data["quality_dimensions"]
+    blocking = qdm["blocking_dimensions"]
+    for expected in ("completeness", "correctness", "governance_compliance", "traceability", "safety"):
+        assert expected in blocking, f"expected blocking: {expected}"
+    for non_blocking in ("output_structure", "evidence_support", "reproducibility"):
+        assert non_blocking not in blocking, f"should not be blocking: {non_blocking}"
+    escalation = qdm["escalation_dimensions"]
+    assert "governance_compliance" in escalation
+    assert "safety" in escalation
+    for non_esc in ("completeness", "correctness", "traceability", "output_structure"):
+        assert non_esc not in escalation, f"should not escalate: {non_esc}"
+
+
+def test_46l_quality_statuses(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    qsm = data["quality_statuses"]
+    assert qsm["status_count"] == 4
+    status_names = [s["status"] for s in qsm["statuses"]]
+    for expected in ("acceptable", "acceptable_with_warnings", "rejected", "escalation_required"):
+        assert expected in status_names, f"missing status: {expected}"
+    terminal = qsm["terminal_statuses"]
+    for expected in ("acceptable", "acceptable_with_warnings", "rejected"):
+        assert expected in terminal, f"expected terminal: {expected}"
+    assert "escalation_required" not in terminal
+    consensus_blocking = qsm["consensus_blocking_statuses"]
+    for expected in ("rejected", "escalation_required"):
+        assert expected in consensus_blocking, f"expected consensus blocking: {expected}"
+    for s in qsm["statuses"]:
+        for field in ("status", "description", "terminal", "requires_human_review", "blocks_consensus"):
+            assert field in s, f"status missing field: {field}"
+    rejected = next(s for s in qsm["statuses"] if s["status"] == "rejected")
+    assert rejected["requires_human_review"] is True
+    escalation = next(s for s in qsm["statuses"] if s["status"] == "escalation_required")
+    assert escalation["requires_human_review"] is True
+
+
+def test_46l_result_quality_record(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rqr = data["result_quality_record"]
+    assert rqr["model_name"] == "ResultQualityRecord"
+    assert rqr["field_count"] == 11
+    assert rqr["required_field_count"] == 11
+    field_names = [f["name"] for f in rqr["fields"]]
+    for expected in (
+        "quality_id", "execution_id", "authorization_id", "prompt_id",
+        "selected_agents", "quality_status", "quality_scores",
+        "findings", "warnings", "errors", "human_review_required",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    immutable = rqr["immutable_fields"]
+    for expected in ("quality_id", "execution_id", "authorization_id", "prompt_id",
+                     "selected_agents", "human_review_required"):
+        assert expected in immutable, f"expected immutable: {expected}"
+    mutable = rqr["mutable_fields"]
+    for expected in ("quality_status", "quality_scores", "findings", "warnings", "errors"):
+        assert expected in mutable, f"expected mutable: {expected}"
+
+
+def test_46l_evaluation_model(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    em = data["evaluation_model"]
+    assert em["area_count"] == 4
+    assert em["all_areas_blocking"] is True
+    area_names = [a["area"] for a in em["areas"]]
+    for expected in (
+        "dimension_evaluation", "record_completeness",
+        "governance_compliance_precedence", "safety_precedence",
+    ):
+        assert expected in area_names, f"missing evaluation area: {expected}"
+    for area in em["areas"]:
+        assert area["blocking"] is True
+        assert len(area["checks"]) > 0
+    assert em["rule_count"] == 4
+    rule_ids = [r["rule_id"] for r in em["rules"]]
+    for expected in ("eqd-r1", "eqd-r2", "eqd-r3", "eqd-r4"):
+        assert expected in rule_ids, f"missing rule: {expected}"
+    statuses_set = {r["sets_status"] for r in em["rules"]}
+    for expected in ("acceptable", "acceptable_with_warnings", "rejected", "escalation_required"):
+        assert expected in statuses_set, f"missing rule status: {expected}"
+
+
+def test_46l_governance_requirements(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["governance_requirements"]
+    assert len(reqs) == 5
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "execution_result_present", "authorization_traceable",
+        "governance_compliance_evaluated", "safety_evaluated", "human_review_on_rejection",
+    ):
+        assert expected in req_names, f"missing governance requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+    for req in reqs:
+        for field in ("requirement", "description", "blocking", "checked_in"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46l_governance_boundaries(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "framework_may" in gb
+    assert "framework_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["framework_may"]).lower()
+    for allowed in (
+        "evaluate future execution outputs", "record quality findings",
+        "record quality warnings", "compute quality scores", "report quality status",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["framework_may_not"]).lower()
+    for forbidden in ("approve execution automatically", "invoke agents",
+                      "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46l_future_evolution(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["execution_quality_design"]["future_evolution"]]
+    for expected in ("46M", "46N"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46l_advisory(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no execution results are evaluated" in advisory
+
+
+def test_46l_no_runtime_invocation(capsys) -> None:
+    main(["execution-quality-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    may_not = " ".join(gb["framework_may_not"]).lower()
+    assert "invoke agents" in may_not
+    assert "modify repository" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_46l_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-quality-design"])
+    output = capsys.readouterr().out
+    assert "Execution result quality framework" in output
+    assert "Quality dimensions" in output
+    assert "Quality statuses" in output
+    assert "ResultQualityRecord model" in output
+    assert "Evaluation model" in output
+    assert "Evaluation rules" in output
+    assert "Governance requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

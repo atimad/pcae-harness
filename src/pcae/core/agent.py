@@ -19002,3 +19002,452 @@ def build_multi_agent_invocation_pilot() -> dict:
         "governance_boundaries": dict(_MAIP_GOVERNANCE_BOUNDARIES),
         "advisory": MULTI_AGENT_INVOCATION_PILOT_ADVISORY,
     }
+
+
+# Phase 46L — Execution Result Quality Framework
+# ---------------------------------------------------------------------------
+
+EXECUTION_QUALITY_DESIGN_ADVISORY = (
+    "Execution quality framework is informational; no execution results are evaluated."
+)
+
+_EQD_INPUT_SOURCES: tuple[str, ...] = (
+    "multi_agent_invocation_pilot",
+    "invocation_pilot_status",
+    "execution_authorization_artifacts",
+    "execution_audit_design",
+    "execution_consensus_design",
+)
+
+_EQD_QUALITY_DIMENSIONS: tuple[dict, ...] = (
+    {
+        "name": "completeness",
+        "description": "Output covers all required aspects of the prompt objective.",
+        "blocking": True,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "correctness",
+        "description": "Output is factually accurate, logically consistent, and free of internal contradictions.",
+        "blocking": True,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "governance_compliance",
+        "description": "Output adheres to PCAE governance rules, policy constraints, and operational boundaries.",
+        "blocking": True,
+        "escalation_on_failure": True,
+    },
+    {
+        "name": "traceability",
+        "description": "Output can be traced back to the authorized prompt, selected agents, and authorization record.",
+        "blocking": True,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "output_structure",
+        "description": "Output conforms to expected format and structural requirements for the declared work type.",
+        "blocking": False,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "evidence_support",
+        "description": "Claims in the output are supported by verifiable evidence or artifact references.",
+        "blocking": False,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "reproducibility",
+        "description": (
+            "Output could be reproduced by a subsequent authorized invocation "
+            "under the same governance constraints."
+        ),
+        "blocking": False,
+        "escalation_on_failure": False,
+    },
+    {
+        "name": "safety",
+        "description": (
+            "Output does not introduce unsafe operations, credentials, "
+            "destructive commands, or policy violations."
+        ),
+        "blocking": True,
+        "escalation_on_failure": True,
+    },
+)
+
+_EQD_QUALITY_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "acceptable",
+        "description": "All quality dimensions pass and no warnings were recorded.",
+        "terminal": True,
+        "requires_human_review": False,
+        "blocks_consensus": False,
+    },
+    {
+        "status": "acceptable_with_warnings",
+        "description": (
+            "All blocking quality dimensions pass but warnings are present; "
+            "human review is advisory."
+        ),
+        "terminal": True,
+        "requires_human_review": False,
+        "blocks_consensus": False,
+    },
+    {
+        "status": "rejected",
+        "description": (
+            "One or more blocking quality dimensions failed; "
+            "result must not proceed to consensus."
+        ),
+        "terminal": True,
+        "requires_human_review": True,
+        "blocks_consensus": True,
+    },
+    {
+        "status": "escalation_required",
+        "description": (
+            "A safety or governance_compliance failure was detected; "
+            "immediate human escalation is required."
+        ),
+        "terminal": False,
+        "requires_human_review": True,
+        "blocks_consensus": True,
+    },
+)
+
+_EQD_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "quality_id",
+        "type": "str",
+        "description": "Unique identifier for this quality evaluation record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "Reference to the execution whose result is being evaluated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact for this execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Reference to the approved prompt artifact that was executed.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agents",
+        "type": "list[str]",
+        "description": "List of agent identifiers whose outputs are being evaluated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "quality_status",
+        "type": "str",
+        "description": "Overall quality status: acceptable, acceptable_with_warnings, rejected, or escalation_required.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "quality_scores",
+        "type": "dict",
+        "description": "Per-dimension quality scores keyed by dimension name. Populated during evaluation.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "findings",
+        "type": "list[str]",
+        "description": "List of quality findings recorded during evaluation.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking quality warnings recorded during evaluation.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "errors",
+        "type": "list[str]",
+        "description": "List of blocking quality errors recorded during evaluation.",
+        "required": True,
+        "immutable": False,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Whether human review is required before this result proceeds to consensus.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_EQD_EVALUATION_AREAS: tuple[dict, ...] = (
+    {
+        "area": "dimension_evaluation",
+        "description": "Evaluates each of the eight quality dimensions against the captured execution output.",
+        "checks": [
+            "completeness evaluated",
+            "correctness evaluated",
+            "governance_compliance evaluated",
+            "traceability evaluated",
+            "output_structure evaluated",
+            "evidence_support evaluated",
+            "reproducibility evaluated",
+            "safety evaluated",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "record_completeness",
+        "description": (
+            "Verifies all required ResultQualityRecord fields are present and "
+            "non-empty before the record is finalized."
+        ),
+        "checks": [
+            "quality_id present",
+            "execution_id present",
+            "authorization_id present",
+            "prompt_id present",
+            "selected_agents non-empty",
+            "quality_status set",
+            "quality_scores present",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "governance_compliance_precedence",
+        "description": (
+            "Verifies the governance_compliance dimension is evaluated before "
+            "quality_status is assigned."
+        ),
+        "checks": [
+            "governance_compliance dimension evaluated first",
+            "governance violation escalates before other status assignment",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "safety_precedence",
+        "description": (
+            "Verifies the safety dimension is evaluated and any safety finding "
+            "triggers escalation_required."
+        ),
+        "checks": [
+            "safety dimension evaluated",
+            "safety failure sets escalation_required",
+            "safety finding recorded in errors",
+        ],
+        "blocking": True,
+    },
+)
+
+_EQD_EVALUATION_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "eqd-r1",
+        "rule": "escalation_dimension_failure",
+        "description": (
+            "If any dimension with escalation_on_failure=true fails, "
+            "quality_status is set to escalation_required regardless of other results."
+        ),
+        "priority": 0,
+        "sets_status": "escalation_required",
+    },
+    {
+        "rule_id": "eqd-r2",
+        "rule": "blocking_dimension_failure",
+        "description": (
+            "If any blocking quality dimension fails (and no escalation rule fired), "
+            "quality_status is set to rejected."
+        ),
+        "priority": 1,
+        "sets_status": "rejected",
+    },
+    {
+        "rule_id": "eqd-r3",
+        "rule": "warnings_present",
+        "description": (
+            "If no blocking dimensions fail but warnings are recorded, "
+            "quality_status is set to acceptable_with_warnings."
+        ),
+        "priority": 2,
+        "sets_status": "acceptable_with_warnings",
+    },
+    {
+        "rule_id": "eqd-r4",
+        "rule": "all_dimensions_pass",
+        "description": (
+            "If all dimensions pass and no warnings are recorded, "
+            "quality_status is set to acceptable."
+        ),
+        "priority": 3,
+        "sets_status": "acceptable",
+    },
+)
+
+_EQD_GOVERNANCE_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "execution_result_present",
+        "description": "A captured execution result must exist before quality evaluation begins.",
+        "blocking": True,
+        "checked_in": "dimension_evaluation",
+    },
+    {
+        "requirement": "authorization_traceable",
+        "description": "The authorization_id must reference a known ExecutionAuthorizationArtifact.",
+        "blocking": True,
+        "checked_in": "record_completeness",
+    },
+    {
+        "requirement": "governance_compliance_evaluated",
+        "description": (
+            "The governance_compliance dimension must be evaluated before "
+            "quality_status is finalized."
+        ),
+        "blocking": True,
+        "checked_in": "governance_compliance_precedence",
+    },
+    {
+        "requirement": "safety_evaluated",
+        "description": (
+            "The safety dimension must be evaluated; any safety failure "
+            "must trigger escalation_required."
+        ),
+        "blocking": True,
+        "checked_in": "safety_precedence",
+    },
+    {
+        "requirement": "human_review_on_rejection",
+        "description": (
+            "A quality_status of rejected or escalation_required must always "
+            "set human_review_required=True."
+        ),
+        "blocking": True,
+        "checked_in": "record_completeness",
+    },
+)
+
+_EQD_GOVERNANCE_BOUNDARIES: dict = {
+    "framework_may": [
+        "evaluate future execution outputs",
+        "record quality findings",
+        "record quality warnings",
+        "compute quality scores",
+        "report quality status",
+    ],
+    "framework_may_not": [
+        "approve execution automatically",
+        "invoke agents",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_EQD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46M", "description": "Authorization Renewal Pilot"},
+    {"phase": "46N", "description": "Governed Write Invocation Design"},
+)
+
+
+def build_execution_quality_design() -> dict:
+    """Design the execution result quality framework for future runtime invocations. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"eqd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    dimensions = [dict(d) for d in _EQD_QUALITY_DIMENSIONS]
+    statuses = [dict(s) for s in _EQD_QUALITY_STATUSES]
+    record_fields = [dict(f) for f in _EQD_RECORD_FIELDS]
+    evaluation_areas = [dict(a) for a in _EQD_EVALUATION_AREAS]
+    evaluation_rules = [dict(r) for r in _EQD_EVALUATION_RULES]
+    governance_requirements = [dict(g) for g in _EQD_GOVERNANCE_REQUIREMENTS]
+
+    blocking_dimensions = [d["name"] for d in dimensions if d["blocking"]]
+    escalation_dimensions = [d["name"] for d in dimensions if d["escalation_on_failure"]]
+    terminal_statuses = [s["status"] for s in statuses if s["terminal"]]
+    consensus_blocking_statuses = [s["status"] for s in statuses if s["blocks_consensus"]]
+
+    result_quality_record_model = {
+        "model_name": "ResultQualityRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "immutable_fields": [f["name"] for f in record_fields if f["immutable"]],
+        "mutable_fields": [f["name"] for f in record_fields if not f["immutable"]],
+        "fields": record_fields,
+    }
+
+    quality_dimension_model = {
+        "dimension_count": len(dimensions),
+        "blocking_dimensions": blocking_dimensions,
+        "escalation_dimensions": escalation_dimensions,
+        "dimensions": dimensions,
+    }
+
+    quality_status_model = {
+        "status_count": len(statuses),
+        "terminal_statuses": terminal_statuses,
+        "consensus_blocking_statuses": consensus_blocking_statuses,
+        "statuses": statuses,
+    }
+
+    evaluation_model = {
+        "area_count": len(evaluation_areas),
+        "areas": evaluation_areas,
+        "all_areas_blocking": all(a["blocking"] for a in evaluation_areas),
+        "rule_count": len(evaluation_rules),
+        "rules": evaluation_rules,
+    }
+
+    execution_quality_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46L",
+        "title": "Execution Result Quality Framework",
+        "summary": (
+            "Defines how PCAE evaluates the quality of future runtime execution results "
+            "before human review or consensus acceptance. Specifies eight quality dimensions "
+            "(completeness, correctness, governance_compliance, traceability, output_structure, "
+            "evidence_support, reproducibility, safety), the ResultQualityRecord model, four "
+            "quality statuses, four evaluation rules, and four evaluation areas with governance "
+            "requirements. No runtime invocation, no prompt execution, and no repository "
+            "modification by agents."
+        ),
+        "input_sources": list(_EQD_INPUT_SOURCES),
+        "dimension_count": len(dimensions),
+        "status_count": len(statuses),
+        "model_count": 1,
+        "evaluation_area_count": len(evaluation_areas),
+        "governance_requirement_count": len(governance_requirements),
+        "human_review_required": True,
+        "governance_boundaries": dict(_EQD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _EQD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "execution_quality_design": execution_quality_design,
+        "quality_dimensions": quality_dimension_model,
+        "quality_statuses": quality_status_model,
+        "result_quality_record": result_quality_record_model,
+        "evaluation_model": evaluation_model,
+        "governance_requirements": governance_requirements,
+        "governance_boundaries": dict(_EQD_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_QUALITY_DESIGN_ADVISORY,
+    }

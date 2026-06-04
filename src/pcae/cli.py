@@ -68,6 +68,7 @@ from pcae.commands.agent import (
     run_authorization_expiration_design,
     run_invocation_pilot_status,
     run_multi_agent_invocation_pilot,
+    run_execution_quality_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1863,6 +1864,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON multi-agent invocation pilot output.",
     )
     multi_agent_invocation_pilot_parser.set_defaults(handler=run_multi_agent_invocation_pilot)
+
+    execution_quality_design_parser = subparsers.add_parser(
+        "execution-quality-design",
+        help="Design execution result quality framework for future runtime invocations (Phase 46L).",
+    )
+    execution_quality_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON execution quality design output.",
+    )
+    execution_quality_design_parser.set_defaults(handler=run_execution_quality_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

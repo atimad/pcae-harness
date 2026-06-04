@@ -436,3 +436,8 @@
 
 - `pcae multi-agent-invocation-pilot`
 - `pcae multi-agent-invocation-pilot --json`
+
+## execution-quality-design
+
+- `pcae execution-quality-design`
+- `pcae execution-quality-design --json`

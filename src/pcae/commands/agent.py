@@ -112,6 +112,8 @@ from pcae.core.agent import (
     INVOCATION_PILOT_STATUS_ADVISORY,
     build_multi_agent_invocation_pilot,
     MULTI_AGENT_INVOCATION_PILOT_ADVISORY,
+    build_execution_quality_design,
+    EXECUTION_QUALITY_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4915,6 +4917,75 @@ def run_multi_agent_invocation_pilot(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_quality_design(args: argparse.Namespace) -> int:
+    data = build_execution_quality_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["execution_quality_design"]
+        print("Execution result quality framework")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Quality dimensions:")
+        qdm = data["quality_dimensions"]
+        for dim in qdm["dimensions"]:
+            blocking = "blocking" if dim["blocking"] else "non-blocking"
+            escalation = ", escalation on failure" if dim["escalation_on_failure"] else ""
+            print(f"  {dim['name']} ({blocking}{escalation})")
+            print(f"    {dim['description']}")
+        print()
+        print("Quality statuses:")
+        qsm = data["quality_statuses"]
+        for status in qsm["statuses"]:
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            review = "human review required" if status["requires_human_review"] else "human review advisory"
+            blocks = ", blocks consensus" if status["blocks_consensus"] else ""
+            print(f"  {status['status']} ({terminal}, {review}{blocks})")
+            print(f"    {status['description']}")
+        print()
+        print("ResultQualityRecord model:")
+        rqr = data["result_quality_record"]
+        print(f"  Fields: {rqr['field_count']}  Required: {rqr['required_field_count']}")
+        print(f"  Immutable: {', '.join(rqr['immutable_fields'])}")
+        print(f"  Mutable:   {', '.join(rqr['mutable_fields'])}")
+        for field in rqr["fields"]:
+            req = "required" if field["required"] else "optional"
+            mut = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {req}, {mut}): {field['description']}")
+        print()
+        print("Evaluation model:")
+        em = data["evaluation_model"]
+        for area in em["areas"]:
+            blocking = "blocking" if area["blocking"] else "non-blocking"
+            print(f"  {area['area']} ({blocking})")
+            print(f"    {area['description']}")
+            for check in area["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Evaluation rules:")
+        for rule in em["rules"]:
+            print(f"  {rule['rule_id']} {rule['rule']} (priority={rule['priority']}, sets_status={rule['sets_status']})")
+            print(f"    {rule['description']}")
+        print()
+        print("Governance requirements:")
+        for req in data["governance_requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking}, checked in {req['checked_in']})")
+            print(f"    {req['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['framework_may'])}")
+        print(f"  May not: {', '.join(gb['framework_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

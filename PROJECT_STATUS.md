@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46K: Multi-Agent Invocation Pilot.
+Phase 46L: Execution Result Quality Framework.
 
 ## Governance Coherence Note
 
@@ -2537,10 +2537,37 @@ plans/evaluate readiness; pilot_may_not invoke runtimes/execute prompts/modify r
 commit/push/rollback; read_only=true, human_review_required=true; future_evolution:
 46L/46M/46N; advisory: "Multi-agent invocation pilot is informational; no runtime invocation
 occurs."
+and the execution result quality framework is designed with
+`pcae execution-quality-design` and `pcae execution-quality-design --json`
+(Phase 46L): inputs: multi_agent_invocation_pilot, invocation_pilot_status,
+execution_authorization_artifacts, execution_audit_design, execution_consensus_design;
+no runtime invocation; no prompt execution; no repository modification by agents;
+quality dimensions (8): completeness/correctness/governance_compliance/traceability
+(all blocking), output_structure/evidence_support/reproducibility (non-blocking),
+safety (blocking); escalation_on_failure dimensions: governance_compliance/safety;
+ResultQualityRecord model: 11 fields (all required), immutable:
+quality_id/execution_id/authorization_id/prompt_id/selected_agents/human_review_required,
+mutable: quality_status/quality_scores/findings/warnings/errors; quality statuses
+(4): acceptable/acceptable_with_warnings (terminal, no consensus block),
+rejected/escalation_required (consensus blocking, human review required;
+escalation_required is non-terminal); evaluation rules (4, by priority):
+eqd-r1 escalation_dimension_failure (priority=0, sets escalation_required)/
+eqd-r2 blocking_dimension_failure (priority=1, sets rejected)/eqd-r3 warnings_present
+(priority=2, sets acceptable_with_warnings)/eqd-r4 all_dimensions_pass (priority=3,
+sets acceptable); evaluation areas (4, all blocking): dimension_evaluation (8 checks)/
+record_completeness (7 checks)/governance_compliance_precedence (2 checks)/
+safety_precedence (3 checks); governance requirements (5, all blocking):
+execution_result_present/authorization_traceable/governance_compliance_evaluated/
+safety_evaluated/human_review_on_rejection; governance_boundaries: framework_may
+evaluate future execution outputs/record quality findings/record quality warnings/
+compute quality scores/report quality status; framework_may_not approve execution
+automatically/invoke agents/modify repository/commit/push/rollback; read_only=true,
+human_review_required=true; future_evolution: 46M/46N; advisory: "Execution quality
+framework is informational; no execution results are evaluated."
 
 ## Next
 
-- TBD: Future phases (46L Execution Result Quality Framework, 46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
+- TBD: Future phases (46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
 
 ## Future Explorations
 
