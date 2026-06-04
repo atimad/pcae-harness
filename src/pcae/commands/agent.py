@@ -143,6 +143,8 @@ from pcae.core.agent import (
     LIVE_WRITE_PILOT_ADVISORY,
     build_runtime_contracts,
     RUNTIME_CONTRACT_VERIFICATION_ADVISORY,
+    build_governance_audit,
+    GOVERNANCE_AUDIT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6043,6 +6045,80 @@ def run_runtime_contracts(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:               {', '.join(gb['verification_may'])}")
         print(f"  May not:           {', '.join(gb['verification_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_governance_audit(args: argparse.Namespace) -> int:
+    data = build_governance_audit()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ga = data["governance_audit"]
+        print("Live execution governance audit")
+        print(f"Audit: {ga['audit_id']}  Generated: {ga['audit_timestamp']}")
+        print(f"Phase: {ga['phase']} — {ga['title']}")
+        print()
+        print(ga["summary"])
+        print()
+        print("Audit summary:")
+        print(f"  Overall status:            {ga['overall_status']}")
+        print(f"  Domains audited:           {ga['domain_count']}")
+        print(f"  Compliant:                 {ga['compliant_count']}")
+        print(f"  Partially compliant:       {ga['partially_compliant_count']}")
+        print(f"  Non-compliant:             {ga['non_compliant_count']}")
+        print(f"  Checks:                    {ga['check_count']}")
+        print(f"  Checks met:                {ga['checks_met']}")
+        print(f"  Checks partially met:      {ga['checks_partially_met']}")
+        print(f"  Checks not met:            {ga['checks_not_met']}")
+        print(f"  Blockers:                  {ga['blocker_count']}")
+        print(f"  Warnings:                  {ga['warning_count']}")
+        print(f"  Recommendations:           {ga['recommendation_count']}")
+        print(f"  Execution allowed:         {'yes' if ga['execution_allowed'] else 'no'}")
+        print()
+        print("GovernanceAuditRecord model:")
+        m = data["audit_record_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        ds = data["domain_statuses"]
+        print(f"Domain statuses ({ds['status_count']}):")
+        for s in ds["statuses"]:
+            print(f"  {s['status']}: {s['description']}")
+        print()
+        print(f"Domain results ({len(data['domain_results'])} domains):")
+        for domain in data["domain_results"]:
+            print(f"  [{domain['status']}] {domain['domain']}")
+            print(f"    {domain['rationale']}")
+            if domain["blockers"]:
+                print(f"    Blockers: {', '.join(domain['blockers'])}")
+        print()
+        print(f"Audit checks ({len(data['audit_checks'])}):")
+        for check in data["audit_checks"]:
+            print(f"  [{check['status']}] {check['check_id']} {check['check']}")
+            print(f"    {check['rationale']}")
+        print()
+        gap = data["gap_analysis"]
+        print(f"Gap analysis ({gap['gap_count']} gaps):")
+        print(f"  Missing paths:             {gap['missing_governance_paths']}")
+        print(f"  Incomplete paths:          {gap['incomplete_governance_paths']}")
+        print(f"  Unverified contracts:      {gap['unverified_runtime_contracts']}")
+        print(f"  Unresolved blockers:       {gap['unresolved_blockers']}")
+        print()
+        print(f"Recommendations ({len(data['recommendations'])}):")
+        for rec in data["recommendations"]:
+            print(f"  [{rec['priority']}] {rec['recommendation_id']}: {rec['recommendation']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['audit_may'])}")
+        print(f"  May not:           {', '.join(gb['audit_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print()
         print(data["advisory"])

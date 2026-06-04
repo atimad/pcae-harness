@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47F: Runtime Contract Verification.
+Phase 47G: Live Execution Governance Audit.
 
 ## Governance Coherence Note
 
@@ -2895,9 +2895,33 @@ verification_may inspect contracts/record capabilities/identify blockers;
 verification_may_not invoke runtimes/execute prompts/modify files/approve
 execution; future_evolution: 47G/47H/48A
 
+and a whole-system governance audit is performed with `pcae governance-audit`
+and `pcae governance-audit --json` (Phase 47G): inputs: 8 sources
+(change_governance_artifacts, rollback_governance_artifacts,
+prompt_governance_artifacts, execution_governance_artifacts,
+runtime_contract_verification, live_readonly_pilot, live_write_pilot,
+rollback_execution_pilot); no runtime invocation; no prompt execution;
+no file modification; GovernanceAuditRecord model: 7 fields (all required,
+all immutable): audit_id/audit_timestamp/overall_status/domain_results/
+blockers/warnings/recommendations; 8 audit domains (all
+partially_compliant): change_governance/rollback_governance/
+prompt_governance/execution_governance/runtime_governance/audit_governance/
+consensus_governance/quality_governance; overall_status=partially_compliant;
+3 domain statuses: compliant/partially_compliant/non_compliant; 7 audit
+checks (all required, all blocking, all partially_met):
+approval_paths_exist/audit_paths_exist/rollback_paths_exist/
+prompt_review_paths_exist/quality_review_paths_exist/
+human_authorization_paths_exist/runtime_contracts_exist; gap analysis:
+4 categories (missing_governance_paths/incomplete_governance_paths/
+unverified_runtime_contracts/unresolved_blockers), 15 total gaps; 6
+recommendations; execution_allowed=False; governance_boundaries:
+audit_may inspect governance artifacts/identify gaps/generate
+recommendations; audit_may_not invoke runtimes/execute prompts/modify
+files/approve execution/commit/push; future_evolution: 47H/47I/48A
+
 ## Next
 
-- TBD: Future phases (47G Live Execution Governance Audit, 47H Runtime Trust Assessment, 48A Controlled Read-Only Runtime Invocation).
+- TBD: Future phases (47H Runtime Trust Assessment, 47I Governance Maturity Assessment, 48A Controlled Read-Only Runtime Invocation Implementation).
 
 ## Future Explorations
 

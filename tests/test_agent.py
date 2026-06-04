@@ -27857,3 +27857,208 @@ def test_47f_human_output_shows_all_sections(capsys) -> None:
     assert "RuntimeContractVerificationRecord model" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 47G — Live Execution Governance Audit
+# ---------------------------------------------------------------------------
+
+
+def test_47g_json_structure(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "governance_audit", "audit_record_model", "domain_results",
+        "domain_statuses", "audit_checks", "gap_analysis",
+        "recommendations", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47g_audit_summary_fields(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ga = data["governance_audit"]
+    for field in (
+        "audit_id", "audit_timestamp", "phase", "title", "summary",
+        "overall_status", "domain_count", "compliant_count",
+        "partially_compliant_count", "non_compliant_count",
+        "check_count", "checks_met", "checks_partially_met", "checks_not_met",
+        "blocker_count", "warning_count", "recommendation_count",
+        "execution_allowed", "input_sources", "governance_boundaries",
+        "future_evolution", "domain_results", "blockers", "warnings",
+        "recommendations",
+    ):
+        assert field in ga, f"missing summary field: {field}"
+    assert ga["audit_id"].startswith("gaa-")
+    assert ga["phase"] == "47G"
+    assert ga["domain_count"] == 8
+    assert ga["check_count"] == 7
+    assert ga["execution_allowed"] is False
+
+
+def test_47g_execution_not_allowed(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["governance_audit"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_47g_overall_status_not_compliant(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["governance_audit"]["overall_status"] != "compliant"
+    assert data["governance_audit"]["overall_status"] == "partially_compliant"
+
+
+def test_47g_audit_record_model(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["audit_record_model"]
+    assert m["model_name"] == "GovernanceAuditRecord"
+    assert m["field_count"] == 7
+    assert m["required_field_count"] == 7
+    assert m["immutable_field_count"] == 7
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "audit_id", "audit_timestamp", "overall_status",
+        "domain_results", "blockers", "warnings", "recommendations",
+    ):
+        assert expected in field_names, f"missing GovernanceAuditRecord field: {expected}"
+    for f in m["fields"]:
+        assert f["immutable"] is True, f"field {f['name']} must be immutable"
+
+
+def test_47g_domain_statuses(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ds = data["domain_statuses"]
+    assert ds["status_count"] == 3
+    status_names = [s["status"] for s in ds["statuses"]]
+    for expected in ("compliant", "partially_compliant", "non_compliant"):
+        assert expected in status_names, f"missing domain status: {expected}"
+    for s in ds["statuses"]:
+        assert "status" in s
+        assert "description" in s
+
+
+def test_47g_domain_results(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = data["domain_results"]
+    assert len(domains) == 8
+    domain_names = [d["domain"] for d in domains]
+    for expected in (
+        "change_governance", "rollback_governance", "prompt_governance",
+        "execution_governance", "runtime_governance", "audit_governance",
+        "consensus_governance", "quality_governance",
+    ):
+        assert expected in domain_names, f"missing audit domain: {expected}"
+    for domain in domains:
+        for field in (
+            "domain", "status", "description", "rationale",
+            "checks_passed", "checks_failed", "blockers",
+        ):
+            assert field in domain, f"domain missing field: {field}"
+    all_statuses = {d["status"] for d in domains}
+    assert "compliant" not in all_statuses
+
+
+def test_47g_audit_checks(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checks = data["audit_checks"]
+    assert len(checks) == 7
+    check_names = [c["check"] for c in checks]
+    for expected in (
+        "approval_paths_exist", "audit_paths_exist", "rollback_paths_exist",
+        "prompt_review_paths_exist", "quality_review_paths_exist",
+        "human_authorization_paths_exist", "runtime_contracts_exist",
+    ):
+        assert expected in check_names, f"missing audit check: {expected}"
+    for check in checks:
+        for field in (
+            "check_id", "check", "description", "status",
+            "required", "blocking", "rationale",
+        ):
+            assert field in check, f"check missing field: {field}"
+        assert check["required"] is True
+        assert check["blocking"] is True
+
+
+def test_47g_gap_analysis(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gap = data["gap_analysis"]
+    for key in (
+        "missing_governance_paths", "incomplete_governance_paths",
+        "unverified_runtime_contracts", "unresolved_blockers", "gap_count",
+    ):
+        assert key in gap, f"missing gap analysis key: {key}"
+    assert len(gap["missing_governance_paths"]) > 0
+    assert len(gap["incomplete_governance_paths"]) > 0
+    assert len(gap["unverified_runtime_contracts"]) > 0
+    assert len(gap["unresolved_blockers"]) > 0
+    assert gap["gap_count"] > 0
+
+
+def test_47g_recommendations(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    recs = data["recommendations"]
+    assert len(recs) >= 5
+    for rec in recs:
+        for field in ("recommendation_id", "recommendation", "priority", "addresses"):
+            assert field in rec, f"recommendation missing field: {field}"
+    priorities = {r["priority"] for r in recs}
+    assert "high" in priorities
+
+
+def test_47g_blockers_and_warnings(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ga = data["governance_audit"]
+    assert ga["blocker_count"] > 0
+    assert ga["warning_count"] > 0
+    assert len(ga["blockers"]) == ga["blocker_count"]
+    assert len(ga["warnings"]) == ga["warning_count"]
+
+
+def test_47g_governance_boundaries(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["read_only"] is True
+    may = " ".join(gb["audit_may"]).lower()
+    for allowed in ("inspect governance artifacts", "identify gaps", "generate recommendations"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["audit_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve execution", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47g_advisory(capsys) -> None:
+    main(["governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_47g_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-audit"])
+    output = capsys.readouterr().out
+    assert "Live execution governance audit" in output
+    assert "Audit summary" in output
+    assert "GovernanceAuditRecord model" in output
+    assert "Domain statuses" in output
+    assert "Domain results" in output
+    assert "Audit checks" in output
+    assert "Gap analysis" in output
+    assert "Recommendations" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

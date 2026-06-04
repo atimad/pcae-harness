@@ -516,3 +516,8 @@
 
 - `pcae runtime-contracts`
 - `pcae runtime-contracts --json`
+
+## governance-audit
+
+- `pcae governance-audit`
+- `pcae governance-audit --json`

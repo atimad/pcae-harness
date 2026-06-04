@@ -84,6 +84,7 @@ from pcae.commands.agent import (
     run_rollback_execution_pilot,
     run_live_write_pilot,
     run_runtime_contracts,
+    run_execution_governance_audit,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2059,6 +2060,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON runtime contracts output.",
     )
     runtime_contracts_parser.set_defaults(handler=run_runtime_contracts)
+
+    exec_governance_audit_parser = subparsers.add_parser(
+        "governance-audit",
+        help="Perform a whole-system governance audit of PCAE execution architecture (Phase 47G).",
+    )
+    exec_governance_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance audit output.",
+    )
+    exec_governance_audit_parser.set_defaults(handler=run_execution_governance_audit)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

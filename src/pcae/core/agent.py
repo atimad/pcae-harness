@@ -27399,3 +27399,547 @@ def build_runtime_contracts() -> dict:
         "governance_boundaries": dict(_RCV_GOVERNANCE_BOUNDARIES),
         "advisory": RUNTIME_CONTRACT_VERIFICATION_ADVISORY,
     }
+
+
+# Phase 47G — Live Execution Governance Audit
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_AUDIT_ADVISORY = (
+    "Live execution governance audit is informational; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_GAA_INPUT_SOURCES: tuple[str, ...] = (
+    "change_governance_artifacts",
+    "rollback_governance_artifacts",
+    "prompt_governance_artifacts",
+    "execution_governance_artifacts",
+    "runtime_contract_verification",
+    "live_readonly_pilot",
+    "live_write_pilot",
+    "rollback_execution_pilot",
+)
+
+_GAA_AUDIT_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "description": "Unique identifier for this governance audit record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_timestamp",
+        "type": "str",
+        "description": "ISO-8601 timestamp when the audit was generated.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "overall_status",
+        "type": "str",
+        "description": (
+            "Overall governance compliance status: compliant, partially_compliant, "
+            "or non_compliant."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "domain_results",
+        "type": "list[dict]",
+        "description": "Per-domain compliance results for all audited governance domains.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blocking issues preventing full governance compliance.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during the audit.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of recommendations to advance governance compliance.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_GAA_DOMAIN_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "compliant",
+        "description": (
+            "All required governance checks pass and the domain has been validated "
+            "end-to-end through live governed execution."
+        ),
+    },
+    {
+        "status": "partially_compliant",
+        "description": (
+            "Governance artifacts and paths are designed and in place, but the domain "
+            "has not been validated through live governed execution."
+        ),
+    },
+    {
+        "status": "non_compliant",
+        "description": (
+            "Required governance artifacts or paths are missing or have been "
+            "violated."
+        ),
+    },
+)
+
+_GAA_DOMAIN_RESULTS: tuple[dict, ...] = (
+    {
+        "domain": "change_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of file changes: write invocation design, file scope governance, "
+            "result review, and change authorization."
+        ),
+        "rationale": (
+            "Change governance was established across write invocation design, file scope, "
+            "result review, and preflight workflows. Live write execution has not been "
+            "performed to validate the full change governance path end-to-end."
+        ),
+        "checks_passed": ["approval_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["live_write_execution_not_validated"],
+    },
+    {
+        "domain": "rollback_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of rollback operations: rollback validation, dry-run simulation, "
+            "and rollback execution pilot."
+        ),
+        "rationale": (
+            "Rollback governance was established across Phases 43A–43E, 46S, and 47D. "
+            "Live rollback execution has not been performed to validate the full rollback "
+            "governance path end-to-end."
+        ),
+        "checks_passed": ["rollback_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["live_rollback_not_performed"],
+    },
+    {
+        "domain": "prompt_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of prompt creation, review, approval, and execution authorization."
+        ),
+        "rationale": (
+            "Prompt governance and approval workflows were designed across prompt "
+            "generation, validation, and artifact phases. No live prompt execution "
+            "has been governed under PCAE."
+        ),
+        "checks_passed": ["prompt_review_paths_exist", "approval_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["live_prompt_execution_not_validated"],
+    },
+    {
+        "domain": "execution_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of execution authorization, audit, consensus, and quality review."
+        ),
+        "rationale": (
+            "Execution authorization, audit design, and consensus design were established. "
+            "No live execution has been authorized or performed under PCAE governance."
+        ),
+        "checks_passed": ["human_authorization_paths_exist", "approval_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["live_execution_not_performed"],
+    },
+    {
+        "domain": "runtime_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of runtime contracts: invocation, sandbox, output capture, "
+            "writable, read-only, and timeout contracts."
+        ),
+        "rationale": (
+            "Runtime contracts were defined in Phase 47F. codex-local and claude-local "
+            "are partially_verified; kimi-local is unverified. Sandbox mode and timeout "
+            "enforcement are not yet validated for any runtime."
+        ),
+        "checks_passed": ["runtime_contracts_exist"],
+        "checks_failed": ["sandbox_contract_unverified", "timeout_contract_unverified"],
+        "blockers": [
+            "kimi_local_unverified",
+            "sandbox_contract_unverified",
+            "timeout_contract_unverified",
+        ],
+    },
+    {
+        "domain": "audit_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of execution audit records: audit path establishment, "
+            "audit record production, and audit trail integrity."
+        ),
+        "rationale": (
+            "Audit design was established in Phase 46K. No live execution audit record "
+            "has been produced; the audit path remains design-only."
+        ),
+        "checks_passed": ["audit_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["no_live_audit_records_produced"],
+    },
+    {
+        "domain": "consensus_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of multi-agent consensus: consensus design, review workflow, "
+            "and consensus path validation."
+        ),
+        "rationale": (
+            "Execution consensus design was established in Phase 46L. No live consensus "
+            "review has been conducted for any execution candidate."
+        ),
+        "checks_passed": ["approval_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["no_live_consensus_review_performed"],
+    },
+    {
+        "domain": "quality_governance",
+        "status": "partially_compliant",
+        "description": (
+            "Governance of execution quality: quality review framework, quality checks, "
+            "and quality acceptance criteria."
+        ),
+        "rationale": (
+            "Quality review framework was established in Phase 46M. No live quality "
+            "review has been performed on any execution result."
+        ),
+        "checks_passed": ["quality_review_paths_exist"],
+        "checks_failed": [],
+        "blockers": ["no_live_quality_review_performed"],
+    },
+)
+
+_GAA_AUDIT_CHECKS: tuple[dict, ...] = (
+    {
+        "check_id": "gac-c01",
+        "check": "approval_paths_exist",
+        "description": (
+            "Approval paths exist for prompt, execution, write, and rollback operations."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Approval path designs exist for all governed operation types. "
+            "No approval path has been exercised in a live governed execution."
+        ),
+    },
+    {
+        "check_id": "gac-c02",
+        "check": "audit_paths_exist",
+        "description": (
+            "Audit paths exist and are linked to all governed execution types."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Audit design established in Phase 46K. No live audit record has been "
+            "produced; audit path is design-only."
+        ),
+    },
+    {
+        "check_id": "gac-c03",
+        "check": "rollback_paths_exist",
+        "description": (
+            "Rollback paths exist for all governed write execution types."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Rollback validation and dry-run governance established. No live rollback "
+            "has been executed to validate the rollback path end-to-end."
+        ),
+    },
+    {
+        "check_id": "gac-c04",
+        "check": "prompt_review_paths_exist",
+        "description": (
+            "Prompt review and approval paths exist for all governed prompt types."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Prompt governance and approval workflows designed. No live prompt has been "
+            "reviewed and approved under PCAE governance."
+        ),
+    },
+    {
+        "check_id": "gac-c05",
+        "check": "quality_review_paths_exist",
+        "description": (
+            "Quality review paths exist for evaluating all governed execution results."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Quality review framework established in Phase 46M. No live quality review "
+            "has been performed on any execution result."
+        ),
+    },
+    {
+        "check_id": "gac-c06",
+        "check": "human_authorization_paths_exist",
+        "description": (
+            "Human authorization paths exist and are required for all governed "
+            "execution and rollback operations."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Execution authorization design established. Human authorization gates are "
+            "present in all pilot designs. No live authorization has been issued."
+        ),
+    },
+    {
+        "check_id": "gac-c07",
+        "check": "runtime_contracts_exist",
+        "description": (
+            "Runtime contracts are defined and verified for all target runtimes."
+        ),
+        "status": "partially_met",
+        "required": True,
+        "blocking": True,
+        "rationale": (
+            "Runtime contracts defined in Phase 47F. codex-local and claude-local "
+            "are partially_verified; kimi-local is unverified. No contract is fully verified."
+        ),
+    },
+)
+
+_GAA_GAP_ANALYSIS: dict = {
+    "missing_governance_paths": [
+        "live_execution_path",
+        "live_audit_record_path",
+    ],
+    "incomplete_governance_paths": [
+        "runtime_writable_contract_end_to_end",
+        "sandbox_isolation",
+        "timeout_enforcement",
+    ],
+    "unverified_runtime_contracts": [
+        "kimi_local_all_areas",
+        "codex_local_sandbox_contract",
+        "codex_local_timeout_contract",
+        "claude_local_sandbox_contract",
+        "claude_local_timeout_contract",
+    ],
+    "unresolved_blockers": [
+        "live_execution_not_performed",
+        "no_live_audit_records_produced",
+        "sandbox_contract_unverified_all_runtimes",
+        "timeout_contract_unverified_all_runtimes",
+        "kimi_local_not_confirmed_installed",
+    ],
+    "gap_count": 15,
+}
+
+_GAA_RECOMMENDATIONS: tuple[dict, ...] = (
+    {
+        "recommendation_id": "gaa-r01",
+        "recommendation": (
+            "Advance to Phase 48A (Controlled Read-Only Runtime Invocation) to produce "
+            "the first live governed execution and audit record."
+        ),
+        "priority": "high",
+        "addresses": ["live_execution_not_performed", "no_live_audit_records_produced"],
+    },
+    {
+        "recommendation_id": "gaa-r02",
+        "recommendation": (
+            "Validate sandbox mode for codex-local and claude-local to advance "
+            "sandbox_contract from unverified to verified."
+        ),
+        "priority": "high",
+        "addresses": ["sandbox_contract_unverified"],
+    },
+    {
+        "recommendation_id": "gaa-r03",
+        "recommendation": (
+            "Validate timeout enforcement behavior for codex-local and claude-local "
+            "to advance timeout_contract from unverified to verified."
+        ),
+        "priority": "high",
+        "addresses": ["timeout_contract_unverified"],
+    },
+    {
+        "recommendation_id": "gaa-r04",
+        "recommendation": (
+            "Confirm kimi-local installation and validate all six runtime contract areas "
+            "to advance kimi-local from unverified to at least partially_verified."
+        ),
+        "priority": "medium",
+        "addresses": ["kimi_local_not_confirmed_installed", "kimi_local_all_areas"],
+    },
+    {
+        "recommendation_id": "gaa-r05",
+        "recommendation": (
+            "Conduct a controlled live consensus review to advance consensus_governance "
+            "from partially_compliant toward compliant."
+        ),
+        "priority": "medium",
+        "addresses": ["no_live_consensus_review_performed"],
+    },
+    {
+        "recommendation_id": "gaa-r06",
+        "recommendation": (
+            "Perform a controlled live quality review on an execution result to advance "
+            "quality_governance from partially_compliant toward compliant."
+        ),
+        "priority": "medium",
+        "addresses": ["no_live_quality_review_performed"],
+    },
+)
+
+_GAA_BLOCKERS: tuple[str, ...] = (
+    "live_execution_not_performed",
+    "no_live_audit_records_produced",
+    "kimi_local_unverified",
+    "sandbox_contracts_unverified_all_runtimes",
+    "timeout_contracts_unverified_all_runtimes",
+)
+
+_GAA_WARNINGS: tuple[str, ...] = (
+    "runtime_contract_verification_incomplete",
+    "all_domains_partially_compliant",
+)
+
+_GAA_GOVERNANCE_BOUNDARIES: dict = {
+    "audit_may": [
+        "inspect governance artifacts",
+        "identify gaps",
+        "generate recommendations",
+    ],
+    "audit_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve execution",
+        "commit",
+        "push",
+    ],
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_GAA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47H", "description": "Runtime Trust Assessment"},
+    {"phase": "47I", "description": "Governance Maturity Assessment"},
+    {"phase": "48A", "description": "Controlled Read-Only Runtime Invocation Implementation"},
+)
+
+
+def build_governance_audit() -> dict:
+    """Perform a whole-system governance audit of PCAE execution architecture. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    audit_id = f"gaa-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    audit_record_fields = [dict(f) for f in _GAA_AUDIT_RECORD_FIELDS]
+    domain_statuses = [dict(s) for s in _GAA_DOMAIN_STATUSES]
+    domain_results = [dict(d) for d in _GAA_DOMAIN_RESULTS]
+    audit_checks = [dict(c) for c in _GAA_AUDIT_CHECKS]
+    recommendations = [dict(r) for r in _GAA_RECOMMENDATIONS]
+    blockers = list(_GAA_BLOCKERS)
+    warnings = list(_GAA_WARNINGS)
+
+    compliant_count = sum(1 for d in domain_results if d["status"] == "compliant")
+    partially_compliant_count = sum(
+        1 for d in domain_results if d["status"] == "partially_compliant"
+    )
+    non_compliant_count = sum(1 for d in domain_results if d["status"] == "non_compliant")
+
+    if non_compliant_count > 0:
+        overall_status = "non_compliant"
+    elif partially_compliant_count > 0:
+        overall_status = "partially_compliant"
+    else:
+        overall_status = "compliant"
+
+    checks_partially_met = sum(1 for c in audit_checks if c["status"] == "partially_met")
+    checks_met = sum(1 for c in audit_checks if c["status"] == "met")
+    checks_not_met = sum(1 for c in audit_checks if c["status"] == "not_met")
+
+    audit_record_model = {
+        "model_name": "GovernanceAuditRecord",
+        "field_count": len(audit_record_fields),
+        "required_field_count": sum(1 for f in audit_record_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in audit_record_fields if f["immutable"]),
+        "fields": audit_record_fields,
+    }
+
+    governance_audit = {
+        "audit_id": audit_id,
+        "audit_timestamp": generated_at,
+        "phase": "47G",
+        "title": "Live Execution Governance Audit",
+        "summary": (
+            "Whole-system governance audit of the PCAE execution architecture. Audits "
+            "eight governance domains (change_governance, rollback_governance, "
+            "prompt_governance, execution_governance, runtime_governance, "
+            "audit_governance, consensus_governance, quality_governance), all "
+            "partially_compliant. Defines seven audit checks (all partially_met), "
+            "identifies fifteen gaps across four gap categories, and generates six "
+            "recommendations. GovernanceAuditRecord model: 7 fields, all immutable. "
+            "Overall status: partially_compliant. No execution occurs. Informational."
+        ),
+        "overall_status": overall_status,
+        "domain_count": len(domain_results),
+        "compliant_count": compliant_count,
+        "partially_compliant_count": partially_compliant_count,
+        "non_compliant_count": non_compliant_count,
+        "check_count": len(audit_checks),
+        "checks_met": checks_met,
+        "checks_partially_met": checks_partially_met,
+        "checks_not_met": checks_not_met,
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings),
+        "recommendation_count": len(recommendations),
+        "execution_allowed": False,
+        "input_sources": list(_GAA_INPUT_SOURCES),
+        "governance_boundaries": dict(_GAA_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _GAA_FUTURE_EVOLUTION],
+        # GovernanceAuditRecord fields
+        "domain_results": domain_results,
+        "blockers": blockers,
+        "warnings": warnings,
+        "recommendations": [r["recommendation_id"] for r in recommendations],
+    }
+
+    return {
+        "governance_audit": governance_audit,
+        "audit_record_model": audit_record_model,
+        "domain_results": domain_results,
+        "domain_statuses": {
+            "status_count": len(domain_statuses),
+            "statuses": domain_statuses,
+        },
+        "audit_checks": audit_checks,
+        "gap_analysis": dict(_GAA_GAP_ANALYSIS),
+        "recommendations": recommendations,
+        "governance_boundaries": dict(_GAA_GOVERNANCE_BOUNDARIES),
+        "advisory": GOVERNANCE_AUDIT_ADVISORY,
+    }
