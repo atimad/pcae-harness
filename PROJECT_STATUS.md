@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.3: Architecture Diagrams (documentation only).
+Phase 48X.4: Contributor Guide (documentation only).
 
 ## Governance Coherence Note
 
@@ -3152,6 +3152,22 @@ explicitly marked as future state, not current capability);
 README.md updated with diagram links table;
 whitepaper updated with diagram links in sections 5/8/9/10/14;
 roadmap updated with 48X.T parallel test standardization and 49A;
+no source logic changes; documentation only
+and PCAE Contributor Guide created (Phase 48X.4):
+CONTRIBUTING.md — 9-section contributor guide covering welcome and
+governance philosophy, development setup (clone, venv, editable install,
+parallel pytest validation with `python -m pytest -n auto`), contribution
+workflow, governance requirements (human approval authoritative, auditability
+required, rollback paths required, runtime trust required, evidence before
+execution), testing requirements (required: `pcae health` + `pcae check` +
+`python -m pytest -n auto`; recommended: `python -m pytest`), documentation
+requirements table, coding standards (backward compatibility, no hidden
+automation, preserve governance boundaries, preserve test coverage), pull
+request expectations, Apache 2.0 license;
+README.md updated with Contributing section linking to CONTRIBUTING.md;
+whitepaper updated with new section 15 (Contributing) covering development
+setup, parallel test execution standardization (48X.T), and documentation
+requirements — License renumbered to section 16;
 no source logic changes; documentation only
 
 ## Next

@@ -135,6 +135,10 @@ No PCAE command currently invokes a runtime, submits a prompt, or modifies repos
 | Controlled write pilot | Planned — rollback governance and change governance scaffolds complete; write gate not yet implemented |
 | Autonomous engineering | Future — depends on evidence and review infrastructure passing human review requirements |
 
+## Contributing
+
+Contributions must preserve PCAE's governance guarantees. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, contribution workflow, governance requirements, testing standards, and pull request expectations.
+
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

@@ -308,7 +308,37 @@ See [05-future-autonomous-flow.md](../architecture/05-future-autonomous-flow.md)
 
 ---
 
-## 15. License
+## 15. Contributing
+
+PCAE welcomes contributions that preserve its governance guarantees. The
+[CONTRIBUTING.md](../../CONTRIBUTING.md) guide documents the full contribution
+workflow, including development setup, governance requirements, testing
+standards, and pull request expectations.
+
+The governance bar for contributions is the same bar PCAE enforces in the
+repos it governs: human approval remains authoritative, auditability is
+required, rollback paths must exist, runtime trust must be assessed, and
+evidence must precede execution. Contributions that weaken any of these
+guarantees fall outside the accepted scope.
+
+**Development setup.** Clone the repository, create a virtual environment,
+install dependencies with `pip install -e ".[dev]"`, and verify with
+`pcae health`, `pcae check`, and `python -m pytest -n auto`. All three
+must pass before beginning work.
+
+**Parallel test execution.** The preferred validation path is
+`python -m pytest -n auto`, which distributes the test suite across available
+CPU cores using `pytest-xdist`. This is the standard for CI and local
+pre-commit validation. Tests must be written to be parallel-safe.
+
+**Documentation.** Every behavior-visible change requires corresponding
+updates to `CHANGELOG.md` and `PROJECT_STATUS.md` at minimum. Architecture
+changes additionally require updates to the white paper, architecture
+diagrams, and governance handbook.
+
+---
+
+## 16. License
 
 PCAE is licensed under the Apache License 2.0.
 
