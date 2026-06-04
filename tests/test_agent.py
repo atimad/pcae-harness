@@ -28590,3 +28590,175 @@ def test_48a_human_output_shows_all_sections(capsys) -> None:
     assert "Result placeholder" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48B — Invocation Result Capture Implementation
+# ---------------------------------------------------------------------------
+
+
+def test_48b_json_structure(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "scaffold_summary", "capture_model", "preflight_model", "summary_model",
+        "sample_capture", "sample_preflight", "sample_summary",
+        "input_sources", "governance_boundaries", "future_evolution", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48b_scaffold_summary_fields(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["scaffold_summary"]
+    for field in (
+        "scaffold_id", "generated_at", "phase", "title", "summary",
+        "capture_allowed", "human_review_required",
+        "capture_model_field_count", "preflight_model_field_count",
+        "summary_model_field_count", "supported_capture_statuses",
+    ):
+        assert field in ss, f"missing scaffold_summary field: {field}"
+    assert ss["phase"] == "48B"
+    assert ss["capture_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["capture_model_field_count"] == 10
+    assert ss["preflight_model_field_count"] == 9
+    assert ss["summary_model_field_count"] == 9
+
+
+def test_48b_capture_always_blocked(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["scaffold_summary"]["capture_allowed"] is False
+    assert data["governance_boundaries"]["capture_allowed"] is False
+    assert data["sample_preflight"]["capture_allowed"] is False
+    assert data["preflight_model"]["capture_allowed_always_false_in_48b"] is True
+
+
+def test_48b_capture_model(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["capture_model"]
+    assert cm["model_name"] == "InvocationResultCapture"
+    assert cm["field_count"] == 10
+    assert cm["required_field_count"] == 10
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "capture_id", "request_id", "result_id", "runtime_id",
+        "stdout", "stderr", "exit_code", "metadata", "capture_status", "created_at",
+    ):
+        assert expected in field_names, f"missing capture field: {expected}"
+    for status in ("pending", "captured", "capture_blocked", "not_executed"):
+        assert status in cm["supported_statuses"], f"missing status: {status}"
+
+
+def test_48b_preflight_model(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["preflight_model"]
+    assert pm["model_name"] == "InvocationCapturePreflight"
+    assert pm["field_count"] == 9
+    assert pm["required_field_count"] == 9
+    assert pm["capture_allowed_always_false_in_48b"] is True
+    field_names = [f["name"] for f in pm["fields"]]
+    for expected in (
+        "capture_preflight_id", "request_id", "result_id",
+        "output_capture_status", "metadata_status", "audit_status",
+        "capture_allowed", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing preflight field: {expected}"
+
+
+def test_48b_summary_model(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "InvocationCaptureSummary"
+    assert sm["field_count"] == 9
+    assert sm["required_field_count"] == 9
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "capture_id", "request_id", "runtime_id",
+        "stdout_present", "stderr_present", "exit_code_present",
+        "metadata_present", "ready_for_review",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_48b_sample_capture_not_executed(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_capture"]
+    assert sc["capture_id"].startswith("irc-cap-")
+    assert sc["capture_status"] == "not_executed"
+    assert sc["stdout"] is None
+    assert sc["stderr"] is None
+    assert sc["exit_code"] is None
+    assert sc["metadata"] == {}
+
+
+def test_48b_sample_preflight_blockers(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_preflight"]
+    assert sp["capture_allowed"] is False
+    assert sp["capture_preflight_id"].startswith("irc-pre-")
+    assert "phase_48b_capture_not_authorized" in sp["blockers"]
+    assert "execution_not_performed" in sp["blockers"]
+    assert "output_capture_pipeline_not_wired" in sp["blockers"]
+
+
+def test_48b_sample_summary_not_ready(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ssum = data["sample_summary"]
+    assert ssum["summary_id"].startswith("irc-sum-")
+    assert ssum["ready_for_review"] is False
+    assert ssum["stdout_present"] is False
+    assert ssum["stderr_present"] is False
+    assert ssum["exit_code_present"] is False
+    assert ssum["metadata_present"] is False
+
+
+def test_48b_governance_boundaries(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["capture_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48B"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("construct result capture models", "evaluate capture readiness", "report blockers"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48b_future_evolution(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "48C" in phases
+
+
+def test_48b_advisory(capsys) -> None:
+    main(["invocation-result-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "capture_allowed=false" in advisory
+
+
+def test_48b_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-result-capture"])
+    output = capsys.readouterr().out
+    assert "Invocation result capture scaffold" in output
+    assert "Capture model" in output
+    assert "Preflight model" in output
+    assert "Summary model" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

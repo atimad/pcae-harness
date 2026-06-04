@@ -88,6 +88,7 @@ from pcae.commands.agent import (
     run_runtime_trust,
     run_governance_maturity,
     run_readonly_invocation,
+    run_invocation_result_capture,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2107,6 +2108,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     readonly_invocation_parser.set_defaults(handler=run_readonly_invocation)
+
+    invocation_result_capture_parser = subparsers.add_parser(
+        "invocation-result-capture",
+        help="Governed invocation result capture scaffold (Phase 48B).",
+    )
+    invocation_result_capture_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    invocation_result_capture_parser.set_defaults(handler=run_invocation_result_capture)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

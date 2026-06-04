@@ -536,3 +536,8 @@
 
 - `pcae readonly-invocation`
 - `pcae readonly-invocation --json`
+
+## invocation-result-capture
+
+- `pcae invocation-result-capture`
+- `pcae invocation-result-capture --json`

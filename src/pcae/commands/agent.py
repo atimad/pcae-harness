@@ -151,6 +151,8 @@ from pcae.core.agent import (
     GOVERNANCE_MATURITY_ADVISORY,
     build_readonly_invocation,
     READONLY_INVOCATION_ADVISORY,
+    build_invocation_result_capture,
+    INVOCATION_RESULT_CAPTURE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6288,6 +6290,62 @@ def run_readonly_invocation(args: argparse.Namespace) -> int:
         print(f"  May:                 {', '.join(gb['may'])}")
         print(f"  May not:             {', '.join(gb['may_not'])}")
         print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_result_capture(args: argparse.Namespace) -> int:
+    data = build_invocation_result_capture()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ss = data["scaffold_summary"]
+        print("Invocation result capture scaffold")
+        print(f"Scaffold: {ss['scaffold_id']}  Generated: {ss['generated_at']}")
+        print(f"Phase: {ss['phase']} — {ss['title']}")
+        print()
+        print(ss["summary"])
+        print()
+        print(f"Capture allowed: {'yes' if ss['capture_allowed'] else 'no'}")
+        print(f"Human review required: {'yes' if ss['human_review_required'] else 'no'}")
+        print(f"Supported capture statuses: {', '.join(ss['supported_capture_statuses'])}")
+        print()
+        cm = data["capture_model"]
+        print(f"Capture model: {cm['model_name']} ({cm['field_count']} fields, {cm['required_field_count']} required)")
+        for f in cm["fields"]:
+            print(f"  {f['name']} ({f['type']}): {f['description']}")
+        print()
+        pm = data["preflight_model"]
+        print(f"Preflight model: {pm['model_name']} ({pm['field_count']} fields, {pm['required_field_count']} required)")
+        print(f"  capture_allowed always False in 48B: {pm['capture_allowed_always_false_in_48b']}")
+        for f in pm["fields"]:
+            print(f"  {f['name']} ({f['type']}): {f['description']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields, {sm['required_field_count']} required)")
+        for f in sm["fields"]:
+            print(f"  {f['name']} ({f['type']}): {f['description']}")
+        print()
+        sp = data["sample_preflight"]
+        print("Sample capture preflight:")
+        print(f"  capture_allowed: {sp['capture_allowed']}")
+        print(f"  Blockers: {', '.join(sp['blockers'])}")
+        if sp["warnings"]:
+            print(f"  Warnings: {', '.join(sp['warnings'])}")
+        print()
+        sc = data["sample_capture"]
+        print(f"Sample capture: status={sc['capture_status']}, stdout={sc['stdout']}, stderr={sc['stderr']}, exit_code={sc['exit_code']}")
+        print()
+        ssum = data["sample_summary"]
+        print(f"Sample summary: ready_for_review={ssum['ready_for_review']}, stdout_present={ssum['stdout_present']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Capture allowed:     {gb['capture_allowed']}")
         print(f"  Human review req'd:  {gb['human_review_required']}")
         print()
         print(data["advisory"])

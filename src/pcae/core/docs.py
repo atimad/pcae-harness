@@ -557,6 +557,11 @@ def render_commands_reference() -> str:
 
 - `pcae readonly-invocation`
 - `pcae readonly-invocation --json`
+
+## invocation-result-capture
+
+- `pcae invocation-result-capture`
+- `pcae invocation-result-capture --json`
 """
 
 

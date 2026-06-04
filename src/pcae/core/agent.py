@@ -29057,3 +29057,348 @@ def build_readonly_invocation() -> dict:
         "future_evolution": [dict(e) for e in _RIR_FUTURE_EVOLUTION],
         "advisory": READONLY_INVOCATION_ADVISORY,
     }
+
+
+# Phase 48B — Invocation Result Capture Implementation
+# ---------------------------------------------------------------------------
+
+INVOCATION_RESULT_CAPTURE_ADVISORY = (
+    "Invocation result capture scaffold is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "capture_allowed=False in Phase 48B."
+)
+
+_IRC_CAPTURE_STATUSES: tuple[str, ...] = (
+    "pending",
+    "captured",
+    "capture_blocked",
+    "not_executed",
+)
+
+_IRC_CAPTURE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "capture_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this invocation result capture record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The ReadOnlyInvocationRequest this capture corresponds to.",
+    },
+    {
+        "name": "result_id",
+        "type": "str",
+        "required": True,
+        "description": "The ReadOnlyInvocationResult placeholder this capture extends.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime that produced (or would produce) the result.",
+    },
+    {
+        "name": "stdout",
+        "type": "str | None",
+        "required": True,
+        "description": "Captured standard output from the runtime (None in 48B).",
+    },
+    {
+        "name": "stderr",
+        "type": "str | None",
+        "required": True,
+        "description": "Captured standard error from the runtime (None in 48B).",
+    },
+    {
+        "name": "exit_code",
+        "type": "int | None",
+        "required": True,
+        "description": "Runtime process exit code (None in 48B).",
+    },
+    {
+        "name": "metadata",
+        "type": "dict",
+        "required": True,
+        "description": "Runtime invocation metadata including timing and adapter info.",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Current capture lifecycle status (not_executed in 48B).",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO 8601 timestamp when this capture record was created.",
+    },
+)
+
+_IRC_PREFLIGHT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "capture_preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this capture preflight evaluation.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request this preflight is associated with.",
+    },
+    {
+        "name": "result_id",
+        "type": "str",
+        "required": True,
+        "description": "The result placeholder this preflight targets.",
+    },
+    {
+        "name": "output_capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of output capture readiness (stdout/stderr pipelines).",
+    },
+    {
+        "name": "metadata_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of metadata capture readiness (timing, adapter info).",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of audit trail readiness for this capture.",
+    },
+    {
+        "name": "capture_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48B; controlled capture not yet authorized.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing result capture.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings about capture readiness.",
+    },
+)
+
+_IRC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this capture summary.",
+    },
+    {
+        "name": "capture_id",
+        "type": "str",
+        "required": True,
+        "description": "The InvocationResultCapture this summary describes.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The originating invocation request.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime associated with this capture.",
+    },
+    {
+        "name": "stdout_present",
+        "type": "bool",
+        "required": True,
+        "description": "Whether stdout was captured (False in 48B).",
+    },
+    {
+        "name": "stderr_present",
+        "type": "bool",
+        "required": True,
+        "description": "Whether stderr was captured (False in 48B).",
+    },
+    {
+        "name": "exit_code_present",
+        "type": "bool",
+        "required": True,
+        "description": "Whether an exit code was recorded (False in 48B).",
+    },
+    {
+        "name": "metadata_present",
+        "type": "bool",
+        "required": True,
+        "description": "Whether capture metadata is populated (False in 48B).",
+    },
+    {
+        "name": "ready_for_review",
+        "type": "bool",
+        "required": True,
+        "description": "Whether this capture is ready for human review (False in 48B).",
+    },
+)
+
+_IRC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct result capture models",
+        "evaluate capture readiness",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "capture_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48B",
+}
+
+_IRC_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "ReadOnlyInvocationResult_placeholder_from_48A",
+    "execution_audit_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+)
+
+_IRC_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "48C", "description": "Runtime Contract Enforcement"},
+)
+
+
+def build_invocation_result_capture() -> dict:
+    """Build invocation result capture scaffold. Read-only; no execution."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    capture_id = f"irc-cap-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    preflight_id = f"irc-pre-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    summary_id = f"irc-sum-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    request_id_ref = "rir-req-placeholder-48b"
+    result_id_ref = "rir-res-placeholder-48b"
+
+    capture_fields = [dict(f) for f in _IRC_CAPTURE_FIELDS]
+    preflight_fields = [dict(f) for f in _IRC_PREFLIGHT_FIELDS]
+    summary_fields = [dict(f) for f in _IRC_SUMMARY_FIELDS]
+
+    capture_model = {
+        "model_name": "InvocationResultCapture",
+        "field_count": len(capture_fields),
+        "required_field_count": sum(1 for f in capture_fields if f["required"]),
+        "supported_statuses": list(_IRC_CAPTURE_STATUSES),
+        "fields": capture_fields,
+    }
+
+    preflight_model = {
+        "model_name": "InvocationCapturePreflight",
+        "field_count": len(preflight_fields),
+        "required_field_count": sum(1 for f in preflight_fields if f["required"]),
+        "capture_allowed_always_false_in_48b": True,
+        "fields": preflight_fields,
+    }
+
+    summary_model = {
+        "model_name": "InvocationCaptureSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "fields": summary_fields,
+    }
+
+    sample_capture = {
+        "capture_id": capture_id,
+        "request_id": request_id_ref,
+        "result_id": result_id_ref,
+        "runtime_id": "codex-local",
+        "stdout": None,
+        "stderr": None,
+        "exit_code": None,
+        "metadata": {},
+        "capture_status": "not_executed",
+        "created_at": generated_at,
+    }
+
+    sample_preflight = {
+        "capture_preflight_id": preflight_id,
+        "request_id": request_id_ref,
+        "result_id": result_id_ref,
+        "output_capture_status": "not_evaluated",
+        "metadata_status": "not_evaluated",
+        "audit_status": "not_evaluated",
+        "capture_allowed": False,
+        "blockers": [
+            "phase_48b_capture_not_authorized",
+            "execution_not_performed",
+            "output_capture_pipeline_not_wired",
+            "audit_trail_not_configured",
+        ],
+        "warnings": [
+            "capture_scaffold_only_no_runtime_probing_performed",
+        ],
+    }
+
+    sample_summary = {
+        "summary_id": summary_id,
+        "capture_id": capture_id,
+        "request_id": request_id_ref,
+        "runtime_id": "codex-local",
+        "stdout_present": False,
+        "stderr_present": False,
+        "exit_code_present": False,
+        "metadata_present": False,
+        "ready_for_review": False,
+    }
+
+    scaffold_summary = {
+        "scaffold_id": f"48b-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48B",
+        "title": "Invocation Result Capture Implementation",
+        "summary": (
+            "Implements the governed result-capture infrastructure scaffold for "
+            "future read-only runtime invocation results. Defines "
+            "InvocationResultCapture (10 fields), InvocationCapturePreflight "
+            "(9 fields), and InvocationCaptureSummary (9 fields). "
+            "capture_allowed=False in Phase 48B. No runtime is invoked, "
+            "no prompt is submitted, and no repository modification occurs. "
+            "Scaffold enables Phase 48C contract enforcement."
+        ),
+        "capture_allowed": False,
+        "human_review_required": True,
+        "capture_model_field_count": len(capture_fields),
+        "preflight_model_field_count": len(preflight_fields),
+        "summary_model_field_count": len(summary_fields),
+        "supported_capture_statuses": list(_IRC_CAPTURE_STATUSES),
+    }
+
+    return {
+        "scaffold_summary": scaffold_summary,
+        "capture_model": capture_model,
+        "preflight_model": preflight_model,
+        "summary_model": summary_model,
+        "sample_capture": sample_capture,
+        "sample_preflight": sample_preflight,
+        "sample_summary": sample_summary,
+        "input_sources": list(_IRC_INPUT_SOURCES),
+        "governance_boundaries": dict(_IRC_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _IRC_FUTURE_EVOLUTION],
+        "advisory": INVOCATION_RESULT_CAPTURE_ADVISORY,
+    }

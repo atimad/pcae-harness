@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48A: Controlled Read-Only Runtime Invocation Implementation.
+Phase 48B: Invocation Result Capture Implementation.
 
 ## Governance Coherence Note
 
@@ -2976,10 +2976,32 @@ execution_allowed=False; human_review_required=True;
 governance_boundaries: may construct invocation request/evaluate preflight/
 report blockers; may_not invoke runtimes/execute prompts/modify repository/
 approve execution/commit/push/rollback; future_evolution: 48B/48C
+and PCAE implements the governed invocation result capture scaffold with
+`pcae invocation-result-capture` and `pcae invocation-result-capture --json`
+(Phase 48B): InvocationResultCapture model (10 required fields: capture_id/
+request_id/result_id/runtime_id/stdout/stderr/exit_code/metadata/
+capture_status/created_at; 4 statuses: pending/captured/capture_blocked/
+not_executed); InvocationCapturePreflight model (9 required fields:
+capture_preflight_id/request_id/result_id/output_capture_status/
+metadata_status/audit_status/capture_allowed/blockers/warnings;
+capture_allowed always False in 48B); InvocationCaptureSummary model
+(9 required fields: summary_id/capture_id/request_id/runtime_id/
+stdout_present/stderr_present/exit_code_present/metadata_present/
+ready_for_review; all boolean presence fields False in 48B);
+sample preflight blockers: phase_48b_capture_not_authorized/
+execution_not_performed/output_capture_pipeline_not_wired/
+audit_trail_not_configured; inputs: 6 sources (ReadOnlyInvocationRequest/
+ReadOnlyInvocationPreflight/ReadOnlyInvocationResult_placeholder_from_48A/
+execution_audit_design/execution_result_review_workflow/
+execution_quality_framework); no runtime invoked; no prompt submitted;
+no repository modification; capture_allowed=False; human_review_required=True;
+governance_boundaries: may construct result capture models/evaluate capture
+readiness/report blockers; may_not invoke runtimes/execute prompts/modify
+repository/approve execution/commit/push/rollback; future_evolution: 48C
 
 ## Next
 
-- TBD: Future phases (48B Invocation Result Capture Implementation, 48C Runtime Contract Enforcement).
+- TBD: Future phases (48C Runtime Contract Enforcement).
 
 ## Future Explorations
 
