@@ -76,6 +76,7 @@ from pcae.commands.agent import (
     run_write_invocation_pilot,
     run_write_result_review_design,
     run_write_rollback_validation_design,
+    run_write_execution_readiness,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1963,6 +1964,17 @@ def build_parser() -> argparse.ArgumentParser:
     write_rollback_validation_design_parser.set_defaults(
         handler=run_write_rollback_validation_design
     )
+
+    write_execution_readiness_parser = subparsers.add_parser(
+        "write-execution-readiness",
+        help="Assess write execution readiness for governed write pilot (Phase 46T).",
+    )
+    write_execution_readiness_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON write execution readiness output.",
+    )
+    write_execution_readiness_parser.set_defaults(handler=run_write_execution_readiness)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -128,6 +128,8 @@ from pcae.core.agent import (
     WRITE_RESULT_REVIEW_DESIGN_ADVISORY,
     build_write_rollback_validation_design,
     WRITE_ROLLBACK_VALIDATION_DESIGN_ADVISORY,
+    build_write_execution_readiness,
+    WRITE_EXECUTION_READINESS_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5401,6 +5403,76 @@ def run_write_result_review_design(args: argparse.Namespace) -> int:
         for rule in er["rules"]:
             print(f"  {rule['condition']} → {rule['escalation_status']}")
             print(f"    {rule['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['workflow_may'])}")
+        print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_execution_readiness(args: argparse.Namespace) -> int:
+    data = build_write_execution_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        r = data["write_execution_readiness"]
+        print("Write execution readiness assessment")
+        print(f"Assessment: {r['readiness_id']}  Generated: {r['generated_at']}")
+        print(f"Phase: {r['phase']} — {r['title']}")
+        print()
+        print(r["summary"])
+        print()
+        print("Assessment results:")
+        print(f"  Overall status:              {r['overall_status']}")
+        print(f"  Write execution recommended: {'yes' if r['write_execution_recommended'] else 'no'}")
+        print(f"  Human review required:       {'yes' if r['human_review_required'] else 'no'}")
+        print(f"  Areas assessed:              {r['area_count']}")
+        print(f"  Not ready:                   {r['not_ready_area_count']}")
+        print(f"  Partially ready:             {r['partially_ready_area_count']}")
+        print(f"  Ready:                       {r['ready_area_count']}")
+        print(f"  Active blockers:             {r['active_blocker_count']}")
+        print()
+        print(f"Readiness areas ({len(data['readiness_areas'])}):")
+        for area in data["readiness_areas"]:
+            critical = "critical" if area["critical"] else "non-critical"
+            print(f"  [{area['status']}] {area['area']} ({critical})")
+            print(f"    {area['description']}")
+            print(f"    Rationale: {area['rationale']}")
+            print(f"    Governance source: {area['governance_source']}")
+        print()
+        print("Readiness result model:")
+        m = data["readiness_result_model"]
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}  Groups: {', '.join(m['groups'])}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    [{field['group']}] {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        bl = data["blockers"]
+        print(f"Blockers ({bl['active_blocker_count']} active of {bl['blocker_count']}):")
+        for b in bl["blockers"]:
+            active = "active" if b["active"] else "inactive"
+            print(f"  [{active}] {b['blocker']} (severity: {b['severity']})")
+            print(f"    {b['description']}")
+        print()
+        ri = data["risks"]
+        print(f"Risks ({ri['risk_count']}):")
+        for risk in ri["risks"]:
+            print(f"  {risk['risk']} (severity: {risk['severity']})")
+            print(f"    {risk['description']}")
+            print(f"    Mitigated by: {risk['mitigated_by']}")
+        print()
+        rec = data["recommendations"]
+        print("Recommendations:")
+        print(f"  Readiness: {rec['readiness_recommendation']}")
+        phases = ", ".join(rec["required_follow_up_phases"])
+        print(f"  Required follow-up phases: {phases}")
+        print(f"  Authorization: {rec['execution_authorization_recommendation']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

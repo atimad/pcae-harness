@@ -476,3 +476,8 @@
 
 - `pcae write-rollback-validation-design`
 - `pcae write-rollback-validation-design --json`
+
+## write-execution-readiness
+
+- `pcae write-execution-readiness`
+- `pcae write-execution-readiness --json`
