@@ -30733,3 +30733,427 @@ def build_readonly_runtime_pilot() -> dict:
         "input_sources": list(_RRP_INPUT_SOURCES),
         "advisory": READONLY_RUNTIME_PILOT_ADVISORY,
     }
+
+
+# Phase 48G — Invocation Result Review Workflow
+# ---------------------------------------------------------------------------
+
+INVOCATION_RESULT_REVIEW_ADVISORY = (
+    "Invocation result review assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48G."
+)
+
+_IRR_REVIEW_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this review record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request associated with this review.",
+    },
+    {
+        "name": "result_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation result under review (or placeholder if absent).",
+    },
+    {
+        "name": "capture_id",
+        "type": "str",
+        "required": True,
+        "description": "The result capture record reference.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The audit record reference for this invocation.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime that produced the result under review.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Overall review outcome: pending, accepted, accepted_with_warnings, "
+            "rejected, escalation_required, or not_executed."
+        ),
+    },
+    {
+        "name": "stdout_review_status",
+        "type": "str",
+        "required": True,
+        "description": "Review status of the stdout output (pending, accepted, rejected, not_executed).",
+    },
+    {
+        "name": "stderr_review_status",
+        "type": "str",
+        "required": True,
+        "description": "Review status of the stderr output (pending, accepted, rejected, not_executed).",
+    },
+    {
+        "name": "metadata_review_status",
+        "type": "str",
+        "required": True,
+        "description": "Review status of the result metadata (pending, accepted, rejected, not_executed).",
+    },
+    {
+        "name": "quality_review_status",
+        "type": "str",
+        "required": True,
+        "description": "Quality framework review outcome (pending, passed, failed, not_executed).",
+    },
+    {
+        "name": "findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Review findings identified during result review.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during review.",
+    },
+    {
+        "name": "errors",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking errors that prevent review acceptance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human review is required before any further action.",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO-8601 timestamp at which this review record was created.",
+    },
+)
+
+_IRR_REVIEW_PREFLIGHT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this review preflight check.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request under preflight evaluation.",
+    },
+    {
+        "name": "result_id",
+        "type": "str",
+        "required": True,
+        "description": "The result reference being evaluated for review readiness.",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Output capture readiness (ready, not_ready, not_executed).",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Audit trail gate outcome (present, blocked).",
+    },
+    {
+        "name": "quality_status",
+        "type": "str",
+        "required": True,
+        "description": "Quality framework availability (available, not_available).",
+    },
+    {
+        "name": "review_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "True only when captured output exists and all gates are unblocked.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Identifiers of blocking conditions preventing review.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during review preflight.",
+    },
+)
+
+_IRR_REVIEW_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this review summary.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The review record referenced by this summary.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request covered by this summary.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime that produced the reviewed result.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall review outcome for this invocation.",
+    },
+    {
+        "name": "ready_for_human_review",
+        "type": "bool",
+        "required": True,
+        "description": "Whether the review record is ready to be presented for human review.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48G; execution is not authorized.",
+    },
+)
+
+_IRR_REVIEW_STATUSES: tuple[str, ...] = (
+    "pending",
+    "accepted",
+    "accepted_with_warnings",
+    "rejected",
+    "escalation_required",
+    "not_executed",
+)
+
+_IRR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct invocation result review models",
+        "evaluate review readiness",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48G",
+}
+
+_IRR_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationResult",
+    "InvocationResultCapture",
+    "InvocationCaptureSummary",
+    "InvocationAuditRecord",
+    "Execution Result Quality Framework",
+    "Execution Result Review Workflow",
+)
+
+# Per-runtime sample review state in Phase 48G.
+# All runtimes produce not_executed review records because:
+#   - no runtime result exists (runtime was never invoked)
+#   - capture output is not present (from 48B)
+#   - audit trail is blocked (from 48E)
+#   - quality framework is not available
+_IRR_SAMPLE_REVIEWS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "capture_status": "not_executed",
+        "audit_status": "blocked",
+        "quality_status": "not_available",
+    },
+    {
+        "runtime_id": "claude-local",
+        "capture_status": "not_executed",
+        "audit_status": "blocked",
+        "quality_status": "not_available",
+    },
+    {
+        "runtime_id": "kimi-local",
+        "capture_status": "not_executed",
+        "audit_status": "blocked",
+        "quality_status": "not_available",
+    },
+)
+
+
+def _build_review_preflight(review_data: dict, request_id: str) -> dict:
+    """Derive a review preflight record from a per-runtime sample."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if review_data["capture_status"] != "ready":
+        blockers.append("captured_output_not_present")
+    if review_data["audit_status"] != "present":
+        blockers.append("audit_trail_blocked")
+    if review_data["quality_status"] != "available":
+        blockers.append("quality_framework_not_available")
+
+    return {
+        "review_preflight_id": f"irp-{review_data['runtime_id']}-{ts}",
+        "runtime_id": review_data["runtime_id"],
+        "request_id": request_id,
+        "result_id": "result-placeholder-48g",
+        "capture_status": review_data["capture_status"],
+        "audit_status": review_data["audit_status"],
+        "quality_status": review_data["quality_status"],
+        "review_allowed": len(blockers) == 0,
+        "blockers": blockers,
+        "warnings": warnings,
+    }
+
+
+def _build_review_record(review_data: dict, preflight: dict, request_id: str) -> dict:
+    """Derive a review record from a per-runtime sample and its preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    runtime_id = review_data["runtime_id"]
+    review_status = "not_executed" if not preflight["review_allowed"] else "pending"
+    return {
+        "review_id": f"irr-{runtime_id}-{ts}",
+        "request_id": request_id,
+        "result_id": preflight["result_id"],
+        "capture_id": "capture-placeholder-48g",
+        "audit_id": f"iat-{runtime_id}-placeholder-48g",
+        "runtime_id": runtime_id,
+        "review_status": review_status,
+        "stdout_review_status": "not_executed",
+        "stderr_review_status": "not_executed",
+        "metadata_review_status": "not_executed",
+        "quality_review_status": "not_executed",
+        "findings": [],
+        "warnings": list(preflight["warnings"]),
+        "errors": list(preflight["blockers"]),
+        "human_review_required": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def _build_review_summary(record: dict, preflight: dict) -> dict:
+    """Derive a review summary from a record and preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    return {
+        "summary_id": f"irs-{record['runtime_id']}-{ts}",
+        "review_id": record["review_id"],
+        "request_id": record["request_id"],
+        "runtime_id": record["runtime_id"],
+        "review_status": record["review_status"],
+        "ready_for_human_review": preflight["review_allowed"],
+        "execution_allowed": False,
+    }
+
+
+def build_invocation_result_review() -> dict:
+    """Scaffold invocation result review models for all known runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48g"
+
+    preflights = [
+        _build_review_preflight(dict(s), request_id_ref)
+        for s in _IRR_SAMPLE_REVIEWS
+    ]
+    records = [
+        _build_review_record(dict(s), pf, request_id_ref)
+        for s, pf in zip(_IRR_SAMPLE_REVIEWS, preflights)
+    ]
+    summaries = [
+        _build_review_summary(rec, pf)
+        for rec, pf in zip(records, preflights)
+    ]
+
+    not_executed_count = sum(1 for r in records if r["review_status"] == "not_executed")
+    review_ready_count = sum(1 for pf in preflights if pf["review_allowed"])
+
+    review_models = [
+        {
+            "model_name": "InvocationResultReviewRecord",
+            "field_count": len(_IRR_REVIEW_RECORD_FIELDS),
+            "required_field_count": sum(1 for f in _IRR_REVIEW_RECORD_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IRR_REVIEW_RECORD_FIELDS],
+        },
+        {
+            "model_name": "InvocationResultReviewPreflight",
+            "field_count": len(_IRR_REVIEW_PREFLIGHT_FIELDS),
+            "required_field_count": sum(1 for f in _IRR_REVIEW_PREFLIGHT_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IRR_REVIEW_PREFLIGHT_FIELDS],
+        },
+        {
+            "model_name": "InvocationResultReviewSummary",
+            "field_count": len(_IRR_REVIEW_SUMMARY_FIELDS),
+            "required_field_count": sum(1 for f in _IRR_REVIEW_SUMMARY_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IRR_REVIEW_SUMMARY_FIELDS],
+        },
+    ]
+
+    review_summary = {
+        "summary_id": f"48g-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48G",
+        "title": "Invocation Result Review Workflow",
+        "summary": (
+            "Scaffolds governed review workflow models for future read-only invocation "
+            "results. Three models are defined: InvocationResultReviewRecord (16 fields), "
+            "InvocationResultReviewPreflight (9 fields), and InvocationResultReviewSummary "
+            "(7 fields). All three runtimes produce not_executed review records in Phase 48G "
+            "because no runtime result exists: no runtime has been invoked, output capture "
+            "is not present from Phase 48B, and the audit trail is blocked from Phase 48E. "
+            "review_allowed=False for all runtimes. execution_allowed=False for all runtimes. "
+            "No runtime is invoked, no prompt is submitted, and no repository modification occurs."
+        ),
+        "runtime_count": len(records),
+        "not_executed_count": not_executed_count,
+        "review_ready_count": review_ready_count,
+        "model_count": len(review_models),
+        "supported_statuses": list(_IRR_REVIEW_STATUSES),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "review_summary": review_summary,
+        "review_models": review_models,
+        "review_records": records,
+        "review_preflights": preflights,
+        "review_summaries": summaries,
+        "governance_boundaries": dict(_IRR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_IRR_INPUT_SOURCES),
+        "advisory": INVOCATION_RESULT_REVIEW_ADVISORY,
+    }

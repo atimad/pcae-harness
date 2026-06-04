@@ -161,6 +161,8 @@ from pcae.core.agent import (
     INVOCATION_AUDIT_TRAIL_ADVISORY,
     build_readonly_runtime_pilot,
     READONLY_RUNTIME_PILOT_ADVISORY,
+    build_invocation_result_review,
+    INVOCATION_RESULT_REVIEW_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6552,6 +6554,60 @@ def run_readonly_runtime_pilot(args: argparse.Namespace) -> int:
             print(f"    human_approval:       {res['human_approval_status']}")
             if res["blockers"]:
                 print(f"    Blockers ({len(res['blockers'])}): {', '.join(res['blockers'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_result_review(args: argparse.Namespace) -> int:
+    data = build_invocation_result_review()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rs = data["review_summary"]
+        print("Invocation result review workflow")
+        print(f"Assessment: {rs['summary_id']}  Generated: {rs['generated_at']}")
+        print(f"Phase: {rs['phase']} — {rs['title']}")
+        print()
+        print(rs["summary"])
+        print()
+        print(f"Runtimes evaluated:  {rs['runtime_count']}")
+        print(f"Not executed:        {rs['not_executed_count']}")
+        print(f"Review ready:        {rs['review_ready_count']}")
+        print(f"Models defined:      {rs['model_count']}")
+        print(f"Execution allowed:   {'yes' if rs['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if rs['human_review_required'] else 'no'}")
+        print()
+        print(f"Review models ({len(data['review_models'])}):")
+        for m in data["review_models"]:
+            print(f"  {m['model_name']}: {m['field_count']} fields ({m['required_field_count']} required)")
+        print()
+        print(f"Review records ({len(data['review_records'])} runtimes):")
+        for rec in data["review_records"]:
+            print(f"  [{rec['review_status']}] {rec['runtime_id']}")
+            print(f"    review_id:              {rec['review_id']}")
+            print(f"    human_review_required:  {rec['human_review_required']}")
+            if rec["errors"]:
+                print(f"    Errors ({len(rec['errors'])}): {', '.join(rec['errors'])}")
+        print()
+        print(f"Review preflights ({len(data['review_preflights'])} runtimes):")
+        for pf in data["review_preflights"]:
+            print(f"  [{pf['runtime_id']}] review_allowed: {pf['review_allowed']}")
+            if pf["blockers"]:
+                print(f"    Blockers ({len(pf['blockers'])}): {', '.join(pf['blockers'])}")
+        print()
+        print(f"Review summaries ({len(data['review_summaries'])} runtimes):")
+        for s in data["review_summaries"]:
+            print(f"  [{s['runtime_id']}] review_status: {s['review_status']}, "
+                  f"ready_for_human_review: {s['ready_for_human_review']}, "
+                  f"execution_allowed: {s['execution_allowed']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

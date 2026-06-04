@@ -29439,3 +29439,182 @@ def test_48f_human_output_shows_all_sections(capsys) -> None:
     assert "Pilot results" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48G — Invocation Result Review Workflow
+
+
+def test_48g_json_structure(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "review_summary", "review_models", "review_records", "review_preflights",
+        "review_summaries", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48g_review_summary_fields(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["review_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "not_executed_count", "review_ready_count",
+        "model_count", "supported_statuses", "execution_allowed", "human_review_required",
+    ):
+        assert field in rs, f"missing review_summary field: {field}"
+    assert rs["phase"] == "48G"
+    assert rs["execution_allowed"] is False
+    assert rs["human_review_required"] is True
+    assert rs["runtime_count"] == 3
+    assert rs["not_executed_count"] == 3
+    assert rs["review_ready_count"] == 0
+    assert rs["model_count"] == 3
+
+
+def test_48g_execution_always_blocked(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["review_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    for s in data["review_summaries"]:
+        assert s["execution_allowed"] is False, (
+            f"runtime {s['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48g_three_review_models(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model_names = [m["model_name"] for m in data["review_models"]]
+    assert "InvocationResultReviewRecord" in model_names
+    assert "InvocationResultReviewPreflight" in model_names
+    assert "InvocationResultReviewSummary" in model_names
+
+
+def test_48g_review_record_model_fields(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec_model = next(m for m in data["review_models"] if m["model_name"] == "InvocationResultReviewRecord")
+    assert rec_model["field_count"] == 16
+    assert rec_model["required_field_count"] == 16
+    field_names = [f["name"] for f in rec_model["fields"]]
+    for expected in (
+        "review_id", "request_id", "result_id", "capture_id", "audit_id",
+        "runtime_id", "review_status", "stdout_review_status", "stderr_review_status",
+        "metadata_review_status", "quality_review_status", "findings",
+        "warnings", "errors", "human_review_required", "created_at",
+    ):
+        assert expected in field_names, f"missing InvocationResultReviewRecord field: {expected}"
+
+
+def test_48g_review_preflight_model_fields(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pf_model = next(m for m in data["review_models"] if m["model_name"] == "InvocationResultReviewPreflight")
+    assert pf_model["field_count"] == 9
+    assert pf_model["required_field_count"] == 9
+    field_names = [f["name"] for f in pf_model["fields"]]
+    for expected in (
+        "review_preflight_id", "request_id", "result_id", "capture_status",
+        "audit_status", "quality_status", "review_allowed", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing InvocationResultReviewPreflight field: {expected}"
+
+
+def test_48g_review_summary_model_fields(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sum_model = next(m for m in data["review_models"] if m["model_name"] == "InvocationResultReviewSummary")
+    assert sum_model["field_count"] == 7
+    assert sum_model["required_field_count"] == 7
+    field_names = [f["name"] for f in sum_model["fields"]]
+    for expected in (
+        "summary_id", "review_id", "request_id", "runtime_id",
+        "review_status", "ready_for_human_review", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing InvocationResultReviewSummary field: {expected}"
+
+
+def test_48g_not_executed_without_captured_output(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["review_records"]:
+        assert rec["review_status"] == "not_executed", (
+            f"{rec['runtime_id']} review_status must be not_executed"
+        )
+        assert rec["human_review_required"] is True
+    for pf in data["review_preflights"]:
+        assert pf["review_allowed"] is False, (
+            f"{pf['runtime_id']} review_allowed must be False"
+        )
+        assert "captured_output_not_present" in pf["blockers"], (
+            f"{pf['runtime_id']} must have captured_output_not_present blocker"
+        )
+
+
+def test_48g_review_id_prefixes(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["review_records"]:
+        assert rec["review_id"].startswith(f"irr-{rec['runtime_id']}-"), (
+            f"review_id must start with irr-<runtime_id>-"
+        )
+    for pf in data["review_preflights"]:
+        assert pf["review_preflight_id"].startswith(f"irp-{pf['runtime_id']}-"), (
+            f"review_preflight_id must start with irp-<runtime_id>-"
+        )
+
+
+def test_48g_supported_statuses(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    statuses = data["review_summary"]["supported_statuses"]
+    for expected in (
+        "pending", "accepted", "accepted_with_warnings",
+        "rejected", "escalation_required", "not_executed",
+    ):
+        assert expected in statuses, f"missing status: {expected}"
+
+
+def test_48g_governance_boundaries(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48G"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "construct invocation result review models",
+        "evaluate review readiness",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48g_advisory(capsys) -> None:
+    main(["invocation-result-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48g_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-result-review"])
+    output = capsys.readouterr().out
+    assert "Invocation result review workflow" in output
+    assert "Review models" in output
+    assert "Review records" in output
+    assert "Review preflights" in output
+    assert "Review summaries" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

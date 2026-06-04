@@ -582,6 +582,11 @@ def render_commands_reference() -> str:
 
 - `pcae readonly-runtime-pilot`
 - `pcae readonly-runtime-pilot --json`
+
+## invocation-result-review
+
+- `pcae invocation-result-review`
+- `pcae invocation-result-review --json`
 """
 
 

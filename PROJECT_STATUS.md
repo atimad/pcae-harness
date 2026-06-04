@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48F: Controlled Read-Only Runtime Invocation Pilot.
+Phase 48G: Invocation Result Review Workflow.
 
 ## Governance Coherence Note
 
@@ -3077,6 +3077,28 @@ no repository modification; human_review_required=True;
 governance_boundaries: may construct pilot result/evaluate readiness
 gates/report blockers; may_not invoke runtimes/execute prompts/modify
 repository/approve execution/commit/push/rollback; inputs: 6 sources
+and PCAE scaffolds a governed invocation result review workflow with
+`pcae invocation-result-review` and `pcae invocation-result-review --json`
+(Phase 48G): three models defined: InvocationResultReviewRecord (16 required
+fields: review_id/request_id/result_id/capture_id/audit_id/runtime_id/
+review_status/stdout_review_status/stderr_review_status/metadata_review_status/
+quality_review_status/findings/warnings/errors/human_review_required/created_at),
+InvocationResultReviewPreflight (9 required fields:
+review_preflight_id/request_id/result_id/capture_status/audit_status/
+quality_status/review_allowed/blockers/warnings),
+InvocationResultReviewSummary (7 required fields:
+summary_id/review_id/request_id/runtime_id/review_status/
+ready_for_human_review/execution_allowed);
+6 statuses: pending/accepted/accepted_with_warnings/rejected/
+escalation_required/not_executed;
+all 3 runtimes: review_status=not_executed (no runtime result),
+review_allowed=False (captured output not present);
+not_executed_count=3, review_ready_count=0;
+execution_allowed=False for all; no runtime invoked; no prompt submitted;
+no repository modification; human_review_required=True;
+governance_boundaries: may construct invocation result review models/evaluate
+review readiness/report blockers and warnings; may_not invoke runtimes/execute
+prompts/modify repository/approve execution/commit/push/rollback; inputs: 6 sources
 
 ## Next
 
