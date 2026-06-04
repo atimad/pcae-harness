@@ -94,6 +94,8 @@ PCAE organizes its governance logic into seven domains, each responsible for a d
 
 Each domain produces structured, machine-readable artifacts. Each domain's output gates the next domain's input. No domain executes without its upstream domain having produced a valid artifact.
 
+See [01-governance-stack.md](../architecture/01-governance-stack.md) for an interactive Mermaid diagram of the governance stack.
+
 ---
 
 ## 6. Change Governance
@@ -157,6 +159,8 @@ Prompt governance controls how prompts are constructed, validated, and delivered
 
 No prompt is submitted without a valid preflight result.
 
+See [03-prompt-governance.md](../architecture/03-prompt-governance.md) for the prompt governance flow diagram.
+
 ---
 
 ## 9. Execution Governance
@@ -188,6 +192,8 @@ Every gate is blocking. A failure at any step halts the chain and produces a str
 - `pcae invocation-result-review` — scaffold the result review workflow
 - `pcae invocation-evidence` — link all upstream artifacts into a single evidence record
 
+See [02-execution-lifecycle.md](../architecture/02-execution-lifecycle.md) for the full gate chain diagram.
+
 ---
 
 ## 10. Runtime Governance
@@ -213,6 +219,8 @@ Runtime governance verifies that the target AI runtime is safe to invoke before 
 | `writable_execution_blocked` | Write execution is explicitly blocked (current phase) |
 
 All three currently configured runtimes (codex-local, claude-local, kimi-local) are blocked by contract enforcement in the current phase. This is expected and intentional: the scaffolding must be complete and validated before any runtime is cleared for invocation.
+
+See [04-runtime-governance.md](../architecture/04-runtime-governance.md) for the runtime governance flow diagram.
 
 ---
 
@@ -286,15 +294,17 @@ As of Phase 48X.2, PCAE has completed the following governance infrastructure:
 
 | Track | Status | Description |
 |-------|--------|-------------|
-| Documentation program | Active | Architecture, commands, glossary, white paper, and governance docs generated and validated |
+| Documentation program | Active | Architecture, commands, glossary, white paper, architecture diagrams generated and validated |
 | Controlled read-only invocation | Active — Phase 48H complete | Full evidence model implemented; all gates scaffolded; execution still blocked |
-| Parallel test execution | Planned — 48X.2 | Add `pytest-xdist` to enable parallel test validation; foundation for faster CI |
+| Parallel test execution | Planned — 48X.T | Standardize `pytest-xdist` across CI; enforce parallel-safe test isolation; foundation for faster governed CI |
 | Invocation execution gate | Planned — 49A | Implement the gate that conditionally clears `execution_allowed` when all 8 lifecycle gates pass |
 | Multi-agent read-only pilot | Planned | Extend the pilot scaffold to multi-agent workflows; validate orchestration handoff |
 | Controlled write pilot | Planned | Introduce write execution with explicit rollback planning as a precondition |
 | Autonomous engineering | Future | Depends on evidence and review infrastructure passing sustained human review requirements |
 
 The sequencing is deliberate. Each phase must demonstrate governance soundness before the next phase introduces new execution capability. No phase skips a gate.
+
+See [05-future-autonomous-flow.md](../architecture/05-future-autonomous-flow.md) for the target autonomous engineering loop (future state).
 
 ---
 

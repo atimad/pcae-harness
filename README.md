@@ -4,6 +4,16 @@ PCAE is a governance-first framework for controlled AI-assisted engineering. It 
 
 For a detailed technical description of the architecture, governance model, and design philosophy, see the [PCAE Architecture White Paper](docs/whitepaper/PCAE_WHITEPAPER.md).
 
+### Architecture Diagrams
+
+| Diagram | Description |
+|---------|-------------|
+| [Governance Stack](docs/architecture/01-governance-stack.md) | The seven governance domains and their relationships |
+| [Execution Lifecycle](docs/architecture/02-execution-lifecycle.md) | The 8-step gate chain every invocation must traverse |
+| [Prompt Governance](docs/architecture/03-prompt-governance.md) | How prompts are generated, validated, and approved |
+| [Runtime Governance](docs/architecture/04-runtime-governance.md) | How runtimes are evaluated for trust and contract compliance |
+| [Future Autonomous Flow](docs/architecture/05-future-autonomous-flow.md) | The target autonomous engineering loop (future state) |
+
 ## Why PCAE Exists
 
 AI coding agents can produce real changes to real repositories — commits, pushes, file modifications — without approval gates, audit trails, or rollback plans. A single unconstrained agent invocation can leave a codebase in an inconsistent state with no clear path back.

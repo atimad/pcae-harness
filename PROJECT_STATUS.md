@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.2: Architecture White Paper (documentation only).
+Phase 48X.3: Architecture Diagrams (documentation only).
 
 ## Governance Coherence Note
 
@@ -3138,6 +3138,20 @@ audit evidence and trust/current maturity/roadmap/license;
 roadmap notes parallel test execution validation (pytest-xdist);
 README.md updated with link to white paper;
 pytest-xdist added to dev dependencies in pyproject.toml;
+no source logic changes; documentation only
+and PCAE Architecture Diagrams created (Phase 48X.3):
+docs/architecture/ directory with 5 Mermaid diagram files:
+01-governance-stack.md (7 governance domains with Human Approval gate),
+02-execution-lifecycle.md (8-step gate chain with blocker paths),
+03-prompt-governance.md (roadmap → approval → canonical prompt →
+agent prompt → validation → governance → approval flow),
+04-runtime-governance.md (runtime contract → trust → readiness →
+pilot → execution blocked, per-runtime status table),
+05-future-autonomous-flow.md (future autonomous engineering loop,
+explicitly marked as future state, not current capability);
+README.md updated with diagram links table;
+whitepaper updated with diagram links in sections 5/8/9/10/14;
+roadmap updated with 48X.T parallel test standardization and 49A;
 no source logic changes; documentation only
 
 ## Next
