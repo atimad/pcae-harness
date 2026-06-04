@@ -21572,3 +21572,607 @@ def build_write_candidate_design() -> dict:
         "governance_boundaries": dict(_WCD_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_CANDIDATE_DESIGN_ADVISORY,
     }
+
+
+# Phase 46Q — Controlled Write Invocation Pilot
+# ---------------------------------------------------------------------------
+
+WRITE_INVOCATION_PILOT_ADVISORY = (
+    "Controlled write invocation pilot is a simulation; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_CWIP_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_write_candidate_artifact",
+    "write_invocation_preflight_dry_run",
+    "execution_authorization_artifact_model",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+    "controlled_file_modification_governance",
+    "rollback_governance",
+)
+
+_CWIP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact is selected as the basis for the "
+            "controlled write invocation pilot."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "A valid ExecutionAuthorizationArtifact is linked to the pilot, "
+            "confirming the prompt is authorized for governed invocation."
+        ),
+        "required": True,
+        "completed_by": "execution_authorization_artifact",
+    },
+    {
+        "step": 3,
+        "name": "governed_write_candidate",
+        "description": (
+            "A GovernedWriteCandidate artifact is located and validated for "
+            "the pilot; all invariants must be satisfied."
+        ),
+        "required": True,
+        "completed_by": "governed_write_candidate_artifact",
+    },
+    {
+        "step": 4,
+        "name": "write_preflight",
+        "description": (
+            "All write safety gates are evaluated against the candidate, file "
+            "scope, rollback plan, and audit plan."
+        ),
+        "required": True,
+        "completed_by": "all_write_safety_gates_evaluated",
+    },
+    {
+        "step": 5,
+        "name": "human_write_approval",
+        "description": (
+            "Explicit human write approval is required before a "
+            "ControlledWritePlan may be prepared. This step is never bypassed."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+    },
+    {
+        "step": 6,
+        "name": "runtime_writable_contract_check",
+        "description": (
+            "The selected runtime is assessed against known writable contracts "
+            "to confirm it supports governed write execution with scope enforcement."
+        ),
+        "required": True,
+        "completed_by": "runtime_writable_contract_confirmed",
+    },
+    {
+        "step": 7,
+        "name": "controlled_write_plan",
+        "description": (
+            "A ControlledWritePlan is prepared, linking the candidate, runtime, "
+            "agent, file scope, writable contract, rollback plan, and audit plan."
+        ),
+        "required": True,
+        "completed_by": "controlled_write_plan_artifact",
+    },
+    {
+        "step": 8,
+        "name": "result_capture_plan",
+        "description": (
+            "A result capture plan is prepared for the selected runtime and "
+            "write invocation mode."
+        ),
+        "required": True,
+        "completed_by": "result_capture_plan_artifact",
+    },
+    {
+        "step": 9,
+        "name": "rollback_plan",
+        "description": (
+            "The rollback plan from the GovernedWriteCandidate is validated "
+            "and linked to the ControlledWritePlan."
+        ),
+        "required": True,
+        "completed_by": "rollback_plan_validated",
+    },
+    {
+        "step": 10,
+        "name": "audit_plan",
+        "description": (
+            "The audit plan from the GovernedWriteCandidate is validated "
+            "and linked to the ControlledWritePlan."
+        ),
+        "required": True,
+        "completed_by": "audit_plan_validated",
+    },
+    {
+        "step": 11,
+        "name": "consensus_review_plan",
+        "description": (
+            "A consensus review plan is prepared if consensus_required is True "
+            "on the GovernedWriteCandidate."
+        ),
+        "required": True,
+        "completed_by": "consensus_review_plan_artifact",
+    },
+    {
+        "step": 12,
+        "name": "future_write_execution",
+        "description": (
+            "A future phase will execute the ControlledWritePlan under governed "
+            "constraints with rollback, audit, and consensus. Not executed in "
+            "this pilot phase."
+        ),
+        "required": True,
+        "completed_by": "future_phase_write_execution",
+    },
+)
+
+_CWIP_WRITE_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "description": "Unique identifier for this controlled write plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Reference to the GovernedWriteCandidate artifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "writable_contract",
+        "type": "RuntimeWritableContract",
+        "description": (
+            "The validated writable contract for the selected runtime, including "
+            "command template and writable mode."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "file_scope",
+        "type": "FileScopeArtifact",
+        "description": (
+            "Declared and validated file scope from the GovernedWriteCandidate."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "allowed_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations permitted during write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "forbidden_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations forbidden during write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_plan",
+        "type": "RollbackPlan",
+        "description": (
+            "Validated rollback plan from the GovernedWriteCandidate."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_plan",
+        "type": "AuditPlan",
+        "description": (
+            "Validated audit plan from the GovernedWriteCandidate."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "description": "Whether consensus review is required before write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "quality_review_required",
+        "type": "bool",
+        "description": "Whether quality review is required after write execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": (
+            "Whether write execution is permitted. Always False in this pilot phase; "
+            "real execution requires explicit authorization in a future phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_CWIP_RUNTIME_WRITABLE_CONTRACTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "writable_mode": "workspace-write",
+        "command_template": 'codex exec --sandbox workspace-write "<prompt>"',
+        "scope_enforcement": "workspace-level file scope enforced by sandbox",
+        "contract_available": True,
+    },
+    {
+        "runtime": "claude-local",
+        "writable_mode": "acceptEdits",
+        "command_template": 'claude -p --permission-mode acceptEdits "<prompt>"',
+        "scope_enforcement": "file scope enforced via permission mode and allowed_files",
+        "contract_available": True,
+    },
+    {
+        "runtime": "kimi-local",
+        "writable_mode": "default",
+        "command_template": 'kimi -p "<prompt>"',
+        "scope_enforcement": "file scope enforced via prompt constraints",
+        "contract_available": True,
+    },
+)
+
+_CWIP_SAFETY_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "cwip-g01",
+        "gate": "prompt_approved",
+        "description": "The selected prompt has a valid prompt approval artifact.",
+        "blocking": True,
+        "checks": [
+            "prompt_id resolves to known prompt artifact",
+            "prompt approval status is approved",
+            "prompt approval artifact is valid",
+        ],
+    },
+    {
+        "gate_id": "cwip-g02",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state "
+            "and has not expired."
+        ),
+        "blocking": True,
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+            "authorization is not expired",
+        ],
+    },
+    {
+        "gate_id": "cwip-g03",
+        "gate": "write_candidate_valid",
+        "description": (
+            "A GovernedWriteCandidate artifact exists and all invariants are satisfied."
+        ),
+        "blocking": True,
+        "checks": [
+            "write_candidate_id resolves to known artifact",
+            "all must_always_have invariants present",
+            "candidate_status is not expired or superseded",
+        ],
+    },
+    {
+        "gate_id": "cwip-g04",
+        "gate": "file_scope_valid",
+        "description": (
+            "File scope is declared, validated, and free of conflicts between "
+            "allowed_files and forbidden_files."
+        ),
+        "blocking": True,
+        "checks": [
+            "file_scope present in write_candidate",
+            "allowed_files is non-empty",
+            "no overlap between allowed_files and forbidden_files",
+        ],
+    },
+    {
+        "gate_id": "cwip-g05",
+        "gate": "rollback_plan_present",
+        "description": (
+            "A rollback plan is present in the GovernedWriteCandidate and "
+            "contains all required fields."
+        ),
+        "blocking": True,
+        "checks": [
+            "rollback_plan present in write_candidate",
+            "rollback_mode defined",
+            "rollback_target defined",
+        ],
+    },
+    {
+        "gate_id": "cwip-g06",
+        "gate": "audit_plan_present",
+        "description": (
+            "An audit plan is present in the GovernedWriteCandidate and "
+            "contains all required fields."
+        ),
+        "blocking": True,
+        "checks": [
+            "audit_plan present in write_candidate",
+            "execution_audit_required is True",
+            "result_review_required is True",
+        ],
+    },
+    {
+        "gate_id": "cwip-g07",
+        "gate": "runtime_writable_contract_available",
+        "description": (
+            "A writable contract is available for the selected runtime and "
+            "scope enforcement is confirmed."
+        ),
+        "blocking": True,
+        "checks": [
+            "selected_runtime in known writable contracts",
+            "contract_available is True",
+            "scope_enforcement documented for runtime",
+        ],
+    },
+    {
+        "gate_id": "cwip-g08",
+        "gate": "human_write_approval_present",
+        "description": (
+            "Explicit human write approval is recorded. This gate is never "
+            "bypassed regardless of pilot readiness."
+        ),
+        "blocking": True,
+        "checks": [
+            "human_write_approval_status is approved on write_candidate",
+            "approval timestamp recorded",
+            "approver identity recorded",
+        ],
+    },
+    {
+        "gate_id": "cwip-g09",
+        "gate": "consensus_path_available",
+        "description": (
+            "If consensus_required is True, a consensus review path is available "
+            "and configured for this candidate."
+        ),
+        "blocking": True,
+        "checks": [
+            "consensus_required field present on write_candidate",
+            "if consensus_required: consensus_review_plan prepared",
+            "consensus path does not bypass human review",
+        ],
+    },
+    {
+        "gate_id": "cwip-g10",
+        "gate": "quality_review_available",
+        "description": (
+            "If quality_review_required is True, a quality review framework is "
+            "available and configured for post-execution evaluation."
+        ),
+        "blocking": True,
+        "checks": [
+            "quality_review_required field present on write_candidate",
+            "if quality_review_required: quality dimensions defined",
+            "quality review does not bypass human review",
+        ],
+    },
+)
+
+_CWIP_PILOT_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this write invocation pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_plan",
+        "type": "ControlledWritePlan",
+        "description": (
+            "The ControlledWritePlan prepared during the pilot, or None if "
+            "safety gates blocked preparation."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "safety_gate_results",
+        "type": "list[dict]",
+        "description": "List of safety gate evaluation results from the pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed or are pending in the pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during the pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "write_execution_allowed",
+        "type": "bool",
+        "description": (
+            "Whether write execution is permitted. Always False in this pilot phase; "
+            "real execution requires explicit authorization in a future phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": (
+            "Whether human review is required before execution may proceed. "
+            "Always True in this pilot phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_CWIP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "simulate controlled write planning",
+        "assess writable contracts",
+        "evaluate safety gates",
+        "prepare rollback plans",
+        "prepare audit plans",
+        "prepare consensus plans",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve writes automatically",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "write_execution_allowed": False,
+    "read_only": True,
+    "pilot_phase": True,
+}
+
+_CWIP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46R", "description": "Write Result Review Workflow"},
+    {"phase": "46S", "description": "Write Rollback Validation Workflow"},
+    {"phase": "46T", "description": "Write Execution Readiness Assessment"},
+    {"phase": "47A", "description": "Governed Live Read-Only Execution"},
+)
+
+
+def build_write_invocation_pilot() -> dict:
+    """Simulate the controlled write invocation pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"cwip-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _CWIP_LIFECYCLE]
+    write_plan_fields = [dict(f) for f in _CWIP_WRITE_PLAN_FIELDS]
+    runtime_contracts = [dict(c) for c in _CWIP_RUNTIME_WRITABLE_CONTRACTS]
+    safety_gates = [dict(g) for g in _CWIP_SAFETY_GATES]
+    pilot_result_fields = [dict(f) for f in _CWIP_PILOT_RESULT_FIELDS]
+
+    write_plan_model = {
+        "model_name": "ControlledWritePlan",
+        "field_count": len(write_plan_fields),
+        "required_field_count": sum(1 for f in write_plan_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in write_plan_fields),
+        "execution_allowed_always_false": True,
+        "fields": write_plan_fields,
+    }
+
+    runtime_contracts_model = {
+        "contract_count": len(runtime_contracts),
+        "all_contracts_available": all(c["contract_available"] for c in runtime_contracts),
+        "runtime_ids": [c["runtime"] for c in runtime_contracts],
+        "contracts": runtime_contracts,
+    }
+
+    safety_gate_model = {
+        "gate_count": len(safety_gates),
+        "all_gates_blocking": all(g["blocking"] for g in safety_gates),
+        "gate_ids": [g["gate_id"] for g in safety_gates],
+        "human_approval_gate_always_required": True,
+        "gates": safety_gates,
+    }
+
+    pilot_result_model = {
+        "model_name": "ControlledWritePilotResult",
+        "field_count": len(pilot_result_fields),
+        "required_field_count": sum(1 for f in pilot_result_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in pilot_result_fields),
+        "write_execution_allowed_always_false": True,
+        "human_review_required_always_true": True,
+        "fields": pilot_result_fields,
+    }
+
+    write_invocation_pilot = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46Q",
+        "title": "Controlled Write Invocation Pilot",
+        "summary": (
+            "Designs and simulates the controlled write invocation pilot without "
+            "invoking runtimes or modifying files. Defines the twelve-step pilot "
+            "lifecycle, ControlledWritePlan model, runtime writable contracts for "
+            "codex-local/claude-local/kimi-local, ten blocking write safety gates, "
+            "and ControlledWritePilotResult model. write_execution_allowed is always "
+            "False; human_review_required is always True; human_write_approval_present "
+            "blocks execution unless explicitly approved. No runtime invocation, "
+            "no prompt execution, and no file modification by agents."
+        ),
+        "input_sources": list(_CWIP_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "write_plan_field_count": len(write_plan_fields),
+        "runtime_contract_count": len(runtime_contracts),
+        "safety_gate_count": len(safety_gates),
+        "pilot_result_field_count": len(pilot_result_fields),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_CWIP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _CWIP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_invocation_pilot": write_invocation_pilot,
+        "pilot_lifecycle": lifecycle,
+        "write_plan_model": write_plan_model,
+        "runtime_writable_contracts": runtime_contracts_model,
+        "safety_gates": safety_gate_model,
+        "pilot_result_model": pilot_result_model,
+        "governance_boundaries": dict(_CWIP_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_INVOCATION_PILOT_ADVISORY,
+    }

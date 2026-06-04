@@ -122,6 +122,8 @@ from pcae.core.agent import (
     WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
     build_write_candidate_design,
     WRITE_CANDIDATE_DESIGN_ADVISORY,
+    build_write_invocation_pilot,
+    WRITE_INVOCATION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5257,6 +5259,74 @@ def run_write_candidate_design(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['artifact_may'])}")
         print(f"  May not: {', '.join(gb['artifact_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_invocation_pilot(args: argparse.Namespace) -> int:
+    data = build_write_invocation_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_invocation_pilot"]
+        print("Controlled write invocation pilot")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Pilot lifecycle:")
+        for step in data["pilot_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("ControlledWritePlan model:")
+        wpm = data["write_plan_model"]
+        print(f"  Fields: {wpm['field_count']}  Required: {wpm['required_field_count']}")
+        print(f"  All fields immutable: {wpm['all_fields_immutable']}")
+        print(f"  execution_allowed always False: {wpm['execution_allowed_always_false']}")
+        for field in wpm["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        print("Runtime writable contracts:")
+        rc = data["runtime_writable_contracts"]
+        print(f"  Contract count: {rc['contract_count']}  All available: {rc['all_contracts_available']}")
+        for contract in rc["contracts"]:
+            available = "available" if contract["contract_available"] else "unavailable"
+            print(f"  {contract['runtime']} ({contract['writable_mode']}, {available})")
+            print(f"    Command: {contract['command_template']}")
+            print(f"    Scope enforcement: {contract['scope_enforcement']}")
+        print()
+        print("Write safety gates:")
+        sg = data["safety_gates"]
+        print(f"  Gate count: {sg['gate_count']}  All blocking: {sg['all_gates_blocking']}")
+        print(f"  Human approval always required: {sg['human_approval_gate_always_required']}")
+        for gate in sg["gates"]:
+            blocking = "blocking" if gate["blocking"] else "non-blocking"
+            print(f"  {gate['gate_id']} {gate['gate']} ({blocking})")
+            print(f"    {gate['description']}")
+            for check in gate["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Pilot result model (ControlledWritePilotResult):")
+        rm = data["pilot_result_model"]
+        print(f"  Fields: {rm['field_count']}  Required: {rm['required_field_count']}")
+        print(f"  All fields immutable: {rm['all_fields_immutable']}")
+        print(f"  write_execution_allowed always False: {rm['write_execution_allowed_always_false']}")
+        print(f"  human_review_required always True: {rm['human_review_required_always_true']}")
+        for field in rm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['pilot_may'])}")
+        print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Write execution allowed: {gb['write_execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

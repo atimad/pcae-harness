@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46P: Governed Write Candidate Artifact.
+Phase 46Q: Controlled Write Invocation Pilot.
 
 ## Governance Coherence Note
 
@@ -2686,10 +2686,46 @@ automatically/commit/push/rollback; execution_allowed=False,
 human_review_required=True; future_evolution: 46Q/46R/46S; advisory:
 "Governed write candidate artifact design is informational; no runtime
 invocation, prompt execution, or file modification occurs."
+and the controlled write invocation pilot is simulated with
+`pcae write-invocation-pilot` and `pcae write-invocation-pilot --json`
+(Phase 46Q): inputs: governed_write_candidate_artifact,
+write_invocation_preflight_dry_run, execution_authorization_artifact_model,
+execution_audit_design, execution_consensus_design,
+execution_result_review_workflow, execution_quality_framework,
+controlled_file_modification_governance, rollback_governance; no runtime
+invocation; no prompt execution; no file modification;
+write_execution_allowed=False always; human_review_required=True always;
+pilot_lifecycle (12 steps, all required): approved_prompt_artifact/
+execution_authorization/governed_write_candidate/write_preflight/
+human_write_approval/runtime_writable_contract_check/controlled_write_plan/
+result_capture_plan/rollback_plan/audit_plan/consensus_review_plan/
+future_write_execution; ControlledWritePlan model: 13 fields (all required,
+all immutable): write_plan_id/write_candidate_id/selected_runtime/
+selected_agent/writable_contract/file_scope/allowed_operations/
+forbidden_operations/rollback_plan/audit_plan/consensus_required/
+quality_review_required/execution_allowed (always False); runtime writable
+contracts (3, all available): codex-local (workspace-write)/claude-local
+(acceptEdits)/kimi-local (default); write safety gates (10, all blocking,
+ids cwip-g01 through cwip-g10): prompt_approved/authorization_valid/
+write_candidate_valid/file_scope_valid/rollback_plan_present/
+audit_plan_present/runtime_writable_contract_available/
+human_write_approval_present/consensus_path_available/
+quality_review_available; ControlledWritePilotResult model: 9 fields (all
+required, all immutable): pilot_id/selected_runtime/selected_agent/
+write_plan/safety_gate_results/blockers/warnings/write_execution_allowed
+(always False)/human_review_required (always True);
+governance_boundaries: pilot_may simulate controlled write planning/assess
+writable contracts/evaluate safety gates/prepare rollback plans/prepare
+audit plans/prepare consensus plans; pilot_may_not invoke runtimes/execute
+prompts/modify files/approve writes automatically/commit/push/rollback;
+write_execution_allowed=False, human_review_required=True;
+future_evolution: 46R/46S/46T/47A; advisory: "Controlled write invocation
+pilot is a simulation; no runtime invocation, prompt execution, or file
+modification occurs."
 
 ## Next
 
-- TBD: Future phases (46Q Controlled Write Invocation Pilot).
+- TBD: Future phases (46R Write Result Review Workflow).
 
 ## Future Explorations
 

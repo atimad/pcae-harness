@@ -461,3 +461,8 @@
 
 - `pcae write-candidate-design`
 - `pcae write-candidate-design --json`
+
+## write-invocation-pilot
+
+- `pcae write-invocation-pilot`
+- `pcae write-invocation-pilot --json`

@@ -73,6 +73,7 @@ from pcae.commands.agent import (
     run_write_invocation_design,
     run_write_preflight_dry_run,
     run_write_candidate_design,
+    run_write_invocation_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1925,6 +1926,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON write candidate design output.",
     )
     write_candidate_design_parser.set_defaults(handler=run_write_candidate_design)
+
+    write_invocation_pilot_parser = subparsers.add_parser(
+        "write-invocation-pilot",
+        help="Simulate controlled write invocation pilot (Phase 46Q).",
+    )
+    write_invocation_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON write invocation pilot output.",
+    )
+    write_invocation_pilot_parser.set_defaults(handler=run_write_invocation_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",
