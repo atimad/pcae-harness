@@ -496,3 +496,8 @@
 
 - `pcae live-write-readiness`
 - `pcae live-write-readiness --json`
+
+## live-readonly-pilot
+
+- `pcae live-readonly-pilot`
+- `pcae live-readonly-pilot --json`

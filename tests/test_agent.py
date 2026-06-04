@@ -27024,3 +27024,200 @@ def test_47b_human_output_shows_all_sections(capsys) -> None:
     assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 47C — Governed Live Read-Only Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_47c_json_structure(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "live_readonly_pilot", "pilot_lifecycle", "pilot_candidate_model",
+        "pilot_gates", "runtime_assessment", "pilot_result_model",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47c_pilot_fields(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    p = data["live_readonly_pilot"]
+    for field in (
+        "pilot_id", "phase", "title", "summary", "readiness_status",
+        "execution_allowed", "human_review_required",
+        "lifecycle_step_count", "pilot_candidate_field_count",
+        "gate_count", "gates_met", "gates_not_met", "runtime_count",
+        "input_sources", "governance_boundaries", "future_evolution",
+    ):
+        assert field in p, f"missing pilot field: {field}"
+    assert p["pilot_id"].startswith("lrop-")
+    assert p["phase"] == "47C"
+    assert p["lifecycle_step_count"] == 8
+    assert p["gate_count"] == 8
+    assert p["pilot_candidate_field_count"] == 10
+
+
+def test_47c_execution_not_allowed(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["live_readonly_pilot"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["pilot_result_model"]["execution_allowed_always_false"] is True
+    assert data["pilot_candidate_model"]["execution_allowed_always_false"] is True
+
+
+def test_47c_human_review_required(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["live_readonly_pilot"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["pilot_result_model"]["human_review_required_always_true"] is True
+
+
+def test_47c_pilot_lifecycle(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert len(lifecycle) == 8
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "approved_prompt", "execution_authorization", "runtime_selection",
+        "pilot_preflight", "human_execution_approval",
+        "future_live_readonly_execution", "result_capture", "review_workflows",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+        assert step["required"] is True
+    steps = [s["step"] for s in lifecycle]
+    assert steps == list(range(1, 9))
+
+
+def test_47c_pilot_candidate_model(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["pilot_candidate_model"]
+    assert m["model_name"] == "PilotCandidate"
+    assert m["field_count"] == 10
+    assert m["required_field_count"] == 10
+    assert m["immutable_field_count"] == 10
+    assert m["execution_allowed_always_false"] is True
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "pilot_candidate_id", "authorization_id", "prompt_id",
+        "selected_runtime", "selected_agent", "output_capture_strategy",
+        "audit_strategy", "review_strategy", "quality_strategy", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    execution_field = next(f for f in m["fields"] if f["name"] == "execution_allowed")
+    assert execution_field["immutable"] is True
+
+
+def test_47c_pilot_gates(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["pilot_gates"]
+    assert pg["gate_count"] == 8
+    assert pg["all_gates_required"] is True
+    assert pg["all_gates_blocking"] is True
+    gate_names = [g["gate"] for g in pg["gates"]]
+    for expected in (
+        "authorization_valid", "audit_ready", "consensus_ready",
+        "output_capture_ready", "review_workflow_ready", "quality_workflow_ready",
+        "runtime_ready", "human_execution_approval_present",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    for gate in pg["gates"]:
+        for field in ("gate_id", "gate", "description", "required", "blocking", "status"):
+            assert field in gate, f"gate missing field: {field}"
+        assert gate["required"] is True
+        assert gate["blocking"] is True
+
+
+def test_47c_all_gates_not_met(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["pilot_gates"]
+    assert pg["gates_met"] == 0
+    assert pg["gates_not_met"] == 8
+    assert all(g["status"] == "not_met" for g in pg["gates"])
+    assert data["live_readonly_pilot"]["readiness_status"] == "blocked"
+
+
+def test_47c_runtime_assessment(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_assessment"]
+    assert rt["runtime_count"] == 3
+    runtime_names = [r["runtime"] for r in rt["runtimes"]]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_names, f"missing runtime: {expected}"
+    for runtime in rt["runtimes"]:
+        for field in ("runtime", "status", "rationale", "adapter_type", "read_only_validated"):
+            assert field in runtime, f"runtime missing field: {field}"
+        assert runtime["read_only_validated"] is False
+    kimi = next(r for r in rt["runtimes"] if r["runtime"] == "kimi-local")
+    assert kimi["status"] == "not_ready"
+
+
+def test_47c_pilot_result_model(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["pilot_result_model"]
+    assert rm["model_name"] == "PilotResult"
+    assert rm["field_count"] == 7
+    assert rm["required_field_count"] == 7
+    assert rm["all_fields_immutable"] is True
+    assert rm["execution_allowed_always_false"] is True
+    assert rm["human_review_required_always_true"] is True
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "pilot_id", "readiness_status", "blockers", "warnings",
+        "recommendations", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+
+
+def test_47c_governance_boundaries(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["pilot_may"]).lower()
+    for allowed in ("define live pilot", "assess readiness", "identify blockers"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve execution", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47c_advisory(capsys) -> None:
+    main(["live-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "design-phase" in advisory
+    assert "no runtime invocation" in advisory
+    assert "repository modification" in advisory
+
+
+def test_47c_human_output_shows_all_sections(capsys) -> None:
+    main(["live-readonly-pilot"])
+    output = capsys.readouterr().out
+    assert "Governed live read-only pilot" in output
+    assert "Pilot status" in output
+    assert "Pilot lifecycle" in output
+    assert "PilotCandidate model" in output
+    assert "Pilot gates" in output
+    assert "Runtime assessment" in output
+    assert "PilotResult model" in output
+    assert "Governance boundaries" in output
+    assert "design-phase" in output.lower()

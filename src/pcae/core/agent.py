@@ -25404,3 +25404,473 @@ def build_live_write_readiness() -> dict:
         "governance_boundaries": dict(_LWRA_GOVERNANCE_BOUNDARIES),
         "advisory": LIVE_WRITE_READINESS_ADVISORY,
     }
+
+
+# Phase 47C — Governed Live Read-Only Pilot
+# ---------------------------------------------------------------------------
+
+LIVE_READONLY_PILOT_ADVISORY = (
+    "Governed live read-only pilot is a design-phase definition; no runtime invocation, "
+    "prompt execution, or repository modification occurs."
+)
+
+_LROP_INPUT_SOURCES: tuple[str, ...] = (
+    "live_readonly_execution_readiness_assessment",
+    "execution_authorization_artifact",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "read_only_invocation_pilot",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+)
+
+_LROP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt",
+        "description": (
+            "An approved prompt artifact is selected for the live read-only pilot execution."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "An ExecutionAuthorizationArtifact authorizing read-only execution is "
+            "prepared and linked to the approved prompt."
+        ),
+        "required": True,
+        "completed_by": "execution_authorization_artifact",
+    },
+    {
+        "step": 3,
+        "name": "runtime_selection",
+        "description": (
+            "A target runtime (codex-local, claude-local, or kimi-local) is selected "
+            "and validated for governed read-only execution."
+        ),
+        "required": True,
+        "completed_by": "runtime_selection_artifact",
+    },
+    {
+        "step": 4,
+        "name": "pilot_preflight",
+        "description": (
+            "All pilot gates are evaluated: authorization, audit, consensus, output "
+            "capture, review workflow, quality workflow, runtime, and human approval."
+        ),
+        "required": True,
+        "completed_by": "all_pilot_gates_pass",
+    },
+    {
+        "step": 5,
+        "name": "human_execution_approval",
+        "description": (
+            "Explicit human approval is required before any live read-only execution "
+            "may proceed. This gate is never bypassed regardless of pilot readiness."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_execution_approval",
+    },
+    {
+        "step": 6,
+        "name": "future_live_readonly_execution",
+        "description": (
+            "Placeholder for the future governed live read-only execution step. "
+            "Execution is deferred to a future live invocation phase. "
+            "No execution occurs in this design phase."
+        ),
+        "required": True,
+        "completed_by": "future_governed_live_invocation",
+    },
+    {
+        "step": 7,
+        "name": "result_capture",
+        "description": (
+            "Execution outputs are captured, classified, and persisted according "
+            "to the output capture strategy defined in the pilot candidate."
+        ),
+        "required": True,
+        "completed_by": "output_capture_artifact",
+    },
+    {
+        "step": 8,
+        "name": "review_workflows",
+        "description": (
+            "Result review, quality review, and audit workflows are applied to the "
+            "captured execution output before any further action."
+        ),
+        "required": True,
+        "completed_by": "review_workflow_completion",
+    },
+)
+
+_LROP_PILOT_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this pilot candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "ID of the linked ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "ID of the approved prompt artifact selected for this pilot.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this pilot execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this pilot execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "output_capture_strategy",
+        "type": "str",
+        "description": "Strategy for capturing and classifying execution outputs.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_strategy",
+        "type": "str",
+        "description": "Strategy for producing the execution audit record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "review_strategy",
+        "type": "str",
+        "description": "Strategy for applying the result review workflow.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "quality_strategy",
+        "type": "str",
+        "description": "Strategy for applying the quality review framework.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; real execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_LROP_PILOT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "lrop-g01",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state "
+            "and has not expired, been denied, or been superseded."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g02",
+        "gate": "audit_ready",
+        "description": (
+            "An execution audit path is established and an audit record is prepared "
+            "prior to any live read-only execution."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g03",
+        "gate": "consensus_ready",
+        "description": (
+            "Multi-agent consensus governance is in place and a consensus review "
+            "path has been validated for this pilot candidate."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g04",
+        "gate": "output_capture_ready",
+        "description": (
+            "An output capture strategy is defined and compatible with the selected "
+            "runtime and execution mode."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g05",
+        "gate": "review_workflow_ready",
+        "description": (
+            "The result review workflow is available and configured for this "
+            "pilot's execution outputs."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g06",
+        "gate": "quality_workflow_ready",
+        "description": (
+            "The quality review framework is available and configured for evaluating "
+            "this pilot's execution outputs."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g07",
+        "gate": "runtime_ready",
+        "description": (
+            "The selected runtime is installed, supports non-interactive execution, "
+            "and its read-only sandbox mode has been validated."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "lrop-g08",
+        "gate": "human_execution_approval_present",
+        "description": (
+            "Explicit human execution approval is present. This gate is never "
+            "bypassed regardless of pilot readiness or other gate results."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+)
+
+_LROP_RUNTIME_RESULTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "status": "partially_ready",
+        "rationale": (
+            "codex-local supports non-interactive execution and has been adapter-inspected. "
+            "Governed live read-only execution has not been validated end-to-end."
+        ),
+        "adapter_type": "cli",
+        "read_only_validated": False,
+    },
+    {
+        "runtime": "claude-local",
+        "status": "partially_ready",
+        "rationale": (
+            "claude-local supports non-interactive execution and has been adapter-inspected. "
+            "Governed live read-only execution has not been validated end-to-end."
+        ),
+        "adapter_type": "cli",
+        "read_only_validated": False,
+    },
+    {
+        "runtime": "kimi-local",
+        "status": "not_ready",
+        "rationale": (
+            "kimi-local has not been confirmed installed or validated for "
+            "governed read-only execution."
+        ),
+        "adapter_type": "cli",
+        "read_only_validated": False,
+    },
+)
+
+_LROP_PILOT_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "description": "Pilot readiness status: ready, blocked, or pending.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed pilot preflight validation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during pilot preflight.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of governance recommendations to advance pilot readiness.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; real execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_LROP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "define live pilot",
+        "assess readiness",
+        "identify blockers",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve execution",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_LROP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47D", "description": "Governed Rollback Execution Pilot"},
+    {"phase": "47E", "description": "Governed Live Write Pilot"},
+    {"phase": "47F", "description": "Runtime Contract Verification"},
+)
+
+
+def build_live_readonly_pilot() -> dict:
+    """Define the first governed live read-only execution pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"lrop-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _LROP_LIFECYCLE]
+    pilot_candidate_fields = [dict(f) for f in _LROP_PILOT_CANDIDATE_FIELDS]
+    pilot_gates = [dict(g) for g in _LROP_PILOT_GATES]
+    runtime_results = [dict(r) for r in _LROP_RUNTIME_RESULTS]
+    pilot_result_fields = [dict(f) for f in _LROP_PILOT_RESULT_FIELDS]
+
+    gates_met = sum(1 for g in pilot_gates if g["status"] == "met")
+    gates_not_met = sum(1 for g in pilot_gates if g["status"] == "not_met")
+    readiness_status = "blocked" if gates_not_met > 0 else "ready"
+
+    pilot_candidate_model = {
+        "model_name": "PilotCandidate",
+        "field_count": len(pilot_candidate_fields),
+        "required_field_count": sum(1 for f in pilot_candidate_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in pilot_candidate_fields if f["immutable"]),
+        "execution_allowed_always_false": True,
+        "fields": pilot_candidate_fields,
+    }
+
+    pilot_gate_model = {
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "all_gates_required": all(g["required"] for g in pilot_gates),
+        "all_gates_blocking": all(g["blocking"] for g in pilot_gates),
+        "gate_ids": [g["gate_id"] for g in pilot_gates],
+        "gates": pilot_gates,
+    }
+
+    runtime_assessment_model = {
+        "runtime_count": len(runtime_results),
+        "ready_count": sum(1 for r in runtime_results if r["status"] == "ready"),
+        "partially_ready_count": sum(
+            1 for r in runtime_results if r["status"] == "partially_ready"
+        ),
+        "not_ready_count": sum(1 for r in runtime_results if r["status"] == "not_ready"),
+        "runtimes": runtime_results,
+    }
+
+    pilot_result_model = {
+        "model_name": "PilotResult",
+        "field_count": len(pilot_result_fields),
+        "required_field_count": sum(1 for f in pilot_result_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in pilot_result_fields),
+        "execution_allowed_always_false": True,
+        "human_review_required_always_true": True,
+        "fields": pilot_result_fields,
+    }
+
+    live_readonly_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "47C",
+        "title": "Governed Live Read-Only Pilot",
+        "summary": (
+            "Defines the first governed live read-only execution pilot. Specifies the "
+            "eight-step pilot lifecycle (approved_prompt through review_workflows), the "
+            "PilotCandidate model (10 fields, all immutable), eight required pilot gates "
+            "(all not_met in this design phase), and the PilotResult model (7 fields, all "
+            "immutable). Assesses three target runtimes. Execution is deferred to a future "
+            "phase requiring explicit human approval. No runtime invocation occurs."
+        ),
+        "readiness_status": readiness_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "lifecycle_step_count": len(lifecycle),
+        "pilot_candidate_field_count": len(pilot_candidate_fields),
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "runtime_count": len(runtime_results),
+        "input_sources": list(_LROP_INPUT_SOURCES),
+        "governance_boundaries": dict(_LROP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LROP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "live_readonly_pilot": live_readonly_pilot,
+        "pilot_lifecycle": lifecycle,
+        "pilot_candidate_model": pilot_candidate_model,
+        "pilot_gates": pilot_gate_model,
+        "runtime_assessment": runtime_assessment_model,
+        "pilot_result_model": pilot_result_model,
+        "governance_boundaries": dict(_LROP_GOVERNANCE_BOUNDARIES),
+        "advisory": LIVE_READONLY_PILOT_ADVISORY,
+    }
