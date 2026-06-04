@@ -155,6 +155,8 @@ from pcae.core.agent import (
     INVOCATION_RESULT_CAPTURE_ADVISORY,
     build_runtime_contract_enforcement,
     RUNTIME_CONTRACT_ENFORCEMENT_ADVISORY,
+    build_invocation_authorization_enforcement,
+    INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6389,6 +6391,58 @@ def run_runtime_contract_enforcement(args: argparse.Namespace) -> int:
             print(f"    execution_allowed: {res['execution_allowed']}")
             if res["failed_checks"]:
                 print(f"    Failed checks: {', '.join(res['failed_checks'])}")
+            if res["warnings"]:
+                print(f"    Warnings: {', '.join(res['warnings'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_authorization_enforcement(args: argparse.Namespace) -> int:
+    data = build_invocation_authorization_enforcement()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        es = data["enforcement_summary"]
+        print("Invocation authorization enforcement")
+        print(f"Assessment: {es['summary_id']}  Generated: {es['generated_at']}")
+        print(f"Phase: {es['phase']} — {es['title']}")
+        print()
+        print(es["summary"])
+        print()
+        print(f"Runtimes evaluated:      {es['runtime_count']}")
+        print(f"Blocked:                 {es['blocked_count']}")
+        print(f"Allowed:                 {es['allowed_count']}")
+        print(f"Enforcement chain steps: {es['enforcement_chain_length']}")
+        print(f"Execution allowed:       {'yes' if es['execution_allowed'] else 'no'}")
+        print(f"Human review required:   {'yes' if es['human_review_required'] else 'no'}")
+        print()
+        rm = data["result_model"]
+        print(f"Result model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(rm['supported_statuses'])}")
+        print(f"  execution_allowed always False in 48D: {rm['execution_allowed_always_false_in_48d']}")
+        print()
+        print(f"Enforcement chain ({len(data['enforcement_chain'])} steps):")
+        for step in data["enforcement_chain"]:
+            print(f"  {step['step']}. [{step['input']}] {step['check_id']}: {step['description']}")
+        print()
+        print(f"Enforcement results ({len(data['enforcement_results'])} runtimes):")
+        for res in data["enforcement_results"]:
+            print(f"  [{res['enforcement_status']}] {res['runtime_id']}")
+            print(f"    execution_allowed: {res['execution_allowed']}")
+            print(f"    authorization_status: {res['authorization_status']}")
+            print(f"    contract_status: {res['contract_status']}")
+            print(f"    preflight_status: {res['preflight_status']}")
+            print(f"    capture_status: {res['capture_status']}")
+            if res["failed_checks"]:
+                print(f"    Failed checks ({len(res['failed_checks'])}): {', '.join(res['failed_checks'])}")
             if res["warnings"]:
                 print(f"    Warnings: {', '.join(res['warnings'])}")
         print()

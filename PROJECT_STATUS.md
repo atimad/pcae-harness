@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48C: Runtime Contract Enforcement.
+Phase 48D: Invocation Authorization Enforcement.
 
 ## Governance Coherence Note
 
@@ -3020,6 +3020,26 @@ human_review_required=True; governance_boundaries: may evaluate enforcement
 checks/report failed checks/report blocked runtimes/generate enforcement
 results; may_not invoke runtimes/execute prompts/modify repository/approve
 execution/commit/push/rollback; inputs: 6 sources
+and PCAE evaluates invocation authorization enforcement with
+`pcae invocation-authorization-enforcement` and
+`pcae invocation-authorization-enforcement --json` (Phase 48D):
+InvocationAuthorizationEnforcementResult model (12 required fields:
+enforcement_id/request_id/authorization_id/runtime_id/authorization_status/
+contract_status/preflight_status/capture_status/enforcement_status/
+failed_checks/warnings/execution_allowed); 8-step enforcement chain
+(all blocking): invocation_request_exists/execution_authorization_exists/
+authorization_valid/authorization_not_expired/
+runtime_contract_enforcement_passed/preflight_passed/
+output_capture_path_ready/human_approval_present;
+all 3 runtimes blocked (authorization=missing, contract=blocked,
+preflight=blocked, capture=not_ready); 6 failed checks per runtime;
+blocked_count=3, allowed_count=0; execution_allowed=False for all;
+no runtime invoked; no prompt submitted; no repository modification;
+human_review_required=True; governance_boundaries: may evaluate
+authorization enforcement/evaluate preflight status/evaluate contract
+enforcement status/report blockers; may_not invoke runtimes/execute
+prompts/modify repository/approve execution/commit/push/rollback;
+inputs: 5 sources
 
 ## Next
 

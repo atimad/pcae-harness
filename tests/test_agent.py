@@ -28922,3 +28922,171 @@ def test_48c_human_output_shows_all_sections(capsys) -> None:
     assert "Enforcement results" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48D — Invocation Authorization Enforcement
+# ---------------------------------------------------------------------------
+
+
+def test_48d_json_structure(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "enforcement_summary", "result_model", "enforcement_chain",
+        "enforcement_results", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48d_enforcement_summary_fields(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    es = data["enforcement_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "blocked_count", "allowed_count",
+        "enforcement_chain_length", "execution_allowed", "human_review_required",
+    ):
+        assert field in es, f"missing enforcement_summary field: {field}"
+    assert es["phase"] == "48D"
+    assert es["execution_allowed"] is False
+    assert es["human_review_required"] is True
+    assert es["runtime_count"] == 3
+    assert es["enforcement_chain_length"] == 8
+    assert es["blocked_count"] == 3
+    assert es["allowed_count"] == 0
+
+
+def test_48d_execution_always_blocked(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["enforcement_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["result_model"]["execution_allowed_always_false_in_48d"] is True
+    for res in data["enforcement_results"]:
+        assert res["execution_allowed"] is False, (
+            f"runtime {res['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48d_result_model(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["result_model"]
+    assert rm["model_name"] == "InvocationAuthorizationEnforcementResult"
+    assert rm["field_count"] == 12
+    assert rm["required_field_count"] == 12
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "enforcement_id", "request_id", "authorization_id", "runtime_id",
+        "authorization_status", "contract_status", "preflight_status",
+        "capture_status", "enforcement_status", "failed_checks",
+        "warnings", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    for status in ("allowed", "blocked", "blocked_with_warnings"):
+        assert status in rm["supported_statuses"], f"missing status: {status}"
+
+
+def test_48d_eight_step_enforcement_chain(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    chain = data["enforcement_chain"]
+    assert len(chain) == 8
+    check_ids = [s["check_id"] for s in chain]
+    for expected in (
+        "invocation_request_exists", "execution_authorization_exists",
+        "authorization_valid", "authorization_not_expired",
+        "runtime_contract_enforcement_passed", "preflight_passed",
+        "output_capture_path_ready", "human_approval_present",
+    ):
+        assert expected in check_ids, f"missing chain step: {expected}"
+    for step in chain:
+        assert step["blocking"] is True, f"step {step['check_id']} must be blocking"
+    steps = [s["step"] for s in chain]
+    assert steps == list(range(1, 9)), "chain steps must be 1-8 in order"
+
+
+def test_48d_missing_authorization_blocks(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["enforcement_results"]:
+        assert res["authorization_status"] == "missing", (
+            f"{res['runtime_id']} authorization_status must be missing"
+        )
+        assert "execution_authorization_exists" in res["failed_checks"], (
+            f"{res['runtime_id']} must fail execution_authorization_exists"
+        )
+
+
+def test_48d_failed_contract_enforcement_blocks(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["enforcement_results"]:
+        assert res["contract_status"] == "blocked", (
+            f"{res['runtime_id']} contract_status must be blocked"
+        )
+        assert "runtime_contract_enforcement_passed" in res["failed_checks"], (
+            f"{res['runtime_id']} must fail runtime_contract_enforcement_passed"
+        )
+
+
+def test_48d_failed_preflight_blocks(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["enforcement_results"]:
+        assert res["preflight_status"] == "blocked", (
+            f"{res['runtime_id']} preflight_status must be blocked"
+        )
+        assert "preflight_passed" in res["failed_checks"], (
+            f"{res['runtime_id']} must fail preflight_passed"
+        )
+
+
+def test_48d_enforcement_id_prefixes(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["enforcement_results"]:
+        assert res["enforcement_id"].startswith(f"iae-{res['runtime_id']}-"), (
+            f"enforcement_id must start with iae-<runtime_id>-"
+        )
+
+
+def test_48d_governance_boundaries(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48D"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "evaluate authorization enforcement", "evaluate preflight status",
+        "evaluate contract enforcement status", "report blockers",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48d_advisory(capsys) -> None:
+    main(["invocation-authorization-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48d_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-authorization-enforcement"])
+    output = capsys.readouterr().out
+    assert "Invocation authorization enforcement" in output
+    assert "Result model" in output
+    assert "Enforcement chain" in output
+    assert "Enforcement results" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

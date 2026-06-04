@@ -29675,3 +29675,348 @@ def build_runtime_contract_enforcement() -> dict:
         "input_sources": list(_RCE_INPUT_SOURCES),
         "advisory": RUNTIME_CONTRACT_ENFORCEMENT_ADVISORY,
     }
+
+
+# Phase 48D — Invocation Authorization Enforcement
+# ---------------------------------------------------------------------------
+
+INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY = (
+    "Invocation authorization enforcement assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48D."
+)
+
+_IAE_ENFORCEMENT_CHAIN: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "check_id": "invocation_request_exists",
+        "description": "A ReadOnlyInvocationRequest record exists for this invocation.",
+        "blocking": True,
+        "input": "ReadOnlyInvocationRequest",
+    },
+    {
+        "step": 2,
+        "check_id": "execution_authorization_exists",
+        "description": "An ExecutionAuthorizationArtifact exists for the request.",
+        "blocking": True,
+        "input": "ExecutionAuthorizationArtifact",
+    },
+    {
+        "step": 3,
+        "check_id": "authorization_valid",
+        "description": "The authorization artifact is structurally valid and well-formed.",
+        "blocking": True,
+        "input": "ExecutionAuthorizationArtifact",
+    },
+    {
+        "step": 4,
+        "check_id": "authorization_not_expired",
+        "description": "The authorization artifact has not passed its expiry timestamp.",
+        "blocking": True,
+        "input": "ExecutionAuthorizationArtifact",
+    },
+    {
+        "step": 5,
+        "check_id": "runtime_contract_enforcement_passed",
+        "description": "The RuntimeContractEnforcementResult for the target runtime is not blocked.",
+        "blocking": True,
+        "input": "RuntimeContractEnforcementResult",
+    },
+    {
+        "step": 6,
+        "check_id": "preflight_passed",
+        "description": "The ReadOnlyInvocationPreflight reports no blocking conditions.",
+        "blocking": True,
+        "input": "ReadOnlyInvocationPreflight",
+    },
+    {
+        "step": 7,
+        "check_id": "output_capture_path_ready",
+        "description": "The InvocationResultCapture path is configured and ready to receive output.",
+        "blocking": True,
+        "input": "InvocationResultCapture",
+    },
+    {
+        "step": 8,
+        "check_id": "human_approval_present",
+        "description": "Human approval has been explicitly recorded for this invocation.",
+        "blocking": True,
+        "input": "ExecutionAuthorizationArtifact",
+    },
+)
+
+_IAE_ENFORCEMENT_STATUSES: tuple[str, ...] = (
+    "allowed",
+    "blocked",
+    "blocked_with_warnings",
+)
+
+_IAE_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "enforcement_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this authorization enforcement result.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request under evaluation.",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The authorization artifact reference (or placeholder if absent).",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this invocation request.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of authorization checks (missing, invalid, expired, valid).",
+    },
+    {
+        "name": "contract_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of runtime contract enforcement (passed, blocked).",
+    },
+    {
+        "name": "preflight_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of invocation preflight (passed, blocked).",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of output capture path readiness (ready, not_ready).",
+    },
+    {
+        "name": "enforcement_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall enforcement outcome: allowed, blocked, or blocked_with_warnings.",
+    },
+    {
+        "name": "failed_checks",
+        "type": "list[str]",
+        "required": True,
+        "description": "Check IDs from the enforcement chain that failed.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings produced during enforcement evaluation.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48D; no execution is authorized.",
+    },
+)
+
+_IAE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "evaluate authorization enforcement",
+        "evaluate preflight status",
+        "evaluate contract enforcement status",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48D",
+}
+
+_IAE_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "RuntimeContractEnforcementResult",
+    "ExecutionAuthorizationArtifact",
+    "InvocationResultCapture",
+)
+
+# Per-runtime sample evaluation showing current blocked state.
+# In Phase 48D every runtime fails because:
+#   - authorization artifacts are placeholders (missing)
+#   - contract enforcement is still blocked from 48C
+#   - preflight execution_allowed is False from 48A
+#   - output capture is not wired (48B)
+_IAE_SAMPLE_EVALUATIONS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "request_exists": True,
+        "authorization_exists": False,
+        "authorization_valid": False,
+        "authorization_expired": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "claude-local",
+        "request_exists": True,
+        "authorization_exists": False,
+        "authorization_valid": False,
+        "authorization_expired": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "kimi-local",
+        "request_exists": True,
+        "authorization_exists": False,
+        "authorization_valid": False,
+        "authorization_expired": False,
+        "contract_enforcement_passed": False,
+        "preflight_passed": False,
+        "capture_path_ready": False,
+        "human_approval_present": False,
+    },
+)
+
+
+def _evaluate_authorization_enforcement(eval_data: dict, request_id: str) -> dict:
+    """Derive an authorization enforcement result from a per-runtime evaluation record."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    enforcement_id = f"iae-{eval_data['runtime_id']}-{ts}"
+    failed: list[str] = []
+    warnings: list[str] = []
+
+    if not eval_data["request_exists"]:
+        failed.append("invocation_request_exists")
+    if not eval_data["authorization_exists"]:
+        failed.append("execution_authorization_exists")
+    if not eval_data["authorization_valid"]:
+        failed.append("authorization_valid")
+    if eval_data["authorization_expired"]:
+        failed.append("authorization_not_expired")
+    if not eval_data["contract_enforcement_passed"]:
+        failed.append("runtime_contract_enforcement_passed")
+    if not eval_data["preflight_passed"]:
+        failed.append("preflight_passed")
+    if not eval_data["capture_path_ready"]:
+        failed.append("output_capture_path_ready")
+    if not eval_data["human_approval_present"]:
+        failed.append("human_approval_present")
+
+    # Derive sub-statuses
+    if not eval_data["authorization_exists"]:
+        auth_status = "missing"
+    elif eval_data["authorization_expired"]:
+        auth_status = "expired"
+    elif not eval_data["authorization_valid"]:
+        auth_status = "invalid"
+    else:
+        auth_status = "valid"
+
+    contract_status = "passed" if eval_data["contract_enforcement_passed"] else "blocked"
+    preflight_status = "passed" if eval_data["preflight_passed"] else "blocked"
+    capture_status = "ready" if eval_data["capture_path_ready"] else "not_ready"
+
+    if failed:
+        status = "blocked_with_warnings" if warnings else "blocked"
+    else:
+        status = "allowed" if not warnings else "blocked_with_warnings"
+
+    return {
+        "enforcement_id": enforcement_id,
+        "request_id": request_id,
+        "authorization_id": "auth-placeholder-48d",
+        "runtime_id": eval_data["runtime_id"],
+        "authorization_status": auth_status,
+        "contract_status": contract_status,
+        "preflight_status": preflight_status,
+        "capture_status": capture_status,
+        "enforcement_status": status,
+        "failed_checks": failed,
+        "warnings": warnings,
+        "execution_allowed": False,
+    }
+
+
+def build_invocation_authorization_enforcement() -> dict:
+    """Evaluate invocation authorization enforcement for all known runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48d"
+
+    result_fields = [dict(f) for f in _IAE_RESULT_FIELDS]
+    chain = [dict(s) for s in _IAE_ENFORCEMENT_CHAIN]
+
+    enforcement_results = [
+        _evaluate_authorization_enforcement(dict(ev), request_id_ref)
+        for ev in _IAE_SAMPLE_EVALUATIONS
+    ]
+
+    blocked_count = sum(
+        1 for r in enforcement_results
+        if r["enforcement_status"] in ("blocked", "blocked_with_warnings")
+    )
+    allowed_count = sum(
+        1 for r in enforcement_results if r["enforcement_status"] == "allowed"
+    )
+
+    result_model = {
+        "model_name": "InvocationAuthorizationEnforcementResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "supported_statuses": list(_IAE_ENFORCEMENT_STATUSES),
+        "execution_allowed_always_false_in_48d": True,
+        "fields": result_fields,
+    }
+
+    enforcement_summary = {
+        "summary_id": f"48d-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48D",
+        "title": "Invocation Authorization Enforcement",
+        "summary": (
+            "Evaluates an 8-step enforcement chain that prevents invocation unless "
+            "authorization, preflight, and runtime contract checks all pass. All "
+            "three runtimes are blocked in Phase 48D: authorization artifacts are "
+            "missing, runtime contract enforcement from Phase 48C remains blocked, "
+            "preflight execution_allowed is False from Phase 48A, and output capture "
+            "is not yet wired from Phase 48B. execution_allowed=False for all runtimes. "
+            "No runtime is invoked, no prompt is submitted, and no repository "
+            "modification occurs."
+        ),
+        "runtime_count": len(enforcement_results),
+        "blocked_count": blocked_count,
+        "allowed_count": allowed_count,
+        "enforcement_chain_length": len(chain),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "enforcement_summary": enforcement_summary,
+        "result_model": result_model,
+        "enforcement_chain": chain,
+        "enforcement_results": enforcement_results,
+        "governance_boundaries": dict(_IAE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_IAE_INPUT_SOURCES),
+        "advisory": INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY,
+    }

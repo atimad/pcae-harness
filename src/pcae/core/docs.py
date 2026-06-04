@@ -567,6 +567,11 @@ def render_commands_reference() -> str:
 
 - `pcae runtime-contract-enforcement`
 - `pcae runtime-contract-enforcement --json`
+
+## invocation-authorization-enforcement
+
+- `pcae invocation-authorization-enforcement`
+- `pcae invocation-authorization-enforcement --json`
 """
 
 
