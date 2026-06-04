@@ -87,6 +87,7 @@ from pcae.commands.agent import (
     run_execution_governance_audit,
     run_runtime_trust,
     run_governance_maturity,
+    run_readonly_invocation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2095,6 +2096,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance maturity assessment output.",
     )
     governance_maturity_parser.set_defaults(handler=run_governance_maturity)
+
+    readonly_invocation_parser = subparsers.add_parser(
+        "readonly-invocation",
+        help="Controlled read-only runtime invocation scaffold (Phase 48A).",
+    )
+    readonly_invocation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    readonly_invocation_parser.set_defaults(handler=run_readonly_invocation)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

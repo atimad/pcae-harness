@@ -28425,3 +28425,168 @@ def test_47i_human_output_shows_all_sections(capsys) -> None:
     assert "Domain assessments" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48A — Controlled Read-Only Runtime Invocation Implementation
+# ---------------------------------------------------------------------------
+
+
+def test_48a_json_structure(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "scaffold_summary", "request_model", "preflight_model",
+        "result_placeholder_model", "sample_request", "sample_preflight",
+        "result_placeholder", "governance_boundaries",
+        "future_evolution", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48a_scaffold_summary_fields(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["scaffold_summary"]
+    for field in (
+        "scaffold_id", "generated_at", "phase", "title", "summary",
+        "execution_allowed", "human_review_required",
+        "request_model_field_count", "preflight_model_field_count", "result_model_field_count",
+    ):
+        assert field in ss, f"missing scaffold_summary field: {field}"
+    assert ss["phase"] == "48A"
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["request_model_field_count"] == 8
+    assert ss["preflight_model_field_count"] == 10
+    assert ss["result_model_field_count"] == 7
+
+
+def test_48a_execution_always_blocked(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["scaffold_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["sample_preflight"]["execution_allowed"] is False
+    assert data["preflight_model"]["execution_allowed_always_false_in_48a"] is True
+
+
+def test_48a_request_model(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["request_model"]
+    assert rm["model_name"] == "ReadOnlyInvocationRequest"
+    assert rm["field_count"] == 8
+    assert rm["required_field_count"] == 8
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "request_id", "runtime_id", "prompt_id", "prompt_text",
+        "sandbox_mode", "timeout_seconds", "output_capture_mode", "authorization_id",
+    ):
+        assert expected in field_names, f"missing request field: {expected}"
+
+
+def test_48a_preflight_model(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["preflight_model"]
+    assert pm["model_name"] == "ReadOnlyInvocationPreflight"
+    assert pm["field_count"] == 10
+    assert pm["required_field_count"] == 10
+    assert pm["execution_allowed_always_false_in_48a"] is True
+    field_names = [f["name"] for f in pm["fields"]]
+    for expected in (
+        "preflight_id", "request_id", "runtime_status", "authorization_status",
+        "sandbox_status", "timeout_status", "output_capture_status",
+        "execution_allowed", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing preflight field: {expected}"
+
+
+def test_48a_result_placeholder_model(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rp = data["result_placeholder_model"]
+    assert rp["model_name"] == "ReadOnlyInvocationResult"
+    assert rp["field_count"] == 7
+    assert rp["required_field_count"] == 7
+    assert "scaffold" in rp["placeholder_note"].lower() or "placeholder" in rp["placeholder_note"].lower()
+    field_names = [f["name"] for f in rp["fields"]]
+    for expected in ("result_id", "request_id", "status", "stdout", "stderr", "metadata", "created_at"):
+        assert expected in field_names, f"missing result field: {expected}"
+
+
+def test_48a_sample_request(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_request"]
+    assert sr["request_id"].startswith("rir-req-")
+    assert sr["sandbox_mode"] == "read-only"
+    assert sr["timeout_seconds"] == 300
+    assert sr["output_capture_mode"] == "stdout"
+
+
+def test_48a_sample_preflight_blockers(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_preflight"]
+    assert sp["execution_allowed"] is False
+    assert "phase_48a_execution_not_authorized" in sp["blockers"]
+    assert "sandbox_contract_unverified" in sp["blockers"]
+    assert "timeout_contract_unverified" in sp["blockers"]
+    assert sp["preflight_id"].startswith("rir-pre-")
+
+
+def test_48a_result_placeholder_not_executed(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    res = data["result_placeholder"]
+    assert res["status"] == "not_executed"
+    assert res["stdout"] is None
+    assert res["stderr"] is None
+    assert res["metadata"] == {}
+    assert res["result_id"].startswith("rir-res-")
+
+
+def test_48a_governance_boundaries(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48A"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("construct invocation request", "evaluate preflight", "report blockers"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48a_future_evolution(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["future_evolution"]]
+    assert "48B" in phases
+    assert "48C" in phases
+
+
+def test_48a_advisory(capsys) -> None:
+    main(["readonly-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48a_human_output_shows_all_sections(capsys) -> None:
+    main(["readonly-invocation"])
+    output = capsys.readouterr().out
+    assert "Controlled read-only runtime invocation scaffold" in output
+    assert "Request model" in output
+    assert "Preflight model" in output
+    assert "Result placeholder" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

@@ -28752,3 +28752,308 @@ def build_runtime_trust() -> dict:
         "governance_boundaries": dict(_RTA_GOVERNANCE_BOUNDARIES),
         "advisory": RUNTIME_TRUST_ADVISORY,
     }
+
+
+# Phase 48A — Controlled Read-Only Runtime Invocation Implementation
+# ---------------------------------------------------------------------------
+
+READONLY_INVOCATION_ADVISORY = (
+    "Controlled read-only runtime invocation scaffold is informational; "
+    "no runtime invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48A."
+)
+
+_RIR_REQUEST_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this read-only invocation request.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "Target runtime identifier (e.g. codex-local, claude-local).",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "Reference identifier for the governed prompt artifact.",
+    },
+    {
+        "name": "prompt_text",
+        "type": "str",
+        "required": True,
+        "description": "The governed prompt text to be submitted to the runtime.",
+    },
+    {
+        "name": "sandbox_mode",
+        "type": "str",
+        "required": True,
+        "description": "Sandbox enforcement mode for the invocation (e.g. read-only).",
+    },
+    {
+        "name": "timeout_seconds",
+        "type": "int",
+        "required": True,
+        "description": "Maximum allowed runtime duration in seconds.",
+    },
+    {
+        "name": "output_capture_mode",
+        "type": "str",
+        "required": True,
+        "description": "How runtime output is captured (e.g. stdout, structured).",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "Reference to the governance authorization record for this request.",
+    },
+)
+
+_RIR_PREFLIGHT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this preflight evaluation.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request this preflight evaluates.",
+    },
+    {
+        "name": "runtime_status",
+        "type": "str",
+        "required": True,
+        "description": "Runtime availability status at preflight time.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Governance authorization status for this request.",
+    },
+    {
+        "name": "sandbox_status",
+        "type": "str",
+        "required": True,
+        "description": "Sandbox mode verification status.",
+    },
+    {
+        "name": "timeout_status",
+        "type": "str",
+        "required": True,
+        "description": "Timeout enforcement verification status.",
+    },
+    {
+        "name": "output_capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Output capture readiness status.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48A; controlled execution not yet authorized.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of blocking conditions preventing execution.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings about the invocation request.",
+    },
+)
+
+_RIR_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "result_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this invocation result placeholder.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request this result corresponds to.",
+    },
+    {
+        "name": "status",
+        "type": "str",
+        "required": True,
+        "description": "Result status (placeholder in Phase 48A: not_executed).",
+    },
+    {
+        "name": "stdout",
+        "type": "str | None",
+        "required": True,
+        "description": "Captured standard output (None in Phase 48A).",
+    },
+    {
+        "name": "stderr",
+        "type": "str | None",
+        "required": True,
+        "description": "Captured standard error (None in Phase 48A).",
+    },
+    {
+        "name": "metadata",
+        "type": "dict",
+        "required": True,
+        "description": "Runtime invocation metadata (empty in Phase 48A).",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO 8601 timestamp when this result record was created.",
+    },
+)
+
+_RIR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct invocation request",
+        "evaluate preflight",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48A",
+}
+
+_RIR_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "48B", "description": "Invocation Result Capture Implementation"},
+    {"phase": "48C", "description": "Runtime Contract Enforcement"},
+)
+
+
+def build_readonly_invocation() -> dict:
+    """Build controlled read-only invocation scaffold. Read-only; no execution."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id = f"rir-req-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    preflight_id = f"rir-pre-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    result_id = f"rir-res-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    request_fields = [dict(f) for f in _RIR_REQUEST_FIELDS]
+    preflight_fields = [dict(f) for f in _RIR_PREFLIGHT_FIELDS]
+    result_fields = [dict(f) for f in _RIR_RESULT_FIELDS]
+
+    request_model = {
+        "model_name": "ReadOnlyInvocationRequest",
+        "field_count": len(request_fields),
+        "required_field_count": sum(1 for f in request_fields if f["required"]),
+        "fields": request_fields,
+    }
+
+    preflight_model = {
+        "model_name": "ReadOnlyInvocationPreflight",
+        "field_count": len(preflight_fields),
+        "required_field_count": sum(1 for f in preflight_fields if f["required"]),
+        "execution_allowed_always_false_in_48a": True,
+        "fields": preflight_fields,
+    }
+
+    result_placeholder_model = {
+        "model_name": "ReadOnlyInvocationResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "placeholder_note": "Result model is a scaffold in Phase 48A; no execution occurs.",
+        "fields": result_fields,
+    }
+
+    sample_request = {
+        "request_id": request_id,
+        "runtime_id": "codex-local",
+        "prompt_id": "prompt-placeholder-48a",
+        "prompt_text": "(governed prompt text — not submitted in Phase 48A)",
+        "sandbox_mode": "read-only",
+        "timeout_seconds": 300,
+        "output_capture_mode": "stdout",
+        "authorization_id": "auth-placeholder-48a",
+    }
+
+    sample_preflight = {
+        "preflight_id": preflight_id,
+        "request_id": request_id,
+        "runtime_status": "not_evaluated",
+        "authorization_status": "not_evaluated",
+        "sandbox_status": "not_evaluated",
+        "timeout_status": "not_evaluated",
+        "output_capture_status": "not_evaluated",
+        "execution_allowed": False,
+        "blockers": [
+            "phase_48a_execution_not_authorized",
+            "sandbox_contract_unverified",
+            "timeout_contract_unverified",
+            "authorization_not_evaluated",
+        ],
+        "warnings": [
+            "invocation_scaffold_only_no_runtime_probing_performed",
+        ],
+    }
+
+    result_placeholder = {
+        "result_id": result_id,
+        "request_id": request_id,
+        "status": "not_executed",
+        "stdout": None,
+        "stderr": None,
+        "metadata": {},
+        "created_at": generated_at,
+    }
+
+    scaffold_summary = {
+        "scaffold_id": f"48a-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48A",
+        "title": "Controlled Read-Only Runtime Invocation Implementation",
+        "summary": (
+            "Implements the infrastructure scaffold for controlled read-only "
+            "runtime invocation. Defines ReadOnlyInvocationRequest (8 fields), "
+            "ReadOnlyInvocationPreflight (10 fields), and ReadOnlyInvocationResult "
+            "placeholder (7 fields). execution_allowed=False in Phase 48A. "
+            "No runtime is invoked, no prompt is submitted, and no repository "
+            "modification occurs. Scaffold enables Phase 48B result capture "
+            "and Phase 48C contract enforcement."
+        ),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "request_model_field_count": len(request_fields),
+        "preflight_model_field_count": len(preflight_fields),
+        "result_model_field_count": len(result_fields),
+    }
+
+    return {
+        "scaffold_summary": scaffold_summary,
+        "request_model": request_model,
+        "preflight_model": preflight_model,
+        "result_placeholder_model": result_placeholder_model,
+        "sample_request": sample_request,
+        "sample_preflight": sample_preflight,
+        "result_placeholder": result_placeholder,
+        "governance_boundaries": dict(_RIR_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RIR_FUTURE_EVOLUTION],
+        "advisory": READONLY_INVOCATION_ADVISORY,
+    }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47I: Governance Maturity Assessment.
+Phase 48A: Controlled Read-Only Runtime Invocation Implementation.
 
 ## Governance Coherence Note
 
@@ -2959,10 +2959,27 @@ and runtime_governance); human_review_required=True; execution_allowed=False;
 governance_boundaries: assessment_may assess maturity/identify blockers/
 generate recommendations; assessment_may_not invoke runtimes/execute prompts/
 approve execution/modify repository/commit/push; future_evolution: 48A/48B/48C
+and PCAE implements the controlled read-only runtime invocation scaffold with
+`pcae readonly-invocation` and `pcae readonly-invocation --json` (Phase 48A):
+ReadOnlyInvocationRequest model (8 required fields: request_id/runtime_id/
+prompt_id/prompt_text/sandbox_mode/timeout_seconds/output_capture_mode/
+authorization_id); ReadOnlyInvocationPreflight model (10 required fields:
+preflight_id/request_id/runtime_status/authorization_status/sandbox_status/
+timeout_status/output_capture_status/execution_allowed/blockers/warnings;
+execution_allowed always False in 48A); ReadOnlyInvocationResult placeholder
+(7 required fields: result_id/request_id/status/stdout/stderr/metadata/
+created_at; status=not_executed in 48A); sample preflight blockers:
+phase_48a_execution_not_authorized/sandbox_contract_unverified/
+timeout_contract_unverified/authorization_not_evaluated;
+no runtime invoked; no prompt submitted; no repository modification;
+execution_allowed=False; human_review_required=True;
+governance_boundaries: may construct invocation request/evaluate preflight/
+report blockers; may_not invoke runtimes/execute prompts/modify repository/
+approve execution/commit/push/rollback; future_evolution: 48B/48C
 
 ## Next
 
-- TBD: Future phases (48A Controlled Read-Only Runtime Invocation Implementation, 48B Invocation Result Capture Implementation, 48C Runtime Contract Enforcement).
+- TBD: Future phases (48B Invocation Result Capture Implementation, 48C Runtime Contract Enforcement).
 
 ## Future Explorations
 

@@ -552,6 +552,11 @@ def render_commands_reference() -> str:
 
 - `pcae governance-maturity`
 - `pcae governance-maturity --json`
+
+## readonly-invocation
+
+- `pcae readonly-invocation`
+- `pcae readonly-invocation --json`
 """
 
 

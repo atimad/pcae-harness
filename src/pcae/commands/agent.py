@@ -149,6 +149,8 @@ from pcae.core.agent import (
     RUNTIME_TRUST_ADVISORY,
     build_governance_maturity,
     GOVERNANCE_MATURITY_ADVISORY,
+    build_readonly_invocation,
+    READONLY_INVOCATION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6234,6 +6236,57 @@ def run_governance_maturity(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:                 {', '.join(gb['assessment_may'])}")
         print(f"  May not:             {', '.join(gb['assessment_may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_readonly_invocation(args: argparse.Namespace) -> int:
+    data = build_readonly_invocation()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ss = data["scaffold_summary"]
+        print("Controlled read-only runtime invocation scaffold")
+        print(f"Scaffold: {ss['scaffold_id']}  Generated: {ss['generated_at']}")
+        print(f"Phase: {ss['phase']} — {ss['title']}")
+        print()
+        print(ss["summary"])
+        print()
+        print(f"Execution allowed: {'yes' if ss['execution_allowed'] else 'no'}")
+        print(f"Human review required: {'yes' if ss['human_review_required'] else 'no'}")
+        print()
+        rm = data["request_model"]
+        print(f"Request model: {rm['model_name']} ({rm['field_count']} fields, {rm['required_field_count']} required)")
+        for f in rm["fields"]:
+            print(f"  {f['name']} ({f['type']}): {f['description']}")
+        print()
+        pm = data["preflight_model"]
+        print(f"Preflight model: {pm['model_name']} ({pm['field_count']} fields, {pm['required_field_count']} required)")
+        print(f"  execution_allowed always False in 48A: {pm['execution_allowed_always_false_in_48a']}")
+        for f in pm["fields"]:
+            print(f"  {f['name']} ({f['type']}): {f['description']}")
+        print()
+        rp = data["result_placeholder_model"]
+        print(f"Result placeholder model: {rp['model_name']} ({rp['field_count']} fields)")
+        print(f"  Note: {rp['placeholder_note']}")
+        print()
+        sp = data["sample_preflight"]
+        print("Sample preflight evaluation:")
+        print(f"  execution_allowed: {sp['execution_allowed']}")
+        print(f"  Blockers: {', '.join(sp['blockers'])}")
+        if sp["warnings"]:
+            print(f"  Warnings: {', '.join(sp['warnings'])}")
+        print()
+        res = data["result_placeholder"]
+        print(f"Result placeholder: status={res['status']}, stdout={res['stdout']}, stderr={res['stderr']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
         print(f"  Execution allowed:   {gb['execution_allowed']}")
         print(f"  Human review req'd:  {gb['human_review_required']}")
         print()
