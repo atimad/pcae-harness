@@ -137,6 +137,8 @@ from pcae.core.agent import (
     LIVE_WRITE_READINESS_ADVISORY,
     build_live_readonly_pilot,
     LIVE_READONLY_PILOT_ADVISORY,
+    build_rollback_execution_pilot,
+    ROLLBACK_EXECUTION_PILOT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -5795,6 +5797,86 @@ def run_live_readonly_pilot(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_rollback_execution_pilot(args: argparse.Namespace) -> int:
+    data = build_rollback_execution_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["rollback_execution_pilot"]
+        print("Governed rollback execution pilot")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Pilot status:")
+        print(f"  Readiness status:      {pilot['readiness_status']}")
+        print(f"  Execution allowed:     {'yes' if pilot['execution_allowed'] else 'no'}")
+        print(f"  Human review required: {'yes' if pilot['human_review_required'] else 'no'}")
+        print(f"  git_reset forbidden:   {'yes' if pilot['git_reset_forbidden'] else 'no'}")
+        print(f"  Lifecycle steps:       {pilot['lifecycle_step_count']}")
+        print(f"  Gates met:             {pilot['gates_met']} of {pilot['gate_count']}")
+        print()
+        print(f"Pilot lifecycle ({len(data['pilot_lifecycle'])} steps):")
+        for step in data["pilot_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("RollbackCandidate model:")
+        m = data["rollback_candidate_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}")
+        print(f"  execution_allowed always False: {m['execution_allowed_always_false']}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        rm = data["rollback_modes"]
+        print(
+            f"Rollback modes ({rm['allowed_mode_count']} allowed,"
+            f" {rm['forbidden_mode_count']} forbidden):"
+        )
+        print(f"  git_reset forbidden: {rm['git_reset_forbidden']}")
+        for mode in rm["allowed_modes"]:
+            print(f"  [allowed]   {mode['mode']}: {mode['description']}")
+        for mode in rm["forbidden_modes"]:
+            print(f"  [FORBIDDEN] {mode['mode']}: {mode['reason']}")
+        print()
+        pg = data["pilot_gates"]
+        print(f"Pilot gates ({pg['gates_met']} met, {pg['gates_not_met']} not met):")
+        print(
+            f"  All required: {pg['all_gates_required']}"
+            f"  All blocking: {pg['all_gates_blocking']}"
+        )
+        for gate in pg["gates"]:
+            print(f"  [{gate['status']}] {gate['gate_id']} {gate['gate']}")
+            print(f"    {gate['description']}")
+        print()
+        print("PilotResult model:")
+        pr = data["pilot_result_model"]
+        print(f"  Model: {pr['model_name']}")
+        print(f"  Fields: {pr['field_count']}  Required: {pr['required_field_count']}")
+        print(f"  All fields immutable: {pr['all_fields_immutable']}")
+        print(f"  execution_allowed always False: {pr['execution_allowed_always_false']}")
+        print(f"  human_review_required always True: {pr['human_review_required_always_true']}")
+        for field in pr["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['pilot_may'])}")
+        print(f"  May not:               {', '.join(gb['pilot_may_not'])}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  git_reset forbidden:   {gb['git_reset_forbidden']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

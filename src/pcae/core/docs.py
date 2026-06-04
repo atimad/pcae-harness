@@ -522,6 +522,11 @@ def render_commands_reference() -> str:
 
 - `pcae live-readonly-pilot`
 - `pcae live-readonly-pilot --json`
+
+## rollback-execution-pilot
+
+- `pcae rollback-execution-pilot`
+- `pcae rollback-execution-pilot --json`
 """
 
 

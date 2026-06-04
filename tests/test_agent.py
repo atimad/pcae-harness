@@ -27221,3 +27221,221 @@ def test_47c_human_output_shows_all_sections(capsys) -> None:
     assert "PilotResult model" in output
     assert "Governance boundaries" in output
     assert "design-phase" in output.lower()
+
+
+# Phase 47D — Governed Rollback Execution Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_47d_json_structure(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "rollback_execution_pilot", "pilot_lifecycle", "rollback_candidate_model",
+        "rollback_modes", "pilot_gates", "pilot_result_model",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47d_pilot_fields(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    p = data["rollback_execution_pilot"]
+    for field in (
+        "pilot_id", "phase", "title", "summary", "readiness_status",
+        "execution_allowed", "human_review_required", "git_reset_forbidden",
+        "lifecycle_step_count", "rollback_candidate_field_count",
+        "allowed_mode_count", "forbidden_mode_count",
+        "gate_count", "gates_met", "gates_not_met",
+        "input_sources", "governance_boundaries", "future_evolution",
+    ):
+        assert field in p, f"missing pilot field: {field}"
+    assert p["pilot_id"].startswith("rrep-")
+    assert p["phase"] == "47D"
+    assert p["lifecycle_step_count"] == 7
+    assert p["gate_count"] == 6
+    assert p["rollback_candidate_field_count"] == 9
+    assert p["allowed_mode_count"] == 3
+    assert p["forbidden_mode_count"] == 2
+
+
+def test_47d_execution_not_allowed(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["rollback_execution_pilot"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["pilot_result_model"]["execution_allowed_always_false"] is True
+    assert data["rollback_candidate_model"]["execution_allowed_always_false"] is True
+
+
+def test_47d_human_review_required(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["rollback_execution_pilot"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["pilot_result_model"]["human_review_required_always_true"] is True
+
+
+def test_47d_git_reset_forbidden(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["rollback_execution_pilot"]["git_reset_forbidden"] is True
+    assert data["governance_boundaries"]["git_reset_forbidden"] is True
+    assert data["rollback_modes"]["git_reset_forbidden"] is True
+    forbidden_modes = [m["mode"] for m in data["rollback_modes"]["forbidden_modes"]]
+    assert "git_reset" in forbidden_modes
+    assert "history_rewrite" in forbidden_modes
+
+
+def test_47d_pilot_lifecycle(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "write_review_record", "rollback_validation_record", "rollback_candidate",
+        "rollback_preflight", "human_rollback_approval",
+        "future_rollback_execution", "rollback_review",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+        assert step["required"] is True
+    assert [s["step"] for s in lifecycle] == list(range(1, 8))
+
+
+def test_47d_rollback_candidate_model(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["rollback_candidate_model"]
+    assert m["model_name"] == "RollbackCandidate"
+    assert m["field_count"] == 9
+    assert m["required_field_count"] == 9
+    assert m["immutable_field_count"] == 9
+    assert m["execution_allowed_always_false"] is True
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "rollback_candidate_id", "rollback_validation_id", "execution_id",
+        "rollback_plan_id", "rollback_target", "rollback_mode",
+        "audit_strategy", "review_strategy", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+
+
+def test_47d_rollback_modes(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["rollback_modes"]
+    assert rm["allowed_mode_count"] == 3
+    assert rm["forbidden_mode_count"] == 2
+    assert rm["git_reset_forbidden"] is True
+    allowed_names = [m["mode"] for m in rm["allowed_modes"]]
+    for expected in ("git_revert", "patch_reverse", "manual_repair"):
+        assert expected in allowed_names, f"missing allowed mode: {expected}"
+    for mode in rm["allowed_modes"]:
+        assert mode["allowed"] is True
+
+
+def test_47d_forbidden_modes(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    forbidden = data["rollback_modes"]["forbidden_modes"]
+    assert len(forbidden) == 2
+    for mode in forbidden:
+        for field in ("mode", "allowed", "reason"):
+            assert field in mode, f"forbidden mode missing field: {field}"
+        assert mode["allowed"] is False
+    forbidden_names = [m["mode"] for m in forbidden]
+    assert "git_reset" in forbidden_names
+    assert "history_rewrite" in forbidden_names
+
+
+def test_47d_pilot_gates(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["pilot_gates"]
+    assert pg["gate_count"] == 6
+    assert pg["all_gates_required"] is True
+    assert pg["all_gates_blocking"] is True
+    gate_names = [g["gate"] for g in pg["gates"]]
+    for expected in (
+        "rollback_validation_passed", "rollback_target_valid", "rollback_scope_valid",
+        "rollback_audit_ready", "rollback_review_ready", "human_rollback_approval_present",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    for gate in pg["gates"]:
+        for field in ("gate_id", "gate", "description", "required", "blocking", "status"):
+            assert field in gate, f"gate missing field: {field}"
+
+
+def test_47d_all_gates_not_met(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["pilot_gates"]
+    assert pg["gates_met"] == 0
+    assert pg["gates_not_met"] == 6
+    assert all(g["status"] == "not_met" for g in pg["gates"])
+    assert data["rollback_execution_pilot"]["readiness_status"] == "blocked"
+
+
+def test_47d_pilot_result_model(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["pilot_result_model"]
+    assert rm["model_name"] == "PilotResult"
+    assert rm["field_count"] == 7
+    assert rm["required_field_count"] == 7
+    assert rm["all_fields_immutable"] is True
+    assert rm["execution_allowed_always_false"] is True
+    assert rm["human_review_required_always_true"] is True
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "pilot_id", "readiness_status", "blockers", "warnings",
+        "recommendations", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+
+
+def test_47d_governance_boundaries(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["git_reset_forbidden"] is True
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["pilot_may"]).lower()
+    for allowed in ("define rollback pilot", "assess rollback readiness", "identify blockers"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in (
+        "execute rollback", "invoke runtimes", "modify files",
+        "reset history", "approve rollback", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47d_advisory(capsys) -> None:
+    main(["rollback-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "design-phase" in advisory
+    assert "no rollback execution" in advisory
+    assert "git reset" in advisory
+
+
+def test_47d_human_output_shows_all_sections(capsys) -> None:
+    main(["rollback-execution-pilot"])
+    output = capsys.readouterr().out
+    assert "Governed rollback execution pilot" in output
+    assert "Pilot status" in output
+    assert "Pilot lifecycle" in output
+    assert "RollbackCandidate model" in output
+    assert "Rollback modes" in output
+    assert "Pilot gates" in output
+    assert "PilotResult model" in output
+    assert "Governance boundaries" in output
+    assert "design-phase" in output.lower()

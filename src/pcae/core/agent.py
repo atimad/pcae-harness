@@ -25874,3 +25874,439 @@ def build_live_readonly_pilot() -> dict:
         "governance_boundaries": dict(_LROP_GOVERNANCE_BOUNDARIES),
         "advisory": LIVE_READONLY_PILOT_ADVISORY,
     }
+
+
+# Phase 47D — Governed Rollback Execution Pilot
+# ---------------------------------------------------------------------------
+
+ROLLBACK_EXECUTION_PILOT_ADVISORY = (
+    "Governed rollback execution pilot is a design-phase definition; no rollback execution, "
+    "runtime invocation, file modification, git reset, or history rewrite occurs."
+)
+
+_RREP_INPUT_SOURCES: tuple[str, ...] = (
+    "write_rollback_validation_workflow",
+    "write_rollback_dry_run",
+    "rollback_governance_artifacts",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "write_result_review_workflow",
+)
+
+_RREP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "write_review_record",
+        "description": (
+            "A write review record is retrieved, confirming the execution result "
+            "was reviewed and accepted or flagged for rollback."
+        ),
+        "required": True,
+        "completed_by": "write_review_record_artifact",
+    },
+    {
+        "step": 2,
+        "name": "rollback_validation_record",
+        "description": (
+            "A rollback validation record is retrieved, confirming the rollback "
+            "plan and scope have been validated."
+        ),
+        "required": True,
+        "completed_by": "rollback_validation_record_artifact",
+    },
+    {
+        "step": 3,
+        "name": "rollback_candidate",
+        "description": (
+            "A RollbackCandidate is prepared, linking the execution ID, rollback "
+            "plan, target, mode, and governance strategies."
+        ),
+        "required": True,
+        "completed_by": "rollback_candidate_artifact",
+    },
+    {
+        "step": 4,
+        "name": "rollback_preflight",
+        "description": (
+            "All pilot gates are evaluated: rollback validation, target validity, "
+            "scope, audit readiness, review readiness, and human approval presence."
+        ),
+        "required": True,
+        "completed_by": "all_rollback_gates_pass",
+    },
+    {
+        "step": 5,
+        "name": "human_rollback_approval",
+        "description": (
+            "Explicit human approval is required before any rollback execution may "
+            "proceed. This gate is never bypassed regardless of pilot readiness."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_rollback_approval",
+    },
+    {
+        "step": 6,
+        "name": "future_rollback_execution",
+        "description": (
+            "Placeholder for the future governed rollback execution step. "
+            "Rollback execution is deferred to a future live phase. "
+            "No rollback occurs in this design phase."
+        ),
+        "required": True,
+        "completed_by": "future_governed_rollback_execution",
+    },
+    {
+        "step": 7,
+        "name": "rollback_review",
+        "description": (
+            "Rollback result is reviewed and audit records are updated. "
+            "Review workflows are applied before any further action."
+        ),
+        "required": True,
+        "completed_by": "rollback_review_completion",
+    },
+)
+
+_RREP_ROLLBACK_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "rollback_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this rollback candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_validation_id",
+        "type": "str",
+        "description": "ID of the linked RollbackValidationRecord.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_id",
+        "type": "str",
+        "description": "ID of the write execution result being rolled back.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "description": "ID of the validated rollback plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_target",
+        "type": "str",
+        "description": "The target state or commit to roll back to.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_mode",
+        "type": "str",
+        "description": "The allowed rollback mode: git_revert, patch_reverse, or manual_repair.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_strategy",
+        "type": "str",
+        "description": "Strategy for producing the rollback audit record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "review_strategy",
+        "type": "str",
+        "description": "Strategy for applying the rollback result review workflow.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; rollback execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_RREP_ALLOWED_MODES: tuple[dict, ...] = (
+    {
+        "mode": "git_revert",
+        "description": "Revert the target commit using git revert, creating a new commit.",
+        "allowed": True,
+    },
+    {
+        "mode": "patch_reverse",
+        "description": "Apply a reverse patch to undo file changes from the target execution.",
+        "allowed": True,
+    },
+    {
+        "mode": "manual_repair",
+        "description": "Manually restore files to their pre-execution state under human oversight.",
+        "allowed": True,
+    },
+)
+
+_RREP_FORBIDDEN_MODES: tuple[dict, ...] = (
+    {
+        "mode": "git_reset",
+        "allowed": False,
+        "reason": "git reset rewrites history and is forbidden; use git_revert instead.",
+    },
+    {
+        "mode": "history_rewrite",
+        "allowed": False,
+        "reason": (
+            "History rewriting is forbidden; governance requires a traceable rollback path."
+        ),
+    },
+)
+
+_RREP_PILOT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "rrep-g01",
+        "gate": "rollback_validation_passed",
+        "description": (
+            "A valid RollbackValidationRecord exists for this execution, confirming "
+            "the rollback plan and scope have been validated."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "rrep-g02",
+        "gate": "rollback_target_valid",
+        "description": (
+            "The rollback target exists, is reachable, matches the audited execution "
+            "result, and has not been superseded."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "rrep-g03",
+        "gate": "rollback_scope_valid",
+        "description": (
+            "The rollback scope is within the write execution scope, does not touch "
+            "forbidden files, and is within the maximum files limit."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "rrep-g04",
+        "gate": "rollback_audit_ready",
+        "description": (
+            "An audit path is established and an audit record is prepared "
+            "prior to any rollback execution."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "rrep-g05",
+        "gate": "rollback_review_ready",
+        "description": (
+            "The rollback result review workflow is available and configured "
+            "for post-rollback evaluation."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+    {
+        "gate_id": "rrep-g06",
+        "gate": "human_rollback_approval_present",
+        "description": (
+            "Explicit human rollback approval is present. This gate is never bypassed "
+            "regardless of pilot readiness or other gate results."
+        ),
+        "required": True,
+        "blocking": True,
+        "status": "not_met",
+    },
+)
+
+_RREP_PILOT_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this rollback pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "description": "Pilot readiness status: ready, blocked, or pending.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed rollback pilot preflight.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during rollback preflight.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of governance recommendations to advance rollback pilot readiness.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": "Always False; rollback execution requires authorization in a future phase.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every rollback pilot result.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_RREP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "define rollback pilot",
+        "assess rollback readiness",
+        "identify blockers",
+    ],
+    "pilot_may_not": [
+        "execute rollback",
+        "invoke runtimes",
+        "modify files",
+        "reset history",
+        "approve rollback",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "git_reset_forbidden": True,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_RREP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47E", "description": "Governed Live Write Pilot"},
+    {"phase": "47F", "description": "Runtime Contract Verification"},
+    {"phase": "47G", "description": "Live Execution Governance Audit"},
+)
+
+
+def build_rollback_execution_pilot() -> dict:
+    """Define the first governed rollback execution pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"rrep-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _RREP_LIFECYCLE]
+    rollback_candidate_fields = [dict(f) for f in _RREP_ROLLBACK_CANDIDATE_FIELDS]
+    allowed_modes = [dict(m) for m in _RREP_ALLOWED_MODES]
+    forbidden_modes = [dict(m) for m in _RREP_FORBIDDEN_MODES]
+    pilot_gates = [dict(g) for g in _RREP_PILOT_GATES]
+    pilot_result_fields = [dict(f) for f in _RREP_PILOT_RESULT_FIELDS]
+
+    gates_met = sum(1 for g in pilot_gates if g["status"] == "met")
+    gates_not_met = sum(1 for g in pilot_gates if g["status"] == "not_met")
+    readiness_status = "blocked" if gates_not_met > 0 else "ready"
+
+    rollback_candidate_model = {
+        "model_name": "RollbackCandidate",
+        "field_count": len(rollback_candidate_fields),
+        "required_field_count": sum(1 for f in rollback_candidate_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in rollback_candidate_fields if f["immutable"]),
+        "execution_allowed_always_false": True,
+        "fields": rollback_candidate_fields,
+    }
+
+    rollback_modes_model = {
+        "allowed_mode_count": len(allowed_modes),
+        "forbidden_mode_count": len(forbidden_modes),
+        "git_reset_forbidden": True,
+        "allowed_modes": allowed_modes,
+        "forbidden_modes": forbidden_modes,
+    }
+
+    pilot_gate_model = {
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "all_gates_required": all(g["required"] for g in pilot_gates),
+        "all_gates_blocking": all(g["blocking"] for g in pilot_gates),
+        "gate_ids": [g["gate_id"] for g in pilot_gates],
+        "gates": pilot_gates,
+    }
+
+    pilot_result_model = {
+        "model_name": "PilotResult",
+        "field_count": len(pilot_result_fields),
+        "required_field_count": sum(1 for f in pilot_result_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in pilot_result_fields),
+        "execution_allowed_always_false": True,
+        "human_review_required_always_true": True,
+        "fields": pilot_result_fields,
+    }
+
+    rollback_execution_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "47D",
+        "title": "Governed Rollback Execution Pilot",
+        "summary": (
+            "Defines the first governed rollback execution pilot. Specifies the seven-step "
+            "pilot lifecycle (write_review_record through rollback_review), the "
+            "RollbackCandidate model (9 fields, all immutable), three allowed rollback modes "
+            "(git_revert, patch_reverse, manual_repair), two forbidden modes (git_reset, "
+            "history_rewrite), six required pilot gates (all not_met in this design phase), "
+            "and the PilotResult model (7 fields, all immutable). Rollback execution is "
+            "deferred to a future phase requiring explicit human approval. "
+            "git_reset remains forbidden. No rollback occurs."
+        ),
+        "readiness_status": readiness_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "git_reset_forbidden": True,
+        "lifecycle_step_count": len(lifecycle),
+        "rollback_candidate_field_count": len(rollback_candidate_fields),
+        "allowed_mode_count": len(allowed_modes),
+        "forbidden_mode_count": len(forbidden_modes),
+        "gate_count": len(pilot_gates),
+        "gates_met": gates_met,
+        "gates_not_met": gates_not_met,
+        "input_sources": list(_RREP_INPUT_SOURCES),
+        "governance_boundaries": dict(_RREP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RREP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "rollback_execution_pilot": rollback_execution_pilot,
+        "pilot_lifecycle": lifecycle,
+        "rollback_candidate_model": rollback_candidate_model,
+        "rollback_modes": rollback_modes_model,
+        "pilot_gates": pilot_gate_model,
+        "pilot_result_model": pilot_result_model,
+        "governance_boundaries": dict(_RREP_GOVERNANCE_BOUNDARIES),
+        "advisory": ROLLBACK_EXECUTION_PILOT_ADVISORY,
+    }
