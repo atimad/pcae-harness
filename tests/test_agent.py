@@ -24804,3 +24804,254 @@ def test_46m_human_output_shows_all_sections(capsys) -> None:
     assert "Governance requirements" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46N — Governed Write Invocation Design
+# ---------------------------------------------------------------------------
+
+
+def test_46n_json_structure(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_invocation_design", "write_invocation_lifecycle",
+        "write_authorization_requirements", "file_scope_model",
+        "write_candidate_model", "write_candidate_statuses",
+        "preflight_gates", "safety_constraints",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46n_design_fields(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_invocation_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "write_auth_requirement_count",
+        "file_scope_field_count", "write_candidate_field_count",
+        "write_candidate_status_count", "preflight_gate_count",
+        "safety_constraint_count", "execution_allowed",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("wid-")
+    assert design["phase"] == "46N"
+    assert design["execution_allowed"] is False
+    assert design["human_review_required"] is True
+    assert design["lifecycle_step_count"] == 7
+    assert design["write_auth_requirement_count"] == 9
+    assert design["file_scope_field_count"] == 6
+    assert design["write_candidate_field_count"] == 11
+    assert design["write_candidate_status_count"] == 4
+    assert design["preflight_gate_count"] == 8
+    assert design["safety_constraint_count"] == 8
+
+
+def test_46n_lifecycle_steps(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["write_invocation_lifecycle"]
+    assert len(lifecycle) == 7
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "approved_prompt_artifact", "write_authorization_request",
+        "file_scope_declaration", "governance_preflight",
+        "human_write_approval", "write_invocation_candidate",
+        "future_write_execution",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 8))
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+
+
+def test_46n_write_authorization_requirements(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    war = data["write_authorization_requirements"]
+    assert war["requirement_count"] == 9
+    assert war["all_requirements_blocking"] is True
+    req_names = [r["requirement"] for r in war["requirements"]]
+    for expected in (
+        "prompt_artifact_approved", "execution_authorization_valid",
+        "explicit_write_permission", "file_scope_declared",
+        "allowed_files_declared", "forbidden_files_declared",
+        "rollback_plan_present", "audit_plan_present",
+        "human_approval_present",
+    ):
+        assert expected in req_names, f"missing requirement: {expected}"
+    for req in war["requirements"]:
+        assert req["blocking"] is True
+        for field in ("requirement", "description", "blocking"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46n_file_scope_model(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fsm = data["file_scope_model"]
+    assert fsm["model_name"] == "FileScopeArtifact"
+    assert fsm["field_count"] == 6
+    assert fsm["all_fields_required"] is True
+    field_names = [f["name"] for f in fsm["fields"]]
+    for expected in (
+        "allowed_files", "forbidden_files", "max_files_changed",
+        "allowed_operations", "forbidden_operations", "scope_validation_required",
+    ):
+        assert expected in field_names, f"missing file scope field: {expected}"
+    for field in fsm["fields"]:
+        assert field["required"] is True
+        for f in ("name", "type", "description", "required"):
+            assert f in field, f"file scope field missing attr: {f}"
+
+
+def test_46n_write_candidate_model(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wcm = data["write_candidate_model"]
+    assert wcm["model_name"] == "WriteInvocationCandidate"
+    assert wcm["field_count"] == 11
+    assert wcm["required_field_count"] == 11
+    assert wcm["writable_allowed_always_false"] is True
+    field_names = [f["name"] for f in wcm["fields"]]
+    for expected in (
+        "write_candidate_id", "prompt_id", "authorization_id",
+        "selected_runtime", "selected_agent", "file_scope",
+        "writable_allowed", "rollback_required", "audit_required",
+        "consensus_required", "status",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    writable_field = next(f for f in wcm["fields"] if f["name"] == "writable_allowed")
+    assert "Always False" in writable_field["description"]
+
+
+def test_46n_write_candidate_statuses(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wcs = data["write_candidate_statuses"]
+    assert wcs["status_count"] == 4
+    assert wcs["all_statuses_writable_allowed_false"] is True
+    status_names = [s["status"] for s in wcs["statuses"]]
+    for expected in ("pending", "approved_for_write", "blocked", "expired"):
+        assert expected in status_names, f"missing candidate status: {expected}"
+    for s in wcs["statuses"]:
+        assert s["writable_allowed"] is False
+        for field in ("status", "description", "writable_allowed", "terminal"):
+            assert field in s, f"status missing field: {field}"
+    expired = next(s for s in wcs["statuses"] if s["status"] == "expired")
+    assert expired["terminal"] is True
+
+
+def test_46n_preflight_gates(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["preflight_gates"]
+    assert pg["gate_count"] == 8
+    assert pg["all_gates_blocking"] is True
+    gate_names = [g["gate"] for g in pg["gates"]]
+    for expected in (
+        "prompt_approved", "authorization_valid", "write_permission_explicit",
+        "file_scope_declared", "rollback_plan_present", "audit_record_prepared",
+        "runtime_supports_writable_execution", "human_write_approval_present",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    gate_ids = pg["gate_ids"]
+    for expected in (f"wid-g{i:02d}" for i in range(1, 9)):
+        assert expected in gate_ids, f"missing gate id: {expected}"
+    for gate in pg["gates"]:
+        assert gate["blocking"] is True
+        assert len(gate["checks"]) >= 2
+        for field in ("gate_id", "gate", "description", "blocking", "checks"):
+            assert field in gate, f"gate missing field: {field}"
+
+
+def test_46n_safety_constraints(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    constraints = data["safety_constraints"]
+    assert len(constraints) == 8
+    constraint_names = [c["constraint"] for c in constraints]
+    for expected in (
+        "read_only_by_default", "write_requires_explicit_approval",
+        "write_authorization_expires", "rollback_plan_mandatory",
+        "audit_trail_mandatory", "scope_violations_block_execution",
+        "no_automatic_commit", "no_automatic_push",
+    ):
+        assert expected in constraint_names, f"missing constraint: {expected}"
+    for c in constraints:
+        for field in ("constraint", "description"):
+            assert field in c, f"constraint missing field: {field}"
+
+
+def test_46n_governance_boundaries(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "design_may" in gb
+    assert "design_may_not" in gb
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["design_may"]).lower()
+    for allowed in (
+        "design write authorization model", "define scope requirements",
+        "define write preflight gates", "define future write candidate model",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["design_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve writes automatically", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46n_writable_allowed_always_false(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_invocation_design"]
+    assert design["execution_allowed"] is False
+    wcs = data["write_candidate_statuses"]
+    assert wcs["all_statuses_writable_allowed_false"] is True
+    wcm = data["write_candidate_model"]
+    assert wcm["writable_allowed_always_false"] is True
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+
+
+def test_46n_future_evolution(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["write_invocation_design"]["future_evolution"]]
+    assert "46O" in phases
+    assert "46P" in phases
+    assert "46Q" in phases
+
+
+def test_46n_advisory(capsys) -> None:
+    main(["write-invocation-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_46n_human_output_shows_all_sections(capsys) -> None:
+    main(["write-invocation-design"])
+    output = capsys.readouterr().out
+    assert "Governed write invocation design" in output
+    assert "Write invocation lifecycle" in output
+    assert "Write authorization requirements" in output
+    assert "File scope model" in output
+    assert "Write invocation candidate model" in output
+    assert "Write candidate statuses" in output
+    assert "Preflight gates" in output
+    assert "Safety constraints" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

@@ -19855,6 +19855,617 @@ _ROIEP_FUTURE_EVOLUTION: tuple[dict, ...] = (
 )
 
 
+# Phase 46N — Governed Write Invocation Design
+# ---------------------------------------------------------------------------
+
+WRITE_INVOCATION_DESIGN_ADVISORY = (
+    "Write invocation design is informational; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_WID_INPUT_SOURCES: tuple[str, ...] = (
+    "read_only_invocation_execution_pilot",
+    "execution_authorization_artifact_model",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+    "controlled_file_modification_governance",
+)
+
+_WID_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact is selected for write invocation."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "write_authorization_request",
+        "description": (
+            "A write authorization request is prepared linking the approved "
+            "prompt artifact and execution authorization artifact."
+        ),
+        "required": True,
+        "completed_by": "write_authorization_request_artifact",
+    },
+    {
+        "step": 3,
+        "name": "file_scope_declaration",
+        "description": (
+            "File scope is declared: allowed_files, forbidden_files, "
+            "max_files_changed, allowed_operations, forbidden_operations, "
+            "and scope_validation_required."
+        ),
+        "required": True,
+        "completed_by": "file_scope_artifact",
+    },
+    {
+        "step": 4,
+        "name": "governance_preflight",
+        "description": (
+            "All write preflight gates are evaluated against the "
+            "write authorization request and declared file scope."
+        ),
+        "required": True,
+        "completed_by": "all_write_preflight_gates_pass",
+    },
+    {
+        "step": 5,
+        "name": "human_write_approval",
+        "description": (
+            "Explicit human approval is required for any write invocation. "
+            "This gate is never bypassed regardless of preflight results."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+    },
+    {
+        "step": 6,
+        "name": "write_invocation_candidate",
+        "description": (
+            "A WriteInvocationCandidate is prepared if all preflight gates "
+            "pass and human write approval is present."
+        ),
+        "required": True,
+        "completed_by": "write_invocation_candidate_artifact",
+    },
+    {
+        "step": 7,
+        "name": "future_write_execution",
+        "description": (
+            "A future phase will execute the write candidate under governed "
+            "constraints with rollback and audit trail. Not implemented in "
+            "this design phase."
+        ),
+        "required": True,
+        "completed_by": "future_phase_write_execution",
+    },
+)
+
+_WID_WRITE_AUTH_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "prompt_artifact_approved",
+        "description": "An approved prompt artifact must exist before write invocation.",
+        "blocking": True,
+    },
+    {
+        "requirement": "execution_authorization_valid",
+        "description": (
+            "A valid ExecutionAuthorizationArtifact must be linked to "
+            "the write authorization request."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "explicit_write_permission",
+        "description": (
+            "Write permission must be explicitly granted; read-only is the "
+            "default and write is never implicit."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "file_scope_declared",
+        "description": (
+            "A file scope artifact must be declared before the write "
+            "authorization request is submitted."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "allowed_files_declared",
+        "description": (
+            "allowed_files must be explicitly listed in the file scope artifact."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "forbidden_files_declared",
+        "description": (
+            "forbidden_files must be explicitly listed in the file scope artifact."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "rollback_plan_present",
+        "description": (
+            "A rollback plan must be present and linked to the write "
+            "authorization request before approval."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "audit_plan_present",
+        "description": (
+            "An audit plan must be present and linked to the write "
+            "authorization request before approval."
+        ),
+        "blocking": True,
+    },
+    {
+        "requirement": "human_approval_present",
+        "description": (
+            "Explicit human approval must be recorded before any write "
+            "invocation candidate may be prepared."
+        ),
+        "blocking": True,
+    },
+)
+
+_WID_FILE_SCOPE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "allowed_files",
+        "type": "list[str]",
+        "description": "Explicit list of file paths permitted to be modified.",
+        "required": True,
+    },
+    {
+        "name": "forbidden_files",
+        "type": "list[str]",
+        "description": "Explicit list of file paths that must not be modified.",
+        "required": True,
+    },
+    {
+        "name": "max_files_changed",
+        "type": "int",
+        "description": "Maximum number of files the write invocation may change.",
+        "required": True,
+    },
+    {
+        "name": "allowed_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations permitted (e.g. create, edit).",
+        "required": True,
+    },
+    {
+        "name": "forbidden_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations that must not be performed.",
+        "required": True,
+    },
+    {
+        "name": "scope_validation_required",
+        "type": "bool",
+        "description": (
+            "Whether scope validation must be performed before "
+            "a write invocation candidate may be prepared."
+        ),
+        "required": True,
+    },
+)
+
+_WID_WRITE_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this write invocation candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Reference to the approved prompt artifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the valid ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "file_scope",
+        "type": "FileScopeArtifact",
+        "description": "Declared file scope governing which files may be modified.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "writable_allowed",
+        "type": "bool",
+        "description": (
+            "Whether write operations are explicitly allowed for this candidate. "
+            "Always False in this design phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "rollback_required",
+        "type": "bool",
+        "description": "Whether a rollback plan is mandatory for this candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "audit_required",
+        "type": "bool",
+        "description": "Whether an audit trail is mandatory for this candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "description": "Whether consensus review is required before execution.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "status",
+        "type": "str",
+        "description": (
+            "Current status of the write invocation candidate: "
+            "pending, approved_for_write, blocked, or expired."
+        ),
+        "required": True,
+        "immutable": False,
+    },
+)
+
+_WID_WRITE_CANDIDATE_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "pending",
+        "description": (
+            "Preflight validation or human approval has not yet completed. "
+            "writable_allowed=False until all gates pass and approval is received."
+        ),
+        "writable_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "approved_for_write",
+        "description": (
+            "All preflight gates passed and explicit human write approval was recorded. "
+            "Candidate is eligible for governed write execution in a future phase."
+        ),
+        "writable_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "blocked",
+        "description": (
+            "One or more preflight gates failed or human approval was denied. "
+            "Remediation is required before the candidate may advance."
+        ),
+        "writable_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "expired",
+        "description": (
+            "Write authorization has expired before execution occurred. "
+            "A new write authorization request is required."
+        ),
+        "writable_allowed": False,
+        "terminal": True,
+    },
+)
+
+_WID_PREFLIGHT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "wid-g01",
+        "gate": "prompt_approved",
+        "description": "The selected prompt has a valid prompt approval artifact.",
+        "blocking": True,
+        "checks": [
+            "prompt_id resolves to known prompt artifact",
+            "prompt approval status is approved",
+            "prompt approval artifact is valid",
+        ],
+    },
+    {
+        "gate_id": "wid-g02",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state "
+            "and has not expired."
+        ),
+        "blocking": True,
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+            "authorization is not expired",
+        ],
+    },
+    {
+        "gate_id": "wid-g03",
+        "gate": "write_permission_explicit",
+        "description": (
+            "Write permission is explicitly granted in the authorization artifact; "
+            "read-only is the default and write is never implicit."
+        ),
+        "blocking": True,
+        "checks": [
+            "write_permission field is present in authorization artifact",
+            "write_permission is explicitly True",
+            "permission was not inherited from a read-only authorization",
+        ],
+    },
+    {
+        "gate_id": "wid-g04",
+        "gate": "file_scope_declared",
+        "description": (
+            "A file scope artifact is declared and linked to the write "
+            "authorization request."
+        ),
+        "blocking": True,
+        "checks": [
+            "file_scope_id present in write authorization request",
+            "allowed_files is a non-empty list",
+            "forbidden_files is declared",
+            "scope_validation_required is True",
+        ],
+    },
+    {
+        "gate_id": "wid-g05",
+        "gate": "rollback_plan_present",
+        "description": (
+            "A rollback plan is present and linked to the write authorization request."
+        ),
+        "blocking": True,
+        "checks": [
+            "rollback_plan_id present in write authorization request",
+            "rollback plan describes recovery steps",
+            "rollback_required is True on candidate",
+        ],
+    },
+    {
+        "gate_id": "wid-g06",
+        "gate": "audit_record_prepared",
+        "description": (
+            "An audit record is prepared and linked to the write authorization "
+            "request before any write execution may proceed."
+        ),
+        "blocking": True,
+        "checks": [
+            "audit_record_id present in write authorization request",
+            "audit record links to authorization and prompt",
+            "audit_required is True on candidate",
+        ],
+    },
+    {
+        "gate_id": "wid-g07",
+        "gate": "runtime_supports_writable_execution",
+        "description": (
+            "The selected runtime is confirmed to support governed write execution "
+            "with scope enforcement."
+        ),
+        "blocking": True,
+        "checks": [
+            "selected_runtime in validated_contracts",
+            "write_contract defined for selected_runtime",
+            "scope enforcement confirmed for runtime",
+        ],
+    },
+    {
+        "gate_id": "wid-g08",
+        "gate": "human_write_approval_present",
+        "description": (
+            "Explicit human write approval is recorded before a write invocation "
+            "candidate may be prepared. This gate is never bypassed."
+        ),
+        "blocking": True,
+        "checks": [
+            "human_write_approval_id present in write authorization request",
+            "approval timestamp recorded",
+            "approver identity recorded",
+        ],
+    },
+)
+
+_WID_SAFETY_CONSTRAINTS: tuple[dict, ...] = (
+    {
+        "constraint": "read_only_by_default",
+        "description": (
+            "Read-only execution is the default; write requires separate explicit approval."
+        ),
+    },
+    {
+        "constraint": "write_requires_explicit_approval",
+        "description": (
+            "Write permission must be explicitly granted; it is never implicit or inherited."
+        ),
+    },
+    {
+        "constraint": "write_authorization_expires",
+        "description": (
+            "Write authorization has an expiration; expired authorization blocks execution."
+        ),
+    },
+    {
+        "constraint": "rollback_plan_mandatory",
+        "description": (
+            "A rollback plan is mandatory for all write invocations; "
+            "absence blocks candidate preparation."
+        ),
+    },
+    {
+        "constraint": "audit_trail_mandatory",
+        "description": (
+            "An audit trail is mandatory for all write invocations; "
+            "absence blocks candidate preparation."
+        ),
+    },
+    {
+        "constraint": "scope_violations_block_execution",
+        "description": (
+            "Any attempt to modify files outside the declared scope blocks execution."
+        ),
+    },
+    {
+        "constraint": "no_automatic_commit",
+        "description": "Write invocations must not automatically commit changes.",
+    },
+    {
+        "constraint": "no_automatic_push",
+        "description": "Write invocations must not automatically push changes.",
+    },
+)
+
+_WID_GOVERNANCE_BOUNDARIES: dict = {
+    "design_may": [
+        "design write authorization model",
+        "define scope requirements",
+        "define write preflight gates",
+        "define future write candidate model",
+    ],
+    "design_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve writes automatically",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_WID_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46O", "description": "Write Invocation Preflight Dry-Run"},
+    {"phase": "46P", "description": "Governed Write Candidate Artifact"},
+    {"phase": "46Q", "description": "Controlled Write Invocation Pilot"},
+)
+
+
+def build_write_invocation_design() -> dict:
+    """Design the governance model for governed write invocation. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"wid-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WID_LIFECYCLE]
+    write_auth_requirements = [dict(r) for r in _WID_WRITE_AUTH_REQUIREMENTS]
+    file_scope_fields = [dict(f) for f in _WID_FILE_SCOPE_FIELDS]
+    write_candidate_fields = [dict(f) for f in _WID_WRITE_CANDIDATE_FIELDS]
+    write_candidate_statuses = [dict(s) for s in _WID_WRITE_CANDIDATE_STATUSES]
+    preflight_gates = [dict(g) for g in _WID_PREFLIGHT_GATES]
+    safety_constraints = [dict(c) for c in _WID_SAFETY_CONSTRAINTS]
+
+    write_authorization_requirements_model = {
+        "requirement_count": len(write_auth_requirements),
+        "all_requirements_blocking": all(r["blocking"] for r in write_auth_requirements),
+        "requirements": write_auth_requirements,
+    }
+
+    file_scope_model = {
+        "model_name": "FileScopeArtifact",
+        "field_count": len(file_scope_fields),
+        "all_fields_required": all(f["required"] for f in file_scope_fields),
+        "fields": file_scope_fields,
+    }
+
+    write_candidate_model = {
+        "model_name": "WriteInvocationCandidate",
+        "field_count": len(write_candidate_fields),
+        "required_field_count": sum(1 for f in write_candidate_fields if f["required"]),
+        "writable_allowed_always_false": True,
+        "fields": write_candidate_fields,
+    }
+
+    write_candidate_statuses_model = {
+        "status_count": len(write_candidate_statuses),
+        "all_statuses_writable_allowed_false": all(
+            not s["writable_allowed"] for s in write_candidate_statuses
+        ),
+        "statuses": write_candidate_statuses,
+    }
+
+    preflight_gate_model = {
+        "gate_count": len(preflight_gates),
+        "all_gates_blocking": all(g["blocking"] for g in preflight_gates),
+        "gate_ids": [g["gate_id"] for g in preflight_gates],
+        "gates": preflight_gates,
+    }
+
+    write_invocation_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46N",
+        "title": "Governed Write Invocation Design",
+        "summary": (
+            "Designs the governance model required before PCAE may ever allow runtime "
+            "prompts to modify repository files. Defines the seven-step write invocation "
+            "lifecycle, nine write authorization requirements, FileScopeArtifact model, "
+            "WriteInvocationCandidate model, eight preflight gates, eight safety constraints, "
+            "and governance boundaries that prevent file modification until explicitly "
+            "authorized with human approval in a future phase. Read-only is the default; "
+            "write requires separate, explicit, expiring authorization. No runtime "
+            "invocation, no prompt execution, and no file modification by agents."
+        ),
+        "input_sources": list(_WID_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "write_auth_requirement_count": len(write_auth_requirements),
+        "file_scope_field_count": len(file_scope_fields),
+        "write_candidate_field_count": len(write_candidate_fields),
+        "write_candidate_status_count": len(write_candidate_statuses),
+        "preflight_gate_count": len(preflight_gates),
+        "safety_constraint_count": len(safety_constraints),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_WID_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WID_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_invocation_design": write_invocation_design,
+        "write_invocation_lifecycle": lifecycle,
+        "write_authorization_requirements": write_authorization_requirements_model,
+        "file_scope_model": file_scope_model,
+        "write_candidate_model": write_candidate_model,
+        "write_candidate_statuses": write_candidate_statuses_model,
+        "preflight_gates": preflight_gate_model,
+        "safety_constraints": safety_constraints,
+        "governance_boundaries": dict(_WID_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_INVOCATION_DESIGN_ADVISORY,
+    }
+
+
 def build_read_only_invocation_execution_pilot() -> dict:
     """Design the first controlled read-only invocation execution pilot. Read-only."""
     generated_at = datetime.now(timezone.utc).isoformat()

@@ -116,6 +116,8 @@ from pcae.core.agent import (
     EXECUTION_QUALITY_DESIGN_ADVISORY,
     build_read_only_invocation_execution_pilot,
     READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
+    build_write_invocation_design,
+    WRITE_INVOCATION_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5049,6 +5051,80 @@ def run_read_only_invocation_execution_pilot(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['pilot_may'])}")
         print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_invocation_design(args: argparse.Namespace) -> int:
+    data = build_write_invocation_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_invocation_design"]
+        print("Governed write invocation design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("Write invocation lifecycle:")
+        for step in data["write_invocation_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("Write authorization requirements:")
+        war = data["write_authorization_requirements"]
+        print(f"  Requirement count: {war['requirement_count']}  All blocking: {war['all_requirements_blocking']}")
+        for req in war["requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking})")
+            print(f"    {req['description']}")
+        print()
+        print("File scope model (FileScopeArtifact):")
+        fsm = data["file_scope_model"]
+        print(f"  Fields: {fsm['field_count']}  All required: {fsm['all_fields_required']}")
+        for field in fsm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Write invocation candidate model (WriteInvocationCandidate):")
+        wcm = data["write_candidate_model"]
+        print(f"  Fields: {wcm['field_count']}  Required: {wcm['required_field_count']}")
+        print(f"  writable_allowed always False: {wcm['writable_allowed_always_false']}")
+        for field in wcm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Write candidate statuses:")
+        wcs = data["write_candidate_statuses"]
+        for status in wcs["statuses"]:
+            writable = "writable allowed" if status["writable_allowed"] else "no write"
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            print(f"  {status['status']} ({writable}, {terminal})")
+            print(f"    {status['description']}")
+        print()
+        print("Preflight gates:")
+        pg = data["preflight_gates"]
+        print(f"  Gate count: {pg['gate_count']}  All blocking: {pg['all_gates_blocking']}")
+        for gate in pg["gates"]:
+            blocking = "blocking" if gate["blocking"] else "non-blocking"
+            print(f"  {gate['gate_id']} {gate['gate']} ({blocking})")
+            print(f"    {gate['description']}")
+            for check in gate["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Safety constraints:")
+        for constraint in data["safety_constraints"]:
+            print(f"  {constraint['constraint']}")
+            print(f"    {constraint['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['design_may'])}")
+        print(f"  May not: {', '.join(gb['design_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()

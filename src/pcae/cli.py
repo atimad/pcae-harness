@@ -70,6 +70,7 @@ from pcae.commands.agent import (
     run_multi_agent_invocation_pilot,
     run_execution_quality_design,
     run_read_only_invocation_execution_pilot,
+    run_write_invocation_design,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1889,6 +1890,17 @@ def build_parser() -> argparse.ArgumentParser:
     read_only_invocation_execution_pilot_parser.set_defaults(
         handler=run_read_only_invocation_execution_pilot
     )
+
+    write_invocation_design_parser = subparsers.add_parser(
+        "write-invocation-design",
+        help="Design governed write invocation governance model (Phase 46N).",
+    )
+    write_invocation_design_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON write invocation design output.",
+    )
+    write_invocation_design_parser.set_defaults(handler=run_write_invocation_design)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

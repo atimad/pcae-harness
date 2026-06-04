@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46M: Read-Only Invocation Execution Pilot.
+Phase 46N: Governed Write Invocation Design.
 
 ## Governance Coherence Note
 
@@ -2586,10 +2586,45 @@ evaluate gates/report blockers; pilot_may_not invoke runtimes/execute prompts/mo
 repository/commit/push/rollback/bypass human authorization; execution_allowed=False,
 human_review_required=True; future_evolution: 46N; advisory: "Read-only invocation
 execution pilot is informational; no runtime invocation occurs."
+and the governance model for governed write invocation is designed with
+`pcae write-invocation-design` and `pcae write-invocation-design --json`
+(Phase 46N): inputs: read_only_invocation_execution_pilot,
+execution_authorization_artifact_model, execution_audit_design,
+execution_consensus_design, execution_result_review_workflow,
+execution_quality_framework, controlled_file_modification_governance;
+no runtime invocation; no prompt execution; no file modification;
+execution_allowed=False in all states; write_invocation_lifecycle (7 steps,
+all required): approved_prompt_artifact/write_authorization_request/
+file_scope_declaration/governance_preflight/human_write_approval/
+write_invocation_candidate/future_write_execution; write authorization
+requirements (9, all blocking): prompt_artifact_approved/
+execution_authorization_valid/explicit_write_permission/file_scope_declared/
+allowed_files_declared/forbidden_files_declared/rollback_plan_present/
+audit_plan_present/human_approval_present; FileScopeArtifact model: 6 fields
+(all required): allowed_files/forbidden_files/max_files_changed/
+allowed_operations/forbidden_operations/scope_validation_required;
+WriteInvocationCandidate model: 11 fields (all required): write_candidate_id/
+prompt_id/authorization_id/selected_runtime/selected_agent/file_scope/
+writable_allowed (always False)/rollback_required/audit_required/
+consensus_required/status; write candidate statuses (4, all writable_allowed=False):
+pending/approved_for_write/blocked/expired (expired is terminal); preflight
+gates (8, all blocking, ids wid-g01 through wid-g08): prompt_approved/
+authorization_valid/write_permission_explicit/file_scope_declared/
+rollback_plan_present/audit_record_prepared/runtime_supports_writable_execution/
+human_write_approval_present; safety constraints (8): read_only_by_default/
+write_requires_explicit_approval/write_authorization_expires/
+rollback_plan_mandatory/audit_trail_mandatory/scope_violations_block_execution/
+no_automatic_commit/no_automatic_push; governance_boundaries: design_may
+design write authorization model/define scope requirements/define write
+preflight gates/define future write candidate model; design_may_not invoke
+runtimes/execute prompts/modify files/approve writes automatically/commit/push/
+rollback; execution_allowed=False, human_review_required=True; future_evolution:
+46O/46P/46Q; advisory: "Write invocation design is informational; no runtime
+invocation, prompt execution, or file modification occurs."
 
 ## Next
 
-- TBD: Future phases (46N Governed Write Invocation Design).
+- TBD: Future phases (46O Write Invocation Preflight Dry-Run).
 
 ## Future Explorations
 

@@ -467,6 +467,11 @@ def render_commands_reference() -> str:
 
 - `pcae read-only-invocation-execution-pilot`
 - `pcae read-only-invocation-execution-pilot --json`
+
+## write-invocation-design
+
+- `pcae write-invocation-design`
+- `pcae write-invocation-design --json`
 """
 
 
