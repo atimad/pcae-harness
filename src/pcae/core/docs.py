@@ -507,6 +507,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-rollback-dry-run`
 - `pcae write-rollback-dry-run --json`
+
+## live-readonly-readiness
+
+- `pcae live-readonly-readiness`
+- `pcae live-readonly-readiness --json`
 """
 
 

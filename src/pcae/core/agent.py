@@ -24397,3 +24397,455 @@ def build_write_rollback_dry_run() -> dict:
         "governance_boundaries": dict(_WRDR_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     }
+
+
+# Phase 47A — Governed Live Read-Only Execution Readiness
+# ---------------------------------------------------------------------------
+
+LIVE_READONLY_READINESS_ADVISORY = (
+    "Live read-only execution readiness assessment is informational; no runtime "
+    "invocation, prompt execution, file modification, or execution authorization occurs."
+)
+
+_LRORA_INPUT_SOURCES: tuple[str, ...] = (
+    "live_execution_readiness_assessment",
+    "execution_authorization_artifact",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "read_only_invocation_pilot",
+    "invocation_workload_validation",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+)
+
+_LRORA_READINESS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "partially_ready",
+    "not_ready",
+)
+
+_LRORA_READINESS_AREAS: tuple[dict, ...] = (
+    {
+        "area": "authorization_readiness",
+        "description": (
+            "Governance controls ensuring that a valid ExecutionAuthorizationArtifact "
+            "is in place before any live read-only execution proceeds."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Execution authorization design and expiration governance were established "
+            "in Phase 46J. No live read-only authorization artifact has been issued or tested."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46J",
+    },
+    {
+        "area": "audit_readiness",
+        "description": (
+            "Governance controls ensuring that every live read-only execution produces "
+            "a complete and linked execution audit record."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Execution audit design was established in Phase 46K. No live audit record "
+            "has been produced for a read-only execution."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46K",
+    },
+    {
+        "area": "consensus_readiness",
+        "description": (
+            "Governance controls ensuring multi-agent consensus is reached when required "
+            "before a live read-only execution proceeds."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The execution consensus framework was established in Phase 46L. No live "
+            "consensus review has been conducted for a read-only execution candidate."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46L",
+    },
+    {
+        "area": "runtime_readiness",
+        "description": (
+            "Assessment of whether target runtimes (codex-local, claude-local, kimi-local) "
+            "are configured and capable of governed read-only execution."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Runtime discovery and adapter inspection were conducted across multiple "
+            "phases (44A–44J, 45A). No live governed execution has been validated "
+            "against any of the three target runtimes."
+        ),
+        "critical": True,
+        "governance_source": "Phases 44A–44J, 45A",
+    },
+    {
+        "area": "output_capture_readiness",
+        "description": (
+            "Governance controls ensuring that read-only execution outputs are captured, "
+            "classified, and persisted before any result review begins."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "Output capture and classification were designed in Phases 45E and 46M. "
+            "No live output capture has been validated for a read-only execution."
+        ),
+        "critical": True,
+        "governance_source": "Phases 45E, 46M",
+    },
+    {
+        "area": "result_review_readiness",
+        "description": (
+            "Governance controls ensuring read-only execution results pass the full "
+            "result review workflow before any further action."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The execution result review workflow was designed in Phase 46R. No live "
+            "read-only result review has been conducted."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46R",
+    },
+    {
+        "area": "quality_review_readiness",
+        "description": (
+            "Governance controls ensuring read-only execution results are evaluated "
+            "against the quality framework before acceptance."
+        ),
+        "status": "partially_ready",
+        "rationale": (
+            "The execution quality framework was established in Phase 46M. No live "
+            "quality review has been performed on a read-only execution result."
+        ),
+        "critical": True,
+        "governance_source": "Phase 46M",
+    },
+    {
+        "area": "human_approval_readiness",
+        "description": (
+            "Governance controls ensuring human approval is required and enforced "
+            "at every mandatory checkpoint before live read-only execution proceeds."
+        ),
+        "status": "not_ready",
+        "rationale": (
+            "Human approval controls are designed but not yet wired into a live "
+            "read-only execution pipeline. No live checkpoint has been exercised."
+        ),
+        "critical": True,
+        "governance_source": "Phases 46J–46M",
+    },
+)
+
+_LRORA_RUNTIME_RESULTS: tuple[dict, ...] = (
+    {
+        "runtime": "codex-local",
+        "status": "partially_ready",
+        "rationale": (
+            "codex-local adapter has been discovered and inspected. Governed "
+            "read-only execution has not been validated in a live context."
+        ),
+        "adapter_type": "cli",
+        "capabilities_verified": False,
+        "live_execution_tested": False,
+    },
+    {
+        "runtime": "claude-local",
+        "status": "partially_ready",
+        "rationale": (
+            "claude-local adapter has been discovered and inspected. Governed "
+            "read-only execution has not been validated in a live context."
+        ),
+        "adapter_type": "cli",
+        "capabilities_verified": False,
+        "live_execution_tested": False,
+    },
+    {
+        "runtime": "kimi-local",
+        "status": "not_ready",
+        "rationale": (
+            "kimi-local adapter has not been confirmed installed or validated. "
+            "No governed read-only execution has been attempted."
+        ),
+        "adapter_type": "cli",
+        "capabilities_verified": False,
+        "live_execution_tested": False,
+    },
+)
+
+_LRORA_MODEL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "description": "Unique identifier for this readiness assessment.",
+        "required": True,
+        "immutable": True,
+        "group": "identity",
+    },
+    {
+        "name": "overall_status",
+        "type": "str",
+        "description": "Overall readiness status: ready, partially_ready, or not_ready.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "live_execution_recommended",
+        "type": "bool",
+        "description": (
+            "True only when all critical governance gates are ready. "
+            "False in all design-phase assessments."
+        ),
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every readiness assessment.",
+        "required": True,
+        "immutable": True,
+        "group": "result",
+    },
+    {
+        "name": "runtime_results",
+        "type": "list[dict]",
+        "description": "List of per-runtime readiness assessment results.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "readiness_areas",
+        "type": "list[dict]",
+        "description": "List of individual readiness area assessments.",
+        "required": True,
+        "immutable": False,
+        "group": "result",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of active blockers preventing live read-only execution.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings to address before live execution.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of governance recommendations for achieving readiness.",
+        "required": True,
+        "immutable": False,
+        "group": "findings",
+    },
+)
+
+_LRORA_BLOCKERS: tuple[dict, ...] = (
+    {
+        "blocker": "missing_authorization",
+        "description": (
+            "No live read-only execution authorization artifact has been issued. "
+            "A valid ExecutionAuthorizationArtifact must exist before execution proceeds."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_audit_path",
+        "description": (
+            "No live execution audit path has been established for read-only execution. "
+            "An audit path must be configured and tested before execution proceeds."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_consensus_path",
+        "description": (
+            "No live consensus review path has been exercised for a read-only candidate. "
+            "Consensus governance must be validated in a live context."
+        ),
+        "active": True,
+        "severity": "high",
+    },
+    {
+        "blocker": "missing_output_capture",
+        "description": (
+            "Live output capture and classification have not been validated for "
+            "read-only execution. Output capture must be confirmed before execution."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_runtime_support",
+        "description": (
+            "No target runtime has been validated for governed live read-only execution. "
+            "At least one runtime must pass a full readiness check."
+        ),
+        "active": True,
+        "severity": "critical",
+    },
+    {
+        "blocker": "missing_review_workflow",
+        "description": (
+            "The live result review workflow has not been validated for read-only "
+            "execution. The review workflow must be exercised before live execution."
+        ),
+        "active": True,
+        "severity": "high",
+    },
+)
+
+_LRORA_WARNINGS: tuple[str, ...] = (
+    "Human approval controls are not yet wired into the live execution pipeline.",
+    "No target runtime has passed a full capabilities verification.",
+    "Quality review framework has not been exercised against a live read-only output.",
+)
+
+_LRORA_RECOMMENDATIONS: dict = {
+    "readiness_recommendation": (
+        "Complete all prerequisite governance phases before attempting live read-only "
+        "execution. All eight readiness areas must achieve 'ready' status, with "
+        "priority on wiring human approval controls into the live execution pipeline."
+    ),
+    "required_follow_up_phases": ["47C"],
+    "execution_authorization_recommendation": (
+        "Defer live read-only execution until all critical governance gates are "
+        "satisfied, human approval controls are wired for live execution, and at "
+        "least one runtime has passed a full readiness verification."
+    ),
+}
+
+_LRORA_GOVERNANCE_BOUNDARIES: dict = {
+    "workflow_may": [
+        "assess readiness",
+        "identify blockers",
+        "generate recommendations",
+    ],
+    "workflow_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve execution",
+        "commit",
+        "push",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_LRORA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47B", "description": "Governed Live Write Execution Readiness"},
+    {"phase": "47C", "description": "Governed Live Read-Only Pilot"},
+    {"phase": "47D", "description": "Governed Rollback Execution Pilot"},
+)
+
+
+def build_live_readonly_readiness() -> dict:
+    """Assess governed live read-only execution readiness. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    readiness_id = f"lrora-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    areas = [dict(a) for a in _LRORA_READINESS_AREAS]
+    model_fields = [dict(f) for f in _LRORA_MODEL_FIELDS]
+    blockers = [dict(b) for b in _LRORA_BLOCKERS]
+    runtime_results = [dict(r) for r in _LRORA_RUNTIME_RESULTS]
+    warnings = list(_LRORA_WARNINGS)
+
+    not_ready_count = sum(1 for a in areas if a["status"] == "not_ready")
+    partially_ready_count = sum(1 for a in areas if a["status"] == "partially_ready")
+    ready_count = sum(1 for a in areas if a["status"] == "ready")
+
+    critical_not_ready = any(
+        a["status"] == "not_ready" and a["critical"] for a in areas
+    )
+    overall_status = (
+        "not_ready"
+        if critical_not_ready or not_ready_count > 0
+        else ("partially_ready" if partially_ready_count > 0 else "ready")
+    )
+    live_execution_recommended = overall_status == "ready"
+
+    readiness_result_model = {
+        "model_name": "LiveReadOnlyReadinessResult",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "groups": sorted({f["group"] for f in model_fields}),
+        "fields": model_fields,
+    }
+
+    blockers_model = {
+        "blocker_count": len(blockers),
+        "active_blocker_count": sum(1 for b in blockers if b["active"]),
+        "blockers": blockers,
+    }
+
+    runtime_readiness_model = {
+        "runtime_count": len(runtime_results),
+        "ready_count": sum(1 for r in runtime_results if r["status"] == "ready"),
+        "partially_ready_count": sum(
+            1 for r in runtime_results if r["status"] == "partially_ready"
+        ),
+        "not_ready_count": sum(1 for r in runtime_results if r["status"] == "not_ready"),
+        "runtimes": runtime_results,
+    }
+
+    live_readonly_readiness = {
+        "readiness_id": readiness_id,
+        "generated_at": generated_at,
+        "phase": "47A",
+        "title": "Governed Live Read-Only Execution Readiness",
+        "summary": (
+            "Assesses whether PCAE is ready for a future governed live read-only "
+            "execution pilot. Evaluates eight readiness areas against governance "
+            "designs from Phases 46J–46M, 46R. Assesses three target runtimes "
+            "(codex-local, claude-local, kimi-local). Identifies six active blockers "
+            "and produces recommendations. Live execution is not recommended until "
+            "all critical governance gates are satisfied. Human review is always required."
+        ),
+        "overall_status": overall_status,
+        "live_execution_recommended": live_execution_recommended,
+        "human_review_required": True,
+        "area_count": len(areas),
+        "not_ready_area_count": not_ready_count,
+        "partially_ready_area_count": partially_ready_count,
+        "ready_area_count": ready_count,
+        "active_blocker_count": sum(1 for b in blockers if b["active"]),
+        "runtime_count": len(runtime_results),
+        "warning_count": len(warnings),
+        "readiness_statuses": list(_LRORA_READINESS_STATUSES),
+        "input_sources": list(_LRORA_INPUT_SOURCES),
+        "execution_allowed": False,
+        "governance_boundaries": dict(_LRORA_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _LRORA_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "live_readonly_readiness": live_readonly_readiness,
+        "readiness_areas": areas,
+        "runtime_results": runtime_readiness_model,
+        "readiness_result_model": readiness_result_model,
+        "blockers": blockers_model,
+        "warnings": warnings,
+        "recommendations": dict(_LRORA_RECOMMENDATIONS),
+        "governance_boundaries": dict(_LRORA_GOVERNANCE_BOUNDARIES),
+        "advisory": LIVE_READONLY_READINESS_ADVISORY,
+    }

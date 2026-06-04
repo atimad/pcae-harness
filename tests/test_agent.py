@@ -26602,3 +26602,204 @@ def test_46u_human_output_shows_all_sections(capsys) -> None:
     assert "Governance gates" in output
     assert "Governance boundaries" in output
     assert "simulation" in output.lower()
+
+
+# Phase 47A — Governed Live Read-Only Execution Readiness
+# ---------------------------------------------------------------------------
+
+
+def test_47a_json_structure(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "live_readonly_readiness", "readiness_areas", "runtime_results",
+        "readiness_result_model", "blockers", "warnings",
+        "recommendations", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47a_readiness_fields(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    r = data["live_readonly_readiness"]
+    for field in (
+        "readiness_id", "phase", "title", "summary", "overall_status",
+        "live_execution_recommended", "human_review_required",
+        "area_count", "not_ready_area_count", "partially_ready_area_count",
+        "ready_area_count", "active_blocker_count", "runtime_count",
+        "warning_count", "readiness_statuses", "input_sources",
+        "execution_allowed", "governance_boundaries", "future_evolution",
+    ):
+        assert field in r, f"missing readiness field: {field}"
+    assert r["readiness_id"].startswith("lrora-")
+    assert r["phase"] == "47A"
+    assert r["area_count"] == 8
+    assert r["execution_allowed"] is False
+
+
+def test_47a_overall_status(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    r = data["live_readonly_readiness"]
+    assert r["overall_status"] == "not_ready"
+    assert r["not_ready_area_count"] >= 1
+    assert (
+        r["not_ready_area_count"] + r["partially_ready_area_count"] + r["ready_area_count"]
+        == 8
+    )
+
+
+def test_47a_live_execution_not_recommended(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["live_readonly_readiness"]["live_execution_recommended"] is False
+
+
+def test_47a_human_review_required(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["live_readonly_readiness"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_47a_readiness_areas(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["readiness_areas"]
+    assert len(areas) == 8
+    area_names = [a["area"] for a in areas]
+    for expected in (
+        "authorization_readiness", "audit_readiness", "consensus_readiness",
+        "runtime_readiness", "output_capture_readiness", "result_review_readiness",
+        "quality_review_readiness", "human_approval_readiness",
+    ):
+        assert expected in area_names, f"missing readiness area: {expected}"
+    for area in areas:
+        for field in ("area", "description", "status", "rationale", "critical", "governance_source"):
+            assert field in area, f"area missing field: {field}"
+        assert area["status"] in ("ready", "partially_ready", "not_ready")
+    assert all(a["critical"] for a in areas)
+    human_approval = next(a for a in areas if a["area"] == "human_approval_readiness")
+    assert human_approval["status"] == "not_ready"
+
+
+def test_47a_runtime_assessment(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_results"]
+    assert rt["runtime_count"] == 3
+    runtime_names = [r["runtime"] for r in rt["runtimes"]]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_names, f"missing runtime: {expected}"
+    for runtime in rt["runtimes"]:
+        for field in (
+            "runtime", "status", "rationale", "adapter_type",
+            "capabilities_verified", "live_execution_tested",
+        ):
+            assert field in runtime, f"runtime missing field: {field}"
+        assert runtime["status"] in ("ready", "partially_ready", "not_ready")
+        assert runtime["live_execution_tested"] is False
+    kimi = next(r for r in rt["runtimes"] if r["runtime"] == "kimi-local")
+    assert kimi["status"] == "not_ready"
+
+
+def test_47a_readiness_result_model(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["readiness_result_model"]
+    assert m["model_name"] == "LiveReadOnlyReadinessResult"
+    assert m["field_count"] == 9
+    assert m["required_field_count"] == 9
+    assert m["immutable_field_count"] == 2
+    assert set(m["groups"]) == {"identity", "result", "findings"}
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "readiness_id", "overall_status", "live_execution_recommended",
+        "human_review_required", "runtime_results", "readiness_areas",
+        "blockers", "warnings", "recommendations",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+    identity_fields = [f for f in m["fields"] if f["group"] == "identity"]
+    assert all(f["immutable"] for f in identity_fields)
+
+
+def test_47a_blockers(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    bl = data["blockers"]
+    assert bl["blocker_count"] == 6
+    assert bl["active_blocker_count"] == 6
+    blocker_names = [b["blocker"] for b in bl["blockers"]]
+    for expected in (
+        "missing_authorization", "missing_audit_path", "missing_consensus_path",
+        "missing_output_capture", "missing_runtime_support", "missing_review_workflow",
+    ):
+        assert expected in blocker_names, f"missing blocker: {expected}"
+    for b in bl["blockers"]:
+        for field in ("blocker", "description", "active", "severity"):
+            assert field in b, f"blocker missing field: {field}"
+        assert b["active"] is True
+
+
+def test_47a_warnings(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    warnings = data["warnings"]
+    assert len(warnings) == 3
+    combined = " ".join(warnings).lower()
+    assert "human approval" in combined
+    assert "runtime" in combined
+    assert "quality review" in combined
+
+
+def test_47a_recommendations(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["recommendations"]
+    assert "readiness_recommendation" in rec
+    assert "required_follow_up_phases" in rec
+    assert "execution_authorization_recommendation" in rec
+    assert "47C" in rec["required_follow_up_phases"]
+
+
+def test_47a_governance_boundaries(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["workflow_may"]).lower()
+    for allowed in ("assess readiness", "identify blockers", "generate recommendations"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["workflow_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve execution", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47a_advisory(capsys) -> None:
+    main(["live-readonly-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_47a_human_output_shows_all_sections(capsys) -> None:
+    main(["live-readonly-readiness"])
+    output = capsys.readouterr().out
+    assert "Live read-only execution readiness assessment" in output
+    assert "Assessment results" in output
+    assert "Readiness areas" in output
+    assert "Runtime assessment" in output
+    assert "LiveReadOnlyReadinessResult model" in output
+    assert "Blockers" in output
+    assert "Warnings" in output
+    assert "Recommendations" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
