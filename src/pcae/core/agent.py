@@ -19451,3 +19451,479 @@ def build_execution_quality_design() -> dict:
         "governance_boundaries": dict(_EQD_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_QUALITY_DESIGN_ADVISORY,
     }
+
+
+# Phase 46M — Read-Only Invocation Execution Pilot
+# ---------------------------------------------------------------------------
+
+READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY = (
+    "Read-only invocation execution pilot is informational; no runtime invocation occurs."
+)
+
+_ROIEP_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_quality_design",
+    "multi_agent_invocation_pilot",
+    "invocation_pilot_status",
+    "execution_authorization_artifacts",
+    "invocation_contracts",
+)
+
+_ROIEP_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt",
+        "description": "An approved prompt artifact is selected for invocation.",
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "An ExecutionAuthorizationArtifact is prepared and linked to the approved prompt."
+        ),
+        "required": True,
+        "completed_by": "execution_authorization_artifact",
+    },
+    {
+        "step": 3,
+        "name": "invocation_candidate",
+        "description": (
+            "An InvocationCandidate or MultiAgentInvocationCandidate is created "
+            "and linked to the authorization."
+        ),
+        "required": True,
+        "completed_by": "invocation_candidate_artifact",
+    },
+    {
+        "step": 4,
+        "name": "invocation_plan",
+        "description": (
+            "An InvocationPlan or MultiAgentInvocationPlan is prepared "
+            "from the candidate and selected runtime."
+        ),
+        "required": True,
+        "completed_by": "invocation_plan_artifact",
+    },
+    {
+        "step": 5,
+        "name": "preflight_validation",
+        "description": "All preflight gates are evaluated against the candidate and plan.",
+        "required": True,
+        "completed_by": "all_preflight_gates_pass",
+    },
+    {
+        "step": 6,
+        "name": "runtime_invocation_ready",
+        "description": (
+            "All runtime-specific readiness gates have passed: runtime installed, "
+            "sandbox documented, timeout strategy defined."
+        ),
+        "required": True,
+        "completed_by": "runtime_readiness_gates",
+    },
+    {
+        "step": 7,
+        "name": "output_capture_ready",
+        "description": (
+            "An output capture plan is prepared and validated "
+            "for the selected runtime and invocation mode."
+        ),
+        "required": True,
+        "completed_by": "output_capture_plan_artifact",
+    },
+    {
+        "step": 8,
+        "name": "audit_ready",
+        "description": (
+            "A governance snapshot has been captured and an audit record "
+            "is prepared before any invocation may proceed."
+        ),
+        "required": True,
+        "completed_by": "governance_snapshot_and_audit_record",
+    },
+    {
+        "step": 9,
+        "name": "human_final_authorization_required",
+        "description": (
+            "Human authorization is required before any runtime may be invoked. "
+            "This gate is never bypassed regardless of pilot readiness status."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_authorization",
+    },
+)
+
+_ROIEP_PREFLIGHT_GATES: tuple[dict, ...] = (
+    {
+        "gate_id": "roiep-g01",
+        "gate": "authorization_valid",
+        "description": (
+            "The ExecutionAuthorizationArtifact is in authorized or renewed state."
+        ),
+        "blocking": True,
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+        ],
+    },
+    {
+        "gate_id": "roiep-g02",
+        "gate": "authorization_not_expired",
+        "description": (
+            "The authorization has not expired, been denied, or been superseded."
+        ),
+        "blocking": True,
+        "checks": [
+            "authorization is not expired",
+            "authorization is not denied",
+            "authorization is not superseded",
+        ],
+    },
+    {
+        "gate_id": "roiep-g03",
+        "gate": "prompt_approved",
+        "description": "The selected prompt has a valid prompt approval artifact.",
+        "blocking": True,
+        "checks": [
+            "prompt_id resolves to known prompt artifact",
+            "prompt_approval_id present and valid",
+            "prompt approval status is approved",
+        ],
+    },
+    {
+        "gate_id": "roiep-g04",
+        "gate": "validation_passed",
+        "description": "Prompt governance validation has passed all required checks.",
+        "blocking": True,
+        "checks": [
+            "validation_status is passed",
+            "no blocking validation errors present",
+            "governance constraints verified",
+        ],
+    },
+    {
+        "gate_id": "roiep-g05",
+        "gate": "runtime_ready",
+        "description": (
+            "The selected runtime is installed and confirmed to support "
+            "non-interactive execution."
+        ),
+        "blocking": True,
+        "checks": [
+            "selected_runtime in validated_contracts",
+            "runtime CLI installed",
+            "non_interactive execution confirmed",
+        ],
+    },
+    {
+        "gate_id": "roiep-g06",
+        "gate": "sandbox_ready",
+        "description": (
+            "The runtime's read-only sandbox mode is documented "
+            "and validated in the invocation contracts."
+        ),
+        "blocking": True,
+        "checks": [
+            "read_only_contract defined for selected_runtime",
+            "sandbox_mode documented for runtime",
+            "sandbox enforcement confirmed",
+        ],
+    },
+    {
+        "gate_id": "roiep-g07",
+        "gate": "timeout_strategy_ready",
+        "description": "A timeout strategy is defined for the selected runtime.",
+        "blocking": True,
+        "checks": [
+            "timeout_strategy documented for runtime",
+            "timeout value within policy limits",
+        ],
+    },
+    {
+        "gate_id": "roiep-g08",
+        "gate": "output_capture_ready",
+        "description": (
+            "An output capture plan is prepared for the selected runtime "
+            "and invocation mode."
+        ),
+        "blocking": True,
+        "checks": [
+            "output_capture_plan_id present",
+            "expected_outputs defined",
+            "capture strategy compatible with runtime",
+        ],
+    },
+    {
+        "gate_id": "roiep-g09",
+        "gate": "audit_record_ready",
+        "description": (
+            "A governance snapshot has been captured and an audit record "
+            "is prepared prior to invocation."
+        ),
+        "blocking": True,
+        "checks": [
+            "governance_snapshot captured",
+            "audit_record_id assigned",
+            "audit record links to authorization and prompt",
+        ],
+    },
+    {
+        "gate_id": "roiep-g10",
+        "gate": "quality_review_ready",
+        "description": (
+            "A quality review framework is available and configured "
+            "for post-capture evaluation of execution outputs."
+        ),
+        "blocking": True,
+        "checks": [
+            "quality dimensions defined",
+            "ResultQualityRecord schema available",
+            "evaluation rules loaded",
+        ],
+    },
+)
+
+_ROIEP_READINESS_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "ready",
+        "description": (
+            "All preflight gates pass; human_final_authorization_required=True; "
+            "execution_allowed=False. Pilot structure is complete and valid."
+        ),
+        "execution_allowed": False,
+        "human_authorization_required": True,
+        "terminal": False,
+    },
+    {
+        "status": "blocked",
+        "description": (
+            "One or more preflight gates failed; remediation is required "
+            "before the pilot can advance to ready. execution_allowed=False."
+        ),
+        "execution_allowed": False,
+        "human_authorization_required": True,
+        "terminal": False,
+    },
+    {
+        "status": "pending",
+        "description": (
+            "Preflight validation has not yet completed. "
+            "execution_allowed=False until all gates are evaluated."
+        ),
+        "execution_allowed": False,
+        "human_authorization_required": True,
+        "terminal": False,
+    },
+)
+
+_ROIEP_PILOT_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "description": "Unique identifier for this pilot readiness result.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "description": "Pilot readiness status: ready, blocked, or pending.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this pilot invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this pilot invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of gate IDs that failed preflight validation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during preflight validation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "required_human_action",
+        "type": "str",
+        "description": (
+            "Description of the human action required before any execution may proceed."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "description": (
+            "Whether execution is permitted. Always False in this pilot phase; "
+            "real execution requires explicit authorization in a future phase."
+        ),
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_ROIEP_GOVERNANCE_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "authorization_valid_before_candidate",
+        "description": (
+            "An ExecutionAuthorizationArtifact must be valid before "
+            "an InvocationCandidate is prepared."
+        ),
+        "blocking": True,
+        "checked_in": "authorization_valid",
+    },
+    {
+        "requirement": "all_gates_must_pass",
+        "description": (
+            "All ten preflight gates must pass before readiness_status "
+            "may be set to ready."
+        ),
+        "blocking": True,
+        "checked_in": "preflight_validation",
+    },
+    {
+        "requirement": "execution_allowed_always_false",
+        "description": (
+            "execution_allowed must always be False in this pilot phase. "
+            "Real execution requires explicit authorization in a future phase."
+        ),
+        "blocking": True,
+        "checked_in": "result_model_integrity",
+    },
+    {
+        "requirement": "human_authorization_required",
+        "description": (
+            "human_final_authorization_required must always be True. "
+            "This requirement is never bypassed regardless of gate results."
+        ),
+        "blocking": True,
+        "checked_in": "human_final_authorization_required",
+    },
+    {
+        "requirement": "no_runtime_invocation_in_pilot",
+        "description": (
+            "No runtime may be invoked during pilot readiness evaluation. "
+            "The pilot prepares and validates structures only."
+        ),
+        "blocking": True,
+        "checked_in": "execution_safety",
+    },
+)
+
+_ROIEP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "prepare pilot readiness",
+        "evaluate gates",
+        "report blockers",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+        "bypass human authorization",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_ROIEP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46N", "description": "Governed Write Invocation Design"},
+)
+
+
+def build_read_only_invocation_execution_pilot() -> dict:
+    """Design the first controlled read-only invocation execution pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_design_id = f"roiep-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _ROIEP_LIFECYCLE]
+    preflight_gates = [dict(g) for g in _ROIEP_PREFLIGHT_GATES]
+    readiness_statuses = [dict(s) for s in _ROIEP_READINESS_STATUSES]
+    pilot_result_fields = [dict(f) for f in _ROIEP_PILOT_RESULT_FIELDS]
+    governance_requirements = [dict(g) for g in _ROIEP_GOVERNANCE_REQUIREMENTS]
+
+    pilot_result_model = {
+        "model_name": "PilotResult",
+        "field_count": len(pilot_result_fields),
+        "required_field_count": sum(1 for f in pilot_result_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in pilot_result_fields),
+        "execution_allowed_always_false": True,
+        "fields": pilot_result_fields,
+    }
+
+    preflight_gate_model = {
+        "gate_count": len(preflight_gates),
+        "all_gates_blocking": all(g["blocking"] for g in preflight_gates),
+        "gate_ids": [g["gate_id"] for g in preflight_gates],
+        "gates": preflight_gates,
+    }
+
+    readiness_status_model = {
+        "status_count": len(readiness_statuses),
+        "all_statuses_execution_allowed_false": all(
+            not s["execution_allowed"] for s in readiness_statuses
+        ),
+        "all_statuses_human_authorization_required": all(
+            s["human_authorization_required"] for s in readiness_statuses
+        ),
+        "statuses": readiness_statuses,
+    }
+
+    read_only_invocation_execution_pilot = {
+        "pilot_design_id": pilot_design_id,
+        "generated_at": generated_at,
+        "phase": "46M",
+        "title": "Read-Only Invocation Execution Pilot",
+        "summary": (
+            "Designs the first controlled read-only invocation execution pilot, defining "
+            "the nine-step execution pilot lifecycle, ten preflight gates, PilotResult model, "
+            "and governance requirements that prevent real runtime execution until explicitly "
+            "authorized in a future phase. Human final authorization is always required "
+            "regardless of gate results. No runtime invocation, no prompt execution, and no "
+            "repository modification by agents."
+        ),
+        "input_sources": list(_ROIEP_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "preflight_gate_count": len(preflight_gates),
+        "model_count": 1,
+        "governance_requirement_count": len(governance_requirements),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_ROIEP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _ROIEP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "read_only_invocation_execution_pilot": read_only_invocation_execution_pilot,
+        "execution_pilot_lifecycle": lifecycle,
+        "preflight_gates": preflight_gate_model,
+        "pilot_result_model": pilot_result_model,
+        "readiness_statuses": readiness_status_model,
+        "governance_requirements": governance_requirements,
+        "governance_boundaries": dict(_ROIEP_GOVERNANCE_BOUNDARIES),
+        "advisory": READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
+    }

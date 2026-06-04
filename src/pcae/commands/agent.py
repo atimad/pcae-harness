@@ -114,6 +114,8 @@ from pcae.core.agent import (
     MULTI_AGENT_INVOCATION_PILOT_ADVISORY,
     build_execution_quality_design,
     EXECUTION_QUALITY_DESIGN_ADVISORY,
+    build_read_only_invocation_execution_pilot,
+    READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4986,6 +4988,68 @@ def run_execution_quality_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['framework_may'])}")
         print(f"  May not: {', '.join(gb['framework_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_read_only_invocation_execution_pilot(args: argparse.Namespace) -> int:
+    data = build_read_only_invocation_execution_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["read_only_invocation_execution_pilot"]
+        print("Read-only invocation execution pilot")
+        print(f"Design: {pilot['pilot_design_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("Execution pilot lifecycle:")
+        for step in data["execution_pilot_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("Preflight gates:")
+        pg = data["preflight_gates"]
+        print(f"  Gate count: {pg['gate_count']}  All blocking: {pg['all_gates_blocking']}")
+        for gate in pg["gates"]:
+            blocking = "blocking" if gate["blocking"] else "non-blocking"
+            print(f"  {gate['gate_id']} {gate['gate']} ({blocking})")
+            print(f"    {gate['description']}")
+            for check in gate["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Pilot result model (PilotResult):")
+        rm = data["pilot_result_model"]
+        print(f"  Fields: {rm['field_count']}  Required: {rm['required_field_count']}")
+        print(f"  All fields immutable: {rm['all_fields_immutable']}")
+        print(f"  execution_allowed always False: {rm['execution_allowed_always_false']}")
+        for field in rm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Readiness statuses:")
+        rs = data["readiness_statuses"]
+        for status in rs["statuses"]:
+            exec_ok = "execution allowed" if status["execution_allowed"] else "no execution"
+            auth = "human auth required" if status["human_authorization_required"] else ""
+            print(f"  {status['status']} ({exec_ok}, {auth})")
+            print(f"    {status['description']}")
+        print()
+        print("Governance requirements:")
+        for req in data["governance_requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking}, checked in {req['checked_in']})")
+            print(f"    {req['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['pilot_may'])}")
+        print(f"  May not: {', '.join(gb['pilot_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

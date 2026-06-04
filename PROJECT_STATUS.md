@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46L: Execution Result Quality Framework.
+Phase 46M: Read-Only Invocation Execution Pilot.
 
 ## Governance Coherence Note
 
@@ -2564,10 +2564,32 @@ compute quality scores/report quality status; framework_may_not approve executio
 automatically/invoke agents/modify repository/commit/push/rollback; read_only=true,
 human_review_required=true; future_evolution: 46M/46N; advisory: "Execution quality
 framework is informational; no execution results are evaluated."
+and the first controlled read-only invocation execution pilot is designed with
+`pcae read-only-invocation-execution-pilot` and
+`pcae read-only-invocation-execution-pilot --json` (Phase 46M): inputs:
+execution_quality_design, multi_agent_invocation_pilot, invocation_pilot_status,
+execution_authorization_artifacts, invocation_contracts; no runtime invocation;
+no prompt execution; no repository modification; execution_allowed=False in all states;
+execution pilot lifecycle (9 steps, all required): approved_prompt/execution_authorization/
+invocation_candidate/invocation_plan/preflight_validation/runtime_invocation_ready/
+output_capture_ready/audit_ready/human_final_authorization_required; preflight gates (10,
+all blocking): authorization_valid/authorization_not_expired/prompt_approved/
+validation_passed/runtime_ready/sandbox_ready/timeout_strategy_ready/output_capture_ready/
+audit_record_ready/quality_review_ready; PilotResult model: 8 fields (all required,
+all immutable): pilot_id/readiness_status/selected_runtime/selected_agent/blockers/warnings/
+required_human_action/execution_allowed (always False); readiness statuses (3): ready/
+blocked/pending (all execution_allowed=False, all human_authorization_required=True);
+governance requirements (5, all blocking): authorization_valid_before_candidate/
+all_gates_must_pass/execution_allowed_always_false/human_authorization_required/
+no_runtime_invocation_in_pilot; governance_boundaries: pilot_may prepare pilot readiness/
+evaluate gates/report blockers; pilot_may_not invoke runtimes/execute prompts/modify
+repository/commit/push/rollback/bypass human authorization; execution_allowed=False,
+human_review_required=True; future_evolution: 46N; advisory: "Read-only invocation
+execution pilot is informational; no runtime invocation occurs."
 
 ## Next
 
-- TBD: Future phases (46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
+- TBD: Future phases (46N Governed Write Invocation Design).
 
 ## Future Explorations
 

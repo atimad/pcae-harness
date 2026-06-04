@@ -441,3 +441,8 @@
 
 - `pcae execution-quality-design`
 - `pcae execution-quality-design --json`
+
+## read-only-invocation-execution-pilot
+
+- `pcae read-only-invocation-execution-pilot`
+- `pcae read-only-invocation-execution-pilot --json`

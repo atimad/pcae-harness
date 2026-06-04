@@ -69,6 +69,7 @@ from pcae.commands.agent import (
     run_invocation_pilot_status,
     run_multi_agent_invocation_pilot,
     run_execution_quality_design,
+    run_read_only_invocation_execution_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1875,6 +1876,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON execution quality design output.",
     )
     execution_quality_design_parser.set_defaults(handler=run_execution_quality_design)
+
+    read_only_invocation_execution_pilot_parser = subparsers.add_parser(
+        "read-only-invocation-execution-pilot",
+        help="Design controlled read-only invocation execution pilot structures (Phase 46M).",
+    )
+    read_only_invocation_execution_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON read-only invocation execution pilot output.",
+    )
+    read_only_invocation_execution_pilot_parser.set_defaults(
+        handler=run_read_only_invocation_execution_pilot
+    )
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

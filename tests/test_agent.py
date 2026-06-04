@@ -24596,3 +24596,211 @@ def test_46l_human_output_shows_all_sections(capsys) -> None:
     assert "Governance requirements" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46M — Read-Only Invocation Execution Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_46m_json_structure(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "read_only_invocation_execution_pilot", "execution_pilot_lifecycle",
+        "preflight_gates", "pilot_result_model", "readiness_statuses",
+        "governance_requirements", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46m_design_fields(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["read_only_invocation_execution_pilot"]
+    for field in (
+        "pilot_design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "preflight_gate_count", "model_count",
+        "governance_requirement_count", "execution_allowed",
+        "human_review_required", "governance_boundaries", "future_evolution",
+    ):
+        assert field in pilot, f"missing pilot field: {field}"
+    assert pilot["pilot_design_id"].startswith("roiep-")
+    assert pilot["phase"] == "46M"
+    assert pilot["execution_allowed"] is False
+    assert pilot["human_review_required"] is True
+    assert pilot["lifecycle_step_count"] == 9
+    assert pilot["preflight_gate_count"] == 10
+    assert pilot["model_count"] == 1
+    assert pilot["governance_requirement_count"] == 5
+
+
+def test_46m_lifecycle_steps(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["execution_pilot_lifecycle"]
+    assert len(lifecycle) == 9
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "approved_prompt", "execution_authorization", "invocation_candidate",
+        "invocation_plan", "preflight_validation", "runtime_invocation_ready",
+        "output_capture_ready", "audit_ready", "human_final_authorization_required",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 10))
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+
+
+def test_46m_preflight_gates(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pg = data["preflight_gates"]
+    assert pg["gate_count"] == 10
+    assert pg["all_gates_blocking"] is True
+    gate_names = [g["gate"] for g in pg["gates"]]
+    for expected in (
+        "authorization_valid", "authorization_not_expired", "prompt_approved",
+        "validation_passed", "runtime_ready", "sandbox_ready",
+        "timeout_strategy_ready", "output_capture_ready",
+        "audit_record_ready", "quality_review_ready",
+    ):
+        assert expected in gate_names, f"missing gate: {expected}"
+    gate_ids = pg["gate_ids"]
+    for expected in (f"roiep-g{i:02d}" for i in range(1, 11)):
+        assert expected in gate_ids, f"missing gate id: {expected}"
+
+
+def test_46m_gate_structure(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for gate in data["preflight_gates"]["gates"]:
+        for field in ("gate_id", "gate", "description", "blocking", "checks"):
+            assert field in gate, f"gate missing field: {field}"
+        assert gate["blocking"] is True
+        assert len(gate["checks"]) >= 2
+
+
+def test_46m_pilot_result_model(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["pilot_result_model"]
+    assert rm["model_name"] == "PilotResult"
+    assert rm["field_count"] == 8
+    assert rm["required_field_count"] == 8
+    assert rm["all_fields_immutable"] is True
+    assert rm["execution_allowed_always_false"] is True
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "pilot_id", "readiness_status", "selected_runtime", "selected_agent",
+        "blockers", "warnings", "required_human_action", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    exec_field = next(f for f in rm["fields"] if f["name"] == "execution_allowed")
+    assert "Always False" in exec_field["description"]
+
+
+def test_46m_readiness_statuses(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rs = data["readiness_statuses"]
+    assert rs["status_count"] == 3
+    assert rs["all_statuses_execution_allowed_false"] is True
+    assert rs["all_statuses_human_authorization_required"] is True
+    status_names = [s["status"] for s in rs["statuses"]]
+    for expected in ("ready", "blocked", "pending"):
+        assert expected in status_names, f"missing readiness status: {expected}"
+    for s in rs["statuses"]:
+        assert s["execution_allowed"] is False
+        assert s["human_authorization_required"] is True
+
+
+def test_46m_governance_requirements(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["governance_requirements"]
+    assert len(reqs) == 5
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "authorization_valid_before_candidate", "all_gates_must_pass",
+        "execution_allowed_always_false", "human_authorization_required",
+        "no_runtime_invocation_in_pilot",
+    ):
+        assert expected in req_names, f"missing requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+    for req in reqs:
+        for field in ("requirement", "description", "blocking", "checked_in"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46m_governance_boundaries(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["pilot_may"]).lower()
+    for allowed in ("prepare pilot readiness", "evaluate gates", "report blockers"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback", "bypass human authorization",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46m_execution_allowed_always_false(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["read_only_invocation_execution_pilot"]
+    assert pilot["execution_allowed"] is False
+    rs = data["readiness_statuses"]
+    assert rs["all_statuses_execution_allowed_false"] is True
+    rm = data["pilot_result_model"]
+    assert rm["execution_allowed_always_false"] is True
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+
+
+def test_46m_future_evolution(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["read_only_invocation_execution_pilot"]["future_evolution"]]
+    assert "46N" in phases
+
+
+def test_46m_advisory(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation occurs" in advisory
+
+
+def test_46m_no_runtime_invocation(capsys) -> None:
+    main(["read-only-invocation-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    assert "invoke runtimes" in may_not
+    assert "execute prompts" in may_not
+    assert "bypass human authorization" in may_not
+
+
+def test_46m_human_output_shows_all_sections(capsys) -> None:
+    main(["read-only-invocation-execution-pilot"])
+    output = capsys.readouterr().out
+    assert "Read-only invocation execution pilot" in output
+    assert "Execution pilot lifecycle" in output
+    assert "Preflight gates" in output
+    assert "Pilot result model" in output
+    assert "Readiness statuses" in output
+    assert "Governance requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
