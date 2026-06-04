@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.1: README Modernization (documentation only).
+Phase 48X.2: Architecture White Paper (documentation only).
 
 ## Governance Coherence Note
 
@@ -3128,6 +3128,16 @@ why PCAE exists/core principles/architecture overview/current capabilities/
 CLI examples/current safety status/roadmap snapshot/license;
 explicitly states execution_allowed=False for all runtimes, prompt execution
 disabled, write execution disabled, human_review_required=True;
+no source logic changes; documentation only
+and PCAE Architecture White Paper created (Phase 48X.2):
+docs/whitepaper/PCAE_WHITEPAPER.md — 15 sections covering executive summary/
+problem statement/why existing agent systems are risky/design philosophy/
+governance-first architecture/change governance/rollback governance/prompt
+governance/execution governance/runtime governance/multi-agent governance/
+audit evidence and trust/current maturity/roadmap/license;
+roadmap notes parallel test execution validation (pytest-xdist);
+README.md updated with link to white paper;
+pytest-xdist added to dev dependencies in pyproject.toml;
 no source logic changes; documentation only
 
 ## Next

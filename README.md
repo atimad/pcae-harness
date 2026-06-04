@@ -2,6 +2,8 @@
 
 PCAE is a governance-first framework for controlled AI-assisted engineering. It is a cross-platform Python CLI injected into Git repositories to make AI coding agent execution safe, resumable, auditable, and human-authoritative.
 
+For a detailed technical description of the architecture, governance model, and design philosophy, see the [PCAE Architecture White Paper](docs/whitepaper/PCAE_WHITEPAPER.md).
+
 ## Why PCAE Exists
 
 AI coding agents can produce real changes to real repositories — commits, pushes, file modifications — without approval gates, audit trails, or rollback plans. A single unconstrained agent invocation can leave a codebase in an inconsistent state with no clear path back.
