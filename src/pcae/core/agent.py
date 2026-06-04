@@ -30020,3 +30020,387 @@ def build_invocation_authorization_enforcement() -> dict:
         "input_sources": list(_IAE_INPUT_SOURCES),
         "advisory": INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY,
     }
+
+
+# Phase 48E — Invocation Audit Trail
+# ---------------------------------------------------------------------------
+
+INVOCATION_AUDIT_TRAIL_ADVISORY = (
+    "Invocation audit trail assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48E."
+)
+
+_IAT_AUDIT_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this audit record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request referenced by this audit record.",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The authorization artifact reference for this invocation.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this invocation.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "The prompt reference submitted for this invocation.",
+    },
+    {
+        "name": "preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "The preflight record reference for this invocation.",
+    },
+    {
+        "name": "enforcement_id",
+        "type": "str",
+        "required": True,
+        "description": "The authorization enforcement result reference.",
+    },
+    {
+        "name": "capture_id",
+        "type": "str",
+        "required": True,
+        "description": "The result capture record reference.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Audit outcome: pending, blocked, or complete.",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO-8601 timestamp at which this audit record was created.",
+    },
+    {
+        "name": "created_by",
+        "type": "str",
+        "required": True,
+        "description": "Identity of the governance component that created this record.",
+    },
+)
+
+_IAT_AUDIT_PREFLIGHT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this audit preflight check.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request under preflight evaluation.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Authorization check outcome (missing, invalid, expired, valid).",
+    },
+    {
+        "name": "contract_status",
+        "type": "str",
+        "required": True,
+        "description": "Runtime contract enforcement outcome (passed, blocked).",
+    },
+    {
+        "name": "preflight_status",
+        "type": "str",
+        "required": True,
+        "description": "Invocation preflight outcome (passed, blocked).",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Output capture path readiness (ready, not_ready).",
+    },
+    {
+        "name": "audit_ready",
+        "type": "bool",
+        "required": True,
+        "description": "True only when all upstream inputs are unblocked and audit can proceed.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Identifiers of blocking conditions preventing audit readiness.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during audit preflight.",
+    },
+)
+
+_IAT_AUDIT_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this audit summary.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The audit record referenced by this summary.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request covered by this summary.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this invocation.",
+    },
+    {
+        "name": "audit_ready",
+        "type": "bool",
+        "required": True,
+        "description": "Whether all prerequisite inputs are present and unblocked.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48E; execution is not authorized.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human review is required before any execution can proceed.",
+    },
+)
+
+_IAT_AUDIT_STATUSES: tuple[str, ...] = (
+    "pending",
+    "blocked",
+    "complete",
+)
+
+_IAT_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct invocation audit models",
+        "evaluate audit readiness",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48E",
+}
+
+_IAT_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "InvocationAuthorizationEnforcementResult",
+    "RuntimeContractEnforcementResult",
+    "InvocationResultCapture",
+)
+
+# Per-runtime sample audit state in Phase 48E.
+# All runtimes are blocked because upstream dependencies (authorization,
+# contract enforcement, preflight, capture) remain unresolved from prior phases.
+_IAT_SAMPLE_AUDITS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "capture_status": "not_ready",
+    },
+    {
+        "runtime_id": "claude-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "capture_status": "not_ready",
+    },
+    {
+        "runtime_id": "kimi-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "capture_status": "not_ready",
+    },
+)
+
+
+def _build_audit_preflight(audit_data: dict, request_id: str) -> dict:
+    """Derive an audit preflight record from a per-runtime sample."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if audit_data["authorization_status"] != "valid":
+        blockers.append("authorization_not_valid")
+    if audit_data["contract_status"] != "passed":
+        blockers.append("contract_enforcement_blocked")
+    if audit_data["preflight_status"] != "passed":
+        blockers.append("preflight_blocked")
+    if audit_data["capture_status"] != "ready":
+        blockers.append("capture_path_not_ready")
+
+    return {
+        "audit_preflight_id": f"iap-{audit_data['runtime_id']}-{ts}",
+        "runtime_id": audit_data["runtime_id"],
+        "request_id": request_id,
+        "authorization_status": audit_data["authorization_status"],
+        "contract_status": audit_data["contract_status"],
+        "preflight_status": audit_data["preflight_status"],
+        "capture_status": audit_data["capture_status"],
+        "audit_ready": len(blockers) == 0,
+        "blockers": blockers,
+        "warnings": warnings,
+    }
+
+
+def _build_audit_record(audit_data: dict, preflight: dict, request_id: str) -> dict:
+    """Derive an audit record from a per-runtime sample and its preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    runtime_id = audit_data["runtime_id"]
+    audit_status = "blocked" if preflight["blockers"] else "pending"
+    return {
+        "audit_id": f"iat-{runtime_id}-{ts}",
+        "request_id": request_id,
+        "authorization_id": "auth-placeholder-48e",
+        "runtime_id": runtime_id,
+        "prompt_id": "prompt-placeholder-48e",
+        "preflight_id": preflight["audit_preflight_id"],
+        "enforcement_id": f"iae-{runtime_id}-placeholder-48e",
+        "capture_id": "capture-placeholder-48e",
+        "audit_status": audit_status,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": "pcae-governance-48e",
+    }
+
+
+def _build_audit_summary(record: dict, preflight: dict) -> dict:
+    """Derive an audit summary from a completed record and preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    return {
+        "summary_id": f"ias-{record['runtime_id']}-{ts}",
+        "audit_id": record["audit_id"],
+        "request_id": record["request_id"],
+        "runtime_id": record["runtime_id"],
+        "audit_ready": preflight["audit_ready"],
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+
+def build_invocation_audit_trail() -> dict:
+    """Scaffold invocation audit trail models for all known runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48e"
+
+    preflights = [
+        _build_audit_preflight(dict(s), request_id_ref)
+        for s in _IAT_SAMPLE_AUDITS
+    ]
+    records = [
+        _build_audit_record(dict(s), pf, request_id_ref)
+        for s, pf in zip(_IAT_SAMPLE_AUDITS, preflights)
+    ]
+    summaries = [
+        _build_audit_summary(rec, pf)
+        for rec, pf in zip(records, preflights)
+    ]
+
+    blocked_count = sum(1 for r in records if r["audit_status"] == "blocked")
+    audit_ready_count = sum(1 for pf in preflights if pf["audit_ready"])
+
+    audit_models = [
+        {
+            "model_name": "InvocationAuditRecord",
+            "field_count": len(_IAT_AUDIT_RECORD_FIELDS),
+            "required_field_count": sum(1 for f in _IAT_AUDIT_RECORD_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IAT_AUDIT_RECORD_FIELDS],
+        },
+        {
+            "model_name": "InvocationAuditPreflight",
+            "field_count": len(_IAT_AUDIT_PREFLIGHT_FIELDS),
+            "required_field_count": sum(1 for f in _IAT_AUDIT_PREFLIGHT_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IAT_AUDIT_PREFLIGHT_FIELDS],
+        },
+        {
+            "model_name": "InvocationAuditSummary",
+            "field_count": len(_IAT_AUDIT_SUMMARY_FIELDS),
+            "required_field_count": sum(1 for f in _IAT_AUDIT_SUMMARY_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IAT_AUDIT_SUMMARY_FIELDS],
+        },
+    ]
+
+    audit_summary = {
+        "summary_id": f"48e-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48E",
+        "title": "Invocation Audit Trail",
+        "summary": (
+            "Scaffolds governed audit trail models for future read-only runtime "
+            "invocation. Three models are defined: InvocationAuditRecord (11 fields), "
+            "InvocationAuditPreflight (9 fields), and InvocationAuditSummary (7 fields). "
+            "All three runtimes are blocked in Phase 48E: authorization artifacts are "
+            "missing, contract enforcement remains blocked from Phase 48C, preflight "
+            "execution_allowed is False from Phase 48A, and output capture is not wired "
+            "from Phase 48B. execution_allowed=False for all runtimes. "
+            "No runtime is invoked, no prompt is submitted, and no repository "
+            "modification occurs."
+        ),
+        "runtime_count": len(records),
+        "blocked_count": blocked_count,
+        "audit_ready_count": audit_ready_count,
+        "model_count": len(audit_models),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "audit_summary": audit_summary,
+        "audit_models": audit_models,
+        "audit_records": records,
+        "audit_preflights": preflights,
+        "audit_summaries": summaries,
+        "governance_boundaries": dict(_IAT_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_IAT_INPUT_SOURCES),
+        "advisory": INVOCATION_AUDIT_TRAIL_ADVISORY,
+    }

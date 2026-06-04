@@ -551,3 +551,8 @@
 
 - `pcae invocation-authorization-enforcement`
 - `pcae invocation-authorization-enforcement --json`
+
+## invocation-audit
+
+- `pcae invocation-audit`
+- `pcae invocation-audit --json`

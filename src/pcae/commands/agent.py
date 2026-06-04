@@ -157,6 +157,8 @@ from pcae.core.agent import (
     RUNTIME_CONTRACT_ENFORCEMENT_ADVISORY,
     build_invocation_authorization_enforcement,
     INVOCATION_AUTHORIZATION_ENFORCEMENT_ADVISORY,
+    build_invocation_audit_trail,
+    INVOCATION_AUDIT_TRAIL_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6445,6 +6447,57 @@ def run_invocation_authorization_enforcement(args: argparse.Namespace) -> int:
                 print(f"    Failed checks ({len(res['failed_checks'])}): {', '.join(res['failed_checks'])}")
             if res["warnings"]:
                 print(f"    Warnings: {', '.join(res['warnings'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_audit_trail(args: argparse.Namespace) -> int:
+    data = build_invocation_audit_trail()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        aus = data["audit_summary"]
+        print("Invocation audit trail")
+        print(f"Assessment: {aus['summary_id']}  Generated: {aus['generated_at']}")
+        print(f"Phase: {aus['phase']} — {aus['title']}")
+        print()
+        print(aus["summary"])
+        print()
+        print(f"Runtimes evaluated:  {aus['runtime_count']}")
+        print(f"Blocked:             {aus['blocked_count']}")
+        print(f"Audit ready:         {aus['audit_ready_count']}")
+        print(f"Models defined:      {aus['model_count']}")
+        print(f"Execution allowed:   {'yes' if aus['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if aus['human_review_required'] else 'no'}")
+        print()
+        print(f"Audit models ({len(data['audit_models'])}):")
+        for m in data["audit_models"]:
+            print(f"  {m['model_name']}: {m['field_count']} fields ({m['required_field_count']} required)")
+        print()
+        print(f"Audit records ({len(data['audit_records'])} runtimes):")
+        for rec in data["audit_records"]:
+            print(f"  [{rec['audit_status']}] {rec['runtime_id']}")
+            print(f"    audit_id:     {rec['audit_id']}")
+            print(f"    created_by:   {rec['created_by']}")
+        print()
+        print(f"Audit preflights ({len(data['audit_preflights'])} runtimes):")
+        for pf in data["audit_preflights"]:
+            print(f"  [{pf['runtime_id']}] audit_ready: {pf['audit_ready']}")
+            if pf["blockers"]:
+                print(f"    Blockers ({len(pf['blockers'])}): {', '.join(pf['blockers'])}")
+        print()
+        print(f"Audit summaries ({len(data['audit_summaries'])} runtimes):")
+        for s in data["audit_summaries"]:
+            print(f"  [{s['runtime_id']}] execution_allowed: {s['execution_allowed']}, "
+                  f"audit_ready: {s['audit_ready']}, human_review_required: {s['human_review_required']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

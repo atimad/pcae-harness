@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48D: Invocation Authorization Enforcement.
+Phase 48E: Invocation Audit Trail.
 
 ## Governance Coherence Note
 
@@ -3040,6 +3040,25 @@ authorization enforcement/evaluate preflight status/evaluate contract
 enforcement status/report blockers; may_not invoke runtimes/execute
 prompts/modify repository/approve execution/commit/push/rollback;
 inputs: 5 sources
+and PCAE scaffolds a governed invocation audit trail with
+`pcae invocation-audit` and `pcae invocation-audit --json` (Phase 48E):
+three models defined: InvocationAuditRecord (11 required fields:
+audit_id/request_id/authorization_id/runtime_id/prompt_id/preflight_id/
+enforcement_id/capture_id/audit_status/created_at/created_by),
+InvocationAuditPreflight (9 required fields:
+audit_preflight_id/request_id/authorization_status/contract_status/
+preflight_status/capture_status/audit_ready/blockers/warnings),
+InvocationAuditSummary (7 required fields:
+summary_id/audit_id/request_id/runtime_id/audit_ready/execution_allowed/
+human_review_required);
+all 3 runtimes blocked (authorization=missing, contract=blocked,
+preflight=blocked, capture=not_ready); blocked_count=3,
+audit_ready_count=0; execution_allowed=False for all;
+no runtime invoked; no prompt submitted; no repository modification;
+human_review_required=True; governance_boundaries: may construct
+invocation audit models/evaluate audit readiness/report blockers;
+may_not invoke runtimes/execute prompts/modify repository/approve
+execution/commit/push/rollback; inputs: 5 sources
 
 ## Next
 

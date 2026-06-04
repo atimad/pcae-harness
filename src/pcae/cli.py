@@ -91,6 +91,7 @@ from pcae.commands.agent import (
     run_invocation_result_capture,
     run_runtime_contract_enforcement,
     run_invocation_authorization_enforcement,
+    run_invocation_audit_trail,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2145,6 +2146,17 @@ def build_parser() -> argparse.ArgumentParser:
     invocation_authorization_enforcement_parser.set_defaults(
         handler=run_invocation_authorization_enforcement
     )
+
+    invocation_audit_trail_parser = subparsers.add_parser(
+        "invocation-audit",
+        help="Scaffold governed invocation audit trail models (Phase 48E).",
+    )
+    invocation_audit_trail_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    invocation_audit_trail_parser.set_defaults(handler=run_invocation_audit_trail)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -29090,3 +29090,176 @@ def test_48d_human_output_shows_all_sections(capsys) -> None:
     assert "Enforcement results" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48E — Invocation Audit Trail
+
+
+def test_48e_json_structure(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "audit_summary", "audit_models", "audit_records", "audit_preflights",
+        "audit_summaries", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48e_audit_summary_fields(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    aus = data["audit_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "blocked_count", "audit_ready_count", "model_count",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in aus, f"missing audit_summary field: {field}"
+    assert aus["phase"] == "48E"
+    assert aus["execution_allowed"] is False
+    assert aus["human_review_required"] is True
+    assert aus["runtime_count"] == 3
+    assert aus["blocked_count"] == 3
+    assert aus["audit_ready_count"] == 0
+    assert aus["model_count"] == 3
+
+
+def test_48e_execution_always_blocked(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["audit_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    for s in data["audit_summaries"]:
+        assert s["execution_allowed"] is False, (
+            f"runtime {s['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48e_three_audit_models(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model_names = [m["model_name"] for m in data["audit_models"]]
+    assert "InvocationAuditRecord" in model_names
+    assert "InvocationAuditPreflight" in model_names
+    assert "InvocationAuditSummary" in model_names
+
+
+def test_48e_audit_record_model_fields(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    record_model = next(m for m in data["audit_models"] if m["model_name"] == "InvocationAuditRecord")
+    assert record_model["field_count"] == 11
+    assert record_model["required_field_count"] == 11
+    field_names = [f["name"] for f in record_model["fields"]]
+    for expected in (
+        "audit_id", "request_id", "authorization_id", "runtime_id", "prompt_id",
+        "preflight_id", "enforcement_id", "capture_id", "audit_status",
+        "created_at", "created_by",
+    ):
+        assert expected in field_names, f"missing InvocationAuditRecord field: {expected}"
+
+
+def test_48e_audit_preflight_model_fields(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pf_model = next(m for m in data["audit_models"] if m["model_name"] == "InvocationAuditPreflight")
+    assert pf_model["field_count"] == 9
+    assert pf_model["required_field_count"] == 9
+    field_names = [f["name"] for f in pf_model["fields"]]
+    for expected in (
+        "audit_preflight_id", "request_id", "authorization_status", "contract_status",
+        "preflight_status", "capture_status", "audit_ready", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing InvocationAuditPreflight field: {expected}"
+
+
+def test_48e_audit_summary_model_fields(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sum_model = next(m for m in data["audit_models"] if m["model_name"] == "InvocationAuditSummary")
+    assert sum_model["field_count"] == 7
+    assert sum_model["required_field_count"] == 7
+    field_names = [f["name"] for f in sum_model["fields"]]
+    for expected in (
+        "summary_id", "audit_id", "request_id", "runtime_id",
+        "audit_ready", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing InvocationAuditSummary field: {expected}"
+
+
+def test_48e_all_runtimes_blocked(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["audit_records"]:
+        assert rec["audit_status"] == "blocked", (
+            f"{rec['runtime_id']} audit_status must be blocked"
+        )
+    for pf in data["audit_preflights"]:
+        assert pf["audit_ready"] is False, (
+            f"{pf['runtime_id']} audit_ready must be False"
+        )
+        assert len(pf["blockers"]) > 0, f"{pf['runtime_id']} must have blockers"
+
+
+def test_48e_audit_record_id_prefixes(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["audit_records"]:
+        assert rec["audit_id"].startswith(f"iat-{rec['runtime_id']}-"), (
+            f"audit_id must start with iat-<runtime_id>-"
+        )
+    for pf in data["audit_preflights"]:
+        assert pf["audit_preflight_id"].startswith(f"iap-{pf['runtime_id']}-"), (
+            f"audit_preflight_id must start with iap-<runtime_id>-"
+        )
+
+
+def test_48e_governance_boundaries(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48E"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "construct invocation audit models", "evaluate audit readiness", "report blockers",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48e_input_sources(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ReadOnlyInvocationRequest", "ReadOnlyInvocationPreflight",
+        "InvocationAuthorizationEnforcementResult",
+        "RuntimeContractEnforcementResult", "InvocationResultCapture",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_48e_advisory(capsys) -> None:
+    main(["invocation-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48e_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-audit"])
+    output = capsys.readouterr().out
+    assert "Invocation audit trail" in output
+    assert "Audit models" in output
+    assert "Audit records" in output
+    assert "Audit preflights" in output
+    assert "Audit summaries" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
