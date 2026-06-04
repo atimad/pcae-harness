@@ -21031,3 +21031,544 @@ def build_write_preflight_dry_run() -> dict:
         "governance_boundaries": dict(_WDPR_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
     }
+
+
+# Phase 46P — Governed Write Candidate Artifact
+# ---------------------------------------------------------------------------
+
+WRITE_CANDIDATE_DESIGN_ADVISORY = (
+    "Governed write candidate artifact design is informational; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_WCD_INPUT_SOURCES: tuple[str, ...] = (
+    "governed_write_invocation_design",
+    "write_invocation_preflight_dry_run",
+    "execution_authorization_artifact_model",
+    "execution_audit_design",
+    "execution_consensus_design",
+    "execution_result_review_workflow",
+    "execution_quality_framework",
+    "controlled_file_modification_governance",
+)
+
+_WCD_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": (
+            "An approved prompt artifact is selected as the basis for the "
+            "governed write candidate."
+        ),
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+    },
+    {
+        "step": 2,
+        "name": "execution_authorization",
+        "description": (
+            "A valid ExecutionAuthorizationArtifact is linked to the candidate, "
+            "confirming the prompt is authorized for governed invocation."
+        ),
+        "required": True,
+        "completed_by": "execution_authorization_artifact",
+    },
+    {
+        "step": 3,
+        "name": "write_authorization",
+        "description": (
+            "A write authorization request is prepared and linked, explicitly "
+            "granting write permission for this candidate."
+        ),
+        "required": True,
+        "completed_by": "write_authorization_artifact",
+    },
+    {
+        "step": 4,
+        "name": "file_scope_validation",
+        "description": (
+            "File scope is declared and validated: allowed_files, forbidden_files, "
+            "max_files_changed, allowed_operations, forbidden_operations."
+        ),
+        "required": True,
+        "completed_by": "file_scope_validated",
+    },
+    {
+        "step": 5,
+        "name": "rollback_plan_validation",
+        "description": (
+            "A rollback plan is present and validated: rollback_mode, rollback_target, "
+            "rollback_review_required, rollback_approval_required."
+        ),
+        "required": True,
+        "completed_by": "rollback_plan_validated",
+    },
+    {
+        "step": 6,
+        "name": "audit_plan_validation",
+        "description": (
+            "An audit plan is present and validated: execution_audit_required, "
+            "consensus_audit_required, result_review_required, quality_review_required."
+        ),
+        "required": True,
+        "completed_by": "audit_plan_validated",
+    },
+    {
+        "step": 7,
+        "name": "human_write_approval",
+        "description": (
+            "Explicit human write approval is recorded before the candidate may "
+            "advance to approved_for_write status. This step is never bypassed."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+    },
+    {
+        "step": 8,
+        "name": "governed_write_candidate",
+        "description": (
+            "A GovernedWriteCandidate artifact is produced, representing a "
+            "fully validated write-capable invocation candidate eligible for "
+            "execution in a future governed phase."
+        ),
+        "required": True,
+        "completed_by": "governed_write_candidate_artifact",
+    },
+)
+
+_WCD_MODEL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "write_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this governed write candidate artifact.",
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Reference to the approved prompt artifact.",
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "prompt_approval_id",
+        "type": "str",
+        "description": "Reference to the prompt approval artifact.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the valid ExecutionAuthorizationArtifact.",
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "description": "Runtime identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "description": "Agent identifier selected for this write invocation.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+    {
+        "name": "file_scope",
+        "type": "FileScopeArtifact",
+        "description": (
+            "Declared and validated file scope governing which files may be modified."
+        ),
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "rollback_plan",
+        "type": "RollbackPlan",
+        "description": (
+            "Validated rollback plan defining recovery steps if write execution fails."
+        ),
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "audit_plan",
+        "type": "AuditPlan",
+        "description": (
+            "Validated audit plan defining what must be recorded before, during, "
+            "and after write execution."
+        ),
+        "required": True,
+        "immutable": True,
+        "invariant": "must_always_have",
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "description": "Whether consensus review is required before write execution.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+    {
+        "name": "quality_review_required",
+        "type": "bool",
+        "description": "Whether quality review is required after write execution.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+    {
+        "name": "human_write_approval_status",
+        "type": "str",
+        "description": (
+            "Status of human write approval: pending, approved, or denied. "
+            "approved_for_write status requires approved."
+        ),
+        "required": True,
+        "immutable": False,
+        "invariant": "none",
+    },
+    {
+        "name": "candidate_status",
+        "type": "str",
+        "description": (
+            "Current lifecycle status: draft, pending_write_approval, "
+            "approved_for_write, blocked, expired, or superseded."
+        ),
+        "required": True,
+        "immutable": False,
+        "invariant": "none",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blocker identifiers preventing candidate advancement.",
+        "required": True,
+        "immutable": False,
+        "invariant": "none",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded against the candidate.",
+        "required": True,
+        "immutable": False,
+        "invariant": "none",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "description": "ISO-8601 timestamp when the candidate artifact was created.",
+        "required": True,
+        "immutable": True,
+        "invariant": "none",
+    },
+)
+
+_WCD_CANDIDATE_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "draft",
+        "description": (
+            "Candidate is being assembled; not all required fields are present. "
+            "No write execution permitted."
+        ),
+        "execution_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "pending_write_approval",
+        "description": (
+            "All fields are present and validated; awaiting explicit human write "
+            "approval. No write execution permitted."
+        ),
+        "execution_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "approved_for_write",
+        "description": (
+            "Human write approval recorded; candidate is eligible for governed write "
+            "execution in a future phase. No write execution permitted in this phase."
+        ),
+        "execution_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "blocked",
+        "description": (
+            "One or more blockers prevent advancement. Remediation is required "
+            "before the candidate may proceed."
+        ),
+        "execution_allowed": False,
+        "terminal": False,
+    },
+    {
+        "status": "expired",
+        "description": (
+            "Write authorization has expired before execution. A new authorization "
+            "and candidate are required."
+        ),
+        "execution_allowed": False,
+        "terminal": True,
+    },
+    {
+        "status": "superseded",
+        "description": (
+            "A newer write candidate has replaced this one. This candidate is "
+            "archived and no longer eligible for execution."
+        ),
+        "execution_allowed": False,
+        "terminal": True,
+    },
+)
+
+_WCD_FILE_SCOPE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "allowed_files",
+        "type": "list[str]",
+        "description": "Explicit list of file paths permitted to be modified.",
+        "required": True,
+    },
+    {
+        "name": "forbidden_files",
+        "type": "list[str]",
+        "description": "Explicit list of file paths that must not be modified.",
+        "required": True,
+    },
+    {
+        "name": "max_files_changed",
+        "type": "int",
+        "description": "Maximum number of files the write invocation may change.",
+        "required": True,
+    },
+    {
+        "name": "allowed_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations permitted (e.g. create, edit).",
+        "required": True,
+    },
+    {
+        "name": "forbidden_operations",
+        "type": "list[str]",
+        "description": "Explicit list of file operations that must not be performed.",
+        "required": True,
+    },
+    {
+        "name": "scope_validation_result",
+        "type": "str",
+        "description": "Result of scope validation: pending, passed, or blocked.",
+        "required": True,
+    },
+)
+
+_WCD_ROLLBACK_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "rollback_mode",
+        "type": "str",
+        "description": "Mode of rollback: git_revert, manual, or snapshot_restore.",
+        "required": True,
+    },
+    {
+        "name": "rollback_target",
+        "type": "str",
+        "description": "Target state to restore if rollback is executed.",
+        "required": True,
+    },
+    {
+        "name": "rollback_review_required",
+        "type": "bool",
+        "description": "Whether human review is required before rollback is executed.",
+        "required": True,
+    },
+    {
+        "name": "rollback_approval_required",
+        "type": "bool",
+        "description": "Whether explicit human approval is required to execute rollback.",
+        "required": True,
+    },
+)
+
+_WCD_AUDIT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "execution_audit_required",
+        "type": "bool",
+        "description": "Whether an execution audit record must be created.",
+        "required": True,
+    },
+    {
+        "name": "consensus_audit_required",
+        "type": "bool",
+        "description": "Whether consensus review must be audited.",
+        "required": True,
+    },
+    {
+        "name": "result_review_required",
+        "type": "bool",
+        "description": "Whether the execution result must be reviewed before acceptance.",
+        "required": True,
+    },
+    {
+        "name": "quality_review_required",
+        "type": "bool",
+        "description": "Whether quality evaluation is required for execution outputs.",
+        "required": True,
+    },
+)
+
+_WCD_ARTIFACT_INVARIANTS: dict = {
+    "must_always_have": [
+        "write_candidate_id",
+        "prompt_id",
+        "authorization_id",
+        "file_scope",
+        "rollback_plan",
+        "audit_plan",
+    ],
+    "must_never_allow": [
+        "missing human write approval for approved_for_write",
+        "file scope removal",
+        "rollback plan removal",
+        "audit plan removal",
+        "automatic commit",
+        "automatic push",
+    ],
+}
+
+_WCD_GOVERNANCE_BOUNDARIES: dict = {
+    "artifact_may": [
+        "represent write candidates",
+        "represent file scope",
+        "represent rollback requirements",
+        "represent audit requirements",
+        "represent blockers and warnings",
+    ],
+    "artifact_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve writes automatically",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_WCD_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46Q", "description": "Controlled Write Invocation Pilot"},
+    {"phase": "46R", "description": "Write Result Review Workflow"},
+    {"phase": "46S", "description": "Write Rollback Validation Workflow"},
+)
+
+
+def build_write_candidate_design() -> dict:
+    """Define the governed write candidate artifact model. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    design_id = f"wcd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    lifecycle = [dict(s) for s in _WCD_LIFECYCLE]
+    model_fields = [dict(f) for f in _WCD_MODEL_FIELDS]
+    candidate_statuses = [dict(s) for s in _WCD_CANDIDATE_STATUSES]
+    file_scope_fields = [dict(f) for f in _WCD_FILE_SCOPE_FIELDS]
+    rollback_fields = [dict(f) for f in _WCD_ROLLBACK_FIELDS]
+    audit_fields = [dict(f) for f in _WCD_AUDIT_FIELDS]
+
+    write_candidate_model = {
+        "model_name": "GovernedWriteCandidate",
+        "field_count": len(model_fields),
+        "required_field_count": sum(1 for f in model_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in model_fields if f["immutable"]),
+        "execution_allowed_always_false": True,
+        "fields": model_fields,
+    }
+
+    candidate_statuses_model = {
+        "status_count": len(candidate_statuses),
+        "all_statuses_execution_allowed_false": all(
+            not s["execution_allowed"] for s in candidate_statuses
+        ),
+        "terminal_statuses": [s["status"] for s in candidate_statuses if s["terminal"]],
+        "statuses": candidate_statuses,
+    }
+
+    file_scope_requirements_model = {
+        "model_name": "FileScopeRequirements",
+        "field_count": len(file_scope_fields),
+        "all_fields_required": all(f["required"] for f in file_scope_fields),
+        "fields": file_scope_fields,
+    }
+
+    rollback_requirements_model = {
+        "model_name": "RollbackPlanRequirements",
+        "field_count": len(rollback_fields),
+        "all_fields_required": all(f["required"] for f in rollback_fields),
+        "fields": rollback_fields,
+    }
+
+    audit_requirements_model = {
+        "model_name": "AuditPlanRequirements",
+        "field_count": len(audit_fields),
+        "all_fields_required": all(f["required"] for f in audit_fields),
+        "fields": audit_fields,
+    }
+
+    write_candidate_design = {
+        "design_id": design_id,
+        "generated_at": generated_at,
+        "phase": "46P",
+        "title": "Governed Write Candidate Artifact",
+        "summary": (
+            "Defines the first-class governed artifact representing a future "
+            "write-capable invocation candidate. Specifies the eight-step "
+            "GovernedWriteCandidate lifecycle, sixteen-field model, six candidate "
+            "statuses, file scope requirements, rollback plan requirements, audit "
+            "plan requirements, and artifact invariants that prevent scope removal, "
+            "rollback removal, audit removal, and automatic commit or push. "
+            "execution_allowed is always False in this design phase; human write "
+            "approval is required before approved_for_write status may be set. "
+            "No runtime invocation, no prompt execution, and no file modification."
+        ),
+        "input_sources": list(_WCD_INPUT_SOURCES),
+        "lifecycle_step_count": len(lifecycle),
+        "model_field_count": len(model_fields),
+        "candidate_status_count": len(candidate_statuses),
+        "file_scope_field_count": len(file_scope_fields),
+        "rollback_field_count": len(rollback_fields),
+        "audit_field_count": len(audit_fields),
+        "execution_allowed": False,
+        "human_review_required": True,
+        "artifact_invariants": dict(_WCD_ARTIFACT_INVARIANTS),
+        "governance_boundaries": dict(_WCD_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _WCD_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "write_candidate_design": write_candidate_design,
+        "write_candidate_lifecycle": lifecycle,
+        "write_candidate_model": write_candidate_model,
+        "candidate_statuses": candidate_statuses_model,
+        "file_scope_requirements": file_scope_requirements_model,
+        "rollback_requirements": rollback_requirements_model,
+        "audit_requirements": audit_requirements_model,
+        "artifact_invariants": dict(_WCD_ARTIFACT_INVARIANTS),
+        "governance_boundaries": dict(_WCD_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_CANDIDATE_DESIGN_ADVISORY,
+    }

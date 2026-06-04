@@ -477,6 +477,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-preflight-dry-run`
 - `pcae write-preflight-dry-run --json`
+
+## write-candidate-design
+
+- `pcae write-candidate-design`
+- `pcae write-candidate-design --json`
 """
 
 

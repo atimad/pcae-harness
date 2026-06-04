@@ -120,6 +120,8 @@ from pcae.core.agent import (
     WRITE_INVOCATION_DESIGN_ADVISORY,
     build_write_preflight_dry_run,
     WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
+    build_write_candidate_design,
+    WRITE_CANDIDATE_DESIGN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -5182,6 +5184,79 @@ def run_write_preflight_dry_run(args: argparse.Namespace) -> int:
         print(f"  May:     {', '.join(gb['dry_run_may'])}")
         print(f"  May not: {', '.join(gb['dry_run_may_not'])}")
         print(f"  Write execution allowed: {gb['write_execution_allowed']}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_candidate_design(args: argparse.Namespace) -> int:
+    data = build_write_candidate_design()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        design = data["write_candidate_design"]
+        print("Governed write candidate artifact design")
+        print(f"Design: {design['design_id']}  Generated: {design['generated_at']}")
+        print(f"Phase: {design['phase']} — {design['title']}")
+        print()
+        print(design["summary"])
+        print()
+        print("GovernedWriteCandidate lifecycle:")
+        for step in data["write_candidate_lifecycle"]:
+            req = "required" if step["required"] else "optional"
+            print(f"  {step['step']}. {step['name']} ({req})")
+            print(f"     {step['description']}")
+            print(f"     Completed by: {step['completed_by']}")
+        print()
+        print("GovernedWriteCandidate model:")
+        wcm = data["write_candidate_model"]
+        print(f"  Fields: {wcm['field_count']}  Required: {wcm['required_field_count']}")
+        print(f"  Immutable: {wcm['immutable_field_count']}")
+        print(f"  execution_allowed always False: {wcm['execution_allowed_always_false']}")
+        for field in wcm["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        print("Candidate statuses:")
+        cs = data["candidate_statuses"]
+        print(f"  Status count: {cs['status_count']}")
+        print(f"  All execution_allowed False: {cs['all_statuses_execution_allowed_false']}")
+        print(f"  Terminal statuses: {', '.join(cs['terminal_statuses'])}")
+        for status in cs["statuses"]:
+            exec_ok = "execution allowed" if status["execution_allowed"] else "no execution"
+            terminal = "terminal" if status["terminal"] else "non-terminal"
+            print(f"  {status['status']} ({exec_ok}, {terminal})")
+            print(f"    {status['description']}")
+        print()
+        print("File scope requirements:")
+        fsr = data["file_scope_requirements"]
+        print(f"  Fields: {fsr['field_count']}  All required: {fsr['all_fields_required']}")
+        for field in fsr["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Rollback plan requirements:")
+        rr = data["rollback_requirements"]
+        print(f"  Fields: {rr['field_count']}  All required: {rr['all_fields_required']}")
+        for field in rr["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Audit plan requirements:")
+        ar = data["audit_requirements"]
+        print(f"  Fields: {ar['field_count']}  All required: {ar['all_fields_required']}")
+        for field in ar["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("Artifact invariants:")
+        inv = data["artifact_invariants"]
+        print(f"  Must always have: {', '.join(inv['must_always_have'])}")
+        print(f"  Must never allow: {', '.join(inv['must_never_allow'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['artifact_may'])}")
+        print(f"  May not: {', '.join(gb['artifact_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

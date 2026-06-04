@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46O: Write Invocation Preflight Dry-Run.
+Phase 46P: Governed Write Candidate Artifact.
 
 ## Governance Coherence Note
 
@@ -2650,10 +2650,46 @@ prompts/modify files/create commits/push/rollback/approve writes automatically;
 write_execution_allowed=False, human_review_required=True; future_evolution:
 46P/46Q/46R; advisory: "Write invocation preflight dry-run is a simulation;
 no runtime invocation, prompt execution, or file modification occurs."
+and the first-class governed write candidate artifact is defined with
+`pcae write-candidate-design` and `pcae write-candidate-design --json`
+(Phase 46P): inputs: governed_write_invocation_design,
+write_invocation_preflight_dry_run, execution_authorization_artifact_model,
+execution_audit_design, execution_consensus_design,
+execution_result_review_workflow, execution_quality_framework,
+controlled_file_modification_governance; no runtime invocation; no prompt
+execution; no file modification; execution_allowed=False always;
+write_candidate_lifecycle (8 steps, all required): approved_prompt_artifact/
+execution_authorization/write_authorization/file_scope_validation/
+rollback_plan_validation/audit_plan_validation/human_write_approval/
+governed_write_candidate; GovernedWriteCandidate model: 16 fields (all
+required): write_candidate_id/prompt_id/prompt_approval_id/authorization_id/
+selected_runtime/selected_agent/file_scope/rollback_plan/audit_plan/
+consensus_required/quality_review_required/human_write_approval_status/
+candidate_status/blockers/warnings/created_at; candidate statuses (6, all
+execution_allowed=False): draft/pending_write_approval/approved_for_write/
+blocked/expired (terminal)/superseded (terminal); FileScopeRequirements
+model: 6 fields (all required): allowed_files/forbidden_files/
+max_files_changed/allowed_operations/forbidden_operations/
+scope_validation_result; RollbackPlanRequirements model: 4 fields (all
+required): rollback_mode/rollback_target/rollback_review_required/
+rollback_approval_required; AuditPlanRequirements model: 4 fields (all
+required): execution_audit_required/consensus_audit_required/
+result_review_required/quality_review_required; artifact_invariants:
+must_always_have write_candidate_id/prompt_id/authorization_id/file_scope/
+rollback_plan/audit_plan; must_never_allow missing human write approval for
+approved_for_write/file scope removal/rollback plan removal/audit plan
+removal/automatic commit/automatic push; governance_boundaries: artifact_may
+represent write candidates/represent file scope/represent rollback
+requirements/represent audit requirements/represent blockers and warnings;
+artifact_may_not invoke runtimes/execute prompts/modify files/approve writes
+automatically/commit/push/rollback; execution_allowed=False,
+human_review_required=True; future_evolution: 46Q/46R/46S; advisory:
+"Governed write candidate artifact design is informational; no runtime
+invocation, prompt execution, or file modification occurs."
 
 ## Next
 
-- TBD: Future phases (46P Governed Write Candidate Artifact).
+- TBD: Future phases (46Q Controlled Write Invocation Pilot).
 
 ## Future Explorations
 

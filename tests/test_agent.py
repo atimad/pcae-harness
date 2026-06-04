@@ -25258,3 +25258,249 @@ def test_46o_human_output_shows_all_sections(capsys) -> None:
     assert "File scope simulation" in output
     assert "Governance boundaries" in output
     assert "simulation" in output.lower()
+
+
+# Phase 46P — Governed Write Candidate Artifact
+# ---------------------------------------------------------------------------
+
+
+def test_46p_json_structure(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_candidate_design", "write_candidate_lifecycle",
+        "write_candidate_model", "candidate_statuses",
+        "file_scope_requirements", "rollback_requirements",
+        "audit_requirements", "artifact_invariants",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46p_design_fields(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_candidate_design"]
+    for field in (
+        "design_id", "phase", "title", "summary", "input_sources",
+        "lifecycle_step_count", "model_field_count", "candidate_status_count",
+        "file_scope_field_count", "rollback_field_count", "audit_field_count",
+        "execution_allowed", "human_review_required",
+        "artifact_invariants", "governance_boundaries", "future_evolution",
+    ):
+        assert field in design, f"missing design field: {field}"
+    assert design["design_id"].startswith("wcd-")
+    assert design["phase"] == "46P"
+    assert design["execution_allowed"] is False
+    assert design["human_review_required"] is True
+    assert design["lifecycle_step_count"] == 8
+    assert design["model_field_count"] == 16
+    assert design["candidate_status_count"] == 6
+    assert design["file_scope_field_count"] == 6
+    assert design["rollback_field_count"] == 4
+    assert design["audit_field_count"] == 4
+
+
+def test_46p_lifecycle_steps(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["write_candidate_lifecycle"]
+    assert len(lifecycle) == 8
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "approved_prompt_artifact", "execution_authorization",
+        "write_authorization", "file_scope_validation",
+        "rollback_plan_validation", "audit_plan_validation",
+        "human_write_approval", "governed_write_candidate",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+    assert all(s["required"] is True for s in lifecycle)
+    steps_ordered = [s["step"] for s in lifecycle]
+    assert steps_ordered == list(range(1, 9))
+    for step in lifecycle:
+        for field in ("step", "name", "description", "required", "completed_by"):
+            assert field in step, f"step missing field: {field}"
+
+
+def test_46p_write_candidate_model(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    wcm = data["write_candidate_model"]
+    assert wcm["model_name"] == "GovernedWriteCandidate"
+    assert wcm["field_count"] == 16
+    assert wcm["required_field_count"] == 16
+    assert wcm["execution_allowed_always_false"] is True
+    field_names = [f["name"] for f in wcm["fields"]]
+    for expected in (
+        "write_candidate_id", "prompt_id", "prompt_approval_id",
+        "authorization_id", "selected_runtime", "selected_agent",
+        "file_scope", "rollback_plan", "audit_plan",
+        "consensus_required", "quality_review_required",
+        "human_write_approval_status", "candidate_status",
+        "blockers", "warnings", "created_at",
+    ):
+        assert expected in field_names, f"missing model field: {expected}"
+    for field in wcm["fields"]:
+        for attr in ("name", "type", "description", "required", "immutable", "invariant"):
+            assert attr in field, f"field missing attr: {attr}"
+
+
+def test_46p_candidate_statuses(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cs = data["candidate_statuses"]
+    assert cs["status_count"] == 6
+    assert cs["all_statuses_execution_allowed_false"] is True
+    assert set(cs["terminal_statuses"]) == {"expired", "superseded"}
+    status_names = [s["status"] for s in cs["statuses"]]
+    for expected in (
+        "draft", "pending_write_approval", "approved_for_write",
+        "blocked", "expired", "superseded",
+    ):
+        assert expected in status_names, f"missing status: {expected}"
+    for s in cs["statuses"]:
+        assert s["execution_allowed"] is False
+        for field in ("status", "description", "execution_allowed", "terminal"):
+            assert field in s, f"status missing field: {field}"
+
+
+def test_46p_file_scope_requirements(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    fsr = data["file_scope_requirements"]
+    assert fsr["model_name"] == "FileScopeRequirements"
+    assert fsr["field_count"] == 6
+    assert fsr["all_fields_required"] is True
+    field_names = [f["name"] for f in fsr["fields"]]
+    for expected in (
+        "allowed_files", "forbidden_files", "max_files_changed",
+        "allowed_operations", "forbidden_operations", "scope_validation_result",
+    ):
+        assert expected in field_names, f"missing file scope field: {expected}"
+
+
+def test_46p_rollback_requirements(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rr = data["rollback_requirements"]
+    assert rr["model_name"] == "RollbackPlanRequirements"
+    assert rr["field_count"] == 4
+    assert rr["all_fields_required"] is True
+    field_names = [f["name"] for f in rr["fields"]]
+    for expected in (
+        "rollback_mode", "rollback_target",
+        "rollback_review_required", "rollback_approval_required",
+    ):
+        assert expected in field_names, f"missing rollback field: {expected}"
+    for field in rr["fields"]:
+        assert field["required"] is True
+
+
+def test_46p_audit_requirements(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ar = data["audit_requirements"]
+    assert ar["model_name"] == "AuditPlanRequirements"
+    assert ar["field_count"] == 4
+    assert ar["all_fields_required"] is True
+    field_names = [f["name"] for f in ar["fields"]]
+    for expected in (
+        "execution_audit_required", "consensus_audit_required",
+        "result_review_required", "quality_review_required",
+    ):
+        assert expected in field_names, f"missing audit field: {expected}"
+    for field in ar["fields"]:
+        assert field["required"] is True
+
+
+def test_46p_artifact_invariants(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    inv = data["artifact_invariants"]
+    assert "must_always_have" in inv
+    assert "must_never_allow" in inv
+    for required in (
+        "write_candidate_id", "prompt_id", "authorization_id",
+        "file_scope", "rollback_plan", "audit_plan",
+    ):
+        assert required in inv["must_always_have"], f"invariant missing: {required}"
+    never_allow = " ".join(inv["must_never_allow"]).lower()
+    for forbidden in (
+        "missing human write approval",
+        "file scope removal",
+        "rollback plan removal",
+        "audit plan removal",
+        "automatic commit",
+        "automatic push",
+    ):
+        assert forbidden in never_allow, f"missing never-allow: {forbidden}"
+
+
+def test_46p_governance_boundaries(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "artifact_may" in gb
+    assert "artifact_may_not" in gb
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["artifact_may"]).lower()
+    for allowed in (
+        "represent write candidates", "represent file scope",
+        "represent rollback requirements", "represent audit requirements",
+        "represent blockers and warnings",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["artifact_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve writes automatically", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46p_execution_allowed_always_false(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    design = data["write_candidate_design"]
+    assert design["execution_allowed"] is False
+    cs = data["candidate_statuses"]
+    assert cs["all_statuses_execution_allowed_false"] is True
+    wcm = data["write_candidate_model"]
+    assert wcm["execution_allowed_always_false"] is True
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+
+
+def test_46p_future_evolution(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["write_candidate_design"]["future_evolution"]]
+    assert "46Q" in phases
+    assert "46R" in phases
+    assert "46S" in phases
+
+
+def test_46p_advisory(capsys) -> None:
+    main(["write-candidate-design", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_46p_human_output_shows_all_sections(capsys) -> None:
+    main(["write-candidate-design"])
+    output = capsys.readouterr().out
+    assert "Governed write candidate artifact design" in output
+    assert "GovernedWriteCandidate lifecycle" in output
+    assert "GovernedWriteCandidate model" in output
+    assert "Candidate statuses" in output
+    assert "File scope requirements" in output
+    assert "Rollback plan requirements" in output
+    assert "Audit plan requirements" in output
+    assert "Artifact invariants" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
