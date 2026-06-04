@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48G: Invocation Result Review Workflow.
+Phase 48H: Invocation Evidence Model.
 
 ## Governance Coherence Note
 
@@ -3099,6 +3099,28 @@ no repository modification; human_review_required=True;
 governance_boundaries: may construct invocation result review models/evaluate
 review readiness/report blockers and warnings; may_not invoke runtimes/execute
 prompts/modify repository/approve execution/commit/push/rollback; inputs: 6 sources
+and PCAE scaffolds governed invocation evidence models with
+`pcae invocation-evidence` and `pcae invocation-evidence --json` (Phase 48H):
+three models defined: InvocationEvidenceRecord (12 required fields:
+evidence_id/request_id/authorization_id/runtime_id/prompt_id/preflight_id/
+enforcement_id/audit_id/capture_id/review_id/evidence_status/created_at),
+InvocationEvidencePreflight (11 required fields:
+evidence_preflight_id/request_id/authorization_status/contract_status/
+preflight_status/audit_status/capture_status/review_status/
+evidence_ready/blockers/warnings),
+InvocationEvidenceSummary (7 required fields:
+summary_id/evidence_id/request_id/runtime_id/evidence_ready/
+execution_allowed/human_review_required);
+4 statuses: complete/incomplete/blocked/not_executed;
+all 3 runtimes: evidence_status=not_executed; evidence_ready=False;
+6 blockers per runtime (all upstream dependencies blocked);
+not_executed_count=3, evidence_ready_count=0;
+execution_allowed=False for all; no runtime invoked; no prompt submitted;
+no repository modification; human_review_required=True;
+governance_boundaries: may construct invocation evidence models/evaluate
+evidence readiness/report blockers and warnings; may_not invoke runtimes/
+execute prompts/modify repository/approve execution/commit/push/rollback;
+inputs: 7 sources
 
 ## Next
 

@@ -94,6 +94,7 @@ from pcae.commands.agent import (
     run_invocation_audit_trail,
     run_readonly_runtime_pilot,
     run_invocation_result_review,
+    run_invocation_evidence,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2181,6 +2182,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     invocation_result_review_parser.set_defaults(handler=run_invocation_result_review)
+
+    invocation_evidence_parser = subparsers.add_parser(
+        "invocation-evidence",
+        help="Scaffold governed invocation evidence models (Phase 48H).",
+    )
+    invocation_evidence_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    invocation_evidence_parser.set_defaults(handler=run_invocation_evidence)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

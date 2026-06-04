@@ -587,6 +587,11 @@ def render_commands_reference() -> str:
 
 - `pcae invocation-result-review`
 - `pcae invocation-result-review --json`
+
+## invocation-evidence
+
+- `pcae invocation-evidence`
+- `pcae invocation-evidence --json`
 """
 
 

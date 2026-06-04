@@ -29618,3 +29618,193 @@ def test_48g_human_output_shows_all_sections(capsys) -> None:
     assert "Review summaries" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48H — Invocation Evidence Model
+
+
+def test_48h_json_structure(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "evidence_summary", "evidence_models", "evidence_records",
+        "evidence_preflights", "evidence_summaries",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48h_evidence_summary_fields(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    es = data["evidence_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "not_executed_count", "evidence_ready_count",
+        "model_count", "supported_statuses", "execution_allowed", "human_review_required",
+    ):
+        assert field in es, f"missing evidence_summary field: {field}"
+    assert es["phase"] == "48H"
+    assert es["execution_allowed"] is False
+    assert es["human_review_required"] is True
+    assert es["runtime_count"] == 3
+    assert es["not_executed_count"] == 3
+    assert es["evidence_ready_count"] == 0
+    assert es["model_count"] == 3
+
+
+def test_48h_execution_always_blocked(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["evidence_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    for s in data["evidence_summaries"]:
+        assert s["execution_allowed"] is False, (
+            f"runtime {s['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48h_three_evidence_models(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model_names = [m["model_name"] for m in data["evidence_models"]]
+    assert "InvocationEvidenceRecord" in model_names
+    assert "InvocationEvidencePreflight" in model_names
+    assert "InvocationEvidenceSummary" in model_names
+
+
+def test_48h_evidence_record_model_fields(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec_model = next(m for m in data["evidence_models"] if m["model_name"] == "InvocationEvidenceRecord")
+    assert rec_model["field_count"] == 12
+    assert rec_model["required_field_count"] == 12
+    field_names = [f["name"] for f in rec_model["fields"]]
+    for expected in (
+        "evidence_id", "request_id", "authorization_id", "runtime_id",
+        "prompt_id", "preflight_id", "enforcement_id", "audit_id",
+        "capture_id", "review_id", "evidence_status", "created_at",
+    ):
+        assert expected in field_names, f"missing InvocationEvidenceRecord field: {expected}"
+
+
+def test_48h_evidence_preflight_model_fields(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pf_model = next(m for m in data["evidence_models"] if m["model_name"] == "InvocationEvidencePreflight")
+    assert pf_model["field_count"] == 11
+    assert pf_model["required_field_count"] == 11
+    field_names = [f["name"] for f in pf_model["fields"]]
+    for expected in (
+        "evidence_preflight_id", "request_id", "authorization_status",
+        "contract_status", "preflight_status", "audit_status",
+        "capture_status", "review_status", "evidence_ready", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing InvocationEvidencePreflight field: {expected}"
+
+
+def test_48h_evidence_summary_model_fields(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sum_model = next(m for m in data["evidence_models"] if m["model_name"] == "InvocationEvidenceSummary")
+    assert sum_model["field_count"] == 7
+    assert sum_model["required_field_count"] == 7
+    field_names = [f["name"] for f in sum_model["fields"]]
+    for expected in (
+        "summary_id", "evidence_id", "request_id", "runtime_id",
+        "evidence_ready", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing InvocationEvidenceSummary field: {expected}"
+
+
+def test_48h_not_executed_without_runtime_result(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["evidence_records"]:
+        assert rec["evidence_status"] == "not_executed", (
+            f"{rec['runtime_id']} evidence_status must be not_executed"
+        )
+    for pf in data["evidence_preflights"]:
+        assert pf["evidence_ready"] is False, (
+            f"{pf['runtime_id']} evidence_ready must be False"
+        )
+        assert "capture_output_not_present" in pf["blockers"], (
+            f"{pf['runtime_id']} must have capture_output_not_present blocker"
+        )
+
+
+def test_48h_all_upstream_blockers_present(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for pf in data["evidence_preflights"]:
+        for expected_blocker in (
+            "authorization_artifact_missing", "contract_enforcement_blocked",
+            "preflight_blocked", "audit_record_blocked",
+            "capture_output_not_present", "review_not_complete",
+        ):
+            assert expected_blocker in pf["blockers"], (
+                f"{pf['runtime_id']} missing blocker: {expected_blocker}"
+            )
+
+
+def test_48h_evidence_id_prefixes(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for rec in data["evidence_records"]:
+        assert rec["evidence_id"].startswith(f"iem-{rec['runtime_id']}-"), (
+            f"evidence_id must start with iem-<runtime_id>-"
+        )
+    for pf in data["evidence_preflights"]:
+        assert pf["evidence_preflight_id"].startswith(f"iep-{pf['runtime_id']}-"), (
+            f"evidence_preflight_id must start with iep-<runtime_id>-"
+        )
+
+
+def test_48h_supported_statuses(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    statuses = data["evidence_summary"]["supported_statuses"]
+    for expected in ("complete", "incomplete", "blocked", "not_executed"):
+        assert expected in statuses, f"missing status: {expected}"
+
+
+def test_48h_governance_boundaries(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48H"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "construct invocation evidence models",
+        "evaluate evidence readiness",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48h_advisory(capsys) -> None:
+    main(["invocation-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48h_human_output_shows_all_sections(capsys) -> None:
+    main(["invocation-evidence"])
+    output = capsys.readouterr().out
+    assert "Invocation evidence model" in output
+    assert "Evidence models" in output
+    assert "Evidence records" in output
+    assert "Evidence preflights" in output
+    assert "Evidence summaries" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

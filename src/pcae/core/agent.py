@@ -31157,3 +31157,431 @@ def build_invocation_result_review() -> dict:
         "input_sources": list(_IRR_INPUT_SOURCES),
         "advisory": INVOCATION_RESULT_REVIEW_ADVISORY,
     }
+
+
+# Phase 48H — Invocation Evidence Model
+# ---------------------------------------------------------------------------
+
+INVOCATION_EVIDENCE_ADVISORY = (
+    "Invocation evidence model assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48H."
+)
+
+_IEM_EVIDENCE_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request linked by this evidence record.",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The authorization artifact reference (or placeholder if absent).",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this invocation.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "The prompt reference submitted for this invocation.",
+    },
+    {
+        "name": "preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "The preflight record reference for this invocation.",
+    },
+    {
+        "name": "enforcement_id",
+        "type": "str",
+        "required": True,
+        "description": "The authorization enforcement result reference.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The audit record reference for this invocation.",
+    },
+    {
+        "name": "capture_id",
+        "type": "str",
+        "required": True,
+        "description": "The result capture record reference.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The result review record reference.",
+    },
+    {
+        "name": "evidence_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall evidence completeness: complete, incomplete, blocked, or not_executed.",
+    },
+    {
+        "name": "created_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO-8601 timestamp at which this evidence record was created.",
+    },
+)
+
+_IEM_EVIDENCE_PREFLIGHT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_preflight_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence preflight check.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request under preflight evaluation.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Authorization artifact gate outcome (present, missing).",
+    },
+    {
+        "name": "contract_status",
+        "type": "str",
+        "required": True,
+        "description": "Runtime contract enforcement gate outcome (passed, blocked).",
+    },
+    {
+        "name": "preflight_status",
+        "type": "str",
+        "required": True,
+        "description": "Invocation preflight gate outcome (passed, blocked).",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Audit trail gate outcome (present, blocked).",
+    },
+    {
+        "name": "capture_status",
+        "type": "str",
+        "required": True,
+        "description": "Output capture gate outcome (ready, not_executed).",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Result review gate outcome (complete, not_executed).",
+    },
+    {
+        "name": "evidence_ready",
+        "type": "bool",
+        "required": True,
+        "description": "True only when all linked records are present and unblocked.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Identifiers of conditions blocking evidence completeness.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during evidence preflight.",
+    },
+)
+
+_IEM_EVIDENCE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence summary.",
+    },
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "The evidence record referenced by this summary.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request covered by this summary.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime targeted by this invocation.",
+    },
+    {
+        "name": "evidence_ready",
+        "type": "bool",
+        "required": True,
+        "description": "Whether all prerequisite evidence records are present and unblocked.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48H; execution is not authorized.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human review is required before any execution can proceed.",
+    },
+)
+
+_IEM_EVIDENCE_STATUSES: tuple[str, ...] = (
+    "complete",
+    "incomplete",
+    "blocked",
+    "not_executed",
+)
+
+_IEM_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "construct invocation evidence models",
+        "evaluate evidence readiness",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48H",
+}
+
+_IEM_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "InvocationAuthorizationEnforcementResult",
+    "RuntimeContractEnforcementResult",
+    "InvocationAuditRecord",
+    "InvocationResultCapture",
+    "InvocationResultReviewRecord",
+)
+
+# Per-runtime sample evidence state in Phase 48H.
+# All runtimes produce not_executed/blocked evidence because:
+#   - authorization artifacts are missing (from 48D)
+#   - contract enforcement is blocked (from 48C)
+#   - preflight execution_allowed is False (from 48A)
+#   - audit trail is blocked (from 48E)
+#   - capture output is not present (from 48B)
+#   - review is not_executed (from 48G)
+_IEM_SAMPLE_EVIDENCE: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "audit_status": "blocked",
+        "capture_status": "not_executed",
+        "review_status": "not_executed",
+    },
+    {
+        "runtime_id": "claude-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "audit_status": "blocked",
+        "capture_status": "not_executed",
+        "review_status": "not_executed",
+    },
+    {
+        "runtime_id": "kimi-local",
+        "authorization_status": "missing",
+        "contract_status": "blocked",
+        "preflight_status": "blocked",
+        "audit_status": "blocked",
+        "capture_status": "not_executed",
+        "review_status": "not_executed",
+    },
+)
+
+
+def _build_evidence_preflight(ev_data: dict, request_id: str) -> dict:
+    """Derive an evidence preflight record from a per-runtime sample."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    if ev_data["authorization_status"] != "present":
+        blockers.append("authorization_artifact_missing")
+    if ev_data["contract_status"] != "passed":
+        blockers.append("contract_enforcement_blocked")
+    if ev_data["preflight_status"] != "passed":
+        blockers.append("preflight_blocked")
+    if ev_data["audit_status"] != "present":
+        blockers.append("audit_record_blocked")
+    if ev_data["capture_status"] != "ready":
+        blockers.append("capture_output_not_present")
+    if ev_data["review_status"] != "complete":
+        blockers.append("review_not_complete")
+
+    return {
+        "evidence_preflight_id": f"iep-{ev_data['runtime_id']}-{ts}",
+        "runtime_id": ev_data["runtime_id"],
+        "request_id": request_id,
+        "authorization_status": ev_data["authorization_status"],
+        "contract_status": ev_data["contract_status"],
+        "preflight_status": ev_data["preflight_status"],
+        "audit_status": ev_data["audit_status"],
+        "capture_status": ev_data["capture_status"],
+        "review_status": ev_data["review_status"],
+        "evidence_ready": len(blockers) == 0,
+        "blockers": blockers,
+        "warnings": warnings,
+    }
+
+
+def _build_evidence_record(ev_data: dict, preflight: dict, request_id: str) -> dict:
+    """Derive an evidence record from a per-runtime sample and its preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    runtime_id = ev_data["runtime_id"]
+    evidence_status = "not_executed" if ev_data["capture_status"] == "not_executed" else "blocked"
+    return {
+        "evidence_id": f"iem-{runtime_id}-{ts}",
+        "request_id": request_id,
+        "authorization_id": "auth-placeholder-48h",
+        "runtime_id": runtime_id,
+        "prompt_id": "prompt-placeholder-48h",
+        "preflight_id": f"rfp-{runtime_id}-placeholder-48h",
+        "enforcement_id": f"iae-{runtime_id}-placeholder-48h",
+        "audit_id": f"iat-{runtime_id}-placeholder-48h",
+        "capture_id": "capture-placeholder-48h",
+        "review_id": f"irr-{runtime_id}-placeholder-48h",
+        "evidence_status": evidence_status,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def _build_evidence_summary(record: dict, preflight: dict) -> dict:
+    """Derive an evidence summary from a record and preflight."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    return {
+        "summary_id": f"ies-{record['runtime_id']}-{ts}",
+        "evidence_id": record["evidence_id"],
+        "request_id": record["request_id"],
+        "runtime_id": record["runtime_id"],
+        "evidence_ready": preflight["evidence_ready"],
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+
+def build_invocation_evidence() -> dict:
+    """Scaffold invocation evidence models for all known runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48h"
+
+    preflights = [
+        _build_evidence_preflight(dict(s), request_id_ref)
+        for s in _IEM_SAMPLE_EVIDENCE
+    ]
+    records = [
+        _build_evidence_record(dict(s), pf, request_id_ref)
+        for s, pf in zip(_IEM_SAMPLE_EVIDENCE, preflights)
+    ]
+    summaries = [
+        _build_evidence_summary(rec, pf)
+        for rec, pf in zip(records, preflights)
+    ]
+
+    not_executed_count = sum(1 for r in records if r["evidence_status"] == "not_executed")
+    evidence_ready_count = sum(1 for pf in preflights if pf["evidence_ready"])
+
+    evidence_models = [
+        {
+            "model_name": "InvocationEvidenceRecord",
+            "field_count": len(_IEM_EVIDENCE_RECORD_FIELDS),
+            "required_field_count": sum(1 for f in _IEM_EVIDENCE_RECORD_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IEM_EVIDENCE_RECORD_FIELDS],
+        },
+        {
+            "model_name": "InvocationEvidencePreflight",
+            "field_count": len(_IEM_EVIDENCE_PREFLIGHT_FIELDS),
+            "required_field_count": sum(1 for f in _IEM_EVIDENCE_PREFLIGHT_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IEM_EVIDENCE_PREFLIGHT_FIELDS],
+        },
+        {
+            "model_name": "InvocationEvidenceSummary",
+            "field_count": len(_IEM_EVIDENCE_SUMMARY_FIELDS),
+            "required_field_count": sum(1 for f in _IEM_EVIDENCE_SUMMARY_FIELDS if f["required"]),
+            "fields": [dict(f) for f in _IEM_EVIDENCE_SUMMARY_FIELDS],
+        },
+    ]
+
+    evidence_summary = {
+        "summary_id": f"48h-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48H",
+        "title": "Invocation Evidence Model",
+        "summary": (
+            "Scaffolds governed evidence models that link future read-only invocation "
+            "requests, authorization, audit, capture, and review records. Three models "
+            "are defined: InvocationEvidenceRecord (12 fields), "
+            "InvocationEvidencePreflight (11 fields), and InvocationEvidenceSummary "
+            "(7 fields). All three runtimes produce not_executed evidence records in "
+            "Phase 48H: no runtime result exists, authorization artifacts are missing "
+            "from Phase 48D, contract enforcement remains blocked from Phase 48C, "
+            "preflight execution_allowed is False from Phase 48A, the audit trail is "
+            "blocked from Phase 48E, output capture is not present from Phase 48B, "
+            "and result review is not_executed from Phase 48G. "
+            "evidence_ready=False for all runtimes. execution_allowed=False for all "
+            "runtimes. No runtime is invoked, no prompt is submitted, and no "
+            "repository modification occurs."
+        ),
+        "runtime_count": len(records),
+        "not_executed_count": not_executed_count,
+        "evidence_ready_count": evidence_ready_count,
+        "model_count": len(evidence_models),
+        "supported_statuses": list(_IEM_EVIDENCE_STATUSES),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "evidence_summary": evidence_summary,
+        "evidence_models": evidence_models,
+        "evidence_records": records,
+        "evidence_preflights": preflights,
+        "evidence_summaries": summaries,
+        "governance_boundaries": dict(_IEM_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_IEM_INPUT_SOURCES),
+        "advisory": INVOCATION_EVIDENCE_ADVISORY,
+    }

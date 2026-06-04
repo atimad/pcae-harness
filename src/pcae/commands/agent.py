@@ -163,6 +163,8 @@ from pcae.core.agent import (
     READONLY_RUNTIME_PILOT_ADVISORY,
     build_invocation_result_review,
     INVOCATION_RESULT_REVIEW_ADVISORY,
+    build_invocation_evidence,
+    INVOCATION_EVIDENCE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6608,6 +6610,58 @@ def run_invocation_result_review(args: argparse.Namespace) -> int:
             print(f"  [{s['runtime_id']}] review_status: {s['review_status']}, "
                   f"ready_for_human_review: {s['ready_for_human_review']}, "
                   f"execution_allowed: {s['execution_allowed']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_invocation_evidence(args: argparse.Namespace) -> int:
+    data = build_invocation_evidence()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        es = data["evidence_summary"]
+        print("Invocation evidence model")
+        print(f"Assessment: {es['summary_id']}  Generated: {es['generated_at']}")
+        print(f"Phase: {es['phase']} — {es['title']}")
+        print()
+        print(es["summary"])
+        print()
+        print(f"Runtimes evaluated:  {es['runtime_count']}")
+        print(f"Not executed:        {es['not_executed_count']}")
+        print(f"Evidence ready:      {es['evidence_ready_count']}")
+        print(f"Models defined:      {es['model_count']}")
+        print(f"Execution allowed:   {'yes' if es['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if es['human_review_required'] else 'no'}")
+        print()
+        print(f"Evidence models ({len(data['evidence_models'])}):")
+        for m in data["evidence_models"]:
+            print(f"  {m['model_name']}: {m['field_count']} fields ({m['required_field_count']} required)")
+        print()
+        print(f"Evidence records ({len(data['evidence_records'])} runtimes):")
+        for rec in data["evidence_records"]:
+            print(f"  [{rec['evidence_status']}] {rec['runtime_id']}")
+            print(f"    evidence_id:  {rec['evidence_id']}")
+            print(f"    created_at:   {rec['created_at']}")
+        print()
+        print(f"Evidence preflights ({len(data['evidence_preflights'])} runtimes):")
+        for pf in data["evidence_preflights"]:
+            print(f"  [{pf['runtime_id']}] evidence_ready: {pf['evidence_ready']}")
+            if pf["blockers"]:
+                print(f"    Blockers ({len(pf['blockers'])}): {', '.join(pf['blockers'])}")
+        print()
+        print(f"Evidence summaries ({len(data['evidence_summaries'])} runtimes):")
+        for s in data["evidence_summaries"]:
+            print(f"  [{s['runtime_id']}] evidence_ready: {s['evidence_ready']}, "
+                  f"execution_allowed: {s['execution_allowed']}, "
+                  f"human_review_required: {s['human_review_required']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

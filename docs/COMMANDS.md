@@ -566,3 +566,8 @@
 
 - `pcae invocation-result-review`
 - `pcae invocation-result-review --json`
+
+## invocation-evidence
+
+- `pcae invocation-evidence`
+- `pcae invocation-evidence --json`
