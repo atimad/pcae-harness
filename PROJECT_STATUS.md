@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48B: Invocation Result Capture Implementation.
+Phase 48B.1: Apache License 2.0 added.
 
 ## Governance Coherence Note
 
@@ -2998,6 +2998,9 @@ no repository modification; capture_allowed=False; human_review_required=True;
 governance_boundaries: may construct result capture models/evaluate capture
 readiness/report blockers; may_not invoke runtimes/execute prompts/modify
 repository/approve execution/commit/push/rollback; future_evolution: 48C
+and Apache License 2.0 added (Phase 48B.1): LICENSE file at repository root
+(copyright 2026 Atila Madai); README.md License section added; pyproject.toml
+updated with license = "Apache-2.0" and OSI classifier; no source logic changes.
 
 ## Next
 

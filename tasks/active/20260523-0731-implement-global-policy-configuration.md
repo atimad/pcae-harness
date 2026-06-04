@@ -38,6 +38,12 @@ Implement orchestration capability matrix.
 - .github
 - .github/workflows/**
 - .gitignore
+- LICENSE
+- pyproject.toml
+
+## Override Protected Files
+
+- pyproject.toml
 
 ## Forbidden Files
 
