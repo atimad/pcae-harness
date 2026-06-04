@@ -229,6 +229,10 @@ effects of other operations. Background tasks, deferred writes, implicit
 rollbacks, and auto-repair logic are not part of the platform's execution
 model. Every consequential action is explicit and human-initiated.
 
+For the operational specification of how each of these principles is enforced
+across the eight governance domains, see the
+[Governance Handbook](docs/governance/GOVERNANCE_HANDBOOK.md).
+
 ---
 
 ## 8. License and Community

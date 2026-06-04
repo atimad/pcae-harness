@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.5: Project Vision (documentation only).
+Phase 48X.6: Governance Handbook (documentation only).
 
 ## Governance Coherence Note
 
@@ -3192,6 +3192,27 @@ governance guarantees);
 README.md updated with link to VISION.md before white paper reference;
 whitepaper executive summary updated with link to VISION.md;
 CONTRIBUTING.md welcome section updated with reference to VISION.md;
+no source logic changes; documentation only
+and PCAE Governance Handbook created (Phase 48X.6):
+docs/governance/GOVERNANCE_HANDBOOK.md — 13-section authoritative governance
+reference consolidating governance concepts from Phases 42A–48H covering
+introduction (governance-first architecture, why governance exists,
+relationship to PCAE vision), governance layers (change, rollback, prompt,
+execution, runtime, multi-agent, audit, evidence), human authority model
+(approval requirements, authorization requirements, escalation paths, authority
+boundaries), change/rollback/prompt/execution/runtime governance summaries,
+runtime governance with current trust state (codex-local=partially_trusted,
+claude-local=partially_trusted, kimi-local=untrusted, all execution_allowed=False),
+audit and evidence (audit trail, result capture, result review, evidence model
+with evidence_status=not_executed), current safety state (runtime execution
+disabled, prompt execution disabled, write execution disabled, human review
+required, auto-commit disabled, auto-push disabled), governance maturity with
+major completed milestones and remaining milestones, future roadmap table
+(48X.T, 49A, 50A, 51A), Apache 2.0 license;
+README.md updated with Governance Handbook link;
+VISION.md section 7 updated with forward reference to handbook;
+CONTRIBUTING.md documentation requirements table updated to handbook path;
+whitepaper section 15 updated with Governance Handbook link;
 no source logic changes; documentation only
 
 ## Next

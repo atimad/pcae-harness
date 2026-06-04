@@ -194,7 +194,7 @@ changes behavior that is visible through the PCAE CLI or governance model:
 | `README.md` | New top-level commands or significant capability additions |
 | `docs/whitepaper/PCAE_WHITEPAPER.md` | Architectural changes, new governance domains, or phase-level milestones |
 | `docs/architecture/` | Changes to any of the seven governance domains or the execution lifecycle |
-| `docs/GOVERNANCE.md` | Changes to governance policies, enforcement rules, or advisory boundaries |
+| `docs/governance/GOVERNANCE_HANDBOOK.md` | Changes to governance policies, enforcement rules, or advisory boundaries |
 | `CHANGELOG.md` | Every contribution, regardless of size |
 | `PROJECT_STATUS.md` | Changes that advance the current phase or alter current capabilities |
 

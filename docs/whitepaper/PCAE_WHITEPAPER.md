@@ -336,7 +336,7 @@ pre-commit validation. Tests must be written to be parallel-safe.
 **Documentation.** Every behavior-visible change requires corresponding
 updates to `CHANGELOG.md` and `PROJECT_STATUS.md` at minimum. Architecture
 changes additionally require updates to the white paper, architecture
-diagrams, and governance handbook.
+diagrams, and the [Governance Handbook](docs/governance/GOVERNANCE_HANDBOOK.md).
 
 ---
 
