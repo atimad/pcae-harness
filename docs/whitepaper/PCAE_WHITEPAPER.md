@@ -14,6 +14,8 @@ The current implementation is a cross-platform Python CLI injected into Git repo
 
 PCAE is designed for engineering teams that want to adopt AI coding agents responsibly — with full auditability, human-authoritative approval, and governed rollback — rather than accepting the risk of unconstrained agent autonomy.
 
+For the project vision, long-term direction, and core principles, see [VISION.md](../../VISION.md).
+
 ---
 
 ## 2. Problem Statement

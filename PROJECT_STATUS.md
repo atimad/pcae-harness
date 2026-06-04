@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.4: Contributor Guide (documentation only).
+Phase 48X.5: Project Vision (documentation only).
 
 ## Governance Coherence Note
 
@@ -3168,6 +3168,30 @@ README.md updated with Contributing section linking to CONTRIBUTING.md;
 whitepaper updated with new section 15 (Contributing) covering development
 setup, parallel test execution standardization (48X.T), and documentation
 requirements — License renumbered to section 16;
+no source logic changes; documentation only
+and PCAE Project Vision created (Phase 48X.5):
+VISION.md — 8-section project vision document covering vision statement
+(governance-first platform for controlled AI-assisted software evolution),
+the problem (uncontrolled execution, missing approval gates, missing audit
+trails, rollback as afterthought, unverified runtime trust, eroding human
+authority), the PCAE approach (governance before autonomy, evidence before
+execution, read-only before write, human approval before irreversible action,
+audit trails for every important decision), what PCAE is becoming (governed
+execution framework, prompt governance system, runtime governance layer,
+multi-agent orchestration platform, autonomous engineering control plane),
+long-term direction (governed read-only invocation, multi-agent execution,
+controlled write, governed commit/push, autonomous roadmap and prompt
+generation, evidence-based software evolution; 48X.T parallel test execution
+standardization; 49A invocation execution gate), non-goals (not an
+unrestricted coding agent, not auto-commit, not auto-push, not a replacement
+for human judgment, not a governance bypass), core principles (human
+authority, traceability, auditability, reversibility, explicit authorization,
+runtime trust, least privilege, no hidden automation), Apache 2.0 license and
+community (enterprise-friendly open collaboration, contributors must preserve
+governance guarantees);
+README.md updated with link to VISION.md before white paper reference;
+whitepaper executive summary updated with link to VISION.md;
+CONTRIBUTING.md welcome section updated with reference to VISION.md;
 no source logic changes; documentation only
 
 ## Next

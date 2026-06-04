@@ -6,6 +6,9 @@ PCAE (Policy Controlled Autonomous Execution) is a governance-first engineering
 framework. Its purpose is to make AI-assisted engineering safe, resumable,
 auditable, and human-authoritative — by architecture, not by convention.
 
+For the project vision, long-term direction, and the principles that every
+contribution must preserve, see [VISION.md](VISION.md).
+
 Contributions are welcome. Every contribution must preserve the governance
 guarantees that PCAE provides:
 
