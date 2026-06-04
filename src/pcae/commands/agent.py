@@ -145,6 +145,8 @@ from pcae.core.agent import (
     RUNTIME_CONTRACT_VERIFICATION_ADVISORY,
     build_governance_audit,
     GOVERNANCE_AUDIT_ADVISORY,
+    build_runtime_trust,
+    RUNTIME_TRUST_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6120,6 +6122,69 @@ def run_execution_governance_audit(args: argparse.Namespace) -> int:
         print(f"  May:               {', '.join(gb['audit_may'])}")
         print(f"  May not:           {', '.join(gb['audit_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_runtime_trust(args: argparse.Namespace) -> int:
+    data = build_runtime_trust()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rt = data["runtime_trust"]
+        print("Runtime trust assessment")
+        print(f"Assessment: {rt['assessment_id']}  Generated: {rt['generated_at']}")
+        print(f"Phase: {rt['phase']} — {rt['title']}")
+        print()
+        print(rt["summary"])
+        print()
+        print("Assessment summary:")
+        print(f"  Runtime count:       {rt['runtime_count']}")
+        print(f"  Trusted:             {rt['trusted_count']}")
+        print(f"  Partially trusted:   {rt['partially_trusted_count']}")
+        print(f"  Untrusted:           {rt['untrusted_count']}")
+        print(f"  Assessment areas:    {rt['assessment_area_count']}")
+        print(f"  Human review req'd:  {'yes' if rt['human_review_required'] else 'no'}")
+        print(f"  Execution allowed:   {'yes' if rt['execution_allowed'] else 'no'}")
+        print()
+        print("RuntimeTrustRecord model:")
+        m = data["trust_record_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}")
+        print(f"  human_review_required always True: {m['human_review_required_always_true']}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        tl = data["trust_levels"]
+        print(f"Trust levels ({tl['level_count']}):")
+        for level in tl["levels"]:
+            print(f"  {level['level']}: {level['description']}")
+        print()
+        print(f"Assessment areas ({len(data['assessment_areas'])}):")
+        for area in data["assessment_areas"]:
+            print(f"  {area['area']}: {area['description']}")
+        print()
+        print(f"Trust records ({len(data['trust_records'])} runtimes):")
+        for rec in data["trust_records"]:
+            print(f"  [{rec['trust_level']}] {rec['trust_id']} (runtime: {rec['runtime_id']})")
+            print(f"    Human review required: {'yes' if rec['human_review_required'] else 'no'}")
+            for area in rec["assessment_areas"]:
+                print(f"    [{area['confidence']}] {area['area']}: {area['rationale']}")
+            if rec["blockers"]:
+                print(f"    Blockers: {', '.join(rec['blockers'])}")
+            if rec["warnings"]:
+                print(f"    Warnings: {', '.join(rec['warnings'])}")
+            print(f"    Recommendations: {', '.join(rec['recommendations'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['assessment_may'])}")
+        print(f"  May not:             {', '.join(gb['assessment_may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

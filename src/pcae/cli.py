@@ -85,6 +85,7 @@ from pcae.commands.agent import (
     run_live_write_pilot,
     run_runtime_contracts,
     run_execution_governance_audit,
+    run_runtime_trust,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2071,6 +2072,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance audit output.",
     )
     exec_governance_audit_parser.set_defaults(handler=run_execution_governance_audit)
+
+    runtime_trust_parser = subparsers.add_parser(
+        "runtime-trust",
+        help="Assess trust levels for PCAE runtimes (Phase 47H).",
+    )
+    runtime_trust_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime trust assessment output.",
+    )
+    runtime_trust_parser.set_defaults(handler=run_runtime_trust)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

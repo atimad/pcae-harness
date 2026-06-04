@@ -28062,3 +28062,207 @@ def test_47g_human_output_shows_all_sections(capsys) -> None:
     assert "Recommendations" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 47H — Runtime Trust Assessment
+# ---------------------------------------------------------------------------
+
+
+def test_47h_json_structure(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "runtime_trust", "trust_record_model", "trust_levels",
+        "assessment_areas", "trust_records",
+        "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47h_summary_fields(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_trust"]
+    for field in (
+        "assessment_id", "phase", "title", "summary",
+        "runtime_count", "trusted_count", "partially_trusted_count", "untrusted_count",
+        "assessment_area_count", "human_review_required", "execution_allowed",
+        "input_sources", "governance_boundaries", "future_evolution",
+    ):
+        assert field in rt, f"missing summary field: {field}"
+    assert rt["assessment_id"].startswith("rta-")
+    assert rt["phase"] == "47H"
+    assert rt["runtime_count"] == 3
+    assert rt["assessment_area_count"] == 7
+    assert rt["human_review_required"] is True
+    assert rt["execution_allowed"] is False
+
+
+def test_47h_execution_not_allowed(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_trust"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_47h_human_review_required(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_trust"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["trust_record_model"]["human_review_required_always_true"] is True
+    for rec in data["trust_records"]:
+        assert rec["human_review_required"] is True, (
+            f"runtime {rec['runtime_id']} must have human_review_required=True"
+        )
+
+
+def test_47h_trust_record_model(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["trust_record_model"]
+    assert m["model_name"] == "RuntimeTrustRecord"
+    assert m["field_count"] == 8
+    assert m["required_field_count"] == 8
+    assert m["immutable_field_count"] == 8
+    assert m["human_review_required_always_true"] is True
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "trust_id", "runtime_id", "trust_level", "assessment_areas",
+        "blockers", "warnings", "recommendations", "human_review_required",
+    ):
+        assert expected in field_names, f"missing trust record field: {expected}"
+    for f in m["fields"]:
+        assert f["immutable"] is True, f"field {f['name']} must be immutable"
+
+
+def test_47h_trust_levels(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    tl = data["trust_levels"]
+    assert tl["level_count"] == 3
+    level_names = [l["level"] for l in tl["levels"]]
+    for expected in ("trusted", "partially_trusted", "untrusted"):
+        assert expected in level_names, f"missing trust level: {expected}"
+    for level in tl["levels"]:
+        assert "level" in level
+        assert "description" in level
+
+
+def test_47h_assessment_areas(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["assessment_areas"]
+    assert len(areas) == 7
+    area_names = [a["area"] for a in areas]
+    for expected in (
+        "contract_verification", "sandbox_confidence", "timeout_confidence",
+        "output_capture_confidence", "writable_confidence",
+        "execution_history", "governance_alignment",
+    ):
+        assert expected in area_names, f"missing assessment area: {expected}"
+    for area in areas:
+        assert "area" in area
+        assert "description" in area
+
+
+def test_47h_trust_records(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    records = data["trust_records"]
+    assert len(records) == 3
+    runtime_ids = [r["runtime_id"] for r in records]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_ids, f"missing trust record: {expected}"
+    for rec in records:
+        for field in (
+            "trust_id", "runtime_id", "trust_level", "assessment_areas",
+            "blockers", "warnings", "recommendations", "human_review_required",
+        ):
+            assert field in rec, f"trust record missing field: {field}"
+        assert len(rec["assessment_areas"]) == 7
+        assert rec["human_review_required"] is True
+
+
+def test_47h_codex_partially_trusted(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    codex = next(r for r in data["trust_records"] if r["runtime_id"] == "codex-local")
+    assert codex["trust_level"] == "partially_trusted"
+    blockers = codex["blockers"]
+    assert "sandbox_contract_unverified" in blockers
+    assert "timeout_contract_unverified" in blockers
+    area_names = [a["area"] for a in codex["assessment_areas"]]
+    assert "sandbox_confidence" in area_names
+    sandbox = next(a for a in codex["assessment_areas"] if a["area"] == "sandbox_confidence")
+    assert sandbox["confidence"] == "none"
+
+
+def test_47h_claude_partially_trusted(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    claude = next(r for r in data["trust_records"] if r["runtime_id"] == "claude-local")
+    assert claude["trust_level"] == "partially_trusted"
+    assert "sandbox_contract_unverified" in claude["blockers"]
+    assert "timeout_contract_unverified" in claude["blockers"]
+
+
+def test_47h_kimi_untrusted(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(r for r in data["trust_records"] if r["runtime_id"] == "kimi-local")
+    assert kimi["trust_level"] == "untrusted"
+    assert "runtime_not_confirmed_installed" in kimi["blockers"]
+    for area in kimi["assessment_areas"]:
+        assert area["confidence"] == "none", (
+            f"kimi area {area['area']} should have confidence=none"
+        )
+
+
+def test_47h_summary_counts(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rt = data["runtime_trust"]
+    assert rt["trusted_count"] == 0
+    assert rt["partially_trusted_count"] == 2
+    assert rt["untrusted_count"] == 1
+
+
+def test_47h_governance_boundaries(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["assessment_may"]).lower()
+    for allowed in ("assess trust", "identify blockers", "generate recommendations"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["assessment_may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "approve execution",
+        "modify repository", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47h_advisory(capsys) -> None:
+    main(["runtime-trust", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "repository modification" in advisory
+
+
+def test_47h_human_output_shows_all_sections(capsys) -> None:
+    main(["runtime-trust"])
+    output = capsys.readouterr().out
+    assert "Runtime trust assessment" in output
+    assert "Assessment summary" in output
+    assert "RuntimeTrustRecord model" in output
+    assert "Trust levels" in output
+    assert "Assessment areas" in output
+    assert "Trust records" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

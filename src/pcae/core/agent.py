@@ -27943,3 +27943,479 @@ def build_governance_audit() -> dict:
         "governance_boundaries": dict(_GAA_GOVERNANCE_BOUNDARIES),
         "advisory": GOVERNANCE_AUDIT_ADVISORY,
     }
+
+
+# Phase 47H — Runtime Trust Assessment
+# ---------------------------------------------------------------------------
+
+RUNTIME_TRUST_ADVISORY = (
+    "Runtime trust assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs."
+)
+
+_RTA_INPUT_SOURCES: tuple[str, ...] = (
+    "runtime_contract_verification",
+    "live_readonly_readiness_assessment",
+    "live_write_readiness_assessment",
+    "governance_audit",
+    "execution_audit_design",
+)
+
+_RTA_TRUST_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "trust_id",
+        "type": "str",
+        "description": "Unique identifier for this runtime trust record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "description": "ID of the runtime being assessed.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "trust_level",
+        "type": "str",
+        "description": "Assigned trust level: trusted, partially_trusted, or untrusted.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "assessment_areas",
+        "type": "list[dict]",
+        "description": "Per-area confidence assessments for this runtime.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blocking issues preventing a higher trust level.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during assessment.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "recommendations",
+        "type": "list[str]",
+        "description": "List of recommendations to advance trust level.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "description": "Always True; human review is required for every trust assessment.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_RTA_TRUST_LEVELS: tuple[dict, ...] = (
+    {
+        "level": "trusted",
+        "description": (
+            "All contracts verified and live execution history confirms "
+            "governance alignment."
+        ),
+    },
+    {
+        "level": "partially_trusted",
+        "description": (
+            "Some contracts verified but gaps remain; no live execution history "
+            "or unverified contract areas present."
+        ),
+    },
+    {
+        "level": "untrusted",
+        "description": (
+            "Contracts unverified or installation unconfirmed; cannot be assigned "
+            "execution authorization."
+        ),
+    },
+)
+
+_RTA_ASSESSMENT_AREAS: tuple[dict, ...] = (
+    {
+        "area": "contract_verification",
+        "description": "Degree to which runtime contracts have been verified.",
+    },
+    {
+        "area": "sandbox_confidence",
+        "description": (
+            "Confidence that the runtime operates in an isolated sandbox "
+            "preventing unintended side effects."
+        ),
+    },
+    {
+        "area": "timeout_confidence",
+        "description": (
+            "Confidence that timeout enforcement is reliable and terminates "
+            "runaway executions within governance bounds."
+        ),
+    },
+    {
+        "area": "output_capture_confidence",
+        "description": (
+            "Confidence that execution outputs are captured, structured, "
+            "and persisted correctly for review and audit."
+        ),
+    },
+    {
+        "area": "writable_confidence",
+        "description": (
+            "Confidence that write operations are bounded, governed, and "
+            "linked to a validated rollback plan."
+        ),
+    },
+    {
+        "area": "execution_history",
+        "description": (
+            "Evidence from live governed execution demonstrating reliable "
+            "and compliant runtime behavior."
+        ),
+    },
+    {
+        "area": "governance_alignment",
+        "description": (
+            "Degree to which runtime behavior aligns with PCAE governance "
+            "requirements across all audited domains."
+        ),
+    },
+)
+
+_RTA_CODEX_AREAS: tuple[dict, ...] = (
+    {
+        "area": "contract_verification",
+        "confidence": "medium",
+        "rationale": (
+            "4 of 6 contract areas partially_verified (invocation, output_capture, "
+            "writable, readonly); 2 unverified (sandbox, timeout)."
+        ),
+    },
+    {
+        "area": "sandbox_confidence",
+        "confidence": "none",
+        "rationale": (
+            "Sandbox contract unverified for codex-local; isolation boundaries "
+            "have not been validated."
+        ),
+    },
+    {
+        "area": "timeout_confidence",
+        "confidence": "none",
+        "rationale": (
+            "Timeout contract unverified for codex-local; timeout enforcement "
+            "has not been validated within PCAE governance bounds."
+        ),
+    },
+    {
+        "area": "output_capture_confidence",
+        "confidence": "medium",
+        "rationale": (
+            "Output capture contract partially_verified; stdout capture confirmed "
+            "but structured governed capture not validated end-to-end."
+        ),
+    },
+    {
+        "area": "writable_confidence",
+        "confidence": "medium",
+        "rationale": (
+            "Writable contract partially_verified; file write possible but governed "
+            "scope and rollback linkage not validated end-to-end."
+        ),
+    },
+    {
+        "area": "execution_history",
+        "confidence": "none",
+        "rationale": (
+            "No live governed execution has been performed with codex-local; "
+            "no execution history exists."
+        ),
+    },
+    {
+        "area": "governance_alignment",
+        "confidence": "medium",
+        "rationale": (
+            "Governance paths designed and contract verification partially complete; "
+            "alignment not confirmed through live execution."
+        ),
+    },
+)
+
+_RTA_CLAUDE_AREAS: tuple[dict, ...] = (
+    {
+        "area": "contract_verification",
+        "confidence": "medium",
+        "rationale": (
+            "4 of 6 contract areas partially_verified (invocation, output_capture, "
+            "writable, readonly); 2 unverified (sandbox, timeout)."
+        ),
+    },
+    {
+        "area": "sandbox_confidence",
+        "confidence": "none",
+        "rationale": (
+            "Sandbox contract unverified for claude-local; isolation boundaries "
+            "have not been validated."
+        ),
+    },
+    {
+        "area": "timeout_confidence",
+        "confidence": "none",
+        "rationale": (
+            "Timeout contract unverified for claude-local; timeout enforcement "
+            "has not been validated within PCAE governance bounds."
+        ),
+    },
+    {
+        "area": "output_capture_confidence",
+        "confidence": "medium",
+        "rationale": (
+            "Output capture contract partially_verified; stdout capture confirmed "
+            "but structured governed capture not validated end-to-end."
+        ),
+    },
+    {
+        "area": "writable_confidence",
+        "confidence": "medium",
+        "rationale": (
+            "Writable contract partially_verified; file write possible but governed "
+            "scope and rollback linkage not validated end-to-end."
+        ),
+    },
+    {
+        "area": "execution_history",
+        "confidence": "none",
+        "rationale": (
+            "No live governed execution has been performed with claude-local; "
+            "no execution history exists."
+        ),
+    },
+    {
+        "area": "governance_alignment",
+        "confidence": "medium",
+        "rationale": (
+            "Governance paths designed and contract verification partially complete; "
+            "alignment not confirmed through live execution."
+        ),
+    },
+)
+
+_RTA_KIMI_AREAS: tuple[dict, ...] = (
+    {
+        "area": "contract_verification",
+        "confidence": "none",
+        "rationale": (
+            "kimi-local has not been confirmed installed; all 6 contract areas "
+            "are unverified."
+        ),
+    },
+    {
+        "area": "sandbox_confidence",
+        "confidence": "none",
+        "rationale": "kimi-local has not been confirmed installed; sandbox mode unknown.",
+    },
+    {
+        "area": "timeout_confidence",
+        "confidence": "none",
+        "rationale": (
+            "kimi-local has not been confirmed installed; timeout enforcement unknown."
+        ),
+    },
+    {
+        "area": "output_capture_confidence",
+        "confidence": "none",
+        "rationale": "kimi-local has not been confirmed installed; output capture unknown.",
+    },
+    {
+        "area": "writable_confidence",
+        "confidence": "none",
+        "rationale": "kimi-local has not been confirmed installed; write contract unknown.",
+    },
+    {
+        "area": "execution_history",
+        "confidence": "none",
+        "rationale": (
+            "No live governed execution has been performed with kimi-local; "
+            "no execution history exists."
+        ),
+    },
+    {
+        "area": "governance_alignment",
+        "confidence": "none",
+        "rationale": (
+            "kimi-local has not been confirmed installed; governance alignment "
+            "cannot be assessed."
+        ),
+    },
+)
+
+_RTA_TRUST_RECORDS: tuple[dict, ...] = (
+    {
+        "trust_id": "rta-codex-local",
+        "runtime_id": "codex-local",
+        "trust_level": "partially_trusted",
+        "assessment_areas": list(_RTA_CODEX_AREAS),
+        "blockers": [
+            "sandbox_contract_unverified",
+            "timeout_contract_unverified",
+            "no_live_execution_history",
+        ],
+        "warnings": [
+            "invocation_contract_partially_verified",
+            "output_capture_contract_partially_verified",
+            "writable_contract_partially_verified",
+            "readonly_contract_partially_verified",
+        ],
+        "recommendations": [
+            "validate_sandbox_mode_to_advance_sandbox_confidence",
+            "validate_timeout_enforcement_to_advance_timeout_confidence",
+            "perform_controlled_live_execution_to_establish_execution_history",
+        ],
+        "human_review_required": True,
+    },
+    {
+        "trust_id": "rta-claude-local",
+        "runtime_id": "claude-local",
+        "trust_level": "partially_trusted",
+        "assessment_areas": list(_RTA_CLAUDE_AREAS),
+        "blockers": [
+            "sandbox_contract_unverified",
+            "timeout_contract_unverified",
+            "no_live_execution_history",
+        ],
+        "warnings": [
+            "invocation_contract_partially_verified",
+            "output_capture_contract_partially_verified",
+            "writable_contract_partially_verified",
+            "readonly_contract_partially_verified",
+        ],
+        "recommendations": [
+            "validate_sandbox_mode_to_advance_sandbox_confidence",
+            "validate_timeout_enforcement_to_advance_timeout_confidence",
+            "perform_controlled_live_execution_to_establish_execution_history",
+        ],
+        "human_review_required": True,
+    },
+    {
+        "trust_id": "rta-kimi-local",
+        "runtime_id": "kimi-local",
+        "trust_level": "untrusted",
+        "assessment_areas": list(_RTA_KIMI_AREAS),
+        "blockers": [
+            "runtime_not_confirmed_installed",
+            "all_contracts_unverified",
+            "no_live_execution_history",
+        ],
+        "warnings": [],
+        "recommendations": [
+            "confirm_kimi_local_installation",
+            "validate_all_six_contract_areas",
+            "then_reassess_trust_level",
+        ],
+        "human_review_required": True,
+    },
+)
+
+_RTA_GOVERNANCE_BOUNDARIES: dict = {
+    "assessment_may": [
+        "assess trust",
+        "identify blockers",
+        "generate recommendations",
+    ],
+    "assessment_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "approve execution",
+        "modify repository",
+        "commit",
+        "push",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_RTA_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47I", "description": "Governance Maturity Assessment"},
+    {"phase": "48A", "description": "Controlled Read-Only Runtime Invocation Implementation"},
+)
+
+
+def build_runtime_trust() -> dict:
+    """Assess trust levels for PCAE runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"rta-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    trust_record_fields = [dict(f) for f in _RTA_TRUST_RECORD_FIELDS]
+    trust_levels = [dict(l) for l in _RTA_TRUST_LEVELS]
+    assessment_areas = [dict(a) for a in _RTA_ASSESSMENT_AREAS]
+    trust_records = [dict(r) for r in _RTA_TRUST_RECORDS]
+
+    trusted_count = sum(1 for r in trust_records if r["trust_level"] == "trusted")
+    partially_trusted_count = sum(
+        1 for r in trust_records if r["trust_level"] == "partially_trusted"
+    )
+    untrusted_count = sum(1 for r in trust_records if r["trust_level"] == "untrusted")
+
+    trust_record_model = {
+        "model_name": "RuntimeTrustRecord",
+        "field_count": len(trust_record_fields),
+        "required_field_count": sum(1 for f in trust_record_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in trust_record_fields if f["immutable"]),
+        "human_review_required_always_true": True,
+        "fields": trust_record_fields,
+    }
+
+    runtime_trust = {
+        "assessment_id": assessment_id,
+        "generated_at": generated_at,
+        "phase": "47H",
+        "title": "Runtime Trust Assessment",
+        "summary": (
+            "Assesses trust levels for the three PCAE target runtimes (codex-local, "
+            "claude-local, kimi-local) based on contract verification, readiness, "
+            "governance audit, and execution history. Defines the RuntimeTrustRecord "
+            "model (8 fields, all immutable) and seven assessment areas "
+            "(contract_verification, sandbox_confidence, timeout_confidence, "
+            "output_capture_confidence, writable_confidence, execution_history, "
+            "governance_alignment). codex-local and claude-local are partially_trusted "
+            "(sandbox and timeout unverified, no live execution history); kimi-local is "
+            "untrusted (installation unconfirmed). human_review_required=True for all "
+            "records. No execution occurs. Assessment is informational."
+        ),
+        "runtime_count": len(trust_records),
+        "trusted_count": trusted_count,
+        "partially_trusted_count": partially_trusted_count,
+        "untrusted_count": untrusted_count,
+        "assessment_area_count": len(assessment_areas),
+        "human_review_required": True,
+        "execution_allowed": False,
+        "input_sources": list(_RTA_INPUT_SOURCES),
+        "governance_boundaries": dict(_RTA_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RTA_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "runtime_trust": runtime_trust,
+        "trust_record_model": trust_record_model,
+        "trust_levels": {
+            "level_count": len(trust_levels),
+            "levels": trust_levels,
+        },
+        "assessment_areas": assessment_areas,
+        "trust_records": trust_records,
+        "governance_boundaries": dict(_RTA_GOVERNANCE_BOUNDARIES),
+        "advisory": RUNTIME_TRUST_ADVISORY,
+    }

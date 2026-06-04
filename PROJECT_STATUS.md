@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47G: Live Execution Governance Audit.
+Phase 47H: Runtime Trust Assessment.
 
 ## Governance Coherence Note
 
@@ -2919,9 +2919,29 @@ audit_may inspect governance artifacts/identify gaps/generate
 recommendations; audit_may_not invoke runtimes/execute prompts/modify
 files/approve execution/commit/push; future_evolution: 47H/47I/48A
 
+and runtime trust is assessed with `pcae runtime-trust` and
+`pcae runtime-trust --json` (Phase 47H): inputs: 5 sources
+(runtime_contract_verification, live_readonly_readiness_assessment,
+live_write_readiness_assessment, governance_audit, execution_audit_design);
+no runtime invocation; no prompt execution; no repository modification;
+RuntimeTrustRecord model: 8 fields (all required, all immutable):
+trust_id/runtime_id/trust_level/assessment_areas/blockers/warnings/
+recommendations/human_review_required (always True); 3 trust levels:
+trusted/partially_trusted/untrusted; 7 assessment areas:
+contract_verification/sandbox_confidence/timeout_confidence/
+output_capture_confidence/writable_confidence/execution_history/
+governance_alignment; codex-local: partially_trusted (sandbox and timeout
+unverified, no live execution history); claude-local: partially_trusted
+(same); kimi-local: untrusted (not confirmed installed); trusted_count=0,
+partially_trusted_count=2, untrusted_count=1; human_review_required=True
+for all records; execution_allowed=False; governance_boundaries:
+assessment_may assess trust/identify blockers/generate recommendations;
+assessment_may_not invoke runtimes/execute prompts/approve execution/
+modify repository/commit/push; future_evolution: 47I/48A
+
 ## Next
 
-- TBD: Future phases (47H Runtime Trust Assessment, 47I Governance Maturity Assessment, 48A Controlled Read-Only Runtime Invocation Implementation).
+- TBD: Future phases (47I Governance Maturity Assessment, 48A Controlled Read-Only Runtime Invocation Implementation).
 
 ## Future Explorations
 
