@@ -29402,3 +29402,276 @@ def build_invocation_result_capture() -> dict:
         "future_evolution": [dict(e) for e in _IRC_FUTURE_EVOLUTION],
         "advisory": INVOCATION_RESULT_CAPTURE_ADVISORY,
     }
+
+
+# Phase 48C — Runtime Contract Enforcement
+# ---------------------------------------------------------------------------
+
+RUNTIME_CONTRACT_ENFORCEMENT_ADVISORY = (
+    "Runtime contract enforcement assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 48C."
+)
+
+_RCE_ENFORCEMENT_CHECKS: tuple[dict, ...] = (
+    {
+        "check_id": "runtime_contract_exists",
+        "description": "A RuntimeContract record exists for the target runtime.",
+        "blocking": True,
+    },
+    {
+        "check_id": "runtime_trust_acceptable",
+        "description": "Runtime trust level is at least partially_trusted.",
+        "blocking": True,
+    },
+    {
+        "check_id": "sandbox_contract_verified",
+        "description": "Sandbox mode contract is verified for the target runtime.",
+        "blocking": True,
+    },
+    {
+        "check_id": "timeout_contract_verified",
+        "description": "Timeout enforcement contract is verified for the target runtime.",
+        "blocking": True,
+    },
+    {
+        "check_id": "output_capture_contract_verified",
+        "description": "Output capture contract is verified for the target runtime.",
+        "blocking": True,
+    },
+    {
+        "check_id": "invocation_mode_matches_request",
+        "description": "Invocation method in contract matches the request adapter type.",
+        "blocking": True,
+    },
+    {
+        "check_id": "writable_execution_blocked",
+        "description": "Writable execution is not requested, or explicit authorization is present.",
+        "blocking": True,
+    },
+)
+
+_RCE_ENFORCEMENT_STATUSES: tuple[str, ...] = (
+    "allowed",
+    "blocked",
+    "blocked_with_warnings",
+)
+
+_RCE_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "enforcement_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this enforcement result.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime being evaluated for contract enforcement.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The invocation request this enforcement result is associated with.",
+    },
+    {
+        "name": "enforcement_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall enforcement outcome: allowed, blocked, or blocked_with_warnings.",
+    },
+    {
+        "name": "failed_checks",
+        "type": "list[str]",
+        "required": True,
+        "description": "Check IDs that failed and are blocking execution.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings produced during enforcement evaluation.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 48C; no execution is authorized.",
+    },
+)
+
+_RCE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "evaluate enforcement checks",
+        "report failed checks",
+        "report blocked runtimes",
+        "generate enforcement results",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "48C",
+}
+
+_RCE_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContract",
+    "RuntimeContractVerificationRecord",
+    "RuntimeTrustRecord",
+    "ReadOnlyInvocationRequest",
+    "ReadOnlyInvocationPreflight",
+    "InvocationResultCapture",
+)
+
+# Per-runtime enforcement evaluation data derived from 47F/47H findings.
+_RCE_RUNTIME_EVALUATIONS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "contract_exists": True,
+        "trust_level": "partially_trusted",
+        "trust_acceptable": True,
+        "sandbox_verified": False,
+        "timeout_verified": False,
+        "output_capture_verified": False,
+        "invocation_mode_matches": True,
+        "writable_blocked": True,
+    },
+    {
+        "runtime_id": "claude-local",
+        "contract_exists": True,
+        "trust_level": "partially_trusted",
+        "trust_acceptable": True,
+        "sandbox_verified": False,
+        "timeout_verified": False,
+        "output_capture_verified": False,
+        "invocation_mode_matches": True,
+        "writable_blocked": True,
+    },
+    {
+        "runtime_id": "kimi-local",
+        "contract_exists": True,
+        "trust_level": "untrusted",
+        "trust_acceptable": False,
+        "sandbox_verified": False,
+        "timeout_verified": False,
+        "output_capture_verified": False,
+        "invocation_mode_matches": False,
+        "writable_blocked": True,
+    },
+)
+
+
+def _evaluate_enforcement(eval_data: dict, request_id: str, generated_at: str) -> dict:
+    """Derive an enforcement result from a per-runtime evaluation record."""
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    enforcement_id = f"rce-{eval_data['runtime_id']}-{ts}"
+    failed: list[str] = []
+    warnings: list[str] = []
+
+    if not eval_data["contract_exists"]:
+        failed.append("runtime_contract_exists")
+    if not eval_data["trust_acceptable"]:
+        failed.append("runtime_trust_acceptable")
+    if not eval_data["sandbox_verified"]:
+        failed.append("sandbox_contract_verified")
+    if not eval_data["timeout_verified"]:
+        failed.append("timeout_contract_verified")
+    if not eval_data["output_capture_verified"]:
+        failed.append("output_capture_contract_verified")
+    if not eval_data["invocation_mode_matches"]:
+        failed.append("invocation_mode_matches_request")
+    if not eval_data["writable_blocked"]:
+        failed.append("writable_execution_blocked")
+
+    if eval_data["trust_acceptable"] and not eval_data["sandbox_verified"]:
+        warnings.append(f"{eval_data['runtime_id']}_sandbox_contract_requires_verification")
+    if eval_data["trust_acceptable"] and not eval_data["timeout_verified"]:
+        warnings.append(f"{eval_data['runtime_id']}_timeout_contract_requires_verification")
+
+    if failed:
+        status = "blocked_with_warnings" if warnings else "blocked"
+    else:
+        status = "allowed" if not warnings else "blocked_with_warnings"
+
+    return {
+        "enforcement_id": enforcement_id,
+        "runtime_id": eval_data["runtime_id"],
+        "request_id": request_id,
+        "enforcement_status": status,
+        "failed_checks": failed,
+        "warnings": warnings,
+        "execution_allowed": False,
+    }
+
+
+def build_runtime_contract_enforcement() -> dict:
+    """Evaluate runtime contract enforcement for all known runtimes. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    request_id_ref = "rir-req-placeholder-48c"
+
+    result_fields = [dict(f) for f in _RCE_RESULT_FIELDS]
+    checks = [dict(c) for c in _RCE_ENFORCEMENT_CHECKS]
+
+    enforcement_results = [
+        _evaluate_enforcement(dict(ev), request_id_ref, generated_at)
+        for ev in _RCE_RUNTIME_EVALUATIONS
+    ]
+
+    blocked_count = sum(
+        1 for r in enforcement_results
+        if r["enforcement_status"] in ("blocked", "blocked_with_warnings")
+    )
+    allowed_count = sum(
+        1 for r in enforcement_results if r["enforcement_status"] == "allowed"
+    )
+
+    result_model = {
+        "model_name": "RuntimeContractEnforcementResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "supported_statuses": list(_RCE_ENFORCEMENT_STATUSES),
+        "execution_allowed_always_false_in_48c": True,
+        "fields": result_fields,
+    }
+
+    enforcement_summary = {
+        "summary_id": f"48c-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}",
+        "generated_at": generated_at,
+        "phase": "48C",
+        "title": "Runtime Contract Enforcement",
+        "summary": (
+            "Evaluates enforcement checks that prevent runtime invocation unless "
+            "runtime contracts satisfy governance requirements. Seven checks are "
+            "applied per runtime. codex-local and claude-local are blocked due to "
+            "unverified sandbox and timeout contracts. kimi-local is blocked as "
+            "untrusted with an unmatched invocation mode. execution_allowed=False "
+            "for all runtimes in Phase 48C. No runtime is invoked, no prompt is "
+            "submitted, and no repository modification occurs."
+        ),
+        "runtime_count": len(enforcement_results),
+        "blocked_count": blocked_count,
+        "allowed_count": allowed_count,
+        "enforcement_check_count": len(checks),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "enforcement_summary": enforcement_summary,
+        "result_model": result_model,
+        "enforcement_checks": checks,
+        "enforcement_results": enforcement_results,
+        "governance_boundaries": dict(_RCE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RCE_INPUT_SOURCES),
+        "advisory": RUNTIME_CONTRACT_ENFORCEMENT_ADVISORY,
+    }

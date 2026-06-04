@@ -562,6 +562,11 @@ def render_commands_reference() -> str:
 
 - `pcae invocation-result-capture`
 - `pcae invocation-result-capture --json`
+
+## runtime-contract-enforcement
+
+- `pcae runtime-contract-enforcement`
+- `pcae runtime-contract-enforcement --json`
 """
 
 

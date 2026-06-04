@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48B.1: Apache License 2.0 added.
+Phase 48C: Runtime Contract Enforcement.
 
 ## Governance Coherence Note
 
@@ -3001,10 +3001,29 @@ repository/approve execution/commit/push/rollback; future_evolution: 48C
 and Apache License 2.0 added (Phase 48B.1): LICENSE file at repository root
 (copyright 2026 Atila Madai); README.md License section added; pyproject.toml
 updated with license = "Apache-2.0" and OSI classifier; no source logic changes.
+and PCAE evaluates runtime contract enforcement with
+`pcae runtime-contract-enforcement` and
+`pcae runtime-contract-enforcement --json` (Phase 48C):
+RuntimeContractEnforcementResult model (7 required fields: enforcement_id/
+runtime_id/request_id/enforcement_status/failed_checks/warnings/
+execution_allowed); 3 enforcement statuses: allowed/blocked/
+blocked_with_warnings; 7 enforcement checks (all blocking):
+runtime_contract_exists/runtime_trust_acceptable/sandbox_contract_verified/
+timeout_contract_verified/output_capture_contract_verified/
+invocation_mode_matches_request/writable_execution_blocked;
+codex-local: blocked_with_warnings (sandbox/timeout/output_capture
+checks failed); claude-local: blocked_with_warnings (same);
+kimi-local: blocked (trust_acceptable and invocation_mode_matches failed);
+all 3 runtimes blocked, allowed_count=0; execution_allowed=False for all;
+no runtime invoked; no prompt submitted; no repository modification;
+human_review_required=True; governance_boundaries: may evaluate enforcement
+checks/report failed checks/report blocked runtimes/generate enforcement
+results; may_not invoke runtimes/execute prompts/modify repository/approve
+execution/commit/push/rollback; inputs: 6 sources
 
 ## Next
 
-- TBD: Future phases (48C Runtime Contract Enforcement).
+- TBD: Future phases (49A Invocation Execution Gate Implementation).
 
 ## Future Explorations
 

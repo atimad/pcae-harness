@@ -28762,3 +28762,163 @@ def test_48b_human_output_shows_all_sections(capsys) -> None:
     assert "Summary model" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 48C — Runtime Contract Enforcement
+# ---------------------------------------------------------------------------
+
+
+def test_48c_json_structure(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "enforcement_summary", "result_model", "enforcement_checks",
+        "enforcement_results", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_48c_enforcement_summary_fields(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    es = data["enforcement_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "blocked_count", "allowed_count",
+        "enforcement_check_count", "execution_allowed", "human_review_required",
+    ):
+        assert field in es, f"missing enforcement_summary field: {field}"
+    assert es["phase"] == "48C"
+    assert es["execution_allowed"] is False
+    assert es["human_review_required"] is True
+    assert es["runtime_count"] == 3
+    assert es["enforcement_check_count"] == 7
+    assert es["blocked_count"] == 3
+    assert es["allowed_count"] == 0
+
+
+def test_48c_execution_always_blocked(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["enforcement_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["result_model"]["execution_allowed_always_false_in_48c"] is True
+    for res in data["enforcement_results"]:
+        assert res["execution_allowed"] is False, (
+            f"runtime {res['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_48c_result_model(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["result_model"]
+    assert rm["model_name"] == "RuntimeContractEnforcementResult"
+    assert rm["field_count"] == 7
+    assert rm["required_field_count"] == 7
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "enforcement_id", "runtime_id", "request_id",
+        "enforcement_status", "failed_checks", "warnings", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    for status in ("allowed", "blocked", "blocked_with_warnings"):
+        assert status in rm["supported_statuses"], f"missing status: {status}"
+
+
+def test_48c_seven_enforcement_checks(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checks = data["enforcement_checks"]
+    assert len(checks) == 7
+    check_ids = [c["check_id"] for c in checks]
+    for expected in (
+        "runtime_contract_exists", "runtime_trust_acceptable",
+        "sandbox_contract_verified", "timeout_contract_verified",
+        "output_capture_contract_verified", "invocation_mode_matches_request",
+        "writable_execution_blocked",
+    ):
+        assert expected in check_ids, f"missing check: {expected}"
+    for chk in checks:
+        assert chk["blocking"] is True, f"check {chk['check_id']} must be blocking"
+
+
+def test_48c_three_runtimes_evaluated(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    results = data["enforcement_results"]
+    assert len(results) == 3
+    runtime_ids = [r["runtime_id"] for r in results]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_ids, f"missing runtime: {expected}"
+
+
+def test_48c_codex_blocked_with_warnings(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    codex = next(r for r in data["enforcement_results"] if r["runtime_id"] == "codex-local")
+    assert codex["enforcement_status"] == "blocked_with_warnings"
+    assert codex["execution_allowed"] is False
+    assert "sandbox_contract_verified" in codex["failed_checks"]
+    assert "timeout_contract_verified" in codex["failed_checks"]
+    assert "output_capture_contract_verified" in codex["failed_checks"]
+    assert codex["enforcement_id"].startswith("rce-codex-local-")
+
+
+def test_48c_claude_blocked_with_warnings(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    claude = next(r for r in data["enforcement_results"] if r["runtime_id"] == "claude-local")
+    assert claude["enforcement_status"] == "blocked_with_warnings"
+    assert claude["execution_allowed"] is False
+    assert "sandbox_contract_verified" in claude["failed_checks"]
+    assert "timeout_contract_verified" in claude["failed_checks"]
+    assert claude["enforcement_id"].startswith("rce-claude-local-")
+
+
+def test_48c_kimi_blocked(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(r for r in data["enforcement_results"] if r["runtime_id"] == "kimi-local")
+    assert kimi["enforcement_status"] == "blocked"
+    assert kimi["execution_allowed"] is False
+    assert "runtime_trust_acceptable" in kimi["failed_checks"]
+    assert "invocation_mode_matches_request" in kimi["failed_checks"]
+    assert kimi["enforcement_id"].startswith("rce-kimi-local-")
+
+
+def test_48c_governance_boundaries(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "48C"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("evaluate enforcement checks", "report failed checks", "report blocked runtimes"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository",
+                      "approve execution", "commit", "push", "rollback"):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_48c_advisory(capsys) -> None:
+    main(["runtime-contract-enforcement", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_48c_human_output_shows_all_sections(capsys) -> None:
+    main(["runtime-contract-enforcement"])
+    output = capsys.readouterr().out
+    assert "Runtime contract enforcement" in output
+    assert "Result model" in output
+    assert "Enforcement checks" in output
+    assert "Enforcement results" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
