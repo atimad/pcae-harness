@@ -83,6 +83,7 @@ from pcae.commands.agent import (
     run_live_readonly_pilot,
     run_rollback_execution_pilot,
     run_live_write_pilot,
+    run_runtime_contracts,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2047,6 +2048,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON live write pilot output.",
     )
     live_write_pilot_parser.set_defaults(handler=run_live_write_pilot)
+
+    runtime_contracts_parser = subparsers.add_parser(
+        "runtime-contracts",
+        help="Define and verify governed runtime contracts (Phase 47F).",
+    )
+    runtime_contracts_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime contracts output.",
+    )
+    runtime_contracts_parser.set_defaults(handler=run_runtime_contracts)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

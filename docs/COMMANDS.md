@@ -511,3 +511,8 @@
 
 - `pcae live-write-pilot`
 - `pcae live-write-pilot --json`
+
+## runtime-contracts
+
+- `pcae runtime-contracts`
+- `pcae runtime-contracts --json`

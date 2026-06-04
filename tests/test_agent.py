@@ -27652,3 +27652,208 @@ def test_47e_human_output_shows_all_sections(capsys) -> None:
     assert "PilotResult model" in output
     assert "Governance boundaries" in output
     assert "design-phase" in output.lower()
+
+
+# Phase 47F — Runtime Contract Verification
+# ---------------------------------------------------------------------------
+
+
+def test_47f_json_structure(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "runtime_contracts", "runtime_contract_model", "contracts",
+        "verification_areas", "verification_statuses", "verification_record_model",
+        "verification_records", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_47f_summary_fields(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rc = data["runtime_contracts"]
+    for field in (
+        "verification_id", "phase", "title", "summary",
+        "runtime_count", "verification_area_count",
+        "verified_count", "partially_verified_count", "unverified_count",
+        "verified_area_count", "partially_verified_area_count", "unverified_area_count",
+        "execution_allowed", "input_sources", "governance_boundaries", "future_evolution",
+    ):
+        assert field in rc, f"missing summary field: {field}"
+    assert rc["verification_id"].startswith("rcv-")
+    assert rc["phase"] == "47F"
+    assert rc["runtime_count"] == 3
+    assert rc["verification_area_count"] == 6
+    assert rc["execution_allowed"] is False
+
+
+def test_47f_execution_not_allowed(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_contracts"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_47f_runtime_contract_model(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    m = data["runtime_contract_model"]
+    assert m["model_name"] == "RuntimeContract"
+    assert m["field_count"] == 8
+    assert m["required_field_count"] == 8
+    assert m["immutable_field_count"] == 8
+    field_names = [f["name"] for f in m["fields"]]
+    for expected in (
+        "runtime_id", "runtime_type", "invocation_method", "sandbox_mode",
+        "writable_supported", "readonly_supported", "verification_status", "contract_version",
+    ):
+        assert expected in field_names, f"missing RuntimeContract field: {expected}"
+    for f in m["fields"]:
+        assert f["immutable"] is True, f"field {f['name']} must be immutable"
+
+
+def test_47f_verification_areas(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    areas = data["verification_areas"]
+    assert len(areas) == 6
+    area_names = [a["area"] for a in areas]
+    for expected in (
+        "invocation_contract", "sandbox_contract", "output_capture_contract",
+        "writable_contract", "readonly_contract", "timeout_contract",
+    ):
+        assert expected in area_names, f"missing verification area: {expected}"
+    for area in areas:
+        assert "area" in area
+        assert "description" in area
+
+
+def test_47f_verification_statuses(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    vs = data["verification_statuses"]
+    assert vs["status_count"] == 3
+    status_names = [s["status"] for s in vs["statuses"]]
+    for expected in ("verified", "partially_verified", "unverified"):
+        assert expected in status_names, f"missing verification status: {expected}"
+    for s in vs["statuses"]:
+        assert "status" in s
+        assert "description" in s
+
+
+def test_47f_contracts(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    contracts = data["contracts"]
+    assert len(contracts) == 3
+    runtime_ids = [c["runtime_id"] for c in contracts]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in runtime_ids, f"missing runtime contract: {expected}"
+    for contract in contracts:
+        for field in (
+            "runtime_id", "runtime_type", "invocation_method", "sandbox_mode",
+            "writable_supported", "readonly_supported", "verification_status",
+            "contract_version", "area_results",
+        ):
+            assert field in contract, f"contract missing field: {field}"
+        assert len(contract["area_results"]) == 6
+    codex = next(c for c in contracts if c["runtime_id"] == "codex-local")
+    claude = next(c for c in contracts if c["runtime_id"] == "claude-local")
+    kimi = next(c for c in contracts if c["runtime_id"] == "kimi-local")
+    assert codex["verification_status"] == "partially_verified"
+    assert claude["verification_status"] == "partially_verified"
+    assert kimi["verification_status"] == "unverified"
+    assert kimi["writable_supported"] is False
+    assert kimi["readonly_supported"] is False
+
+
+def test_47f_kimi_all_unverified(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    kimi = next(c for c in data["contracts"] if c["runtime_id"] == "kimi-local")
+    for ar in kimi["area_results"]:
+        assert ar["status"] == "unverified", f"kimi area {ar['area']} should be unverified"
+
+
+def test_47f_verification_record_model(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["verification_record_model"]
+    assert rm["model_name"] == "RuntimeContractVerificationRecord"
+    assert rm["field_count"] == 7
+    assert rm["required_field_count"] == 7
+    assert rm["immutable_field_count"] == 7
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "verification_id", "runtime_id", "verification_status",
+        "verified_capabilities", "missing_capabilities", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing verification record field: {expected}"
+
+
+def test_47f_verification_records(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    records = data["verification_records"]
+    assert len(records) == 3
+    record_runtime_ids = [r["runtime_id"] for r in records]
+    for expected in ("codex-local", "claude-local", "kimi-local"):
+        assert expected in record_runtime_ids, f"missing verification record: {expected}"
+    for rec in records:
+        for field in (
+            "verification_id", "runtime_id", "verification_status",
+            "verified_capabilities", "missing_capabilities", "blockers", "warnings",
+        ):
+            assert field in rec, f"record missing field: {field}"
+    kimi_rec = next(r for r in records if r["runtime_id"] == "kimi-local")
+    assert kimi_rec["verification_status"] == "unverified"
+    assert "runtime_not_confirmed_installed" in kimi_rec["blockers"]
+
+
+def test_47f_summary_counts(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rc = data["runtime_contracts"]
+    assert rc["verified_count"] == 0
+    assert rc["partially_verified_count"] == 2
+    assert rc["unverified_count"] == 1
+    assert rc["verified_area_count"] == 0
+
+
+def test_47f_governance_boundaries(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["read_only"] is True
+    may = " ".join(gb["verification_may"]).lower()
+    for allowed in ("inspect contracts", "record capabilities", "identify blockers"):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["verification_may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify files", "approve execution"):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_47f_advisory(capsys) -> None:
+    main(["runtime-contracts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "file modification" in advisory
+
+
+def test_47f_human_output_shows_all_sections(capsys) -> None:
+    main(["runtime-contracts"])
+    output = capsys.readouterr().out
+    assert "Runtime contract verification" in output
+    assert "Verification summary" in output
+    assert "RuntimeContract model" in output
+    assert "Verification statuses" in output
+    assert "Verification areas" in output
+    assert "Runtime contracts" in output
+    assert "Verification records" in output
+    assert "RuntimeContractVerificationRecord model" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

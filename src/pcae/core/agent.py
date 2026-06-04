@@ -26876,3 +26876,526 @@ def build_live_write_pilot() -> dict:
         "governance_boundaries": dict(_LWP_GOVERNANCE_BOUNDARIES),
         "advisory": LIVE_WRITE_PILOT_ADVISORY,
     }
+
+
+# Phase 47F — Runtime Contract Verification
+# ---------------------------------------------------------------------------
+
+RUNTIME_CONTRACT_VERIFICATION_ADVISORY = (
+    "Runtime contract verification is informational; no runtime invocation, "
+    "prompt execution, or file modification occurs."
+)
+
+_RCV_INPUT_SOURCES: tuple[str, ...] = (
+    "live_readonly_execution_readiness_assessment",
+    "live_write_execution_readiness_assessment",
+    "live_readonly_pilot",
+    "live_write_pilot",
+    "execution_authorization_artifacts",
+)
+
+_RCV_RUNTIME_CONTRACT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "description": "Unique identifier for this runtime (e.g., codex-local).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_type",
+        "type": "str",
+        "description": "Runtime type family (e.g., codex, claude, kimi).",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_method",
+        "type": "str",
+        "description": "How the runtime is invoked: cli, api, or sdk.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "sandbox_mode",
+        "type": "str",
+        "description": "Sandbox isolation mode: none, partial, or full.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "writable_supported",
+        "type": "bool",
+        "description": "Whether governed write operations are supported by this runtime.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "readonly_supported",
+        "type": "bool",
+        "description": "Whether governed read-only operation mode is supported.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "description": "Overall contract verification status: verified, partially_verified, or unverified.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "contract_version",
+        "type": "str",
+        "description": "Version of the contract definition for this runtime.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_RCV_VERIFICATION_AREAS: tuple[dict, ...] = (
+    {
+        "area": "invocation_contract",
+        "description": (
+            "How the runtime is invoked: CLI flags, non-interactive mode, "
+            "output format, and argument passing convention."
+        ),
+    },
+    {
+        "area": "sandbox_contract",
+        "description": (
+            "Whether the runtime operates in an isolated sandbox environment "
+            "preventing unintended side effects outside the governed scope."
+        ),
+    },
+    {
+        "area": "output_capture_contract",
+        "description": (
+            "How execution output is captured, structured, and persisted "
+            "for review and audit purposes."
+        ),
+    },
+    {
+        "area": "writable_contract",
+        "description": (
+            "Whether write operations are governed, bounded to authorized file scope, "
+            "and linked to a validated rollback plan."
+        ),
+    },
+    {
+        "area": "readonly_contract",
+        "description": (
+            "Whether read-only operation mode is confirmed, preventing file "
+            "modifications outside the authorized write scope."
+        ),
+    },
+    {
+        "area": "timeout_contract",
+        "description": (
+            "Whether timeout enforcement is defined, reliable, and terminates "
+            "runaway executions within PCAE governance bounds."
+        ),
+    },
+)
+
+_RCV_VERIFICATION_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "verified",
+        "description": "Contract area confirmed through end-to-end evidence in PCAE governance.",
+    },
+    {
+        "status": "partially_verified",
+        "description": (
+            "Some evidence exists (adapter inspection, documentation reference) "
+            "but end-to-end governed validation is incomplete."
+        ),
+    },
+    {
+        "status": "unverified",
+        "description": "No evidence collected; contract area has not been validated.",
+    },
+)
+
+_RCV_VERIFICATION_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "verification_id",
+        "type": "str",
+        "description": "Unique identifier for this verification record.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "description": "ID of the runtime being verified.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "description": "Overall verification status for this runtime.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "verified_capabilities",
+        "type": "list[str]",
+        "description": "List of contract areas confirmed as verified.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "missing_capabilities",
+        "type": "list[str]",
+        "description": "List of contract areas that remain unverified.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "description": "List of blocking issues preventing full contract verification.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "description": "List of non-blocking warnings recorded during verification.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_RCV_CODEX_AREA_RESULTS: tuple[dict, ...] = (
+    {
+        "area": "invocation_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "CLI non-interactive invocation confirmed via adapter inspection. "
+            "Governed PCAE end-to-end invocation has not been validated."
+        ),
+    },
+    {
+        "area": "sandbox_contract",
+        "status": "unverified",
+        "rationale": (
+            "No sandbox mode has been confirmed for codex-local. "
+            "Isolation boundaries are not yet validated."
+        ),
+    },
+    {
+        "area": "output_capture_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "stdout capture confirmed via adapter inspection. "
+            "Structured governed output capture has not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "writable_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "File write operations possible via CLI. Governed scope, rollback linkage, "
+            "and audit path have not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "readonly_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "Non-writing invocation mode available. Read-only enforcement "
+            "under PCAE governance has not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "timeout_contract",
+        "status": "unverified",
+        "rationale": (
+            "Timeout enforcement behavior has not been validated "
+            "within PCAE governance bounds."
+        ),
+    },
+)
+
+_RCV_CLAUDE_AREA_RESULTS: tuple[dict, ...] = (
+    {
+        "area": "invocation_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "CLI non-interactive invocation confirmed via adapter inspection. "
+            "Governed PCAE end-to-end invocation has not been validated."
+        ),
+    },
+    {
+        "area": "sandbox_contract",
+        "status": "unverified",
+        "rationale": (
+            "No sandbox mode has been confirmed for claude-local. "
+            "Isolation boundaries are not yet validated."
+        ),
+    },
+    {
+        "area": "output_capture_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "stdout capture confirmed via adapter inspection. "
+            "Structured governed output capture has not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "writable_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "File write operations possible via CLI. Governed scope, rollback linkage, "
+            "and audit path have not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "readonly_contract",
+        "status": "partially_verified",
+        "rationale": (
+            "Non-writing invocation mode available. Read-only enforcement "
+            "under PCAE governance has not been validated end-to-end."
+        ),
+    },
+    {
+        "area": "timeout_contract",
+        "status": "unverified",
+        "rationale": (
+            "Timeout enforcement behavior has not been validated "
+            "within PCAE governance bounds."
+        ),
+    },
+)
+
+_RCV_KIMI_AREA_RESULTS: tuple[dict, ...] = (
+    {
+        "area": "invocation_contract",
+        "status": "unverified",
+        "rationale": (
+            "kimi-local has not been confirmed installed. "
+            "CLI invocation has not been validated."
+        ),
+    },
+    {
+        "area": "sandbox_contract",
+        "status": "unverified",
+        "rationale": "kimi-local has not been confirmed installed; sandbox mode is unknown.",
+    },
+    {
+        "area": "output_capture_contract",
+        "status": "unverified",
+        "rationale": "kimi-local has not been confirmed installed; output capture is unknown.",
+    },
+    {
+        "area": "writable_contract",
+        "status": "unverified",
+        "rationale": "kimi-local has not been confirmed installed; write contract is unknown.",
+    },
+    {
+        "area": "readonly_contract",
+        "status": "unverified",
+        "rationale": "kimi-local has not been confirmed installed; read-only contract is unknown.",
+    },
+    {
+        "area": "timeout_contract",
+        "status": "unverified",
+        "rationale": "kimi-local has not been confirmed installed; timeout contract is unknown.",
+    },
+)
+
+_RCV_RUNTIME_CONTRACTS: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "runtime_type": "codex",
+        "invocation_method": "cli",
+        "sandbox_mode": "none",
+        "writable_supported": True,
+        "readonly_supported": True,
+        "verification_status": "partially_verified",
+        "contract_version": "0.1",
+        "area_results": list(_RCV_CODEX_AREA_RESULTS),
+    },
+    {
+        "runtime_id": "claude-local",
+        "runtime_type": "claude",
+        "invocation_method": "cli",
+        "sandbox_mode": "none",
+        "writable_supported": True,
+        "readonly_supported": True,
+        "verification_status": "partially_verified",
+        "contract_version": "0.1",
+        "area_results": list(_RCV_CLAUDE_AREA_RESULTS),
+    },
+    {
+        "runtime_id": "kimi-local",
+        "runtime_type": "kimi",
+        "invocation_method": "cli",
+        "sandbox_mode": "none",
+        "writable_supported": False,
+        "readonly_supported": False,
+        "verification_status": "unverified",
+        "contract_version": "0.1",
+        "area_results": list(_RCV_KIMI_AREA_RESULTS),
+    },
+)
+
+_RCV_VERIFICATION_RECORDS: tuple[dict, ...] = (
+    {
+        "verification_id": "rcv-codex-local",
+        "runtime_id": "codex-local",
+        "verification_status": "partially_verified",
+        "verified_capabilities": [],
+        "missing_capabilities": ["sandbox_contract", "timeout_contract"],
+        "blockers": ["sandbox_contract_unverified", "timeout_contract_unverified"],
+        "warnings": [
+            "invocation_contract_partially_verified",
+            "output_capture_contract_partially_verified",
+            "writable_contract_partially_verified",
+            "readonly_contract_partially_verified",
+        ],
+    },
+    {
+        "verification_id": "rcv-claude-local",
+        "runtime_id": "claude-local",
+        "verification_status": "partially_verified",
+        "verified_capabilities": [],
+        "missing_capabilities": ["sandbox_contract", "timeout_contract"],
+        "blockers": ["sandbox_contract_unverified", "timeout_contract_unverified"],
+        "warnings": [
+            "invocation_contract_partially_verified",
+            "output_capture_contract_partially_verified",
+            "writable_contract_partially_verified",
+            "readonly_contract_partially_verified",
+        ],
+    },
+    {
+        "verification_id": "rcv-kimi-local",
+        "runtime_id": "kimi-local",
+        "verification_status": "unverified",
+        "verified_capabilities": [],
+        "missing_capabilities": [
+            "invocation_contract",
+            "sandbox_contract",
+            "output_capture_contract",
+            "writable_contract",
+            "readonly_contract",
+            "timeout_contract",
+        ],
+        "blockers": ["runtime_not_confirmed_installed"],
+        "warnings": [],
+    },
+)
+
+_RCV_GOVERNANCE_BOUNDARIES: dict = {
+    "verification_may": [
+        "inspect contracts",
+        "record capabilities",
+        "identify blockers",
+    ],
+    "verification_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve execution",
+    ],
+    "execution_allowed": False,
+    "read_only": True,
+    "design_phase": True,
+}
+
+_RCV_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "47G", "description": "Live Execution Governance Audit"},
+    {"phase": "47H", "description": "Runtime Trust Assessment"},
+    {"phase": "48A", "description": "Controlled Read-Only Runtime Invocation"},
+)
+
+
+def build_runtime_contracts() -> dict:
+    """Define governed runtime contracts and verification status. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    verification_id = f"rcv-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    runtime_contract_fields = [dict(f) for f in _RCV_RUNTIME_CONTRACT_FIELDS]
+    verification_areas = [dict(a) for a in _RCV_VERIFICATION_AREAS]
+    verification_statuses = [dict(s) for s in _RCV_VERIFICATION_STATUSES]
+    verification_record_fields = [dict(f) for f in _RCV_VERIFICATION_RECORD_FIELDS]
+    contracts = [dict(c) for c in _RCV_RUNTIME_CONTRACTS]
+    verification_records = [dict(r) for r in _RCV_VERIFICATION_RECORDS]
+
+    verified_count = sum(1 for c in contracts if c["verification_status"] == "verified")
+    partially_verified_count = sum(
+        1 for c in contracts if c["verification_status"] == "partially_verified"
+    )
+    unverified_count = sum(1 for c in contracts if c["verification_status"] == "unverified")
+
+    all_area_results = [
+        ar for c in contracts for ar in c["area_results"]
+    ]
+    verified_area_count = sum(1 for a in all_area_results if a["status"] == "verified")
+    partially_verified_area_count = sum(
+        1 for a in all_area_results if a["status"] == "partially_verified"
+    )
+    unverified_area_count = sum(1 for a in all_area_results if a["status"] == "unverified")
+
+    runtime_contract_model = {
+        "model_name": "RuntimeContract",
+        "field_count": len(runtime_contract_fields),
+        "required_field_count": sum(1 for f in runtime_contract_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in runtime_contract_fields if f["immutable"]),
+        "fields": runtime_contract_fields,
+    }
+
+    verification_record_model = {
+        "model_name": "RuntimeContractVerificationRecord",
+        "field_count": len(verification_record_fields),
+        "required_field_count": sum(1 for f in verification_record_fields if f["required"]),
+        "immutable_field_count": sum(1 for f in verification_record_fields if f["immutable"]),
+        "fields": verification_record_fields,
+    }
+
+    runtime_contracts_summary = {
+        "verification_id": verification_id,
+        "generated_at": generated_at,
+        "phase": "47F",
+        "title": "Runtime Contract Verification",
+        "summary": (
+            "Defines and verifies governed runtime contracts for the three PCAE target "
+            "runtimes (codex-local, claude-local, kimi-local). Specifies the RuntimeContract "
+            "model (8 fields, all immutable), six verification areas (invocation_contract, "
+            "sandbox_contract, output_capture_contract, writable_contract, readonly_contract, "
+            "timeout_contract), three verification statuses (verified, partially_verified, "
+            "unverified), and the RuntimeContractVerificationRecord model (7 fields, all "
+            "immutable). codex-local and claude-local are partially_verified; kimi-local is "
+            "unverified. No runtime invocation occurs. Verification is informational."
+        ),
+        "runtime_count": len(contracts),
+        "verification_area_count": len(verification_areas),
+        "verified_count": verified_count,
+        "partially_verified_count": partially_verified_count,
+        "unverified_count": unverified_count,
+        "verified_area_count": verified_area_count,
+        "partially_verified_area_count": partially_verified_area_count,
+        "unverified_area_count": unverified_area_count,
+        "execution_allowed": False,
+        "input_sources": list(_RCV_INPUT_SOURCES),
+        "governance_boundaries": dict(_RCV_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _RCV_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "runtime_contracts": runtime_contracts_summary,
+        "runtime_contract_model": runtime_contract_model,
+        "contracts": contracts,
+        "verification_areas": verification_areas,
+        "verification_statuses": {
+            "status_count": len(verification_statuses),
+            "statuses": verification_statuses,
+        },
+        "verification_record_model": verification_record_model,
+        "verification_records": verification_records,
+        "governance_boundaries": dict(_RCV_GOVERNANCE_BOUNDARIES),
+        "advisory": RUNTIME_CONTRACT_VERIFICATION_ADVISORY,
+    }

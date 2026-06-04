@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 47E: Governed Live Write Pilot.
+Phase 47F: Runtime Contract Verification.
 
 ## Governance Coherence Note
 
@@ -2873,9 +2873,31 @@ recommendations; pilot_may_not invoke runtimes/execute prompts/modify files/
 approve writes/commit/push/rollback/reset history; future_evolution:
 47F/47G/47H/48A
 
+and runtime contracts are defined and verified with `pcae runtime-contracts`
+and `pcae runtime-contracts --json` (Phase 47F): inputs: 5 sources
+(live_readonly_execution_readiness_assessment,
+live_write_execution_readiness_assessment, live_readonly_pilot,
+live_write_pilot, execution_authorization_artifacts); no runtime invocation;
+no prompt execution; no file modification; RuntimeContract model: 8 fields
+(all required, all immutable): runtime_id/runtime_type/invocation_method/
+sandbox_mode/writable_supported/readonly_supported/verification_status/
+contract_version; 3 runtime targets: codex-local (partially_verified),
+claude-local (partially_verified), kimi-local (unverified); 6 verification
+areas: invocation_contract/sandbox_contract/output_capture_contract/
+writable_contract/readonly_contract/timeout_contract; 3 verification
+statuses: verified/partially_verified/unverified;
+RuntimeContractVerificationRecord model: 7 fields (all required, all
+immutable): verification_id/runtime_id/verification_status/
+verified_capabilities/missing_capabilities/blockers/warnings;
+verified_count=0, partially_verified_count=2, unverified_count=1;
+verified_area_count=0; execution_allowed=False; governance_boundaries:
+verification_may inspect contracts/record capabilities/identify blockers;
+verification_may_not invoke runtimes/execute prompts/modify files/approve
+execution; future_evolution: 47G/47H/48A
+
 ## Next
 
-- TBD: Future phases (47F Runtime Contract Verification, 47G Live Execution Governance Audit, 47H Live Write Pilot Readiness Reassessment, 48A Controlled Read-Only Runtime Invocation Implementation).
+- TBD: Future phases (47G Live Execution Governance Audit, 47H Runtime Trust Assessment, 48A Controlled Read-Only Runtime Invocation).
 
 ## Future Explorations
 

@@ -141,6 +141,8 @@ from pcae.core.agent import (
     ROLLBACK_EXECUTION_PILOT_ADVISORY,
     build_live_write_pilot,
     LIVE_WRITE_PILOT_ADVISORY,
+    build_runtime_contracts,
+    RUNTIME_CONTRACT_VERIFICATION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -5960,6 +5962,88 @@ def run_live_write_pilot(args: argparse.Namespace) -> int:
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  git_reset forbidden:   {gb['git_reset_forbidden']}")
         print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_runtime_contracts(args: argparse.Namespace) -> int:
+    data = build_runtime_contracts()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        rc = data["runtime_contracts"]
+        print("Runtime contract verification")
+        print(f"Verification: {rc['verification_id']}  Generated: {rc['generated_at']}")
+        print(f"Phase: {rc['phase']} — {rc['title']}")
+        print()
+        print(rc["summary"])
+        print()
+        print("Verification summary:")
+        print(f"  Runtime count:               {rc['runtime_count']}")
+        print(f"  Verification areas:          {rc['verification_area_count']}")
+        print(f"  Runtimes verified:           {rc['verified_count']}")
+        print(f"  Runtimes partially verified: {rc['partially_verified_count']}")
+        print(f"  Runtimes unverified:         {rc['unverified_count']}")
+        print(f"  Areas verified:              {rc['verified_area_count']}")
+        print(f"  Areas partially verified:    {rc['partially_verified_area_count']}")
+        print(f"  Areas unverified:            {rc['unverified_area_count']}")
+        print(f"  Execution allowed:           {'yes' if rc['execution_allowed'] else 'no'}")
+        print()
+        print("RuntimeContract model:")
+        m = data["runtime_contract_model"]
+        print(f"  Model: {m['model_name']}")
+        print(f"  Fields: {m['field_count']}  Required: {m['required_field_count']}")
+        print(f"  Immutable: {m['immutable_field_count']}")
+        for field in m["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        vs = data["verification_statuses"]
+        print(f"Verification statuses ({vs['status_count']}):")
+        for s in vs["statuses"]:
+            print(f"  {s['status']}: {s['description']}")
+        print()
+        print(f"Verification areas ({len(data['verification_areas'])}):")
+        for area in data["verification_areas"]:
+            print(f"  {area['area']}: {area['description']}")
+        print()
+        print(f"Runtime contracts ({len(data['contracts'])} runtimes):")
+        for contract in data["contracts"]:
+            print(
+                f"  [{contract['verification_status']}] {contract['runtime_id']}"
+                f" ({contract['runtime_type']}, {contract['invocation_method']})"
+            )
+            print(f"    Sandbox mode: {contract['sandbox_mode']}")
+            print(
+                f"    Writable supported: {'yes' if contract['writable_supported'] else 'no'}"
+                f"  Readonly supported: {'yes' if contract['readonly_supported'] else 'no'}"
+            )
+            for ar in contract["area_results"]:
+                print(f"    [{ar['status']}] {ar['area']}: {ar['rationale']}")
+        print()
+        print("Verification records:")
+        for rec in data["verification_records"]:
+            print(f"  {rec['verification_id']} [{rec['verification_status']}]")
+            print(f"    Verified:  {rec['verified_capabilities'] or 'none'}")
+            print(f"    Missing:   {rec['missing_capabilities']}")
+            print(f"    Blockers:  {rec['blockers']}")
+            print(f"    Warnings:  {rec['warnings'] or 'none'}")
+        print()
+        print("RuntimeContractVerificationRecord model:")
+        rm = data["verification_record_model"]
+        print(f"  Model: {rm['model_name']}")
+        print(f"  Fields: {rm['field_count']}  Required: {rm['required_field_count']}")
+        print(f"  Immutable: {rm['immutable_field_count']}")
+        for field in rm["fields"]:
+            imm = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {imm}): {field['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['verification_may'])}")
+        print(f"  May not:           {', '.join(gb['verification_may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
         print()
         print(data["advisory"])
     return 0
