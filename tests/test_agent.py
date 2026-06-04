@@ -24168,3 +24168,214 @@ def test_46j_human_output_shows_all_sections(capsys) -> None:
     assert "Governance requirements" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 46K — Multi-Agent Invocation Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_46k_multi_agent_invocation_pilot_json_structure(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "multi_agent_invocation_pilot", "multi_agent_candidate_model", "multi_agent_plan_model",
+        "output_capture_plan_model", "invocation_strategies", "readiness_evaluation",
+        "governance_requirements", "governance_boundaries", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_46k_multi_agent_invocation_pilot_design_fields(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pilot = data["multi_agent_invocation_pilot"]
+    for field in (
+        "pilot_id", "phase", "title", "summary", "input_sources",
+        "model_count", "invocation_strategy_count", "readiness_area_count",
+        "governance_requirement_count", "human_review_required",
+        "governance_boundaries", "future_evolution",
+    ):
+        assert field in pilot, f"missing pilot field: {field}"
+    assert pilot["pilot_id"].startswith("maip-")
+    assert pilot["phase"] == "46K"
+    assert pilot["human_review_required"] is True
+    assert pilot["model_count"] == 3
+    assert pilot["invocation_strategy_count"] == 4
+    assert pilot["readiness_area_count"] == 5
+    assert pilot["governance_requirement_count"] == 5
+
+
+def test_46k_multi_agent_candidate_model(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["multi_agent_candidate_model"]
+    assert model["model_name"] == "MultiAgentInvocationCandidate"
+    assert model["field_count"] == 7
+    assert model["required_field_count"] == 7
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "multi_invocation_candidate_id", "authorization_id", "prompt_id",
+        "selected_runtimes", "selected_agents", "invocation_mode", "invocation_status",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    immutable = model["immutable_fields"]
+    for expected in (
+        "multi_invocation_candidate_id", "authorization_id", "prompt_id",
+        "selected_runtimes", "selected_agents", "invocation_mode",
+    ):
+        assert expected in immutable, f"expected immutable: {expected}"
+    assert "invocation_status" in model["mutable_fields"]
+    statuses = [s["status"] for s in model["statuses"]]
+    for expected in ("pending", "prepared", "blocked", "completed"):
+        assert expected in statuses, f"missing candidate status: {expected}"
+    terminal = [s["status"] for s in model["statuses"] if s["terminal"]]
+    assert terminal == ["completed"]
+    assert model["plan_allowed_statuses"] == ["prepared"]
+
+
+def test_46k_multi_agent_plan_model(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["multi_agent_plan_model"]
+    assert model["model_name"] == "MultiAgentInvocationPlan"
+    assert model["field_count"] == 8
+    assert model["required_field_count"] == 8
+    assert model["all_fields_immutable"] is True
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "multi_invocation_plan_id", "multi_invocation_candidate_id", "participating_runtimes",
+        "invocation_strategy", "output_capture_strategy", "timeout_strategy",
+        "governance_snapshot", "consensus_required",
+    ):
+        assert expected in field_names, f"missing plan field: {expected}"
+
+
+def test_46k_output_capture_plan_model(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    model = data["output_capture_plan_model"]
+    assert model["model_name"] == "MultiAgentOutputCapturePlan"
+    assert model["field_count"] == 6
+    assert model["required_field_count"] == 3
+    field_names = [f["name"] for f in model["fields"]]
+    for expected in (
+        "output_capture_plan_id", "multi_invocation_candidate_id", "expected_outputs",
+        "stdout_references", "stderr_references", "metadata",
+    ):
+        assert expected in field_names, f"missing capture plan field: {expected}"
+    required_fields = [f["name"] for f in model["fields"] if f["required"]]
+    for expected in ("output_capture_plan_id", "multi_invocation_candidate_id", "expected_outputs"):
+        assert expected in required_fields, f"expected required: {expected}"
+    optional_fields = [f["name"] for f in model["fields"] if not f["required"]]
+    for expected in ("stdout_references", "stderr_references", "metadata"):
+        assert expected in optional_fields, f"expected optional: {expected}"
+
+
+def test_46k_invocation_strategies(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    strat = data["invocation_strategies"]
+    assert strat["strategy_count"] == 4
+    strategy_names = strat["strategy_names"]
+    for expected in ("sequential", "parallel_review", "parallel_planning", "consensus_preparation"):
+        assert expected in strategy_names, f"missing strategy: {expected}"
+    assert "consensus_preparation" in strat["consensus_strategies"]
+    for expected in ("parallel_review", "parallel_planning", "consensus_preparation"):
+        assert expected in strat["parallel_strategies"], f"expected parallel: {expected}"
+    assert "sequential" not in strat["parallel_strategies"]
+
+
+def test_46k_readiness_evaluation(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    re_ = data["readiness_evaluation"]
+    assert re_["area_count"] == 5
+    assert re_["all_areas_blocking"] is True
+    area_names = [a["area"] for a in re_["areas"]]
+    for expected in (
+        "candidate_readiness", "authorization_readiness", "runtime_readiness",
+        "consensus_readiness", "audit_readiness",
+    ):
+        assert expected in area_names, f"missing readiness area: {expected}"
+    for area in re_["areas"]:
+        assert area["blocking"] is True
+        assert len(area["checks"]) > 0
+
+
+def test_46k_governance_requirements(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    reqs = data["governance_requirements"]
+    assert len(reqs) == 5
+    req_names = [r["requirement"] for r in reqs]
+    for expected in (
+        "authorization_valid", "authorization_not_expired", "all_runtimes_supported",
+        "invocation_strategy_valid", "governance_snapshot_present",
+    ):
+        assert expected in req_names, f"missing governance requirement: {expected}"
+    assert all(r["blocking"] is True for r in reqs)
+    for req in reqs:
+        for field in ("requirement", "description", "blocking", "checked_in"):
+            assert field in req, f"requirement missing field: {field}"
+
+
+def test_46k_governance_boundaries(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert "pilot_may" in gb
+    assert "pilot_may_not" in gb
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    may = " ".join(gb["pilot_may"]).lower()
+    for allowed in (
+        "create multi-agent candidate models",
+        "create multi-agent plan models",
+        "create output capture plans",
+        "evaluate readiness",
+    ):
+        assert allowed in may, f"missing may boundary: {allowed}"
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    for forbidden in ("invoke runtimes", "execute prompts", "modify repository", "commit", "push"):
+        assert forbidden in may_not, f"missing may-not boundary: {forbidden}"
+
+
+def test_46k_future_evolution(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    phases = [e["phase"] for e in data["multi_agent_invocation_pilot"]["future_evolution"]]
+    for expected in ("46L", "46M", "46N"):
+        assert expected in phases, f"missing future phase: {expected}"
+
+
+def test_46k_advisory(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation occurs" in advisory
+
+
+def test_46k_no_runtime_invocation(capsys) -> None:
+    main(["multi-agent-invocation-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    may_not = " ".join(gb["pilot_may_not"]).lower()
+    assert "invoke runtimes" in may_not
+    assert "execute prompts" in may_not
+    assert "commit" in may_not
+    assert "push" in may_not
+
+
+def test_46k_human_output_shows_all_sections(capsys) -> None:
+    main(["multi-agent-invocation-pilot"])
+    output = capsys.readouterr().out
+    assert "Multi-agent invocation pilot" in output
+    assert "MultiAgentInvocationCandidate model" in output
+    assert "MultiAgentInvocationPlan model" in output
+    assert "MultiAgentOutputCapturePlan model" in output
+    assert "Invocation strategies" in output
+    assert "Readiness evaluation" in output
+    assert "Governance requirements" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

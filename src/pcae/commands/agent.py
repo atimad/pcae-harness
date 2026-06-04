@@ -110,6 +110,8 @@ from pcae.core.agent import (
     AUTHORIZATION_EXPIRATION_ADVISORY,
     build_invocation_pilot_status,
     INVOCATION_PILOT_STATUS_ADVISORY,
+    build_multi_agent_invocation_pilot,
+    MULTI_AGENT_INVOCATION_PILOT_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
     build_capability_registry,
@@ -4845,6 +4847,74 @@ def run_authorization_expiration_design(args: argparse.Namespace) -> int:
         print("Governance boundaries:")
         print(f"  May:     {', '.join(gb['workflow_may'])}")
         print(f"  May not: {', '.join(gb['workflow_may_not'])}")
+        print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_multi_agent_invocation_pilot(args: argparse.Namespace) -> int:
+    data = build_multi_agent_invocation_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        pilot = data["multi_agent_invocation_pilot"]
+        print("Multi-agent invocation pilot")
+        print(f"Pilot: {pilot['pilot_id']}  Generated: {pilot['generated_at']}")
+        print(f"Phase: {pilot['phase']} — {pilot['title']}")
+        print()
+        print(pilot["summary"])
+        print()
+        print("MultiAgentInvocationCandidate model:")
+        cm = data["multi_agent_candidate_model"]
+        print(f"  Fields: {cm['field_count']}  Required: {cm['required_field_count']}")
+        print(f"  Statuses: {', '.join(s['status'] for s in cm['statuses'])}")
+        for field in cm["fields"]:
+            req = "required" if field["required"] else "optional"
+            mut = "immutable" if field["immutable"] else "mutable"
+            print(f"    {field['name']} ({field['type']}, {req}, {mut}): {field['description']}")
+        print()
+        print("MultiAgentInvocationPlan model:")
+        pm = data["multi_agent_plan_model"]
+        print(f"  Fields: {pm['field_count']}  Required: {pm['required_field_count']}")
+        print(f"  All fields immutable: {pm['all_fields_immutable']}")
+        for field in pm["fields"]:
+            print(f"    {field['name']} ({field['type']}): {field['description']}")
+        print()
+        print("MultiAgentOutputCapturePlan model:")
+        oc = data["output_capture_plan_model"]
+        print(f"  Fields: {oc['field_count']}  Required: {oc['required_field_count']}")
+        for field in oc["fields"]:
+            req = "required" if field["required"] else "optional"
+            print(f"    {field['name']} ({field['type']}, {req}): {field['description']}")
+        print()
+        print("Invocation strategies:")
+        strat = data["invocation_strategies"]
+        for s in strat["strategies"]:
+            parallel = "parallel" if s["parallel"] else "sequential-mode"
+            consensus = ", consensus required" if s["consensus_required"] else ""
+            print(f"  {s['strategy']} ({parallel}{consensus})")
+            print(f"    {s['description']}")
+        print()
+        print("Readiness evaluation:")
+        re_ = data["readiness_evaluation"]
+        for area in re_["areas"]:
+            blocking = "blocking" if area["blocking"] else "non-blocking"
+            print(f"  {area['area']} ({blocking})")
+            print(f"    {area['description']}")
+            for check in area["checks"]:
+                print(f"    - {check}")
+        print()
+        print("Governance requirements:")
+        for req in data["governance_requirements"]:
+            blocking = "blocking" if req["blocking"] else "non-blocking"
+            print(f"  {req['requirement']} ({blocking}, checked in {req['checked_in']})")
+            print(f"    {req['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:     {', '.join(gb['pilot_may'])}")
+        print(f"  May not: {', '.join(gb['pilot_may_not'])}")
         print(f"  Human review required: {gb['human_review_required']}")
         print()
         print(data["advisory"])

@@ -67,6 +67,7 @@ from pcae.commands.agent import (
     run_execution_result_review_design,
     run_authorization_expiration_design,
     run_invocation_pilot_status,
+    run_multi_agent_invocation_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -1851,6 +1852,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON invocation pilot status output.",
     )
     invocation_pilot_status_parser.set_defaults(handler=run_invocation_pilot_status)
+
+    multi_agent_invocation_pilot_parser = subparsers.add_parser(
+        "multi-agent-invocation-pilot",
+        help="Design governed multi-agent read-only invocation pilot structures (Phase 46K).",
+    )
+    multi_agent_invocation_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON multi-agent invocation pilot output.",
+    )
+    multi_agent_invocation_pilot_parser.set_defaults(handler=run_multi_agent_invocation_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

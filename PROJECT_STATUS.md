@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 46J: Read-Only Invocation Pilot Implementation.
+Phase 46K: Multi-Agent Invocation Pilot.
 
 ## Governance Coherence Note
 
@@ -2512,10 +2512,35 @@ governance_snapshot_present; governance_boundaries: pilot_may define models/eval
 readiness; pilot_may_not invoke runtimes/execute prompts/modify repository/commit/push/
 rollback; read_only=true, human_review_required=true; future_evolution: 46K/46L/46M/46N;
 advisory: "Invocation pilot status is informational; no runtime invocation occurs."
+and the governed internal structures for future multi-agent read-only invocation pilots are
+designed with `pcae multi-agent-invocation-pilot` and `pcae multi-agent-invocation-pilot --json`
+(Phase 46K): inputs: execution authorization artifacts, invocation pilot status, invocation
+contracts, consensus execution design, execution audit design; no runtime invocation; no prompt
+execution; no repository modification by agents; MultiAgentInvocationCandidate model: 7 fields
+(all required), immutable: multi_invocation_candidate_id/authorization_id/prompt_id/
+selected_runtimes/selected_agents/invocation_mode, mutable: invocation_status; statuses (4):
+pending/prepared/blocked/completed (completed is terminal; only prepared allows plan
+preparation); MultiAgentInvocationPlan model: 8 fields, all required/immutable
+(multi_invocation_plan_id/multi_invocation_candidate_id/participating_runtimes/
+invocation_strategy/output_capture_strategy/timeout_strategy/governance_snapshot/
+consensus_required); MultiAgentOutputCapturePlan model: 6 fields (3 required, 3 optional):
+output_capture_plan_id/multi_invocation_candidate_id/expected_outputs required;
+stdout_references/stderr_references/metadata optional; invocation strategies (4):
+sequential/parallel_review/parallel_planning/consensus_preparation; readiness evaluation
+(5 areas, all blocking): candidate_readiness (6 checks)/authorization_readiness (5 checks)/
+runtime_readiness (4 checks)/consensus_readiness (4 checks)/audit_readiness (3 checks);
+governance requirements (5, all blocking):
+authorization_valid/authorization_not_expired/all_runtimes_supported/
+invocation_strategy_valid/governance_snapshot_present; governance_boundaries: pilot_may
+create multi-agent candidate models/create multi-agent plan models/create output capture
+plans/evaluate readiness; pilot_may_not invoke runtimes/execute prompts/modify repository/
+commit/push/rollback; read_only=true, human_review_required=true; future_evolution:
+46L/46M/46N; advisory: "Multi-agent invocation pilot is informational; no runtime invocation
+occurs."
 
 ## Next
 
-- TBD: Future phases (46K Multi-Agent Invocation Pilot, 46L Execution Result Quality Framework, 46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
+- TBD: Future phases (46L Execution Result Quality Framework, 46M Authorization Renewal Pilot, 46N Governed Write Invocation Design).
 
 ## Future Explorations
 

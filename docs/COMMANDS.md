@@ -431,3 +431,8 @@
 
 - `pcae invocation-pilot-status`
 - `pcae invocation-pilot-status --json`
+
+## multi-agent-invocation-pilot
+
+- `pcae multi-agent-invocation-pilot`
+- `pcae multi-agent-invocation-pilot --json`

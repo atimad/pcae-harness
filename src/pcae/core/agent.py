@@ -18536,3 +18536,469 @@ def build_invocation_pilot_status() -> dict:
         "governance_boundaries": dict(_IPST_GOVERNANCE_BOUNDARIES),
         "advisory": INVOCATION_PILOT_STATUS_ADVISORY,
     }
+
+
+# Phase 46K — Multi-Agent Invocation Pilot
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_INVOCATION_PILOT_ADVISORY = (
+    "Multi-agent invocation pilot is informational; no runtime invocation occurs."
+)
+
+_MAIP_INPUT_SOURCES: tuple[str, ...] = (
+    "execution_authorization_artifacts",
+    "invocation_pilot_status",
+    "invocation_contracts",
+    "consensus_execution_design",
+    "execution_audit_design",
+)
+
+_MAIP_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "multi_invocation_candidate_id",
+        "type": "str",
+        "description": "Unique identifier for this multi-agent invocation candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "description": "Reference to the ExecutionAuthorizationArtifact authorizing this candidate.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "description": "Identifier of the approved prompt artifact to be invoked across selected runtimes.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_runtimes",
+        "type": "list[str]",
+        "description": "Ordered list of runtime identifiers selected for this multi-agent invocation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "selected_agents",
+        "type": "list[str]",
+        "description": "Ordered list of agent identifiers corresponding to selected runtimes.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_mode",
+        "type": "str",
+        "description": "Invocation strategy mode: sequential, parallel_review, parallel_planning, or consensus_preparation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_status",
+        "type": "str",
+        "description": "Current status of the candidate (pending, prepared, blocked, completed).",
+        "required": True,
+        "immutable": False,
+    },
+)
+
+_MAIP_CANDIDATE_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "pending",
+        "description": "Candidate has been created; governance requirements have not yet been evaluated.",
+        "terminal": False,
+        "allows_plan_preparation": False,
+    },
+    {
+        "status": "prepared",
+        "description": "All governance requirements passed; a MultiAgentInvocationPlan has been prepared.",
+        "terminal": False,
+        "allows_plan_preparation": True,
+    },
+    {
+        "status": "blocked",
+        "description": "One or more governance requirements failed; candidate cannot proceed without remediation.",
+        "terminal": False,
+        "allows_plan_preparation": False,
+    },
+    {
+        "status": "completed",
+        "description": "Candidate processing is complete (plan prepared and handed off for future execution).",
+        "terminal": True,
+        "allows_plan_preparation": False,
+    },
+)
+
+_MAIP_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "multi_invocation_plan_id",
+        "type": "str",
+        "description": "Unique identifier for this multi-agent invocation plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "multi_invocation_candidate_id",
+        "type": "str",
+        "description": "Reference to the MultiAgentInvocationCandidate this plan was prepared for.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "participating_runtimes",
+        "type": "list[str]",
+        "description": "Ordered list of runtime identifiers participating in this invocation plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "invocation_strategy",
+        "type": "str",
+        "description": "Invocation strategy: sequential, parallel_review, parallel_planning, or consensus_preparation.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "output_capture_strategy",
+        "type": "str",
+        "description": "Output capture mode for all participating runtimes: stdout, stderr, structured, or combined.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "timeout_strategy",
+        "type": "str",
+        "description": "Timeout policy applied to each runtime invocation in this plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "governance_snapshot",
+        "type": "str",
+        "description": "Reference to the governance snapshot captured at plan preparation time.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "description": "Whether consensus processing is required after all runtime outputs are captured.",
+        "required": True,
+        "immutable": True,
+    },
+)
+
+_MAIP_OUTPUT_CAPTURE_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "output_capture_plan_id",
+        "type": "str",
+        "description": "Unique identifier for this multi-agent output capture plan.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "multi_invocation_candidate_id",
+        "type": "str",
+        "description": "Reference to the MultiAgentInvocationCandidate whose outputs will be captured.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "expected_outputs",
+        "type": "list[str]",
+        "description": "List of expected output artifact names, one per participating runtime.",
+        "required": True,
+        "immutable": True,
+    },
+    {
+        "name": "stdout_references",
+        "type": "list[str] | None",
+        "description": "Paths or references to captured standard output per runtime. Null before capture.",
+        "required": False,
+        "immutable": False,
+    },
+    {
+        "name": "stderr_references",
+        "type": "list[str] | None",
+        "description": "Paths or references to captured standard error per runtime. Null before capture.",
+        "required": False,
+        "immutable": False,
+    },
+    {
+        "name": "metadata",
+        "type": "dict | None",
+        "description": "Per-runtime metadata (exit codes, durations, runtime versions, sandbox modes). Null before capture.",
+        "required": False,
+        "immutable": False,
+    },
+)
+
+_MAIP_INVOCATION_STRATEGIES: tuple[dict, ...] = (
+    {
+        "strategy": "sequential",
+        "description": "Runtimes are invoked one after another; each result is available before the next invocation begins.",
+        "consensus_required": False,
+        "parallel": False,
+    },
+    {
+        "strategy": "parallel_review",
+        "description": "Multiple runtimes are prepared simultaneously for parallel review; results are collected independently.",
+        "consensus_required": False,
+        "parallel": True,
+    },
+    {
+        "strategy": "parallel_planning",
+        "description": "Multiple runtimes are prepared simultaneously for parallel planning work; results are merged after collection.",
+        "consensus_required": False,
+        "parallel": True,
+    },
+    {
+        "strategy": "consensus_preparation",
+        "description": "Multiple runtimes are prepared for consensus processing; consensus_required is True.",
+        "consensus_required": True,
+        "parallel": True,
+    },
+)
+
+_MAIP_READINESS_CHECKS: tuple[dict, ...] = (
+    {
+        "area": "candidate_readiness",
+        "description": "Verifies all required MultiAgentInvocationCandidate fields are present and non-empty.",
+        "checks": [
+            "multi_invocation_candidate_id present",
+            "authorization_id present",
+            "prompt_id present",
+            "selected_runtimes non-empty",
+            "selected_agents non-empty",
+            "invocation_mode is a valid invocation strategy",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "authorization_readiness",
+        "description": (
+            "Verifies the referenced ExecutionAuthorizationArtifact is valid, "
+            "not expired, not denied, and not superseded."
+        ),
+        "checks": [
+            "authorization_id resolves to known artifact",
+            "authorization state is authorized or renewed",
+            "authorization is not expired",
+            "authorization is not denied",
+            "authorization is not superseded",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "runtime_readiness",
+        "description": (
+            "Verifies all selected runtimes appear in the validated invocation contracts "
+            "and support read-only sandbox execution."
+        ),
+        "checks": [
+            "all selected_runtimes in validated_contracts",
+            "read_only_contract defined for each runtime",
+            "sandbox_mode documented for each runtime",
+            "timeout_strategy documented for each runtime",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "consensus_readiness",
+        "description": (
+            "Verifies consensus requirements are consistent with the selected invocation strategy "
+            "and that all participating runtimes can contribute to consensus processing."
+        ),
+        "checks": [
+            "invocation_mode is a supported invocation strategy",
+            "consensus_required consistent with invocation_mode",
+            "all participating runtimes have consensus contribution capability",
+            "conflict escalation policy defined",
+        ],
+        "blocking": True,
+    },
+    {
+        "area": "audit_readiness",
+        "description": (
+            "Verifies governance snapshot and audit trail requirements are satisfied "
+            "for all participating runtimes."
+        ),
+        "checks": [
+            "governance_snapshot captured at plan preparation time",
+            "audit trail recordable for all selected runtimes",
+            "governance requirements traceable per runtime",
+        ],
+        "blocking": True,
+    },
+)
+
+_MAIP_GOVERNANCE_REQUIREMENTS: tuple[dict, ...] = (
+    {
+        "requirement": "authorization_valid",
+        "description": (
+            "The authorization_id must reference a known ExecutionAuthorizationArtifact "
+            "in authorized or renewed state."
+        ),
+        "blocking": True,
+        "checked_in": "authorization_readiness",
+    },
+    {
+        "requirement": "authorization_not_expired",
+        "description": (
+            "The authorization must not be in expired, denied, or superseded state. "
+            "Expired authorizations require renewal before a candidate may be prepared."
+        ),
+        "blocking": True,
+        "checked_in": "authorization_readiness",
+    },
+    {
+        "requirement": "all_runtimes_supported",
+        "description": (
+            "All selected_runtimes must appear in the validated invocation contracts "
+            "with a documented read-only sandbox mode."
+        ),
+        "blocking": True,
+        "checked_in": "runtime_readiness",
+    },
+    {
+        "requirement": "invocation_strategy_valid",
+        "description": (
+            "The invocation_mode must be one of the four supported strategies: "
+            "sequential, parallel_review, parallel_planning, or consensus_preparation."
+        ),
+        "blocking": True,
+        "checked_in": "consensus_readiness",
+    },
+    {
+        "requirement": "governance_snapshot_present",
+        "description": (
+            "A governance snapshot must be captured at plan preparation time. "
+            "Candidates without a governance snapshot may not transition to prepared."
+        ),
+        "blocking": True,
+        "checked_in": "audit_readiness",
+    },
+)
+
+_MAIP_GOVERNANCE_BOUNDARIES: dict = {
+    "pilot_may": [
+        "create multi-agent candidate models",
+        "create multi-agent plan models",
+        "create output capture plans",
+        "evaluate readiness",
+    ],
+    "pilot_may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "human_review_required": True,
+    "read_only": True,
+    "implementation_phase": True,
+}
+
+_MAIP_FUTURE_EVOLUTION: tuple[dict, ...] = (
+    {"phase": "46L", "description": "Execution Result Quality Framework"},
+    {"phase": "46M", "description": "Authorization Renewal Pilot"},
+    {"phase": "46N", "description": "Governed Write Invocation Design"},
+)
+
+
+def build_multi_agent_invocation_pilot() -> dict:
+    """Design governed internal structures for multi-agent read-only invocation pilots. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pilot_id = f"maip-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    candidate_fields = [dict(f) for f in _MAIP_CANDIDATE_FIELDS]
+    candidate_statuses = [dict(s) for s in _MAIP_CANDIDATE_STATUSES]
+    plan_fields = [dict(f) for f in _MAIP_PLAN_FIELDS]
+    capture_fields = [dict(f) for f in _MAIP_OUTPUT_CAPTURE_PLAN_FIELDS]
+    strategies = [dict(s) for s in _MAIP_INVOCATION_STRATEGIES]
+    readiness_checks = [dict(r) for r in _MAIP_READINESS_CHECKS]
+    governance_requirements = [dict(g) for g in _MAIP_GOVERNANCE_REQUIREMENTS]
+
+    terminal_statuses = [s["status"] for s in candidate_statuses if s["terminal"]]
+    plan_allowed_statuses = [s["status"] for s in candidate_statuses if s["allows_plan_preparation"]]
+
+    multi_agent_candidate_model = {
+        "model_name": "MultiAgentInvocationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "immutable_fields": [f["name"] for f in candidate_fields if f["immutable"]],
+        "mutable_fields": [f["name"] for f in candidate_fields if not f["immutable"]],
+        "status_count": len(candidate_statuses),
+        "terminal_statuses": terminal_statuses,
+        "plan_allowed_statuses": plan_allowed_statuses,
+        "fields": candidate_fields,
+        "statuses": candidate_statuses,
+    }
+
+    multi_agent_plan_model = {
+        "model_name": "MultiAgentInvocationPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in plan_fields),
+        "fields": plan_fields,
+    }
+
+    output_capture_plan_model = {
+        "model_name": "MultiAgentOutputCapturePlan",
+        "field_count": len(capture_fields),
+        "required_field_count": sum(1 for f in capture_fields if f["required"]),
+        "all_fields_immutable": all(f["immutable"] for f in capture_fields),
+        "fields": capture_fields,
+    }
+
+    invocation_strategies = {
+        "strategy_count": len(strategies),
+        "strategies": strategies,
+        "strategy_names": [s["strategy"] for s in strategies],
+        "consensus_strategies": [s["strategy"] for s in strategies if s["consensus_required"]],
+        "parallel_strategies": [s["strategy"] for s in strategies if s["parallel"]],
+    }
+
+    readiness_evaluation = {
+        "area_count": len(readiness_checks),
+        "areas": readiness_checks,
+        "all_areas_blocking": all(r["blocking"] for r in readiness_checks),
+    }
+
+    multi_agent_invocation_pilot = {
+        "pilot_id": pilot_id,
+        "generated_at": generated_at,
+        "phase": "46K",
+        "title": "Multi-Agent Invocation Pilot",
+        "summary": (
+            "Designs the governed internal structures required for future multi-agent read-only "
+            "invocation pilots. Defines MultiAgentInvocationCandidate, MultiAgentInvocationPlan, "
+            "and MultiAgentOutputCapturePlan models with four invocation strategies and five "
+            "readiness evaluation areas. No runtime invocation, no prompt execution, and no "
+            "repository modification by agents."
+        ),
+        "input_sources": list(_MAIP_INPUT_SOURCES),
+        "model_count": 3,
+        "invocation_strategy_count": len(strategies),
+        "readiness_area_count": len(readiness_checks),
+        "governance_requirement_count": len(governance_requirements),
+        "human_review_required": True,
+        "governance_boundaries": dict(_MAIP_GOVERNANCE_BOUNDARIES),
+        "future_evolution": [dict(e) for e in _MAIP_FUTURE_EVOLUTION],
+    }
+
+    return {
+        "multi_agent_invocation_pilot": multi_agent_invocation_pilot,
+        "multi_agent_candidate_model": multi_agent_candidate_model,
+        "multi_agent_plan_model": multi_agent_plan_model,
+        "output_capture_plan_model": output_capture_plan_model,
+        "invocation_strategies": invocation_strategies,
+        "readiness_evaluation": readiness_evaluation,
+        "governance_requirements": governance_requirements,
+        "governance_boundaries": dict(_MAIP_GOVERNANCE_BOUNDARIES),
+        "advisory": MULTI_AGENT_INVOCATION_PILOT_ADVISORY,
+    }
