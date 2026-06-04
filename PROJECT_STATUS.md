@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48H: Invocation Evidence Model.
+Phase 48X.1: README Modernization (documentation only).
 
 ## Governance Coherence Note
 
@@ -3121,6 +3121,14 @@ governance_boundaries: may construct invocation evidence models/evaluate
 evidence readiness/report blockers and warnings; may_not invoke runtimes/
 execute prompts/modify repository/approve execution/commit/push/rollback;
 inputs: 7 sources
+and PCAE README.md substantially modernized (Phase 48X.1):
+rewritten to accurately describe PCAE as a governance-first framework for
+controlled AI-assisted engineering; sections: project title/short description/
+why PCAE exists/core principles/architecture overview/current capabilities/
+CLI examples/current safety status/roadmap snapshot/license;
+explicitly states execution_allowed=False for all runtimes, prompt execution
+disabled, write execution disabled, human_review_required=True;
+no source logic changes; documentation only
 
 ## Next
 
