@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49K: Governance Invariant Enforcement.
+Phase 49L: Runtime Safety Invariant Framework.
 
 ## Governance Coherence Note
 
@@ -3374,10 +3374,25 @@ session_continuity_verified_before_handoff, governance_audit_is_advisory_only;
 execution_allowed=False; human_review_required=True;
 assessment_status=compliant_with_warnings; no state modifications occur;
 `docs/COMMANDS.md` regenerated; 15 new tests; 3583 total tests passing
+and runtime safety invariant framework implemented (Phase 49L):
+`pcae runtime-safety-invariants` and `--json`; defines and audits runtime
+safety invariants before PCAE moves toward controlled write authorization;
+three models — RuntimeSafetyInvariant (7 fields, adds runtime_id vs
+GovernanceInvariant), RuntimeSafetyInvariantAssessment (7 fields, uses
+runtime_results), RuntimeSafetyInvariantSummary (8 fields, adds runtime_count
+and invariant_count); eight invariant domains; eight required invariants
+covering trust, contracts, sandbox, timeout, output capture, writable
+execution, and human authorization; three runtimes assessed: codex-local
+(partially_trusted), claude-local (partially_trusted), kimi-local (untrusted);
+untrusted_runtime_cannot_execute invariant applied to kimi-local;
+sandbox/timeout/output capture verification unconfirmed → three
+compliant_with_warnings; execution_allowed=False; human_review_required=True;
+assessment_status=compliant_with_warnings; no runtimes invoked;
+`docs/COMMANDS.md` regenerated; 16 new tests; 3599 total tests passing
 
 ## Current Phase
 
-Phase 49K: Governance Invariant Enforcement.
+Phase 49L: Runtime Safety Invariant Framework.
 
 ## Next
 

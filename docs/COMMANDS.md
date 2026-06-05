@@ -626,3 +626,8 @@
 
 - `pcae governance-invariants`
 - `pcae governance-invariants --json`
+
+## runtime-safety-invariants
+
+- `pcae runtime-safety-invariants`
+- `pcae runtime-safety-invariants --json`

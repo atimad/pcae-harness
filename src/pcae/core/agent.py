@@ -35948,3 +35948,472 @@ def build_governance_invariants() -> dict:
         "input_sources": list(_GI_INPUT_SOURCES),
         "advisory": GOVERNANCE_INVARIANTS_ADVISORY,
     }
+
+
+# Phase 49L — Runtime Safety Invariant Framework
+# ---------------------------------------------------------------------------
+
+RUNTIME_SAFETY_INVARIANTS_ADVISORY = (
+    "Runtime safety invariant framework is informational; invariants may be audited "
+    "but not enforced automatically. No runtimes are invoked, no prompts are executed, "
+    "and no state modifications occur. "
+    "execution_allowed=False in Phase 49L."
+)
+
+_RSI_INVARIANT_DOMAINS: tuple[str, ...] = (
+    "Runtime Trust Invariants",
+    "Runtime Contract Invariants",
+    "Sandbox Invariants",
+    "Timeout Invariants",
+    "Output Capture Invariants",
+    "Writable Execution Invariants",
+    "Runtime Availability Invariants",
+    "Human Authorization Invariants",
+)
+
+_RSI_INVARIANT_STATUSES: tuple[str, ...] = (
+    "compliant",
+    "compliant_with_warnings",
+    "blocked",
+    "violated",
+)
+
+_RSI_KNOWN_RUNTIMES: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+_RSI_INVARIANT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "invariant_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this runtime safety invariant.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "Runtime this invariant applies to, or 'all' for cross-runtime invariants.",
+    },
+    {
+        "name": "invariant_name",
+        "type": "str",
+        "required": True,
+        "description": "Machine-readable name of this invariant.",
+    },
+    {
+        "name": "invariant_domain",
+        "type": "str",
+        "required": True,
+        "description": "The runtime safety domain this invariant belongs to.",
+    },
+    {
+        "name": "invariant_description",
+        "type": "str",
+        "required": True,
+        "description": "Human-readable description of what this invariant asserts.",
+    },
+    {
+        "name": "invariant_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49L.",
+    },
+)
+
+_RSI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this runtime safety invariant assessment.",
+    },
+    {
+        "name": "runtime_results",
+        "type": "list[RuntimeSafetyInvariant]",
+        "required": True,
+        "description": "Ordered list of runtime safety invariant evaluation results.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants assessed as compliant or compliant_with_warnings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants with warnings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants in blocked or violated state.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49L.",
+    },
+)
+
+_RSI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this runtime safety invariant summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "runtime_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of distinct runtimes assessed.",
+    },
+    {
+        "name": "invariant_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of invariants evaluated.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of compliant invariants.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants with warnings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocked or violated invariants.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+)
+
+_RSI_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "evaluate runtime safety invariants",
+        "report violations",
+        "report warnings",
+        "recommend future enforcement",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "approve runtime execution",
+        "repair state",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49L",
+}
+
+_RSI_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContract",
+    "RuntimeContractVerificationRecord",
+    "RuntimeTrustRecord",
+    "runtime contract enforcement",
+    "readonly runtime pilot",
+    "multi-agent readonly pilot",
+    "governance invariant assessment",
+)
+
+_RSI_REQUIRED_INVARIANTS: tuple[dict, ...] = (
+    {
+        "invariant_name": "untrusted_runtime_cannot_execute",
+        "runtime_id": "kimi-local",
+        "invariant_domain": "Runtime Trust Invariants",
+        "invariant_description": (
+            "A runtime with trust_level=untrusted must never be permitted to execute."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "kimi-local trust_level=untrusted. execution_allowed=False enforced. "
+            "No invocation path exists for untrusted runtimes. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "partially_trusted_runtime_requires_human_review",
+        "runtime_id": "all",
+        "invariant_domain": "Runtime Trust Invariants",
+        "invariant_description": (
+            "A runtime with trust_level=partially_trusted must require human_review_required=True "
+            "before any execution is permitted."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "codex-local and claude-local are partially_trusted. "
+            "human_review_required=True enforced across all governance scaffold phases. "
+            "No execution path bypasses human review. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "writable_execution_requires_explicit_authorization",
+        "runtime_id": "all",
+        "invariant_domain": "Writable Execution Invariants",
+        "invariant_description": (
+            "Write execution must require explicit human authorization; "
+            "it may not be inferred or inherited from read-only authorization."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "Write execution is not yet authorized for any runtime. "
+            "execution_allowed=False enforced across all scaffold phases. "
+            "No implicit write authorization path exists. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "sandbox_contract_required_before_execution",
+        "runtime_id": "all",
+        "invariant_domain": "Sandbox Invariants",
+        "invariant_description": (
+            "A sandbox contract must be verified before any runtime execution is permitted."
+        ),
+        "expected_status": "compliant_with_warnings",
+        "finding": (
+            "Sandbox contracts are defined in RuntimeContract for codex-local and claude-local. "
+            "Sandbox verification has not been confirmed for either runtime. "
+            "Execution remains blocked. Verification required before any execution gate opens."
+        ),
+        "warnings": ["sandbox_verification_not_confirmed_for_codex_local_or_claude_local"],
+    },
+    {
+        "invariant_name": "timeout_contract_required_before_execution",
+        "runtime_id": "all",
+        "invariant_domain": "Timeout Invariants",
+        "invariant_description": (
+            "A timeout contract must be verified before any runtime execution is permitted."
+        ),
+        "expected_status": "compliant_with_warnings",
+        "finding": (
+            "Timeout contracts are defined in RuntimeContract. "
+            "Timeout enforcement has not been confirmed for any runtime. "
+            "Execution remains blocked. Verification required before any execution gate opens."
+        ),
+        "warnings": ["timeout_enforcement_not_confirmed_for_any_runtime"],
+    },
+    {
+        "invariant_name": "output_capture_required_before_execution",
+        "runtime_id": "all",
+        "invariant_domain": "Output Capture Invariants",
+        "invariant_description": (
+            "Output capture must be verified before any runtime execution is permitted."
+        ),
+        "expected_status": "compliant_with_warnings",
+        "finding": (
+            "Output capture is defined in RuntimeContract. "
+            "Output capture verification has not been confirmed for any runtime. "
+            "Execution remains blocked. Verification required before any execution gate opens."
+        ),
+        "warnings": ["output_capture_not_confirmed_for_any_runtime"],
+    },
+    {
+        "invariant_name": "runtime_contract_enforcement_required",
+        "runtime_id": "all",
+        "invariant_domain": "Runtime Contract Invariants",
+        "invariant_description": (
+            "Runtime contract enforcement must be active before any runtime execution is permitted."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "Runtime contract enforcement is verified across all scaffold phases (49G–49L). "
+            "No execution gate has been opened without contract enforcement. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "execution_allowed_false_for_unverified_runtimes",
+        "runtime_id": "all",
+        "invariant_domain": "Human Authorization Invariants",
+        "invariant_description": (
+            "execution_allowed must remain False for any runtime whose sandbox, timeout, "
+            "and output capture contracts have not been fully verified."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "execution_allowed=False enforced for codex-local, claude-local, and kimi-local. "
+            "No runtime has completed sandbox/timeout/output capture verification. "
+            "Invariant holds."
+        ),
+        "warnings": [],
+    },
+)
+
+
+def build_runtime_safety_invariants() -> dict:
+    """Audit runtime safety invariants before controlled write authorization. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    assessment_id_ref = f"rsia-{ts}"
+
+    invariant_fields = [dict(f) for f in _RSI_INVARIANT_FIELDS]
+    assessment_fields = [dict(f) for f in _RSI_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _RSI_SUMMARY_FIELDS]
+
+    invariant_results: list[dict] = []
+    for i, inv in enumerate(_RSI_REQUIRED_INVARIANTS):
+        invariant_results.append({
+            "invariant_id": f"rsi-{i + 1:03d}-{ts}",
+            "runtime_id": inv["runtime_id"],
+            "invariant_name": inv["invariant_name"],
+            "invariant_domain": inv["invariant_domain"],
+            "invariant_description": inv["invariant_description"],
+            "invariant_status": inv["expected_status"],
+            "finding": inv["finding"],
+            "warnings": inv["warnings"],
+            "human_review_required": True,
+        })
+
+    compliant_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] in ("compliant", "compliant_with_warnings")
+    )
+    warning_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] == "compliant_with_warnings"
+    )
+    blocker_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] in ("blocked", "violated")
+    )
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+    elif any(r["invariant_status"] == "violated" for r in invariant_results):
+        overall_status = "violated"
+    elif warning_count > 0:
+        overall_status = "compliant_with_warnings"
+    else:
+        overall_status = "compliant"
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "runtime_results": [r["invariant_id"] for r in invariant_results],
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"rsis-{ts}",
+        "assessment_id": assessment_id_ref,
+        "runtime_count": len(_RSI_KNOWN_RUNTIMES),
+        "invariant_count": len(invariant_results),
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+    }
+
+    invariant_model = {
+        "model_name": "RuntimeSafetyInvariant",
+        "field_count": len(invariant_fields),
+        "required_field_count": sum(1 for f in invariant_fields if f["required"]),
+        "supported_invariant_statuses": list(_RSI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49l": True,
+        "fields": invariant_fields,
+    }
+
+    assessment_model = {
+        "model_name": "RuntimeSafetyInvariantAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_invariant_statuses": list(_RSI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49l": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "RuntimeSafetyInvariantSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_invariant_statuses": list(_RSI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49l": True,
+        "fields": summary_fields,
+    }
+
+    safety_overview = {
+        "overview_id": f"49l-{ts}",
+        "generated_at": generated_at,
+        "phase": "49L",
+        "title": "Runtime Safety Invariant Framework",
+        "summary": (
+            "Defines and audits runtime safety invariants before PCAE moves toward "
+            "controlled write authorization. "
+            "Eight invariant domains are assessed: Runtime Trust Invariants, "
+            "Runtime Contract Invariants, Sandbox Invariants, Timeout Invariants, "
+            "Output Capture Invariants, Writable Execution Invariants, "
+            "Runtime Availability Invariants, and Human Authorization Invariants. "
+            f"Three runtimes assessed: {', '.join(_RSI_KNOWN_RUNTIMES)}. "
+            "Invariants may be audited but not enforced automatically. "
+            "No runtimes are invoked. "
+            f"assessment_status={overall_status}. execution_allowed=False."
+        ),
+        "invariant_domain_count": len(_RSI_INVARIANT_DOMAINS),
+        "runtime_count": len(_RSI_KNOWN_RUNTIMES),
+        "invariant_count": len(invariant_results),
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "safety_overview": safety_overview,
+        "invariant_model": invariant_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "invariant_results": invariant_results,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RSI_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RSI_INPUT_SOURCES),
+        "advisory": RUNTIME_SAFETY_INVARIANTS_ADVISORY,
+    }

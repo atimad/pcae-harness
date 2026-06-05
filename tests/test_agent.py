@@ -31954,3 +31954,239 @@ def test_49k_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49L — Runtime Safety Invariant Framework
+
+
+def test_49l_json_structure(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "safety_overview", "invariant_model", "assessment_model", "summary_model",
+        "invariant_results", "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49l_safety_overview_fields(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["safety_overview"]
+    for field in (
+        "overview_id", "generated_at", "phase", "title", "summary",
+        "invariant_domain_count", "runtime_count", "invariant_count",
+        "compliant_count", "warning_count", "blocker_count", "assessment_status",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in ov, f"missing safety_overview field: {field}"
+    assert ov["phase"] == "49L"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["invariant_domain_count"] == 8
+    assert ov["invariant_count"] == 8
+    assert ov["runtime_count"] == 3
+
+
+def test_49l_execution_always_blocked(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["safety_overview"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["invariant_model"]["execution_allowed_always_false_in_49l"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_49l"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49l"] is True
+    assert data["sample_assessment"]["execution_allowed"] is False
+
+
+def test_49l_human_review_always_required(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["safety_overview"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for r in data["invariant_results"]:
+        assert r["human_review_required"] is True, (
+            f"human_review_required not True for {r['invariant_name']}"
+        )
+
+
+def test_49l_invariant_model(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    im = data["invariant_model"]
+    assert im["model_name"] == "RuntimeSafetyInvariant"
+    assert im["field_count"] == 7
+    assert im["required_field_count"] == 7
+    field_names = [f["name"] for f in im["fields"]]
+    for expected in (
+        "invariant_id", "runtime_id", "invariant_name", "invariant_domain",
+        "invariant_description", "invariant_status", "human_review_required",
+    ):
+        assert expected in field_names, f"missing invariant field: {expected}"
+    for status in ("compliant", "compliant_with_warnings", "blocked", "violated"):
+        assert status in im["supported_invariant_statuses"], f"missing status: {status}"
+
+
+def test_49l_assessment_model(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "RuntimeSafetyInvariantAssessment"
+    assert am["field_count"] == 7
+    assert am["required_field_count"] == 7
+    field_names = [f["name"] for f in am["fields"]]
+    for expected in (
+        "assessment_id", "runtime_results", "compliant_count",
+        "warning_count", "blocker_count", "assessment_status", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing assessment field: {expected}"
+
+
+def test_49l_summary_model(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "RuntimeSafetyInvariantSummary"
+    assert sm["field_count"] == 8
+    assert sm["required_field_count"] == 8
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "assessment_id", "runtime_count", "invariant_count",
+        "compliant_count", "warning_count", "blocker_count", "assessment_status",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49l_all_required_invariants_present(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    names = [r["invariant_name"] for r in data["invariant_results"]]
+    for expected in (
+        "untrusted_runtime_cannot_execute",
+        "partially_trusted_runtime_requires_human_review",
+        "writable_execution_requires_explicit_authorization",
+        "sandbox_contract_required_before_execution",
+        "timeout_contract_required_before_execution",
+        "output_capture_required_before_execution",
+        "runtime_contract_enforcement_required",
+        "execution_allowed_false_for_unverified_runtimes",
+    ):
+        assert expected in names, f"missing required invariant: {expected}"
+    assert len(names) == 8
+
+
+def test_49l_invariant_results_structure(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for r in data["invariant_results"]:
+        for key in (
+            "invariant_id", "runtime_id", "invariant_name", "invariant_domain",
+            "invariant_description", "invariant_status",
+            "finding", "warnings", "human_review_required",
+        ):
+            assert key in r, f"invariant {r.get('invariant_name')!r} missing key: {key}"
+        assert r["invariant_status"] in (
+            "compliant", "compliant_with_warnings", "blocked", "violated"
+        )
+
+
+def test_49l_all_invariant_domains_covered(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {r["invariant_domain"] for r in data["invariant_results"]}
+    for expected in (
+        "Runtime Trust Invariants", "Runtime Contract Invariants",
+        "Sandbox Invariants", "Timeout Invariants", "Output Capture Invariants",
+        "Writable Execution Invariants", "Human Authorization Invariants",
+    ):
+        assert expected in domains, f"missing invariant domain: {expected}"
+
+
+def test_49l_untrusted_runtime_blocked(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    untrusted = next(
+        r for r in data["invariant_results"]
+        if r["invariant_name"] == "untrusted_runtime_cannot_execute"
+    )
+    assert untrusted["runtime_id"] == "kimi-local"
+    assert untrusted["invariant_status"] in (
+        "compliant", "compliant_with_warnings", "blocked", "violated"
+    )
+
+
+def test_49l_sample_assessment_fields(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    assert sa["execution_allowed"] is False
+    assert sa["assessment_status"] in (
+        "compliant", "compliant_with_warnings", "blocked", "violated"
+    )
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["warning_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["runtime_results"], list)
+    assert len(sa["runtime_results"]) == 8
+
+
+def test_49l_sample_summary_fields(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["runtime_count"] == 3
+    assert ss["invariant_count"] == 8
+    assert ss["assessment_status"] in (
+        "compliant", "compliant_with_warnings", "blocked", "violated"
+    )
+    assert isinstance(ss["compliant_count"], int)
+    assert isinstance(ss["warning_count"], int)
+    assert isinstance(ss["blocker_count"], int)
+
+
+def test_49l_input_sources(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "RuntimeContract", "RuntimeContractVerificationRecord", "RuntimeTrustRecord",
+        "runtime contract enforcement", "readonly runtime pilot",
+        "multi-agent readonly pilot", "governance invariant assessment",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49l_governance_boundaries(capsys) -> None:
+    main(["runtime-safety-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49L"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "evaluate runtime safety invariants", "report violations",
+        "report warnings", "recommend future enforcement",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "approve runtime execution", "repair state", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49l_human_output_shows_all_sections(capsys) -> None:
+    main(["runtime-safety-invariants"])
+    output = capsys.readouterr().out
+    assert "Runtime safety invariant framework" in output
+    assert "Invariant model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Invariant results" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

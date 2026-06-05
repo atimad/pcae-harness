@@ -187,6 +187,8 @@ from pcae.core.agent import (
     SESSION_CONTINUITY_GOVERNANCE_ADVISORY,
     build_governance_invariants,
     GOVERNANCE_INVARIANTS_ADVISORY,
+    build_runtime_safety_invariants,
+    RUNTIME_SAFETY_INVARIANTS_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7432,6 +7434,73 @@ def run_governance_invariants(args: argparse.Namespace) -> int:
         print()
         ss = data["sample_summary"]
         print("Sample summary:")
+        print(f"  invariant_count:       {ss['invariant_count']}")
+        print(f"  assessment_status:     {ss['assessment_status']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['may'])}")
+        print(f"  May not:           {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_runtime_safety_invariants(args: argparse.Namespace) -> int:
+    data = build_runtime_safety_invariants()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["safety_overview"]
+        print("Runtime safety invariant framework")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Invariant domains:     {ov['invariant_domain_count']}")
+        print(f"Runtimes assessed:     {ov['runtime_count']}")
+        print(f"Invariants audited:    {ov['invariant_count']}")
+        print(f"Compliant:             {ov['compliant_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Assessment status:     {ov['assessment_status']}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        im = data["invariant_model"]
+        print(f"Invariant model: {im['model_name']} ({im['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(im['supported_invariant_statuses'])}")
+        print(f"  execution_allowed always False in 49L: {im['execution_allowed_always_false_in_49l']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Invariant results:")
+        for r in data["invariant_results"]:
+            warn_tag = f" [{len(r['warnings'])} warning(s)]" if r["warnings"] else ""
+            print(
+                f"  [{r['invariant_status'].upper()}]{warn_tag} "
+                f"{r['invariant_name']} "
+                f"[runtime={r['runtime_id']}] ({r['invariant_domain']})"
+            )
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  assessment_status:     {sa['assessment_status']}")
+        print(f"  compliant_count:       {sa['compliant_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  runtime_count:         {ss['runtime_count']}")
         print(f"  invariant_count:       {ss['invariant_count']}")
         print(f"  assessment_status:     {ss['assessment_status']}")
         print()

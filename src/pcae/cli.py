@@ -106,6 +106,7 @@ from pcae.commands.agent import (
     run_task_transition_governance,
     run_session_continuity_governance,
     run_governance_invariants,
+    run_runtime_safety_invariants,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3684,6 +3685,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_invariants_parser.set_defaults(handler=run_governance_invariants)
+
+    runtime_safety_invariants_parser = subparsers.add_parser(
+        "runtime-safety-invariants",
+        help="Audit runtime safety invariants before controlled write authorization (Phase 49L).",
+    )
+    runtime_safety_invariants_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    runtime_safety_invariants_parser.set_defaults(handler=run_runtime_safety_invariants)
 
     return parser
 
