@@ -30195,3 +30195,199 @@ def test_49b_human_output_shows_all_sections(capsys) -> None:
     assert "Escalation paths" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49C — Multi-Agent Arbitration Framework
+
+
+def test_49c_json_structure(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "arbitration_summary", "candidate_model", "decision_model", "summary_model",
+        "sample_candidate", "sample_decision", "sample_summary",
+        "escalation_paths", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49c_arbitration_summary_fields(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["arbitration_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "agent_count", "arbitration_reason_count", "arbitration_status",
+        "escalation_required", "escalation_path_count",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in s, f"missing arbitration_summary field: {field}"
+    assert s["phase"] == "49C"
+    assert s["execution_allowed"] is False
+    assert s["human_review_required"] is True
+    assert s["agent_count"] == 3
+    assert s["arbitration_reason_count"] == 5
+    assert s["arbitration_status"] == "pending_human_review"
+    assert s["escalation_required"] is True
+    assert s["escalation_path_count"] == 4
+
+
+def test_49c_execution_always_blocked(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["arbitration_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49c"] is True
+    assert data["decision_model"]["execution_allowed_always_false_in_49c"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49c"] is True
+    assert data["sample_decision"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+
+
+def test_49c_candidate_model(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "ArbitrationCandidate"
+    assert cm["field_count"] == 6
+    assert cm["required_field_count"] == 6
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "arbitration_id", "request_id", "participating_agents",
+        "arbitration_reason", "escalation_required", "human_review_required",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for reason in (
+        "consensus_not_reached", "insufficient_agents",
+        "conflicting_recommendations", "runtime_unavailable", "trust_mismatch",
+    ):
+        assert reason in cm["supported_arbitration_reasons"], f"missing reason: {reason}"
+
+
+def test_49c_decision_model(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    dm = data["decision_model"]
+    assert dm["model_name"] == "ArbitrationDecision"
+    assert dm["field_count"] == 9
+    assert dm["required_field_count"] == 9
+    field_names = [f["name"] for f in dm["fields"]]
+    for expected in (
+        "arbitration_id", "request_id", "agent_positions", "arbitration_status",
+        "recommended_resolution", "blockers", "warnings",
+        "escalation_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing decision field: {expected}"
+    for status in (
+        "pending_human_review", "blocked", "advisory_resolution", "insufficient_evidence",
+    ):
+        assert status in dm["supported_arbitration_statuses"], f"missing status: {status}"
+
+
+def test_49c_summary_model(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "ArbitrationSummary"
+    assert sm["field_count"] == 6
+    assert sm["required_field_count"] == 6
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "arbitration_id", "arbitration_status",
+        "escalation_required", "human_review_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49c_all_agents_present(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    positions = data["sample_decision"]["agent_positions"]
+    assert len(positions) == 3
+    agent_ids = {p["agent_id"] for p in positions}
+    assert agent_ids == {"codex-local", "claude-local", "kimi-local"}
+    for pos in positions:
+        assert pos["position"] == "unavailable", (
+            f"{pos['agent_id']} must be unavailable in Phase 49C"
+        )
+        assert pos.get("blocker"), f"{pos['agent_id']} must have a blocker"
+
+
+def test_49c_arbitration_status_pending(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_decision"]["arbitration_status"] == "pending_human_review"
+    assert data["sample_summary"]["arbitration_status"] == "pending_human_review"
+    assert data["arbitration_summary"]["arbitration_status"] == "pending_human_review"
+
+
+def test_49c_escalation_and_human_review(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_candidate"]["escalation_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_decision"]["escalation_required"] is True
+    assert data["sample_summary"]["escalation_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+
+
+def test_49c_escalation_paths(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    paths = data["escalation_paths"]
+    assert len(paths) == 4
+    path_names = [ep["path"] for ep in paths]
+    for expected in (
+        "human_arbitration", "defer_to_governance_policy",
+        "reduce_agent_scope", "defer_arbitration",
+    ):
+        assert expected in path_names, f"missing escalation path: {expected}"
+    for ep in paths:
+        assert ep["human_required"] is True, (
+            f"escalation path {ep['path']} must have human_required=True"
+        )
+
+
+def test_49c_governance_boundaries(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49C"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define arbitration models", "assess disagreement scenarios",
+        "define escalation paths", "generate advisory resolutions",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49c_input_sources(capsys) -> None:
+    main(["arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ConsensusCandidate", "ConsensusResult", "ConsensusSummary",
+        "RuntimeTrustRecord", "GovernanceAuditRecord", "InvocationEvidenceRecord",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49c_human_output_shows_all_sections(capsys) -> None:
+    main(["arbitration"])
+    output = capsys.readouterr().out
+    assert "Multi-agent arbitration framework" in output
+    assert "Candidate model" in output
+    assert "Decision model" in output
+    assert "Summary model" in output
+    assert "Sample decision" in output
+    assert "Escalation paths" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

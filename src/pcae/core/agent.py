@@ -32457,3 +32457,370 @@ def build_consensus_engine() -> dict:
         "input_sources": list(_CE_INPUT_SOURCES),
         "advisory": CONSENSUS_ENGINE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 49C — Multi-Agent Arbitration Framework
+# ---------------------------------------------------------------------------
+
+ARBITRATION_ADVISORY = (
+    "Arbitration framework assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49C."
+)
+
+_AF_ARBITRATION_REASONS: tuple[str, ...] = (
+    "consensus_not_reached",
+    "insufficient_agents",
+    "conflicting_recommendations",
+    "runtime_unavailable",
+    "trust_mismatch",
+)
+
+_AF_ARBITRATION_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "blocked",
+    "advisory_resolution",
+    "insufficient_evidence",
+)
+
+_AF_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "arbitration_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this arbitration candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this arbitration candidate is associated with.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs participating in this arbitration evaluation.",
+    },
+    {
+        "name": "arbitration_reason",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Reason arbitration was triggered: consensus_not_reached, "
+            "insufficient_agents, conflicting_recommendations, "
+            "runtime_unavailable, or trust_mismatch."
+        ),
+    },
+    {
+        "name": "escalation_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49C; escalation is required for every arbitration candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every arbitration candidate.",
+    },
+)
+
+_AF_DECISION_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "arbitration_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this arbitration decision.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this arbitration decision is associated with.",
+    },
+    {
+        "name": "agent_positions",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-agent position records captured at arbitration time.",
+    },
+    {
+        "name": "arbitration_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Overall arbitration outcome: pending_human_review, blocked, "
+            "advisory_resolution, or insufficient_evidence."
+        ),
+    },
+    {
+        "name": "recommended_resolution",
+        "type": "str",
+        "required": True,
+        "description": "Advisory resolution text; non-binding and subject to human review.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing arbitration from proceeding.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during arbitration.",
+    },
+    {
+        "name": "escalation_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49C; human escalation is required.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49C; no execution is authorized.",
+    },
+)
+
+_AF_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this arbitration summary.",
+    },
+    {
+        "name": "arbitration_id",
+        "type": "str",
+        "required": True,
+        "description": "The arbitration candidate this summary is associated with.",
+    },
+    {
+        "name": "arbitration_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall arbitration status for this summary.",
+    },
+    {
+        "name": "escalation_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49C; escalation is required.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every arbitration summary.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49C; no execution is authorized.",
+    },
+)
+
+_AF_ESCALATION_PATHS: tuple[dict, ...] = (
+    {
+        "path": "human_arbitration",
+        "trigger": "consensus_not_reached_or_conflicting",
+        "description": (
+            "Human engineer makes the final arbitration decision when agents "
+            "cannot reach consensus or produce conflicting recommendations. "
+            "Human authority is the terminal escalation path."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "defer_to_governance_policy",
+        "trigger": "trust_mismatch_detected",
+        "description": (
+            "When trust levels across participating agents diverge, defer to the "
+            "governance policy for trust resolution before re-entering arbitration. "
+            "No execution proceeds until trust alignment is confirmed."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "reduce_agent_scope",
+        "trigger": "insufficient_agents",
+        "description": (
+            "When fewer agents are available than required for a valid arbitration "
+            "evaluation, reduce scope to available agents and escalate the reduced "
+            "evidence set to human review."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "defer_arbitration",
+        "trigger": "runtime_unavailable",
+        "description": (
+            "Defer arbitration until all required runtimes are available and "
+            "trust-verified. Arbitration evidence must be complete before any "
+            "advisory resolution is produced."
+        ),
+        "human_required": True,
+    },
+)
+
+_AF_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define arbitration models",
+        "assess disagreement scenarios",
+        "define escalation paths",
+        "generate advisory resolutions",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49C",
+}
+
+_AF_INPUT_SOURCES: tuple[str, ...] = (
+    "ConsensusCandidate",
+    "ConsensusResult",
+    "ConsensusSummary",
+    "RuntimeTrustRecord",
+    "GovernanceAuditRecord",
+    "InvocationEvidenceRecord",
+)
+
+_AF_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+
+def build_arbitration_framework() -> dict:
+    """Define the multi-agent arbitration framework governance model. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    arbitration_id_ref = f"af-{ts}"
+    request_id_ref = "af-req-placeholder-49c"
+
+    candidate_fields = [dict(f) for f in _AF_CANDIDATE_FIELDS]
+    decision_fields = [dict(f) for f in _AF_DECISION_FIELDS]
+    summary_fields = [dict(f) for f in _AF_SUMMARY_FIELDS]
+    escalation_paths = [dict(p) for p in _AF_ESCALATION_PATHS]
+    participating_agents = list(_AF_AGENTS)
+
+    agent_positions = [
+        {
+            "agent_id": agent_id,
+            "position": "unavailable",
+            "blocker": "consensus_not_reached",
+        }
+        for agent_id in participating_agents
+    ]
+
+    sample_candidate = {
+        "arbitration_id": arbitration_id_ref,
+        "request_id": request_id_ref,
+        "participating_agents": participating_agents,
+        "arbitration_reason": "consensus_not_reached",
+        "escalation_required": True,
+        "human_review_required": True,
+    }
+
+    sample_decision = {
+        "arbitration_id": arbitration_id_ref,
+        "request_id": request_id_ref,
+        "agent_positions": agent_positions,
+        "arbitration_status": "pending_human_review",
+        "recommended_resolution": (
+            "No advisory resolution available; all agents unavailable. "
+            "Human review required before any resolution is considered."
+        ),
+        "blockers": [f"{a}:consensus_not_reached" for a in participating_agents],
+        "warnings": [],
+        "escalation_required": True,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"af-sum-{ts}",
+        "arbitration_id": arbitration_id_ref,
+        "arbitration_status": "pending_human_review",
+        "escalation_required": True,
+        "human_review_required": True,
+        "execution_allowed": False,
+    }
+
+    candidate_model = {
+        "model_name": "ArbitrationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_arbitration_reasons": list(_AF_ARBITRATION_REASONS),
+        "execution_allowed_always_false_in_49c": True,
+        "fields": candidate_fields,
+    }
+
+    decision_model = {
+        "model_name": "ArbitrationDecision",
+        "field_count": len(decision_fields),
+        "required_field_count": sum(1 for f in decision_fields if f["required"]),
+        "supported_arbitration_statuses": list(_AF_ARBITRATION_STATUSES),
+        "execution_allowed_always_false_in_49c": True,
+        "fields": decision_fields,
+    }
+
+    summary_model = {
+        "model_name": "ArbitrationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "execution_allowed_always_false_in_49c": True,
+        "fields": summary_fields,
+    }
+
+    arbitration_summary = {
+        "summary_id": f"49c-{ts}",
+        "generated_at": generated_at,
+        "phase": "49C",
+        "title": "Multi-Agent Arbitration Framework",
+        "summary": (
+            "Defines the governance model used when multi-agent consensus cannot "
+            "be reached (codex-local, claude-local, kimi-local). Arbitration is "
+            "triggered by: consensus_not_reached, insufficient_agents, "
+            "conflicting_recommendations, runtime_unavailable, or trust_mismatch. "
+            "arbitration_status=pending_human_review. escalation_required=True. "
+            "execution_allowed=False. No runtime is invoked, no prompt is "
+            "submitted, and no repository modification occurs."
+        ),
+        "agent_count": len(participating_agents),
+        "arbitration_reason_count": len(_AF_ARBITRATION_REASONS),
+        "arbitration_status": "pending_human_review",
+        "escalation_required": True,
+        "escalation_path_count": len(escalation_paths),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "arbitration_summary": arbitration_summary,
+        "candidate_model": candidate_model,
+        "decision_model": decision_model,
+        "summary_model": summary_model,
+        "sample_candidate": sample_candidate,
+        "sample_decision": sample_decision,
+        "sample_summary": sample_summary,
+        "escalation_paths": escalation_paths,
+        "governance_boundaries": dict(_AF_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_AF_INPUT_SOURCES),
+        "advisory": ARBITRATION_ADVISORY,
+    }

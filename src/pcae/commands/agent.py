@@ -169,6 +169,8 @@ from pcae.core.agent import (
     MULTI_AGENT_READONLY_PILOT_ADVISORY,
     build_consensus_engine,
     CONSENSUS_ENGINE_ADVISORY,
+    build_arbitration_framework,
+    ARBITRATION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6853,6 +6855,65 @@ def run_consensus_engine(args: argparse.Namespace) -> int:
         print(f"  Agent positions ({len(sr['agent_positions'])} agents):")
         for pos in sr["agent_positions"]:
             print(f"    [{pos['position']}] {pos['agent_id']} (trust: {pos['trust_level']})")
+            if pos.get("blocker"):
+                print(f"      Blocker: {pos['blocker']}")
+        print()
+        print(f"Escalation paths ({len(data['escalation_paths'])}):")
+        for ep in data["escalation_paths"]:
+            print(f"  {ep['path']} (trigger: {ep['trigger']}, human_required: {ep['human_required']})")
+            print(f"    {ep['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_arbitration(args: argparse.Namespace) -> int:
+    data = build_arbitration_framework()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        s = data["arbitration_summary"]
+        print("Multi-agent arbitration framework")
+        print(f"Assessment: {s['summary_id']}  Generated: {s['generated_at']}")
+        print(f"Phase: {s['phase']} — {s['title']}")
+        print()
+        print(s["summary"])
+        print()
+        print(f"Agents evaluated:      {s['agent_count']}")
+        print(f"Arbitration reasons:   {s['arbitration_reason_count']}")
+        print(f"Arbitration status:    {s['arbitration_status']}")
+        print(f"Escalation required:   {'yes' if s['escalation_required'] else 'no'}")
+        print(f"Escalation paths:      {s['escalation_path_count']}")
+        print(f"Execution allowed:     {'yes' if s['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if s['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported arbitration reasons: {', '.join(cm['supported_arbitration_reasons'])}")
+        print(f"  execution_allowed always False in 49C: {cm['execution_allowed_always_false_in_49c']}")
+        print()
+        dm = data["decision_model"]
+        print(f"Decision model: {dm['model_name']} ({dm['field_count']} fields)")
+        print(f"  Supported arbitration statuses: {', '.join(dm['supported_arbitration_statuses'])}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        sd = data["sample_decision"]
+        print("Sample decision:")
+        print(f"  arbitration_status:  {sd['arbitration_status']}")
+        print(f"  escalation_required: {sd['escalation_required']}")
+        print(f"  execution_allowed:   {sd['execution_allowed']}")
+        print(f"  Agent positions ({len(sd['agent_positions'])} agents):")
+        for pos in sd["agent_positions"]:
+            print(f"    [{pos['position']}] {pos['agent_id']}")
             if pos.get("blocker"):
                 print(f"      Blocker: {pos['blocker']}")
         print()

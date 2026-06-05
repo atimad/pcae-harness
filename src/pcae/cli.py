@@ -97,6 +97,7 @@ from pcae.commands.agent import (
     run_invocation_evidence,
     run_multi_agent_readonly_pilot,
     run_consensus_engine,
+    run_arbitration,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2217,6 +2218,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     consensus_engine_parser.set_defaults(handler=run_consensus_engine)
+
+    arbitration_parser = subparsers.add_parser(
+        "arbitration",
+        help="Define the multi-agent arbitration framework governance model (Phase 49C).",
+    )
+    arbitration_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    arbitration_parser.set_defaults(handler=run_arbitration)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

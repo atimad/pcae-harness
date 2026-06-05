@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49B: Multi-Agent Consensus Engine.
+Phase 49C: Multi-Agent Arbitration Framework.
 
 ## Governance Coherence Note
 
@@ -3263,10 +3263,26 @@ consensus_status=blocked; escalation_required=True; execution_allowed=False;
 human_review_required=True; no runtime invocation, no prompt execution, no
 repository modification; `docs/COMMANDS.md` regenerated; 13 new tests;
 3456 total tests passing
+and multi-agent arbitration framework implemented (Phase 49C):
+`pcae arbitration` and `--json`; defines the governance model used when
+multi-agent consensus cannot be reached; three models — ArbitrationCandidate
+(6 fields), ArbitrationDecision (9 fields), ArbitrationSummary (6 fields);
+five arbitration reasons: consensus_not_reached, insufficient_agents,
+conflicting_recommendations, runtime_unavailable, trust_mismatch; four
+arbitration statuses: pending_human_review, blocked, advisory_resolution,
+insufficient_evidence; four escalation paths: human_arbitration (terminal),
+defer_to_governance_policy, reduce_agent_scope, defer_arbitration (all
+human_required=True); inputs: ConsensusCandidate, ConsensusResult,
+ConsensusSummary, RuntimeTrustRecord, GovernanceAuditRecord,
+InvocationEvidenceRecord; all three agents (codex-local, claude-local,
+kimi-local) unavailable; arbitration_status=pending_human_review;
+escalation_required=True; execution_allowed=False; human_review_required=True;
+no runtime invocation, no prompt execution, no repository modification;
+`docs/COMMANDS.md` regenerated; 13 new tests; 3469 total tests passing
 
 ## Next
 
-- TBD: Future phases (49A Invocation Execution Gate Implementation).
+- TBD: Future phases (49D or 49A Invocation Execution Gate Implementation).
 
 ## Future Explorations
 

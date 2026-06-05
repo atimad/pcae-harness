@@ -477,6 +477,11 @@
 - `pcae consensus-engine`
 - `pcae consensus-engine --json`
 
+## arbitration
+
+- `pcae arbitration`
+- `pcae arbitration --json`
+
 ## write-result-review-design
 
 - `pcae write-result-review-design`
