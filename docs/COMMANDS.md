@@ -641,3 +641,8 @@
 
 - `pcae governance-drift-review`
 - `pcae governance-drift-review --json`
+
+## agent-lock-governance
+
+- `pcae agent-lock-governance`
+- `pcae agent-lock-governance --json`

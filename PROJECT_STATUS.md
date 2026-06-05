@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49N: Governance Drift Review Workflow.
+Phase 49O: Agent Lock Governance.
 
 ## Governance Coherence Note
 
@@ -3425,9 +3425,24 @@ human_decision_recording, escalation_path_review, roadmap_followup_review;
 repair_allowed=False; execution_allowed=False; human_review_required=True;
 `docs/COMMANDS.md` regenerated; 15 new tests; 3627 total tests passing
 
+`pcae agent-lock-governance` and `--json`; defines governance checks for
+agent lock lifecycle, stale lock detection, lock ownership, and safe handoff
+behavior; three models — AgentLockCandidate (6 fields: lock_id, agent_id,
+task_id, lock_status, stale, human_review_required), AgentLockAssessment
+(8 fields: assessment_id, lock_count, stale_lock_count, conflict_count,
+blocker_count, warning_count, assessment_status, repair_recommended),
+AgentLockSummary (8 fields: summary_id, assessment_id, lock_count,
+stale_lock_count, conflict_count, blocker_count, warning_count,
+assessment_status); five lock statuses: valid, valid_with_warnings, stale,
+conflicted, blocked; seven governance domains; two lock candidates: claude-local
+(valid) and codex-local (stale, closed task); assessment_status=stale;
+repair_recommended=True (advisory); execution_allowed=False;
+human_review_required=True; `docs/COMMANDS.md` regenerated; 15 new tests;
+3642 total tests passing
+
 ## Current Phase
 
-Phase 49N: Governance Drift Review Workflow.
+Phase 49O: Agent Lock Governance.
 
 ## Next
 

@@ -193,6 +193,8 @@ from pcae.core.agent import (
     GOVERNANCE_DRIFT_ADVISORY,
     build_governance_drift_review,
     GOVERNANCE_DRIFT_REVIEW_ADVISORY,
+    build_agent_lock_governance,
+    AGENT_LOCK_GOVERNANCE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7645,6 +7647,79 @@ def run_governance_drift_review(args: argparse.Namespace) -> int:
         print(f"  May:               {', '.join(gb['may'])}")
         print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Repair allowed:    {gb['repair_allowed']}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_agent_lock_governance(args: argparse.Namespace) -> int:
+    data = build_agent_lock_governance()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["lock_overview"]
+        print("Agent lock governance")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Governance domains:    {ov['governance_domain_count']}")
+        print(f"Locks inspected:       {ov['lock_count']}")
+        print(f"Stale locks:           {ov['stale_lock_count']}")
+        print(f"Conflicts:             {ov['conflict_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Assessment status:     {ov['assessment_status']}")
+        print(f"Repair recommended:    {'yes' if ov['repair_recommended'] else 'no'}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(cm['supported_lock_statuses'])}")
+        print(f"  execution_allowed always False in 49O: {cm['execution_allowed_always_false_in_49o']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Lock candidates:")
+        for c in data["lock_candidates"]:
+            stale_tag = " [STALE]" if c["stale"] else ""
+            print(
+                f"  [{c['lock_status'].upper()}]{stale_tag} "
+                f"{c['agent_id']} → {c['task_id']}"
+            )
+        print()
+        print("Domain findings:")
+        for d in data["domain_findings"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']} ({d['lock_status']})")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  assessment_status:     {sa['assessment_status']}")
+        print(f"  lock_count:            {sa['lock_count']}")
+        print(f"  stale_lock_count:      {sa['stale_lock_count']}")
+        print(f"  conflict_count:        {sa['conflict_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  repair_recommended:    {sa['repair_recommended']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  assessment_status:     {ss['assessment_status']}")
+        print(f"  stale_lock_count:      {ss['stale_lock_count']}")
+        print(f"  conflict_count:        {ss['conflict_count']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['may'])}")
+        print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review req'd:{gb['human_review_required']}")
         print()

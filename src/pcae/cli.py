@@ -109,6 +109,7 @@ from pcae.commands.agent import (
     run_runtime_safety_invariants,
     run_governance_drift,
     run_governance_drift_review,
+    run_agent_lock_governance,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3720,6 +3721,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_drift_review_parser.set_defaults(handler=run_governance_drift_review)
+
+    agent_lock_governance_parser = subparsers.add_parser(
+        "agent-lock-governance",
+        help="Governance checks for agent lock lifecycle, stale lock detection, and handoff (Phase 49O).",
+    )
+    agent_lock_governance_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    agent_lock_governance_parser.set_defaults(handler=run_agent_lock_governance)
 
     return parser
 

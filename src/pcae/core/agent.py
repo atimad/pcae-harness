@@ -37275,3 +37275,446 @@ def build_governance_drift_review() -> dict:
         "input_sources": list(_GDR_INPUT_SOURCES),
         "advisory": GOVERNANCE_DRIFT_REVIEW_ADVISORY,
     }
+
+
+# Phase 49O — Agent Lock Governance
+# ---------------------------------------------------------------------------
+
+AGENT_LOCK_GOVERNANCE_ADVISORY = (
+    "Agent lock governance is informational; lock state may be inspected and "
+    "stale or conflicted locks reported, but no locks are modified automatically. "
+    "No state modifications are made, no prompts are executed, and no runtimes "
+    "are invoked. repair_recommended may be True but repair must not occur. "
+    "execution_allowed=False in Phase 49O."
+)
+
+_ALG_GOVERNANCE_DOMAINS: tuple[str, ...] = (
+    "lock_presence_validation",
+    "lock_owner_validation",
+    "stale_lock_detection",
+    "handoff_lock_validation",
+    "lock_transition_validation",
+    "multi_agent_lock_conflict_detection",
+    "lock_recovery_recommendations",
+)
+
+_ALG_LOCK_STATUSES: tuple[str, ...] = (
+    "valid",
+    "valid_with_warnings",
+    "stale",
+    "conflicted",
+    "blocked",
+)
+
+_ALG_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "lock_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock candidate.",
+    },
+    {
+        "name": "agent_id",
+        "type": "str",
+        "required": True,
+        "description": "The agent holding or previously holding this lock.",
+    },
+    {
+        "name": "task_id",
+        "type": "str",
+        "required": True,
+        "description": "The task this lock is associated with.",
+    },
+    {
+        "name": "lock_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, stale, conflicted, or blocked.",
+    },
+    {
+        "name": "stale",
+        "type": "bool",
+        "required": True,
+        "description": "True if the lock has exceeded the configured stale threshold.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49O.",
+    },
+)
+
+_ALG_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock assessment.",
+    },
+    {
+        "name": "lock_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of agent lock candidates inspected.",
+    },
+    {
+        "name": "stale_lock_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of locks detected as stale.",
+    },
+    {
+        "name": "conflict_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lock ownership conflicts detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with blocker-severity findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with warning-severity findings.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, stale, conflicted, or blocked.",
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True if any domain finding recommends repair review.",
+    },
+)
+
+_ALG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "lock_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of agent lock candidates inspected.",
+    },
+    {
+        "name": "stale_lock_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of stale locks detected.",
+    },
+    {
+        "name": "conflict_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lock conflicts detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity domain findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity domain findings.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, stale, conflicted, or blocked.",
+    },
+)
+
+_ALG_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect locks",
+        "detect stale locks",
+        "detect ownership conflicts",
+        "recommend lock recovery",
+    ],
+    "may_not": [
+        "modify locks",
+        "clear locks",
+        "rewrite session state",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "repair_recommended_advisory_only": True,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49O",
+}
+
+_ALG_INPUT_SOURCES: tuple[str, ...] = (
+    "agent lock state",
+    "session continuity state",
+    "task transition governance",
+    "governance drift assessment",
+    "governance drift review",
+)
+
+_ALG_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "lock_presence_validation",
+        "finding": (
+            "Current session has an active agent lock held by claude-local. "
+            "Lock presence is confirmed. No missing lock detected."
+        ),
+        "lock_status": "valid",
+        "stale": False,
+        "repair_recommended": False,
+        "severity": "info",
+    },
+    {
+        "domain": "lock_owner_validation",
+        "finding": (
+            "Lock owner claude-local matches the agent recorded in the current session. "
+            "Cross-agent ownership verification is unconfirmed for multi-agent scenarios."
+        ),
+        "lock_status": "valid_with_warnings",
+        "stale": False,
+        "repair_recommended": False,
+        "severity": "warning",
+    },
+    {
+        "domain": "stale_lock_detection",
+        "finding": (
+            "A historical lock entry for agent codex-local references task "
+            "20260523-0731-implement-global-policy-configuration (now closed). "
+            "The lock is stale — task is done but lock record was not cleared on close."
+        ),
+        "lock_status": "stale",
+        "stale": True,
+        "repair_recommended": True,
+        "severity": "warning",
+    },
+    {
+        "domain": "handoff_lock_validation",
+        "finding": (
+            "No recent lock handoff event detected. Last handoff record is absent or "
+            "predates the current session. Handoff lock transfer protocol cannot be "
+            "fully verified without a handoff event record."
+        ),
+        "lock_status": "valid_with_warnings",
+        "stale": False,
+        "repair_recommended": False,
+        "severity": "warning",
+    },
+    {
+        "domain": "lock_transition_validation",
+        "finding": (
+            "Lock transitions from the last completed phase follow governance policy. "
+            "No unexpected lock state transitions detected in the current session."
+        ),
+        "lock_status": "valid",
+        "stale": False,
+        "repair_recommended": False,
+        "severity": "info",
+    },
+    {
+        "domain": "multi_agent_lock_conflict_detection",
+        "finding": (
+            "No concurrent lock conflicts detected. Only one agent (claude-local) "
+            "holds an active lock. Multi-agent conflict detection is advisory — "
+            "remote agent state cannot be verified without a live registry."
+        ),
+        "lock_status": "valid_with_warnings",
+        "stale": False,
+        "repair_recommended": False,
+        "severity": "warning",
+    },
+    {
+        "domain": "lock_recovery_recommendations",
+        "finding": (
+            "Stale lock for codex-local on closed task should be cleared via "
+            "`pcae agent release --force`. Recovery is advisory; no automatic "
+            "lock modification occurs."
+        ),
+        "lock_status": "valid_with_warnings",
+        "stale": False,
+        "repair_recommended": True,
+        "severity": "warning",
+    },
+)
+
+_ALG_SAMPLE_CANDIDATES: tuple[dict, ...] = (
+    {
+        "agent_id": "claude-local",
+        "task_id": "20260605-1052-multi-agent-governance-audit",
+        "lock_status": "valid",
+        "stale": False,
+    },
+    {
+        "agent_id": "codex-local",
+        "task_id": "20260523-0731-implement-global-policy-configuration",
+        "lock_status": "stale",
+        "stale": True,
+    },
+)
+
+
+def build_agent_lock_governance() -> dict:
+    """Audit agent lock lifecycle, stale lock detection, and handoff behavior. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    assessment_id_ref = f"alga-{ts}"
+
+    candidate_fields = [dict(f) for f in _ALG_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _ALG_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _ALG_SUMMARY_FIELDS]
+
+    lock_candidates: list[dict] = []
+    for i, c in enumerate(_ALG_SAMPLE_CANDIDATES):
+        lock_candidates.append({
+            "lock_id": f"alc-{i + 1:03d}-{ts}",
+            "agent_id": c["agent_id"],
+            "task_id": c["task_id"],
+            "lock_status": c["lock_status"],
+            "stale": c["stale"],
+            "human_review_required": True,
+        })
+
+    domain_findings = [dict(d) for d in _ALG_DOMAIN_FINDINGS]
+
+    stale_lock_count = sum(1 for c in lock_candidates if c["stale"])
+    conflict_count = sum(
+        1 for d in domain_findings if d["lock_status"] == "conflicted"
+    )
+    blocker_count = sum(
+        1 for d in domain_findings if d["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for d in domain_findings if d["severity"] == "warning"
+    )
+    repair_recommended = any(d["repair_recommended"] for d in domain_findings)
+
+    if blocker_count > 0 or any(d["lock_status"] == "blocked" for d in domain_findings):
+        assessment_status = "blocked"
+    elif conflict_count > 0:
+        assessment_status = "conflicted"
+    elif stale_lock_count > 0:
+        assessment_status = "stale"
+    elif warning_count > 0:
+        assessment_status = "valid_with_warnings"
+    else:
+        assessment_status = "valid"
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "lock_count": len(lock_candidates),
+        "stale_lock_count": stale_lock_count,
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+        "repair_recommended": repair_recommended,
+    }
+
+    sample_summary = {
+        "summary_id": f"algs-{ts}",
+        "assessment_id": assessment_id_ref,
+        "lock_count": len(lock_candidates),
+        "stale_lock_count": stale_lock_count,
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+    }
+
+    candidate_model = {
+        "model_name": "AgentLockCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_lock_statuses": list(_ALG_LOCK_STATUSES),
+        "execution_allowed_always_false_in_49o": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "AgentLockAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_lock_statuses": list(_ALG_LOCK_STATUSES),
+        "execution_allowed_always_false_in_49o": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "AgentLockSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_lock_statuses": list(_ALG_LOCK_STATUSES),
+        "execution_allowed_always_false_in_49o": True,
+        "fields": summary_fields,
+    }
+
+    lock_overview = {
+        "overview_id": f"49o-{ts}",
+        "generated_at": generated_at,
+        "phase": "49O",
+        "title": "Agent Lock Governance",
+        "summary": (
+            "Defines governance checks for agent lock lifecycle, stale lock detection, "
+            "lock ownership, and safe handoff behavior. "
+            "Seven governance domains are assessed: lock_presence_validation, "
+            "lock_owner_validation, stale_lock_detection, handoff_lock_validation, "
+            "lock_transition_validation, multi_agent_lock_conflict_detection, "
+            "and lock_recovery_recommendations. "
+            f"lock_count={len(lock_candidates)}, stale_lock_count={stale_lock_count}, "
+            f"conflict_count={conflict_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"assessment_status={assessment_status}. "
+            "Lock governance is advisory and read-only. No locks are modified. "
+            "execution_allowed=False."
+        ),
+        "governance_domain_count": len(_ALG_GOVERNANCE_DOMAINS),
+        "lock_count": len(lock_candidates),
+        "stale_lock_count": stale_lock_count,
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "lock_overview": lock_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "lock_candidates": lock_candidates,
+        "domain_findings": domain_findings,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ALG_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ALG_INPUT_SOURCES),
+        "advisory": AGENT_LOCK_GOVERNANCE_ADVISORY,
+    }
