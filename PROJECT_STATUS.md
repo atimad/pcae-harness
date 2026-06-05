@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49I: Task Transition Governance.
+Phase 49J: Session Continuity Governance.
 
 ## Governance Coherence Note
 
@@ -3345,10 +3345,25 @@ state, governance state audit, governance state repair plan; transition_allowed=
 human_review_required=True; validation_status=valid_with_warnings;
 no files modified, no tasks moved; `docs/COMMANDS.md` regenerated; 16 new tests;
 3550 total tests passing
+and session continuity governance implemented (Phase 49J):
+`pcae session-continuity-governance` and `--json`; defines governance checks
+for session continuity integrity, stale session detection, and safe session
+refresh behavior; three models — SessionContinuityCandidate (7 fields),
+SessionContinuityValidation (9 fields), SessionContinuitySummary (7 fields);
+five continuity statuses: valid, valid_with_warnings, blocked, stale, orphaned;
+seven governance domains: session_active_task_alignment,
+stale_session_reference_detection, orphaned_session_state_detection,
+session_refresh_requirement_detection, continuity_pack_alignment,
+agent_handoff_alignment, session_recovery_recommendations; inputs: session
+state, active task state, done task state, governance state audit, task
+transition governance; refresh_allowed=False; human_review_required=True;
+validation_status=valid_with_warnings; no session files rewritten, no task
+files moved; `docs/COMMANDS.md` regenerated; 18 new tests;
+3568 total tests passing
 
 ## Current Phase
 
-Phase 49I: Task Transition Governance.
+Phase 49J: Session Continuity Governance.
 
 ## Next
 

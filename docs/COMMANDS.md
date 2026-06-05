@@ -616,3 +616,8 @@
 
 - `pcae task-transition-governance`
 - `pcae task-transition-governance --json`
+
+## session-continuity-governance
+
+- `pcae session-continuity-governance`
+- `pcae session-continuity-governance --json`

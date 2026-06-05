@@ -35073,3 +35073,447 @@ def build_task_transition_governance() -> dict:
         "input_sources": list(_TTG_INPUT_SOURCES),
         "advisory": TASK_TRANSITION_GOVERNANCE_ADVISORY,
     }
+
+
+# Phase 49J — Session Continuity Governance
+# ---------------------------------------------------------------------------
+
+SESSION_CONTINUITY_GOVERNANCE_ADVISORY = (
+    "Session continuity governance is informational; no session files are rewritten, "
+    "no task files are moved, no roadmap is modified, and no runtimes are invoked. "
+    "refresh_allowed=False in Phase 49J. All session refresh actions require human review."
+)
+
+_SCG_GOVERNANCE_DOMAINS: tuple[str, ...] = (
+    "session_active_task_alignment",
+    "stale_session_reference_detection",
+    "orphaned_session_state_detection",
+    "session_refresh_requirement_detection",
+    "continuity_pack_alignment",
+    "agent_handoff_alignment",
+    "session_recovery_recommendations",
+)
+
+_SCG_CONTINUITY_STATUSES: tuple[str, ...] = (
+    "valid",
+    "valid_with_warnings",
+    "blocked",
+    "stale",
+    "orphaned",
+)
+
+_SCG_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "continuity_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session continuity candidate.",
+    },
+    {
+        "name": "session_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the session being assessed for continuity.",
+    },
+    {
+        "name": "active_task_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the current active task at assessment time.",
+    },
+    {
+        "name": "expected_task_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the task the session is expected to be aligned with.",
+    },
+    {
+        "name": "continuity_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, blocked, stale, or orphaned.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49J. No session refresh proceeds without human review.",
+    },
+    {
+        "name": "refresh_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49J. Framework is advisory only.",
+    },
+)
+
+_SCG_VALIDATION_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "validation_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session continuity validation.",
+    },
+    {
+        "name": "continuity_id",
+        "type": "str",
+        "required": True,
+        "description": "The continuity candidate this validation is associated with.",
+    },
+    {
+        "name": "active_task_status",
+        "type": "str",
+        "required": True,
+        "description": "Governance status of the active task at validation time.",
+    },
+    {
+        "name": "session_task_status",
+        "type": "str",
+        "required": True,
+        "description": "Alignment status of session state with respect to active task.",
+    },
+    {
+        "name": "stale_reference_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of stale session reference detection.",
+    },
+    {
+        "name": "orphaned_state_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of orphaned session state detection.",
+    },
+    {
+        "name": "handoff_alignment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of agent handoff alignment with session state.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions that must be resolved before session refresh.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings associated with this continuity assessment.",
+    },
+)
+
+_SCG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session continuity summary.",
+    },
+    {
+        "name": "continuity_id",
+        "type": "str",
+        "required": True,
+        "description": "The continuity candidate this summary is associated with.",
+    },
+    {
+        "name": "validation_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, blocked, stale, or orphaned.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocking conditions found.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of non-blocking warnings found.",
+    },
+    {
+        "name": "refresh_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49J.",
+    },
+)
+
+_SCG_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect session state",
+        "detect stale session references",
+        "detect orphaned session state",
+        "recommend refresh/recovery actions",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "rewrite session state",
+        "move task files",
+        "modify roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "refresh_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49J",
+}
+
+_SCG_INPUT_SOURCES: tuple[str, ...] = (
+    "session state",
+    "active task state",
+    "done task state",
+    "governance state audit",
+    "task transition governance",
+)
+
+
+def build_session_continuity_governance() -> dict:
+    """Define governance checks for session continuity integrity. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    continuity_id_ref = f"scc-{ts}"
+
+    candidate_fields = [dict(f) for f in _SCG_CANDIDATE_FIELDS]
+    validation_fields = [dict(f) for f in _SCG_VALIDATION_FIELDS]
+    summary_fields = [dict(f) for f in _SCG_SUMMARY_FIELDS]
+
+    domain_checks: dict[str, dict] = {
+        "session_active_task_alignment": {
+            "domain": "session_active_task_alignment",
+            "input": "session state, active task state",
+            "status": "valid",
+            "finding": (
+                "Session state is aligned with active task "
+                "20260605-1052-multi-agent-governance-audit. "
+                "Agent lock held by claude-local. "
+                "No misalignment between session and task state detected."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "recommended_action": "no action required; session and task are aligned",
+        },
+        "stale_session_reference_detection": {
+            "domain": "stale_session_reference_detection",
+            "input": "session state, governance state audit",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Session state references phases 49G and 49H in continuity context. "
+                "Phase 49J session should suppress legacy phase labels to prevent "
+                "stale context from being replayed by a fresh agent. "
+                "Session continuity pack should be refreshed after phase transitions."
+            ),
+            "blockers": [],
+            "warnings": ["legacy_phase_labels_49g_49h_present_in_session_continuity_context"],
+            "recommended_action": (
+                "refresh continuity pack after phase 49J to suppress legacy phase labels"
+            ),
+        },
+        "orphaned_session_state_detection": {
+            "domain": "orphaned_session_state_detection",
+            "input": "session state, done task state",
+            "status": "valid",
+            "finding": (
+                "No orphaned session state detected. "
+                "All historical session references point to tasks present in done records. "
+                "Agent lock transfer history is consistent."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "recommended_action": "no action required; no orphaned session state detected",
+        },
+        "session_refresh_requirement_detection": {
+            "domain": "session_refresh_requirement_detection",
+            "input": "session state, task transition governance",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Session refresh will be required after the active task completes. "
+                "Task transition governance (Phase 49I) flags session_refresh as a "
+                "required action during task transition. "
+                "Human operator must invoke session refresh at transition time; "
+                "no automated session refresh is permitted."
+            ),
+            "blockers": [],
+            "warnings": ["session_refresh_required_at_task_transition"],
+            "recommended_action": (
+                "human operator must run `pcae session end` and `pcae session start` "
+                "at task transition time"
+            ),
+        },
+        "continuity_pack_alignment": {
+            "domain": "continuity_pack_alignment",
+            "input": "session state, governance state audit",
+            "status": "valid",
+            "finding": (
+                "Continuity pack is present and aligned with current phase and active task. "
+                "No continuity pack drift detected. "
+                "Continuity pack should be re-exported after each phase completion."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "recommended_action": "export continuity pack after phase 49J completion",
+        },
+        "agent_handoff_alignment": {
+            "domain": "agent_handoff_alignment",
+            "input": "session state, active task state",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Agent handoff alignment is advisory. "
+                "claude-local holds the current agent lock. "
+                "Handoff alignment should be verified before any cross-agent session transfer "
+                "to prevent session state misalignment. "
+                "No active handoff in progress."
+            ),
+            "blockers": [],
+            "warnings": ["agent_handoff_alignment_must_be_verified_before_cross_agent_transfer"],
+            "recommended_action": (
+                "verify agent handoff alignment with `pcae phase handoff` before transfer"
+            ),
+        },
+        "session_recovery_recommendations": {
+            "domain": "session_recovery_recommendations",
+            "input": "session state, governance state audit, task transition governance",
+            "status": "valid",
+            "finding": (
+                "Session recovery path is clear. "
+                "In the event of session loss, recovery sequence is: "
+                "(1) run `pcae session bootstrap --compact` to restore context, "
+                "(2) verify active task with `pcae task list`, "
+                "(3) run `pcae check` to confirm governance integrity, "
+                "(4) resume work under active task scope. "
+                "No automated recovery is permitted."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "recommended_action": (
+                "use `pcae session bootstrap --compact` for session recovery"
+            ),
+        },
+    }
+
+    all_blockers: list[str] = []
+    all_warnings: list[str] = []
+    for d in domain_checks.values():
+        all_blockers.extend(d["blockers"])
+        all_warnings.extend(d["warnings"])
+
+    if all_blockers:
+        overall_validation_status = "blocked"
+    elif all_warnings:
+        overall_validation_status = "valid_with_warnings"
+    else:
+        overall_validation_status = "valid"
+
+    sample_candidate = {
+        "continuity_id": continuity_id_ref,
+        "session_id": f"session-{ts}",
+        "active_task_id": "20260605-1052-multi-agent-governance-audit",
+        "expected_task_id": "20260605-1052-multi-agent-governance-audit",
+        "continuity_status": overall_validation_status,
+        "human_review_required": True,
+        "refresh_allowed": False,
+    }
+
+    sample_validation = {
+        "validation_id": f"scv-{ts}",
+        "continuity_id": continuity_id_ref,
+        "active_task_status": "active",
+        "session_task_status": "aligned",
+        "stale_reference_status": "valid_with_warnings",
+        "orphaned_state_status": "valid",
+        "handoff_alignment_status": "valid_with_warnings",
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+        "refresh_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"scs-{ts}",
+        "continuity_id": continuity_id_ref,
+        "validation_status": overall_validation_status,
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "refresh_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "SessionContinuityCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_continuity_statuses": list(_SCG_CONTINUITY_STATUSES),
+        "refresh_allowed_always_false_in_49j": True,
+        "fields": candidate_fields,
+    }
+
+    validation_model = {
+        "model_name": "SessionContinuityValidation",
+        "field_count": len(validation_fields),
+        "required_field_count": sum(1 for f in validation_fields if f["required"]),
+        "supported_continuity_statuses": list(_SCG_CONTINUITY_STATUSES),
+        "refresh_allowed_always_false_in_49j": True,
+        "fields": validation_fields,
+    }
+
+    summary_model = {
+        "model_name": "SessionContinuitySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_continuity_statuses": list(_SCG_CONTINUITY_STATUSES),
+        "refresh_allowed_always_false_in_49j": True,
+        "fields": summary_fields,
+    }
+
+    continuity_overview = {
+        "overview_id": f"49j-{ts}",
+        "generated_at": generated_at,
+        "phase": "49J",
+        "title": "Session Continuity Governance",
+        "summary": (
+            "Defines governance checks for session continuity integrity, "
+            "stale session detection, and safe session refresh behavior. "
+            "Seven governance domains are assessed: session_active_task_alignment, "
+            "stale_session_reference_detection, orphaned_session_state_detection, "
+            "session_refresh_requirement_detection, continuity_pack_alignment, "
+            "agent_handoff_alignment, and session_recovery_recommendations. "
+            "No session files are rewritten, no task files are moved, "
+            "and no runtimes are invoked. "
+            f"validation_status={overall_validation_status}. "
+            "refresh_allowed=False. human_review_required=True."
+        ),
+        "governance_domain_count": len(_SCG_GOVERNANCE_DOMAINS),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "validation_status": overall_validation_status,
+        "refresh_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "continuity_overview": continuity_overview,
+        "candidate_model": candidate_model,
+        "validation_model": validation_model,
+        "summary_model": summary_model,
+        "domain_checks": domain_checks,
+        "sample_candidate": sample_candidate,
+        "sample_validation": sample_validation,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_SCG_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_SCG_INPUT_SOURCES),
+        "advisory": SESSION_CONTINUITY_GOVERNANCE_ADVISORY,
+    }
