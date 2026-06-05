@@ -179,6 +179,8 @@ from pcae.core.agent import (
     MULTI_AGENT_GOVERNANCE_AUDIT_ADVISORY,
     build_governance_state_audit,
     GOVERNANCE_STATE_AUDIT_ADVISORY,
+    build_governance_state_repair,
+    GOVERNANCE_STATE_REPAIR_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7157,6 +7159,72 @@ def run_governance_state_audit(args: argparse.Namespace) -> int:
         print(f"  May:               {', '.join(gb['may'])}")
         print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_state_repair(args: argparse.Namespace) -> int:
+    data = build_governance_state_repair()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["repair_overview"]
+        print("Governance state repair framework")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Repair domains:        {ov['repair_domain_count']}")
+        print(f"Candidates:            {ov['candidate_count']}")
+        print(f"Blocked:               {ov['blocked_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Plan status:           {ov['plan_status']}")
+        print(f"Repair allowed:        {'yes' if ov['repair_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported repair statuses: {', '.join(cm['supported_repair_statuses'])}")
+        print(f"  repair_allowed always False in 49H: {cm['repair_allowed_always_false_in_49h']}")
+        print()
+        pm = data["plan_model"]
+        print(f"Plan model: {pm['model_name']} ({pm['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Repair candidates:")
+        for c in data["repair_candidates"]:
+            print(
+                f"  [{c['repair_status'].upper()}] {c['repair_domain']}: "
+                f"{c['recommended_action']}"
+            )
+        print()
+        rp = data["repair_plan"]
+        print("Repair plan:")
+        print(f"  plan_status:           {rp['plan_status']}")
+        print(f"  repair_allowed:        {rp['repair_allowed']}")
+        print(f"  human_review_req'd:    {rp['human_review_required']}")
+        if rp["warnings"]:
+            print(f"  Warnings ({len(rp['warnings'])}):")
+            for w in rp["warnings"]:
+                print(f"    {w}")
+        print()
+        rs = data["repair_summary"]
+        print("Repair summary:")
+        print(f"  candidate_count:       {rs['candidate_count']}")
+        print(f"  blocked_count:         {rs['blocked_count']}")
+        print(f"  warning_count:         {rs['warning_count']}")
+        print(f"  repair_allowed:        {rs['repair_allowed']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['may'])}")
+        print(f"  May not:           {', '.join(gb['may_not'])}")
+        print(f"  Repair allowed:    {gb['repair_allowed']}")
+        print(f"  Human review req'd:{gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

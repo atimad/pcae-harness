@@ -31101,3 +31101,188 @@ def test_49g_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49H — Governance State Repair Framework
+
+
+def test_49h_json_structure(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "repair_overview", "candidate_model", "plan_model", "summary_model",
+        "repair_candidates", "repair_plan", "repair_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49h_repair_overview_fields(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["repair_overview"]
+    for field in (
+        "overview_id", "generated_at", "phase", "title", "summary",
+        "repair_domain_count", "candidate_count", "blocked_count", "warning_count",
+        "plan_status", "repair_allowed", "human_review_required",
+    ):
+        assert field in ov, f"missing repair_overview field: {field}"
+    assert ov["phase"] == "49H"
+    assert ov["repair_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["repair_domain_count"] == 7
+
+
+def test_49h_repair_always_blocked(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["repair_overview"]["repair_allowed"] is False
+    assert data["governance_boundaries"]["repair_allowed"] is False
+    assert data["candidate_model"]["repair_allowed_always_false_in_49h"] is True
+    assert data["plan_model"]["repair_allowed_always_false_in_49h"] is True
+    assert data["summary_model"]["repair_allowed_always_false_in_49h"] is True
+    assert data["repair_plan"]["repair_allowed"] is False
+    assert data["repair_summary"]["repair_allowed"] is False
+    for c in data["repair_candidates"]:
+        assert c["repair_allowed"] is False, f"repair_allowed not False for {c['repair_domain']}"
+
+
+def test_49h_human_review_always_required(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["repair_overview"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["repair_plan"]["human_review_required"] is True
+    assert data["repair_summary"]["human_review_required"] is True
+    for c in data["repair_candidates"]:
+        assert c["human_review_required"] is True, f"human_review_required not True for {c['repair_domain']}"
+
+
+def test_49h_candidate_model(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "GovernanceRepairCandidate"
+    assert cm["field_count"] == 8
+    assert cm["required_field_count"] == 8
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "repair_id", "audit_id", "repair_domain", "issue_type",
+        "recommended_action", "human_review_required", "repair_allowed", "repair_status",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for status in ("advisory", "pending_human_review", "blocked", "not_required"):
+        assert status in cm["supported_repair_statuses"], f"missing repair status: {status}"
+
+
+def test_49h_plan_model(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["plan_model"]
+    assert pm["model_name"] == "GovernanceRepairPlan"
+    assert pm["field_count"] == 8
+    assert pm["required_field_count"] == 8
+    field_names = [f["name"] for f in pm["fields"]]
+    for expected in (
+        "repair_plan_id", "audit_id", "repair_candidates", "plan_status",
+        "blockers", "warnings", "human_review_required", "repair_allowed",
+    ):
+        assert expected in field_names, f"missing plan field: {expected}"
+
+
+def test_49h_summary_model(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "GovernanceRepairSummary"
+    assert sm["field_count"] == 7
+    assert sm["required_field_count"] == 7
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "repair_plan_id", "candidate_count",
+        "blocked_count", "warning_count", "repair_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49h_all_repair_domains_present(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = [c["repair_domain"] for c in data["repair_candidates"]]
+    for expected in (
+        "active_task_repair", "task_lifecycle_repair", "session_continuity_repair",
+        "stale_reference_repair", "roadmap_consistency_repair",
+        "documentation_consistency_repair", "runtime_state_repair",
+    ):
+        assert expected in domains, f"missing repair domain: {expected}"
+    assert len(domains) == 7
+
+
+def test_49h_repair_candidates_structure(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for c in data["repair_candidates"]:
+        for key in (
+            "repair_id", "audit_id", "repair_domain", "issue_type",
+            "recommended_action", "human_review_required", "repair_allowed", "repair_status",
+        ):
+            assert key in c, f"candidate {c.get('repair_domain')!r} missing key: {key}"
+        assert c["repair_status"] in ("advisory", "pending_human_review", "blocked", "not_required")
+
+
+def test_49h_repair_statuses(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for model_key in ("candidate_model", "plan_model", "summary_model"):
+        statuses = data[model_key]["supported_repair_statuses"]
+        for expected in ("advisory", "pending_human_review", "blocked", "not_required"):
+            assert expected in statuses, f"{model_key} missing status: {expected}"
+    assert data["repair_plan"]["plan_status"] in (
+        "advisory", "pending_human_review", "blocked", "not_required"
+    )
+
+
+def test_49h_input_sources(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "GovernanceStateAuditRecord", "GovernanceStateAuditSummary",
+        "task lifecycle state", "session state", "roadmap state", "documentation state",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49h_governance_boundaries(capsys) -> None:
+    main(["governance-state-repair", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["repair_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49H"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "identify repair candidates", "recommend repair actions",
+        "classify repair risk", "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "modify files", "move tasks", "rewrite session state", "edit roadmap",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49h_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-state-repair"])
+    output = capsys.readouterr().out
+    assert "Governance state repair framework" in output
+    assert "Candidate model" in output
+    assert "Plan model" in output
+    assert "Summary model" in output
+    assert "Repair candidates" in output
+    assert "Repair plan" in output
+    assert "Repair summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

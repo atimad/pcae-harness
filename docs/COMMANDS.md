@@ -606,3 +606,8 @@
 
 - `pcae governance-state-audit`
 - `pcae governance-state-audit --json`
+
+## governance-state-repair
+
+- `pcae governance-state-repair`
+- `pcae governance-state-repair --json`

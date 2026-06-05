@@ -34225,3 +34225,422 @@ def build_governance_state_audit() -> dict:
         "input_sources": list(_GSA_INPUT_SOURCES),
         "advisory": GOVERNANCE_STATE_AUDIT_ADVISORY,
     }
+
+
+# Phase 49H — Governance State Repair Framework
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_STATE_REPAIR_ADVISORY = (
+    "Governance state repair framework is informational; no files are modified, "
+    "no tasks are moved, no session state is rewritten, and no runtimes are invoked. "
+    "repair_allowed=False in Phase 49H. All repair actions require human review."
+)
+
+_GSR_REPAIR_DOMAINS: tuple[str, ...] = (
+    "active_task_repair",
+    "task_lifecycle_repair",
+    "session_continuity_repair",
+    "stale_reference_repair",
+    "roadmap_consistency_repair",
+    "documentation_consistency_repair",
+    "runtime_state_repair",
+)
+
+_GSR_REPAIR_STATUSES: tuple[str, ...] = (
+    "advisory",
+    "pending_human_review",
+    "blocked",
+    "not_required",
+)
+
+_GSR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "repair_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this repair candidate.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The governance state audit record this candidate is derived from.",
+    },
+    {
+        "name": "repair_domain",
+        "type": "str",
+        "required": True,
+        "description": "Governance repair domain this candidate addresses.",
+    },
+    {
+        "name": "issue_type",
+        "type": "str",
+        "required": True,
+        "description": "Classification of the governance issue requiring repair.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "Advisory repair action recommended for human review.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49H. No repair proceeds without human review.",
+    },
+    {
+        "name": "repair_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49H. Framework is advisory only.",
+    },
+    {
+        "name": "repair_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: advisory, pending_human_review, blocked, or not_required.",
+    },
+)
+
+_GSR_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "repair_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this repair plan.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The governance state audit record this plan is derived from.",
+    },
+    {
+        "name": "repair_candidates",
+        "type": "list[GovernanceRepairCandidate]",
+        "required": True,
+        "description": "Ordered list of repair candidates identified for this plan.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: advisory, pending_human_review, blocked, or not_required.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing any repair from proceeding.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings associated with the repair plan.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49H.",
+    },
+    {
+        "name": "repair_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49H.",
+    },
+)
+
+_GSR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this repair summary.",
+    },
+    {
+        "name": "repair_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The repair plan this summary is associated with.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of repair candidates identified.",
+    },
+    {
+        "name": "blocked_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of repair candidates with blocked status.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of non-blocking warnings across repair candidates.",
+    },
+    {
+        "name": "repair_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49H.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49H.",
+    },
+)
+
+_GSR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "identify repair candidates",
+        "recommend repair actions",
+        "classify repair risk",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "modify files",
+        "move tasks",
+        "rewrite session state",
+        "edit roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "repair_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49H",
+}
+
+_GSR_INPUT_SOURCES: tuple[str, ...] = (
+    "GovernanceStateAuditRecord",
+    "GovernanceStateAuditSummary",
+    "task lifecycle state",
+    "session state",
+    "roadmap state",
+    "documentation state",
+)
+
+
+def build_governance_state_repair() -> dict:
+    """Define repair framework for governance state inconsistencies. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"gsa-{ts}"
+    plan_id_ref = f"gsrp-{ts}"
+
+    candidate_fields = [dict(f) for f in _GSR_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _GSR_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _GSR_SUMMARY_FIELDS]
+
+    domain_candidates: list[dict] = [
+        {
+            "repair_id": f"rpc-active-task-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "active_task_repair",
+            "issue_type": "active_task_integrity_check",
+            "recommended_action": (
+                "Verify active task count remains exactly one. "
+                "If duplicates are detected, human operator should close extraneous tasks."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "not_required",
+        },
+        {
+            "repair_id": f"rpc-task-lifecycle-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "task_lifecycle_repair",
+            "issue_type": "stale_task_closure_warning",
+            "recommended_action": (
+                "Review historical task closure records. "
+                "Confirm manual closure of previously stale task was correctly recorded. "
+                "No automated action permitted."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "advisory",
+        },
+        {
+            "repair_id": f"rpc-session-continuity-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "session_continuity_repair",
+            "issue_type": "session_continuity_check",
+            "recommended_action": (
+                "Session continuity verified in Phase 49G audit. "
+                "No repair action required at this time."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "not_required",
+        },
+        {
+            "repair_id": f"rpc-stale-reference-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "stale_reference_repair",
+            "issue_type": "legacy_phase_label_in_doc_context",
+            "recommended_action": (
+                "Locate legacy phase label references in documentation context. "
+                "Human operator should update or remove stale labels in the next documentation pass. "
+                "No automated file modification permitted."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "advisory",
+        },
+        {
+            "repair_id": f"rpc-roadmap-consistency-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "roadmap_consistency_repair",
+            "issue_type": "superseded_phase_label_references",
+            "recommended_action": (
+                "Review roadmap documentation for superseded phase labels. "
+                "Human operator should update legacy phase references to current phase identifiers. "
+                "No automated roadmap edit permitted."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "advisory",
+        },
+        {
+            "repair_id": f"rpc-documentation-consistency-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "documentation_consistency_repair",
+            "issue_type": "documentation_consistency_check",
+            "recommended_action": (
+                "Documentation consistency verified in Phase 49G audit. "
+                "No repair action required at this time."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "not_required",
+        },
+        {
+            "repair_id": f"rpc-runtime-state-{ts}",
+            "audit_id": audit_id_ref,
+            "repair_domain": "runtime_state_repair",
+            "issue_type": "runtime_trust_unverified",
+            "recommended_action": (
+                "Runtime trust has not yet been verified for any agent. "
+                "Human operator should initiate runtime trust verification process "
+                "before any write execution is considered. "
+                "No automated runtime invocation permitted."
+            ),
+            "human_review_required": True,
+            "repair_allowed": False,
+            "repair_status": "pending_human_review",
+        },
+    ]
+
+    plan_blockers: list[str] = []
+    plan_warnings: list[str] = [
+        c["issue_type"]
+        for c in domain_candidates
+        if c["repair_status"] in ("advisory", "pending_human_review")
+    ]
+    blocked_count = sum(1 for c in domain_candidates if c["repair_status"] == "blocked")
+
+    if plan_blockers:
+        plan_status = "blocked"
+    elif any(c["repair_status"] == "pending_human_review" for c in domain_candidates):
+        plan_status = "pending_human_review"
+    elif any(c["repair_status"] == "advisory" for c in domain_candidates):
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    repair_plan = {
+        "repair_plan_id": plan_id_ref,
+        "audit_id": audit_id_ref,
+        "repair_candidates": [c["repair_id"] for c in domain_candidates],
+        "plan_status": plan_status,
+        "blockers": plan_blockers,
+        "warnings": plan_warnings,
+        "human_review_required": True,
+        "repair_allowed": False,
+    }
+
+    repair_summary = {
+        "summary_id": f"gsrs-{ts}",
+        "repair_plan_id": plan_id_ref,
+        "candidate_count": len(domain_candidates),
+        "blocked_count": blocked_count,
+        "warning_count": len(plan_warnings),
+        "repair_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "GovernanceRepairCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_repair_statuses": list(_GSR_REPAIR_STATUSES),
+        "repair_allowed_always_false_in_49h": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "GovernanceRepairPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_repair_statuses": list(_GSR_REPAIR_STATUSES),
+        "repair_allowed_always_false_in_49h": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceRepairSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_repair_statuses": list(_GSR_REPAIR_STATUSES),
+        "repair_allowed_always_false_in_49h": True,
+        "fields": summary_fields,
+    }
+
+    repair_overview = {
+        "overview_id": f"49h-{ts}",
+        "generated_at": generated_at,
+        "phase": "49H",
+        "title": "Governance State Repair Framework",
+        "summary": (
+            "Defines the repair framework for governance state inconsistencies detected "
+            "by governance-state-audit (Phase 49G). Repair is advisory only. "
+            "Seven repair domains are assessed: active_task_repair, task_lifecycle_repair, "
+            "session_continuity_repair, stale_reference_repair, roadmap_consistency_repair, "
+            "documentation_consistency_repair, and runtime_state_repair. "
+            "No files are modified, no tasks are moved, and no runtimes are invoked. "
+            f"plan_status={plan_status}. repair_allowed=False. human_review_required=True."
+        ),
+        "repair_domain_count": len(_GSR_REPAIR_DOMAINS),
+        "candidate_count": len(domain_candidates),
+        "blocked_count": blocked_count,
+        "warning_count": len(plan_warnings),
+        "plan_status": plan_status,
+        "repair_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "repair_overview": repair_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "repair_candidates": domain_candidates,
+        "repair_plan": repair_plan,
+        "repair_summary": repair_summary,
+        "governance_boundaries": dict(_GSR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GSR_INPUT_SOURCES),
+        "advisory": GOVERNANCE_STATE_REPAIR_ADVISORY,
+    }

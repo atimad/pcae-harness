@@ -102,6 +102,7 @@ from pcae.commands.agent import (
     run_decision_record,
     run_multi_agent_governance_audit,
     run_governance_state_audit,
+    run_governance_state_repair,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3636,6 +3637,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_state_audit_parser.set_defaults(handler=run_governance_state_audit)
+
+    governance_state_repair_parser = subparsers.add_parser(
+        "governance-state-repair",
+        help="Define repair framework for governance state inconsistencies (Phase 49H).",
+    )
+    governance_state_repair_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    governance_state_repair_parser.set_defaults(handler=run_governance_state_repair)
 
     return parser
 

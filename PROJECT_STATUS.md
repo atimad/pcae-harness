@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49G: Governance State Integrity Audit.
+Phase 49H: Governance State Repair Framework.
 
 ## Governance Coherence Note
 
@@ -3308,10 +3308,33 @@ InvocationEvidenceRecord; decision_status=pending_human_review;
 execution_allowed=False; human_review_required=True; no runtime invocation,
 no prompt execution, no repository modification; `docs/COMMANDS.md`
 regenerated; 13 new tests; 3494 total tests passing
+and governance state repair framework implemented (Phase 49H):
+`pcae governance-state-repair` and `--json`; defines the repair framework for
+governance state inconsistencies detected by governance-state-audit (Phase 49G);
+three models — GovernanceRepairCandidate (8 fields: repair_id, audit_id,
+repair_domain, issue_type, recommended_action, human_review_required,
+repair_allowed, repair_status), GovernanceRepairPlan (8 fields: repair_plan_id,
+audit_id, repair_candidates, plan_status, blockers, warnings,
+human_review_required, repair_allowed), GovernanceRepairSummary (7 fields:
+summary_id, repair_plan_id, candidate_count, blocked_count, warning_count,
+repair_allowed, human_review_required); four repair statuses: advisory,
+pending_human_review, blocked, not_required; seven repair domains:
+active_task_repair, task_lifecycle_repair, session_continuity_repair,
+stale_reference_repair, roadmap_consistency_repair,
+documentation_consistency_repair, runtime_state_repair; inputs:
+GovernanceStateAuditRecord, GovernanceStateAuditSummary, task lifecycle state,
+session state, roadmap state, documentation state; repair_allowed=False;
+human_review_required=True; plan_status=pending_human_review; no files modified,
+no tasks moved, no session state rewritten, no runtimes invoked; `docs/COMMANDS.md`
+regenerated; 13 new tests; 3534 total tests passing
+
+## Current Phase
+
+Phase 49H: Governance State Repair Framework.
 
 ## Next
 
-- TBD: Future phases (49F or 49A Invocation Execution Gate Implementation).
+- TBD: Future phases (49A Invocation Execution Gate Implementation).
 
 ## Future Explorations
 
