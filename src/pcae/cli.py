@@ -113,6 +113,7 @@ from pcae.commands.agent import (
     run_agent_lock_conflicts,
     run_governance_recovery_plan,
     run_write_authorization,
+    run_write_authorization_review,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3768,6 +3769,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_authorization_parser.set_defaults(handler=run_write_authorization)
+
+    write_authorization_review_parser = subparsers.add_parser(
+        "write-authorization-review",
+        help="Define the human review workflow for write authorization candidates (Phase 50B).",
+    )
+    write_authorization_review_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_authorization_review_parser.set_defaults(handler=run_write_authorization_review)
 
     return parser
 

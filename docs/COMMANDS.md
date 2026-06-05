@@ -661,3 +661,8 @@
 
 - `pcae write-authorization`
 - `pcae write-authorization --json`
+
+## write-authorization-review
+
+- `pcae write-authorization-review`
+- `pcae write-authorization-review --json`

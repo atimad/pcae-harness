@@ -682,6 +682,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-authorization`
 - `pcae write-authorization --json`
+
+## write-authorization-review
+
+- `pcae write-authorization-review`
+- `pcae write-authorization-review --json`
 """
 
 

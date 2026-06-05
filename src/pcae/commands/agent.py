@@ -201,6 +201,8 @@ from pcae.core.agent import (
     GOVERNANCE_RECOVERY_PLAN_ADVISORY,
     build_write_authorization,
     WRITE_AUTHORIZATION_ADVISORY,
+    build_write_authorization_review,
+    WRITE_AUTHORIZATION_REVIEW_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7928,6 +7930,76 @@ def run_write_authorization(args: argparse.Namespace) -> int:
         print(f"  domain_count:          {ss['domain_count']}")
         print(f"  blocker_count:         {ss['blocker_count']}")
         print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  authorization_allowed: {ss['authorization_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Authorization allowed: {gb['authorization_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_authorization_review(args: argparse.Namespace) -> int:
+    data = build_write_authorization_review()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_authorization_review_overview"]
+        print("Write authorization review workflow")
+        print(f"Review: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Review domains:         {ov['review_domain_count']}")
+        print(f"Domains defined:        {ov['domain_count']}")
+        print(f"Review status:          {ov['review_status']}")
+        print(f"Authorization allowed:  {'yes' if ov['authorization_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_review_statuses'])}")
+        print(f"  authorization_allowed always False in 50B: {cm['authorization_allowed_always_false_in_50b']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Domain findings:")
+        for d in data["domain_findings"]:
+            print(f"  [{d['review_status'].upper()}] {d['domain']}")
+            print(f"    {d['description'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  review_allowed:        {sc['review_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  selected_runtime:      {sc['selected_runtime']}")
+        print(f"  selected_agent:        {sc['selected_agent']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  review_status:         {sr['review_status']}")
+        print(f"  authorization_allowed: {sr['authorization_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print(f"  reviewed_domains:      {sr['reviewed_domains']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  review_status:         {ss['review_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  requested_change_count:{ss['requested_change_count']}")
+        print(f"  escalation_count:      {ss['escalation_count']}")
         print(f"  authorization_allowed: {ss['authorization_allowed']}")
         print(f"  human_review_required: {ss['human_review_required']}")
         print()

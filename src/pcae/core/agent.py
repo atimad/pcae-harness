@@ -39024,3 +39024,423 @@ def build_write_authorization() -> dict:
         "input_sources": list(_WA_INPUT_SOURCES),
         "advisory": WRITE_AUTHORIZATION_ADVISORY,
     }
+
+
+# Phase 50B — Write Authorization Review Workflow
+# ---------------------------------------------------------------------------
+
+WRITE_AUTHORIZATION_REVIEW_ADVISORY = (
+    "Write authorization review is informational; review domains may be defined "
+    "and review outcomes recorded, but no automatic authorization occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. authorization_allowed=False in Phase 50B."
+)
+
+_WAR_REVIEW_DOMAINS: tuple[str, ...] = (
+    "explicit_permission_review",
+    "file_scope_review",
+    "rollback_plan_review",
+    "audit_plan_review",
+    "runtime_writable_review",
+    "expiration_policy_review",
+    "revocation_policy_review",
+    "human_decision_recording",
+)
+
+_WAR_REVIEW_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "reviewed",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_WAR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization review candidate.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate being reviewed.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the prompt requesting write execution.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for write execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for write execution.",
+    },
+    {
+        "name": "review_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of review domains to be assessed by the human reviewer.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50B.",
+    },
+    {
+        "name": "review_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Whether the review workflow is allowed to proceed.",
+    },
+)
+
+_WAR_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization review record.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this record is associated with.",
+    },
+    {
+        "name": "reviewed_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Domains reviewed by the human reviewer.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: pending_human_review, reviewed, changes_requested, escalated, or blocked.",
+    },
+    {
+        "name": "accepted_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Authorization domain findings accepted by the human reviewer.",
+    },
+    {
+        "name": "rejected_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Authorization domain findings rejected by the human reviewer.",
+    },
+    {
+        "name": "requested_changes",
+        "type": "list[str]",
+        "required": True,
+        "description": "Changes requested by the human reviewer before authorization can proceed.",
+    },
+    {
+        "name": "escalations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Issues escalated by the human reviewer for further governance attention.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50B.",
+    },
+)
+
+_WAR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization review summary.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization review record this summary is associated with.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: pending_human_review, reviewed, changes_requested, escalated, or blocked.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of review domains.",
+    },
+    {
+        "name": "requested_change_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of changes requested by the human reviewer.",
+    },
+    {
+        "name": "escalation_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of issues escalated by the human reviewer.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50B.",
+    },
+)
+
+_WAR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define write authorization review models",
+        "classify review outcomes",
+        "recommend requested changes",
+        "recommend escalation paths",
+    ],
+    "may_not": [
+        "authorize writes automatically",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "authorization_allowed": False,
+    "execution_allowed": False,
+    "automatic_approval_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50B",
+}
+
+_WAR_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationCandidate",
+    "WriteAuthorizationPolicy",
+    "WriteAuthorizationSummary",
+    "GovernedWriteCandidate",
+    "ControlledWritePlan",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WAR_DOMAIN_DESCRIPTIONS: tuple[dict, ...] = (
+    {
+        "domain": "explicit_permission_review",
+        "description": (
+            "Human reviewer must verify that explicit write permission has been "
+            "granted for this prompt and agent combination."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "file_scope_review",
+        "description": (
+            "Human reviewer must confirm the file scope boundaries are appropriate "
+            "and no unauthorized files are included in the write scope."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "rollback_plan_review",
+        "description": (
+            "Human reviewer must confirm that a valid rollback plan is in place "
+            "and can be executed if write execution fails or produces unexpected results."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "audit_plan_review",
+        "description": (
+            "Human reviewer must confirm that audit capture is authorized and "
+            "that all write operations will be traceable in the governance audit trail."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "runtime_writable_review",
+        "description": (
+            "Human reviewer must confirm that the selected runtime is authorized "
+            "for write-capable execution and meets all runtime safety invariants."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "expiration_policy_review",
+        "description": (
+            "Human reviewer must confirm that the write authorization expiration "
+            "policy is set and that the authorization will not remain valid indefinitely."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "revocation_policy_review",
+        "description": (
+            "Human reviewer must confirm that the write authorization revocation "
+            "policy is in place and that authorization can be withdrawn at any time."
+        ),
+        "review_status": "pending_human_review",
+    },
+    {
+        "domain": "human_decision_recording",
+        "description": (
+            "Human reviewer must record their review decision explicitly so that "
+            "governance provenance captures the authorization intent unambiguously."
+        ),
+        "review_status": "pending_human_review",
+    },
+)
+
+
+def build_write_authorization_review() -> dict:
+    """Define write authorization review workflow. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    review_id_ref = f"war-{ts}"
+
+    candidate_fields = [dict(f) for f in _WAR_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _WAR_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _WAR_SUMMARY_FIELDS]
+
+    domain_findings: list[dict] = []
+    for d in _WAR_DOMAIN_DESCRIPTIONS:
+        domain_findings.append({
+            "domain": d["domain"],
+            "description": d["description"],
+            "review_status": d["review_status"],
+            "authorization_allowed": False,
+        })
+
+    domain_count = len(domain_findings)
+    review_status = "pending_human_review"
+
+    sample_candidate = {
+        "review_id": review_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "prompt_id": f"prompt-{ts}",
+        "selected_runtime": "unset",
+        "selected_agent": "unset",
+        "review_domains": list(_WAR_REVIEW_DOMAINS),
+        "human_review_required": True,
+        "review_allowed": True,
+    }
+
+    sample_record = {
+        "review_id": review_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "reviewed_domains": [],
+        "review_status": review_status,
+        "accepted_findings": [],
+        "rejected_findings": [],
+        "requested_changes": [],
+        "escalations": [],
+        "authorization_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wars-{ts}",
+        "review_id": review_id_ref,
+        "review_status": review_status,
+        "domain_count": domain_count,
+        "requested_change_count": 0,
+        "escalation_count": 0,
+        "authorization_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteAuthorizationReviewCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_review_statuses": list(_WAR_REVIEW_STATUSES),
+        "authorization_allowed_always_false_in_50b": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "WriteAuthorizationReviewRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_review_statuses": list(_WAR_REVIEW_STATUSES),
+        "authorization_allowed_always_false_in_50b": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteAuthorizationReviewSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_review_statuses": list(_WAR_REVIEW_STATUSES),
+        "authorization_allowed_always_false_in_50b": True,
+        "fields": summary_fields,
+    }
+
+    write_authorization_review_overview = {
+        "overview_id": f"50b-{ts}",
+        "generated_at": generated_at,
+        "phase": "50B",
+        "title": "Write Authorization Review Workflow",
+        "summary": (
+            "Defines the human review workflow for write authorization candidates "
+            "created by Phase 50A. Eight review domains are defined: "
+            "explicit_permission_review, file_scope_review, rollback_plan_review, "
+            "audit_plan_review, runtime_writable_review, expiration_policy_review, "
+            "revocation_policy_review, and human_decision_recording. "
+            f"domain_count={domain_count}. "
+            f"review_status={review_status}. "
+            "Write authorization review is advisory and read-only. No write execution occurs. "
+            "authorization_allowed=False."
+        ),
+        "review_domain_count": len(_WAR_REVIEW_DOMAINS),
+        "domain_count": domain_count,
+        "review_status": review_status,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "automatic_approval_allowed": False,
+    }
+
+    return {
+        "write_authorization_review_overview": write_authorization_review_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_findings": domain_findings,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WAR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WAR_INPUT_SOURCES),
+        "advisory": WRITE_AUTHORIZATION_REVIEW_ADVISORY,
+    }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50A: Controlled Write Authorization.
+Phase 50B: Write Authorization Review Workflow.
 
 ## Governance Coherence Note
 
@@ -3462,6 +3462,19 @@ domains with one candidate per domain; 1 blocker (governance_drift_recovery),
 execution_allowed=False; human_review_required=True; `docs/COMMANDS.md`
 regenerated; 14 new tests; 3670 total tests passing
 
+`pcae write-authorization-review` and `--json`; defines the human review
+workflow for write authorization candidates created by Phase 50A; three models
+— WriteAuthorizationReviewCandidate (8 fields), WriteAuthorizationReviewRecord
+(10 fields), WriteAuthorizationReviewSummary (8 fields); five review statuses;
+eight review domains all initialized as pending_human_review;
+review_status=pending_human_review; authorization_allowed=False;
+execution_allowed=False; automatic_approval_allowed=False;
+human_review_required=True; inputs: WriteAuthorizationCandidate,
+WriteAuthorizationPolicy, WriteAuthorizationSummary, GovernedWriteCandidate,
+ControlledWritePlan, RuntimeSafetyInvariantAssessment, GovernanceRecoveryPlan;
+advisory and read-only; no write execution occurs; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3700 total tests passing
+
 `pcae write-authorization` and `--json`; defines the governed authorization
 model required before PCAE may allow write-capable execution; three models —
 WriteAuthorizationCandidate (9 fields: write_authorization_id, prompt_id,
@@ -3488,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50A: Controlled Write Authorization.
+Phase 50B: Write Authorization Review Workflow.
 
 ## Next
 
-- TBD: Future phases (50B and beyond).
+- TBD: Future phases (50C and beyond).
 
 ## Future Explorations
 
