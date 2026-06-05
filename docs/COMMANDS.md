@@ -482,6 +482,11 @@
 - `pcae arbitration`
 - `pcae arbitration --json`
 
+## evidence-framework
+
+- `pcae evidence-framework`
+- `pcae evidence-framework --json`
+
 ## write-result-review-design
 
 - `pcae write-result-review-design`

@@ -171,6 +171,8 @@ from pcae.core.agent import (
     CONSENSUS_ENGINE_ADVISORY,
     build_arbitration_framework,
     ARBITRATION_ADVISORY,
+    build_evidence_framework,
+    EVIDENCE_FRAMEWORK_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6862,6 +6864,67 @@ def run_consensus_engine(args: argparse.Namespace) -> int:
         for ep in data["escalation_paths"]:
             print(f"  {ep['path']} (trigger: {ep['trigger']}, human_required: {ep['human_required']})")
             print(f"    {ep['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_evidence_framework(args: argparse.Namespace) -> int:
+    data = build_evidence_framework()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        s = data["framework_summary"]
+        print("Multi-agent evidence framework")
+        print(f"Assessment: {s['summary_id']}  Generated: {s['generated_at']}")
+        print(f"Phase: {s['phase']} — {s['title']}")
+        print()
+        print(s["summary"])
+        print()
+        print(f"Agents:                {s['agent_count']}")
+        print(f"Evidence kinds:        {s['evidence_kind_count']}")
+        print(f"Review workflow steps: {s['review_workflow_step_count']}")
+        print(f"Execution allowed:     {'yes' if s['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if s['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported evidence kinds: {', '.join(cm['supported_evidence_kinds'])}")
+        print(f"  execution_allowed always False in 49D: {cm['execution_allowed_always_false_in_49d']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Trust levels:        {', '.join(rm['supported_trust_levels'])}")
+        print(f"  Validation statuses: {', '.join(rm['supported_validation_statuses'])}")
+        print()
+        bm = data["bundle_model"]
+        print(f"Bundle model: {bm['model_name']} ({bm['field_count']} fields)")
+        print(f"  Bundle statuses: {', '.join(bm['supported_bundle_statuses'])}")
+        print()
+        sb = data["sample_bundle"]
+        print(f"Sample bundle: {sb['bundle_id']} (status: {sb['bundle_status']})")
+        print(f"  Participating agents ({len(sb['participating_agents'])}):")
+        for agent_id in sb["participating_agents"]:
+            print(f"    {agent_id}")
+        print(f"  Evidence records ({len(sb['evidence_records'])}):")
+        for rec in sb["evidence_records"]:
+            print(
+                f"    [{rec['validation_status']}] {rec['source_agent']} "
+                f"(trust: {rec['trust_level']}, kind: {rec['evidence_kind']})"
+            )
+        print()
+        print(f"Review workflow ({len(data['review_workflow'])} steps):")
+        for step in data["review_workflow"]:
+            human_flag = " [human required]" if step["human_required"] else ""
+            print(f"  {step['step']}{human_flag}")
+            print(f"    {step['description']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

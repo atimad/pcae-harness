@@ -30391,3 +30391,186 @@ def test_49c_human_output_shows_all_sections(capsys) -> None:
     assert "Escalation paths" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49D — Multi-Agent Evidence Framework
+
+
+def test_49d_json_structure(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "framework_summary", "candidate_model", "record_model", "bundle_model",
+        "sample_candidate", "sample_records", "sample_bundle",
+        "review_workflow", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49d_framework_summary_fields(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["framework_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "agent_count", "evidence_kind_count", "review_workflow_step_count",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in s, f"missing framework_summary field: {field}"
+    assert s["phase"] == "49D"
+    assert s["execution_allowed"] is False
+    assert s["human_review_required"] is True
+    assert s["agent_count"] == 3
+    assert s["evidence_kind_count"] == 6
+    assert s["review_workflow_step_count"] == 6
+
+
+def test_49d_execution_always_blocked(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["framework_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49d"] is True
+    assert data["record_model"]["execution_allowed_always_false_in_49d"] is True
+    assert data["bundle_model"]["execution_allowed_always_false_in_49d"] is True
+
+
+def test_49d_candidate_model(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "EvidenceCandidate"
+    assert cm["field_count"] == 7
+    assert cm["required_field_count"] == 7
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "evidence_id", "request_id", "source_type", "source_agent",
+        "evidence_kind", "collected_at", "review_required",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for kind in (
+        "governance", "runtime", "validation", "consensus", "arbitration", "provenance",
+    ):
+        assert kind in cm["supported_evidence_kinds"], f"missing evidence kind: {kind}"
+
+
+def test_49d_record_model(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "EvidenceRecord"
+    assert rm["field_count"] == 8
+    assert rm["required_field_count"] == 8
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "evidence_id", "request_id", "source_agent", "evidence_kind",
+        "evidence_summary", "trust_level", "validation_status", "warnings",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    for level in ("trusted", "partially_trusted", "untrusted"):
+        assert level in rm["supported_trust_levels"], f"missing trust level: {level}"
+    for status in ("valid", "warning", "invalid", "not_reviewed"):
+        assert status in rm["supported_validation_statuses"], f"missing validation status: {status}"
+
+
+def test_49d_bundle_model(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    bm = data["bundle_model"]
+    assert bm["model_name"] == "EvidenceBundle"
+    assert bm["field_count"] == 6
+    assert bm["required_field_count"] == 6
+    field_names = [f["name"] for f in bm["fields"]]
+    for expected in (
+        "bundle_id", "request_id", "evidence_records",
+        "participating_agents", "bundle_status", "review_required",
+    ):
+        assert expected in field_names, f"missing bundle field: {expected}"
+    for status in ("draft", "review_required", "approved_for_review", "blocked"):
+        assert status in bm["supported_bundle_statuses"], f"missing bundle status: {status}"
+
+
+def test_49d_sample_bundle_structure(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sb = data["sample_bundle"]
+    assert sb["bundle_status"] == "review_required"
+    assert sb["review_required"] is True
+    agents = set(sb["participating_agents"])
+    assert agents == {"codex-local", "claude-local", "kimi-local"}
+    assert len(sb["evidence_records"]) == 3
+    for rec in sb["evidence_records"]:
+        assert rec["validation_status"] == "not_reviewed", (
+            f"{rec['source_agent']} must be not_reviewed in Phase 49D"
+        )
+
+
+def test_49d_trust_levels_in_records(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    records = data["sample_records"]
+    trust_map = {r["source_agent"]: r["trust_level"] for r in records}
+    assert trust_map["kimi-local"] == "untrusted"
+    assert trust_map["codex-local"] == "partially_trusted"
+    assert trust_map["claude-local"] == "partially_trusted"
+
+
+def test_49d_review_workflow(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    steps = data["review_workflow"]
+    assert len(steps) == 6
+    step_names = [s["step"] for s in steps]
+    for expected in (
+        "evidence_collection", "evidence_normalization", "evidence_validation",
+        "bundle_assembly", "human_review", "bundle_consumption",
+    ):
+        assert expected in step_names, f"missing workflow step: {expected}"
+    human_steps = [s["step"] for s in steps if s["human_required"]]
+    assert "human_review" in human_steps
+    assert "bundle_consumption" in human_steps
+
+
+def test_49d_governance_boundaries(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49D"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define evidence models", "define evidence normalization",
+        "define evidence review workflow", "define evidence bundle workflow",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49d_input_sources(capsys) -> None:
+    main(["evidence-framework", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ConsensusResult", "ArbitrationDecision", "GovernanceAuditRecord",
+        "InvocationEvidenceRecord", "RuntimeTrustRecord",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49d_human_output_shows_all_sections(capsys) -> None:
+    main(["evidence-framework"])
+    output = capsys.readouterr().out
+    assert "Multi-agent evidence framework" in output
+    assert "Candidate model" in output
+    assert "Record model" in output
+    assert "Bundle model" in output
+    assert "Sample bundle" in output
+    assert "Review workflow" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

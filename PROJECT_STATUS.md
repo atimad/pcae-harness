@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49C: Multi-Agent Arbitration Framework.
+Phase 49D: Multi-Agent Evidence Framework.
 
 ## Governance Coherence Note
 
@@ -3279,10 +3279,27 @@ kimi-local) unavailable; arbitration_status=pending_human_review;
 escalation_required=True; execution_allowed=False; human_review_required=True;
 no runtime invocation, no prompt execution, no repository modification;
 `docs/COMMANDS.md` regenerated; 13 new tests; 3469 total tests passing
+and multi-agent evidence framework implemented (Phase 49D):
+`pcae evidence-framework` and `--json`; defines how evidence is collected,
+normalized, reviewed, and consumed by multi-agent governance workflows;
+three models — EvidenceCandidate (7 fields), EvidenceRecord (8 fields),
+EvidenceBundle (6 fields); six evidence kinds: governance, runtime, validation,
+consensus, arbitration, provenance; three trust levels: trusted,
+partially_trusted, untrusted; four validation statuses: valid, warning,
+invalid, not_reviewed; four bundle statuses: draft, review_required,
+approved_for_review, blocked; six-step review workflow: evidence_collection,
+evidence_normalization, evidence_validation, bundle_assembly, human_review,
+bundle_consumption (last two human_required=True); inputs: ConsensusResult,
+ArbitrationDecision, GovernanceAuditRecord, InvocationEvidenceRecord,
+RuntimeTrustRecord; all sample records not_reviewed in 49D; kimi-local
+untrusted, codex-local/claude-local partially_trusted; bundle_status=review_required;
+execution_allowed=False; human_review_required=True; no runtime invocation, no
+prompt execution, no repository modification; `docs/COMMANDS.md` regenerated;
+12 new tests; 3481 total tests passing
 
 ## Next
 
-- TBD: Future phases (49D or 49A Invocation Execution Gate Implementation).
+- TBD: Future phases (49A Invocation Execution Gate Implementation).
 
 ## Future Explorations
 

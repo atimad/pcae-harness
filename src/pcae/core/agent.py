@@ -32824,3 +32824,370 @@ def build_arbitration_framework() -> dict:
         "input_sources": list(_AF_INPUT_SOURCES),
         "advisory": ARBITRATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 49D — Multi-Agent Evidence Framework
+# ---------------------------------------------------------------------------
+
+EVIDENCE_FRAMEWORK_ADVISORY = (
+    "Evidence framework assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49D."
+)
+
+_EF_EVIDENCE_KINDS: tuple[str, ...] = (
+    "governance",
+    "runtime",
+    "validation",
+    "consensus",
+    "arbitration",
+    "provenance",
+)
+
+_EF_TRUST_LEVELS: tuple[str, ...] = (
+    "trusted",
+    "partially_trusted",
+    "untrusted",
+)
+
+_EF_VALIDATION_STATUSES: tuple[str, ...] = (
+    "valid",
+    "warning",
+    "invalid",
+    "not_reviewed",
+)
+
+_EF_BUNDLE_STATUSES: tuple[str, ...] = (
+    "draft",
+    "review_required",
+    "approved_for_review",
+    "blocked",
+)
+
+_EF_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this evidence candidate is associated with.",
+    },
+    {
+        "name": "source_type",
+        "type": "str",
+        "required": True,
+        "description": "Origin type of the evidence: agent, governance, runtime, or provenance.",
+    },
+    {
+        "name": "source_agent",
+        "type": "str",
+        "required": True,
+        "description": "Agent ID that produced or nominated this evidence candidate.",
+    },
+    {
+        "name": "evidence_kind",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Kind of evidence: governance, runtime, validation, consensus, "
+            "arbitration, or provenance."
+        ),
+    },
+    {
+        "name": "collected_at",
+        "type": "str",
+        "required": True,
+        "description": "ISO 8601 timestamp when this evidence candidate was collected.",
+    },
+    {
+        "name": "review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every evidence candidate.",
+    },
+)
+
+_EF_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this evidence record is associated with.",
+    },
+    {
+        "name": "source_agent",
+        "type": "str",
+        "required": True,
+        "description": "Agent ID that produced this evidence record.",
+    },
+    {
+        "name": "evidence_kind",
+        "type": "str",
+        "required": True,
+        "description": "Kind of evidence: governance, runtime, validation, consensus, arbitration, or provenance.",
+    },
+    {
+        "name": "evidence_summary",
+        "type": "str",
+        "required": True,
+        "description": "Human-readable summary of the evidence content.",
+    },
+    {
+        "name": "trust_level",
+        "type": "str",
+        "required": True,
+        "description": "Trust level of the source agent: trusted, partially_trusted, or untrusted.",
+    },
+    {
+        "name": "validation_status",
+        "type": "str",
+        "required": True,
+        "description": "Validation outcome: valid, warning, invalid, or not_reviewed.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during evidence validation.",
+    },
+)
+
+_EF_BUNDLE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "bundle_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this evidence bundle.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this evidence bundle is associated with.",
+    },
+    {
+        "name": "evidence_records",
+        "type": "list[dict]",
+        "required": True,
+        "description": "List of EvidenceRecord entries included in this bundle.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs whose evidence is represented in this bundle.",
+    },
+    {
+        "name": "bundle_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of this bundle: draft, review_required, approved_for_review, or blocked.",
+    },
+    {
+        "name": "review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49D; human review is required for every evidence bundle.",
+    },
+)
+
+_EF_REVIEW_WORKFLOW_STEPS: tuple[dict, ...] = (
+    {
+        "step": "evidence_collection",
+        "description": "Evidence candidates are nominated from governance, runtime, and agent sources.",
+        "human_required": False,
+    },
+    {
+        "step": "evidence_normalization",
+        "description": "Candidates are normalized into EvidenceRecords with trust_level and validation_status.",
+        "human_required": False,
+    },
+    {
+        "step": "evidence_validation",
+        "description": "Each EvidenceRecord is validated; warnings and invalid records are flagged.",
+        "human_required": False,
+    },
+    {
+        "step": "bundle_assembly",
+        "description": "Valid and warning records are assembled into an EvidenceBundle for review.",
+        "human_required": False,
+    },
+    {
+        "step": "human_review",
+        "description": (
+            "Human engineer reviews the EvidenceBundle, resolves warnings, "
+            "and determines whether the bundle is approved for downstream consumption."
+        ),
+        "human_required": True,
+    },
+    {
+        "step": "bundle_consumption",
+        "description": (
+            "Approved bundles are made available to governance workflows "
+            "(consensus, arbitration, audit) as advisory inputs."
+        ),
+        "human_required": True,
+    },
+)
+
+_EF_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define evidence models",
+        "define evidence normalization",
+        "define evidence review workflow",
+        "define evidence bundle workflow",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49D",
+}
+
+_EF_INPUT_SOURCES: tuple[str, ...] = (
+    "ConsensusResult",
+    "ArbitrationDecision",
+    "GovernanceAuditRecord",
+    "InvocationEvidenceRecord",
+    "RuntimeTrustRecord",
+)
+
+_EF_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+
+def build_evidence_framework() -> dict:
+    """Define the multi-agent evidence framework governance model. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    evidence_id_ref = f"ef-{ts}"
+    request_id_ref = "ef-req-placeholder-49d"
+    bundle_id_ref = f"efb-{ts}"
+
+    candidate_fields = [dict(f) for f in _EF_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _EF_RECORD_FIELDS]
+    bundle_fields = [dict(f) for f in _EF_BUNDLE_FIELDS]
+    review_workflow = [dict(s) for s in _EF_REVIEW_WORKFLOW_STEPS]
+    participating_agents = list(_EF_AGENTS)
+
+    sample_evidence_records = [
+        {
+            "evidence_id": f"{evidence_id_ref}-{agent_id}",
+            "request_id": request_id_ref,
+            "source_agent": agent_id,
+            "evidence_kind": "governance",
+            "evidence_summary": f"Governance evidence from {agent_id}; not_reviewed pending human review.",
+            "trust_level": "untrusted" if agent_id == "kimi-local" else "partially_trusted",
+            "validation_status": "not_reviewed",
+            "warnings": ["evidence_not_reviewed_in_49d"],
+        }
+        for agent_id in participating_agents
+    ]
+
+    sample_candidate = {
+        "evidence_id": evidence_id_ref,
+        "request_id": request_id_ref,
+        "source_type": "agent",
+        "source_agent": participating_agents[0],
+        "evidence_kind": "governance",
+        "collected_at": generated_at,
+        "review_required": True,
+    }
+
+    sample_bundle = {
+        "bundle_id": bundle_id_ref,
+        "request_id": request_id_ref,
+        "evidence_records": sample_evidence_records,
+        "participating_agents": participating_agents,
+        "bundle_status": "review_required",
+        "review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "EvidenceCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_evidence_kinds": list(_EF_EVIDENCE_KINDS),
+        "execution_allowed_always_false_in_49d": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "EvidenceRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_trust_levels": list(_EF_TRUST_LEVELS),
+        "supported_validation_statuses": list(_EF_VALIDATION_STATUSES),
+        "execution_allowed_always_false_in_49d": True,
+        "fields": record_fields,
+    }
+
+    bundle_model = {
+        "model_name": "EvidenceBundle",
+        "field_count": len(bundle_fields),
+        "required_field_count": sum(1 for f in bundle_fields if f["required"]),
+        "supported_bundle_statuses": list(_EF_BUNDLE_STATUSES),
+        "execution_allowed_always_false_in_49d": True,
+        "fields": bundle_fields,
+    }
+
+    framework_summary = {
+        "summary_id": f"49d-{ts}",
+        "generated_at": generated_at,
+        "phase": "49D",
+        "title": "Multi-Agent Evidence Framework",
+        "summary": (
+            "Defines how evidence is collected, normalized, reviewed, and consumed "
+            "by multi-agent governance workflows (codex-local, claude-local, "
+            "kimi-local). Evidence kinds: governance, runtime, validation, consensus, "
+            "arbitration, provenance. Trust levels: trusted, partially_trusted, "
+            "untrusted. Validation statuses: valid, warning, invalid, not_reviewed. "
+            "Bundle statuses: draft, review_required, approved_for_review, blocked. "
+            "All evidence records are not_reviewed in Phase 49D. "
+            "execution_allowed=False. human_review_required=True. "
+            "No runtime is invoked, no prompt is submitted, and no repository "
+            "modification occurs."
+        ),
+        "agent_count": len(participating_agents),
+        "evidence_kind_count": len(_EF_EVIDENCE_KINDS),
+        "review_workflow_step_count": len(review_workflow),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "framework_summary": framework_summary,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "bundle_model": bundle_model,
+        "sample_candidate": sample_candidate,
+        "sample_records": sample_evidence_records,
+        "sample_bundle": sample_bundle,
+        "review_workflow": review_workflow,
+        "governance_boundaries": dict(_EF_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EF_INPUT_SOURCES),
+        "advisory": EVIDENCE_FRAMEWORK_ADVISORY,
+    }
