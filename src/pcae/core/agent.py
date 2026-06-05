@@ -38608,3 +38608,419 @@ def build_governance_recovery_plan() -> dict:
         "input_sources": list(_GRP_INPUT_SOURCES),
         "advisory": GOVERNANCE_RECOVERY_PLAN_ADVISORY,
     }
+
+
+# Phase 50A — Controlled Write Authorization
+# ---------------------------------------------------------------------------
+
+WRITE_AUTHORIZATION_ADVISORY = (
+    "Write authorization assessment is informational; authorization domains may be "
+    "defined and domain assessments recorded, but no automatic authorization occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. authorization_allowed=False in Phase 50A."
+)
+
+_WA_AUTHORIZATION_DOMAINS: tuple[str, ...] = (
+    "explicit_write_permission",
+    "file_scope_authorization",
+    "rollback_authorization",
+    "audit_authorization",
+    "runtime_writable_authorization",
+    "human_write_approval",
+    "expiration_policy",
+    "revocation_policy",
+)
+
+_WA_AUTHORIZATION_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "authorized",
+)
+
+_WA_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_WA_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization candidate.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the prompt requesting write execution.",
+    },
+    {
+        "name": "authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the authorization artifact this candidate is associated with.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for write execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for write execution.",
+    },
+    {
+        "name": "file_scope",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of files authorized for write access.",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the rollback plan associated with this write authorization.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50A.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50A.",
+    },
+)
+
+_WA_POLICY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "policy_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this authorization policy.",
+    },
+    {
+        "name": "required_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Authorization domains that must all be satisfied before write authorization is granted.",
+    },
+    {
+        "name": "expiration_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether an expiration timestamp is required on all authorizations.",
+    },
+    {
+        "name": "revocation_supported",
+        "type": "bool",
+        "required": True,
+        "description": "Whether authorization revocation is supported.",
+    },
+    {
+        "name": "human_approval_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50A.",
+    },
+    {
+        "name": "automatic_approval_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50A.",
+    },
+)
+
+_WA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization summary.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of authorization domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity domain findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity domain findings.",
+    },
+    {
+        "name": "authorization_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: draft, pending_human_review, blocked, or authorized.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50A.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50A.",
+    },
+)
+
+_WA_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define write authorization models",
+        "assess authorization domains",
+        "report blockers and warnings",
+        "recommend future authorization workflow",
+    ],
+    "may_not": [
+        "authorize writes automatically",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "authorization_allowed": False,
+    "execution_allowed": False,
+    "automatic_approval_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50A",
+}
+
+_WA_INPUT_SOURCES: tuple[str, ...] = (
+    "GovernanceRecoveryPlan",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "GovernedWriteCandidate",
+    "ControlledWritePlan",
+    "WriteExecutionReadinessAssessment",
+    "ExecutionAuthorizationArtifact",
+)
+
+_WA_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "explicit_write_permission",
+        "severity": "blocker",
+        "finding": (
+            "No explicit write permission has been granted. Human authorization is required "
+            "before any write operation may proceed."
+        ),
+    },
+    {
+        "domain": "file_scope_authorization",
+        "severity": "blocker",
+        "finding": (
+            "File scope has not been authorized for write operations. Scope boundaries must "
+            "be confirmed by a human reviewer before write execution is permitted."
+        ),
+    },
+    {
+        "domain": "rollback_authorization",
+        "severity": "warning",
+        "finding": (
+            "No rollback plan has been authorized. Rollback authorization must be confirmed "
+            "before write execution proceeds."
+        ),
+    },
+    {
+        "domain": "audit_authorization",
+        "severity": "warning",
+        "finding": (
+            "Audit trail has not been authorized. Audit capture authorization must be "
+            "confirmed before write execution proceeds."
+        ),
+    },
+    {
+        "domain": "runtime_writable_authorization",
+        "severity": "blocker",
+        "finding": (
+            "No runtime has been authorized for write-capable execution. Runtime write "
+            "authorization must be granted explicitly before invocation."
+        ),
+    },
+    {
+        "domain": "human_write_approval",
+        "severity": "blocker",
+        "finding": (
+            "Human approval for write execution has not been received. Human write approval "
+            "is a mandatory prerequisite for all write-capable invocations."
+        ),
+    },
+    {
+        "domain": "expiration_policy",
+        "severity": "warning",
+        "finding": (
+            "Write authorization expiration policy has not been set. Expiration policy is "
+            "required before any write authorization can be granted."
+        ),
+    },
+    {
+        "domain": "revocation_policy",
+        "severity": "warning",
+        "finding": (
+            "Write authorization revocation policy has not been set. Revocation policy is "
+            "required before any write authorization can be granted."
+        ),
+    },
+)
+
+
+def build_write_authorization() -> dict:
+    """Define controlled write authorization model. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    authorization_id_ref = f"wa-{ts}"
+
+    candidate_fields = [dict(f) for f in _WA_CANDIDATE_FIELDS]
+    policy_fields = [dict(f) for f in _WA_POLICY_FIELDS]
+    summary_fields = [dict(f) for f in _WA_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = []
+    for finding in _WA_DOMAIN_FINDINGS:
+        domain_assessments.append({
+            "domain": finding["domain"],
+            "severity": finding["severity"],
+            "finding": finding["finding"],
+            "authorization_required": True,
+            "authorization_allowed": False,
+        })
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        authorization_status = "pending_human_review"
+    elif warning_count > 0:
+        authorization_status = "draft"
+    else:
+        authorization_status = "authorized"
+
+    wac_id = f"wac-{ts}"
+
+    sample_candidate = {
+        "write_authorization_id": wac_id,
+        "prompt_id": f"prompt-{ts}",
+        "authorization_id": authorization_id_ref,
+        "selected_runtime": "unset",
+        "selected_agent": "unset",
+        "file_scope": [],
+        "rollback_plan_id": "unset",
+        "human_review_required": True,
+        "authorization_allowed": False,
+    }
+
+    sample_policy = {
+        "policy_id": f"wap-{ts}",
+        "required_domains": list(_WA_AUTHORIZATION_DOMAINS),
+        "expiration_required": True,
+        "revocation_supported": True,
+        "human_approval_required": True,
+        "automatic_approval_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"was-{ts}",
+        "write_authorization_id": wac_id,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "authorization_status": authorization_status,
+        "authorization_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteAuthorizationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_authorization_statuses": list(_WA_AUTHORIZATION_STATUSES),
+        "authorization_allowed_always_false_in_50a": True,
+        "fields": candidate_fields,
+    }
+
+    policy_model = {
+        "model_name": "WriteAuthorizationPolicy",
+        "field_count": len(policy_fields),
+        "required_field_count": sum(1 for f in policy_fields if f["required"]),
+        "automatic_approval_allowed_always_false_in_50a": True,
+        "fields": policy_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteAuthorizationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_authorization_statuses": list(_WA_AUTHORIZATION_STATUSES),
+        "authorization_allowed_always_false_in_50a": True,
+        "fields": summary_fields,
+    }
+
+    write_authorization_overview = {
+        "overview_id": f"50a-{ts}",
+        "generated_at": generated_at,
+        "phase": "50A",
+        "title": "Controlled Write Authorization",
+        "summary": (
+            "Defines the governed authorization model required before PCAE may allow "
+            "write-capable execution. Eight authorization domains are assessed: "
+            "explicit_write_permission, file_scope_authorization, rollback_authorization, "
+            "audit_authorization, runtime_writable_authorization, human_write_approval, "
+            "expiration_policy, and revocation_policy. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"authorization_status={authorization_status}. "
+            "Write authorization assessment is advisory and read-only. No write execution occurs. "
+            "authorization_allowed=False."
+        ),
+        "authorization_domain_count": len(_WA_AUTHORIZATION_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "authorization_status": authorization_status,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_authorization_overview": write_authorization_overview,
+        "candidate_model": candidate_model,
+        "policy_model": policy_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_policy": sample_policy,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WA_INPUT_SOURCES),
+        "advisory": WRITE_AUTHORIZATION_ADVISORY,
+    }

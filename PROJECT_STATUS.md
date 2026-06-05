@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49Q: Governance Recovery Planning.
+Phase 50A: Controlled Write Authorization.
 
 ## Governance Coherence Note
 
@@ -3462,13 +3462,37 @@ domains with one candidate per domain; 1 blocker (governance_drift_recovery),
 execution_allowed=False; human_review_required=True; `docs/COMMANDS.md`
 regenerated; 14 new tests; 3670 total tests passing
 
+`pcae write-authorization` and `--json`; defines the governed authorization
+model required before PCAE may allow write-capable execution; three models —
+WriteAuthorizationCandidate (9 fields: write_authorization_id, prompt_id,
+authorization_id, selected_runtime, selected_agent, file_scope,
+rollback_plan_id, human_review_required, authorization_allowed),
+WriteAuthorizationPolicy (6 fields: policy_id, required_domains,
+expiration_required, revocation_supported, human_approval_required,
+automatic_approval_allowed), WriteAuthorizationSummary (8 fields: summary_id,
+write_authorization_id, domain_count, blocker_count, warning_count,
+authorization_status, authorization_allowed, human_review_required); four
+authorization statuses: draft, pending_human_review, blocked, authorized;
+eight authorization domains: explicit_write_permission,
+file_scope_authorization, rollback_authorization, audit_authorization,
+runtime_writable_authorization, human_write_approval, expiration_policy,
+revocation_policy; all eight domains assessed (4 blockers, 4 warnings);
+authorization_status=pending_human_review; authorization_allowed=False;
+execution_allowed=False; automatic_approval_allowed=False;
+human_review_required=True; inputs: GovernanceRecoveryPlan,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment,
+GovernedWriteCandidate, ControlledWritePlan, WriteExecutionReadinessAssessment,
+ExecutionAuthorizationArtifact; write authorization assessment is advisory and
+read-only; no write execution occurs; no files are modified; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3685 total tests passing
+
 ## Current Phase
 
-Phase 49Q: Governance Recovery Planning.
+Phase 50A: Controlled Write Authorization.
 
 ## Next
 
-- TBD: Future phases (49A Invocation Execution Gate Implementation).
+- TBD: Future phases (50B and beyond).
 
 ## Future Explorations
 

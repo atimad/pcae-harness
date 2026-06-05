@@ -33097,3 +33097,205 @@ def test_49q_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50A — Controlled Write Authorization tests
+# ---------------------------------------------------------------------------
+
+def test_50a_json_structure(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_authorization_overview", "candidate_model", "policy_model", "summary_model",
+        "domain_assessments", "sample_candidate", "sample_policy", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50a_write_authorization_overview_fields(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_authorization_overview"]
+    assert ov["phase"] == "50A"
+    assert ov["authorization_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["authorization_domain_count"] == 8
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["authorization_status"] in (
+        "draft", "pending_human_review", "blocked", "authorized"
+    )
+
+
+def test_50a_authorization_always_blocked(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_authorization_overview"]["authorization_allowed"] is False
+    assert data["write_authorization_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["authorization_allowed"] is False
+    assert data["sample_summary"]["authorization_allowed"] is False
+    assert data["governance_boundaries"]["authorization_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["authorization_allowed_always_false_in_50a"] is True
+    assert data["summary_model"]["authorization_allowed_always_false_in_50a"] is True
+    for d in data["domain_assessments"]:
+        assert d["authorization_allowed"] is False
+
+
+def test_50a_human_review_always_required(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_authorization_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50a_automatic_approval_forbidden(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_policy"]["automatic_approval_allowed"] is False
+    assert data["sample_policy"]["human_approval_required"] is True
+    assert data["governance_boundaries"]["automatic_approval_allowed"] is False
+    assert data["policy_model"]["automatic_approval_allowed_always_false_in_50a"] is True
+
+
+def test_50a_candidate_model(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteAuthorizationCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 9
+    assert set(cm["supported_authorization_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "authorized"
+    }
+
+
+def test_50a_policy_model(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["policy_model"]
+    assert pm["model_name"] == "WriteAuthorizationPolicy"
+    assert pm["field_count"] == 6
+    assert pm["field_count"] == pm["required_field_count"]
+    assert pm["automatic_approval_allowed_always_false_in_50a"] is True
+
+
+def test_50a_summary_model(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteAuthorizationSummary"
+    assert sm["field_count"] == 8
+    assert sm["field_count"] == sm["required_field_count"]
+    assert set(sm["supported_authorization_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "authorized"
+    }
+
+
+def test_50a_all_authorization_domains_covered(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "explicit_write_permission", "file_scope_authorization", "rollback_authorization",
+        "audit_authorization", "runtime_writable_authorization", "human_write_approval",
+        "expiration_policy", "revocation_policy",
+    ):
+        assert expected in domains, f"missing authorization domain: {expected}"
+
+
+def test_50a_domain_assessment_structure(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "authorization_required", "authorization_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["authorization_allowed"] is False
+        assert d["authorization_required"] is True
+
+
+def test_50a_sample_candidate_fields(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "write_authorization_id", "prompt_id", "authorization_id",
+        "selected_runtime", "selected_agent", "file_scope",
+        "rollback_plan_id", "human_review_required", "authorization_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["authorization_allowed"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["file_scope"], list)
+
+
+def test_50a_sample_policy_fields(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_policy"]
+    for field in (
+        "policy_id", "required_domains", "expiration_required",
+        "revocation_supported", "human_approval_required", "automatic_approval_allowed",
+    ):
+        assert field in sp, f"missing field {field!r} in sample_policy"
+    assert sp["human_approval_required"] is True
+    assert sp["automatic_approval_allowed"] is False
+    assert isinstance(sp["required_domains"], list)
+    assert len(sp["required_domains"]) == 8
+
+
+def test_50a_input_sources(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "GovernanceRecoveryPlan", "RuntimeSafetyInvariantAssessment",
+        "GovernanceInvariantAssessment", "GovernedWriteCandidate",
+        "ControlledWritePlan", "WriteExecutionReadinessAssessment",
+        "ExecutionAuthorizationArtifact",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50a_governance_boundaries(capsys) -> None:
+    main(["write-authorization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["authorization_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["automatic_approval_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50A"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define write authorization models", "assess authorization domains",
+        "report blockers and warnings", "recommend future authorization workflow",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize writes automatically", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50a_human_output_shows_all_sections(capsys) -> None:
+    main(["write-authorization"])
+    output = capsys.readouterr().out
+    assert "Controlled write authorization" in output
+    assert "Candidate model" in output
+    assert "Policy model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample policy" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

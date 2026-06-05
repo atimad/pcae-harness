@@ -677,6 +677,11 @@ def render_commands_reference() -> str:
 
 - `pcae governance-recovery-plan`
 - `pcae governance-recovery-plan --json`
+
+## write-authorization
+
+- `pcae write-authorization`
+- `pcae write-authorization --json`
 """
 
 

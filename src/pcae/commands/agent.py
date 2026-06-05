@@ -199,6 +199,8 @@ from pcae.core.agent import (
     AGENT_LOCK_CONFLICTS_ADVISORY,
     build_governance_recovery_plan,
     GOVERNANCE_RECOVERY_PLAN_ADVISORY,
+    build_write_authorization,
+    WRITE_AUTHORIZATION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7863,6 +7865,79 @@ def run_governance_recovery_plan(args: argparse.Namespace) -> int:
         print(f"  Recovery allowed:  {gb['recovery_allowed']}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_authorization(args: argparse.Namespace) -> int:
+    data = build_write_authorization()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_authorization_overview"]
+        print("Controlled write authorization")
+        print(f"Authorization: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Authorization domains:  {ov['authorization_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Authorization status:   {ov['authorization_status']}")
+        print(f"Authorization allowed:  {'yes' if ov['authorization_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_authorization_statuses'])}")
+        print(f"  authorization_allowed always False in 50A: {cm['authorization_allowed_always_false_in_50a']}")
+        print()
+        pm = data["policy_model"]
+        print(f"Policy model: {pm['model_name']} ({pm['field_count']} fields)")
+        print(f"  automatic_approval_allowed always False in 50A: {pm['automatic_approval_allowed_always_false_in_50a']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  authorization_allowed: {sc['authorization_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  selected_runtime:      {sc['selected_runtime']}")
+        print(f"  selected_agent:        {sc['selected_agent']}")
+        print()
+        sp = data["sample_policy"]
+        print("Sample policy:")
+        print(f"  human_approval_required:    {sp['human_approval_required']}")
+        print(f"  automatic_approval_allowed: {sp['automatic_approval_allowed']}")
+        print(f"  expiration_required:        {sp['expiration_required']}")
+        print(f"  revocation_supported:       {sp['revocation_supported']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  authorization_status:  {ss['authorization_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  authorization_allowed: {ss['authorization_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Authorization allowed: {gb['authorization_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

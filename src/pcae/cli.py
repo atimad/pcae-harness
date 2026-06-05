@@ -112,6 +112,7 @@ from pcae.commands.agent import (
     run_agent_lock_governance,
     run_agent_lock_conflicts,
     run_governance_recovery_plan,
+    run_write_authorization,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3756,6 +3757,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_recovery_plan_parser.set_defaults(handler=run_governance_recovery_plan)
+
+    write_authorization_parser = subparsers.add_parser(
+        "write-authorization",
+        help="Define the governed authorization model required before PCAE may allow write-capable execution (Phase 50A).",
+    )
+    write_authorization_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_authorization_parser.set_defaults(handler=run_write_authorization)
 
     return parser
 
