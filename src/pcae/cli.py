@@ -114,6 +114,7 @@ from pcae.commands.agent import (
     run_governance_recovery_plan,
     run_write_authorization,
     run_write_authorization_review,
+    run_write_authorization_decision,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3780,6 +3781,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_authorization_review_parser.set_defaults(handler=run_write_authorization_review)
+
+    write_authorization_decision_parser = subparsers.add_parser(
+        "write-authorization-decision",
+        help="Define the governed decision artifact produced after write authorization review (Phase 50C).",
+    )
+    write_authorization_decision_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_authorization_decision_parser.set_defaults(handler=run_write_authorization_decision)
 
     return parser
 

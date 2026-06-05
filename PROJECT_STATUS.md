@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50B: Write Authorization Review Workflow.
+Phase 50C: Write Authorization Decision Record.
 
 ## Governance Coherence Note
 
@@ -3501,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50B: Write Authorization Review Workflow.
+Phase 50C: Write Authorization Decision Record.
 
 ## Next
 
-- TBD: Future phases (50C and beyond).
+- TBD: Future phases (50D and beyond).
 
 ## Future Explorations
 

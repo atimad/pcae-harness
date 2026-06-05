@@ -203,6 +203,8 @@ from pcae.core.agent import (
     WRITE_AUTHORIZATION_ADVISORY,
     build_write_authorization_review,
     WRITE_AUTHORIZATION_REVIEW_ADVISORY,
+    build_write_authorization_decision,
+    WRITE_AUTHORIZATION_DECISION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8001,6 +8003,84 @@ def run_write_authorization_review(args: argparse.Namespace) -> int:
         print(f"  requested_change_count:{ss['requested_change_count']}")
         print(f"  escalation_count:      {ss['escalation_count']}")
         print(f"  authorization_allowed: {ss['authorization_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Authorization allowed: {gb['authorization_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_authorization_decision(args: argparse.Namespace) -> int:
+    data = build_write_authorization_decision()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_authorization_decision_overview"]
+        print("Write authorization decision record")
+        print(f"Decision: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Decision domains:       {ov['decision_domain_count']}")
+        print(f"Domains defined:        {ov['domain_count']}")
+        print(f"Decision status:        {ov['decision_status']}")
+        print(f"Authorization allowed:  {'yes' if ov['authorization_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_decision_statuses'])}")
+        print(f"  authorization_allowed always False in 50C: {cm['authorization_allowed_always_false_in_50c']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  authorization_allowed always False in 50C: {rm['authorization_allowed_always_false_in_50c']}")
+        print(f"  execution_allowed always False in 50C:     {rm['execution_allowed_always_false_in_50c']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  authorization_allowed always False in 50C: {sm['authorization_allowed_always_false_in_50c']}")
+        print(f"  execution_allowed always False in 50C:     {sm['execution_allowed_always_false_in_50c']}")
+        print()
+        print("Domain findings:")
+        for d in data["domain_findings"]:
+            print(f"  [{d['decision_status'].upper()}] {d['domain']}")
+            print(f"    {d['description'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  decision_allowed:      {sc['decision_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  selected_runtime:      {sc['selected_runtime']}")
+        print(f"  selected_agent:        {sc['selected_agent']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  decision_status:       {sr['decision_status']}")
+        print(f"  authorization_allowed: {sr['authorization_allowed']}")
+        print(f"  execution_allowed:     {sr['execution_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print(f"  accepted_domains:      {sr['accepted_domains']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  decision_status:       {ss['decision_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  accepted_count:        {ss['accepted_count']}")
+        print(f"  rejected_count:        {ss['rejected_count']}")
+        print(f"  requested_change_count:{ss['requested_change_count']}")
+        print(f"  escalation_count:      {ss['escalation_count']}")
+        print(f"  authorization_allowed: {ss['authorization_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
         print(f"  human_review_required: {ss['human_review_required']}")
         print()
         gb = data["governance_boundaries"]

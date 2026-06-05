@@ -39444,3 +39444,469 @@ def build_write_authorization_review() -> dict:
         "input_sources": list(_WAR_INPUT_SOURCES),
         "advisory": WRITE_AUTHORIZATION_REVIEW_ADVISORY,
     }
+
+
+# Phase 50C — Write Authorization Decision Record
+# ---------------------------------------------------------------------------
+
+WRITE_AUTHORIZATION_DECISION_ADVISORY = (
+    "Write authorization decision is informational; decision domains may be defined "
+    "and decision outcomes recorded, but no automatic authorization occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. authorization_allowed=False and "
+    "execution_allowed=False in Phase 50C."
+)
+
+_WAD_DECISION_DOMAINS: tuple[str, ...] = (
+    "permission_decision",
+    "file_scope_decision",
+    "rollback_decision",
+    "audit_decision",
+    "runtime_writable_decision",
+    "expiration_decision",
+    "revocation_decision",
+    "human_final_decision",
+)
+
+_WAD_DECISION_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "approved",
+    "rejected",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_WAD_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization decision candidate.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this decision is based on.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization review record this decision follows from.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the prompt requesting write execution.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for write execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for write execution.",
+    },
+    {
+        "name": "decision_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of decision domains to be resolved in this decision record.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50C.",
+    },
+    {
+        "name": "decision_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50C.",
+    },
+)
+
+_WAD_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization decision record.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this record is associated with.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization review record this decision follows from.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: draft, pending_human_review, approved, rejected, "
+            "changes_requested, escalated, or blocked."
+        ),
+    },
+    {
+        "name": "accepted_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Decision domains accepted by the human reviewer.",
+    },
+    {
+        "name": "rejected_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Decision domains rejected by the human reviewer.",
+    },
+    {
+        "name": "requested_changes",
+        "type": "list[str]",
+        "required": True,
+        "description": "Changes requested by the human reviewer before authorization can proceed.",
+    },
+    {
+        "name": "escalations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Issues escalated by the human reviewer for further governance attention.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50C.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50C.",
+    },
+)
+
+_WAD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization decision summary.",
+    },
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization decision record this summary is associated with.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: draft, pending_human_review, approved, rejected, "
+            "changes_requested, escalated, or blocked."
+        ),
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of decision domains.",
+    },
+    {
+        "name": "accepted_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of decision domains accepted by the human reviewer.",
+    },
+    {
+        "name": "rejected_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of decision domains rejected by the human reviewer.",
+    },
+    {
+        "name": "requested_change_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of changes requested by the human reviewer.",
+    },
+    {
+        "name": "escalation_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of issues escalated by the human reviewer.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50C.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50C.",
+    },
+)
+
+_WAD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define write authorization decision models",
+        "classify decision outcomes",
+        "recommend requested changes",
+        "recommend escalation paths",
+    ],
+    "may_not": [
+        "authorize writes automatically",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "authorization_allowed": False,
+    "execution_allowed": False,
+    "automatic_approval_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50C",
+}
+
+_WAD_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationCandidate",
+    "WriteAuthorizationPolicy",
+    "WriteAuthorizationSummary",
+    "WriteAuthorizationReviewRecord",
+    "WriteAuthorizationReviewSummary",
+    "GovernedWriteCandidate",
+    "ControlledWritePlan",
+)
+
+_WAD_DOMAIN_DESCRIPTIONS: tuple[dict, ...] = (
+    {
+        "domain": "permission_decision",
+        "description": (
+            "Human reviewer must record the final permission decision for this "
+            "write authorization request, confirming or denying explicit write permission."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "file_scope_decision",
+        "description": (
+            "Human reviewer must record the file scope decision, confirming whether "
+            "the declared file scope is approved for write execution."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "rollback_decision",
+        "description": (
+            "Human reviewer must record the rollback decision, confirming that a "
+            "valid rollback plan is approved and will be available if write execution fails."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "audit_decision",
+        "description": (
+            "Human reviewer must record the audit decision, confirming that audit "
+            "capture is approved and all write operations will be traceable."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "runtime_writable_decision",
+        "description": (
+            "Human reviewer must record the runtime writability decision, confirming "
+            "whether the selected runtime is authorized for write-capable execution."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "expiration_decision",
+        "description": (
+            "Human reviewer must record the expiration decision, confirming that "
+            "the write authorization expiration policy is approved and enforced."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "revocation_decision",
+        "description": (
+            "Human reviewer must record the revocation decision, confirming that "
+            "the write authorization revocation policy is approved and can be invoked."
+        ),
+        "decision_status": "pending_human_review",
+    },
+    {
+        "domain": "human_final_decision",
+        "description": (
+            "Human reviewer must record their final overall decision explicitly so "
+            "that governance provenance captures the authorization intent unambiguously."
+        ),
+        "decision_status": "pending_human_review",
+    },
+)
+
+
+def build_write_authorization_decision() -> dict:
+    """Define write authorization decision record. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    decision_id_ref = f"wad-{ts}"
+
+    candidate_fields = [dict(f) for f in _WAD_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _WAD_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _WAD_SUMMARY_FIELDS]
+
+    domain_findings: list[dict] = []
+    for d in _WAD_DOMAIN_DESCRIPTIONS:
+        domain_findings.append({
+            "domain": d["domain"],
+            "description": d["description"],
+            "decision_status": d["decision_status"],
+            "authorization_allowed": False,
+        })
+
+    domain_count = len(domain_findings)
+    decision_status = "pending_human_review"
+
+    sample_candidate = {
+        "decision_id": decision_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "review_id": f"war-{ts}",
+        "prompt_id": f"prompt-{ts}",
+        "selected_runtime": "unset",
+        "selected_agent": "unset",
+        "decision_domains": list(_WAD_DECISION_DOMAINS),
+        "human_review_required": True,
+        "decision_allowed": False,
+    }
+
+    sample_record = {
+        "decision_id": decision_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "review_id": f"war-{ts}",
+        "decision_status": decision_status,
+        "accepted_domains": [],
+        "rejected_domains": [],
+        "requested_changes": [],
+        "escalations": [],
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wads-{ts}",
+        "decision_id": decision_id_ref,
+        "decision_status": decision_status,
+        "domain_count": domain_count,
+        "accepted_count": 0,
+        "rejected_count": 0,
+        "requested_change_count": 0,
+        "escalation_count": 0,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteAuthorizationDecisionCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_decision_statuses": list(_WAD_DECISION_STATUSES),
+        "authorization_allowed_always_false_in_50c": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "WriteAuthorizationDecisionRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_decision_statuses": list(_WAD_DECISION_STATUSES),
+        "authorization_allowed_always_false_in_50c": True,
+        "execution_allowed_always_false_in_50c": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteAuthorizationDecisionSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_decision_statuses": list(_WAD_DECISION_STATUSES),
+        "authorization_allowed_always_false_in_50c": True,
+        "execution_allowed_always_false_in_50c": True,
+        "fields": summary_fields,
+    }
+
+    write_authorization_decision_overview = {
+        "overview_id": f"50c-{ts}",
+        "generated_at": generated_at,
+        "phase": "50C",
+        "title": "Write Authorization Decision Record",
+        "summary": (
+            "Defines the governed decision artifact produced after write authorization "
+            "review. Eight decision domains are defined: "
+            "permission_decision, file_scope_decision, rollback_decision, "
+            "audit_decision, runtime_writable_decision, expiration_decision, "
+            "revocation_decision, and human_final_decision. "
+            f"domain_count={domain_count}. "
+            f"decision_status={decision_status}. "
+            "Write authorization decision is advisory and read-only. No write execution occurs. "
+            "authorization_allowed=False. execution_allowed=False."
+        ),
+        "decision_domain_count": len(_WAD_DECISION_DOMAINS),
+        "domain_count": domain_count,
+        "decision_status": decision_status,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "automatic_approval_allowed": False,
+    }
+
+    return {
+        "write_authorization_decision_overview": write_authorization_decision_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_findings": domain_findings,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WAD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WAD_INPUT_SOURCES),
+        "advisory": WRITE_AUTHORIZATION_DECISION_ADVISORY,
+    }
