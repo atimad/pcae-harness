@@ -1,18 +1,51 @@
 {
   "active_task": {
-    "id": "20260523-0731-implement-global-policy-configuration",
-    "title": "Implement global policy configuration"
+    "id": "20260605-1052-multi-agent-governance-audit",
+    "title": "Multi-agent governance audit"
   },
   "architectural_notes": [],
   "blockers": [],
   "current_objective": "",
   "git": {
     "branch": "main",
-    "changed_files": [],
-    "status_summary": "clean"
+    "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
+      {
+        "path": "CHANGELOG.md",
+        "status": " M"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260523-0731-implement-global-policy-configuration.md",
+        "status": " D"
+      },
+      {
+        "path": "tasks/active/20260605-1052-multi-agent-governance-audit.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260523-0731-implement-global-policy-configuration.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260605-1042-plan-multi-agent-governance-next-phase.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260605-1043-plan-multi-agent-governance-next-phase.md",
+        "status": "??"
+      }
+    ],
+    "status_summary": "8 changed files"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-05-24T11:15:16.724185+00:00",
+  "timestamp": "2026-06-05T09:03:32.065021+00:00",
   "warnings": []
 }

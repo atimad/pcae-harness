@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49E: Multi-Agent Decision Record.
+Phase 49E.1: Governance Continuity Restored (stale orchestration task closed).
 
 ## Governance Coherence Note
 

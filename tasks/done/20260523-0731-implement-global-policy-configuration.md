@@ -10,7 +10,7 @@ Implement global policy configuration
 
 ## Status
 
-active
+done
 
 ## Mode
 
