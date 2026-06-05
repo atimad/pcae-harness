@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49F: Multi-Agent Governance Audit.
+Phase 49G: Governance State Integrity Audit.
 
 ## Governance Coherence Note
 

@@ -622,6 +622,11 @@ def render_commands_reference() -> str:
 
 - `pcae multi-agent-governance-audit`
 - `pcae multi-agent-governance-audit --json`
+
+## governance-state-audit
+
+- `pcae governance-state-audit`
+- `pcae governance-state-audit --json`
 """
 
 

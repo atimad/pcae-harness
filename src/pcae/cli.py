@@ -101,6 +101,7 @@ from pcae.commands.agent import (
     run_evidence_framework,
     run_decision_record,
     run_multi_agent_governance_audit,
+    run_governance_state_audit,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3624,6 +3625,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     multi_agent_governance_audit_parser.set_defaults(handler=run_multi_agent_governance_audit)
+
+    governance_state_audit_parser = subparsers.add_parser(
+        "governance-state-audit",
+        help="Audit PCAE governance state for consistency and integrity (Phase 49G).",
+    )
+    governance_state_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    governance_state_audit_parser.set_defaults(handler=run_governance_state_audit)
 
     return parser
 

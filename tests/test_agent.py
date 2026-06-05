@@ -30922,3 +30922,182 @@ def test_49f_human_output_shows_all_sections(capsys) -> None:
     assert "Sample record" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49G — Governance State Integrity Audit
+
+
+def test_49g_json_structure(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "audit_overview", "record_model", "summary_model", "domain_findings",
+        "sample_record", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49g_audit_overview_fields(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["audit_overview"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "domain_count", "blocker_count", "warning_count", "stale_reference_count",
+        "audit_status", "execution_allowed",
+    ):
+        assert field in s, f"missing audit_overview field: {field}"
+    assert s["phase"] == "49G"
+    assert s["execution_allowed"] is False
+    assert s["domain_count"] == 8
+
+
+def test_49g_execution_always_blocked(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["audit_overview"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["record_model"]["execution_allowed_always_false_in_49g"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49g"] is True
+    assert data["sample_record"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+
+
+def test_49g_record_model(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "GovernanceStateAuditRecord"
+    assert rm["field_count"] == 6
+    assert rm["required_field_count"] == 6
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "audit_id", "audit_domains", "findings", "blockers", "warnings", "audit_status",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    for status in ("compliant", "compliant_with_warnings", "blocked", "inconsistent"):
+        assert status in rm["supported_audit_statuses"], f"missing status: {status}"
+
+
+def test_49g_summary_model(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "GovernanceStateAuditSummary"
+    assert sm["field_count"] == 7
+    assert sm["required_field_count"] == 7
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "audit_id", "domain_count", "blocker_count",
+        "warning_count", "stale_reference_count", "audit_status",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49g_all_domains_present(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    findings = data["domain_findings"]
+    for domain in (
+        "active_task_integrity", "task_lifecycle_integrity",
+        "session_continuity_integrity", "governance_record_integrity",
+        "roadmap_consistency", "stale_reference_detection",
+        "documentation_consistency", "runtime_state_consistency",
+    ):
+        assert domain in findings, f"missing domain: {domain}"
+    assert len(findings) == 8
+
+
+def test_49g_domain_findings_structure(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for domain, finding in data["domain_findings"].items():
+        for key in ("domain", "input", "status", "finding", "blockers", "warnings", "stale_references"):
+            assert key in finding, f"domain {domain!r} missing key: {key}"
+        assert finding["status"] in ("compliant", "compliant_with_warnings", "blocked", "inconsistent")
+
+
+def test_49g_stale_reference_detection(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["audit_overview"]
+    assert "stale_reference_count" in s
+    assert isinstance(s["stale_reference_count"], int)
+    ss = data["sample_summary"]
+    assert "stale_reference_count" in ss
+    assert isinstance(ss["stale_reference_count"], int)
+    assert ss["stale_reference_count"] == s["stale_reference_count"]
+    stale_domain = data["domain_findings"]["stale_reference_detection"]
+    assert "stale_references" in stale_domain
+
+
+def test_49g_input_sources(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "active tasks", "completed tasks", "session state",
+        "governance records", "roadmap state", "continuity state",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49g_governance_boundaries(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49G"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("audit governance state", "detect stale references", "assess task lifecycle integrity"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49g_sample_record_fields(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    assert sr["execution_allowed"] is False
+    assert len(sr["audit_domains"]) == 8
+    assert len(sr["findings"]) == 8
+    assert sr["audit_status"] in ("compliant", "compliant_with_warnings", "blocked", "inconsistent")
+
+
+def test_49g_sample_summary_fields(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["execution_allowed"] is False
+    assert ss["domain_count"] == 8
+    assert "stale_reference_count" in ss
+    assert ss["audit_status"] in ("compliant", "compliant_with_warnings", "blocked", "inconsistent")
+
+
+def test_49g_audit_statuses(capsys) -> None:
+    main(["governance-state-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for model_key in ("record_model", "summary_model"):
+        statuses = data[model_key]["supported_audit_statuses"]
+        for expected in ("compliant", "compliant_with_warnings", "blocked", "inconsistent"):
+            assert expected in statuses, f"{model_key} missing status: {expected}"
+
+
+def test_49g_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-state-audit"])
+    output = capsys.readouterr().out
+    assert "Governance state integrity audit" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Domain findings" in output
+    assert "Sample record" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

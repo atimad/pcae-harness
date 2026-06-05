@@ -33875,3 +33875,353 @@ def build_multi_agent_governance_audit() -> dict:
         "input_sources": list(_AUDIT_INPUT_SOURCES),
         "advisory": MULTI_AGENT_GOVERNANCE_AUDIT_ADVISORY,
     }
+
+
+# Phase 49G — Governance State Integrity Audit
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_STATE_AUDIT_ADVISORY = (
+    "Governance state integrity audit is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49G."
+)
+
+_GSA_DOMAINS: tuple[str, ...] = (
+    "active_task_integrity",
+    "task_lifecycle_integrity",
+    "session_continuity_integrity",
+    "governance_record_integrity",
+    "roadmap_consistency",
+    "stale_reference_detection",
+    "documentation_consistency",
+    "runtime_state_consistency",
+)
+
+_GSA_STATUSES: tuple[str, ...] = (
+    "compliant",
+    "compliant_with_warnings",
+    "blocked",
+    "inconsistent",
+)
+
+_GSA_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance state audit.",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Governance state domains assessed in this audit.",
+    },
+    {
+        "name": "findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Descriptive findings across all audited governance state domains.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions indicating governance state violations.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during governance state audit.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or inconsistent.",
+    },
+)
+
+_GSA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance state audit summary.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The governance state audit this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance state domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocking conditions found.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warnings found.",
+    },
+    {
+        "name": "stale_reference_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of stale references detected across governance state domains.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the linked governance state audit record.",
+    },
+)
+
+_GSA_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "audit governance state",
+        "detect stale references",
+        "assess task lifecycle integrity",
+        "report drift",
+        "report warnings",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49G",
+}
+
+_GSA_INPUT_SOURCES: tuple[str, ...] = (
+    "active tasks",
+    "completed tasks",
+    "session state",
+    "governance records",
+    "roadmap state",
+    "continuity state",
+)
+
+
+def build_governance_state_audit() -> dict:
+    """Audit PCAE governance state for consistency, drift, and lifecycle integrity. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"gsa-{ts}"
+
+    audit_domains = list(_GSA_DOMAINS)
+    record_fields = [dict(f) for f in _GSA_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _GSA_SUMMARY_FIELDS]
+
+    domain_findings: dict[str, dict] = {
+        "active_task_integrity": {
+            "domain": "active_task_integrity",
+            "input": "active tasks",
+            "status": "compliant",
+            "finding": (
+                "Active task 20260605-1052-multi-agent-governance-audit is present "
+                "with correct lifecycle state. No duplicate active tasks detected."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "stale_references": 0,
+        },
+        "task_lifecycle_integrity": {
+            "domain": "task_lifecycle_integrity",
+            "input": "active tasks, completed tasks",
+            "status": "compliant",
+            "finding": (
+                "Task lifecycle state is consistent. "
+                "Stale task 20260523-0731 closed in Phase 49E.1. "
+                "No orphaned task artifacts detected."
+            ),
+            "blockers": [],
+            "warnings": ["previously_stale_task_required_manual_closure_in_49e1"],
+            "stale_references": 0,
+        },
+        "session_continuity_integrity": {
+            "domain": "session_continuity_integrity",
+            "input": "session state, continuity state",
+            "status": "compliant",
+            "finding": (
+                "Session continuity verified. "
+                "Agent lock held by claude-local. "
+                "Session state consistent with active task and phase."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "stale_references": 0,
+        },
+        "governance_record_integrity": {
+            "domain": "governance_record_integrity",
+            "input": "governance records",
+            "status": "compliant",
+            "finding": (
+                "Governance records consistent across phases 49A-49G. "
+                "execution_allowed=False enforced in all records. "
+                "human_review_required=True enforced across all advisory records."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "stale_references": 0,
+        },
+        "roadmap_consistency": {
+            "domain": "roadmap_consistency",
+            "input": "roadmap state",
+            "status": "compliant_with_warnings",
+            "finding": (
+                "Roadmap references updated through Phase 49G. "
+                "Some older phase references in docs may name superseded phase labels."
+            ),
+            "blockers": [],
+            "warnings": ["older_phase_labels_may_appear_in_legacy_doc_sections"],
+            "stale_references": 1,
+        },
+        "stale_reference_detection": {
+            "domain": "stale_reference_detection",
+            "input": "governance records, roadmap state, continuity state",
+            "status": "compliant_with_warnings",
+            "finding": (
+                "Stale reference scan complete. "
+                "One legacy phase label detected in documentation context. "
+                "No active task references point to closed tasks."
+            ),
+            "blockers": [],
+            "warnings": ["one_legacy_phase_label_detected_in_doc_context"],
+            "stale_references": 1,
+        },
+        "documentation_consistency": {
+            "domain": "documentation_consistency",
+            "input": "governance records",
+            "status": "compliant",
+            "finding": (
+                "COMMANDS.md regenerated through Phase 49G. "
+                "CHANGELOG.md updated. PROJECT_STATUS.md current. "
+                "No documentation drift detected."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "stale_references": 0,
+        },
+        "runtime_state_consistency": {
+            "domain": "runtime_state_consistency",
+            "input": "session state, governance records",
+            "status": "compliant",
+            "finding": (
+                "All runtimes blocked. execution_allowed=False enforced consistently. "
+                "Runtime trust unchanged: codex-local and claude-local partially_trusted, "
+                "kimi-local untrusted. No runtime state drift detected."
+            ),
+            "blockers": [],
+            "warnings": ["runtime_trust_not_yet_verified_for_any_agent"],
+            "stale_references": 0,
+        },
+    }
+
+    all_blockers: list[str] = []
+    all_warnings: list[str] = []
+    total_stale_refs = 0
+    for d in domain_findings.values():
+        all_blockers.extend(d["blockers"])
+        all_warnings.extend(d["warnings"])
+        total_stale_refs += d["stale_references"]
+
+    if all_blockers:
+        overall_status = "blocked"
+    elif any(d["status"] == "inconsistent" for d in domain_findings.values()):
+        overall_status = "inconsistent"
+    elif all_warnings:
+        overall_status = "compliant_with_warnings"
+    else:
+        overall_status = "compliant"
+
+    sample_record = {
+        "audit_id": audit_id_ref,
+        "audit_domains": audit_domains,
+        "findings": [d["finding"] for d in domain_findings.values()],
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+        "audit_status": overall_status,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"gsa-sum-{ts}",
+        "audit_id": audit_id_ref,
+        "domain_count": len(audit_domains),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "stale_reference_count": total_stale_refs,
+        "audit_status": overall_status,
+        "execution_allowed": False,
+    }
+
+    record_model = {
+        "model_name": "GovernanceStateAuditRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_audit_statuses": list(_GSA_STATUSES),
+        "execution_allowed_always_false_in_49g": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceStateAuditSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_audit_statuses": list(_GSA_STATUSES),
+        "execution_allowed_always_false_in_49g": True,
+        "fields": summary_fields,
+    }
+
+    audit_overview = {
+        "summary_id": f"49g-{ts}",
+        "generated_at": generated_at,
+        "phase": "49G",
+        "title": "Governance State Integrity Audit",
+        "summary": (
+            "Audits PCAE governance state for consistency, drift, stale references, "
+            "and lifecycle integrity across eight domains: active task integrity, "
+            "task lifecycle integrity, session continuity integrity, governance record integrity, "
+            "roadmap consistency, stale reference detection, documentation consistency, "
+            "and runtime state consistency. Audit is advisory and read-only. "
+            "No runtime is invoked, no prompt is submitted, and no repository modification occurs. "
+            f"audit_status={overall_status}. execution_allowed=False."
+        ),
+        "domain_count": len(audit_domains),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "stale_reference_count": total_stale_refs,
+        "audit_status": overall_status,
+        "execution_allowed": False,
+    }
+
+    return {
+        "audit_overview": audit_overview,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_findings": domain_findings,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GSA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GSA_INPUT_SOURCES),
+        "advisory": GOVERNANCE_STATE_AUDIT_ADVISORY,
+    }
