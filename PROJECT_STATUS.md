@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49A: Multi-Agent Read-Only Pilot.
+Phase 49B: Multi-Agent Consensus Engine.
 
 ## Governance Coherence Note
 
@@ -3249,6 +3249,20 @@ kimi-local untrusted); consensus_status=blocked; execution_allowed=False for
 all runtimes and pilot candidate; human_review_required=True; no runtime
 invocation, no prompt execution, no repository modification; `docs/COMMANDS.md`
 regenerated; 14 new tests; 3443 total tests passing
+and multi-agent consensus engine implemented (Phase 49B):
+`pcae consensus-engine` and `--json`; defines the governance model for
+evaluating agreement, disagreement, and escalation across multiple agents;
+three models — ConsensusCandidate (7 fields), ConsensusResult (10 fields),
+ConsensusSummary (6 fields); three strategies: unanimous, majority, advisory;
+four consensus statuses: consensus_reached, consensus_not_reached,
+insufficient_agents, blocked; four escalation paths: human_escalation
+(terminal), retry_with_fewer_agents, sequential_review, defer_invocation
+(all human_required=True); all three agents unavailable in 49B
+(codex-local/claude-local partially_trusted, kimi-local untrusted);
+consensus_status=blocked; escalation_required=True; execution_allowed=False;
+human_review_required=True; no runtime invocation, no prompt execution, no
+repository modification; `docs/COMMANDS.md` regenerated; 13 new tests;
+3456 total tests passing
 
 ## Next
 

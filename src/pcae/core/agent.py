@@ -32040,3 +32040,420 @@ def build_multi_agent_readonly_pilot() -> dict:
         "input_sources": list(_MARP_INPUT_SOURCES),
         "advisory": MULTI_AGENT_READONLY_PILOT_ADVISORY,
     }
+
+
+# Phase 49B — Multi-Agent Consensus Engine
+# ---------------------------------------------------------------------------
+
+CONSENSUS_ENGINE_ADVISORY = (
+    "Consensus engine assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49B."
+)
+
+_CE_STRATEGIES: tuple[str, ...] = (
+    "unanimous",
+    "majority",
+    "advisory",
+)
+
+_CE_CONSENSUS_STATUSES: tuple[str, ...] = (
+    "consensus_reached",
+    "consensus_not_reached",
+    "insufficient_agents",
+    "blocked",
+)
+
+_CE_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this consensus candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this consensus candidate is associated with.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs participating in this consensus evaluation.",
+    },
+    {
+        "name": "strategy",
+        "type": "str",
+        "required": True,
+        "description": "Consensus strategy: unanimous, majority, or advisory.",
+    },
+    {
+        "name": "minimum_agents",
+        "type": "int",
+        "required": True,
+        "description": "Minimum number of agents required for a valid consensus evaluation.",
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether consensus must be reached before execution is eligible.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every consensus candidate.",
+    },
+)
+
+_CE_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this consensus result.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this consensus result is associated with.",
+    },
+    {
+        "name": "agent_positions",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-agent position records (agree, disagree, unavailable, or blocked).",
+    },
+    {
+        "name": "agreement_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of agents in agreement.",
+    },
+    {
+        "name": "disagreement_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of agents in disagreement.",
+    },
+    {
+        "name": "unavailable_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of agents unavailable or blocked.",
+    },
+    {
+        "name": "consensus_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall consensus outcome: consensus_reached, consensus_not_reached, insufficient_agents, or blocked.",
+    },
+    {
+        "name": "escalation_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human escalation is required due to blocked or unresolved consensus.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing consensus evaluation.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during consensus evaluation.",
+    },
+)
+
+_CE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this consensus summary.",
+    },
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "required": True,
+        "description": "The consensus candidate this summary is associated with.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs that participated in or were evaluated for this consensus.",
+    },
+    {
+        "name": "consensus_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall consensus status for this summary.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every consensus summary.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49B; no execution is authorized.",
+    },
+)
+
+_CE_ESCALATION_PATHS: tuple[dict, ...] = (
+    {
+        "path": "human_escalation",
+        "trigger": "consensus_blocked_or_not_reached",
+        "description": (
+            "Human engineer makes the final authorization decision when agents "
+            "cannot reach consensus or are unavailable. Human authority is always "
+            "the terminal escalation path."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "retry_with_fewer_agents",
+        "trigger": "insufficient_agents_for_strategy",
+        "description": (
+            "Reduce the minimum_agents threshold or switch to advisory strategy "
+            "when fewer agents are available than required. Only applicable when "
+            "at least one agent is available and the strategy permits relaxation."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "sequential_review",
+        "trigger": "parallel_consensus_blocked",
+        "description": (
+            "Switch to sequential_review strategy to allow deeper per-agent "
+            "analysis when parallel consensus evaluation is blocked. Each agent "
+            "reviews in sequence rather than simultaneously."
+        ),
+        "human_required": True,
+    },
+    {
+        "path": "defer_invocation",
+        "trigger": "blockers_unresolved",
+        "description": (
+            "Defer the consensus evaluation until all blocking conditions are "
+            "resolved: runtime trust must advance, contracts must be verified, "
+            "and authorization artifacts must be present."
+        ),
+        "human_required": True,
+    },
+)
+
+_CE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define consensus model",
+        "assess readiness",
+        "identify escalation paths",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49B",
+}
+
+_CE_INPUT_SOURCES: tuple[str, ...] = (
+    "MultiAgentReadOnlyPilotCandidate",
+    "MultiAgentReadOnlyPilotResult",
+    "RuntimeTrustRecord",
+    "GovernanceAuditRecord",
+    "InvocationEvidenceRecord",
+)
+
+# Per-agent state in Phase 49B.
+# All three agents are unavailable:
+#   - codex-local: partially_trusted, no live execution history
+#   - claude-local: partially_trusted, no live execution history
+#   - kimi-local: untrusted (installation unconfirmed)
+_CE_AGENT_STATES: tuple[dict, ...] = (
+    {
+        "agent_id": "codex-local",
+        "trust_level": "partially_trusted",
+        "position": "unavailable",
+        "blocker": "no_live_execution_history",
+    },
+    {
+        "agent_id": "claude-local",
+        "trust_level": "partially_trusted",
+        "position": "unavailable",
+        "blocker": "no_live_execution_history",
+    },
+    {
+        "agent_id": "kimi-local",
+        "trust_level": "untrusted",
+        "position": "unavailable",
+        "blocker": "runtime_untrusted",
+    },
+)
+
+
+def _evaluate_ce_agent(state: dict) -> dict:
+    """Derive a per-agent position record for the consensus engine."""
+    warnings: list[str] = []
+    if state["trust_level"] == "partially_trusted":
+        warnings.append("runtime_partially_trusted_no_execution_history")
+    return {
+        "agent_id": state["agent_id"],
+        "trust_level": state["trust_level"],
+        "position": state["position"],
+        "blocker": state["blocker"],
+        "warnings": warnings,
+    }
+
+
+def build_consensus_engine() -> dict:
+    """Define the multi-agent consensus engine governance model. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    consensus_id_ref = f"ce-{ts}"
+    request_id_ref = "ce-req-placeholder-49b"
+
+    candidate_fields = [dict(f) for f in _CE_CANDIDATE_FIELDS]
+    result_fields = [dict(f) for f in _CE_RESULT_FIELDS]
+    summary_fields = [dict(f) for f in _CE_SUMMARY_FIELDS]
+    escalation_paths = [dict(p) for p in _CE_ESCALATION_PATHS]
+
+    agent_positions = [_evaluate_ce_agent(dict(s)) for s in _CE_AGENT_STATES]
+
+    agreement_count = sum(1 for p in agent_positions if p["position"] == "agree")
+    disagreement_count = sum(1 for p in agent_positions if p["position"] == "disagree")
+    unavailable_count = sum(
+        1 for p in agent_positions if p["position"] in ("unavailable", "blocked")
+    )
+
+    consensus_status = "blocked" if unavailable_count > 0 else "consensus_not_reached"
+    escalation_required = True
+
+    all_blockers = [
+        f"{p['agent_id']}:{p['blocker']}"
+        for p in agent_positions
+        if p.get("blocker")
+    ]
+    all_warnings = [
+        f"{p['agent_id']}:{w}"
+        for p in agent_positions
+        for w in p.get("warnings", [])
+    ]
+
+    participating_agents = [s["agent_id"] for s in _CE_AGENT_STATES]
+
+    sample_candidate = {
+        "consensus_id": consensus_id_ref,
+        "request_id": request_id_ref,
+        "participating_agents": participating_agents,
+        "strategy": "unanimous",
+        "minimum_agents": 2,
+        "consensus_required": True,
+        "human_review_required": True,
+    }
+
+    sample_result = {
+        "consensus_id": consensus_id_ref,
+        "request_id": request_id_ref,
+        "agent_positions": agent_positions,
+        "agreement_count": agreement_count,
+        "disagreement_count": disagreement_count,
+        "unavailable_count": unavailable_count,
+        "consensus_status": consensus_status,
+        "escalation_required": escalation_required,
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+    }
+
+    sample_summary = {
+        "summary_id": f"ce-sum-{ts}",
+        "consensus_id": consensus_id_ref,
+        "participating_agents": participating_agents,
+        "consensus_status": consensus_status,
+        "human_review_required": True,
+        "execution_allowed": False,
+    }
+
+    candidate_model = {
+        "model_name": "ConsensusCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_strategies": list(_CE_STRATEGIES),
+        "execution_allowed_always_false_in_49b": True,
+        "fields": candidate_fields,
+    }
+
+    result_model = {
+        "model_name": "ConsensusResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "supported_consensus_statuses": list(_CE_CONSENSUS_STATUSES),
+        "execution_allowed_always_false_in_49b": True,
+        "fields": result_fields,
+    }
+
+    summary_model = {
+        "model_name": "ConsensusSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "execution_allowed_always_false_in_49b": True,
+        "fields": summary_fields,
+    }
+
+    consensus_summary = {
+        "summary_id": f"49b-{ts}",
+        "generated_at": generated_at,
+        "phase": "49B",
+        "title": "Multi-Agent Consensus Engine",
+        "summary": (
+            "Defines the governance model used to evaluate agreement, disagreement, "
+            "and escalation across multiple agents (codex-local, claude-local, "
+            "kimi-local). All three agents are unavailable in Phase 49B: "
+            "codex-local and claude-local are partially_trusted (no live execution "
+            "history); kimi-local is untrusted (installation unconfirmed). "
+            "consensus_status=blocked. escalation_required=True. "
+            "execution_allowed=False. No runtime is invoked, no prompt is "
+            "submitted, and no repository modification occurs."
+        ),
+        "agent_count": len(agent_positions),
+        "agreement_count": agreement_count,
+        "disagreement_count": disagreement_count,
+        "unavailable_count": unavailable_count,
+        "consensus_status": consensus_status,
+        "escalation_required": escalation_required,
+        "escalation_path_count": len(escalation_paths),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "consensus_summary": consensus_summary,
+        "candidate_model": candidate_model,
+        "result_model": result_model,
+        "summary_model": summary_model,
+        "sample_candidate": sample_candidate,
+        "sample_result": sample_result,
+        "sample_summary": sample_summary,
+        "escalation_paths": escalation_paths,
+        "governance_boundaries": dict(_CE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CE_INPUT_SOURCES),
+        "advisory": CONSENSUS_ENGINE_ADVISORY,
+    }

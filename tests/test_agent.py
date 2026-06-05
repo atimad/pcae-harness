@@ -30008,3 +30008,190 @@ def test_49a_human_output_shows_all_sections(capsys) -> None:
     assert "Pilot result" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49B — Multi-Agent Consensus Engine
+
+
+def test_49b_json_structure(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "consensus_summary", "candidate_model", "result_model", "summary_model",
+        "sample_candidate", "sample_result", "sample_summary",
+        "escalation_paths", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49b_consensus_summary_fields(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cs = data["consensus_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "agent_count", "agreement_count", "disagreement_count", "unavailable_count",
+        "consensus_status", "escalation_required", "escalation_path_count",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in cs, f"missing consensus_summary field: {field}"
+    assert cs["phase"] == "49B"
+    assert cs["execution_allowed"] is False
+    assert cs["human_review_required"] is True
+    assert cs["agent_count"] == 3
+    assert cs["agreement_count"] == 0
+    assert cs["unavailable_count"] == 3
+    assert cs["consensus_status"] == "blocked"
+    assert cs["escalation_required"] is True
+    assert cs["escalation_path_count"] == 4
+
+
+def test_49b_execution_always_blocked(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["consensus_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49b"] is True
+    assert data["result_model"]["execution_allowed_always_false_in_49b"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49b"] is True
+    assert data["sample_summary"]["execution_allowed"] is False
+
+
+def test_49b_candidate_model(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "ConsensusCandidate"
+    assert cm["field_count"] == 7
+    assert cm["required_field_count"] == 7
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "consensus_id", "request_id", "participating_agents", "strategy",
+        "minimum_agents", "consensus_required", "human_review_required",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for strategy in ("unanimous", "majority", "advisory"):
+        assert strategy in cm["supported_strategies"], f"missing strategy: {strategy}"
+
+
+def test_49b_result_model(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["result_model"]
+    assert rm["model_name"] == "ConsensusResult"
+    assert rm["field_count"] == 10
+    assert rm["required_field_count"] == 10
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "consensus_id", "request_id", "agent_positions", "agreement_count",
+        "disagreement_count", "unavailable_count", "consensus_status",
+        "escalation_required", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    for status in ("consensus_reached", "consensus_not_reached", "insufficient_agents", "blocked"):
+        assert status in rm["supported_consensus_statuses"], f"missing status: {status}"
+
+
+def test_49b_summary_model(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "ConsensusSummary"
+    assert sm["field_count"] == 6
+    assert sm["required_field_count"] == 6
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "consensus_id", "participating_agents",
+        "consensus_status", "human_review_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49b_all_agents_unavailable(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    positions = data["sample_result"]["agent_positions"]
+    assert len(positions) == 3
+    agent_ids = {p["agent_id"] for p in positions}
+    assert agent_ids == {"codex-local", "claude-local", "kimi-local"}
+    for pos in positions:
+        assert pos["position"] == "unavailable", (
+            f"{pos['agent_id']} must be unavailable in Phase 49B"
+        )
+        assert pos.get("blocker"), f"{pos['agent_id']} must have a blocker"
+
+
+def test_49b_kimi_untrusted(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    positions = data["sample_result"]["agent_positions"]
+    kimi = next(p for p in positions if p["agent_id"] == "kimi-local")
+    assert kimi["trust_level"] == "untrusted"
+    assert kimi["blocker"] == "runtime_untrusted"
+
+
+def test_49b_consensus_status_blocked(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_result"]["consensus_status"] == "blocked"
+    assert data["sample_summary"]["consensus_status"] == "blocked"
+    assert data["consensus_summary"]["consensus_status"] == "blocked"
+
+
+def test_49b_escalation_paths(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    paths = data["escalation_paths"]
+    assert len(paths) == 4
+    path_names = [ep["path"] for ep in paths]
+    for expected in (
+        "human_escalation", "retry_with_fewer_agents",
+        "sequential_review", "defer_invocation",
+    ):
+        assert expected in path_names, f"missing escalation path: {expected}"
+    for ep in paths:
+        assert ep["human_required"] is True, (
+            f"escalation path {ep['path']} must have human_required=True"
+        )
+
+
+def test_49b_governance_boundaries(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49B"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("define consensus model", "assess readiness", "identify escalation paths"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49b_input_sources(capsys) -> None:
+    main(["consensus-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "MultiAgentReadOnlyPilotCandidate", "MultiAgentReadOnlyPilotResult",
+        "RuntimeTrustRecord", "GovernanceAuditRecord", "InvocationEvidenceRecord",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49b_human_output_shows_all_sections(capsys) -> None:
+    main(["consensus-engine"])
+    output = capsys.readouterr().out
+    assert "Multi-agent consensus engine" in output
+    assert "Candidate model" in output
+    assert "Result model" in output
+    assert "Summary model" in output
+    assert "Sample result" in output
+    assert "Escalation paths" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

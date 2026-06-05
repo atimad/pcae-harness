@@ -167,6 +167,8 @@ from pcae.core.agent import (
     INVOCATION_EVIDENCE_ADVISORY,
     build_multi_agent_readonly_pilot,
     MULTI_AGENT_READONLY_PILOT_ADVISORY,
+    build_consensus_engine,
+    CONSENSUS_ENGINE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6798,6 +6800,66 @@ def run_multi_agent_readonly_pilot(args: argparse.Namespace) -> int:
                 print(f"      Blockers ({len(res['blockers'])}): {', '.join(res['blockers'])}")
             if res["warnings"]:
                 print(f"      Warnings ({len(res['warnings'])}): {', '.join(res['warnings'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_consensus_engine(args: argparse.Namespace) -> int:
+    data = build_consensus_engine()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        cs = data["consensus_summary"]
+        print("Multi-agent consensus engine")
+        print(f"Assessment: {cs['summary_id']}  Generated: {cs['generated_at']}")
+        print(f"Phase: {cs['phase']} — {cs['title']}")
+        print()
+        print(cs["summary"])
+        print()
+        print(f"Agents evaluated:    {cs['agent_count']}")
+        print(f"Agreement:           {cs['agreement_count']}")
+        print(f"Disagreement:        {cs['disagreement_count']}")
+        print(f"Unavailable:         {cs['unavailable_count']}")
+        print(f"Consensus status:    {cs['consensus_status']}")
+        print(f"Escalation required: {'yes' if cs['escalation_required'] else 'no'}")
+        print(f"Escalation paths:    {cs['escalation_path_count']}")
+        print(f"Execution allowed:   {'yes' if cs['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if cs['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported strategies: {', '.join(cm['supported_strategies'])}")
+        print(f"  execution_allowed always False in 49B: {cm['execution_allowed_always_false_in_49b']}")
+        print()
+        rm = data["result_model"]
+        print(f"Result model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported consensus statuses: {', '.join(rm['supported_consensus_statuses'])}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        sr = data["sample_result"]
+        print("Sample result:")
+        print(f"  consensus_status:    {sr['consensus_status']}")
+        print(f"  escalation_required: {sr['escalation_required']}")
+        print(f"  Agent positions ({len(sr['agent_positions'])} agents):")
+        for pos in sr["agent_positions"]:
+            print(f"    [{pos['position']}] {pos['agent_id']} (trust: {pos['trust_level']})")
+            if pos.get("blocker"):
+                print(f"      Blocker: {pos['blocker']}")
+        print()
+        print(f"Escalation paths ({len(data['escalation_paths'])}):")
+        for ep in data["escalation_paths"]:
+            print(f"  {ep['path']} (trigger: {ep['trigger']}, human_required: {ep['human_required']})")
+            print(f"    {ep['description']}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")
