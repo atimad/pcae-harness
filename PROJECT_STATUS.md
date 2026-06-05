@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49H: Governance State Repair Framework.
+Phase 49I: Task Transition Governance.
 
 ## Governance Coherence Note
 
@@ -3327,10 +3327,28 @@ session state, roadmap state, documentation state; repair_allowed=False;
 human_review_required=True; plan_status=pending_human_review; no files modified,
 no tasks moved, no session state rewritten, no runtimes invoked; `docs/COMMANDS.md`
 regenerated; 13 new tests; 3534 total tests passing
+and task transition governance implemented (Phase 49I):
+`pcae task-transition-governance` and `--json`; defines governance checks for
+safe transitions between active tasks, completed tasks, and newly created
+roadmap tasks; three models — TaskTransitionCandidate (7 fields: transition_id,
+previous_task_id, next_task_id, transition_type, required_actions,
+human_review_required, transition_allowed), TaskTransitionValidation (9 fields:
+validation_id, transition_id, previous_task_status, next_task_status,
+session_status, continuity_status, scope_status, blockers, warnings),
+TaskTransitionSummary (7 fields: summary_id, transition_id, validation_status,
+blocker_count, warning_count, transition_allowed, human_review_required);
+four transition statuses: valid, valid_with_warnings, blocked, not_required;
+seven transition domains: active_task_completion, done_task_recording,
+session_refresh, new_task_creation, task_scope_validation, continuity_alignment,
+stale_reference_prevention; inputs: active task state, done task state, session
+state, governance state audit, governance state repair plan; transition_allowed=False;
+human_review_required=True; validation_status=valid_with_warnings;
+no files modified, no tasks moved; `docs/COMMANDS.md` regenerated; 16 new tests;
+3550 total tests passing
 
 ## Current Phase
 
-Phase 49H: Governance State Repair Framework.
+Phase 49I: Task Transition Governance.
 
 ## Next
 

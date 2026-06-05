@@ -31286,3 +31286,216 @@ def test_49h_human_output_shows_all_sections(capsys) -> None:
     assert "Repair summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49I — Task Transition Governance
+
+
+def test_49i_json_structure(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "transition_overview", "candidate_model", "validation_model", "summary_model",
+        "domain_checks", "sample_candidate", "sample_validation", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49i_transition_overview_fields(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["transition_overview"]
+    for field in (
+        "overview_id", "generated_at", "phase", "title", "summary",
+        "transition_domain_count", "blocker_count", "warning_count",
+        "validation_status", "transition_allowed", "human_review_required",
+    ):
+        assert field in ov, f"missing transition_overview field: {field}"
+    assert ov["phase"] == "49I"
+    assert ov["transition_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["transition_domain_count"] == 7
+
+
+def test_49i_transition_always_blocked(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["transition_overview"]["transition_allowed"] is False
+    assert data["governance_boundaries"]["transition_allowed"] is False
+    assert data["candidate_model"]["transition_allowed_always_false_in_49i"] is True
+    assert data["validation_model"]["transition_allowed_always_false_in_49i"] is True
+    assert data["summary_model"]["transition_allowed_always_false_in_49i"] is True
+    assert data["sample_candidate"]["transition_allowed"] is False
+    assert data["sample_validation"]["transition_allowed"] is False
+    assert data["sample_summary"]["transition_allowed"] is False
+
+
+def test_49i_human_review_always_required(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["transition_overview"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_validation"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+
+
+def test_49i_candidate_model(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "TaskTransitionCandidate"
+    assert cm["field_count"] == 7
+    assert cm["required_field_count"] == 7
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "transition_id", "previous_task_id", "next_task_id", "transition_type",
+        "required_actions", "human_review_required", "transition_allowed",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for status in ("valid", "valid_with_warnings", "blocked", "not_required"):
+        assert status in cm["supported_transition_statuses"], f"missing status: {status}"
+
+
+def test_49i_validation_model(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    vm = data["validation_model"]
+    assert vm["model_name"] == "TaskTransitionValidation"
+    assert vm["field_count"] == 9
+    assert vm["required_field_count"] == 9
+    field_names = [f["name"] for f in vm["fields"]]
+    for expected in (
+        "validation_id", "transition_id", "previous_task_status", "next_task_status",
+        "session_status", "continuity_status", "scope_status", "blockers", "warnings",
+    ):
+        assert expected in field_names, f"missing validation field: {expected}"
+
+
+def test_49i_summary_model(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "TaskTransitionSummary"
+    assert sm["field_count"] == 7
+    assert sm["required_field_count"] == 7
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "transition_id", "validation_status",
+        "blocker_count", "warning_count", "transition_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49i_all_transition_domains_present(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    checks = data["domain_checks"]
+    for expected in (
+        "active_task_completion", "done_task_recording", "session_refresh",
+        "new_task_creation", "task_scope_validation", "continuity_alignment",
+        "stale_reference_prevention",
+    ):
+        assert expected in checks, f"missing transition domain: {expected}"
+    assert len(checks) == 7
+
+
+def test_49i_domain_checks_structure(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for domain, check in data["domain_checks"].items():
+        for key in ("domain", "input", "status", "finding", "blockers", "warnings", "required_action"):
+            assert key in check, f"domain {domain!r} missing key: {key}"
+        assert check["status"] in ("valid", "valid_with_warnings", "blocked", "not_required")
+
+
+def test_49i_stale_reference_prevention(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    stale = data["domain_checks"]["stale_reference_prevention"]
+    assert stale["status"] in ("valid", "valid_with_warnings", "blocked", "not_required")
+    assert len(stale["warnings"]) > 0
+    assert "required_action" in stale
+
+
+def test_49i_sample_candidate_fields(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    assert sc["transition_allowed"] is False
+    assert sc["human_review_required"] is True
+    assert sc["transition_type"] == "completion"
+    assert isinstance(sc["required_actions"], list)
+    assert len(sc["required_actions"]) > 0
+
+
+def test_49i_sample_validation_fields(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sv = data["sample_validation"]
+    assert sv["transition_allowed"] is False
+    assert sv["human_review_required"] is True
+    for key in (
+        "validation_id", "transition_id", "previous_task_status", "next_task_status",
+        "session_status", "continuity_status", "scope_status", "blockers", "warnings",
+    ):
+        assert key in sv, f"sample_validation missing key: {key}"
+
+
+def test_49i_sample_summary_fields(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["transition_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["validation_status"] in ("valid", "valid_with_warnings", "blocked", "not_required")
+    assert isinstance(ss["blocker_count"], int)
+    assert isinstance(ss["warning_count"], int)
+
+
+def test_49i_input_sources(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "active task state", "done task state", "session state",
+        "governance state audit", "governance state repair plan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49i_governance_boundaries(capsys) -> None:
+    main(["task-transition-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["transition_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49I"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "inspect task transition state", "recommend transition actions",
+        "detect stale references", "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "move task files", "rewrite session state", "modify roadmap",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49i_human_output_shows_all_sections(capsys) -> None:
+    main(["task-transition-governance"])
+    output = capsys.readouterr().out
+    assert "Task transition governance" in output
+    assert "Candidate model" in output
+    assert "Validation model" in output
+    assert "Summary model" in output
+    assert "Domain checks" in output
+    assert "Sample candidate" in output
+    assert "Sample validation" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

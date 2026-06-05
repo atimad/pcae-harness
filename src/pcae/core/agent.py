@@ -34644,3 +34644,432 @@ def build_governance_state_repair() -> dict:
         "input_sources": list(_GSR_INPUT_SOURCES),
         "advisory": GOVERNANCE_STATE_REPAIR_ADVISORY,
     }
+
+
+# Phase 49I — Task Transition Governance
+# ---------------------------------------------------------------------------
+
+TASK_TRANSITION_GOVERNANCE_ADVISORY = (
+    "Task transition governance is informational; no task files are moved, "
+    "no session state is rewritten, no roadmap is modified, and no runtimes are invoked. "
+    "transition_allowed=False in Phase 49I. All transition actions require human review."
+)
+
+_TTG_TRANSITION_DOMAINS: tuple[str, ...] = (
+    "active_task_completion",
+    "done_task_recording",
+    "session_refresh",
+    "new_task_creation",
+    "task_scope_validation",
+    "continuity_alignment",
+    "stale_reference_prevention",
+)
+
+_TTG_TRANSITION_STATUSES: tuple[str, ...] = (
+    "valid",
+    "valid_with_warnings",
+    "blocked",
+    "not_required",
+)
+
+_TTG_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "transition_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this task transition candidate.",
+    },
+    {
+        "name": "previous_task_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the task being transitioned away from.",
+    },
+    {
+        "name": "next_task_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the task being transitioned to, or empty if none yet created.",
+    },
+    {
+        "name": "transition_type",
+        "type": "str",
+        "required": True,
+        "description": "Classification of this transition: completion, creation, or continuation.",
+    },
+    {
+        "name": "required_actions",
+        "type": "list[str]",
+        "required": True,
+        "description": "Ordered list of governance actions required before transition may proceed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49I. No transition proceeds without human review.",
+    },
+    {
+        "name": "transition_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49I. Framework is advisory only.",
+    },
+)
+
+_TTG_VALIDATION_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "validation_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this transition validation.",
+    },
+    {
+        "name": "transition_id",
+        "type": "str",
+        "required": True,
+        "description": "The transition candidate this validation is associated with.",
+    },
+    {
+        "name": "previous_task_status",
+        "type": "str",
+        "required": True,
+        "description": "Governance status of the previous task at transition time.",
+    },
+    {
+        "name": "next_task_status",
+        "type": "str",
+        "required": True,
+        "description": "Governance status of the next task at transition time.",
+    },
+    {
+        "name": "session_status",
+        "type": "str",
+        "required": True,
+        "description": "Session continuity status at transition time.",
+    },
+    {
+        "name": "continuity_status",
+        "type": "str",
+        "required": True,
+        "description": "Governance continuity alignment status.",
+    },
+    {
+        "name": "scope_status",
+        "type": "str",
+        "required": True,
+        "description": "Task scope validation status.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions that must be resolved before transition.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings associated with this transition.",
+    },
+)
+
+_TTG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this transition summary.",
+    },
+    {
+        "name": "transition_id",
+        "type": "str",
+        "required": True,
+        "description": "The transition candidate this summary is associated with.",
+    },
+    {
+        "name": "validation_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: valid, valid_with_warnings, blocked, or not_required.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocking conditions found.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of non-blocking warnings found.",
+    },
+    {
+        "name": "transition_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49I.",
+    },
+)
+
+_TTG_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect task transition state",
+        "recommend transition actions",
+        "detect stale references",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "move task files",
+        "rewrite session state",
+        "modify roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "transition_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49I",
+}
+
+_TTG_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "governance state audit",
+    "governance state repair plan",
+)
+
+
+def build_task_transition_governance() -> dict:
+    """Define governance checks for safe task transitions. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    transition_id_ref = f"ttc-{ts}"
+
+    candidate_fields = [dict(f) for f in _TTG_CANDIDATE_FIELDS]
+    validation_fields = [dict(f) for f in _TTG_VALIDATION_FIELDS]
+    summary_fields = [dict(f) for f in _TTG_SUMMARY_FIELDS]
+
+    domain_checks: dict[str, dict] = {
+        "active_task_completion": {
+            "domain": "active_task_completion",
+            "input": "active task state",
+            "status": "valid",
+            "finding": (
+                "Active task 20260605-1052-multi-agent-governance-audit is present "
+                "and in correct lifecycle state. Completion requires human operator "
+                "to run `pcae task complete` after governance review."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "required_action": "human operator must invoke `pcae task complete` after review",
+        },
+        "done_task_recording": {
+            "domain": "done_task_recording",
+            "input": "done task state",
+            "status": "valid",
+            "finding": (
+                "Done task record for previous phases is present and consistent. "
+                "No orphaned done entries detected. "
+                "Recording is append-only; no done task may be modified."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "required_action": "verify done task recording after completion",
+        },
+        "session_refresh": {
+            "domain": "session_refresh",
+            "input": "session state",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Session state is consistent with current active task. "
+                "Session refresh required after task transition to prevent stale "
+                "agent lock state. Human operator must run `pcae session end` "
+                "and `pcae session start` or equivalent handoff."
+            ),
+            "blockers": [],
+            "warnings": ["session_refresh_required_after_transition"],
+            "required_action": "run session refresh after task transition",
+        },
+        "new_task_creation": {
+            "domain": "new_task_creation",
+            "input": "active task state, governance state audit",
+            "status": "valid",
+            "finding": (
+                "New task creation may proceed once active task is completed. "
+                "New task must declare scope boundaries in contract. "
+                "Human operator must create task manually; no automatic task creation."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "required_action": "human operator creates new task with declared scope",
+        },
+        "task_scope_validation": {
+            "domain": "task_scope_validation",
+            "input": "active task state, governance state audit",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Active task scope is consistent with Phase 49H governance boundaries. "
+                "Next task scope must be validated against governance state repair plan "
+                "to avoid overlapping repair domain assignments."
+            ),
+            "blockers": [],
+            "warnings": ["next_task_scope_must_not_overlap_repair_domains_in_49h"],
+            "required_action": "validate next task scope against governance state repair plan",
+        },
+        "continuity_alignment": {
+            "domain": "continuity_alignment",
+            "input": "session state, governance state audit",
+            "status": "valid",
+            "finding": (
+                "Governance continuity is aligned across phases 49G and 49H. "
+                "Phase 49I transition must preserve continuity chain. "
+                "Continuity pack should be exported before task transition."
+            ),
+            "blockers": [],
+            "warnings": [],
+            "required_action": "export continuity pack before task transition",
+        },
+        "stale_reference_prevention": {
+            "domain": "stale_reference_prevention",
+            "input": "active task state, done task state, governance state repair plan",
+            "status": "valid_with_warnings",
+            "finding": (
+                "Stale reference scan complete for task transition path. "
+                "PROJECT_STATUS.md and CHANGELOG.md must be updated to reflect "
+                "completed task before new task references are introduced. "
+                "Legacy phase labels from Phase 49G remain in documentation context "
+                "and should be resolved during task transition."
+            ),
+            "blockers": [],
+            "warnings": [
+                "project_status_must_be_updated_before_new_task_references",
+                "legacy_49g_phase_labels_in_doc_context_to_resolve",
+            ],
+            "required_action": (
+                "update PROJECT_STATUS.md and CHANGELOG.md before creating next task"
+            ),
+        },
+    }
+
+    all_blockers: list[str] = []
+    all_warnings: list[str] = []
+    for d in domain_checks.values():
+        all_blockers.extend(d["blockers"])
+        all_warnings.extend(d["warnings"])
+
+    if all_blockers:
+        overall_validation_status = "blocked"
+    elif all_warnings:
+        overall_validation_status = "valid_with_warnings"
+    else:
+        overall_validation_status = "valid"
+
+    sample_candidate = {
+        "transition_id": transition_id_ref,
+        "previous_task_id": "20260605-1052-multi-agent-governance-audit",
+        "next_task_id": "",
+        "transition_type": "completion",
+        "required_actions": [d["required_action"] for d in domain_checks.values()],
+        "human_review_required": True,
+        "transition_allowed": False,
+    }
+
+    sample_validation = {
+        "validation_id": f"ttv-{ts}",
+        "transition_id": transition_id_ref,
+        "previous_task_status": "active",
+        "next_task_status": "not_yet_created",
+        "session_status": "valid",
+        "continuity_status": "aligned",
+        "scope_status": "valid_with_warnings",
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+        "transition_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"tts-{ts}",
+        "transition_id": transition_id_ref,
+        "validation_status": overall_validation_status,
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "transition_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "TaskTransitionCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_transition_statuses": list(_TTG_TRANSITION_STATUSES),
+        "transition_allowed_always_false_in_49i": True,
+        "fields": candidate_fields,
+    }
+
+    validation_model = {
+        "model_name": "TaskTransitionValidation",
+        "field_count": len(validation_fields),
+        "required_field_count": sum(1 for f in validation_fields if f["required"]),
+        "supported_transition_statuses": list(_TTG_TRANSITION_STATUSES),
+        "transition_allowed_always_false_in_49i": True,
+        "fields": validation_fields,
+    }
+
+    summary_model = {
+        "model_name": "TaskTransitionSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_transition_statuses": list(_TTG_TRANSITION_STATUSES),
+        "transition_allowed_always_false_in_49i": True,
+        "fields": summary_fields,
+    }
+
+    transition_overview = {
+        "overview_id": f"49i-{ts}",
+        "generated_at": generated_at,
+        "phase": "49I",
+        "title": "Task Transition Governance",
+        "summary": (
+            "Defines governance checks for safe transitions between active tasks, "
+            "completed tasks, and newly created roadmap tasks. "
+            "Seven transition domains are assessed: active_task_completion, "
+            "done_task_recording, session_refresh, new_task_creation, "
+            "task_scope_validation, continuity_alignment, and stale_reference_prevention. "
+            "No task files are moved, no session state is rewritten, and no runtimes are invoked. "
+            f"validation_status={overall_validation_status}. "
+            "transition_allowed=False. human_review_required=True."
+        ),
+        "transition_domain_count": len(_TTG_TRANSITION_DOMAINS),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "validation_status": overall_validation_status,
+        "transition_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "transition_overview": transition_overview,
+        "candidate_model": candidate_model,
+        "validation_model": validation_model,
+        "summary_model": summary_model,
+        "domain_checks": domain_checks,
+        "sample_candidate": sample_candidate,
+        "sample_validation": sample_validation,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_TTG_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_TTG_INPUT_SOURCES),
+        "advisory": TASK_TRANSITION_GOVERNANCE_ADVISORY,
+    }

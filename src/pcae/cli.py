@@ -103,6 +103,7 @@ from pcae.commands.agent import (
     run_multi_agent_governance_audit,
     run_governance_state_audit,
     run_governance_state_repair,
+    run_task_transition_governance,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3648,6 +3649,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_state_repair_parser.set_defaults(handler=run_governance_state_repair)
+
+    task_transition_governance_parser = subparsers.add_parser(
+        "task-transition-governance",
+        help="Define governance checks for safe task transitions (Phase 49I).",
+    )
+    task_transition_governance_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    task_transition_governance_parser.set_defaults(handler=run_task_transition_governance)
 
     return parser
 

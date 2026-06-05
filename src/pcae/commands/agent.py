@@ -181,6 +181,8 @@ from pcae.core.agent import (
     GOVERNANCE_STATE_AUDIT_ADVISORY,
     build_governance_state_repair,
     GOVERNANCE_STATE_REPAIR_ADVISORY,
+    build_task_transition_governance,
+    TASK_TRANSITION_GOVERNANCE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7225,6 +7227,81 @@ def run_governance_state_repair(args: argparse.Namespace) -> int:
         print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Repair allowed:    {gb['repair_allowed']}")
         print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_task_transition_governance(args: argparse.Namespace) -> int:
+    data = build_task_transition_governance()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["transition_overview"]
+        print("Task transition governance")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Transition domains:    {ov['transition_domain_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Validation status:     {ov['validation_status']}")
+        print(f"Transition allowed:    {'yes' if ov['transition_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(cm['supported_transition_statuses'])}")
+        print(f"  transition_allowed always False in 49I: {cm['transition_allowed_always_false_in_49i']}")
+        print()
+        vm = data["validation_model"]
+        print(f"Validation model: {vm['model_name']} ({vm['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Domain checks:")
+        for domain, check in data["domain_checks"].items():
+            warn_tag = f" [{len(check['warnings'])} warning(s)]" if check["warnings"] else ""
+            print(f"  [{check['status'].upper()}]{warn_tag} {domain}: {check['finding']}")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  transition_type:       {sc['transition_type']}")
+        print(f"  transition_allowed:    {sc['transition_allowed']}")
+        print(f"  human_review_req'd:    {sc['human_review_required']}")
+        if sc["required_actions"]:
+            print(f"  Required actions ({len(sc['required_actions'])}):")
+            for a in sc["required_actions"]:
+                print(f"    {a}")
+        print()
+        sv = data["sample_validation"]
+        print("Sample validation:")
+        print(f"  previous_task_status:  {sv['previous_task_status']}")
+        print(f"  next_task_status:      {sv['next_task_status']}")
+        print(f"  session_status:        {sv['session_status']}")
+        print(f"  continuity_status:     {sv['continuity_status']}")
+        print(f"  scope_status:          {sv['scope_status']}")
+        if sv["warnings"]:
+            print(f"  Warnings ({len(sv['warnings'])}):")
+            for w in sv["warnings"]:
+                print(f"    {w}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  validation_status:     {ss['validation_status']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  transition_allowed:    {ss['transition_allowed']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                {', '.join(gb['may'])}")
+        print(f"  May not:            {', '.join(gb['may_not'])}")
+        print(f"  Transition allowed: {gb['transition_allowed']}")
+        print(f"  Human review req'd: {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

@@ -632,6 +632,11 @@ def render_commands_reference() -> str:
 
 - `pcae governance-state-repair`
 - `pcae governance-state-repair --json`
+
+## task-transition-governance
+
+- `pcae task-transition-governance`
+- `pcae task-transition-governance --json`
 """
 
 
