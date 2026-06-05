@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 48X.T: Parallel Test Execution Standardization (documentation only).
+Phase 49A: Multi-Agent Read-Only Pilot.
 
 ## Governance Coherence Note
 
@@ -3233,6 +3233,22 @@ link;
 governance handbook roadmap 48X.T row updated to complete with guide link;
 governance handbook remaining milestones updated to reflect 48X.T complete;
 no source logic changes; documentation only
+and multi-agent read-only pilot implemented (Phase 49A):
+`pcae multi-agent-readonly-pilot` and `--json`; defines the first governed
+multi-agent read-only pilot using three runtimes (codex-local, claude-local,
+kimi-local) while keeping execution disabled; two new models —
+MultiAgentReadOnlyPilotCandidate (7 fields: candidate_id, request_id,
+selected_agents, selected_runtimes, strategy, consensus_required,
+execution_allowed) and MultiAgentReadOnlyPilotResult (11 fields: pilot_id,
+candidate_id, runtime_results, trust_results, authorization_results,
+contract_results, consensus_status, blockers, warnings, execution_allowed,
+human_review_required); three strategies: parallel_review, sequential_review,
+consensus_preparation; 9-step lifecycle ending in pilot_result_produced; all
+three runtimes blocked in 49A (codex-local and claude-local partially_trusted;
+kimi-local untrusted); consensus_status=blocked; execution_allowed=False for
+all runtimes and pilot candidate; human_review_required=True; no runtime
+invocation, no prompt execution, no repository modification; `docs/COMMANDS.md`
+regenerated; 14 new tests; 3443 total tests passing
 
 ## Next
 

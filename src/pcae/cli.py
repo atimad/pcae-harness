@@ -95,6 +95,7 @@ from pcae.commands.agent import (
     run_readonly_runtime_pilot,
     run_invocation_result_review,
     run_invocation_evidence,
+    run_multi_agent_readonly_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2193,6 +2194,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     invocation_evidence_parser.set_defaults(handler=run_invocation_evidence)
+
+    multi_agent_readonly_pilot_parser = subparsers.add_parser(
+        "multi-agent-readonly-pilot",
+        help="Define the first governed multi-agent read-only pilot (Phase 49A).",
+    )
+    multi_agent_readonly_pilot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    multi_agent_readonly_pilot_parser.set_defaults(handler=run_multi_agent_readonly_pilot)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

@@ -31585,3 +31585,458 @@ def build_invocation_evidence() -> dict:
         "input_sources": list(_IEM_INPUT_SOURCES),
         "advisory": INVOCATION_EVIDENCE_ADVISORY,
     }
+
+
+# Phase 49A — Multi-Agent Read-Only Pilot
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_READONLY_PILOT_ADVISORY = (
+    "Multi-agent read-only pilot assessment is informational; no runtime "
+    "invocation, prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49A."
+)
+
+_MARP_STRATEGIES: tuple[str, ...] = (
+    "parallel_review",
+    "sequential_review",
+    "consensus_preparation",
+)
+
+_MARP_CONSENSUS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "not_ready",
+    "blocked",
+)
+
+_MARP_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "candidate_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this multi-agent pilot candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "Reference invocation request this pilot candidate is associated with.",
+    },
+    {
+        "name": "selected_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs selected for this multi-agent pilot.",
+    },
+    {
+        "name": "selected_runtimes",
+        "type": "list[str]",
+        "required": True,
+        "description": "Runtime IDs corresponding to the selected agents.",
+    },
+    {
+        "name": "strategy",
+        "type": "str",
+        "required": True,
+        "description": "Orchestration strategy: parallel_review, sequential_review, or consensus_preparation.",
+    },
+    {
+        "name": "consensus_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether consensus across agents is required before the pilot result is accepted.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49A; no execution is authorized.",
+    },
+)
+
+_MARP_RESULT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "pilot_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this multi-agent pilot result.",
+    },
+    {
+        "name": "candidate_id",
+        "type": "str",
+        "required": True,
+        "description": "The pilot candidate this result is associated with.",
+    },
+    {
+        "name": "runtime_results",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-runtime blocking status derived from trust, contract, and authorization gates.",
+    },
+    {
+        "name": "trust_results",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-runtime trust assessment summary from RuntimeTrustRecord.",
+    },
+    {
+        "name": "authorization_results",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-runtime authorization enforcement status.",
+    },
+    {
+        "name": "contract_results",
+        "type": "list[dict]",
+        "required": True,
+        "description": "Per-runtime contract enforcement status.",
+    },
+    {
+        "name": "consensus_status",
+        "type": "str",
+        "required": True,
+        "description": "Overall consensus readiness: ready, not_ready, or blocked.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions across all runtimes preventing pilot execution.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during multi-agent pilot evaluation.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49A; no execution is authorized.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every multi-agent pilot result.",
+    },
+)
+
+_MARP_LIFECYCLE_STEPS: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "request_created",
+        "description": "MultiAgentReadOnlyPilotCandidate is created with selected agents, runtimes, and strategy.",
+        "input": "MultiAgentReadOnlyPilotCandidate",
+    },
+    {
+        "step": 2,
+        "name": "candidate_agents_selected",
+        "description": "Agent IDs and corresponding runtimes are evaluated for registration and eligibility.",
+        "input": "AgentRegistry",
+    },
+    {
+        "step": 3,
+        "name": "runtime_trust_evaluated",
+        "description": "RuntimeTrustRecord is consulted for each selected runtime; untrusted runtimes are blocked.",
+        "input": "RuntimeTrustRecord",
+    },
+    {
+        "step": 4,
+        "name": "contract_enforcement_evaluated",
+        "description": "RuntimeContractEnforcementResult is evaluated for each runtime; unverified contracts block.",
+        "input": "RuntimeContractEnforcementResult",
+    },
+    {
+        "step": 5,
+        "name": "authorization_enforcement_evaluated",
+        "description": "InvocationAuthorizationEnforcementResult is evaluated for each runtime.",
+        "input": "InvocationAuthorizationEnforcementResult",
+    },
+    {
+        "step": 6,
+        "name": "audit_evidence_path_evaluated",
+        "description": "InvocationAuditRecord and InvocationEvidenceRecord paths are validated for each runtime.",
+        "input": "InvocationEvidenceRecord",
+    },
+    {
+        "step": 7,
+        "name": "consensus_path_evaluated",
+        "description": "Consensus strategy and multi-agent agreement readiness are evaluated without executing agents.",
+        "input": "ExecutionConsensusDesign",
+    },
+    {
+        "step": 8,
+        "name": "human_approval_checked",
+        "description": "Human approval artifact presence is verified for the pilot candidate.",
+        "input": "human_approval_artifact",
+    },
+    {
+        "step": 9,
+        "name": "pilot_result_produced",
+        "description": "MultiAgentReadOnlyPilotResult is produced reflecting all gate outcomes.",
+        "input": "MultiAgentReadOnlyPilotResult",
+    },
+)
+
+_MARP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define multi-agent pilot",
+        "evaluate trust and readiness",
+        "evaluate consensus path",
+        "report blockers",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49A",
+}
+
+_MARP_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyRuntimePilotResult",
+    "InvocationAuditRecord",
+    "InvocationEvidenceRecord",
+    "RuntimeTrustRecord",
+    "ExecutionConsensusDesign",
+    "GovernanceAuditResult",
+)
+
+# Per-runtime state in Phase 49A.
+# All three runtimes are blocked:
+#   - codex-local: partially_trusted, sandbox/timeout unverified, no execution history
+#   - claude-local: partially_trusted, sandbox/timeout unverified, no execution history
+#   - kimi-local: untrusted (installation unconfirmed), all contracts unverified
+_MARP_RUNTIME_STATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "codex-local",
+        "agent_id": "codex-local",
+        "trust_level": "partially_trusted",
+        "contract_enforcement_passed": False,
+        "authorization_enforcement_passed": False,
+        "audit_evidence_path_valid": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "claude-local",
+        "agent_id": "claude-local",
+        "trust_level": "partially_trusted",
+        "contract_enforcement_passed": False,
+        "authorization_enforcement_passed": False,
+        "audit_evidence_path_valid": False,
+        "human_approval_present": False,
+    },
+    {
+        "runtime_id": "kimi-local",
+        "agent_id": "kimi-local",
+        "trust_level": "untrusted",
+        "contract_enforcement_passed": False,
+        "authorization_enforcement_passed": False,
+        "audit_evidence_path_valid": False,
+        "human_approval_present": False,
+    },
+)
+
+
+def _evaluate_marp_runtime(state: dict, ts: str) -> dict:
+    """Derive per-runtime assessment from a runtime state record."""
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    trust_status = state["trust_level"]
+    if trust_status == "untrusted":
+        blockers.append("runtime_untrusted")
+    elif trust_status == "partially_trusted":
+        warnings.append("runtime_partially_trusted_no_execution_history")
+
+    contract_status = "passed" if state["contract_enforcement_passed"] else "blocked"
+    if not state["contract_enforcement_passed"]:
+        blockers.append("contract_enforcement_blocked")
+
+    authorization_status = "passed" if state["authorization_enforcement_passed"] else "blocked"
+    if not state["authorization_enforcement_passed"]:
+        blockers.append("authorization_enforcement_blocked")
+
+    evidence_status = "valid" if state["audit_evidence_path_valid"] else "blocked"
+    if not state["audit_evidence_path_valid"]:
+        blockers.append("audit_evidence_path_blocked")
+
+    human_approval_status = "approved" if state["human_approval_present"] else "missing"
+    if not state["human_approval_present"]:
+        blockers.append("human_approval_missing")
+
+    pilot_status = (
+        "blocked_with_warnings" if (blockers and warnings)
+        else ("blocked" if blockers else "eligible")
+    )
+
+    return {
+        "runtime_id": state["runtime_id"],
+        "agent_id": state["agent_id"],
+        "trust_status": trust_status,
+        "contract_status": contract_status,
+        "authorization_status": authorization_status,
+        "evidence_status": evidence_status,
+        "human_approval_status": human_approval_status,
+        "pilot_status": pilot_status,
+        "blockers": blockers,
+        "warnings": warnings,
+        "execution_allowed": False,
+    }
+
+
+def build_multi_agent_readonly_pilot() -> dict:
+    """Define the first governed multi-agent read-only pilot. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    request_id_ref = "marp-req-placeholder-49a"
+    candidate_id_ref = f"marp-cand-{ts}"
+
+    candidate_fields = [dict(f) for f in _MARP_CANDIDATE_FIELDS]
+    result_fields = [dict(f) for f in _MARP_RESULT_FIELDS]
+    lifecycle = [dict(s) for s in _MARP_LIFECYCLE_STEPS]
+
+    runtime_assessments = [
+        _evaluate_marp_runtime(dict(s), ts)
+        for s in _MARP_RUNTIME_STATES
+    ]
+
+    trust_results = [
+        {
+            "runtime_id": a["runtime_id"],
+            "trust_level": a["trust_status"],
+            "trust_blocker": "runtime_untrusted" in a["blockers"],
+            "trust_warning": "runtime_partially_trusted_no_execution_history" in a["warnings"],
+        }
+        for a in runtime_assessments
+    ]
+    contract_results = [
+        {
+            "runtime_id": a["runtime_id"],
+            "contract_status": a["contract_status"],
+            "blocked": a["contract_status"] == "blocked",
+        }
+        for a in runtime_assessments
+    ]
+    authorization_results = [
+        {
+            "runtime_id": a["runtime_id"],
+            "authorization_status": a["authorization_status"],
+            "blocked": a["authorization_status"] == "blocked",
+        }
+        for a in runtime_assessments
+    ]
+
+    all_blockers: list[str] = []
+    all_warnings: list[str] = []
+    for a in runtime_assessments:
+        for b in a["blockers"]:
+            qualified = f"{a['runtime_id']}:{b}"
+            if qualified not in all_blockers:
+                all_blockers.append(qualified)
+        for w in a["warnings"]:
+            qualified = f"{a['runtime_id']}:{w}"
+            if qualified not in all_warnings:
+                all_warnings.append(qualified)
+
+    any_blocked = any(
+        a["pilot_status"] in ("blocked", "blocked_with_warnings")
+        for a in runtime_assessments
+    )
+    consensus_status = "blocked" if any_blocked else "ready"
+
+    sample_candidate = {
+        "candidate_id": candidate_id_ref,
+        "request_id": request_id_ref,
+        "selected_agents": [s["agent_id"] for s in _MARP_RUNTIME_STATES],
+        "selected_runtimes": [s["runtime_id"] for s in _MARP_RUNTIME_STATES],
+        "strategy": "consensus_preparation",
+        "consensus_required": True,
+        "execution_allowed": False,
+    }
+
+    pilot_result = {
+        "pilot_id": f"marp-pilot-{ts}",
+        "candidate_id": candidate_id_ref,
+        "runtime_results": runtime_assessments,
+        "trust_results": trust_results,
+        "authorization_results": authorization_results,
+        "contract_results": contract_results,
+        "consensus_status": consensus_status,
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    blocked_count = sum(
+        1 for a in runtime_assessments
+        if a["pilot_status"] in ("blocked", "blocked_with_warnings")
+    )
+    eligible_count = sum(
+        1 for a in runtime_assessments if a["pilot_status"] == "eligible"
+    )
+
+    candidate_model = {
+        "model_name": "MultiAgentReadOnlyPilotCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_strategies": list(_MARP_STRATEGIES),
+        "execution_allowed_always_false_in_49a": True,
+        "fields": candidate_fields,
+    }
+
+    result_model = {
+        "model_name": "MultiAgentReadOnlyPilotResult",
+        "field_count": len(result_fields),
+        "required_field_count": sum(1 for f in result_fields if f["required"]),
+        "supported_consensus_statuses": list(_MARP_CONSENSUS_STATUSES),
+        "execution_allowed_always_false_in_49a": True,
+        "fields": result_fields,
+    }
+
+    pilot_summary = {
+        "summary_id": f"49a-{ts}",
+        "generated_at": generated_at,
+        "phase": "49A",
+        "title": "Multi-Agent Read-Only Pilot",
+        "summary": (
+            "Defines the first governed multi-agent read-only pilot using three runtimes "
+            "(codex-local, claude-local, kimi-local) while keeping execution disabled. "
+            "All three runtimes are blocked in Phase 49A: codex-local and claude-local "
+            "are partially_trusted (sandbox and timeout contracts unverified, no live "
+            "execution history); kimi-local is untrusted (installation unconfirmed). "
+            "Contract enforcement and authorization enforcement are blocked for all "
+            "runtimes. Human approval has not been recorded. "
+            "consensus_status=blocked. execution_allowed=False for all runtimes and "
+            "for the pilot candidate. No runtime is invoked, no prompt is submitted, "
+            "and no repository modification occurs."
+        ),
+        "runtime_count": len(runtime_assessments),
+        "blocked_count": blocked_count,
+        "eligible_count": eligible_count,
+        "lifecycle_steps": len(lifecycle),
+        "consensus_status": consensus_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "pilot_summary": pilot_summary,
+        "candidate_model": candidate_model,
+        "result_model": result_model,
+        "sample_candidate": sample_candidate,
+        "pilot_lifecycle": lifecycle,
+        "pilot_result": pilot_result,
+        "governance_boundaries": dict(_MARP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_MARP_INPUT_SOURCES),
+        "advisory": MULTI_AGENT_READONLY_PILOT_ADVISORY,
+    }

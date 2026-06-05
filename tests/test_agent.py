@@ -29807,4 +29807,204 @@ def test_48h_human_output_shows_all_sections(capsys) -> None:
     assert "Evidence preflights" in output
     assert "Evidence summaries" in output
     assert "Governance boundaries" in output
+
+
+# Phase 49A — Multi-Agent Read-Only Pilot
+
+
+def test_49a_json_structure(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "pilot_summary", "candidate_model", "result_model", "sample_candidate",
+        "pilot_lifecycle", "pilot_result", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49a_pilot_summary_fields(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ps = data["pilot_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "runtime_count", "blocked_count", "eligible_count", "lifecycle_steps",
+        "consensus_status", "execution_allowed", "human_review_required",
+    ):
+        assert field in ps, f"missing pilot_summary field: {field}"
+    assert ps["phase"] == "49A"
+    assert ps["execution_allowed"] is False
+    assert ps["human_review_required"] is True
+    assert ps["runtime_count"] == 3
+    assert ps["blocked_count"] == 3
+    assert ps["eligible_count"] == 0
+    assert ps["lifecycle_steps"] == 9
+    assert ps["consensus_status"] == "blocked"
+
+
+def test_49a_execution_always_blocked(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["pilot_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49a"] is True
+    assert data["result_model"]["execution_allowed_always_false_in_49a"] is True
+    assert data["sample_candidate"]["execution_allowed"] is False
+    pr = data["pilot_result"]
+    assert pr["execution_allowed"] is False
+    for res in pr["runtime_results"]:
+        assert res["execution_allowed"] is False, (
+            f"runtime {res['runtime_id']} must have execution_allowed=False"
+        )
+
+
+def test_49a_candidate_model(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "MultiAgentReadOnlyPilotCandidate"
+    assert cm["field_count"] == 7
+    assert cm["required_field_count"] == 7
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "candidate_id", "request_id", "selected_agents", "selected_runtimes",
+        "strategy", "consensus_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for strategy in ("parallel_review", "sequential_review", "consensus_preparation"):
+        assert strategy in cm["supported_strategies"], f"missing strategy: {strategy}"
+
+
+def test_49a_result_model(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["result_model"]
+    assert rm["model_name"] == "MultiAgentReadOnlyPilotResult"
+    assert rm["field_count"] == 11
+    assert rm["required_field_count"] == 11
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "pilot_id", "candidate_id", "runtime_results", "trust_results",
+        "authorization_results", "contract_results", "consensus_status",
+        "blockers", "warnings", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing result field: {expected}"
+    for status in ("ready", "not_ready", "blocked"):
+        assert status in rm["supported_consensus_statuses"], f"missing consensus status: {status}"
+
+
+def test_49a_nine_step_lifecycle(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    lifecycle = data["pilot_lifecycle"]
+    assert len(lifecycle) == 9
+    step_numbers = [s["step"] for s in lifecycle]
+    assert step_numbers == list(range(1, 10)), "lifecycle steps must be 1-9 in order"
+    step_names = [s["name"] for s in lifecycle]
+    for expected in (
+        "request_created", "candidate_agents_selected", "runtime_trust_evaluated",
+        "contract_enforcement_evaluated", "authorization_enforcement_evaluated",
+        "audit_evidence_path_evaluated", "consensus_path_evaluated",
+        "human_approval_checked", "pilot_result_produced",
+    ):
+        assert expected in step_names, f"missing lifecycle step: {expected}"
+
+
+def test_49a_all_runtimes_blocked(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    runtime_results = data["pilot_result"]["runtime_results"]
+    assert len(runtime_results) == 3
+    runtime_ids = {r["runtime_id"] for r in runtime_results}
+    assert runtime_ids == {"codex-local", "claude-local", "kimi-local"}
+    for res in runtime_results:
+        assert res["pilot_status"] in ("blocked", "blocked_with_warnings"), (
+            f"{res['runtime_id']} must be blocked in Phase 49A"
+        )
+
+
+def test_49a_kimi_untrusted(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    runtime_results = data["pilot_result"]["runtime_results"]
+    kimi = next(r for r in runtime_results if r["runtime_id"] == "kimi-local")
+    assert kimi["trust_status"] == "untrusted"
+    assert "runtime_untrusted" in kimi["blockers"]
+    trust_results = data["pilot_result"]["trust_results"]
+    kimi_trust = next(t for t in trust_results if t["runtime_id"] == "kimi-local")
+    assert kimi_trust["trust_level"] == "untrusted"
+    assert kimi_trust["trust_blocker"] is True
+
+
+def test_49a_consensus_blocked(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["pilot_result"]["consensus_status"] == "blocked"
+    assert data["pilot_summary"]["consensus_status"] == "blocked"
+
+
+def test_49a_human_approval_missing_blocks_all(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for res in data["pilot_result"]["runtime_results"]:
+        assert res["human_approval_status"] == "missing", (
+            f"{res['runtime_id']} human_approval_status must be missing"
+        )
+        assert "human_approval_missing" in res["blockers"], (
+            f"{res['runtime_id']} must have human_approval_missing blocker"
+        )
+
+
+def test_49a_governance_boundaries(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49A"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define multi-agent pilot", "evaluate trust and readiness",
+        "evaluate consensus path", "report blockers",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49a_input_sources(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ReadOnlyRuntimePilotResult", "InvocationAuditRecord",
+        "InvocationEvidenceRecord", "RuntimeTrustRecord",
+        "ExecutionConsensusDesign", "GovernanceAuditResult",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49a_advisory(capsys) -> None:
+    main(["multi-agent-readonly-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    advisory = data["advisory"].lower()
+    assert "informational" in advisory
+    assert "no runtime invocation" in advisory
+    assert "execution_allowed=false" in advisory
+
+
+def test_49a_human_output_shows_all_sections(capsys) -> None:
+    main(["multi-agent-readonly-pilot"])
+    output = capsys.readouterr().out
+    assert "Multi-agent read-only pilot" in output
+    assert "Candidate model" in output
+    assert "Result model" in output
+    assert "Pilot lifecycle" in output
+    assert "Pilot result" in output
+    assert "Governance boundaries" in output
     assert "informational" in output.lower()

@@ -165,6 +165,8 @@ from pcae.core.agent import (
     INVOCATION_RESULT_REVIEW_ADVISORY,
     build_invocation_evidence,
     INVOCATION_EVIDENCE_ADVISORY,
+    build_multi_agent_readonly_pilot,
+    MULTI_AGENT_READONLY_PILOT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6744,6 +6746,65 @@ def run_write_rollback_validation_design(args: argparse.Namespace) -> int:
         print(f"  May not: {', '.join(gb['workflow_may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review required: {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_multi_agent_readonly_pilot(args: argparse.Namespace) -> int:
+    data = build_multi_agent_readonly_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ps = data["pilot_summary"]
+        print("Multi-agent read-only pilot")
+        print(f"Assessment: {ps['summary_id']}  Generated: {ps['generated_at']}")
+        print(f"Phase: {ps['phase']} — {ps['title']}")
+        print()
+        print(ps["summary"])
+        print()
+        print(f"Runtimes evaluated:  {ps['runtime_count']}")
+        print(f"Blocked:             {ps['blocked_count']}")
+        print(f"Eligible:            {ps['eligible_count']}")
+        print(f"Consensus status:    {ps['consensus_status']}")
+        print(f"Lifecycle steps:     {ps['lifecycle_steps']}")
+        print(f"Execution allowed:   {'yes' if ps['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if ps['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported strategies: {', '.join(cm['supported_strategies'])}")
+        print(f"  execution_allowed always False in 49A: {cm['execution_allowed_always_false_in_49a']}")
+        print()
+        rm = data["result_model"]
+        print(f"Result model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported consensus statuses: {', '.join(rm['supported_consensus_statuses'])}")
+        print(f"  execution_allowed always False in 49A: {rm['execution_allowed_always_false_in_49a']}")
+        print()
+        print(f"Pilot lifecycle ({len(data['pilot_lifecycle'])} steps):")
+        for step in data["pilot_lifecycle"]:
+            print(f"  {step['step']}. [{step['input']}] {step['name']}: {step['description']}")
+        print()
+        pr = data["pilot_result"]
+        print("Pilot result:")
+        print(f"  pilot_id:              {pr['pilot_id']}")
+        print(f"  consensus_status:      {pr['consensus_status']}")
+        print(f"  execution_allowed:     {pr['execution_allowed']}")
+        print(f"  human_review_required: {pr['human_review_required']}")
+        print(f"  Runtime results ({len(pr['runtime_results'])} runtimes):")
+        for res in pr["runtime_results"]:
+            print(f"    [{res['pilot_status']}] {res['runtime_id']} (trust: {res['trust_status']})")
+            if res["blockers"]:
+                print(f"      Blockers ({len(res['blockers'])}): {', '.join(res['blockers'])}")
+            if res["warnings"]:
+                print(f"      Warnings ({len(res['warnings'])}): {', '.join(res['warnings'])}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

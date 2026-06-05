@@ -467,6 +467,11 @@
 - `pcae write-invocation-pilot`
 - `pcae write-invocation-pilot --json`
 
+## multi-agent-readonly-pilot
+
+- `pcae multi-agent-readonly-pilot`
+- `pcae multi-agent-readonly-pilot --json`
+
 ## write-result-review-design
 
 - `pcae write-result-review-design`
