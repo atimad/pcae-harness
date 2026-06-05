@@ -175,6 +175,8 @@ from pcae.core.agent import (
     EVIDENCE_FRAMEWORK_ADVISORY,
     build_decision_record,
     DECISION_RECORD_ADVISORY,
+    build_multi_agent_governance_audit,
+    MULTI_AGENT_GOVERNANCE_AUDIT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7037,6 +7039,58 @@ def run_arbitration(args: argparse.Namespace) -> int:
         for ep in data["escalation_paths"]:
             print(f"  {ep['path']} (trigger: {ep['trigger']}, human_required: {ep['human_required']})")
             print(f"    {ep['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_multi_agent_governance_audit(args: argparse.Namespace) -> int:
+    data = build_multi_agent_governance_audit()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        s = data["audit_overview"]
+        print("Multi-agent governance audit")
+        print(f"Assessment: {s['summary_id']}  Generated: {s['generated_at']}")
+        print(f"Phase: {s['phase']} — {s['title']}")
+        print()
+        print(s["summary"])
+        print()
+        print(f"Domains assessed:    {s['domain_count']}")
+        print(f"Blockers:            {s['blocker_count']}")
+        print(f"Warnings:            {s['warning_count']}")
+        print(f"Audit status:        {s['audit_status']}")
+        print(f"Execution allowed:   {'yes' if s['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if s['human_review_required'] else 'no'}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported audit statuses: {', '.join(rm['supported_audit_statuses'])}")
+        print(f"  execution_allowed always False in 49F: {rm['execution_allowed_always_false_in_49f']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Domain findings:")
+        for domain, finding in data["domain_findings"].items():
+            print(f"  [{finding['status'].upper()}] {domain}: {finding['finding']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  audit_status:        {sr['audit_status']}")
+        print(f"  execution_allowed:   {sr['execution_allowed']}")
+        print(f"  human_review_req'd:  {sr['human_review_required']}")
+        if sr["warnings"]:
+            print(f"  Warnings ({len(sr['warnings'])}):")
+            for w in sr["warnings"]:
+                print(f"    {w}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

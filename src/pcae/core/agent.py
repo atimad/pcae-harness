@@ -33511,3 +33511,367 @@ def build_decision_record() -> dict:
         "input_sources": list(_DR_INPUT_SOURCES),
         "advisory": DECISION_RECORD_ADVISORY,
     }
+
+
+# Phase 49F — Multi-Agent Governance Audit
+# ---------------------------------------------------------------------------
+
+MULTI_AGENT_GOVERNANCE_AUDIT_ADVISORY = (
+    "Multi-agent governance audit is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49F."
+)
+
+_AUDIT_DOMAINS: tuple[str, ...] = (
+    "multi_agent_pilot",
+    "consensus",
+    "arbitration",
+    "evidence",
+    "decision_records",
+    "runtime_trust",
+    "human_review_enforcement",
+    "execution_blocking_enforcement",
+)
+
+_AUDIT_STATUSES: tuple[str, ...] = (
+    "compliant",
+    "compliant_with_warnings",
+    "blocked",
+    "insufficient_evidence",
+)
+
+_AUDIT_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance audit.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this audit is associated with.",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Governance domains assessed in this audit.",
+    },
+    {
+        "name": "findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Descriptive findings across all audited domains.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing governance compliance.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during audit.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or insufficient_evidence.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49F; no execution is authorized.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49F; human review is required for every audit.",
+    },
+)
+
+_AUDIT_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this audit summary.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The governance audit record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocking conditions found.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warnings found.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the linked audit record.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49F; no execution is authorized.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49F; human review is required.",
+    },
+)
+
+_AUDIT_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "audit governance artifacts",
+        "assess readiness",
+        "report blockers",
+        "report warnings",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49F",
+}
+
+_AUDIT_INPUT_SOURCES: tuple[str, ...] = (
+    "MultiAgentReadOnlyPilotResult",
+    "ConsensusResult",
+    "ArbitrationDecision",
+    "EvidenceBundle",
+    "DecisionRecord",
+    "RuntimeTrustRecord",
+    "GovernanceAuditRecord",
+)
+
+
+def build_multi_agent_governance_audit() -> dict:
+    """Audit the complete multi-agent governance architecture. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"mga-{ts}"
+    request_id_ref = "mga-req-placeholder-49f"
+
+    audit_domains = list(_AUDIT_DOMAINS)
+    audit_record_fields = [dict(f) for f in _AUDIT_RECORD_FIELDS]
+    audit_summary_fields = [dict(f) for f in _AUDIT_SUMMARY_FIELDS]
+
+    domain_findings: dict[str, dict] = {
+        "multi_agent_pilot": {
+            "domain": "multi_agent_pilot",
+            "phase_source": "49A",
+            "input": "MultiAgentReadOnlyPilotResult",
+            "status": "compliant",
+            "finding": (
+                "Multi-agent read-only pilot defined. "
+                "All runtimes blocked. execution_allowed=False."
+            ),
+            "blockers": [],
+            "warnings": ["all_runtimes_blocked_in_49a"],
+        },
+        "consensus": {
+            "domain": "consensus",
+            "phase_source": "49B",
+            "input": "ConsensusResult",
+            "status": "compliant",
+            "finding": (
+                "Consensus engine defined. "
+                "All agents unavailable. execution_allowed=False."
+            ),
+            "blockers": [],
+            "warnings": ["all_agents_unavailable_in_49b"],
+        },
+        "arbitration": {
+            "domain": "arbitration",
+            "phase_source": "49C",
+            "input": "ArbitrationDecision",
+            "status": "compliant",
+            "finding": (
+                "Arbitration framework defined. "
+                "Escalation required. execution_allowed=False."
+            ),
+            "blockers": [],
+            "warnings": ["escalation_required_in_49c"],
+        },
+        "evidence": {
+            "domain": "evidence",
+            "phase_source": "49D",
+            "input": "EvidenceBundle",
+            "status": "compliant",
+            "finding": (
+                "Evidence framework defined. "
+                "All evidence not reviewed. execution_allowed=False."
+            ),
+            "blockers": [],
+            "warnings": ["evidence_not_reviewed_in_49d"],
+        },
+        "decision_records": {
+            "domain": "decision_records",
+            "phase_source": "49E",
+            "input": "DecisionRecord",
+            "status": "compliant",
+            "finding": (
+                "Decision record defined. "
+                "Status pending_human_review. execution_allowed=False."
+            ),
+            "blockers": [],
+            "warnings": ["decision_pending_human_review_in_49e"],
+        },
+        "runtime_trust": {
+            "domain": "runtime_trust",
+            "phase_source": "46H",
+            "input": "RuntimeTrustRecord",
+            "status": "compliant",
+            "finding": (
+                "Runtime trust record defined. "
+                "Trust partially assessed; not yet verified."
+            ),
+            "blockers": [],
+            "warnings": ["runtime_trust_partially_trusted_not_verified"],
+        },
+        "human_review_enforcement": {
+            "domain": "human_review_enforcement",
+            "phase_source": "49A-49E",
+            "input": "DecisionRecord",
+            "status": "compliant",
+            "finding": (
+                "human_review_required=True enforced across all phases 49A-49E."
+            ),
+            "blockers": [],
+            "warnings": [],
+        },
+        "execution_blocking_enforcement": {
+            "domain": "execution_blocking_enforcement",
+            "phase_source": "49A-49E",
+            "input": "MultiAgentReadOnlyPilotResult",
+            "status": "compliant",
+            "finding": (
+                "execution_allowed=False enforced across all phases 49A-49E."
+            ),
+            "blockers": [],
+            "warnings": [],
+        },
+    }
+
+    all_blockers: list[str] = []
+    all_warnings: list[str] = []
+    for d in domain_findings.values():
+        all_blockers.extend(d["blockers"])
+        all_warnings.extend(d["warnings"])
+
+    if all_blockers:
+        overall_status = "blocked"
+    elif all_warnings:
+        overall_status = "compliant_with_warnings"
+    else:
+        overall_status = "compliant"
+
+    sample_record = {
+        "audit_id": audit_id_ref,
+        "request_id": request_id_ref,
+        "audit_domains": audit_domains,
+        "findings": [d["finding"] for d in domain_findings.values()],
+        "blockers": all_blockers,
+        "warnings": all_warnings,
+        "audit_status": overall_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"mga-sum-{ts}",
+        "audit_id": audit_id_ref,
+        "domain_count": len(audit_domains),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "audit_status": overall_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    record_model = {
+        "model_name": "MultiAgentGovernanceAuditRecord",
+        "field_count": len(audit_record_fields),
+        "required_field_count": sum(1 for f in audit_record_fields if f["required"]),
+        "supported_audit_statuses": list(_AUDIT_STATUSES),
+        "execution_allowed_always_false_in_49f": True,
+        "fields": audit_record_fields,
+    }
+
+    summary_model = {
+        "model_name": "MultiAgentGovernanceAuditSummary",
+        "field_count": len(audit_summary_fields),
+        "required_field_count": sum(1 for f in audit_summary_fields if f["required"]),
+        "supported_audit_statuses": list(_AUDIT_STATUSES),
+        "execution_allowed_always_false_in_49f": True,
+        "fields": audit_summary_fields,
+    }
+
+    audit_overview = {
+        "summary_id": f"49f-{ts}",
+        "generated_at": generated_at,
+        "phase": "49F",
+        "title": "Multi-Agent Governance Audit",
+        "summary": (
+            "Audits the complete multi-agent governance architecture built in phases "
+            "49A-49E (multi-agent pilot, consensus, arbitration, evidence, decision records), "
+            "plus runtime trust (46H) and enforcement of human_review_required and "
+            "execution_allowed=False across all domains. Audit is advisory and read-only. "
+            "No runtime is invoked, no prompt is submitted, and no repository modification occurs. "
+            f"audit_status={overall_status}. execution_allowed=False. human_review_required=True."
+        ),
+        "domain_count": len(audit_domains),
+        "blocker_count": len(all_blockers),
+        "warning_count": len(all_warnings),
+        "audit_status": overall_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "audit_overview": audit_overview,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_findings": domain_findings,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_AUDIT_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_AUDIT_INPUT_SOURCES),
+        "advisory": MULTI_AGENT_GOVERNANCE_AUDIT_ADVISORY,
+    }

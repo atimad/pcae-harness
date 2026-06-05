@@ -100,6 +100,7 @@ from pcae.commands.agent import (
     run_arbitration,
     run_evidence_framework,
     run_decision_record,
+    run_multi_agent_governance_audit,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3612,6 +3613,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON handoff result.",
     )
     phase_handoff_parser.set_defaults(handler=run_phase_handoff)
+
+    multi_agent_governance_audit_parser = subparsers.add_parser(
+        "multi-agent-governance-audit",
+        help="Audit the complete multi-agent governance architecture (Phase 49F).",
+    )
+    multi_agent_governance_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    multi_agent_governance_audit_parser.set_defaults(handler=run_multi_agent_governance_audit)
 
     return parser
 

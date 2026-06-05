@@ -596,3 +596,8 @@
 
 - `pcae invocation-evidence`
 - `pcae invocation-evidence --json`
+
+## multi-agent-governance-audit
+
+- `pcae multi-agent-governance-audit`
+- `pcae multi-agent-governance-audit --json`

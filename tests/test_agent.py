@@ -30755,3 +30755,170 @@ def test_49e_human_output_shows_all_sections(capsys) -> None:
     assert "Sample record" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49F — Multi-Agent Governance Audit
+
+
+def test_49f_json_structure(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "audit_overview", "record_model", "summary_model", "domain_findings",
+        "sample_record", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49f_audit_overview_fields(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["audit_overview"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "domain_count", "blocker_count", "warning_count",
+        "audit_status", "execution_allowed", "human_review_required",
+    ):
+        assert field in s, f"missing audit_overview field: {field}"
+    assert s["phase"] == "49F"
+    assert s["execution_allowed"] is False
+    assert s["human_review_required"] is True
+    assert s["domain_count"] == 8
+
+
+def test_49f_execution_always_blocked(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["audit_overview"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["record_model"]["execution_allowed_always_false_in_49f"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49f"] is True
+    assert data["sample_record"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+
+
+def test_49f_human_review_always_required(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["audit_overview"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["sample_record"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+
+
+def test_49f_record_model(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "MultiAgentGovernanceAuditRecord"
+    assert rm["field_count"] == 9
+    assert rm["required_field_count"] == 9
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "audit_id", "request_id", "audit_domains", "findings",
+        "blockers", "warnings", "audit_status",
+        "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    for status in ("compliant", "compliant_with_warnings", "blocked", "insufficient_evidence"):
+        assert status in rm["supported_audit_statuses"], f"missing status: {status}"
+
+
+def test_49f_summary_model(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "MultiAgentGovernanceAuditSummary"
+    assert sm["field_count"] == 8
+    assert sm["required_field_count"] == 8
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "audit_id", "domain_count", "blocker_count",
+        "warning_count", "audit_status", "execution_allowed", "human_review_required",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49f_all_domains_present(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    findings = data["domain_findings"]
+    for domain in (
+        "multi_agent_pilot", "consensus", "arbitration", "evidence",
+        "decision_records", "runtime_trust",
+        "human_review_enforcement", "execution_blocking_enforcement",
+    ):
+        assert domain in findings, f"missing domain: {domain}"
+    assert len(findings) == 8
+
+
+def test_49f_domain_findings_structure(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for domain, finding in data["domain_findings"].items():
+        for key in ("domain", "phase_source", "input", "status", "finding", "blockers", "warnings"):
+            assert key in finding, f"domain {domain!r} missing key: {key}"
+        assert finding["status"] in ("compliant", "compliant_with_warnings", "blocked", "insufficient_evidence")
+
+
+def test_49f_input_sources(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "MultiAgentReadOnlyPilotResult", "ConsensusResult", "ArbitrationDecision",
+        "EvidenceBundle", "DecisionRecord", "RuntimeTrustRecord", "GovernanceAuditRecord",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49f_governance_boundaries(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49F"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("audit governance artifacts", "assess readiness", "report blockers", "report warnings"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49f_sample_record_fields(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    assert sr["execution_allowed"] is False
+    assert sr["human_review_required"] is True
+    assert len(sr["audit_domains"]) == 8
+    assert len(sr["findings"]) == 8
+    assert sr["audit_status"] in ("compliant", "compliant_with_warnings", "blocked", "insufficient_evidence")
+
+
+def test_49f_sample_summary_fields(capsys) -> None:
+    main(["multi-agent-governance-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["domain_count"] == 8
+    assert ss["audit_status"] in ("compliant", "compliant_with_warnings", "blocked", "insufficient_evidence")
+
+
+def test_49f_human_output_shows_all_sections(capsys) -> None:
+    main(["multi-agent-governance-audit"])
+    output = capsys.readouterr().out
+    assert "Multi-agent governance audit" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Domain findings" in output
+    assert "Sample record" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
