@@ -646,3 +646,8 @@
 
 - `pcae agent-lock-governance`
 - `pcae agent-lock-governance --json`
+
+## agent-lock-conflicts
+
+- `pcae agent-lock-conflicts`
+- `pcae agent-lock-conflicts --json`

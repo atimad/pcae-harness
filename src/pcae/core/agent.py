@@ -37718,3 +37718,441 @@ def build_agent_lock_governance() -> dict:
         "input_sources": list(_ALG_INPUT_SOURCES),
         "advisory": AGENT_LOCK_GOVERNANCE_ADVISORY,
     }
+
+
+# Phase 49P — Multi-Agent Lock Conflict Governance
+# ---------------------------------------------------------------------------
+
+AGENT_LOCK_CONFLICTS_ADVISORY = (
+    "Multi-agent lock conflict governance is informational; conflicts may be detected "
+    "and classified but no locks are modified automatically. "
+    "No state modifications are made, no runtimes are invoked, and no prompts "
+    "are executed. execution_allowed=False in Phase 49P."
+)
+
+_ALC_CONFLICT_DOMAINS: tuple[str, ...] = (
+    "same_task_multi_agent_lock",
+    "same_agent_multi_task_lock",
+    "stale_lock_conflict",
+    "handoff_overlap_conflict",
+    "runtime_lock_conflict",
+    "lock_owner_mismatch",
+    "recovery_path_required",
+)
+
+_ALC_CONFLICT_STATUSES: tuple[str, ...] = (
+    "no_conflict",
+    "conflict_with_warnings",
+    "conflicted",
+    "blocked",
+)
+
+_ALC_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_ALC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "conflict_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this lock conflict candidate.",
+    },
+    {
+        "name": "lock_ids",
+        "type": "list[str]",
+        "required": True,
+        "description": "Lock identifiers involved in this conflict.",
+    },
+    {
+        "name": "involved_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs involved in this conflict.",
+    },
+    {
+        "name": "involved_tasks",
+        "type": "list[str]",
+        "required": True,
+        "description": "Task IDs involved in this conflict.",
+    },
+    {
+        "name": "conflict_type",
+        "type": "str",
+        "required": True,
+        "description": "The conflict domain type (e.g., stale_lock_conflict).",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Severity: info, warning, or blocker.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49P.",
+    },
+)
+
+_ALC_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this conflict assessment.",
+    },
+    {
+        "name": "conflict_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of conflict candidates detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity conflict candidates.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity conflict candidates.",
+    },
+    {
+        "name": "conflict_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: no_conflict, conflict_with_warnings, conflicted, or blocked.",
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True if any conflict candidate recommends repair review.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49P.",
+    },
+)
+
+_ALC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this conflict summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "conflict_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of conflict candidates detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity conflicts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity conflicts.",
+    },
+    {
+        "name": "conflict_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: no_conflict, conflict_with_warnings, conflicted, or blocked.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49P.",
+    },
+)
+
+_ALC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect lock candidates",
+        "detect conflicts",
+        "classify severity",
+        "recommend recovery paths",
+    ],
+    "may_not": [
+        "modify locks",
+        "clear locks",
+        "rewrite session state",
+        "move tasks",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49P",
+}
+
+_ALC_INPUT_SOURCES: tuple[str, ...] = (
+    "agent lock governance",
+    "session continuity governance",
+    "task transition governance",
+    "governance drift review",
+    "active task state",
+)
+
+_ALC_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "same_task_multi_agent_lock",
+        "finding": (
+            "No concurrent multi-agent lock on the same task detected. "
+            "Only one agent (claude-local) holds an active lock on the current task. "
+            "Remote agent state cannot be verified without a live registry — "
+            "detection is advisory."
+        ),
+        "conflict_status": "no_conflict",
+        "severity": "info",
+        "repair_recommended": False,
+    },
+    {
+        "domain": "same_agent_multi_task_lock",
+        "finding": (
+            "claude-local holds a lock on exactly one active task. "
+            "No same-agent multi-task lock detected. "
+            "Historical lock record for codex-local (closed task) does not "
+            "constitute a concurrent multi-task lock."
+        ),
+        "conflict_status": "no_conflict",
+        "severity": "info",
+        "repair_recommended": False,
+    },
+    {
+        "domain": "stale_lock_conflict",
+        "finding": (
+            "Stale lock for codex-local on closed task "
+            "20260523-0731-implement-global-policy-configuration conflicts with "
+            "the expectation that closed tasks have no active lock record. "
+            "Repair advisory: clear stale lock via `pcae agent release --force`."
+        ),
+        "conflict_status": "conflict_with_warnings",
+        "severity": "warning",
+        "repair_recommended": True,
+    },
+    {
+        "domain": "handoff_overlap_conflict",
+        "finding": (
+            "No handoff overlap detected. No concurrent handoff event is in progress. "
+            "Last handoff record is absent — overlap detection cannot be fully verified "
+            "without a handoff event record."
+        ),
+        "conflict_status": "conflict_with_warnings",
+        "severity": "warning",
+        "repair_recommended": False,
+    },
+    {
+        "domain": "runtime_lock_conflict",
+        "finding": (
+            "No runtime lock conflict detected. No concurrent runtime execution is "
+            "authorized. execution_allowed=False enforced across all runtimes."
+        ),
+        "conflict_status": "no_conflict",
+        "severity": "info",
+        "repair_recommended": False,
+    },
+    {
+        "domain": "lock_owner_mismatch",
+        "finding": (
+            "Stale lock record for codex-local references an agent not present in "
+            "the current session. Lock owner mismatch detected for the historical "
+            "lock entry. Active lock for claude-local matches current session agent."
+        ),
+        "conflict_status": "conflict_with_warnings",
+        "severity": "warning",
+        "repair_recommended": True,
+    },
+    {
+        "domain": "recovery_path_required",
+        "finding": (
+            "Recovery path required for stale codex-local lock on closed task. "
+            "Recommended action: `pcae agent release --force --agent codex-local`. "
+            "Recovery is advisory; no automatic lock modification occurs."
+        ),
+        "conflict_status": "conflict_with_warnings",
+        "severity": "warning",
+        "repair_recommended": True,
+    },
+)
+
+_ALC_REQUIRED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "lock_ids": ["alc-002"],
+        "involved_agents": ["codex-local", "claude-local"],
+        "involved_tasks": [
+            "20260523-0731-implement-global-policy-configuration",
+            "20260605-1052-multi-agent-governance-audit",
+        ],
+        "conflict_type": "stale_lock_conflict",
+        "severity": "warning",
+    },
+    {
+        "lock_ids": ["alc-002"],
+        "involved_agents": ["codex-local"],
+        "involved_tasks": ["20260523-0731-implement-global-policy-configuration"],
+        "conflict_type": "lock_owner_mismatch",
+        "severity": "warning",
+    },
+    {
+        "lock_ids": ["alc-002"],
+        "involved_agents": ["codex-local"],
+        "involved_tasks": ["20260523-0731-implement-global-policy-configuration"],
+        "conflict_type": "recovery_path_required",
+        "severity": "warning",
+    },
+)
+
+
+def build_agent_lock_conflicts() -> dict:
+    """Detect multi-agent lock conflicts, ownership conflicts, and contention. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    assessment_id_ref = f"alca-{ts}"
+
+    candidate_fields = [dict(f) for f in _ALC_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _ALC_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _ALC_SUMMARY_FIELDS]
+
+    conflict_candidates: list[dict] = []
+    for i, c in enumerate(_ALC_REQUIRED_CANDIDATES):
+        conflict_candidates.append({
+            "conflict_id": f"alcc-{i + 1:03d}-{ts}",
+            "lock_ids": list(c["lock_ids"]),
+            "involved_agents": list(c["involved_agents"]),
+            "involved_tasks": list(c["involved_tasks"]),
+            "conflict_type": c["conflict_type"],
+            "severity": c["severity"],
+            "human_review_required": True,
+        })
+
+    domain_findings = [dict(d) for d in _ALC_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for c in conflict_candidates if c["severity"] == "blocker")
+    warning_count = sum(1 for c in conflict_candidates if c["severity"] == "warning")
+    conflict_count = len(conflict_candidates)
+    repair_recommended = any(d["repair_recommended"] for d in domain_findings)
+
+    if blocker_count > 0:
+        conflict_status = "blocked"
+    elif any(d["conflict_status"] == "conflicted" for d in domain_findings):
+        conflict_status = "conflicted"
+    elif warning_count > 0:
+        conflict_status = "conflict_with_warnings"
+    else:
+        conflict_status = "no_conflict"
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "conflict_status": conflict_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"alcsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "conflict_status": conflict_status,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "AgentLockConflictCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_conflict_statuses": list(_ALC_CONFLICT_STATUSES),
+        "supported_severity_values": list(_ALC_SEVERITY_VALUES),
+        "execution_allowed_always_false_in_49p": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "AgentLockConflictAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_conflict_statuses": list(_ALC_CONFLICT_STATUSES),
+        "execution_allowed_always_false_in_49p": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "AgentLockConflictSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_conflict_statuses": list(_ALC_CONFLICT_STATUSES),
+        "execution_allowed_always_false_in_49p": True,
+        "fields": summary_fields,
+    }
+
+    conflict_overview = {
+        "overview_id": f"49p-{ts}",
+        "generated_at": generated_at,
+        "phase": "49P",
+        "title": "Multi-Agent Lock Conflict Governance",
+        "summary": (
+            "Defines governance checks for multi-agent lock conflicts, cross-agent "
+            "ownership conflicts, and lock contention scenarios. "
+            "Seven conflict domains are assessed: same_task_multi_agent_lock, "
+            "same_agent_multi_task_lock, stale_lock_conflict, handoff_overlap_conflict, "
+            "runtime_lock_conflict, lock_owner_mismatch, and recovery_path_required. "
+            f"conflict_count={conflict_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"conflict_status={conflict_status}. "
+            "Conflict governance is advisory and read-only. No locks are modified. "
+            "execution_allowed=False."
+        ),
+        "conflict_domain_count": len(_ALC_CONFLICT_DOMAINS),
+        "conflict_count": conflict_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "conflict_status": conflict_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "conflict_overview": conflict_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "conflict_candidates": conflict_candidates,
+        "domain_findings": domain_findings,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ALC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ALC_INPUT_SOURCES),
+        "advisory": AGENT_LOCK_CONFLICTS_ADVISORY,
+    }

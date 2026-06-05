@@ -195,6 +195,8 @@ from pcae.core.agent import (
     GOVERNANCE_DRIFT_REVIEW_ADVISORY,
     build_agent_lock_governance,
     AGENT_LOCK_GOVERNANCE_ADVISORY,
+    build_agent_lock_conflicts,
+    AGENT_LOCK_CONFLICTS_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7722,6 +7724,76 @@ def run_agent_lock_governance(args: argparse.Namespace) -> int:
         print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_agent_lock_conflicts(args: argparse.Namespace) -> int:
+    data = build_agent_lock_conflicts()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["conflict_overview"]
+        print("Multi-agent lock conflict governance")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Conflict domains:      {ov['conflict_domain_count']}")
+        print(f"Conflicts detected:    {ov['conflict_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Conflict status:       {ov['conflict_status']}")
+        print(f"Repair recommended:    {'yes' if ov['repair_recommended'] else 'no'}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_conflict_statuses'])}")
+        print(f"  Supported severities:{', '.join(cm['supported_severity_values'])}")
+        print(f"  execution_allowed always False in 49P: {cm['execution_allowed_always_false_in_49p']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Conflict candidates:")
+        for c in data["conflict_candidates"]:
+            print(
+                f"  [{c['severity'].upper()}] {c['conflict_type']} "
+                f"agents={c['involved_agents']}"
+            )
+        print()
+        print("Domain findings:")
+        for d in data["domain_findings"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']} ({d['conflict_status']})")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  conflict_status:       {sa['conflict_status']}")
+        print(f"  conflict_count:        {sa['conflict_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  repair_recommended:    {sa['repair_recommended']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print()
+        ss2 = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  conflict_status:       {ss2['conflict_status']}")
+        print(f"  conflict_count:        {ss2['conflict_count']}")
+        print(f"  human_review_required: {ss2['human_review_required']}")
+        print()
+        gb2 = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb2['may'])}")
+        print(f"  May not:           {', '.join(gb2['may_not'])}")
+        print(f"  Execution allowed: {gb2['execution_allowed']}")
+        print(f"  Human review req'd:{gb2['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

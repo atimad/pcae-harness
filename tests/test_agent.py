@@ -32725,3 +32725,182 @@ def test_49o_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49P — Multi-Agent Lock Conflict Governance tests
+# ---------------------------------------------------------------------------
+
+def test_49p_json_structure(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "conflict_overview", "candidate_model", "assessment_model", "summary_model",
+        "conflict_candidates", "domain_findings", "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49p_conflict_overview_fields(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["conflict_overview"]
+    assert ov["phase"] == "49P"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["conflict_domain_count"] == 7
+    assert isinstance(ov["conflict_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["conflict_status"] in (
+        "no_conflict", "conflict_with_warnings", "conflicted", "blocked"
+    )
+
+
+def test_49p_execution_always_blocked(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["conflict_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49p"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_49p"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49p"] is True
+
+
+def test_49p_human_review_always_required(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["conflict_overview"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for c in data["conflict_candidates"]:
+        assert c["human_review_required"] is True
+
+
+def test_49p_candidate_model(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "AgentLockConflictCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 7
+    assert set(cm["supported_conflict_statuses"]) == {
+        "no_conflict", "conflict_with_warnings", "conflicted", "blocked"
+    }
+    assert set(cm["supported_severity_values"]) == {"info", "warning", "blocker"}
+
+
+def test_49p_assessment_model(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "AgentLockConflictAssessment"
+    assert am["field_count"] == 7
+
+
+def test_49p_summary_model(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "AgentLockConflictSummary"
+    assert sm["field_count"] == 7
+
+
+def test_49p_all_conflict_domains_covered(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_findings"]}
+    for expected in (
+        "same_task_multi_agent_lock", "same_agent_multi_task_lock",
+        "stale_lock_conflict", "handoff_overlap_conflict", "runtime_lock_conflict",
+        "lock_owner_mismatch", "recovery_path_required",
+    ):
+        assert expected in domains, f"missing conflict domain: {expected}"
+
+
+def test_49p_conflict_candidate_structure(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for c in data["conflict_candidates"]:
+        for field in (
+            "conflict_id", "lock_ids", "involved_agents", "involved_tasks",
+            "conflict_type", "severity", "human_review_required",
+        ):
+            assert field in c, f"missing field {field!r} in conflict candidate"
+        assert c["severity"] in ("info", "warning", "blocker")
+        assert isinstance(c["lock_ids"], list)
+        assert isinstance(c["involved_agents"], list)
+        assert isinstance(c["involved_tasks"], list)
+
+
+def test_49p_sample_assessment_fields(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    assert sa["execution_allowed"] is False
+    assert sa["conflict_status"] in (
+        "no_conflict", "conflict_with_warnings", "conflicted", "blocked"
+    )
+    assert isinstance(sa["conflict_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+    assert isinstance(sa["repair_recommended"], bool)
+
+
+def test_49p_sample_summary_fields(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["human_review_required"] is True
+    assert ss["conflict_status"] in (
+        "no_conflict", "conflict_with_warnings", "conflicted", "blocked"
+    )
+    assert isinstance(ss["conflict_count"], int)
+
+
+def test_49p_input_sources(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "agent lock governance", "session continuity governance",
+        "task transition governance", "governance drift review", "active task state",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49p_governance_boundaries(capsys) -> None:
+    main(["agent-lock-conflicts", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49P"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "inspect lock candidates", "detect conflicts",
+        "classify severity", "recommend recovery paths",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "modify locks", "clear locks", "rewrite session state", "move tasks",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49p_human_output_shows_all_sections(capsys) -> None:
+    main(["agent-lock-conflicts"])
+    output = capsys.readouterr().out
+    assert "Multi-agent lock conflict governance" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Conflict candidates" in output
+    assert "Domain findings" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

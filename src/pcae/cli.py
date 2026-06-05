@@ -110,6 +110,7 @@ from pcae.commands.agent import (
     run_governance_drift,
     run_governance_drift_review,
     run_agent_lock_governance,
+    run_agent_lock_conflicts,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3732,6 +3733,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     agent_lock_governance_parser.set_defaults(handler=run_agent_lock_governance)
+
+    agent_lock_conflicts_parser = subparsers.add_parser(
+        "agent-lock-conflicts",
+        help="Detect multi-agent lock conflicts, ownership conflicts, and contention (Phase 49P).",
+    )
+    agent_lock_conflicts_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    agent_lock_conflicts_parser.set_defaults(handler=run_agent_lock_conflicts)
 
     return parser
 

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49O: Agent Lock Governance.
+Phase 49P: Multi-Agent Lock Conflict Governance.
 
 ## Governance Coherence Note
 
@@ -3440,9 +3440,21 @@ repair_recommended=True (advisory); execution_allowed=False;
 human_review_required=True; `docs/COMMANDS.md` regenerated; 15 new tests;
 3642 total tests passing
 
+`pcae agent-lock-conflicts` and `--json`; defines governance checks for
+multi-agent lock conflicts, cross-agent ownership conflicts, and lock
+contention scenarios; three models — AgentLockConflictCandidate (7 fields),
+AgentLockConflictAssessment (7 fields), AgentLockConflictSummary (7 fields);
+four conflict statuses; three severity values; seven conflict domains:
+same_task_multi_agent_lock, same_agent_multi_task_lock, stale_lock_conflict,
+handoff_overlap_conflict, runtime_lock_conflict, lock_owner_mismatch,
+recovery_path_required; conflict_status=conflict_with_warnings (0 blockers,
+3 warnings); repair_recommended=True (advisory); execution_allowed=False;
+human_review_required=True; `docs/COMMANDS.md` regenerated; 14 new tests;
+3656 total tests passing
+
 ## Current Phase
 
-Phase 49O: Agent Lock Governance.
+Phase 49P: Multi-Agent Lock Conflict Governance.
 
 ## Next
 
