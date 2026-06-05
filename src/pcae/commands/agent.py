@@ -189,6 +189,8 @@ from pcae.core.agent import (
     GOVERNANCE_INVARIANTS_ADVISORY,
     build_runtime_safety_invariants,
     RUNTIME_SAFETY_INVARIANTS_ADVISORY,
+    build_governance_drift,
+    GOVERNANCE_DRIFT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7510,6 +7512,71 @@ def run_runtime_safety_invariants(args: argparse.Namespace) -> int:
         print(f"  May not:           {', '.join(gb['may_not'])}")
         print(f"  Execution allowed: {gb['execution_allowed']}")
         print(f"  Human review req'd:{gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_drift(args: argparse.Namespace) -> int:
+    data = build_governance_drift()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["drift_overview"]
+        print("Governance drift detection")
+        print(f"Assessment: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Drift domains:         {ov['drift_domain_count']}")
+        print(f"Drift signals:         {ov['drift_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Assessment status:     {ov['assessment_status']}")
+        print(f"Repair recommended:    {'yes' if ov['repair_recommended'] else 'no'}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        sm = data["signal_model"]
+        print(f"Signal model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  Supported severities: {', '.join(sm['supported_severity_values'])}")
+        print(f"  execution_allowed always False in 49M: {sm['execution_allowed_always_false_in_49m']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print()
+        summ = data["summary_model"]
+        print(f"Summary model: {summ['model_name']} ({summ['field_count']} fields)")
+        print()
+        print("Drift signals:")
+        for s in data["drift_signals"]:
+            print(
+                f"  [{s['severity'].upper()}] {s['drift_type']} "
+                f"({s['drift_domain']})"
+            )
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  assessment_status:     {sa['assessment_status']}")
+        print(f"  drift_count:           {sa['drift_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  repair_recommended:    {sa['repair_recommended']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print()
+        ss2 = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  drift_count:           {ss2['drift_count']}")
+        print(f"  assessment_status:     {ss2['assessment_status']}")
+        print(f"  human_review_required: {ss2['human_review_required']}")
+        print()
+        gb2 = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb2['may'])}")
+        print(f"  May not:           {', '.join(gb2['may_not'])}")
+        print(f"  Execution allowed: {gb2['execution_allowed']}")
+        print(f"  Human review req'd:{gb2['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

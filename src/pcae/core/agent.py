@@ -36417,3 +36417,447 @@ def build_runtime_safety_invariants() -> dict:
         "input_sources": list(_RSI_INPUT_SOURCES),
         "advisory": RUNTIME_SAFETY_INVARIANTS_ADVISORY,
     }
+
+
+# Phase 49M — Governance Drift Detection
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_DRIFT_ADVISORY = (
+    "Governance drift detection is informational; drift signals may be detected "
+    "and classified but no automatic repair occurs. No state modifications are made, "
+    "no prompts are executed, and no runtimes are invoked. "
+    "execution_allowed=False in Phase 49M."
+)
+
+_GD_DRIFT_DOMAINS: tuple[str, ...] = (
+    "task_lifecycle_drift",
+    "session_continuity_drift",
+    "roadmap_status_drift",
+    "documentation_drift",
+    "governance_artifact_drift",
+    "runtime_trust_drift",
+    "invariant_drift",
+    "evidence_drift",
+)
+
+_GD_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_GD_ASSESSMENT_STATUSES: tuple[str, ...] = (
+    "no_drift",
+    "drift_detected",
+    "drift_with_blockers",
+    "insufficient_evidence",
+)
+
+_GD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "drift_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift signal.",
+    },
+    {
+        "name": "drift_domain",
+        "type": "str",
+        "required": True,
+        "description": "The governance domain where drift was detected.",
+    },
+    {
+        "name": "drift_type",
+        "type": "str",
+        "required": True,
+        "description": "Machine-readable name of the specific drift pattern detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_reference",
+        "type": "str",
+        "required": True,
+        "description": "The state or reference detected in the governance artifact.",
+    },
+    {
+        "name": "expected_reference",
+        "type": "str",
+        "required": True,
+        "description": "The expected state or reference per governance policy.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49M.",
+    },
+)
+
+_GD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift assessment.",
+    },
+    {
+        "name": "drift_signals",
+        "type": "list[GovernanceDriftSignal]",
+        "required": True,
+        "description": "Ordered list of detected drift signals.",
+    },
+    {
+        "name": "drift_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of drift signals detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity drift signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity drift signals.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: no_drift, drift_detected, drift_with_blockers, or insufficient_evidence.",
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True if any drift signals recommend repair review.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49M.",
+    },
+)
+
+_GD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "drift_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of drift signals detected.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: no_drift, drift_detected, drift_with_blockers, or insufficient_evidence.",
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True if repair review is recommended.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49M.",
+    },
+)
+
+_GD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "detect drift",
+        "classify drift severity",
+        "recommend repair review",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "repair state",
+        "rewrite session files",
+        "move tasks",
+        "edit roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49M",
+}
+
+_GD_INPUT_SOURCES: tuple[str, ...] = (
+    "governance state audit",
+    "governance state repair framework",
+    "task transition governance",
+    "session continuity governance",
+    "governance invariant assessment",
+    "runtime safety invariant assessment",
+    "active task state",
+    "completed task state",
+    "session state",
+    "roadmap/project status",
+    "documentation state",
+)
+
+_GD_REQUIRED_SIGNALS: tuple[dict, ...] = (
+    {
+        "drift_domain": "task_lifecycle_drift",
+        "drift_type": "stale_active_task_detected",
+        "severity": "blocker",
+        "detected_reference": "task status=active with no recent commit activity",
+        "expected_reference": "active tasks must have evidence of ongoing activity",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "task_lifecycle_drift",
+        "drift_type": "completed_task_in_active_directory",
+        "severity": "warning",
+        "detected_reference": "task files present in tasks/active/ after phase completion",
+        "expected_reference": "completed tasks must be moved to tasks/done/ on phase close",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "session_continuity_drift",
+        "drift_type": "session_lock_agent_mismatch",
+        "severity": "warning",
+        "detected_reference": "session lock held by different agent than last recorded handoff",
+        "expected_reference": "session lock agent must match the agent recorded in last handoff event",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "session_continuity_drift",
+        "drift_type": "bootstrap_session_not_verified",
+        "severity": "warning",
+        "detected_reference": "session bootstrap completed without governance check verification",
+        "expected_reference": "session bootstrap must verify pcae check before reporting ready",
+        "repair_recommended": False,
+    },
+    {
+        "drift_domain": "roadmap_status_drift",
+        "drift_type": "project_status_phase_mismatch",
+        "severity": "warning",
+        "detected_reference": "PROJECT_STATUS.md references a stale or superseded phase",
+        "expected_reference": "PROJECT_STATUS.md must reflect the current active phase",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "roadmap_status_drift",
+        "drift_type": "changelog_missing_current_phase",
+        "severity": "info",
+        "detected_reference": "CHANGELOG.md does not include the most recently completed phase",
+        "expected_reference": "CHANGELOG.md must be updated on each phase completion",
+        "repair_recommended": False,
+    },
+    {
+        "drift_domain": "documentation_drift",
+        "drift_type": "commands_doc_out_of_sync",
+        "severity": "warning",
+        "detected_reference": "docs/COMMANDS.md does not list all registered CLI subcommands",
+        "expected_reference": "docs/COMMANDS.md must be regenerated after each phase adds commands",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "governance_artifact_drift",
+        "drift_type": "stale_decisions_reference",
+        "severity": "info",
+        "detected_reference": "tasks/DECISIONS.md references a decision superseded by later ADR",
+        "expected_reference": "decisions must reference the most recent ADR that supersedes them",
+        "repair_recommended": False,
+    },
+    {
+        "drift_domain": "runtime_trust_drift",
+        "drift_type": "trust_record_references_unknown_runtime",
+        "severity": "blocker",
+        "detected_reference": "runtime trust record references a runtime not in the agent registry",
+        "expected_reference": "all runtime trust records must reference registered agent registry entries",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "invariant_drift",
+        "drift_type": "invariant_assessment_references_stale_phase",
+        "severity": "warning",
+        "detected_reference": "governance invariant assessment references a superseded phase ID",
+        "expected_reference": "invariant assessments must reference the active governance phase",
+        "repair_recommended": False,
+    },
+    {
+        "drift_domain": "evidence_drift",
+        "drift_type": "evidence_references_unapproved_roadmap_phase",
+        "severity": "warning",
+        "detected_reference": "evidence framework references a roadmap phase not yet approved",
+        "expected_reference": "evidence must only reference approved roadmap phases",
+        "repair_recommended": True,
+    },
+    {
+        "drift_domain": "evidence_drift",
+        "drift_type": "evidence_missing_for_completed_task",
+        "severity": "info",
+        "detected_reference": "completed task has no associated provenance evidence record",
+        "expected_reference": "all completed tasks must have at least one provenance attribution event",
+        "repair_recommended": False,
+    },
+)
+
+
+def build_governance_drift() -> dict:
+    """Detect governance drift across tasks, sessions, roadmap, docs, and artifacts. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    assessment_id_ref = f"gda-{ts}"
+
+    signal_fields = [dict(f) for f in _GD_SIGNAL_FIELDS]
+    assessment_fields = [dict(f) for f in _GD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _GD_SUMMARY_FIELDS]
+
+    drift_signals: list[dict] = []
+    for i, sig in enumerate(_GD_REQUIRED_SIGNALS):
+        drift_signals.append({
+            "drift_id": f"gds-{i + 1:03d}-{ts}",
+            "drift_domain": sig["drift_domain"],
+            "drift_type": sig["drift_type"],
+            "severity": sig["severity"],
+            "detected_reference": sig["detected_reference"],
+            "expected_reference": sig["expected_reference"],
+            "human_review_required": True,
+        })
+
+    blocker_count = sum(1 for s in drift_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in drift_signals if s["severity"] == "warning")
+    drift_count = len(drift_signals)
+    repair_recommended = any(sig["repair_recommended"] for sig in _GD_REQUIRED_SIGNALS)
+
+    if blocker_count > 0:
+        assessment_status = "drift_with_blockers"
+    elif drift_count > 0:
+        assessment_status = "drift_detected"
+    else:
+        assessment_status = "no_drift"
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "drift_signals": [s["drift_id"] for s in drift_signals],
+        "drift_count": drift_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"gdsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "drift_count": drift_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+        "repair_recommended": repair_recommended,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "GovernanceDriftSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for f in signal_fields if f["required"]),
+        "supported_severity_values": list(_GD_SEVERITY_VALUES),
+        "execution_allowed_always_false_in_49m": True,
+        "fields": signal_fields,
+    }
+
+    assessment_model = {
+        "model_name": "GovernanceDriftAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_assessment_statuses": list(_GD_ASSESSMENT_STATUSES),
+        "execution_allowed_always_false_in_49m": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceDriftSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_assessment_statuses": list(_GD_ASSESSMENT_STATUSES),
+        "execution_allowed_always_false_in_49m": True,
+        "fields": summary_fields,
+    }
+
+    drift_overview = {
+        "overview_id": f"49m-{ts}",
+        "generated_at": generated_at,
+        "phase": "49M",
+        "title": "Governance Drift Detection",
+        "summary": (
+            "Detects governance drift across tasks, sessions, roadmap state, "
+            "runtime state, documentation, and governance artifacts. "
+            "Eight drift domains are assessed: task_lifecycle_drift, "
+            "session_continuity_drift, roadmap_status_drift, documentation_drift, "
+            "governance_artifact_drift, runtime_trust_drift, invariant_drift, "
+            "and evidence_drift. "
+            "Drift detection is advisory and read-only. No state is modified. "
+            f"drift_count={drift_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"assessment_status={assessment_status}. "
+            "repair_recommended=True where applicable. execution_allowed=False."
+        ),
+        "drift_domain_count": len(_GD_DRIFT_DOMAINS),
+        "drift_count": drift_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "assessment_status": assessment_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "drift_overview": drift_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "drift_signals": drift_signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GD_INPUT_SOURCES),
+        "advisory": GOVERNANCE_DRIFT_ADVISORY,
+    }

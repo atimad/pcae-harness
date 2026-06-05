@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49L: Runtime Safety Invariant Framework.
+Phase 49M: Governance Drift Detection.
 
 ## Governance Coherence Note
 
@@ -3390,9 +3390,28 @@ compliant_with_warnings; execution_allowed=False; human_review_required=True;
 assessment_status=compliant_with_warnings; no runtimes invoked;
 `docs/COMMANDS.md` regenerated; 16 new tests; 3599 total tests passing
 
+`pcae governance-drift` and `--json`; detects governance drift across tasks,
+sessions, roadmap state, runtime state, documentation, and governance
+artifacts; three models — GovernanceDriftSignal (7 fields: drift_id,
+drift_domain, drift_type, severity, detected_reference, expected_reference,
+human_review_required), GovernanceDriftAssessment (8 fields: assessment_id,
+drift_signals, drift_count, blocker_count, warning_count, assessment_status,
+repair_recommended, execution_allowed), GovernanceDriftSummary (8 fields:
+summary_id, assessment_id, drift_count, blocker_count, warning_count,
+assessment_status, repair_recommended, human_review_required); three severity
+values: info, warning, blocker; four assessment statuses: no_drift,
+drift_detected, drift_with_blockers, insufficient_evidence; eight drift
+domains: task_lifecycle_drift, session_continuity_drift, roadmap_status_drift,
+documentation_drift, governance_artifact_drift, runtime_trust_drift,
+invariant_drift, evidence_drift; twelve drift signals across all eight domains;
+execution_allowed=False; human_review_required=True;
+assessment_status=drift_with_blockers (2 blockers, 7 warnings); drift
+detection is advisory and read-only; no state modifications occur;
+`docs/COMMANDS.md` regenerated; 13 new tests; 3612 total tests passing
+
 ## Current Phase
 
-Phase 49L: Runtime Safety Invariant Framework.
+Phase 49M: Governance Drift Detection.
 
 ## Next
 

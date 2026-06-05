@@ -32190,3 +32190,166 @@ def test_49l_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49M — Governance Drift Detection tests
+# ---------------------------------------------------------------------------
+
+def test_49m_json_structure(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "drift_overview", "signal_model", "assessment_model", "summary_model",
+        "drift_signals", "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49m_drift_overview_fields(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["drift_overview"]
+    assert ov["phase"] == "49M"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["drift_domain_count"] == 8
+    assert isinstance(ov["drift_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["assessment_status"] in (
+        "no_drift", "drift_detected", "drift_with_blockers", "insufficient_evidence"
+    )
+
+
+def test_49m_execution_always_blocked(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["drift_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_49m_human_review_always_required(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["drift_overview"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for sig in data["drift_signals"]:
+        assert sig["human_review_required"] is True
+
+
+def test_49m_signal_model(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["signal_model"]
+    assert sm["model_name"] == "GovernanceDriftSignal"
+    assert sm["execution_allowed_always_false_in_49m"] is True
+    assert set(sm["supported_severity_values"]) == {"info", "warning", "blocker"}
+    assert sm["field_count"] == sm["required_field_count"]
+
+
+def test_49m_assessment_model(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "GovernanceDriftAssessment"
+    assert am["execution_allowed_always_false_in_49m"] is True
+    assert set(am["supported_assessment_statuses"]) == {
+        "no_drift", "drift_detected", "drift_with_blockers", "insufficient_evidence"
+    }
+
+
+def test_49m_summary_model(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    summ = data["summary_model"]
+    assert summ["model_name"] == "GovernanceDriftSummary"
+    assert summ["execution_allowed_always_false_in_49m"] is True
+
+
+def test_49m_all_drift_domains_covered(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {s["drift_domain"] for s in data["drift_signals"]}
+    for expected in (
+        "task_lifecycle_drift", "session_continuity_drift", "roadmap_status_drift",
+        "documentation_drift", "governance_artifact_drift", "runtime_trust_drift",
+        "invariant_drift", "evidence_drift",
+    ):
+        assert expected in domains, f"missing drift domain: {expected}"
+
+
+def test_49m_drift_signal_structure(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for sig in data["drift_signals"]:
+        for field in (
+            "drift_id", "drift_domain", "drift_type", "severity",
+            "detected_reference", "expected_reference", "human_review_required",
+        ):
+            assert field in sig, f"missing field {field!r} in drift signal"
+        assert sig["severity"] in ("info", "warning", "blocker")
+
+
+def test_49m_sample_assessment_fields(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    assert sa["execution_allowed"] is False
+    assert sa["assessment_status"] in (
+        "no_drift", "drift_detected", "drift_with_blockers", "insufficient_evidence"
+    )
+    assert isinstance(sa["drift_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+    assert isinstance(sa["drift_signals"], list)
+    assert isinstance(sa["repair_recommended"], bool)
+
+
+def test_49m_sample_summary_fields(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["human_review_required"] is True
+    assert ss["assessment_status"] in (
+        "no_drift", "drift_detected", "drift_with_blockers", "insufficient_evidence"
+    )
+    assert isinstance(ss["drift_count"], int)
+    assert isinstance(ss["blocker_count"], int)
+    assert isinstance(ss["warning_count"], int)
+    assert isinstance(ss["repair_recommended"], bool)
+
+
+def test_49m_governance_boundaries(capsys) -> None:
+    main(["governance-drift", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49M"
+    may = " ".join(gb["may"]).lower()
+    for allowed in ("detect drift", "classify drift severity", "recommend repair review"):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "repair state", "rewrite session files", "move tasks",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49m_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-drift"])
+    output = capsys.readouterr().out
+    assert "Governance drift detection" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Drift signals" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

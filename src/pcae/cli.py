@@ -107,6 +107,7 @@ from pcae.commands.agent import (
     run_session_continuity_governance,
     run_governance_invariants,
     run_runtime_safety_invariants,
+    run_governance_drift,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3696,6 +3697,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     runtime_safety_invariants_parser.set_defaults(handler=run_runtime_safety_invariants)
+
+    governance_drift_parser = subparsers.add_parser(
+        "governance-drift",
+        help="Detect governance drift across tasks, sessions, roadmap, docs, and artifacts (Phase 49M).",
+    )
+    governance_drift_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    governance_drift_parser.set_defaults(handler=run_governance_drift)
 
     return parser
 

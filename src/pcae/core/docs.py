@@ -652,6 +652,11 @@ def render_commands_reference() -> str:
 
 - `pcae runtime-safety-invariants`
 - `pcae runtime-safety-invariants --json`
+
+## governance-drift
+
+- `pcae governance-drift`
+- `pcae governance-drift --json`
 """
 
 
