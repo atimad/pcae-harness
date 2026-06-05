@@ -38156,3 +38156,455 @@ def build_agent_lock_conflicts() -> dict:
         "input_sources": list(_ALC_INPUT_SOURCES),
         "advisory": AGENT_LOCK_CONFLICTS_ADVISORY,
     }
+
+
+# Phase 49Q — Governance Recovery Planning
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_RECOVERY_PLAN_ADVISORY = (
+    "Governance recovery planning is informational; recovery candidates may be defined "
+    "and recommended actions recorded, but no automatic repair occurs. "
+    "No state modifications are made, no locks are cleared, no runtimes are invoked, "
+    "and no prompts are executed. recovery_allowed=False in Phase 49Q."
+)
+
+_GRP_RECOVERY_DOMAINS: tuple[str, ...] = (
+    "stale_task_recovery",
+    "stale_session_recovery",
+    "stale_lock_recovery",
+    "lock_conflict_recovery",
+    "governance_drift_recovery",
+    "invariant_violation_recovery",
+    "runtime_trust_regression_recovery",
+    "documentation_drift_recovery",
+)
+
+_GRP_PLAN_STATUSES: tuple[str, ...] = (
+    "advisory",
+    "pending_human_review",
+    "blocked",
+    "not_required",
+)
+
+_GRP_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_GRP_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this recovery candidate.",
+    },
+    {
+        "name": "recovery_domain",
+        "type": "str",
+        "required": True,
+        "description": "The recovery domain this candidate addresses.",
+    },
+    {
+        "name": "source_issue",
+        "type": "str",
+        "required": True,
+        "description": "Description of the governance issue requiring recovery.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Severity: info, warning, or blocker.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "Advisory recovery action recommended for the source issue.",
+    },
+    {
+        "name": "requires_human_review",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49Q.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49Q.",
+    },
+)
+
+_GRP_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this recovery plan.",
+    },
+    {
+        "name": "recovery_candidates",
+        "type": "list[GovernanceRecoveryCandidate]",
+        "required": True,
+        "description": "Ordered list of recovery candidates in this plan.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity recovery candidates.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity recovery candidates.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: advisory, pending_human_review, blocked, or not_required.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49Q.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49Q.",
+    },
+)
+
+_GRP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this recovery summary.",
+    },
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The recovery plan this summary is associated with.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity candidates.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity candidates.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: advisory, pending_human_review, blocked, or not_required.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49Q.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49Q.",
+    },
+)
+
+_GRP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define recovery candidates",
+        "classify recovery severity",
+        "recommend recovery actions",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "repair state",
+        "clear locks",
+        "rewrite session files",
+        "move tasks",
+        "edit roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49Q",
+}
+
+_GRP_INPUT_SOURCES: tuple[str, ...] = (
+    "GovernanceStateAuditRecord",
+    "GovernanceRepairPlan",
+    "GovernanceDriftAssessment",
+    "GovernanceDriftReviewRecord",
+    "AgentLockAssessment",
+    "AgentLockConflictAssessment",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_GRP_REQUIRED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "recovery_domain": "stale_task_recovery",
+        "source_issue": (
+            "Active task 20260605-1052-multi-agent-governance-audit has been running "
+            "across multiple phases without explicit closure. Governance policy requires "
+            "tasks to be closed on phase completion."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Close active task via `pcae task complete` once phase work is committed, "
+            "then create a new task for the next phase via `pcae task create`."
+        ),
+    },
+    {
+        "recovery_domain": "stale_session_recovery",
+        "source_issue": (
+            "Session continuity governance (Phase 49J) reported valid_with_warnings: "
+            "stale session reference detection and session refresh requirement detection "
+            "domains have unresolved warnings."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Run `pcae session bootstrap` to verify session freshness before the next "
+            "phase begins. Confirm agent lock and active task alignment."
+        ),
+    },
+    {
+        "recovery_domain": "stale_lock_recovery",
+        "source_issue": (
+            "Agent lock governance (Phase 49O) detected a stale lock held by codex-local "
+            "on closed task 20260523-0731-implement-global-policy-configuration. "
+            "Stale lock was not cleared on task completion."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Run `pcae agent release --force --agent codex-local` to clear the stale lock. "
+            "Verify with `pcae health` that no stale locks remain after release."
+        ),
+    },
+    {
+        "recovery_domain": "lock_conflict_recovery",
+        "source_issue": (
+            "Multi-agent lock conflict governance (Phase 49P) detected conflict_with_warnings: "
+            "stale_lock_conflict, lock_owner_mismatch, and recovery_path_required signals "
+            "for codex-local's historical lock record."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Resolve stale_lock_recovery first. Once codex-local lock is cleared, "
+            "re-run `pcae agent-lock-conflicts` to confirm no conflicts remain."
+        ),
+    },
+    {
+        "recovery_domain": "governance_drift_recovery",
+        "source_issue": (
+            "Governance drift detection (Phase 49M) reported drift_with_blockers: "
+            "stale_active_task_detected (blocker) and trust_record_references_unknown_runtime "
+            "(blocker) alongside seven warning-severity signals."
+        ),
+        "severity": "blocker",
+        "recommended_action": (
+            "Address blocker signals via governance drift review (Phase 49N) before "
+            "proceeding with controlled write authorization. Human review of each "
+            "blocker signal is required."
+        ),
+    },
+    {
+        "recovery_domain": "invariant_violation_recovery",
+        "source_issue": (
+            "Governance invariant enforcement (Phase 49K) reported compliant_with_warnings: "
+            "session_continuity_verified_before_handoff invariant has unresolved warnings."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Verify session continuity before the next handoff. Run "
+            "`pcae session-continuity-governance` to assess and resolve warnings."
+        ),
+    },
+    {
+        "recovery_domain": "runtime_trust_regression_recovery",
+        "source_issue": (
+            "Runtime safety invariant framework (Phase 49L) assessed three runtimes: "
+            "codex-local and claude-local are partially_trusted; kimi-local is untrusted. "
+            "Sandbox, timeout, and output capture verification are unconfirmed."
+        ),
+        "severity": "warning",
+        "recommended_action": (
+            "Confirm sandbox, timeout, and output capture contracts for codex-local and "
+            "claude-local before any write invocation is authorized. "
+            "kimi-local must remain blocked until trust is verified."
+        ),
+    },
+    {
+        "recovery_domain": "documentation_drift_recovery",
+        "source_issue": (
+            "Governance drift detection (Phase 49M) flagged commands_doc_out_of_sync as "
+            "a warning: docs/COMMANDS.md may not list all registered CLI subcommands."
+        ),
+        "severity": "info",
+        "recommended_action": (
+            "Run `pcae docs commands --force` to regenerate docs/COMMANDS.md after each "
+            "phase that adds new CLI commands."
+        ),
+    },
+)
+
+
+def build_governance_recovery_plan() -> dict:
+    """Define recovery plans for governance issues across all detected domains. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    recovery_plan_id_ref = f"grp-{ts}"
+
+    candidate_fields = [dict(f) for f in _GRP_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _GRP_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _GRP_SUMMARY_FIELDS]
+
+    recovery_candidates: list[dict] = []
+    for i, c in enumerate(_GRP_REQUIRED_CANDIDATES):
+        recovery_candidates.append({
+            "recovery_id": f"grpc-{i + 1:03d}-{ts}",
+            "recovery_domain": c["recovery_domain"],
+            "source_issue": c["source_issue"],
+            "severity": c["severity"],
+            "recommended_action": c["recommended_action"],
+            "requires_human_review": True,
+            "recovery_allowed": False,
+        })
+
+    blocker_count = sum(1 for c in recovery_candidates if c["severity"] == "blocker")
+    warning_count = sum(1 for c in recovery_candidates if c["severity"] == "warning")
+    candidate_count = len(recovery_candidates)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "advisory"
+    elif candidate_count > 0:
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    sample_plan = {
+        "recovery_plan_id": recovery_plan_id_ref,
+        "recovery_candidates": [c["recovery_id"] for c in recovery_candidates],
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"grps-{ts}",
+        "recovery_plan_id": recovery_plan_id_ref,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "GovernanceRecoveryCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_severity_values": list(_GRP_SEVERITY_VALUES),
+        "recovery_allowed_always_false_in_49q": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "GovernanceRecoveryPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_plan_statuses": list(_GRP_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_49q": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceRecoverySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_GRP_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_49q": True,
+        "fields": summary_fields,
+    }
+
+    recovery_overview = {
+        "overview_id": f"49q-{ts}",
+        "generated_at": generated_at,
+        "phase": "49Q",
+        "title": "Governance Recovery Planning",
+        "summary": (
+            "Defines recovery plans for governance issues detected across task lifecycle, "
+            "session continuity, locks, drift, invariants, and runtime trust. "
+            "Eight recovery domains are addressed: stale_task_recovery, "
+            "stale_session_recovery, stale_lock_recovery, lock_conflict_recovery, "
+            "governance_drift_recovery, invariant_violation_recovery, "
+            "runtime_trust_regression_recovery, and documentation_drift_recovery. "
+            f"candidate_count={candidate_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Recovery planning is advisory and read-only. No state is modified. "
+            "recovery_allowed=False."
+        ),
+        "recovery_domain_count": len(_GRP_RECOVERY_DOMAINS),
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "recovery_overview": recovery_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "recovery_candidates": recovery_candidates,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GRP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GRP_INPUT_SOURCES),
+        "advisory": GOVERNANCE_RECOVERY_PLAN_ADVISORY,
+    }

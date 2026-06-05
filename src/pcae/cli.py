@@ -111,6 +111,7 @@ from pcae.commands.agent import (
     run_governance_drift_review,
     run_agent_lock_governance,
     run_agent_lock_conflicts,
+    run_governance_recovery_plan,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3744,6 +3745,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     agent_lock_conflicts_parser.set_defaults(handler=run_agent_lock_conflicts)
+
+    governance_recovery_plan_parser = subparsers.add_parser(
+        "governance-recovery-plan",
+        help="Define recovery plans for governance issues across all detected domains (Phase 49Q).",
+    )
+    governance_recovery_plan_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    governance_recovery_plan_parser.set_defaults(handler=run_governance_recovery_plan)
 
     return parser
 

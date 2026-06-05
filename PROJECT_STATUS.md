@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49P: Multi-Agent Lock Conflict Governance.
+Phase 49Q: Governance Recovery Planning.
 
 ## Governance Coherence Note
 
@@ -3452,9 +3452,19 @@ recovery_path_required; conflict_status=conflict_with_warnings (0 blockers,
 human_review_required=True; `docs/COMMANDS.md` regenerated; 14 new tests;
 3656 total tests passing
 
+`pcae governance-recovery-plan` and `--json`; defines recovery plans for
+governance issues detected across task lifecycle, session continuity, locks,
+drift, invariants, and runtime trust; three models —
+GovernanceRecoveryCandidate (7 fields), GovernanceRecoveryPlan (8 fields),
+GovernanceRecoverySummary (8 fields); four plan statuses; eight recovery
+domains with one candidate per domain; 1 blocker (governance_drift_recovery),
+6 warnings, 1 info; plan_status=pending_human_review; recovery_allowed=False;
+execution_allowed=False; human_review_required=True; `docs/COMMANDS.md`
+regenerated; 14 new tests; 3670 total tests passing
+
 ## Current Phase
 
-Phase 49P: Multi-Agent Lock Conflict Governance.
+Phase 49Q: Governance Recovery Planning.
 
 ## Next
 

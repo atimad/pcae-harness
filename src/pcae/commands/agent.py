@@ -197,6 +197,8 @@ from pcae.core.agent import (
     AGENT_LOCK_GOVERNANCE_ADVISORY,
     build_agent_lock_conflicts,
     AGENT_LOCK_CONFLICTS_ADVISORY,
+    build_governance_recovery_plan,
+    GOVERNANCE_RECOVERY_PLAN_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7794,6 +7796,73 @@ def run_agent_lock_conflicts(args: argparse.Namespace) -> int:
         print(f"  May not:           {', '.join(gb2['may_not'])}")
         print(f"  Execution allowed: {gb2['execution_allowed']}")
         print(f"  Human review req'd:{gb2['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_recovery_plan(args: argparse.Namespace) -> int:
+    data = build_governance_recovery_plan()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["recovery_overview"]
+        print("Governance recovery planning")
+        print(f"Plan: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Recovery domains:      {ov['recovery_domain_count']}")
+        print(f"Recovery candidates:   {ov['candidate_count']}")
+        print(f"Blockers:              {ov['blocker_count']}")
+        print(f"Warnings:              {ov['warning_count']}")
+        print(f"Plan status:           {ov['plan_status']}")
+        print(f"Recovery allowed:      {'yes' if ov['recovery_allowed'] else 'no'}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported severities: {', '.join(cm['supported_severity_values'])}")
+        print(f"  recovery_allowed always False in 49Q: {cm['recovery_allowed_always_false_in_49q']}")
+        print()
+        pm = data["plan_model"]
+        print(f"Plan model: {pm['model_name']} ({pm['field_count']} fields)")
+        print(f"  Supported plan statuses: {', '.join(pm['supported_plan_statuses'])}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Recovery candidates:")
+        for c in data["recovery_candidates"]:
+            print(f"  [{c['severity'].upper()}] {c['recovery_domain']}")
+            print(f"    Issue:  {c['source_issue'][:80]}...")
+            print(f"    Action: {c['recommended_action'][:80]}...")
+        print()
+        sp = data["sample_plan"]
+        print("Sample plan:")
+        print(f"  plan_status:           {sp['plan_status']}")
+        print(f"  candidate_count:       {sp['candidate_count']}")
+        print(f"  blocker_count:         {sp['blocker_count']}")
+        print(f"  warning_count:         {sp['warning_count']}")
+        print(f"  recovery_allowed:      {sp['recovery_allowed']}")
+        print(f"  human_review_required: {sp['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  plan_status:           {ss['plan_status']}")
+        print(f"  candidate_count:       {ss['candidate_count']}")
+        print(f"  recovery_allowed:      {ss['recovery_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['may'])}")
+        print(f"  May not:           {', '.join(gb['may_not'])}")
+        print(f"  Recovery allowed:  {gb['recovery_allowed']}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review req'd:{gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

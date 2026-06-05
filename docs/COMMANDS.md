@@ -651,3 +651,8 @@
 
 - `pcae agent-lock-conflicts`
 - `pcae agent-lock-conflicts --json`
+
+## governance-recovery-plan
+
+- `pcae governance-recovery-plan`
+- `pcae governance-recovery-plan --json`

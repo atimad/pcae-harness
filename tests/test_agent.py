@@ -32904,3 +32904,196 @@ def test_49p_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49Q — Governance Recovery Planning tests
+# ---------------------------------------------------------------------------
+
+def test_49q_json_structure(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "recovery_overview", "candidate_model", "plan_model", "summary_model",
+        "recovery_candidates", "sample_plan", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49q_recovery_overview_fields(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["recovery_overview"]
+    assert ov["phase"] == "49Q"
+    assert ov["recovery_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["recovery_domain_count"] == 8
+    assert isinstance(ov["candidate_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["plan_status"] in (
+        "advisory", "pending_human_review", "blocked", "not_required"
+    )
+
+
+def test_49q_recovery_always_blocked(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["recovery_overview"]["recovery_allowed"] is False
+    assert data["recovery_overview"]["execution_allowed"] is False
+    assert data["sample_plan"]["recovery_allowed"] is False
+    assert data["sample_summary"]["recovery_allowed"] is False
+    assert data["governance_boundaries"]["recovery_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["recovery_allowed_always_false_in_49q"] is True
+    assert data["plan_model"]["recovery_allowed_always_false_in_49q"] is True
+    assert data["summary_model"]["recovery_allowed_always_false_in_49q"] is True
+
+
+def test_49q_human_review_always_required(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["recovery_overview"]["human_review_required"] is True
+    assert data["sample_plan"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for c in data["recovery_candidates"]:
+        assert c["requires_human_review"] is True
+        assert c["recovery_allowed"] is False
+
+
+def test_49q_candidate_model(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "GovernanceRecoveryCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 7
+    assert set(cm["supported_severity_values"]) == {"info", "warning", "blocker"}
+
+
+def test_49q_plan_model(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["plan_model"]
+    assert pm["model_name"] == "GovernanceRecoveryPlan"
+    assert pm["field_count"] == 8
+    assert set(pm["supported_plan_statuses"]) == {
+        "advisory", "pending_human_review", "blocked", "not_required"
+    }
+
+
+def test_49q_summary_model(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "GovernanceRecoverySummary"
+    assert sm["field_count"] == 8
+    assert set(sm["supported_plan_statuses"]) == {
+        "advisory", "pending_human_review", "blocked", "not_required"
+    }
+
+
+def test_49q_all_recovery_domains_covered(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {c["recovery_domain"] for c in data["recovery_candidates"]}
+    for expected in (
+        "stale_task_recovery", "stale_session_recovery", "stale_lock_recovery",
+        "lock_conflict_recovery", "governance_drift_recovery",
+        "invariant_violation_recovery", "runtime_trust_regression_recovery",
+        "documentation_drift_recovery",
+    ):
+        assert expected in domains, f"missing recovery domain: {expected}"
+
+
+def test_49q_recovery_candidate_structure(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for c in data["recovery_candidates"]:
+        for field in (
+            "recovery_id", "recovery_domain", "source_issue", "severity",
+            "recommended_action", "requires_human_review", "recovery_allowed",
+        ):
+            assert field in c, f"missing field {field!r} in recovery candidate"
+        assert c["severity"] in ("info", "warning", "blocker")
+        assert c["recovery_allowed"] is False
+        assert c["requires_human_review"] is True
+
+
+def test_49q_sample_plan_fields(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_plan"]
+    assert sp["recovery_allowed"] is False
+    assert sp["human_review_required"] is True
+    assert sp["plan_status"] in (
+        "advisory", "pending_human_review", "blocked", "not_required"
+    )
+    assert isinstance(sp["candidate_count"], int)
+    assert isinstance(sp["blocker_count"], int)
+    assert isinstance(sp["warning_count"], int)
+    assert isinstance(sp["recovery_candidates"], list)
+
+
+def test_49q_sample_summary_fields(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["recovery_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["plan_status"] in (
+        "advisory", "pending_human_review", "blocked", "not_required"
+    )
+    assert isinstance(ss["candidate_count"], int)
+
+
+def test_49q_input_sources(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "GovernanceStateAuditRecord", "GovernanceRepairPlan",
+        "GovernanceDriftAssessment", "GovernanceDriftReviewRecord",
+        "AgentLockAssessment", "AgentLockConflictAssessment",
+        "GovernanceInvariantAssessment", "RuntimeSafetyInvariantAssessment",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49q_governance_boundaries(capsys) -> None:
+    main(["governance-recovery-plan", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["recovery_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49Q"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define recovery candidates", "classify recovery severity",
+        "recommend recovery actions", "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "repair state", "clear locks", "rewrite session files", "move tasks",
+        "edit roadmap", "invoke runtimes", "execute prompts",
+        "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49q_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-recovery-plan"])
+    output = capsys.readouterr().out
+    assert "Governance recovery planning" in output
+    assert "Candidate model" in output
+    assert "Plan model" in output
+    assert "Summary model" in output
+    assert "Recovery candidates" in output
+    assert "Sample plan" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
