@@ -39910,3 +39910,439 @@ def build_write_authorization_decision() -> dict:
         "input_sources": list(_WAD_INPUT_SOURCES),
         "advisory": WRITE_AUTHORIZATION_DECISION_ADVISORY,
     }
+
+
+# Phase 50D — Write Authorization Expiration and Revocation Policy
+# ---------------------------------------------------------------------------
+
+WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY = (
+    "Write authorization lifecycle governance is informational; expiration and "
+    "revocation lifecycle domains may be defined and lifecycle states recorded, "
+    "but no automatic authorization or renewal occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. authorization_allowed=False and "
+    "execution_allowed=False in Phase 50D."
+)
+
+_WAL_LIFECYCLE_DOMAINS: tuple[str, ...] = (
+    "expiration_policy",
+    "revocation_policy",
+    "renewal_policy",
+    "supersession_policy",
+    "authorization_state_transition",
+    "audit_recording",
+    "human_reapproval",
+)
+
+_WAL_LIFECYCLE_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "active",
+    "expired",
+    "revoked",
+    "superseded",
+    "blocked",
+)
+
+_WAL_POLICY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "lifecycle_policy_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization lifecycle policy.",
+    },
+    {
+        "name": "expiration_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether write authorization must carry an expiration date.",
+    },
+    {
+        "name": "revocation_supported",
+        "type": "bool",
+        "required": True,
+        "description": "Whether write authorization can be revoked before expiration.",
+    },
+    {
+        "name": "renewal_supported",
+        "type": "bool",
+        "required": True,
+        "description": "Whether write authorization can be renewed after expiration.",
+    },
+    {
+        "name": "supersession_supported",
+        "type": "bool",
+        "required": True,
+        "description": "Whether a new write authorization can supersede an existing one.",
+    },
+    {
+        "name": "human_reapproval_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human reapproval is required for any lifecycle state change.",
+    },
+    {
+        "name": "automatic_renewal_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50D.",
+    },
+)
+
+_WAL_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "lifecycle_record_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization lifecycle record.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this lifecycle record tracks.",
+    },
+    {
+        "name": "current_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Current lifecycle status: draft, pending_human_review, active, "
+            "expired, revoked, superseded, or blocked."
+        ),
+    },
+    {
+        "name": "expiration_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the expiration domain assessment.",
+    },
+    {
+        "name": "revocation_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the revocation domain assessment.",
+    },
+    {
+        "name": "renewal_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the renewal domain assessment.",
+    },
+    {
+        "name": "supersession_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the supersession domain assessment.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Lifecycle blockers that prevent authorization from proceeding.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Lifecycle warnings that require human attention.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50D.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50D.",
+    },
+)
+
+_WAL_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write authorization lifecycle summary.",
+    },
+    {
+        "name": "lifecycle_record_id",
+        "type": "str",
+        "required": True,
+        "description": "The lifecycle record this summary is associated with.",
+    },
+    {
+        "name": "current_status",
+        "type": "str",
+        "required": True,
+        "description": "Current lifecycle status of the write authorization.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lifecycle blockers present.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lifecycle warnings present.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50D.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50D.",
+    },
+)
+
+_WAL_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define expiration and revocation lifecycle models",
+        "classify authorization lifecycle states",
+        "recommend renewal/revocation review",
+    ],
+    "may_not": [
+        "authorize writes automatically",
+        "renew authorizations automatically",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "authorization_allowed": False,
+    "execution_allowed": False,
+    "automatic_renewal_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50D",
+}
+
+_WAL_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationCandidate",
+    "WriteAuthorizationReviewRecord",
+    "WriteAuthorizationDecisionRecord",
+    "WriteAuthorizationPolicy",
+    "ExecutionAuthorizationArtifact",
+    "AuthorizationExpirationWorkflow",
+)
+
+_WAL_DOMAIN_DESCRIPTIONS: tuple[dict, ...] = (
+    {
+        "domain": "expiration_policy",
+        "description": (
+            "Defines when and how a write authorization expires. "
+            "All authorizations must carry an expiration date; "
+            "human review is required before any expiration extension is granted."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "revocation_policy",
+        "description": (
+            "Defines conditions under which a write authorization may be revoked "
+            "before it expires. Revocation is immediate and requires human decision "
+            "recording in the governance audit trail."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "renewal_policy",
+        "description": (
+            "Defines conditions and requirements for renewing an expired write "
+            "authorization. Renewal requires fresh human review; "
+            "automatic renewal is forbidden in Phase 50D."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "supersession_policy",
+        "description": (
+            "Defines how a new write authorization supersedes an existing one. "
+            "The superseded authorization transitions to the superseded state "
+            "and requires human acknowledgement."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "authorization_state_transition",
+        "description": (
+            "Governs valid state transitions for write authorization lifecycle: "
+            "draft → pending_human_review → active → expired | revoked | superseded. "
+            "Each transition requires human review."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "audit_recording",
+        "description": (
+            "All lifecycle state changes — expiration, revocation, renewal, "
+            "supersession — must be recorded in the governance audit trail "
+            "with provenance attribution."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+    {
+        "domain": "human_reapproval",
+        "description": (
+            "Any lifecycle state change that could affect write execution eligibility "
+            "requires explicit human reapproval. No lifecycle state change is "
+            "automatic in Phase 50D."
+        ),
+        "lifecycle_status": "pending_human_review",
+    },
+)
+
+
+def build_write_authorization_lifecycle() -> dict:
+    """Define write authorization expiration and revocation lifecycle policy. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    lifecycle_record_id_ref = f"walr-{ts}"
+
+    policy_fields = [dict(f) for f in _WAL_POLICY_FIELDS]
+    record_fields = [dict(f) for f in _WAL_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _WAL_SUMMARY_FIELDS]
+
+    domain_findings: list[dict] = []
+    for d in _WAL_DOMAIN_DESCRIPTIONS:
+        domain_findings.append({
+            "domain": d["domain"],
+            "description": d["description"],
+            "lifecycle_status": d["lifecycle_status"],
+            "authorization_allowed": False,
+        })
+
+    domain_count = len(domain_findings)
+    lifecycle_status = "pending_human_review"
+
+    sample_policy = {
+        "lifecycle_policy_id": f"walp-{ts}",
+        "expiration_required": True,
+        "revocation_supported": True,
+        "renewal_supported": True,
+        "supersession_supported": True,
+        "human_reapproval_required": True,
+        "automatic_renewal_allowed": False,
+    }
+
+    sample_record = {
+        "lifecycle_record_id": lifecycle_record_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "current_status": lifecycle_status,
+        "expiration_status": lifecycle_status,
+        "revocation_status": lifecycle_status,
+        "renewal_status": lifecycle_status,
+        "supersession_status": lifecycle_status,
+        "blockers": [],
+        "warnings": [],
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wals-{ts}",
+        "lifecycle_record_id": lifecycle_record_id_ref,
+        "current_status": lifecycle_status,
+        "blocker_count": 0,
+        "warning_count": 0,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    policy_model = {
+        "model_name": "WriteAuthorizationLifecyclePolicy",
+        "field_count": len(policy_fields),
+        "required_field_count": sum(1 for f in policy_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_WAL_LIFECYCLE_STATUSES),
+        "automatic_renewal_allowed_always_false_in_50d": True,
+        "authorization_allowed_always_false_in_50d": True,
+        "fields": policy_fields,
+    }
+
+    record_model = {
+        "model_name": "WriteAuthorizationLifecycleRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_WAL_LIFECYCLE_STATUSES),
+        "authorization_allowed_always_false_in_50d": True,
+        "execution_allowed_always_false_in_50d": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteAuthorizationLifecycleSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_WAL_LIFECYCLE_STATUSES),
+        "authorization_allowed_always_false_in_50d": True,
+        "execution_allowed_always_false_in_50d": True,
+        "fields": summary_fields,
+    }
+
+    write_authorization_lifecycle_overview = {
+        "overview_id": f"50d-{ts}",
+        "generated_at": generated_at,
+        "phase": "50D",
+        "title": "Write Authorization Expiration and Revocation Policy",
+        "summary": (
+            "Defines expiration and revocation lifecycle governance for write "
+            "authorization decisions. Seven lifecycle domains are defined: "
+            "expiration_policy, revocation_policy, renewal_policy, "
+            "supersession_policy, authorization_state_transition, "
+            "audit_recording, and human_reapproval. "
+            f"domain_count={domain_count}. "
+            f"lifecycle_status={lifecycle_status}. "
+            "Write authorization lifecycle governance is advisory and read-only. "
+            "No write execution occurs. "
+            "authorization_allowed=False. execution_allowed=False. "
+            "automatic_renewal_allowed=False."
+        ),
+        "lifecycle_domain_count": len(_WAL_LIFECYCLE_DOMAINS),
+        "domain_count": domain_count,
+        "lifecycle_status": lifecycle_status,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "automatic_renewal_allowed": False,
+    }
+
+    return {
+        "write_authorization_lifecycle_overview": write_authorization_lifecycle_overview,
+        "policy_model": policy_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_findings": domain_findings,
+        "sample_policy": sample_policy,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WAL_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WAL_INPUT_SOURCES),
+        "advisory": WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY,
+    }

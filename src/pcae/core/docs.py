@@ -692,6 +692,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-authorization-decision`
 - `pcae write-authorization-decision --json`
+
+## write-authorization-lifecycle
+
+- `pcae write-authorization-lifecycle`
+- `pcae write-authorization-lifecycle --json`
 """
 
 

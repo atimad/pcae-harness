@@ -33740,3 +33740,241 @@ def test_50c_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50D — Write Authorization Expiration and Revocation Policy tests
+# ---------------------------------------------------------------------------
+
+def test_50d_json_structure(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_authorization_lifecycle_overview", "policy_model", "record_model",
+        "summary_model", "domain_findings", "sample_policy", "sample_record",
+        "sample_summary", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50d_overview_fields(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_authorization_lifecycle_overview"]
+    assert ov["phase"] == "50D"
+    assert ov["authorization_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["automatic_renewal_allowed"] is False
+    assert ov["lifecycle_domain_count"] == 7
+    assert isinstance(ov["domain_count"], int)
+    assert ov["lifecycle_status"] in (
+        "draft", "pending_human_review", "active", "expired",
+        "revoked", "superseded", "blocked"
+    )
+
+
+def test_50d_authorization_always_blocked(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_authorization_lifecycle_overview"]["authorization_allowed"] is False
+    assert data["write_authorization_lifecycle_overview"]["execution_allowed"] is False
+    assert data["sample_record"]["authorization_allowed"] is False
+    assert data["sample_record"]["execution_allowed"] is False
+    assert data["sample_summary"]["authorization_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["authorization_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["policy_model"]["authorization_allowed_always_false_in_50d"] is True
+    assert data["record_model"]["authorization_allowed_always_false_in_50d"] is True
+    assert data["record_model"]["execution_allowed_always_false_in_50d"] is True
+    assert data["summary_model"]["authorization_allowed_always_false_in_50d"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50d"] is True
+    for d in data["domain_findings"]:
+        assert d["authorization_allowed"] is False
+
+
+def test_50d_human_review_always_required(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_authorization_lifecycle_overview"]["human_review_required"] is True
+    assert data["sample_record"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50d_automatic_renewal_forbidden(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_authorization_lifecycle_overview"]["automatic_renewal_allowed"] is False
+    assert data["sample_policy"]["automatic_renewal_allowed"] is False
+    assert data["governance_boundaries"]["automatic_renewal_allowed"] is False
+    assert data["policy_model"]["automatic_renewal_allowed_always_false_in_50d"] is True
+
+
+def test_50d_policy_model(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["policy_model"]
+    assert pm["model_name"] == "WriteAuthorizationLifecyclePolicy"
+    assert pm["field_count"] == pm["required_field_count"]
+    assert pm["field_count"] == 7
+    assert set(pm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "active", "expired",
+        "revoked", "superseded", "blocked"
+    }
+
+
+def test_50d_record_model(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "WriteAuthorizationLifecycleRecord"
+    assert rm["field_count"] == rm["required_field_count"]
+    assert rm["field_count"] == 12
+    assert set(rm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "active", "expired",
+        "revoked", "superseded", "blocked"
+    }
+
+
+def test_50d_summary_model(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteAuthorizationLifecycleSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 8
+    assert set(sm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "active", "expired",
+        "revoked", "superseded", "blocked"
+    }
+
+
+def test_50d_all_lifecycle_domains_covered(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_findings"]}
+    for expected in (
+        "expiration_policy", "revocation_policy", "renewal_policy",
+        "supersession_policy", "authorization_state_transition",
+        "audit_recording", "human_reapproval",
+    ):
+        assert expected in domains, f"missing lifecycle domain: {expected}"
+
+
+def test_50d_domain_finding_structure(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_findings"]:
+        for field in ("domain", "description", "lifecycle_status", "authorization_allowed"):
+            assert field in d, f"missing field {field!r} in domain finding"
+        assert d["lifecycle_status"] in (
+            "draft", "pending_human_review", "active", "expired",
+            "revoked", "superseded", "blocked"
+        )
+        assert d["authorization_allowed"] is False
+
+
+def test_50d_sample_policy_fields(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_policy"]
+    for field in (
+        "lifecycle_policy_id", "expiration_required", "revocation_supported",
+        "renewal_supported", "supersession_supported",
+        "human_reapproval_required", "automatic_renewal_allowed",
+    ):
+        assert field in sp, f"missing field {field!r} in sample_policy"
+    assert sp["expiration_required"] is True
+    assert sp["revocation_supported"] is True
+    assert sp["renewal_supported"] is True
+    assert sp["supersession_supported"] is True
+    assert sp["human_reapproval_required"] is True
+    assert sp["automatic_renewal_allowed"] is False
+
+
+def test_50d_sample_record_fields(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    for field in (
+        "lifecycle_record_id", "write_authorization_id", "current_status",
+        "expiration_status", "revocation_status", "renewal_status",
+        "supersession_status", "blockers", "warnings",
+        "authorization_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in sr, f"missing field {field!r} in sample_record"
+    assert sr["authorization_allowed"] is False
+    assert sr["execution_allowed"] is False
+    assert sr["human_review_required"] is True
+    assert isinstance(sr["blockers"], list)
+    assert isinstance(sr["warnings"], list)
+
+
+def test_50d_sample_summary_fields(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "lifecycle_record_id", "current_status",
+        "blocker_count", "warning_count",
+        "authorization_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["authorization_allowed"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert isinstance(ss["blocker_count"], int)
+    assert isinstance(ss["warning_count"], int)
+
+
+def test_50d_input_sources(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationCandidate", "WriteAuthorizationReviewRecord",
+        "WriteAuthorizationDecisionRecord", "WriteAuthorizationPolicy",
+        "ExecutionAuthorizationArtifact", "AuthorizationExpirationWorkflow",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50d_governance_boundaries(capsys) -> None:
+    main(["write-authorization-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["authorization_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["automatic_renewal_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50D"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define expiration and revocation lifecycle models",
+        "classify authorization lifecycle states",
+        "recommend renewal/revocation review",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize writes automatically", "renew authorizations automatically",
+        "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50d_human_output_shows_all_sections(capsys) -> None:
+    main(["write-authorization-lifecycle"])
+    output = capsys.readouterr().out
+    assert "Write authorization lifecycle policy" in output
+    assert "Policy model" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Domain findings" in output
+    assert "Sample policy" in output
+    assert "Sample record" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

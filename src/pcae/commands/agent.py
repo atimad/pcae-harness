@@ -205,6 +205,8 @@ from pcae.core.agent import (
     WRITE_AUTHORIZATION_REVIEW_ADVISORY,
     build_write_authorization_decision,
     WRITE_AUTHORIZATION_DECISION_ADVISORY,
+    build_write_authorization_lifecycle,
+    WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8089,6 +8091,87 @@ def run_write_authorization_decision(args: argparse.Namespace) -> int:
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Authorization allowed: {gb['authorization_allowed']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_authorization_lifecycle(args: argparse.Namespace) -> int:
+    data = build_write_authorization_lifecycle()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_authorization_lifecycle_overview"]
+        print("Write authorization lifecycle policy")
+        print(f"Lifecycle: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Lifecycle domains:      {ov['lifecycle_domain_count']}")
+        print(f"Domains defined:        {ov['domain_count']}")
+        print(f"Lifecycle status:       {ov['lifecycle_status']}")
+        print(f"Authorization allowed:  {'yes' if ov['authorization_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print(f"Automatic renewal:      {'yes' if ov['automatic_renewal_allowed'] else 'no'}")
+        print()
+        pm = data["policy_model"]
+        print(f"Policy model: {pm['model_name']} ({pm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(pm['supported_lifecycle_statuses'])}")
+        print(f"  automatic_renewal_allowed always False in 50D: {pm['automatic_renewal_allowed_always_false_in_50d']}")
+        print(f"  authorization_allowed always False in 50D:     {pm['authorization_allowed_always_false_in_50d']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  authorization_allowed always False in 50D: {rm['authorization_allowed_always_false_in_50d']}")
+        print(f"  execution_allowed always False in 50D:     {rm['execution_allowed_always_false_in_50d']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  authorization_allowed always False in 50D: {sm['authorization_allowed_always_false_in_50d']}")
+        print(f"  execution_allowed always False in 50D:     {sm['execution_allowed_always_false_in_50d']}")
+        print()
+        print("Domain findings:")
+        for d in data["domain_findings"]:
+            print(f"  [{d['lifecycle_status'].upper()}] {d['domain']}")
+            print(f"    {d['description'][:80]}...")
+        print()
+        sp = data["sample_policy"]
+        print("Sample policy:")
+        print(f"  expiration_required:      {sp['expiration_required']}")
+        print(f"  revocation_supported:     {sp['revocation_supported']}")
+        print(f"  renewal_supported:        {sp['renewal_supported']}")
+        print(f"  supersession_supported:   {sp['supersession_supported']}")
+        print(f"  human_reapproval_required:{sp['human_reapproval_required']}")
+        print(f"  automatic_renewal_allowed:{sp['automatic_renewal_allowed']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  current_status:        {sr['current_status']}")
+        print(f"  authorization_allowed: {sr['authorization_allowed']}")
+        print(f"  execution_allowed:     {sr['execution_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print(f"  blockers:              {sr['blockers']}")
+        print(f"  warnings:              {sr['warnings']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  current_status:        {ss['current_status']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  authorization_allowed: {ss['authorization_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Authorization allowed: {gb['authorization_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Automatic renewal:     {gb['automatic_renewal_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()
         print(data["advisory"])

@@ -115,6 +115,7 @@ from pcae.commands.agent import (
     run_write_authorization,
     run_write_authorization_review,
     run_write_authorization_decision,
+    run_write_authorization_lifecycle,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3792,6 +3793,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_authorization_decision_parser.set_defaults(handler=run_write_authorization_decision)
+
+    write_authorization_lifecycle_parser = subparsers.add_parser(
+        "write-authorization-lifecycle",
+        help="Define expiration and revocation lifecycle governance for write authorization decisions (Phase 50D).",
+    )
+    write_authorization_lifecycle_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_authorization_lifecycle_parser.set_defaults(handler=run_write_authorization_lifecycle)
 
     return parser
 

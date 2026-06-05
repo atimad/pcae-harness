@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50C: Write Authorization Decision Record.
+Phase 50D: Write Authorization Expiration and Revocation Policy.
 
 ## Governance Coherence Note
 
@@ -3501,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50C: Write Authorization Decision Record.
+Phase 50D: Write Authorization Expiration and Revocation Policy.
 
 ## Next
 
-- TBD: Future phases (50D and beyond).
+- TBD: Future phases (50E and beyond).
 
 ## Future Explorations
 
