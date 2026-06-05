@@ -173,6 +173,8 @@ from pcae.core.agent import (
     ARBITRATION_ADVISORY,
     build_evidence_framework,
     EVIDENCE_FRAMEWORK_ADVISORY,
+    build_decision_record,
+    DECISION_RECORD_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -6864,6 +6866,57 @@ def run_consensus_engine(args: argparse.Namespace) -> int:
         for ep in data["escalation_paths"]:
             print(f"  {ep['path']} (trigger: {ep['trigger']}, human_required: {ep['human_required']})")
             print(f"    {ep['description']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                 {', '.join(gb['may'])}")
+        print(f"  May not:             {', '.join(gb['may_not'])}")
+        print(f"  Execution allowed:   {gb['execution_allowed']}")
+        print(f"  Human review req'd:  {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_decision_record(args: argparse.Namespace) -> int:
+    data = build_decision_record()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        s = data["decision_summary"]
+        print("Multi-agent decision record")
+        print(f"Assessment: {s['summary_id']}  Generated: {s['generated_at']}")
+        print(f"Phase: {s['phase']} — {s['title']}")
+        print()
+        print(s["summary"])
+        print()
+        print(f"Agents:              {s['agent_count']}")
+        print(f"Decision status:     {s['decision_status']}")
+        print(f"Execution allowed:   {'yes' if s['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:  {'yes' if s['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported decision statuses: {', '.join(cm['supported_decision_statuses'])}")
+        print(f"  execution_allowed always False in 49E: {cm['execution_allowed_always_false_in_49e']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  Supported decision statuses: {', '.join(rm['supported_decision_statuses'])}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  decision_status:     {sr['decision_status']}")
+        print(f"  consensus_status:    {sr['consensus_status']}")
+        print(f"  arbitration_status:  {sr['arbitration_status']}")
+        print(f"  execution_allowed:   {sr['execution_allowed']}")
+        print(f"  human_review_req'd:  {sr['human_review_required']}")
+        print(f"  Blockers ({len(sr['blockers'])}):")
+        for b in sr["blockers"]:
+            print(f"    {b}")
         print()
         gb = data["governance_boundaries"]
         print("Governance boundaries:")

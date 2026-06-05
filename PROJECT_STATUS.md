@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49D: Multi-Agent Evidence Framework.
+Phase 49E: Multi-Agent Decision Record.
 
 ## Governance Coherence Note
 
@@ -3296,10 +3296,22 @@ untrusted, codex-local/claude-local partially_trusted; bundle_status=review_requ
 execution_allowed=False; human_review_required=True; no runtime invocation, no
 prompt execution, no repository modification; `docs/COMMANDS.md` regenerated;
 12 new tests; 3481 total tests passing
+and multi-agent decision record implemented (Phase 49E):
+`pcae decision-record` and `--json`; defines the authoritative decision
+artifact produced by multi-agent governance workflows; three models —
+DecisionCandidate (7 fields), DecisionRecord (11 fields), DecisionSummary
+(6 fields); four decision statuses: draft, advisory, pending_human_review,
+blocked; decision records link ConsensusResult, ArbitrationDecision, and
+EvidenceBundle into a single governance artifact; inputs: ConsensusResult,
+ArbitrationDecision, EvidenceBundle, GovernanceAuditRecord,
+InvocationEvidenceRecord; decision_status=pending_human_review;
+execution_allowed=False; human_review_required=True; no runtime invocation,
+no prompt execution, no repository modification; `docs/COMMANDS.md`
+regenerated; 13 new tests; 3494 total tests passing
 
 ## Next
 
-- TBD: Future phases (49A Invocation Execution Gate Implementation).
+- TBD: Future phases (49F or 49A Invocation Execution Gate Implementation).
 
 ## Future Explorations
 

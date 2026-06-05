@@ -33191,3 +33191,323 @@ def build_evidence_framework() -> dict:
         "input_sources": list(_EF_INPUT_SOURCES),
         "advisory": EVIDENCE_FRAMEWORK_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 49E — Multi-Agent Decision Record
+# ---------------------------------------------------------------------------
+
+DECISION_RECORD_ADVISORY = (
+    "Decision record assessment is informational; no runtime invocation, "
+    "prompt execution, or repository modification occurs. "
+    "execution_allowed=False in Phase 49E."
+)
+
+_DR_DECISION_STATUSES: tuple[str, ...] = (
+    "draft",
+    "advisory",
+    "pending_human_review",
+    "blocked",
+)
+
+_DR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this decision candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this decision candidate is associated with.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs participating in this decision evaluation.",
+    },
+    {
+        "name": "evidence_bundle_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the EvidenceBundle that supports this decision candidate.",
+    },
+    {
+        "name": "consensus_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the ConsensusResult linked to this decision candidate.",
+    },
+    {
+        "name": "arbitration_id",
+        "type": "str",
+        "required": True,
+        "description": "ID of the ArbitrationDecision linked to this decision candidate.",
+    },
+    {
+        "name": "review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every decision candidate.",
+    },
+)
+
+_DR_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this decision record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The request this decision record is associated with.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs that contributed to this decision record.",
+    },
+    {
+        "name": "evidence_summary",
+        "type": "str",
+        "required": True,
+        "description": "Human-readable summary of the evidence supporting this decision.",
+    },
+    {
+        "name": "consensus_status",
+        "type": "str",
+        "required": True,
+        "description": "Consensus outcome linked to this decision record.",
+    },
+    {
+        "name": "arbitration_status",
+        "type": "str",
+        "required": True,
+        "description": "Arbitration outcome linked to this decision record.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of this decision record: draft, advisory, pending_human_review, or blocked.",
+    },
+    {
+        "name": "blockers",
+        "type": "list[str]",
+        "required": True,
+        "description": "Blocking conditions preventing this decision from advancing.",
+    },
+    {
+        "name": "warnings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Non-blocking warnings surfaced during decision evaluation.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49E; human review is required for every decision record.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49E; no execution is authorized.",
+    },
+)
+
+_DR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this decision summary.",
+    },
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "The decision record this summary is associated with.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the linked decision record.",
+    },
+    {
+        "name": "participating_agents",
+        "type": "list[str]",
+        "required": True,
+        "description": "Agent IDs represented in this decision summary.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True; human review is required for every decision summary.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49E; no execution is authorized.",
+    },
+)
+
+_DR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define decision models",
+        "link consensus, arbitration, and evidence",
+        "generate advisory decision records",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "approve execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49E",
+}
+
+_DR_INPUT_SOURCES: tuple[str, ...] = (
+    "ConsensusResult",
+    "ArbitrationDecision",
+    "EvidenceBundle",
+    "GovernanceAuditRecord",
+    "InvocationEvidenceRecord",
+)
+
+_DR_AGENTS: tuple[str, ...] = (
+    "codex-local",
+    "claude-local",
+    "kimi-local",
+)
+
+
+def build_decision_record() -> dict:
+    """Define the multi-agent decision record governance model. Read-only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    decision_id_ref = f"dr-{ts}"
+    request_id_ref = "dr-req-placeholder-49e"
+
+    candidate_fields = [dict(f) for f in _DR_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _DR_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _DR_SUMMARY_FIELDS]
+    participating_agents = list(_DR_AGENTS)
+
+    sample_candidate = {
+        "decision_id": decision_id_ref,
+        "request_id": request_id_ref,
+        "participating_agents": participating_agents,
+        "evidence_bundle_id": f"efb-{ts}",
+        "consensus_id": f"ce-{ts}",
+        "arbitration_id": f"af-{ts}",
+        "review_required": True,
+    }
+
+    sample_record = {
+        "decision_id": decision_id_ref,
+        "request_id": request_id_ref,
+        "participating_agents": participating_agents,
+        "evidence_summary": (
+            "No evidence reviewed; all agents unavailable. "
+            "Consensus blocked; arbitration pending human review. "
+            "Human review required before any decision is considered advisory."
+        ),
+        "consensus_status": "blocked",
+        "arbitration_status": "pending_human_review",
+        "decision_status": "pending_human_review",
+        "blockers": [
+            "consensus_blocked",
+            "arbitration_pending_human_review",
+            "evidence_not_reviewed",
+        ],
+        "warnings": ["all_agents_unavailable_in_49e"],
+        "human_review_required": True,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"dr-sum-{ts}",
+        "decision_id": decision_id_ref,
+        "decision_status": "pending_human_review",
+        "participating_agents": participating_agents,
+        "human_review_required": True,
+        "execution_allowed": False,
+    }
+
+    candidate_model = {
+        "model_name": "DecisionCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_decision_statuses": list(_DR_DECISION_STATUSES),
+        "execution_allowed_always_false_in_49e": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "DecisionRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_decision_statuses": list(_DR_DECISION_STATUSES),
+        "execution_allowed_always_false_in_49e": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "DecisionSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "execution_allowed_always_false_in_49e": True,
+        "fields": summary_fields,
+    }
+
+    decision_summary = {
+        "summary_id": f"49e-{ts}",
+        "generated_at": generated_at,
+        "phase": "49E",
+        "title": "Multi-Agent Decision Record",
+        "summary": (
+            "Defines the authoritative decision artifact produced by multi-agent "
+            "governance workflows (codex-local, claude-local, kimi-local). "
+            "Decision records link ConsensusResult, ArbitrationDecision, and "
+            "EvidenceBundle into a single governance artifact. "
+            "Decision statuses: draft, advisory, pending_human_review, blocked. "
+            "decision_status=pending_human_review. execution_allowed=False. "
+            "human_review_required=True. No runtime is invoked, no prompt is "
+            "submitted, and no repository modification occurs."
+        ),
+        "agent_count": len(participating_agents),
+        "decision_status": "pending_human_review",
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "decision_summary": decision_summary,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_DR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_DR_INPUT_SOURCES),
+        "advisory": DECISION_RECORD_ADVISORY,
+    }

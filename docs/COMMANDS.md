@@ -487,6 +487,11 @@
 - `pcae evidence-framework`
 - `pcae evidence-framework --json`
 
+## decision-record
+
+- `pcae decision-record`
+- `pcae decision-record --json`
+
 ## write-result-review-design
 
 - `pcae write-result-review-design`

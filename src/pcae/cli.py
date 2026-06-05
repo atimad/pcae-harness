@@ -99,6 +99,7 @@ from pcae.commands.agent import (
     run_consensus_engine,
     run_arbitration,
     run_evidence_framework,
+    run_decision_record,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -2241,6 +2242,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     evidence_framework_parser.set_defaults(handler=run_evidence_framework)
+
+    decision_record_parser = subparsers.add_parser(
+        "decision-record",
+        help="Define the multi-agent decision record governance model (Phase 49E).",
+    )
+    decision_record_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    decision_record_parser.set_defaults(handler=run_decision_record)
 
     capability_registry_parser = subparsers.add_parser(
         "capability-registry",

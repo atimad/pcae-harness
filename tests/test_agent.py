@@ -30574,3 +30574,184 @@ def test_49d_human_output_shows_all_sections(capsys) -> None:
     assert "Review workflow" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49E — Multi-Agent Decision Record
+
+
+def test_49e_json_structure(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "decision_summary", "candidate_model", "record_model", "summary_model",
+        "sample_candidate", "sample_record", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49e_decision_summary_fields(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    s = data["decision_summary"]
+    for field in (
+        "summary_id", "generated_at", "phase", "title", "summary",
+        "agent_count", "decision_status", "execution_allowed", "human_review_required",
+    ):
+        assert field in s, f"missing decision_summary field: {field}"
+    assert s["phase"] == "49E"
+    assert s["execution_allowed"] is False
+    assert s["human_review_required"] is True
+    assert s["agent_count"] == 3
+    assert s["decision_status"] == "pending_human_review"
+
+
+def test_49e_execution_always_blocked(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["decision_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["execution_allowed_always_false_in_49e"] is True
+    assert data["record_model"]["execution_allowed_always_false_in_49e"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49e"] is True
+    assert data["sample_record"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+
+
+def test_49e_candidate_model(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "DecisionCandidate"
+    assert cm["field_count"] == 7
+    assert cm["required_field_count"] == 7
+    field_names = [f["name"] for f in cm["fields"]]
+    for expected in (
+        "decision_id", "request_id", "participating_agents",
+        "evidence_bundle_id", "consensus_id", "arbitration_id", "review_required",
+    ):
+        assert expected in field_names, f"missing candidate field: {expected}"
+    for status in ("draft", "advisory", "pending_human_review", "blocked"):
+        assert status in cm["supported_decision_statuses"], f"missing status: {status}"
+
+
+def test_49e_record_model(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "DecisionRecord"
+    assert rm["field_count"] == 11
+    assert rm["required_field_count"] == 11
+    field_names = [f["name"] for f in rm["fields"]]
+    for expected in (
+        "decision_id", "request_id", "participating_agents", "evidence_summary",
+        "consensus_status", "arbitration_status", "decision_status",
+        "blockers", "warnings", "human_review_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing record field: {expected}"
+    for status in ("draft", "advisory", "pending_human_review", "blocked"):
+        assert status in rm["supported_decision_statuses"], f"missing status: {status}"
+
+
+def test_49e_summary_model(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "DecisionSummary"
+    assert sm["field_count"] == 6
+    assert sm["required_field_count"] == 6
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "decision_id", "decision_status",
+        "participating_agents", "human_review_required", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49e_sample_record(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    assert sr["decision_status"] == "pending_human_review"
+    assert sr["consensus_status"] == "blocked"
+    assert sr["arbitration_status"] == "pending_human_review"
+    assert sr["human_review_required"] is True
+    assert sr["execution_allowed"] is False
+    agents = set(sr["participating_agents"])
+    assert agents == {"codex-local", "claude-local", "kimi-local"}
+    assert len(sr["blockers"]) >= 1
+
+
+def test_49e_sample_candidate_links(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    assert sc["review_required"] is True
+    assert "evidence_bundle_id" in sc
+    assert "consensus_id" in sc
+    assert "arbitration_id" in sc
+    assert set(sc["participating_agents"]) == {"codex-local", "claude-local", "kimi-local"}
+
+
+def test_49e_decision_statuses(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for model_key in ("candidate_model", "record_model"):
+        statuses = data[model_key]["supported_decision_statuses"]
+        for expected in ("draft", "advisory", "pending_human_review", "blocked"):
+            assert expected in statuses, f"{model_key} missing status: {expected}"
+
+
+def test_49e_governance_boundaries(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49E"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define decision models",
+        "link consensus, arbitration, and evidence",
+        "generate advisory decision records",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify repository",
+        "approve execution", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49e_input_sources(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ConsensusResult", "ArbitrationDecision", "EvidenceBundle",
+        "GovernanceAuditRecord", "InvocationEvidenceRecord",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49e_human_review_always_required(capsys) -> None:
+    main(["decision-record", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_candidate"]["review_required"] is True
+    assert data["sample_record"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["decision_summary"]["human_review_required"] is True
+
+
+def test_49e_human_output_shows_all_sections(capsys) -> None:
+    main(["decision-record"])
+    output = capsys.readouterr().out
+    assert "Multi-agent decision record" in output
+    assert "Candidate model" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Sample record" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()
