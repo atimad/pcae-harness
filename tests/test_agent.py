@@ -31732,3 +31732,225 @@ def test_49j_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49K — Governance Invariant Enforcement
+
+
+def test_49k_json_structure(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "invariant_overview", "invariant_model", "assessment_model", "summary_model",
+        "invariant_results", "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49k_invariant_overview_fields(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["invariant_overview"]
+    for field in (
+        "overview_id", "generated_at", "phase", "title", "summary",
+        "invariant_domain_count", "invariant_count", "compliant_count",
+        "warning_count", "blocker_count", "assessment_status",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in ov, f"missing invariant_overview field: {field}"
+    assert ov["phase"] == "49K"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["invariant_domain_count"] == 8
+    assert ov["invariant_count"] == 8
+
+
+def test_49k_execution_always_blocked(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["invariant_overview"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["invariant_model"]["execution_allowed_always_false_in_49k"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_49k"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_49k"] is True
+    assert data["sample_assessment"]["execution_allowed"] is False
+
+
+def test_49k_human_review_always_required(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["invariant_overview"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for r in data["invariant_results"]:
+        assert r["human_review_required"] is True, (
+            f"human_review_required not True for {r['invariant_name']}"
+        )
+
+
+def test_49k_invariant_model(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    im = data["invariant_model"]
+    assert im["model_name"] == "GovernanceInvariant"
+    assert im["field_count"] == 6
+    assert im["required_field_count"] == 6
+    field_names = [f["name"] for f in im["fields"]]
+    for expected in (
+        "invariant_id", "invariant_name", "invariant_domain",
+        "invariant_description", "invariant_status", "human_review_required",
+    ):
+        assert expected in field_names, f"missing invariant field: {expected}"
+    for status in ("compliant", "compliant_with_warnings", "blocked", "violated"):
+        assert status in im["supported_invariant_statuses"], f"missing status: {status}"
+
+
+def test_49k_assessment_model(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "GovernanceInvariantAssessment"
+    assert am["field_count"] == 7
+    assert am["required_field_count"] == 7
+    field_names = [f["name"] for f in am["fields"]]
+    for expected in (
+        "assessment_id", "invariant_results", "compliant_count",
+        "warning_count", "blocker_count", "assessment_status", "execution_allowed",
+    ):
+        assert expected in field_names, f"missing assessment field: {expected}"
+
+
+def test_49k_summary_model(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "GovernanceInvariantSummary"
+    assert sm["field_count"] == 7
+    assert sm["required_field_count"] == 7
+    field_names = [f["name"] for f in sm["fields"]]
+    for expected in (
+        "summary_id", "assessment_id", "invariant_count",
+        "compliant_count", "warning_count", "blocker_count", "assessment_status",
+    ):
+        assert expected in field_names, f"missing summary field: {expected}"
+
+
+def test_49k_all_required_invariants_present(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    names = [r["invariant_name"] for r in data["invariant_results"]]
+    for expected in (
+        "active_task_count_lte_1",
+        "active_task_matches_session",
+        "closed_tasks_not_active",
+        "execution_allowed_false_for_governance_scaffolds",
+        "human_review_required_true_for_governance_scaffolds",
+        "repair_frameworks_cannot_modify_state",
+        "session_continuity_verified_before_handoff",
+        "governance_audit_is_advisory_only",
+    ):
+        assert expected in names, f"missing required invariant: {expected}"
+    assert len(names) == 8
+
+
+def test_49k_invariant_results_structure(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for r in data["invariant_results"]:
+        for key in (
+            "invariant_id", "invariant_name", "invariant_domain",
+            "invariant_description", "invariant_status",
+            "finding", "warnings", "human_review_required",
+        ):
+            assert key in r, f"invariant {r.get('invariant_name')!r} missing key: {key}"
+        assert r["invariant_status"] in (
+            "compliant", "compliant_with_warnings", "blocked", "violated"
+        )
+
+
+def test_49k_all_invariant_domains_covered(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {r["invariant_domain"] for r in data["invariant_results"]}
+    for expected in (
+        "Active Task Invariants", "Session Continuity Invariants",
+        "Governance State Invariants", "Runtime Safety Invariants",
+        "Human Review Invariants", "Execution Blocking Invariants",
+        "Evidence Integrity Invariants", "Audit Integrity Invariants",
+    ):
+        assert expected in domains, f"missing invariant domain: {expected}"
+
+
+def test_49k_sample_assessment_fields(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    assert sa["execution_allowed"] is False
+    assert sa["assessment_status"] in (
+        "compliant", "compliant_with_warnings", "blocked", "violated"
+    )
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["warning_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["invariant_results"], list)
+    assert len(sa["invariant_results"]) == 8
+
+
+def test_49k_sample_summary_fields(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["invariant_count"] == 8
+    assert ss["assessment_status"] in (
+        "compliant", "compliant_with_warnings", "blocked", "violated"
+    )
+    assert isinstance(ss["compliant_count"], int)
+    assert isinstance(ss["warning_count"], int)
+    assert isinstance(ss["blocker_count"], int)
+
+
+def test_49k_input_sources(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "governance state audit", "governance state repair framework",
+        "task transition governance", "session continuity governance",
+        "active task state", "session state",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49k_governance_boundaries(capsys) -> None:
+    main(["governance-invariants", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49K"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "evaluate invariants", "report violations",
+        "report warnings", "recommend future enforcement",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "repair state", "rewrite session files", "move tasks",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49k_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-invariants"])
+    output = capsys.readouterr().out
+    assert "Governance invariant enforcement" in output
+    assert "Invariant model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Invariant results" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

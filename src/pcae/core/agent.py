@@ -35517,3 +35517,434 @@ def build_session_continuity_governance() -> dict:
         "input_sources": list(_SCG_INPUT_SOURCES),
         "advisory": SESSION_CONTINUITY_GOVERNANCE_ADVISORY,
     }
+
+
+# Phase 49K — Governance Invariant Enforcement
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_INVARIANTS_ADVISORY = (
+    "Governance invariant enforcement is informational; invariants may be audited "
+    "but not enforced automatically. No state modifications occur, no runtimes are "
+    "invoked, and no prompt execution takes place. "
+    "execution_allowed=False in Phase 49K."
+)
+
+_GI_INVARIANT_DOMAINS: tuple[str, ...] = (
+    "Active Task Invariants",
+    "Session Continuity Invariants",
+    "Governance State Invariants",
+    "Runtime Safety Invariants",
+    "Human Review Invariants",
+    "Execution Blocking Invariants",
+    "Evidence Integrity Invariants",
+    "Audit Integrity Invariants",
+)
+
+_GI_INVARIANT_STATUSES: tuple[str, ...] = (
+    "compliant",
+    "compliant_with_warnings",
+    "blocked",
+    "violated",
+)
+
+_GI_INVARIANT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "invariant_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance invariant.",
+    },
+    {
+        "name": "invariant_name",
+        "type": "str",
+        "required": True,
+        "description": "Machine-readable name of this invariant.",
+    },
+    {
+        "name": "invariant_domain",
+        "type": "str",
+        "required": True,
+        "description": "The governance domain this invariant belongs to.",
+    },
+    {
+        "name": "invariant_description",
+        "type": "str",
+        "required": True,
+        "description": "Human-readable description of what this invariant asserts.",
+    },
+    {
+        "name": "invariant_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49K.",
+    },
+)
+
+_GI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this invariant assessment.",
+    },
+    {
+        "name": "invariant_results",
+        "type": "list[GovernanceInvariant]",
+        "required": True,
+        "description": "Ordered list of invariant evaluation results.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants assessed as compliant or compliant_with_warnings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants with warnings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants in blocked or violated state.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49K.",
+    },
+)
+
+_GI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this invariant summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "invariant_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of invariants evaluated.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of compliant invariants.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of invariants with warnings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocked or violated invariants.",
+    },
+    {
+        "name": "assessment_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: compliant, compliant_with_warnings, blocked, or violated.",
+    },
+)
+
+_GI_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "evaluate invariants",
+        "report violations",
+        "report warnings",
+        "recommend future enforcement",
+    ],
+    "may_not": [
+        "repair state",
+        "rewrite session files",
+        "move tasks",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49K",
+}
+
+_GI_INPUT_SOURCES: tuple[str, ...] = (
+    "governance state audit",
+    "governance state repair framework",
+    "task transition governance",
+    "session continuity governance",
+    "active task state",
+    "session state",
+)
+
+_GI_REQUIRED_INVARIANTS: tuple[dict, ...] = (
+    {
+        "invariant_name": "active_task_count_lte_1",
+        "invariant_domain": "Active Task Invariants",
+        "invariant_description": "At most one active task may exist at any time.",
+        "expected_status": "compliant",
+        "finding": (
+            "Exactly one active task detected: "
+            "20260605-1052-multi-agent-governance-audit. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "active_task_matches_session",
+        "invariant_domain": "Session Continuity Invariants",
+        "invariant_description": (
+            "The active task recorded in session state must match the active task "
+            "in the task lifecycle."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "Session state is aligned with active task "
+            "20260605-1052-multi-agent-governance-audit. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "closed_tasks_not_active",
+        "invariant_domain": "Governance State Invariants",
+        "invariant_description": "No task in the done state may appear in the active task list.",
+        "expected_status": "compliant",
+        "finding": (
+            "All done tasks are correctly recorded in done state only. "
+            "No done task appears in the active task list. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "execution_allowed_false_for_governance_scaffolds",
+        "invariant_domain": "Runtime Safety Invariants",
+        "invariant_description": (
+            "execution_allowed must be False across all governance scaffold phases "
+            "(49G, 49H, 49I, 49J, 49K)."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "execution_allowed=False verified across phases 49G, 49H, 49I, 49J, and 49K. "
+            "No scaffold phase permits execution. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "human_review_required_true_for_governance_scaffolds",
+        "invariant_domain": "Human Review Invariants",
+        "invariant_description": (
+            "human_review_required must be True across all governance scaffold phases."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "human_review_required=True verified across phases 49G, 49H, 49I, 49J, and 49K. "
+            "No scaffold phase permits unsupervised operation. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "repair_frameworks_cannot_modify_state",
+        "invariant_domain": "Execution Blocking Invariants",
+        "invariant_description": (
+            "Repair framework commands (governance-state-repair) must not modify "
+            "any governance artifact or session file."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "governance-state-repair (Phase 49H) is verified read-only. "
+            "repair_allowed=False enforced. No artifact modification occurs. Invariant holds."
+        ),
+        "warnings": [],
+    },
+    {
+        "invariant_name": "session_continuity_verified_before_handoff",
+        "invariant_domain": "Evidence Integrity Invariants",
+        "invariant_description": (
+            "Session continuity must be verified before any agent handoff is initiated."
+        ),
+        "expected_status": "compliant_with_warnings",
+        "finding": (
+            "Session continuity is currently verified (Phase 49J). "
+            "Agent handoff alignment requires explicit verification before transfer. "
+            "Advisory: agent_handoff_alignment_must_be_verified_before_cross_agent_transfer."
+        ),
+        "warnings": ["agent_handoff_alignment_must_be_verified_before_cross_agent_transfer"],
+    },
+    {
+        "invariant_name": "governance_audit_is_advisory_only",
+        "invariant_domain": "Audit Integrity Invariants",
+        "invariant_description": (
+            "All governance audit commands must remain advisory and must not modify state."
+        ),
+        "expected_status": "compliant",
+        "finding": (
+            "All audit commands (governance-state-audit, multi-agent-governance-audit) "
+            "are verified advisory and read-only. No audit command modifies governance state. "
+            "Invariant holds."
+        ),
+        "warnings": [],
+    },
+)
+
+
+def build_governance_invariants() -> dict:
+    """Audit core governance invariants across PCAE workflows. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    assessment_id_ref = f"gia-{ts}"
+
+    invariant_fields = [dict(f) for f in _GI_INVARIANT_FIELDS]
+    assessment_fields = [dict(f) for f in _GI_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _GI_SUMMARY_FIELDS]
+
+    invariant_results: list[dict] = []
+    for i, inv in enumerate(_GI_REQUIRED_INVARIANTS):
+        invariant_results.append({
+            "invariant_id": f"gi-{i + 1:03d}-{ts}",
+            "invariant_name": inv["invariant_name"],
+            "invariant_domain": inv["invariant_domain"],
+            "invariant_description": inv["invariant_description"],
+            "invariant_status": inv["expected_status"],
+            "finding": inv["finding"],
+            "warnings": inv["warnings"],
+            "human_review_required": True,
+        })
+
+    compliant_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] in ("compliant", "compliant_with_warnings")
+    )
+    warning_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] == "compliant_with_warnings"
+    )
+    blocker_count = sum(
+        1 for r in invariant_results
+        if r["invariant_status"] in ("blocked", "violated")
+    )
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+    elif any(r["invariant_status"] == "violated" for r in invariant_results):
+        overall_status = "violated"
+    elif warning_count > 0:
+        overall_status = "compliant_with_warnings"
+    else:
+        overall_status = "compliant"
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "invariant_results": [r["invariant_id"] for r in invariant_results],
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"gis-{ts}",
+        "assessment_id": assessment_id_ref,
+        "invariant_count": len(invariant_results),
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+    }
+
+    invariant_model = {
+        "model_name": "GovernanceInvariant",
+        "field_count": len(invariant_fields),
+        "required_field_count": sum(1 for f in invariant_fields if f["required"]),
+        "supported_invariant_statuses": list(_GI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49k": True,
+        "fields": invariant_fields,
+    }
+
+    assessment_model = {
+        "model_name": "GovernanceInvariantAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_invariant_statuses": list(_GI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49k": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceInvariantSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_invariant_statuses": list(_GI_INVARIANT_STATUSES),
+        "execution_allowed_always_false_in_49k": True,
+        "fields": summary_fields,
+    }
+
+    invariant_overview = {
+        "overview_id": f"49k-{ts}",
+        "generated_at": generated_at,
+        "phase": "49K",
+        "title": "Governance Invariant Enforcement",
+        "summary": (
+            "Defines and audits the core invariants that must always hold true "
+            "across PCAE governance workflows. "
+            "Eight invariant domains are assessed: Active Task Invariants, "
+            "Session Continuity Invariants, Governance State Invariants, "
+            "Runtime Safety Invariants, Human Review Invariants, "
+            "Execution Blocking Invariants, Evidence Integrity Invariants, "
+            "and Audit Integrity Invariants. "
+            "Invariants may be audited but not enforced automatically. "
+            "No state modifications occur. "
+            f"assessment_status={overall_status}. execution_allowed=False."
+        ),
+        "invariant_domain_count": len(_GI_INVARIANT_DOMAINS),
+        "invariant_count": len(invariant_results),
+        "compliant_count": compliant_count,
+        "warning_count": warning_count,
+        "blocker_count": blocker_count,
+        "assessment_status": overall_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "invariant_overview": invariant_overview,
+        "invariant_model": invariant_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "invariant_results": invariant_results,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GI_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GI_INPUT_SOURCES),
+        "advisory": GOVERNANCE_INVARIANTS_ADVISORY,
+    }

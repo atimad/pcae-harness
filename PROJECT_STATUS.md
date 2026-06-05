@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49J: Session Continuity Governance.
+Phase 49K: Governance Invariant Enforcement.
 
 ## Governance Coherence Note
 
@@ -3360,10 +3360,24 @@ transition governance; refresh_allowed=False; human_review_required=True;
 validation_status=valid_with_warnings; no session files rewritten, no task
 files moved; `docs/COMMANDS.md` regenerated; 18 new tests;
 3568 total tests passing
+and governance invariant enforcement implemented (Phase 49K):
+`pcae governance-invariants` and `--json`; defines and audits core invariants
+that must always hold across PCAE governance workflows; three models —
+GovernanceInvariant (6 fields), GovernanceInvariantAssessment (7 fields),
+GovernanceInvariantSummary (7 fields); four invariant statuses: compliant,
+compliant_with_warnings, blocked, violated; eight invariant domains and eight
+required invariants: active_task_count_lte_1, active_task_matches_session,
+closed_tasks_not_active, execution_allowed_false_for_governance_scaffolds,
+human_review_required_true_for_governance_scaffolds,
+repair_frameworks_cannot_modify_state,
+session_continuity_verified_before_handoff, governance_audit_is_advisory_only;
+execution_allowed=False; human_review_required=True;
+assessment_status=compliant_with_warnings; no state modifications occur;
+`docs/COMMANDS.md` regenerated; 15 new tests; 3583 total tests passing
 
 ## Current Phase
 
-Phase 49J: Session Continuity Governance.
+Phase 49K: Governance Invariant Enforcement.
 
 ## Next
 

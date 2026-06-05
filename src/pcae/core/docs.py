@@ -642,6 +642,11 @@ def render_commands_reference() -> str:
 
 - `pcae session-continuity-governance`
 - `pcae session-continuity-governance --json`
+
+## governance-invariants
+
+- `pcae governance-invariants`
+- `pcae governance-invariants --json`
 """
 
 
