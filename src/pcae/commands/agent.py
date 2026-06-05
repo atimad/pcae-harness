@@ -191,6 +191,8 @@ from pcae.core.agent import (
     RUNTIME_SAFETY_INVARIANTS_ADVISORY,
     build_governance_drift,
     GOVERNANCE_DRIFT_ADVISORY,
+    build_governance_drift_review,
+    GOVERNANCE_DRIFT_REVIEW_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -7577,6 +7579,74 @@ def run_governance_drift(args: argparse.Namespace) -> int:
         print(f"  May not:           {', '.join(gb2['may_not'])}")
         print(f"  Execution allowed: {gb2['execution_allowed']}")
         print(f"  Human review req'd:{gb2['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_drift_review(args: argparse.Namespace) -> int:
+    data = build_governance_drift_review()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["review_overview"]
+        print("Governance drift review workflow")
+        print(f"Review: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Review domains:        {ov['review_domain_count']}")
+        print(f"Review status:         {ov['review_status']}")
+        print(f"Repair allowed:        {'yes' if ov['repair_allowed'] else 'no'}")
+        print(f"Execution allowed:     {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:    {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses: {', '.join(cm['supported_review_statuses'])}")
+        print(f"  repair_allowed always False in 49N: {cm['repair_allowed_always_false_in_49n']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print()
+        print("Review domains:")
+        for d in data["review_domains"]:
+            print(f"  [{d['review_status'].upper()}] {d['domain']}")
+            print(f"    {d['description']}")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  review_status:         {sc['review_status'] if 'review_status' in sc else 'pending_human_review'}")
+        print(f"  drift_count:           {sc['drift_count']}")
+        print(f"  blocker_count:         {sc['blocker_count']}")
+        print(f"  warning_count:         {sc['warning_count']}")
+        print(f"  repair_recommended:    {sc['repair_recommended']}")
+        print(f"  review_allowed:        {sc['review_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  review_status:     {sr['review_status']}")
+        print(f"  repair_allowed:    {sr['repair_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  review_status:     {ss['review_status']}")
+        print(f"  repair_allowed:    {ss['repair_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:               {', '.join(gb['may'])}")
+        print(f"  May not:           {', '.join(gb['may_not'])}")
+        print(f"  Repair allowed:    {gb['repair_allowed']}")
+        print(f"  Execution allowed: {gb['execution_allowed']}")
+        print(f"  Human review req'd:{gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

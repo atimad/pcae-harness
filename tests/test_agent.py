@@ -32353,3 +32353,191 @@ def test_49m_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 49N — Governance Drift Review Workflow tests
+# ---------------------------------------------------------------------------
+
+def test_49n_json_structure(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "review_overview", "candidate_model", "record_model", "summary_model",
+        "review_domains", "sample_candidate", "sample_record", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_49n_review_overview_fields(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["review_overview"]
+    assert ov["phase"] == "49N"
+    assert ov["repair_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["review_domain_count"] == 7
+    assert ov["review_status"] == "pending_human_review"
+
+
+def test_49n_repair_always_blocked(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["review_overview"]["repair_allowed"] is False
+    assert data["review_overview"]["execution_allowed"] is False
+    assert data["sample_record"]["repair_allowed"] is False
+    assert data["sample_summary"]["repair_allowed"] is False
+    assert data["governance_boundaries"]["repair_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_49n_human_review_always_required(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["review_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_record"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_49n_candidate_model(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "GovernanceDriftReviewCandidate"
+    assert cm["repair_allowed_always_false_in_49n"] is True
+    assert set(cm["supported_review_statuses"]) == {
+        "pending_human_review", "reviewed", "changes_requested", "escalated", "blocked"
+    }
+    assert cm["field_count"] == cm["required_field_count"]
+
+
+def test_49n_record_model(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "GovernanceDriftReviewRecord"
+    assert rm["repair_allowed_always_false_in_49n"] is True
+    assert set(rm["supported_review_statuses"]) == {
+        "pending_human_review", "reviewed", "changes_requested", "escalated", "blocked"
+    }
+
+
+def test_49n_summary_model(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "GovernanceDriftReviewSummary"
+    assert sm["repair_allowed_always_false_in_49n"] is True
+
+
+def test_49n_all_review_domains_defined(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["review_domains"]}
+    for expected in (
+        "drift_signal_review", "blocker_review", "warning_review",
+        "repair_recommendation_review", "human_decision_recording",
+        "escalation_path_review", "roadmap_followup_review",
+    ):
+        assert expected in domains, f"missing review domain: {expected}"
+
+
+def test_49n_review_domain_structure(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["review_domains"]:
+        assert "domain" in d
+        assert "description" in d
+        assert "review_status" in d
+        assert d["review_status"] == "pending_human_review"
+        assert d["repair_allowed"] is False
+
+
+def test_49n_sample_candidate_fields(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    assert sc["human_review_required"] is True
+    assert sc["review_allowed"] is True
+    assert isinstance(sc["drift_count"], int)
+    assert isinstance(sc["blocker_count"], int)
+    assert isinstance(sc["warning_count"], int)
+    assert isinstance(sc["repair_recommended"], bool)
+
+
+def test_49n_sample_record_fields(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    assert sr["repair_allowed"] is False
+    assert sr["human_review_required"] is True
+    assert sr["review_status"] == "pending_human_review"
+    for list_field in ("reviewed_signals", "accepted_findings", "rejected_findings",
+                       "requested_repairs", "escalations"):
+        assert list_field in sr
+        assert isinstance(sr[list_field], list)
+
+
+def test_49n_sample_summary_fields(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    assert ss["repair_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["review_status"] == "pending_human_review"
+    for count_field in ("accepted_count", "rejected_count",
+                        "repair_request_count", "escalation_count"):
+        assert count_field in ss
+        assert isinstance(ss[count_field], int)
+
+
+def test_49n_input_sources(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "GovernanceDriftSignal", "GovernanceDriftAssessment", "GovernanceDriftSummary",
+        "GovernanceRepairPlan", "GovernanceInvariantAssessment",
+        "RuntimeSafetyInvariantAssessment",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_49n_governance_boundaries(capsys) -> None:
+    main(["governance-drift-review", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["repair_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "49N"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define drift review models", "classify drift review outcomes",
+        "recommend escalation paths", "recommend repair requests",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "repair state", "rewrite session files", "move tasks",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_49n_human_output_shows_all_sections(capsys) -> None:
+    main(["governance-drift-review"])
+    output = capsys.readouterr().out
+    assert "Governance drift review workflow" in output
+    assert "Candidate model" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Review domains" in output
+    assert "Sample candidate" in output
+    assert "Sample record" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

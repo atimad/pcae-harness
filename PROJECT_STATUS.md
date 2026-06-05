@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 49M: Governance Drift Detection.
+Phase 49N: Governance Drift Review Workflow.
 
 ## Governance Coherence Note
 
@@ -3409,9 +3409,25 @@ assessment_status=drift_with_blockers (2 blockers, 7 warnings); drift
 detection is advisory and read-only; no state modifications occur;
 `docs/COMMANDS.md` regenerated; 13 new tests; 3612 total tests passing
 
+`pcae governance-drift-review` and `--json`; defines the human review
+workflow for governance drift signals detected by Phase 49M; three models —
+GovernanceDriftReviewCandidate (8 fields: review_id, assessment_id,
+drift_count, blocker_count, warning_count, repair_recommended,
+human_review_required, review_allowed), GovernanceDriftReviewRecord (10
+fields: review_id, assessment_id, reviewed_signals, review_status,
+accepted_findings, rejected_findings, requested_repairs, escalations,
+human_review_required, repair_allowed), GovernanceDriftReviewSummary (9
+fields: summary_id, review_id, review_status, accepted_count, rejected_count,
+repair_request_count, escalation_count, human_review_required,
+repair_allowed); five review statuses; seven review domains: drift_signal_review,
+blocker_review, warning_review, repair_recommendation_review,
+human_decision_recording, escalation_path_review, roadmap_followup_review;
+repair_allowed=False; execution_allowed=False; human_review_required=True;
+`docs/COMMANDS.md` regenerated; 15 new tests; 3627 total tests passing
+
 ## Current Phase
 
-Phase 49M: Governance Drift Detection.
+Phase 49N: Governance Drift Review Workflow.
 
 ## Next
 

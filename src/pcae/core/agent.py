@@ -36861,3 +36861,417 @@ def build_governance_drift() -> dict:
         "input_sources": list(_GD_INPUT_SOURCES),
         "advisory": GOVERNANCE_DRIFT_ADVISORY,
     }
+
+
+# Phase 49N — Governance Drift Review Workflow
+# ---------------------------------------------------------------------------
+
+GOVERNANCE_DRIFT_REVIEW_ADVISORY = (
+    "Governance drift review workflow is informational; review candidates may be "
+    "defined and review intent recorded, but no automatic repair occurs. "
+    "No state modifications are made, no prompts are executed, and no runtimes "
+    "are invoked. repair_allowed=False in Phase 49N."
+)
+
+_GDR_REVIEW_DOMAINS: tuple[str, ...] = (
+    "drift_signal_review",
+    "blocker_review",
+    "warning_review",
+    "repair_recommendation_review",
+    "human_decision_recording",
+    "escalation_path_review",
+    "roadmap_followup_review",
+)
+
+_GDR_REVIEW_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "reviewed",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_GDR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift review candidate.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The GovernanceDriftAssessment this candidate is drawn from.",
+    },
+    {
+        "name": "drift_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of drift signals in the source assessment.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity drift signals requiring review.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity drift signals requiring review.",
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True if any drift signal in the assessment recommends repair.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49N.",
+    },
+    {
+        "name": "review_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always True — review intent may be recorded; repair_allowed remains False.",
+    },
+)
+
+_GDR_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift review record.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The GovernanceDriftAssessment this record is associated with.",
+    },
+    {
+        "name": "reviewed_signals",
+        "type": "list[str]",
+        "required": True,
+        "description": "Ordered list of drift_ids reviewed in this record.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: pending_human_review, reviewed, changes_requested, escalated, or blocked.",
+    },
+    {
+        "name": "accepted_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "drift_ids whose findings were accepted by the reviewer.",
+    },
+    {
+        "name": "rejected_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "drift_ids whose findings were rejected by the reviewer.",
+    },
+    {
+        "name": "requested_repairs",
+        "type": "list[str]",
+        "required": True,
+        "description": "drift_ids for which repair review was requested.",
+    },
+    {
+        "name": "escalations",
+        "type": "list[str]",
+        "required": True,
+        "description": "drift_ids escalated for additional human review.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49N.",
+    },
+    {
+        "name": "repair_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49N.",
+    },
+)
+
+_GDR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this drift review summary.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The review record this summary is associated with.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: pending_human_review, reviewed, changes_requested, escalated, or blocked.",
+    },
+    {
+        "name": "accepted_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of drift findings accepted.",
+    },
+    {
+        "name": "rejected_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of drift findings rejected.",
+    },
+    {
+        "name": "repair_request_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of drift signals for which repair was requested.",
+    },
+    {
+        "name": "escalation_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of drift signals escalated for additional review.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 49N.",
+    },
+    {
+        "name": "repair_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 49N.",
+    },
+)
+
+_GDR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define drift review models",
+        "classify drift review outcomes",
+        "recommend escalation paths",
+        "recommend repair requests",
+    ],
+    "may_not": [
+        "repair state",
+        "rewrite session files",
+        "move tasks",
+        "edit roadmap",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "repair_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "49N",
+}
+
+_GDR_INPUT_SOURCES: tuple[str, ...] = (
+    "GovernanceDriftSignal",
+    "GovernanceDriftAssessment",
+    "GovernanceDriftSummary",
+    "GovernanceRepairPlan",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_GDR_REVIEW_DOMAIN_DESCRIPTIONS: tuple[dict, ...] = (
+    {
+        "domain": "drift_signal_review",
+        "description": (
+            "Review each GovernanceDriftSignal for accuracy and relevance. "
+            "Reviewer classifies each signal as accepted or rejected."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "blocker_review",
+        "description": (
+            "Prioritized review of blocker-severity drift signals. "
+            "Blockers must be resolved before governance workflows may proceed."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "warning_review",
+        "description": (
+            "Review warning-severity drift signals for impact and urgency. "
+            "Warnings may be accepted, deferred, or escalated."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "repair_recommendation_review",
+        "description": (
+            "Review repair recommendations attached to drift signals. "
+            "Reviewer records repair intent; actual repair is not executed."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "human_decision_recording",
+        "description": (
+            "Record human review decisions for accepted findings, rejected findings, "
+            "repair requests, and escalations in the GovernanceDriftReviewRecord."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "escalation_path_review",
+        "description": (
+            "Define escalation paths for drift signals that cannot be resolved in "
+            "the current session. Escalated signals require additional human review."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+    {
+        "domain": "roadmap_followup_review",
+        "description": (
+            "Assess whether any accepted drift findings require a new roadmap phase "
+            "or task to address. Roadmap updates are advisory; no phase is created automatically."
+        ),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+    },
+)
+
+
+def build_governance_drift_review() -> dict:
+    """Define the human review workflow for governance drift signals. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    review_id_ref = f"gdrv-{ts}"
+    assessment_id_ref = f"gda-{ts}"
+
+    candidate_fields = [dict(f) for f in _GDR_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _GDR_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _GDR_SUMMARY_FIELDS]
+
+    sample_candidate = {
+        "review_id": review_id_ref,
+        "assessment_id": assessment_id_ref,
+        "drift_count": 12,
+        "blocker_count": 2,
+        "warning_count": 7,
+        "repair_recommended": True,
+        "human_review_required": True,
+        "review_allowed": True,
+    }
+
+    sample_record = {
+        "review_id": review_id_ref,
+        "assessment_id": assessment_id_ref,
+        "reviewed_signals": [],
+        "review_status": "pending_human_review",
+        "accepted_findings": [],
+        "rejected_findings": [],
+        "requested_repairs": [],
+        "escalations": [],
+        "human_review_required": True,
+        "repair_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"gdrs-{ts}",
+        "review_id": review_id_ref,
+        "review_status": "pending_human_review",
+        "accepted_count": 0,
+        "rejected_count": 0,
+        "repair_request_count": 0,
+        "escalation_count": 0,
+        "human_review_required": True,
+        "repair_allowed": False,
+    }
+
+    candidate_model = {
+        "model_name": "GovernanceDriftReviewCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_review_statuses": list(_GDR_REVIEW_STATUSES),
+        "repair_allowed_always_false_in_49n": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "GovernanceDriftReviewRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_review_statuses": list(_GDR_REVIEW_STATUSES),
+        "repair_allowed_always_false_in_49n": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceDriftReviewSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_review_statuses": list(_GDR_REVIEW_STATUSES),
+        "repair_allowed_always_false_in_49n": True,
+        "fields": summary_fields,
+    }
+
+    review_domains = [dict(d) for d in _GDR_REVIEW_DOMAIN_DESCRIPTIONS]
+
+    review_overview = {
+        "overview_id": f"49n-{ts}",
+        "generated_at": generated_at,
+        "phase": "49N",
+        "title": "Governance Drift Review Workflow",
+        "summary": (
+            "Defines the human review workflow for governance drift signals detected "
+            "by Phase 49M. Seven review domains are defined: drift_signal_review, "
+            "blocker_review, warning_review, repair_recommendation_review, "
+            "human_decision_recording, escalation_path_review, and "
+            "roadmap_followup_review. "
+            "Review workflow is advisory and read-only. No state is modified. "
+            "repair_allowed=False. "
+            "review_status=pending_human_review for all domains. "
+            "execution_allowed=False."
+        ),
+        "review_domain_count": len(_GDR_REVIEW_DOMAINS),
+        "review_status": "pending_human_review",
+        "repair_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "review_overview": review_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "review_domains": review_domains,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GDR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GDR_INPUT_SOURCES),
+        "advisory": GOVERNANCE_DRIFT_REVIEW_ADVISORY,
+    }

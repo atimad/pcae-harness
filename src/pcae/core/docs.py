@@ -657,6 +657,11 @@ def render_commands_reference() -> str:
 
 - `pcae governance-drift`
 - `pcae governance-drift --json`
+
+## governance-drift-review
+
+- `pcae governance-drift-review`
+- `pcae governance-drift-review --json`
 """
 
 
