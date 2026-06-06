@@ -717,6 +717,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-audit`
 - `pcae write-audit --json`
+
+## write-rollback-verification
+
+- `pcae write-rollback-verification`
+- `pcae write-rollback-verification --json`
 """
 
 

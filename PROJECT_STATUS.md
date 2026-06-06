@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50H: Controlled Write Audit Requirements.
+Phase 50I: Controlled Write Rollback Verification.
 
 ## Governance Coherence Note
 
@@ -3499,13 +3499,40 @@ ExecutionAuthorizationArtifact; write authorization assessment is advisory and
 read-only; no write execution occurs; no files are modified; `docs/COMMANDS.md`
 regenerated; 15 new tests; 3685 total tests passing
 
+`pcae write-rollback-verification` and `--json`; defines rollback verification
+requirements that must exist before a write authorization can ever be
+considered eligible for execution; three models —
+WriteRollbackVerificationCandidate (8 fields: verification_id, write_plan_id,
+rollback_plan_id, rollback_target, rollback_mode, verification_domains,
+human_review_required, rollback_verified),
+WriteRollbackVerificationAssessment (10 fields: assessment_id, verification_id,
+domain_count, compliant_count, blocker_count, warning_count,
+verification_status, rollback_verified, execution_allowed,
+human_review_required), WriteRollbackVerificationSummary (10 fields:
+summary_id, assessment_id, domain_count, compliant_count, blocker_count,
+warning_count, verification_status, rollback_verified, execution_allowed,
+human_review_required); four verification statuses: insufficient_rollback,
+rollback_with_warnings, pending_human_review, verified; eight verification
+domains: rollback_plan_verification, rollback_scope_verification,
+rollback_target_verification, rollback_mode_verification,
+rollback_audit_verification, rollback_risk_verification,
+rollback_human_approval_verification, rollback_execution_blocking; eight
+blockers; verification_status=pending_human_review; rollback_verified=False;
+execution_allowed=False; human_review_required=True; inputs:
+WriteAuthorizationDecisionRecord, WritePlanCandidate, WriteReadinessAssessment,
+WriteEvidenceAssessment, WriteAuditAssessment, RollbackValidationRecord,
+GovernanceInvariantAssessment, RuntimeSafetyInvariantAssessment,
+GovernanceRecoveryPlan; write rollback verification is advisory and read-only;
+no write execution occurs; no files are modified; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3808 total tests passing
+
 ## Current Phase
 
-Phase 50H: Controlled Write Audit Requirements.
+Phase 50I: Controlled Write Rollback Verification.
 
 ## Next
 
-- TBD: Future phases (50I and beyond).
+- TBD: Future phases (50J and beyond).
 
 ## Future Explorations
 

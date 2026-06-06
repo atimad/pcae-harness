@@ -34879,3 +34879,231 @@ def test_50h_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50I — Controlled Write Rollback Verification tests
+# ---------------------------------------------------------------------------
+
+def test_50i_json_structure(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_rollback_verification_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50i_overview_fields(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_rollback_verification_overview"]
+    assert ov["phase"] == "50I"
+    assert ov["rollback_verified"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["verification_domain_count"] == 8
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["compliant_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["verification_status"] in (
+        "insufficient_rollback", "rollback_with_warnings",
+        "pending_human_review", "verified"
+    )
+
+
+def test_50i_rollback_always_unverified(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_rollback_verification_overview"]["rollback_verified"] is False
+    assert data["write_rollback_verification_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["rollback_verified"] is False
+    assert data["sample_assessment"]["rollback_verified"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["rollback_verified"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["rollback_verified"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["rollback_verified_always_false_in_50i"] is True
+    assert data["assessment_model"]["rollback_verified_always_false_in_50i"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_50i"] is True
+    assert data["summary_model"]["rollback_verified_always_false_in_50i"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50i"] is True
+    for d in data["domain_assessments"]:
+        assert d["rollback_verified"] is False
+
+
+def test_50i_human_review_always_required(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_rollback_verification_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50i_candidate_model(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteRollbackVerificationCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 8
+    assert set(cm["supported_verification_statuses"]) == {
+        "insufficient_rollback", "rollback_with_warnings",
+        "pending_human_review", "verified"
+    }
+
+
+def test_50i_assessment_model(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "WriteRollbackVerificationAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 10
+    assert set(am["supported_verification_statuses"]) == {
+        "insufficient_rollback", "rollback_with_warnings",
+        "pending_human_review", "verified"
+    }
+
+
+def test_50i_summary_model(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteRollbackVerificationSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_verification_statuses"]) == {
+        "insufficient_rollback", "rollback_with_warnings",
+        "pending_human_review", "verified"
+    }
+
+
+def test_50i_all_verification_domains_covered(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "rollback_plan_verification", "rollback_scope_verification",
+        "rollback_target_verification", "rollback_mode_verification",
+        "rollback_audit_verification", "rollback_risk_verification",
+        "rollback_human_approval_verification", "rollback_execution_blocking",
+    ):
+        assert expected in domains, f"missing verification domain: {expected}"
+
+
+def test_50i_domain_assessment_structure(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "rollback_verified"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["rollback_verified"] is False
+
+
+def test_50i_sample_candidate_fields(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "verification_id", "write_plan_id", "rollback_plan_id",
+        "rollback_target", "rollback_mode", "verification_domains",
+        "human_review_required", "rollback_verified",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["rollback_verified"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["verification_domains"], list)
+    assert len(sc["verification_domains"]) == 8
+
+
+def test_50i_sample_assessment_fields(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "verification_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "verification_status",
+        "rollback_verified", "execution_allowed", "human_review_required",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["rollback_verified"] is False
+    assert sa["execution_allowed"] is False
+    assert sa["human_review_required"] is True
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+
+
+def test_50i_sample_summary_fields(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "verification_status",
+        "rollback_verified", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["rollback_verified"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_50i_input_sources(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationDecisionRecord", "WritePlanCandidate",
+        "WriteReadinessAssessment", "WriteEvidenceAssessment",
+        "WriteAuditAssessment", "RollbackValidationRecord",
+        "GovernanceInvariantAssessment", "RuntimeSafetyInvariantAssessment",
+        "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50i_governance_boundaries(capsys) -> None:
+    main(["write-rollback-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["rollback_verified"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50I"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess rollback verification requirements",
+        "identify missing rollback artifacts",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "execute rollback", "commit", "push",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50i_human_output_shows_all_sections(capsys) -> None:
+    main(["write-rollback-verification"])
+    output = capsys.readouterr().out
+    assert "Controlled write rollback verification" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

@@ -42153,3 +42153,471 @@ def build_write_audit() -> dict:
         "input_sources": list(_WAU_INPUT_SOURCES),
         "advisory": WRITE_AUDIT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 50I — Controlled Write Rollback Verification
+# ---------------------------------------------------------------------------
+
+WRITE_ROLLBACK_VERIFICATION_ADVISORY = (
+    "Write rollback verification is informational; rollback verification requirements "
+    "may be assessed and blockers and warnings reported, but no automatic rollback "
+    "acceptance occurs. No write execution occurs, no files are modified, no runtimes "
+    "are invoked, and no prompts are executed. rollback_verified=False and "
+    "execution_allowed=False in Phase 50I."
+)
+
+_WRV_VERIFICATION_DOMAINS: tuple[str, ...] = (
+    "rollback_plan_verification",
+    "rollback_scope_verification",
+    "rollback_target_verification",
+    "rollback_mode_verification",
+    "rollback_audit_verification",
+    "rollback_risk_verification",
+    "rollback_human_approval_verification",
+    "rollback_execution_blocking",
+)
+
+_WRV_VERIFICATION_STATUSES: tuple[str, ...] = (
+    "insufficient_rollback",
+    "rollback_with_warnings",
+    "pending_human_review",
+    "verified",
+)
+
+_WRV_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "verification_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write rollback verification candidate.",
+    },
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The write plan candidate this rollback verification is associated with.",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The rollback plan this verification is assessing.",
+    },
+    {
+        "name": "rollback_target",
+        "type": "str",
+        "required": True,
+        "description": "The target resource or state to be restored on rollback.",
+    },
+    {
+        "name": "rollback_mode",
+        "type": "str",
+        "required": True,
+        "description": "The mode of rollback (e.g. git-revert, snapshot-restore, manual).",
+    },
+    {
+        "name": "verification_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of rollback verification domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50I.",
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50I.",
+    },
+)
+
+_WRV_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write rollback verification assessment.",
+    },
+    {
+        "name": "verification_id",
+        "type": "str",
+        "required": True,
+        "description": "The rollback verification candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of rollback verification domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with sufficient rollback verification artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with missing or blocking rollback verification artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_rollback, rollback_with_warnings, "
+            "pending_human_review, or verified."
+        ),
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50I.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50I.",
+    },
+)
+
+_WRV_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write rollback verification summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The rollback verification assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of rollback verification domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with sufficient rollback verification artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with missing or blocking rollback verification artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_rollback, rollback_with_warnings, "
+            "pending_human_review, or verified."
+        ),
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50I.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50I.",
+    },
+)
+
+_WRV_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess rollback verification requirements",
+        "identify missing rollback artifacts",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "execute rollback",
+        "commit",
+        "push",
+    ],
+    "rollback_verified": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50I",
+}
+
+_WRV_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationDecisionRecord",
+    "WritePlanCandidate",
+    "WriteReadinessAssessment",
+    "WriteEvidenceAssessment",
+    "WriteAuditAssessment",
+    "RollbackValidationRecord",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WRV_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "rollback_plan_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback plan artifact has been established. "
+            "A documented rollback plan identifying recovery steps and owner "
+            "must be present before execution eligibility is assessed."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_scope_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback scope record has been established. "
+            "The scope of files and resources covered by the rollback plan "
+            "must be explicitly defined and verified before execution proceeds."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_target_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback target has been verified. "
+            "The target state or snapshot to restore on rollback must be "
+            "identified and confirmed before execution eligibility is assessed."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_mode_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback mode has been verified. "
+            "The rollback execution mode (e.g. git-revert, snapshot-restore, manual) "
+            "must be declared and confirmed as feasible before execution proceeds."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_audit_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback audit trail has been established. "
+            "An audit record confirming rollback plan provenance and review "
+            "must be present before execution eligibility is assessed."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_risk_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback risk assessment has been completed. "
+            "Known rollback risks and mitigations must be documented "
+            "before execution eligibility is assessed."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_human_approval_verification",
+        "severity": "blocker",
+        "finding": (
+            "No human approval for the rollback plan has been recorded. "
+            "Explicit human sign-off on the rollback plan is required "
+            "before execution eligibility can be considered."
+        ),
+        "rollback_verified": False,
+    },
+    {
+        "domain": "rollback_execution_blocking",
+        "severity": "blocker",
+        "finding": (
+            "Rollback execution is explicitly blocked in Phase 50I. "
+            "No rollback execution may occur until all prior verification "
+            "domains have been satisfied and human approval has been granted."
+        ),
+        "rollback_verified": False,
+    },
+)
+
+
+def build_write_rollback_verification() -> dict:
+    """Define write rollback verification requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    verification_id_ref = f"wrv-{ts}"
+
+    candidate_fields = [dict(f) for f in _WRV_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WRV_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WRV_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WRV_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        verification_status = "pending_human_review"
+    elif warning_count > 0:
+        verification_status = "rollback_with_warnings"
+    else:
+        verification_status = "insufficient_rollback"
+
+    assessment_id_ref = f"wrva-{ts}"
+
+    sample_candidate = {
+        "verification_id": verification_id_ref,
+        "write_plan_id": f"wp-{ts}",
+        "rollback_plan_id": f"rbp-{ts}",
+        "rollback_target": "pre-write-snapshot",
+        "rollback_mode": "git-revert",
+        "verification_domains": list(_WRV_VERIFICATION_DOMAINS),
+        "human_review_required": True,
+        "rollback_verified": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "verification_id": verification_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wrvs-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteRollbackVerificationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_verification_statuses": list(_WRV_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_50i": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteRollbackVerificationAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_verification_statuses": list(_WRV_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_50i": True,
+        "execution_allowed_always_false_in_50i": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteRollbackVerificationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_verification_statuses": list(_WRV_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_50i": True,
+        "execution_allowed_always_false_in_50i": True,
+        "fields": summary_fields,
+    }
+
+    write_rollback_verification_overview = {
+        "overview_id": f"50i-{ts}",
+        "generated_at": generated_at,
+        "phase": "50I",
+        "title": "Controlled Write Rollback Verification",
+        "summary": (
+            "Defines the rollback verification requirements that must exist before a write "
+            "authorization can ever be considered eligible for execution. "
+            "Eight verification domains are assessed: "
+            "rollback_plan_verification, rollback_scope_verification, "
+            "rollback_target_verification, rollback_mode_verification, "
+            "rollback_audit_verification, rollback_risk_verification, "
+            "rollback_human_approval_verification, and rollback_execution_blocking. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"verification_status={verification_status}. "
+            "Write rollback verification is advisory and read-only. No write execution occurs. "
+            "rollback_verified=False. execution_allowed=False."
+        ),
+        "verification_domain_count": len(_WRV_VERIFICATION_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_rollback_verification_overview": write_rollback_verification_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WRV_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WRV_INPUT_SOURCES),
+        "advisory": WRITE_ROLLBACK_VERIFICATION_ADVISORY,
+    }
