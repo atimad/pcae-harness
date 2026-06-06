@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52D: Agent Lock Recovery.
+Phase 52E: Corruption Recovery.
 
 ## Governance Coherence Note
 

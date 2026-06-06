@@ -138,6 +138,7 @@ from pcae.commands.agent import (
     run_session_recovery,
     run_governance_state_recovery,
     run_agent_lock_recovery,
+    run_corruption_recovery,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4072,6 +4073,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     agent_lock_recovery_parser.set_defaults(handler=run_agent_lock_recovery)
+
+    corruption_recovery_parser = subparsers.add_parser(
+        "corruption-recovery",
+        help="Define recovery planning for corrupted, malformed, missing, or inconsistent PCAE project state artifacts (Phase 52E).",
+    )
+    corruption_recovery_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    corruption_recovery_parser.set_defaults(handler=run_corruption_recovery)
 
     return parser
 

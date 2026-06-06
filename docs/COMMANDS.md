@@ -786,3 +786,8 @@
 
 - `pcae agent-lock-recovery`
 - `pcae agent-lock-recovery --json`
+
+## corruption-recovery
+
+- `pcae corruption-recovery`
+- `pcae corruption-recovery --json`

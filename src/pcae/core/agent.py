@@ -50669,3 +50669,523 @@ def build_agent_lock_recovery() -> dict:
         "input_sources": list(_ALREC_INPUT_SOURCES),
         "advisory": AGENT_LOCK_RECOVERY_ADVISORY,
     }
+
+
+# --- Phase 52E: Corruption Recovery ---
+
+CORRUPTION_RECOVERY_ADVISORY = (
+    "Corruption recovery is informational; project state artifacts may be "
+    "inspected and recovery steps recommended, but no automatic recovery "
+    "occurs and no files are rewritten or modified. No runtimes are invoked "
+    "and no prompts are executed. recovery_allowed=False in Phase 52E. "
+    "Recovery is advisory only and requires human review."
+)
+
+_CREC_CORRUPTION_DOMAINS: tuple[str, ...] = (
+    "task_file_corruption",
+    "session_file_corruption",
+    "governance_record_corruption",
+    "command_catalog_corruption",
+    "project_status_corruption",
+    "changelog_corruption",
+    "lock_file_corruption",
+    "artifact_reference_corruption",
+)
+
+_CREC_PLAN_STATUSES: tuple[str, ...] = (
+    "not_required",
+    "advisory",
+    "pending_human_review",
+    "blocked",
+)
+
+_CREC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this corruption recovery candidate.",
+    },
+    {
+        "name": "artifact_id",
+        "type": "str",
+        "required": True,
+        "description": "The artifact this candidate addresses.",
+    },
+    {
+        "name": "artifact_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of artifact that is corrupted or missing.",
+    },
+    {
+        "name": "corruption_domain",
+        "type": "str",
+        "required": True,
+        "description": "The corruption domain this candidate belongs to.",
+    },
+    {
+        "name": "corruption_reason",
+        "type": "str",
+        "required": True,
+        "description": "The reason recovery is recommended for this domain.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "The human-reviewed action recommended to resolve this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52E.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52E.",
+    },
+)
+
+_CREC_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this corruption recovery plan.",
+    },
+    {
+        "name": "recovery_candidates",
+        "type": "list[CorruptionRecoveryCandidate]",
+        "required": True,
+        "description": "List of recovery candidates produced for all assessed domains.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates in the plan.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52E.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52E.",
+    },
+)
+
+_CREC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this corruption recovery summary.",
+    },
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The recovery plan this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of corruption domains assessed.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52E.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52E.",
+    },
+)
+
+_CREC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect project state artifacts",
+        "detect missing/malformed/inconsistent artifacts",
+        "recommend human-reviewed recovery steps",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "rewrite files",
+        "move task files",
+        "rewrite session files",
+        "clear locks",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_allowed": False,
+    "human_review_required": True,
+    "recovery_automatic": False,
+    "read_only": True,
+    "phase": "52E",
+}
+
+_CREC_INPUT_SOURCES: tuple[str, ...] = (
+    "task lifecycle hardening",
+    "session recovery",
+    "governance state recovery",
+    "agent lock recovery",
+    "governance recovery planning",
+    "governance invariant assessment",
+    "runtime safety invariant assessment",
+)
+
+_CREC_DOMAIN_CANDIDATES: tuple[dict, ...] = (
+    {
+        "corruption_domain": "task_file_corruption",
+        "artifact_type": "task_file",
+        "severity": "blocker",
+        "corruption_reason": (
+            "A task file is malformed, missing required fields, or contains "
+            "inconsistent state. Corrupted task files break lifecycle tracking "
+            "and prevent reliable phase transitions."
+        ),
+        "recommended_action": (
+            "Human must inspect the task file, identify which fields are "
+            "missing or inconsistent, restore or recreate the file from "
+            "governance records, and verify task state with `pcae task list`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "session_file_corruption",
+        "artifact_type": "session_file",
+        "severity": "blocker",
+        "corruption_reason": (
+            "The session file is malformed, missing required fields, or "
+            "references state that no longer exists. A corrupted session file "
+            "prevents safe agent continuity and handoff."
+        ),
+        "recommended_action": (
+            "Human must inspect `.pcae/session.json`, identify the corruption, "
+            "and restore the file by running `pcae session bootstrap` under "
+            "direct supervision to reinitialize a clean session state."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "governance_record_corruption",
+        "artifact_type": "governance_record",
+        "severity": "blocker",
+        "corruption_reason": (
+            "A governance record is malformed, contains invalid JSON or YAML, "
+            "or is missing fields required for provenance verification. "
+            "Corrupted governance records break the audit trail."
+        ),
+        "recommended_action": (
+            "Human must identify the corrupted record, reconstruct it from "
+            "available provenance history or git log, regenerate it via the "
+            "appropriate `pcae` command, and verify with `pcae check`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "command_catalog_corruption",
+        "artifact_type": "command_catalog",
+        "severity": "blocker",
+        "corruption_reason": (
+            "The command catalog or docs reference is malformed, out of sync "
+            "with registered CLI commands, or missing entries. A corrupted "
+            "command catalog misleads agents about available capabilities."
+        ),
+        "recommended_action": (
+            "Human must run `pcae docs commands --force` to regenerate the "
+            "command catalog, verify with `pcae check`, and confirm that all "
+            "registered commands appear correctly in `docs/COMMANDS.md`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "project_status_corruption",
+        "artifact_type": "project_status_file",
+        "severity": "blocker",
+        "corruption_reason": (
+            "PROJECT_STATUS.md is malformed, references a phase that does not "
+            "exist, or is inconsistent with the active task and governance "
+            "records. Corrupted project status misleads agents about current "
+            "project state."
+        ),
+        "recommended_action": (
+            "Human must review PROJECT_STATUS.md against the current phase, "
+            "active task, and governance records, correct any inconsistencies, "
+            "and verify coherence with `pcae status coherence`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "changelog_corruption",
+        "artifact_type": "changelog_file",
+        "severity": "warning",
+        "corruption_reason": (
+            "CHANGELOG.md is malformed, contains entries that contradict the "
+            "git history, or is missing entries for completed phases. "
+            "Changelog corruption degrades traceability and misleads agents "
+            "about what has been implemented."
+        ),
+        "recommended_action": (
+            "Human must reconcile CHANGELOG.md with the git log, add missing "
+            "entries for completed phases, remove or correct contradictory "
+            "entries, and verify the result passes `pcae check`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "lock_file_corruption",
+        "artifact_type": "lock_file",
+        "severity": "blocker",
+        "corruption_reason": (
+            "The agent lock file is malformed, missing required fields, or "
+            "contains an invalid agent ID or timestamp. A corrupted lock file "
+            "prevents safe lock acquisition and release."
+        ),
+        "recommended_action": (
+            "Human must inspect the lock file, determine whether the lock "
+            "represents a valid active session, and either restore the missing "
+            "fields manually or release the lock via `pcae agent release` "
+            "after confirming no work is in progress."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "corruption_domain": "artifact_reference_corruption",
+        "artifact_type": "artifact_reference",
+        "severity": "warning",
+        "corruption_reason": (
+            "A governance or task artifact references a file path, record ID, "
+            "or external resource that is missing, renamed, or unreachable. "
+            "Broken artifact references degrade evidence chains and prevent "
+            "complete traceability."
+        ),
+        "recommended_action": (
+            "Human must locate or recreate the referenced artifact, update "
+            "the referencing record to reflect the correct path or ID, and "
+            "verify that evidence chains remain intact with `pcae check`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+)
+
+
+def build_corruption_recovery() -> dict:
+    """Define corruption recovery planning. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    plan_id_ref = f"crec-{ts}"
+
+    candidate_fields = [dict(f) for f in _CREC_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _CREC_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _CREC_SUMMARY_FIELDS]
+
+    domain_candidates: list[dict] = []
+    for i, d in enumerate(_CREC_DOMAIN_CANDIDATES):
+        entry = dict(d)
+        entry["recovery_id"] = f"crec-cand-{ts}-{i:02d}"
+        entry["artifact_id"] = f"artifact-{ts}-{i:02d}"
+        domain_candidates.append(entry)
+
+    blocker_count = sum(1 for d in domain_candidates if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_candidates if d["severity"] == "warning")
+    candidate_count = len(domain_candidates)
+    domain_count = len(_CREC_CORRUPTION_DOMAINS)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    sample_candidate = {
+        "recovery_id": f"crec-cand-{ts}-00",
+        "artifact_id": f"artifact-{ts}-00",
+        "artifact_type": "task_file",
+        "corruption_domain": "task_file_corruption",
+        "corruption_reason": (
+            "A task file is malformed, missing required fields, or contains "
+            "inconsistent state."
+        ),
+        "severity": "blocker",
+        "recommended_action": (
+            "Human must inspect the task file and restore or recreate it from "
+            "governance records."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    }
+
+    sample_plan = {
+        "recovery_plan_id": plan_id_ref,
+        "recovery_candidates": domain_candidates,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"crecsum-{ts}",
+        "recovery_plan_id": plan_id_ref,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "CorruptionRecoveryCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "recovery_allowed_always_false_in_52e": True,
+        "human_review_required_always_true_in_52e": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "CorruptionRecoveryPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_plan_statuses": list(_CREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52e": True,
+        "human_review_required_always_true_in_52e": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "CorruptionRecoverySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_CREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52e": True,
+        "human_review_required_always_true_in_52e": True,
+        "fields": summary_fields,
+    }
+
+    corruption_recovery_overview = {
+        "overview_id": f"52e-{ts}",
+        "generated_at": generated_at,
+        "phase": "52E",
+        "title": "Corruption Recovery",
+        "summary": (
+            "Defines recovery planning for corrupted, malformed, missing, or "
+            "inconsistent PCAE project state artifacts. Eight corruption domains "
+            "are assessed: task_file_corruption, session_file_corruption, "
+            "governance_record_corruption, command_catalog_corruption, "
+            "project_status_corruption, changelog_corruption, "
+            "lock_file_corruption, and artifact_reference_corruption. "
+            f"domain_count={domain_count}, candidate_count={candidate_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Corruption recovery is advisory and read-only. "
+            "No files are rewritten or modified. "
+            "recovery_allowed=False. recovery_automatic=False."
+        ),
+        "corruption_domain_count": domain_count,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "corruption_recovery_overview": corruption_recovery_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "domain_candidates": domain_candidates,
+        "sample_candidate": sample_candidate,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CREC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CREC_INPUT_SOURCES),
+        "advisory": CORRUPTION_RECOVERY_ADVISORY,
+    }
