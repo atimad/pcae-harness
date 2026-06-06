@@ -34431,3 +34431,227 @@ def test_50f_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50G — Controlled Write Evidence Requirements tests
+# ---------------------------------------------------------------------------
+
+def test_50g_json_structure(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_evidence_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50g_overview_fields(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_evidence_overview"]
+    assert ov["phase"] == "50G"
+    assert ov["evidence_complete"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["evidence_domain_count"] == 8
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["compliant_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["evidence_status"] in (
+        "insufficient_evidence", "evidence_with_warnings",
+        "pending_human_review", "complete"
+    )
+
+
+def test_50g_evidence_always_incomplete(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_evidence_overview"]["evidence_complete"] is False
+    assert data["write_evidence_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["evidence_complete"] is False
+    assert data["sample_assessment"]["evidence_complete"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["evidence_complete"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["evidence_complete"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["evidence_complete_always_false_in_50g"] is True
+    assert data["assessment_model"]["evidence_complete_always_false_in_50g"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_50g"] is True
+    assert data["summary_model"]["evidence_complete_always_false_in_50g"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50g"] is True
+    for d in data["domain_assessments"]:
+        assert d["evidence_complete"] is False
+
+
+def test_50g_human_review_always_required(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_evidence_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50g_candidate_model(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteEvidenceCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 6
+    assert set(cm["supported_evidence_statuses"]) == {
+        "insufficient_evidence", "evidence_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50g_assessment_model(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "WriteEvidenceAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 9
+    assert set(am["supported_evidence_statuses"]) == {
+        "insufficient_evidence", "evidence_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50g_summary_model(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteEvidenceSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_evidence_statuses"]) == {
+        "insufficient_evidence", "evidence_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50g_all_evidence_domains_covered(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "problem_statement_evidence", "change_scope_evidence",
+        "file_impact_evidence", "rollback_evidence",
+        "test_evidence", "audit_evidence",
+        "approval_evidence", "risk_evidence",
+    ):
+        assert expected in domains, f"missing evidence domain: {expected}"
+
+
+def test_50g_domain_assessment_structure(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "evidence_complete"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["evidence_complete"] is False
+
+
+def test_50g_sample_candidate_fields(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "evidence_id", "write_plan_id", "evidence_domains",
+        "evidence_count", "human_review_required", "evidence_complete",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["evidence_complete"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["evidence_domains"], list)
+    assert len(sc["evidence_domains"]) == 8
+    assert sc["evidence_count"] == 8
+
+
+def test_50g_sample_assessment_fields(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "evidence_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "evidence_status",
+        "evidence_complete", "execution_allowed",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["evidence_complete"] is False
+    assert sa["execution_allowed"] is False
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+
+
+def test_50g_sample_summary_fields(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "evidence_status",
+        "evidence_complete", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["evidence_complete"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_50g_input_sources(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationDecisionRecord", "WritePlanCandidate",
+        "WriteReadinessAssessment", "GovernanceInvariantAssessment",
+        "RuntimeSafetyInvariantAssessment", "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50g_governance_boundaries(capsys) -> None:
+    main(["write-evidence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["evidence_complete"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50G"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess evidence requirements",
+        "identify missing evidence",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50g_human_output_shows_all_sections(capsys) -> None:
+    main(["write-evidence"])
+    output = capsys.readouterr().out
+    assert "Controlled write evidence requirements" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

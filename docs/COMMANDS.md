@@ -686,3 +686,8 @@
 
 - `pcae write-readiness`
 - `pcae write-readiness --json`
+
+## write-evidence
+
+- `pcae write-evidence`
+- `pcae write-evidence --json`

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50F: Controlled Write Readiness Assessment.
+Phase 50G: Controlled Write Evidence Requirements.
 
 ## Governance Coherence Note
 
@@ -3501,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50F: Controlled Write Readiness Assessment.
+Phase 50G: Controlled Write Evidence Requirements.
 
 ## Next
 
-- TBD: Future phases (50G and beyond).
+- TBD: Future phases (50H and beyond).
 
 ## Future Explorations
 

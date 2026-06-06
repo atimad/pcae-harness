@@ -118,6 +118,7 @@ from pcae.commands.agent import (
     run_write_authorization_lifecycle,
     run_write_plan,
     run_write_readiness,
+    run_write_evidence,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3828,6 +3829,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_readiness_parser.set_defaults(handler=run_write_readiness)
+
+    write_evidence_parser = subparsers.add_parser(
+        "write-evidence",
+        help="Define evidence requirements that must exist before a write authorization can be considered ready (Phase 50G).",
+    )
+    write_evidence_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_evidence_parser.set_defaults(handler=run_write_evidence)
 
     return parser
 

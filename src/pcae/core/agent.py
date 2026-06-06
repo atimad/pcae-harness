@@ -41269,3 +41269,445 @@ def build_write_readiness() -> dict:
         "input_sources": list(_WR_INPUT_SOURCES),
         "advisory": WRITE_READINESS_ADVISORY,
     }
+
+
+# Phase 50G — Controlled Write Evidence Requirements
+# ---------------------------------------------------------------------------
+
+WRITE_EVIDENCE_ADVISORY = (
+    "Write evidence assessment is informational; evidence requirements may be assessed "
+    "and blockers and warnings reported, but no automatic evidence acceptance occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. evidence_complete=False and "
+    "execution_allowed=False in Phase 50G."
+)
+
+_WE_EVIDENCE_DOMAINS: tuple[str, ...] = (
+    "problem_statement_evidence",
+    "change_scope_evidence",
+    "file_impact_evidence",
+    "rollback_evidence",
+    "test_evidence",
+    "audit_evidence",
+    "approval_evidence",
+    "risk_evidence",
+)
+
+_WE_EVIDENCE_STATUSES: tuple[str, ...] = (
+    "insufficient_evidence",
+    "evidence_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_WE_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write evidence candidate.",
+    },
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The write plan candidate this evidence assessment is associated with.",
+    },
+    {
+        "name": "evidence_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of evidence domains to be assessed.",
+    },
+    {
+        "name": "evidence_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of evidence domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50G.",
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50G.",
+    },
+)
+
+_WE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write evidence assessment.",
+    },
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "The write evidence candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of evidence domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with sufficient evidence.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with missing or blocking evidence.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with incomplete but non-blocking evidence.",
+    },
+    {
+        "name": "evidence_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_evidence, evidence_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50G.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50G.",
+    },
+)
+
+_WE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write evidence summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The write evidence assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of evidence domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with sufficient evidence.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with missing or blocking evidence.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with incomplete but non-blocking evidence.",
+    },
+    {
+        "name": "evidence_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_evidence, evidence_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50G.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50G.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50G.",
+    },
+)
+
+_WE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess evidence requirements",
+        "identify missing evidence",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "evidence_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50G",
+}
+
+_WE_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationDecisionRecord",
+    "WritePlanCandidate",
+    "WriteReadinessAssessment",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WE_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "problem_statement_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No problem statement evidence has been provided. "
+            "A clear problem statement describing the motivation and "
+            "expected outcome of the write operation is required."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "change_scope_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No change scope evidence has been provided. "
+            "The explicit boundaries of the change, including which systems "
+            "and components are affected, must be documented."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "file_impact_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No file impact evidence has been provided. "
+            "A complete list of files to be modified, created, or deleted "
+            "must be documented before write authorization can proceed."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "rollback_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No rollback evidence has been provided. "
+            "Documentation confirming a tested and available rollback procedure "
+            "must be present before write execution is considered."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "test_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No test evidence has been provided. "
+            "Evidence that the change has been validated through applicable "
+            "tests or review processes is required."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "audit_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No audit evidence has been provided. "
+            "Evidence confirming that all write operations will be captured "
+            "in the governance audit trail is required."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "approval_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No approval evidence has been provided. "
+            "Documented human approval of the write plan must be present "
+            "before any write execution is considered."
+        ),
+        "evidence_complete": False,
+    },
+    {
+        "domain": "risk_evidence",
+        "severity": "warning",
+        "finding": (
+            "Risk assessment evidence has not been documented. "
+            "A risk summary describing known risks and mitigations should "
+            "be present to support informed human review."
+        ),
+        "evidence_complete": False,
+    },
+)
+
+
+def build_write_evidence() -> dict:
+    """Define write evidence requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    evidence_id_ref = f"we-{ts}"
+
+    candidate_fields = [dict(f) for f in _WE_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WE_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WE_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WE_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        evidence_status = "pending_human_review"
+    elif warning_count > 0:
+        evidence_status = "evidence_with_warnings"
+    else:
+        evidence_status = "insufficient_evidence"
+
+    assessment_id_ref = f"wea-{ts}"
+
+    sample_candidate = {
+        "evidence_id": evidence_id_ref,
+        "write_plan_id": f"wp-{ts}",
+        "evidence_domains": list(_WE_EVIDENCE_DOMAINS),
+        "evidence_count": len(_WE_EVIDENCE_DOMAINS),
+        "human_review_required": True,
+        "evidence_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "evidence_id": evidence_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"wes-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteEvidenceCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_evidence_statuses": list(_WE_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_50g": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteEvidenceAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_evidence_statuses": list(_WE_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_50g": True,
+        "execution_allowed_always_false_in_50g": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteEvidenceSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_evidence_statuses": list(_WE_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_50g": True,
+        "execution_allowed_always_false_in_50g": True,
+        "fields": summary_fields,
+    }
+
+    write_evidence_overview = {
+        "overview_id": f"50g-{ts}",
+        "generated_at": generated_at,
+        "phase": "50G",
+        "title": "Controlled Write Evidence Requirements",
+        "summary": (
+            "Defines the evidence requirements that must exist before a write "
+            "authorization can ever be considered ready. "
+            "Eight evidence domains are assessed: "
+            "problem_statement_evidence, change_scope_evidence, file_impact_evidence, "
+            "rollback_evidence, test_evidence, audit_evidence, "
+            "approval_evidence, and risk_evidence. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"evidence_status={evidence_status}. "
+            "Write evidence assessment is advisory and read-only. No write execution occurs. "
+            "evidence_complete=False. execution_allowed=False."
+        ),
+        "evidence_domain_count": len(_WE_EVIDENCE_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_evidence_overview": write_evidence_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WE_INPUT_SOURCES),
+        "advisory": WRITE_EVIDENCE_ADVISORY,
+    }
