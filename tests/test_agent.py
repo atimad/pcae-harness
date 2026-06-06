@@ -36653,3 +36653,226 @@ def test_51e_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 51F: Execution Readiness Assessment ---
+
+
+def test_51f_json_structure(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "execution_readiness_assessment_overview", "candidate_model",
+        "assessment_model", "summary_model", "domain_assessments",
+        "sample_candidate", "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_51f_overview_fields(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_readiness_assessment_overview"]
+    assert ov["phase"] == "51F"
+    assert ov["readiness_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["readiness_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert isinstance(ov["compliant_count"], int)
+    assert ov["readiness_status"] in (
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked"
+    )
+
+
+def test_51f_readiness_always_blocked(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_readiness_assessment_overview"]
+    assert ov["readiness_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert data["sample_candidate"]["readiness_allowed"] is False
+    assert data["sample_assessment"]["readiness_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["readiness_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    gb = data["governance_boundaries"]
+    assert gb["readiness_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert data["candidate_model"]["readiness_allowed_always_false_in_51f"] is True
+    assert data["assessment_model"]["readiness_allowed_always_false_in_51f"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_51f"] is True
+    assert data["summary_model"]["readiness_allowed_always_false_in_51f"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_51f"] is True
+
+
+def test_51f_human_review_always_required(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["execution_readiness_assessment_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_51f_candidate_model(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "ExecutionReadinessCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 8
+    assert set(cm["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked",
+    }
+    assert cm["readiness_allowed_always_false_in_51f"] is True
+
+
+def test_51f_assessment_model(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "ExecutionReadinessAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 10
+    assert set(am["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked",
+    }
+    assert am["readiness_allowed_always_false_in_51f"] is True
+    assert am["execution_allowed_always_false_in_51f"] is True
+
+
+def test_51f_summary_model(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "ExecutionReadinessSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked",
+    }
+    assert sm["readiness_allowed_always_false_in_51f"] is True
+    assert sm["execution_allowed_always_false_in_51f"] is True
+
+
+def test_51f_all_readiness_domains_covered(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "request_readiness", "review_readiness", "decision_readiness",
+        "lifecycle_readiness", "execution_plan_readiness",
+        "runtime_safety_readiness", "governance_readiness", "rollback_readiness",
+    ):
+        assert expected in domains, f"missing readiness domain: {expected}"
+
+
+def test_51f_domain_assessment_structure(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "readiness_allowed", "execution_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["readiness_allowed"] is False
+        assert d["execution_allowed"] is False
+
+
+def test_51f_sample_candidate_fields(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "readiness_id", "request_id", "plan_id", "selected_runtime", "selected_agent",
+        "readiness_domains", "human_review_required", "readiness_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["readiness_allowed"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["readiness_domains"], list)
+    assert len(sc["readiness_domains"]) == 8
+
+
+def test_51f_sample_assessment_fields(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "readiness_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "readiness_status",
+        "readiness_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["readiness_allowed"] is False
+    assert sa["execution_allowed"] is False
+    assert sa["human_review_required"] is True
+    assert isinstance(sa["compliant_count"], int)
+
+
+def test_51f_sample_summary_fields(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "readiness_status",
+        "readiness_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["readiness_allowed"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_51f_input_sources(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ExecutionRequestSummary", "ExecutionReviewSummary", "ExecutionDecisionSummary",
+        "ExecutionLifecycleSummary", "ExecutionPlanSummary",
+        "RuntimeSafetyInvariantAssessment", "GovernanceInvariantAssessment",
+        "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_51f_governance_boundaries(capsys) -> None:
+    main(["execution-readiness-assessment", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["readiness_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "51F"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess execution readiness",
+        "identify missing prerequisites",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_51f_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-readiness-assessment"])
+    output = capsys.readouterr().out
+    assert "Execution readiness assessment" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

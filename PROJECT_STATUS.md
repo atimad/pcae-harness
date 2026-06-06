@@ -3699,9 +3699,59 @@ GovernanceRecoveryPlan; execution plan definition is advisory and read-only;
 no execution occurs; no files are modified; `docs/COMMANDS.md` regenerated;
 15 new tests; 3913 total tests passing
 
+`pcae execution-readiness-assessment` and `--json`; assesses whether an
+execution plan satisfies all prerequisites required for future controlled
+execution; three models — ExecutionReadinessCandidate (8 fields: readiness_id,
+request_id, plan_id, selected_runtime, selected_agent, readiness_domains,
+human_review_required, readiness_allowed), ExecutionReadinessAssessment (10
+fields: assessment_id, readiness_id, domain_count, compliant_count,
+blocker_count, warning_count, readiness_status, readiness_allowed,
+execution_allowed, human_review_required), ExecutionReadinessSummary (10
+fields: summary_id, assessment_id, domain_count, compliant_count,
+blocker_count, warning_count, readiness_status, readiness_allowed,
+execution_allowed, human_review_required); four readiness statuses: not_ready,
+ready_with_warnings, pending_human_review, blocked; eight readiness domains:
+request_readiness, review_readiness, decision_readiness, lifecycle_readiness,
+execution_plan_readiness, runtime_safety_readiness, governance_readiness,
+rollback_readiness; eight blockers; readiness_status=pending_human_review;
+readiness_allowed=False; execution_allowed=False; human_review_required=True;
+inputs: ExecutionRequestSummary, ExecutionReviewSummary,
+ExecutionDecisionSummary, ExecutionLifecycleSummary, ExecutionPlanSummary,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment,
+GovernanceRecoveryPlan; execution readiness assessment is advisory and
+read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3928 total tests passing
+
+## Phase 51F: Execution Readiness Assessment
+
+Implemented `pcae execution-readiness-assessment` and `--json`. Assesses
+whether an execution plan satisfies all prerequisites required for future
+controlled execution. Three models — ExecutionReadinessCandidate (8 fields:
+readiness_id, request_id, plan_id, selected_runtime, selected_agent,
+readiness_domains, human_review_required, readiness_allowed),
+ExecutionReadinessAssessment (10 fields: assessment_id, readiness_id,
+domain_count, compliant_count, blocker_count, warning_count, readiness_status,
+readiness_allowed, execution_allowed, human_review_required),
+ExecutionReadinessSummary (10 fields: summary_id, assessment_id, domain_count,
+compliant_count, blocker_count, warning_count, readiness_status,
+readiness_allowed, execution_allowed, human_review_required); four readiness
+statuses: not_ready, ready_with_warnings, pending_human_review, blocked; eight
+readiness domains: request_readiness, review_readiness, decision_readiness,
+lifecycle_readiness, execution_plan_readiness, runtime_safety_readiness,
+governance_readiness, rollback_readiness; eight blockers;
+readiness_status=pending_human_review; readiness_allowed=False;
+execution_allowed=False; human_review_required=True; inputs:
+ExecutionRequestSummary, ExecutionReviewSummary, ExecutionDecisionSummary,
+ExecutionLifecycleSummary, ExecutionPlanSummary, RuntimeSafetyInvariantAssessment,
+GovernanceInvariantAssessment, GovernanceRecoveryPlan; execution readiness
+assessment is advisory and read-only; no execution occurs; no files are
+modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3928 total tests
+passing. Note: command is `execution-readiness-assessment` (not
+`execution-readiness`) to avoid conflict with Phase 44Y.
+
 ## Current Phase
 
-Phase 51E: Execution Plan.
+Phase 51F: Execution Readiness Assessment.
 
 ## Next
 

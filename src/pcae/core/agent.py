@@ -45890,3 +45890,470 @@ def build_execution_plan() -> dict:
         "input_sources": list(_EPL_INPUT_SOURCES),
         "advisory": EXECUTION_PLAN_ADVISORY,
     }
+
+
+EXECUTION_READINESS_ASSESSMENT_ADVISORY = (
+    "Execution readiness is informational; readiness may be assessed and "
+    "missing prerequisites identified, but no execution occurs and no "
+    "authorization is granted. No files are modified, no runtimes are invoked, "
+    "and no prompts are executed. readiness_allowed=False and "
+    "execution_allowed=False in Phase 51F."
+)
+
+_ERDA_READINESS_DOMAINS: tuple[str, ...] = (
+    "request_readiness",
+    "review_readiness",
+    "decision_readiness",
+    "lifecycle_readiness",
+    "execution_plan_readiness",
+    "runtime_safety_readiness",
+    "governance_readiness",
+    "rollback_readiness",
+)
+
+_ERDA_READINESS_STATUSES: tuple[str, ...] = (
+    "not_ready",
+    "ready_with_warnings",
+    "pending_human_review",
+    "blocked",
+)
+
+_ERDA_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution readiness candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this readiness candidate is associated with.",
+    },
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution plan this readiness candidate is assessing.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for this execution plan.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for this execution plan.",
+    },
+    {
+        "name": "readiness_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of readiness domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51F.",
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51F.",
+    },
+)
+
+_ERDA_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution readiness assessment.",
+    },
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "required": True,
+        "description": "The readiness candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of readiness domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with non-blocking warnings.",
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_ready, ready_with_warnings, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51F.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51F.",
+    },
+)
+
+_ERDA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution readiness summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of readiness domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with non-blocking warnings.",
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_ready, ready_with_warnings, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51F.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51F.",
+    },
+)
+
+_ERDA_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess execution readiness",
+        "identify missing prerequisites",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "readiness_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51F",
+}
+
+_ERDA_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_ERDA_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "request_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant execution request summary is present. "
+            "A human-reviewed execution request summary is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "review_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant execution review summary is present. "
+            "A human-reviewed execution review summary is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "decision_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant execution decision summary is present. "
+            "A human-reviewed execution decision summary is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "lifecycle_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant execution lifecycle summary is present. "
+            "A human-reviewed execution lifecycle summary is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_plan_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant execution plan summary is present. "
+            "A human-reviewed execution plan summary is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "runtime_safety_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant runtime safety invariant assessment is present. "
+            "A passing runtime safety assessment is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "governance_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No compliant governance invariant assessment is present. "
+            "A passing governance invariant assessment is required before "
+            "readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No rollback plan is present in the execution plan. "
+            "At least one rollback point must be declared and reviewed by a human "
+            "before readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_readiness_assessment() -> dict:
+    """Assess execution readiness against all governed prerequisites. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    readiness_id_ref = f"erda-{ts}"
+
+    candidate_fields = [dict(f) for f in _ERDA_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _ERDA_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _ERDA_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _ERDA_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        readiness_status = "pending_human_review"
+    elif warning_count > 0:
+        readiness_status = "ready_with_warnings"
+    else:
+        readiness_status = "blocked"
+
+    assessment_id_ref = f"erdar-{ts}"
+
+    sample_candidate = {
+        "readiness_id": readiness_id_ref,
+        "request_id": f"era-{ts}",
+        "plan_id": f"epl-{ts}",
+        "selected_runtime": "pending_human_review",
+        "selected_agent": "pending_human_review",
+        "readiness_domains": list(_ERDA_READINESS_DOMAINS),
+        "human_review_required": True,
+        "readiness_allowed": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "readiness_id": readiness_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"erdasum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionReadinessCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_readiness_statuses": list(_ERDA_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_51f": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionReadinessAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_readiness_statuses": list(_ERDA_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_51f": True,
+        "execution_allowed_always_false_in_51f": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionReadinessSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_readiness_statuses": list(_ERDA_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_51f": True,
+        "execution_allowed_always_false_in_51f": True,
+        "fields": summary_fields,
+    }
+
+    execution_readiness_assessment_overview = {
+        "overview_id": f"51f-{ts}",
+        "generated_at": generated_at,
+        "phase": "51F",
+        "title": "Execution Readiness Assessment",
+        "summary": (
+            "Assesses whether an execution plan satisfies all prerequisites required "
+            "for future controlled execution. Eight readiness domains are assessed: "
+            "request_readiness, review_readiness, decision_readiness, "
+            "lifecycle_readiness, execution_plan_readiness, runtime_safety_readiness, "
+            "governance_readiness, and rollback_readiness. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"readiness_status={readiness_status}. "
+            "Execution readiness assessment is advisory and read-only. "
+            "No execution occurs. readiness_allowed=False. execution_allowed=False."
+        ),
+        "readiness_domain_count": len(_ERDA_READINESS_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_readiness_assessment_overview": execution_readiness_assessment_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ERDA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ERDA_INPUT_SOURCES),
+        "advisory": EXECUTION_READINESS_ASSESSMENT_ADVISORY,
+    }

@@ -128,6 +128,7 @@ from pcae.commands.agent import (
     run_execution_decision,
     run_execution_lifecycle,
     run_execution_plan,
+    run_execution_readiness_assessment,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3948,6 +3949,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_plan_parser.set_defaults(handler=run_execution_plan)
+
+    execution_readiness_assessment_parser = subparsers.add_parser(
+        "execution-readiness-assessment",
+        help="Assess whether an execution plan satisfies all prerequisites for future controlled execution (Phase 51F).",
+    )
+    execution_readiness_assessment_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_readiness_assessment_parser.set_defaults(
+        handler=run_execution_readiness_assessment
+    )
 
     return parser
 
