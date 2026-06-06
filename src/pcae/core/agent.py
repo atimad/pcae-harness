@@ -41711,3 +41711,445 @@ def build_write_evidence() -> dict:
         "input_sources": list(_WE_INPUT_SOURCES),
         "advisory": WRITE_EVIDENCE_ADVISORY,
     }
+
+
+# Phase 50H — Controlled Write Audit Requirements
+# ---------------------------------------------------------------------------
+
+WRITE_AUDIT_ADVISORY = (
+    "Write audit assessment is informational; audit requirements may be assessed "
+    "and blockers and warnings reported, but no automatic audit acceptance occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. audit_complete=False and "
+    "execution_allowed=False in Phase 50H."
+)
+
+_WAU_AUDIT_DOMAINS: tuple[str, ...] = (
+    "authorization_audit",
+    "review_audit",
+    "decision_audit",
+    "lifecycle_audit",
+    "planning_audit",
+    "evidence_audit",
+    "execution_trace_audit",
+    "rollback_audit",
+)
+
+_WAU_AUDIT_STATUSES: tuple[str, ...] = (
+    "insufficient_audit",
+    "audit_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_WAU_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write audit candidate.",
+    },
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The write plan candidate this audit assessment is associated with.",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of audit domains to be assessed.",
+    },
+    {
+        "name": "audit_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of audit domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50H.",
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50H.",
+    },
+)
+
+_WAU_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write audit assessment.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The write audit candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with sufficient audit artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with missing or blocking audit artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_audit, audit_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50H.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50H.",
+    },
+)
+
+_WAU_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write audit summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The write audit assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with sufficient audit artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with missing or blocking audit artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_audit, audit_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50H.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50H.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50H.",
+    },
+)
+
+_WAU_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess audit requirements",
+        "identify missing audit artifacts",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "audit_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50H",
+}
+
+_WAU_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationDecisionRecord",
+    "WritePlanCandidate",
+    "WriteReadinessAssessment",
+    "WriteEvidenceAssessment",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WAU_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "authorization_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization audit record has been established. "
+            "An audit trail confirming write authorization decision provenance "
+            "must be present before execution eligibility is assessed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "review_audit",
+        "severity": "blocker",
+        "finding": (
+            "No review audit record has been established. "
+            "An audit trail confirming the write authorization review record "
+            "and all reviewer decisions must be present."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "decision_audit",
+        "severity": "blocker",
+        "finding": (
+            "No decision audit record has been established. "
+            "An audit trail confirming the write authorization decision record "
+            "and all decision domain outcomes must be present."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "lifecycle_audit",
+        "severity": "blocker",
+        "finding": (
+            "No lifecycle audit record has been established. "
+            "An audit trail confirming the write authorization lifecycle state "
+            "transitions must be present before eligibility is assessed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "planning_audit",
+        "severity": "blocker",
+        "finding": (
+            "No planning audit record has been established. "
+            "An audit trail confirming the write plan candidate, file scope, "
+            "allowed and forbidden operations must be present."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "evidence_audit",
+        "severity": "blocker",
+        "finding": (
+            "No evidence audit record has been established. "
+            "An audit trail confirming all required evidence domains have been "
+            "assessed must be present before execution eligibility proceeds."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "execution_trace_audit",
+        "severity": "warning",
+        "finding": (
+            "Execution trace audit record cannot be established prior to execution. "
+            "This domain is assessed post-execution; a plan for capturing "
+            "execution traces must be documented before execution begins."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "rollback_audit",
+        "severity": "blocker",
+        "finding": (
+            "No rollback audit record has been established. "
+            "An audit trail confirming rollback plan readiness and "
+            "availability must be present before execution eligibility is assessed."
+        ),
+        "audit_complete": False,
+    },
+)
+
+
+def build_write_audit() -> dict:
+    """Define write audit requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"wau-{ts}"
+
+    candidate_fields = [dict(f) for f in _WAU_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WAU_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WAU_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WAU_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        audit_status = "pending_human_review"
+    elif warning_count > 0:
+        audit_status = "audit_with_warnings"
+    else:
+        audit_status = "insufficient_audit"
+
+    assessment_id_ref = f"waua-{ts}"
+
+    sample_candidate = {
+        "audit_id": audit_id_ref,
+        "write_plan_id": f"wp-{ts}",
+        "audit_domains": list(_WAU_AUDIT_DOMAINS),
+        "audit_count": len(_WAU_AUDIT_DOMAINS),
+        "human_review_required": True,
+        "audit_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "audit_id": audit_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"waus-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteAuditCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_audit_statuses": list(_WAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50h": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteAuditAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_audit_statuses": list(_WAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50h": True,
+        "execution_allowed_always_false_in_50h": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteAuditSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_audit_statuses": list(_WAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50h": True,
+        "execution_allowed_always_false_in_50h": True,
+        "fields": summary_fields,
+    }
+
+    write_audit_overview = {
+        "overview_id": f"50h-{ts}",
+        "generated_at": generated_at,
+        "phase": "50H",
+        "title": "Controlled Write Audit Requirements",
+        "summary": (
+            "Defines the audit requirements that must exist before a write "
+            "authorization can ever be considered eligible for execution. "
+            "Eight audit domains are assessed: "
+            "authorization_audit, review_audit, decision_audit, lifecycle_audit, "
+            "planning_audit, evidence_audit, execution_trace_audit, and rollback_audit. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"audit_status={audit_status}. "
+            "Write audit assessment is advisory and read-only. No write execution occurs. "
+            "audit_complete=False. execution_allowed=False."
+        ),
+        "audit_domain_count": len(_WAU_AUDIT_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_audit_overview": write_audit_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WAU_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WAU_INPUT_SOURCES),
+        "advisory": WRITE_AUDIT_ADVISORY,
+    }

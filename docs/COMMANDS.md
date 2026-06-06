@@ -691,3 +691,8 @@
 
 - `pcae write-evidence`
 - `pcae write-evidence --json`
+
+## write-audit
+
+- `pcae write-audit`
+- `pcae write-audit --json`

@@ -34655,3 +34655,227 @@ def test_50g_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50H — Controlled Write Audit Requirements tests
+# ---------------------------------------------------------------------------
+
+def test_50h_json_structure(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_audit_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50h_overview_fields(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_audit_overview"]
+    assert ov["phase"] == "50H"
+    assert ov["audit_complete"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["audit_domain_count"] == 8
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["compliant_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["audit_status"] in (
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete"
+    )
+
+
+def test_50h_audit_always_incomplete(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_audit_overview"]["audit_complete"] is False
+    assert data["write_audit_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["audit_complete"] is False
+    assert data["sample_assessment"]["audit_complete"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["audit_complete"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["audit_complete"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["audit_complete_always_false_in_50h"] is True
+    assert data["assessment_model"]["audit_complete_always_false_in_50h"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_50h"] is True
+    assert data["summary_model"]["audit_complete_always_false_in_50h"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50h"] is True
+    for d in data["domain_assessments"]:
+        assert d["audit_complete"] is False
+
+
+def test_50h_human_review_always_required(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_audit_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50h_candidate_model(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteAuditCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 6
+    assert set(cm["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50h_assessment_model(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "WriteAuditAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 9
+    assert set(am["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50h_summary_model(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteAuditSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete"
+    }
+
+
+def test_50h_all_audit_domains_covered(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "authorization_audit", "review_audit", "decision_audit",
+        "lifecycle_audit", "planning_audit", "evidence_audit",
+        "execution_trace_audit", "rollback_audit",
+    ):
+        assert expected in domains, f"missing audit domain: {expected}"
+
+
+def test_50h_domain_assessment_structure(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "audit_complete"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["audit_complete"] is False
+
+
+def test_50h_sample_candidate_fields(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "audit_id", "write_plan_id", "audit_domains",
+        "audit_count", "human_review_required", "audit_complete",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["audit_complete"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["audit_domains"], list)
+    assert len(sc["audit_domains"]) == 8
+    assert sc["audit_count"] == 8
+
+
+def test_50h_sample_assessment_fields(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "audit_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "audit_status",
+        "audit_complete", "execution_allowed",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["audit_complete"] is False
+    assert sa["execution_allowed"] is False
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+
+
+def test_50h_sample_summary_fields(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "audit_status",
+        "audit_complete", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["audit_complete"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_50h_input_sources(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationDecisionRecord", "WritePlanCandidate",
+        "WriteReadinessAssessment", "WriteEvidenceAssessment",
+        "GovernanceInvariantAssessment", "RuntimeSafetyInvariantAssessment",
+        "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50h_governance_boundaries(capsys) -> None:
+    main(["write-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["audit_complete"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50H"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess audit requirements",
+        "identify missing audit artifacts",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50h_human_output_shows_all_sections(capsys) -> None:
+    main(["write-audit"])
+    output = capsys.readouterr().out
+    assert "Controlled write audit requirements" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

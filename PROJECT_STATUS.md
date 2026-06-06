@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50G: Controlled Write Evidence Requirements.
+Phase 50H: Controlled Write Audit Requirements.
 
 ## Governance Coherence Note
 
@@ -3501,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50G: Controlled Write Evidence Requirements.
+Phase 50H: Controlled Write Audit Requirements.
 
 ## Next
 
-- TBD: Future phases (50H and beyond).
+- TBD: Future phases (50I and beyond).
 
 ## Future Explorations
 

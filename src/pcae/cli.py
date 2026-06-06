@@ -119,6 +119,7 @@ from pcae.commands.agent import (
     run_write_plan,
     run_write_readiness,
     run_write_evidence,
+    run_write_audit,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3840,6 +3841,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_evidence_parser.set_defaults(handler=run_write_evidence)
+
+    write_audit_parser = subparsers.add_parser(
+        "write-audit",
+        help="Define audit requirements that must exist before a write authorization can be considered eligible for execution (Phase 50H).",
+    )
+    write_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_audit_parser.set_defaults(handler=run_write_audit)
 
     return parser
 

@@ -712,6 +712,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-evidence`
 - `pcae write-evidence --json`
+
+## write-audit
+
+- `pcae write-audit`
+- `pcae write-audit --json`
 """
 
 
