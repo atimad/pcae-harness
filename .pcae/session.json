@@ -1,7 +1,7 @@
 {
   "active_task": {
-    "id": "20260605-1052-multi-agent-governance-audit",
-    "title": "Multi-agent governance audit"
+    "id": "20260606-2117-documentation-refresh-and-release-checkpoint",
+    "title": "Documentation refresh and release checkpoint"
   },
   "architectural_notes": [],
   "blockers": [],
@@ -14,38 +14,22 @@
         "status": " M"
       },
       {
-        "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260523-0731-implement-global-policy-configuration.md",
+        "path": "tasks/active/20260605-1052-multi-agent-governance-audit.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260605-1052-multi-agent-governance-audit.md",
+        "path": "tasks/active/20260606-2117-documentation-refresh-and-release-checkpoint.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260523-0731-implement-global-policy-configuration.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260605-1042-plan-multi-agent-governance-next-phase.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260605-1043-plan-multi-agent-governance-next-phase.md",
+        "path": "tasks/done/20260605-1052-multi-agent-governance-audit.md",
         "status": "??"
       }
     ],
-    "status_summary": "8 changed files"
+    "status_summary": "4 changed files"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-05T09:03:32.065021+00:00",
+  "timestamp": "2026-06-06T19:38:08.429418+00:00",
   "warnings": []
 }

@@ -10,7 +10,7 @@ Multi-agent governance audit
 
 ## Status
 
-active
+done
 
 ## Mode
 
