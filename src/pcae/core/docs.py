@@ -787,6 +787,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-recommendation`
 - `pcae execution-recommendation --json`
+
+## task-lifecycle-hardening
+
+- `pcae task-lifecycle-hardening`
+- `pcae task-lifecycle-hardening --json`
 """
 
 

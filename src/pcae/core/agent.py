@@ -46681,6 +46681,484 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+TASK_LIFECYCLE_HARDENING_ADVISORY = (
+    "Task lifecycle hardening is informational; lifecycle state may be inspected "
+    "and signals reported, but no automatic repair occurs and no tasks are moved "
+    "or modified. No files are modified, no runtimes are invoked, and no prompts "
+    "are executed. execution_allowed=False in Phase 52A. "
+    "Repair is advisory only and requires human review."
+)
+
+_TLHD_HARDENING_DOMAINS: tuple[str, ...] = (
+    "active_task_count_validation",
+    "stale_active_task_detection",
+    "done_task_integrity_validation",
+    "active_done_overlap_detection",
+    "task_scope_completeness_validation",
+    "task_status_consistency_validation",
+    "task_session_alignment_validation",
+    "task_handoff_contamination_prevention",
+)
+
+_TLHD_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_TLHD_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_TLHD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening signal.",
+    },
+    {
+        "name": "task_id",
+        "type": "str",
+        "required": True,
+        "description": "The task this signal is associated with.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The hardening domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of hardening signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The actual state observed during inspection.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The expected state according to governance policy.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52A.",
+    },
+)
+
+_TLHD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True when blockers or warnings are present; repair is advisory only.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52A.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52A.",
+    },
+)
+
+_TLHD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "repair_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True when blockers or warnings are present; repair is advisory only.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52A.",
+    },
+)
+
+_TLHD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect task lifecycle state",
+        "detect stale task conditions",
+        "report blockers and warnings",
+        "recommend human-reviewed repair",
+    ],
+    "may_not": [
+        "move tasks",
+        "rewrite task files",
+        "rewrite session files",
+        "invoke runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "repair_automatic": False,
+    "read_only": True,
+    "phase": "52A",
+}
+
+_TLHD_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "task transition governance",
+    "governance state audit",
+    "governance drift detection",
+    "governance recovery planning",
+)
+
+_TLHD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "active_task_count_validation",
+        "signal_type": "excessive_active_tasks",
+        "severity": "blocker",
+        "detected_state": "unknown — active task count not yet inspected",
+        "expected_state": "exactly one active task at any given time",
+        "finding": (
+            "Active task count has not been validated. "
+            "Multiple simultaneous active tasks contaminate session continuity "
+            "and handoff integrity. Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "stale_active_task_detection",
+        "signal_type": "stale_active_task",
+        "severity": "blocker",
+        "detected_state": "unknown — stale active task check not yet performed",
+        "expected_state": "active task reflects current session work",
+        "finding": (
+            "Stale active task detection has not been performed. "
+            "Active tasks that no longer reflect current work contaminate "
+            "agent continuity and governance provenance. Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "done_task_integrity_validation",
+        "signal_type": "done_task_integrity_failure",
+        "severity": "warning",
+        "detected_state": "unknown — done task integrity not yet verified",
+        "expected_state": "all done tasks have complete acceptance records",
+        "finding": (
+            "Done task integrity has not been verified. "
+            "Tasks moved to done without complete acceptance records undermine "
+            "governance traceability. Human review is recommended."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "active_done_overlap_detection",
+        "signal_type": "active_done_overlap",
+        "severity": "blocker",
+        "detected_state": "unknown — active/done overlap not yet checked",
+        "expected_state": "no task appears in both active and done simultaneously",
+        "finding": (
+            "Active/done overlap has not been checked. "
+            "Tasks appearing in both active and done state create ambiguous lifecycle "
+            "state that corrupts session and handoff governance. Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "task_scope_completeness_validation",
+        "signal_type": "incomplete_task_scope",
+        "severity": "warning",
+        "detected_state": "unknown — task scope completeness not yet assessed",
+        "expected_state": "all active tasks have complete scope definitions",
+        "finding": (
+            "Task scope completeness has not been assessed. "
+            "Active tasks with missing or incomplete scope definitions allow agents "
+            "to operate outside intended boundaries. Human review is recommended."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "task_status_consistency_validation",
+        "signal_type": "task_status_inconsistency",
+        "severity": "blocker",
+        "detected_state": "unknown — task status consistency not yet validated",
+        "expected_state": "task status field is consistent with task file location",
+        "finding": (
+            "Task status consistency has not been validated. "
+            "Tasks whose status field contradicts their filesystem location "
+            "create governance ambiguity that can mislead orchestration. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "task_session_alignment_validation",
+        "signal_type": "session_task_misalignment",
+        "severity": "warning",
+        "detected_state": "unknown — session/task alignment not yet verified",
+        "expected_state": "current session references exactly the active task",
+        "finding": (
+            "Session/task alignment has not been verified. "
+            "Sessions that do not reference the current active task allow agents "
+            "to act on stale context and introduce governance drift. "
+            "Human review is recommended."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "task_handoff_contamination_prevention",
+        "signal_type": "handoff_contamination_risk",
+        "severity": "blocker",
+        "detected_state": "unknown — handoff contamination check not yet performed",
+        "expected_state": "handoff state references only current valid active task",
+        "finding": (
+            "Handoff contamination check has not been performed. "
+            "Handoffs that carry references to stale or completed tasks contaminate "
+            "the next agent session and undermine governance continuity. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_task_lifecycle_hardening() -> dict:
+    """Harden task lifecycle validation. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(f) for f in _TLHD_SIGNAL_FIELDS]
+    assessment_fields = [dict(f) for f in _TLHD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _TLHD_SUMMARY_FIELDS]
+
+    domain_signals: list[dict] = [dict(d) for d in _TLHD_DOMAIN_SIGNALS]
+
+    blocker_count = sum(1 for d in domain_signals if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_signals if d["severity"] == "warning")
+    info_count = sum(1 for d in domain_signals if d["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_TLHD_HARDENING_DOMAINS)
+
+    if blocker_count > 0:
+        hardening_status = "hardening_required"
+        repair_recommended = True
+    elif warning_count > 0:
+        hardening_status = "hardened_with_warnings"
+        repair_recommended = True
+    else:
+        hardening_status = "hardened"
+        repair_recommended = False
+
+    assessment_id_ref = f"tlhda-{ts}"
+
+    sample_signal = {
+        "signal_id": f"tlhds-{ts}",
+        "task_id": f"task-{ts}",
+        "hardening_domain": "stale_active_task_detection",
+        "signal_type": "stale_active_task",
+        "severity": "blocker",
+        "detected_state": "active task has no recent session reference",
+        "expected_state": "active task reflects current session work",
+        "human_review_required": True,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"tlhdsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "repair_recommended": repair_recommended,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "TaskLifecycleHardeningSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for f in signal_fields if f["required"]),
+        "severity_values": list(_TLHD_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52a": True,
+        "fields": signal_fields,
+    }
+
+    assessment_model = {
+        "model_name": "TaskLifecycleHardeningAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_hardening_statuses": list(_TLHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52a": True,
+        "human_review_required_always_true_in_52a": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "TaskLifecycleHardeningSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_hardening_statuses": list(_TLHD_HARDENING_STATUSES),
+        "human_review_required_always_true_in_52a": True,
+        "fields": summary_fields,
+    }
+
+    task_lifecycle_hardening_overview = {
+        "overview_id": f"52a-{ts}",
+        "generated_at": generated_at,
+        "phase": "52A",
+        "title": "Task Lifecycle Hardening",
+        "summary": (
+            "Hardens PCAE task lifecycle validation so stale, inconsistent, or "
+            "ambiguous task state can be detected before it contaminates sessions, "
+            "handoffs, or agent continuity. Eight hardening domains are assessed: "
+            "active_task_count_validation, stale_active_task_detection, "
+            "done_task_integrity_validation, active_done_overlap_detection, "
+            "task_scope_completeness_validation, task_status_consistency_validation, "
+            "task_session_alignment_validation, and task_handoff_contamination_prevention. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. hardening_status={hardening_status}. "
+            "Task lifecycle hardening is advisory and read-only. "
+            "No tasks are moved or modified. repair_recommended="
+            f"{repair_recommended}. execution_allowed=False."
+        ),
+        "hardening_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "hardening_status": hardening_status,
+        "repair_recommended": repair_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "task_lifecycle_hardening_overview": task_lifecycle_hardening_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_TLHD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_TLHD_INPUT_SOURCES),
+        "advisory": TASK_LIFECYCLE_HARDENING_ADVISORY,
+    }
+
+
 EXECUTION_RECOMMENDATION_ADVISORY = (
     "Execution recommendation is informational; recommendation domains may be "
     "assessed, but no execution occurs and no authorization is granted. "

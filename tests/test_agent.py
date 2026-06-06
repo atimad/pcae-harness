@@ -38020,3 +38020,216 @@ def test_51k_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52A: Task Lifecycle Hardening ---
+
+
+def test_52a_json_structure(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "task_lifecycle_hardening_overview", "signal_model", "assessment_model",
+        "summary_model", "domain_signals", "sample_signal",
+        "sample_assessment", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52a_overview_fields(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["task_lifecycle_hardening_overview"]
+    assert ov["phase"] == "52A"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["hardening_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert isinstance(ov["signal_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["hardening_status"] in (
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    )
+
+
+def test_52a_execution_always_blocked(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["task_lifecycle_hardening_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["assessment_model"]["execution_allowed_always_false_in_52a"] is True
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["repair_automatic"] is False
+
+
+def test_52a_human_review_always_required(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["task_lifecycle_hardening_overview"]["human_review_required"] is True
+    assert data["sample_signal"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["signal_model"]["human_review_required_always_true_in_52a"] is True
+    assert data["assessment_model"]["human_review_required_always_true_in_52a"] is True
+    assert data["summary_model"]["human_review_required_always_true_in_52a"] is True
+
+
+def test_52a_signal_model(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["signal_model"]
+    assert sm["model_name"] == "TaskLifecycleHardeningSignal"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 8
+    assert set(sm["severity_values"]) == {"info", "warning", "blocker"}
+    assert sm["human_review_required_always_true_in_52a"] is True
+
+
+def test_52a_assessment_model(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "TaskLifecycleHardeningAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 8
+    assert set(am["supported_hardening_statuses"]) == {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert am["execution_allowed_always_false_in_52a"] is True
+    assert am["human_review_required_always_true_in_52a"] is True
+
+
+def test_52a_summary_model(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "TaskLifecycleHardeningSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 9
+    assert set(sm["supported_hardening_statuses"]) == {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert sm["human_review_required_always_true_in_52a"] is True
+
+
+def test_52a_all_hardening_domains_covered(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_signals"]}
+    for expected in (
+        "active_task_count_validation", "stale_active_task_detection",
+        "done_task_integrity_validation", "active_done_overlap_detection",
+        "task_scope_completeness_validation", "task_status_consistency_validation",
+        "task_session_alignment_validation", "task_handoff_contamination_prevention",
+    ):
+        assert expected in domains, f"missing hardening domain: {expected}"
+
+
+def test_52a_stale_active_task_detection_present(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_signals"]}
+    assert "stale_active_task_detection" in domains
+    stale = next(d for d in data["domain_signals"] if d["domain"] == "stale_active_task_detection")
+    assert stale["signal_type"] == "stale_active_task"
+    assert stale["severity"] == "blocker"
+    assert stale["human_review_required"] is True
+
+
+def test_52a_domain_signal_structure(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_signals"]:
+        for field in (
+            "domain", "signal_type", "severity", "finding",
+            "detected_state", "expected_state", "human_review_required",
+        ):
+            assert field in d, f"missing field {field!r} in domain signal"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["human_review_required"] is True
+
+
+def test_52a_sample_signal_fields(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sig = data["sample_signal"]
+    for field in (
+        "signal_id", "task_id", "hardening_domain", "signal_type",
+        "severity", "detected_state", "expected_state", "human_review_required",
+    ):
+        assert field in sig, f"missing field {field!r} in sample_signal"
+    assert sig["human_review_required"] is True
+    assert sig["severity"] in ("info", "warning", "blocker")
+
+
+def test_52a_sample_assessment_fields(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "signal_count", "blocker_count", "warning_count",
+        "hardening_status", "repair_recommended", "execution_allowed", "human_review_required",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["execution_allowed"] is False
+    assert sa["human_review_required"] is True
+    assert isinstance(sa["repair_recommended"], bool)
+
+
+def test_52a_sample_summary_fields(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "signal_count",
+        "blocker_count", "warning_count", "hardening_status",
+        "repair_recommended", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["human_review_required"] is True
+    assert ss["domain_count"] == 8
+    assert isinstance(ss["repair_recommended"], bool)
+
+
+def test_52a_governance_boundaries(capsys) -> None:
+    main(["task-lifecycle-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["repair_automatic"] is False
+    assert gb["read_only"] is True
+    assert gb["phase"] == "52A"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "inspect task lifecycle state",
+        "detect stale task conditions",
+        "report blockers and warnings",
+        "recommend human-reviewed repair",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "move tasks", "rewrite task files", "rewrite session files",
+        "invoke runtimes", "execute prompts", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_52a_human_output_shows_all_sections(capsys) -> None:
+    main(["task-lifecycle-hardening"])
+    output = capsys.readouterr().out
+    assert "Task lifecycle hardening" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

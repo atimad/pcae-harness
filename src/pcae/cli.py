@@ -134,6 +134,7 @@ from pcae.commands.agent import (
     run_execution_rollback_verification,
     run_execution_chain_governance_audit,
     run_execution_recommendation,
+    run_task_lifecycle_hardening,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4024,6 +4025,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_recommendation_parser.set_defaults(handler=run_execution_recommendation)
+
+    task_lifecycle_hardening_parser = subparsers.add_parser(
+        "task-lifecycle-hardening",
+        help="Harden PCAE task lifecycle validation to detect stale, inconsistent, or ambiguous task state (Phase 52A).",
+    )
+    task_lifecycle_hardening_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    task_lifecycle_hardening_parser.set_defaults(handler=run_task_lifecycle_hardening)
 
     return parser
 
