@@ -46681,6 +46681,504 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+GOVERNANCE_STATE_RECOVERY_ADVISORY = (
+    "Governance state recovery is informational; governance state may be inspected "
+    "and recovery steps recommended, but no automatic recovery occurs and no "
+    "governance, session, or task files are modified. No runtimes are invoked and "
+    "no prompts are executed. recovery_allowed=False in Phase 52C. "
+    "Recovery is advisory only and requires human review."
+)
+
+_GSREC_RECOVERY_DOMAINS: tuple[str, ...] = (
+    "missing_governance_record_recovery",
+    "stale_governance_record_recovery",
+    "inconsistent_governance_status_recovery",
+    "governance_artifact_reference_recovery",
+    "governance_audit_gap_recovery",
+    "governance_drift_recovery",
+    "governance_invariant_recovery",
+    "governance_recovery_escalation",
+)
+
+_GSREC_PLAN_STATUSES: tuple[str, ...] = (
+    "not_required",
+    "advisory",
+    "pending_human_review",
+    "blocked",
+)
+
+_GSREC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance state recovery candidate.",
+    },
+    {
+        "name": "governance_record_id",
+        "type": "str",
+        "required": True,
+        "description": "The governance record this candidate addresses.",
+    },
+    {
+        "name": "recovery_domain",
+        "type": "str",
+        "required": True,
+        "description": "The recovery domain this candidate belongs to.",
+    },
+    {
+        "name": "recovery_reason",
+        "type": "str",
+        "required": True,
+        "description": "The reason recovery is recommended for this domain.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "The human-reviewed action recommended to resolve this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52C.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52C.",
+    },
+)
+
+_GSREC_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance state recovery plan.",
+    },
+    {
+        "name": "recovery_candidates",
+        "type": "list[GovernanceStateRecoveryCandidate]",
+        "required": True,
+        "description": "List of recovery candidates produced for all assessed domains.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates in the plan.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52C.",
+    },
+)
+
+_GSREC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this governance state recovery summary.",
+    },
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The recovery plan this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery domains assessed.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52C.",
+    },
+)
+
+_GSREC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect governance state",
+        "detect stale/missing/inconsistent governance state",
+        "recommend human-reviewed recovery steps",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "rewrite governance files",
+        "rewrite session files",
+        "move task files",
+        "clear locks",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_allowed": False,
+    "human_review_required": True,
+    "recovery_automatic": False,
+    "read_only": True,
+    "phase": "52C",
+}
+
+_GSREC_INPUT_SOURCES: tuple[str, ...] = (
+    "governance state audit",
+    "governance state repair framework",
+    "governance drift detection",
+    "governance drift review",
+    "governance recovery planning",
+    "task lifecycle hardening",
+    "session recovery",
+)
+
+_GSREC_DOMAIN_CANDIDATES: tuple[dict, ...] = (
+    {
+        "recovery_domain": "missing_governance_record_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "A required governance record is absent. Missing governance records "
+            "break the provenance chain and prevent verifiable phase transitions."
+        ),
+        "recommended_action": (
+            "Human must identify the missing record, determine whether it was "
+            "never created or was deleted, and restore or recreate it under "
+            "governed conditions before resuming any phase work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "stale_governance_record_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "A governance record predates the current phase or reflects "
+            "superseded state. Stale records mislead agents about current "
+            "governance posture and contaminate handoffs."
+        ),
+        "recommended_action": (
+            "Human must verify which governance records are current, archive "
+            "stale records with a datestamp, and regenerate current records "
+            "via the appropriate pcae commands."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "inconsistent_governance_status_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Governance status fields are inconsistent across related records. "
+            "Status contradictions prevent reliable governance chain assessment "
+            "and create ambiguous authorization state."
+        ),
+        "recommended_action": (
+            "Human must audit all governance records in the affected chain, "
+            "identify the authoritative status, and update inconsistent records "
+            "to reflect the correct governance state."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "governance_artifact_reference_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "A governance record references an artifact that is missing, "
+            "renamed, or unreachable. Broken artifact references degrade "
+            "traceability and undermine evidence chains."
+        ),
+        "recommended_action": (
+            "Human must locate or recreate the referenced artifact, update "
+            "the governance record to reflect the correct reference, and "
+            "verify that evidence chains remain intact."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "governance_audit_gap_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "An audit record is absent for a governance step that has been "
+            "completed. Audit gaps prevent complete traceability and may "
+            "indicate undocumented governance decisions."
+        ),
+        "recommended_action": (
+            "Human must reconstruct the missing audit record from available "
+            "evidence, document the gap in the governance log, and verify "
+            "that no unauthorized changes occurred in the unaudited window."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "governance_drift_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Governance drift has been detected between current state and "
+            "the expected governance baseline. Unrecovered drift allows "
+            "agent behavior to diverge from governed boundaries."
+        ),
+        "recommended_action": (
+            "Human must run `pcae status coherence` to surface all drift, "
+            "review each drift item, and repair the governance baseline before "
+            "allowing any further agent work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "governance_invariant_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "A governance invariant has been violated. Invariant violations "
+            "indicate that the governance framework has been bypassed or that "
+            "state has been mutated outside governed boundaries."
+        ),
+        "recommended_action": (
+            "Human must identify the violated invariant, determine the root "
+            "cause, restore the invariant condition manually, and verify "
+            "governance health with `pcae health` and `pcae check`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "governance_recovery_escalation",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Multiple governance recovery signals are present simultaneously. "
+            "Compound governance state failure requires escalated human review "
+            "before any governed operation can be trusted."
+        ),
+        "recommended_action": (
+            "Human must resolve all blocking recovery candidates in priority "
+            "order, verify full governance health with `pcae health`, run "
+            "`pcae check`, and confirm coherence with `pcae status coherence` "
+            "before resuming agent work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+)
+
+
+def build_governance_state_recovery() -> dict:
+    """Define governance state recovery planning. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    plan_id_ref = f"gsrec-{ts}"
+
+    candidate_fields = [dict(f) for f in _GSREC_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _GSREC_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _GSREC_SUMMARY_FIELDS]
+
+    domain_candidates: list[dict] = []
+    for i, d in enumerate(_GSREC_DOMAIN_CANDIDATES):
+        entry = dict(d)
+        entry["recovery_id"] = f"gsrec-cand-{ts}-{i:02d}"
+        entry["governance_record_id"] = f"gov-rec-{ts}-{i:02d}"
+        domain_candidates.append(entry)
+
+    blocker_count = sum(1 for d in domain_candidates if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_candidates if d["severity"] == "warning")
+    candidate_count = len(domain_candidates)
+    domain_count = len(_GSREC_RECOVERY_DOMAINS)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    sample_candidate = {
+        "recovery_id": f"gsrec-cand-{ts}-00",
+        "governance_record_id": f"gov-rec-{ts}-00",
+        "recovery_domain": "stale_governance_record_recovery",
+        "recovery_reason": (
+            "A governance record predates the current phase or reflects superseded state."
+        ),
+        "severity": "blocker",
+        "recommended_action": (
+            "Human must verify current governance records and regenerate stale ones."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    }
+
+    sample_plan = {
+        "recovery_plan_id": plan_id_ref,
+        "recovery_candidates": domain_candidates,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"gsrecsum-{ts}",
+        "recovery_plan_id": plan_id_ref,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "GovernanceStateRecoveryCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "recovery_allowed_always_false_in_52c": True,
+        "human_review_required_always_true_in_52c": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "GovernanceStateRecoveryPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_plan_statuses": list(_GSREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52c": True,
+        "human_review_required_always_true_in_52c": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "GovernanceStateRecoverySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_GSREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52c": True,
+        "human_review_required_always_true_in_52c": True,
+        "fields": summary_fields,
+    }
+
+    governance_state_recovery_overview = {
+        "overview_id": f"52c-{ts}",
+        "generated_at": generated_at,
+        "phase": "52C",
+        "title": "Governance State Recovery",
+        "summary": (
+            "Defines recovery planning for inconsistent, stale, missing, or corrupted "
+            "PCAE governance state. Eight recovery domains are assessed: "
+            "missing_governance_record_recovery, stale_governance_record_recovery, "
+            "inconsistent_governance_status_recovery, "
+            "governance_artifact_reference_recovery, governance_audit_gap_recovery, "
+            "governance_drift_recovery, governance_invariant_recovery, and "
+            "governance_recovery_escalation. "
+            f"domain_count={domain_count}, candidate_count={candidate_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Governance state recovery is advisory and read-only. "
+            "No governance, session, or task files are modified. "
+            "recovery_allowed=False. recovery_automatic=False."
+        ),
+        "recovery_domain_count": domain_count,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "governance_state_recovery_overview": governance_state_recovery_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "domain_candidates": domain_candidates,
+        "sample_candidate": sample_candidate,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_GSREC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_GSREC_INPUT_SOURCES),
+        "advisory": GOVERNANCE_STATE_RECOVERY_ADVISORY,
+    }
+
+
 SESSION_RECOVERY_ADVISORY = (
     "Session recovery is informational; session state may be inspected and "
     "recovery steps recommended, but no automatic recovery occurs and no session "

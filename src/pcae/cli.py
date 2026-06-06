@@ -136,6 +136,7 @@ from pcae.commands.agent import (
     run_execution_recommendation,
     run_task_lifecycle_hardening,
     run_session_recovery,
+    run_governance_state_recovery,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4048,6 +4049,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     session_recovery_parser.set_defaults(handler=run_session_recovery)
+
+    governance_state_recovery_parser = subparsers.add_parser(
+        "governance-state-recovery",
+        help="Define recovery planning for inconsistent, stale, missing, or corrupted PCAE governance state (Phase 52C).",
+    )
+    governance_state_recovery_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    governance_state_recovery_parser.set_defaults(handler=run_governance_state_recovery)
 
     return parser
 

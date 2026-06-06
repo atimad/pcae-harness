@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52B: Session Recovery.
+Phase 52C: Governance State Recovery.
 
 ## Governance Coherence Note
 

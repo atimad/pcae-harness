@@ -233,6 +233,8 @@ from pcae.core.agent import (
     EXECUTION_PLAN_ADVISORY,
     build_execution_readiness_assessment,
     EXECUTION_READINESS_ASSESSMENT_ADVISORY,
+    build_governance_state_recovery,
+    GOVERNANCE_STATE_RECOVERY_ADVISORY,
     build_session_recovery,
     SESSION_RECOVERY_ADVISORY,
     build_task_lifecycle_hardening,
@@ -8865,6 +8867,86 @@ def run_execution_decision(args: argparse.Namespace) -> int:
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Decision allowed:      {gb['decision_allowed']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_governance_state_recovery(args: argparse.Namespace) -> int:
+    data = build_governance_state_recovery()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["governance_state_recovery_overview"]
+        print("Governance state recovery")
+        print(f"Recovery: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Recovery domains:       {ov['recovery_domain_count']}")
+        print(f"Candidates produced:    {ov['candidate_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Plan status:            {ov['plan_status']}")
+        print(f"Recovery allowed:       {'yes' if ov['recovery_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  recovery_allowed always False in 52C: {cm['recovery_allowed_always_false_in_52c']}")
+        print(f"  human_review_required always True in 52C: {cm['human_review_required_always_true_in_52c']}")
+        print()
+        pm = data["plan_model"]
+        print(f"Plan model: {pm['model_name']} ({pm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(pm['supported_plan_statuses'])}")
+        print(f"  recovery_allowed always False in 52C: {pm['recovery_allowed_always_false_in_52c']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  recovery_allowed always False in 52C: {sm['recovery_allowed_always_false_in_52c']}")
+        print(f"  human_review_required always True in 52C: {sm['human_review_required_always_true_in_52c']}")
+        print()
+        print("Domain candidates:")
+        for d in data["domain_candidates"]:
+            sev = d["severity"].upper()
+            print(f"  [{sev}] {d['recovery_domain']}")
+            print(f"    Reason: {d['recovery_reason'][:75]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  recovery_domain:       {sc['recovery_domain']}")
+        print(f"  severity:              {sc['severity']}")
+        print(f"  recovery_reason:       {sc['recovery_reason'][:60]}...")
+        print(f"  recovery_allowed:      {sc['recovery_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print()
+        sp = data["sample_plan"]
+        print("Sample plan:")
+        print(f"  plan_status:           {sp['plan_status']}")
+        print(f"  candidate_count:       {sp['candidate_count']}")
+        print(f"  blocker_count:         {sp['blocker_count']}")
+        print(f"  warning_count:         {sp['warning_count']}")
+        print(f"  recovery_allowed:      {sp['recovery_allowed']}")
+        print(f"  human_review_required: {sp['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  plan_status:           {ss['plan_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  candidate_count:       {ss['candidate_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  recovery_allowed:      {ss['recovery_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Recovery allowed:      {gb['recovery_allowed']}")
+        print(f"  Recovery automatic:    {gb['recovery_automatic']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()
         print(data["advisory"])

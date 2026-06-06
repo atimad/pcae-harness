@@ -776,3 +776,8 @@
 
 - `pcae session-recovery`
 - `pcae session-recovery --json`
+
+## governance-state-recovery
+
+- `pcae governance-state-recovery`
+- `pcae governance-state-recovery --json`

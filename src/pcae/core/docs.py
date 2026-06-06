@@ -797,6 +797,11 @@ def render_commands_reference() -> str:
 
 - `pcae session-recovery`
 - `pcae session-recovery --json`
+
+## governance-state-recovery
+
+- `pcae governance-state-recovery`
+- `pcae governance-state-recovery --json`
 """
 
 
