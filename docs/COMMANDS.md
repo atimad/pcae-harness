@@ -756,3 +756,8 @@
 
 - `pcae execution-rollback-verification`
 - `pcae execution-rollback-verification --json`
+
+## execution-governance-audit
+
+- `pcae execution-governance-audit`
+- `pcae execution-governance-audit --json`

@@ -46681,6 +46681,482 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+EXECUTION_CHAIN_GOVERNANCE_AUDIT_ADVISORY = (
+    "Execution governance audit is informational; the governance chain may be "
+    "assessed for completeness, but no execution occurs and no authorization is "
+    "granted. No files are modified, no runtimes are invoked, and no prompts are "
+    "executed. audit_complete=False and execution_allowed=False in Phase 51J."
+)
+
+_EGAU_AUDIT_DOMAINS: tuple[str, ...] = (
+    "execution_request_audit",
+    "execution_review_audit",
+    "execution_decision_audit",
+    "execution_lifecycle_audit",
+    "execution_plan_audit",
+    "execution_readiness_audit",
+    "execution_evidence_audit",
+    "execution_audit_audit",
+    "execution_rollback_audit",
+    "governance_consistency_audit",
+)
+
+_EGAU_AUDIT_STATUSES: tuple[str, ...] = (
+    "insufficient_governance",
+    "governance_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_EGAU_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution governance audit candidate.",
+    },
+    {
+        "name": "execution_chain_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution governance chain this audit candidate covers.",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of execution governance audit domains to be assessed.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance audit domains declared for this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51J.",
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51J.",
+    },
+)
+
+_EGAU_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution governance audit assessment.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The audit candidate this assessment is associated with.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with non-blocking warnings.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_governance, governance_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51J.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51J.",
+    },
+)
+
+_EGAU_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution governance audit summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of governance audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance domains with non-blocking warnings.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_governance, governance_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51J.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51J.",
+    },
+)
+
+_EGAU_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess execution governance completeness",
+        "identify missing governance controls",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "audit_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51J",
+}
+
+_EGAU_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "ExecutionAuditSummary",
+    "ExecutionRollbackVerificationSummary",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_EGAU_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "execution_request_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution request governance record has been verified. "
+            "A complete ExecutionRequestSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_review_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution review governance record has been verified. "
+            "A complete ExecutionReviewSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_decision_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution decision governance record has been verified. "
+            "A complete ExecutionDecisionSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_lifecycle_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution lifecycle governance record has been verified. "
+            "A complete ExecutionLifecycleSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_plan_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution plan governance record has been verified. "
+            "A complete ExecutionPlanSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_readiness_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution readiness governance record has been verified. "
+            "A complete ExecutionReadinessSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_evidence_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution evidence governance record has been verified. "
+            "A complete ExecutionEvidenceSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_audit_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution audit governance record has been verified. "
+            "A complete ExecutionAuditSummary reviewed by a human is required "
+            "before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_rollback_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution rollback verification governance record has been verified. "
+            "A complete ExecutionRollbackVerificationSummary reviewed by a human is "
+            "required before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "governance_consistency_audit",
+        "severity": "blocker",
+        "finding": (
+            "Cross-chain governance consistency has not been verified. "
+            "All execution governance artifacts must be mutually consistent and "
+            "human-reviewed before governance audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_chain_governance_audit() -> dict:
+    """Audit the complete execution governance chain. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"egau-{ts}"
+
+    candidate_fields = [dict(f) for f in _EGAU_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _EGAU_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _EGAU_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EGAU_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        audit_status = "pending_human_review"
+    elif warning_count > 0:
+        audit_status = "governance_with_warnings"
+    else:
+        audit_status = "insufficient_governance"
+
+    assessment_id_ref = f"egaua-{ts}"
+
+    sample_candidate = {
+        "audit_id": audit_id_ref,
+        "execution_chain_id": f"ech-{ts}",
+        "audit_domains": list(_EGAU_AUDIT_DOMAINS),
+        "domain_count": domain_count,
+        "human_review_required": True,
+        "audit_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "audit_id": audit_id_ref,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"egausum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionGovernanceAuditCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_audit_statuses": list(_EGAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51j": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionGovernanceAuditAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_audit_statuses": list(_EGAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51j": True,
+        "execution_allowed_always_false_in_51j": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionGovernanceAuditSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_audit_statuses": list(_EGAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51j": True,
+        "execution_allowed_always_false_in_51j": True,
+        "fields": summary_fields,
+    }
+
+    execution_governance_audit_overview = {
+        "overview_id": f"51j-{ts}",
+        "generated_at": generated_at,
+        "phase": "51J",
+        "title": "Execution Governance Audit",
+        "summary": (
+            "Audits the complete execution governance chain established in phases "
+            "51A–51I. Ten governance audit domains are assessed: "
+            "execution_request_audit, execution_review_audit, "
+            "execution_decision_audit, execution_lifecycle_audit, "
+            "execution_plan_audit, execution_readiness_audit, "
+            "execution_evidence_audit, execution_audit_audit, "
+            "execution_rollback_audit, and governance_consistency_audit. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"audit_status={audit_status}. "
+            "Execution governance audit is advisory and read-only. "
+            "No execution occurs. audit_complete=False. execution_allowed=False."
+        ),
+        "governance_domain_count": len(_EGAU_AUDIT_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_governance_audit_overview": execution_governance_audit_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EGAU_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EGAU_INPUT_SOURCES),
+        "advisory": EXECUTION_CHAIN_GOVERNANCE_AUDIT_ADVISORY,
+    }
+
+
 EXECUTION_ROLLBACK_VERIFICATION_ADVISORY = (
     "Execution rollback verification is informational; rollback requirements may be "
     "defined and assessed, but no execution occurs and no authorization is granted. "
