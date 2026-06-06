@@ -1,5 +1,30 @@
 # PCAE Command Reference
 
+Commands are organized by capability area. All commands that have a `--json` variant are listed with both forms. Run `pcae <command> --help` for detailed usage.
+
+**Capability Areas:**
+
+- [Core Governance](#core-governance) — health, check, inspect
+- [Task and Session Management](#task-and-session-management) — task, session, phase, status
+- [Provenance and Architecture](#provenance-and-architecture) — provenance, architecture, analytics
+- [Export, Fleet, and Infrastructure](#export-fleet-and-infrastructure) — export/import, repo, fleet, pipeline, daemon, agent, ci, docs
+- [Orchestration](#orchestration) — orchestration, context
+- [Design and Prototype Scaffolds](#design-and-prototype-scaffolds) — early design phases
+- [Roadmap and Prompt Governance](#roadmap-and-prompt-governance) — roadmap generation, prompt governance
+- [Invocation Governance Scaffolds](#invocation-governance-scaffolds) — invocation lifecycle scaffolds
+- [Runtime and Invocation Governance](#runtime-and-invocation-governance) — runtime trust, read-only invocation, multi-agent pilots
+- [Governance State and Invariants](#governance-state-and-invariants) — governance state audit, invariants, drift, lock governance
+- [Controlled Write Governance (50A–50K)](#controlled-write-governance-50a50k) — write authorization chain
+- [Controlled Execution Orchestration (51A–51K)](#controlled-execution-orchestration-51a51k) — execution orchestration chain
+- [Recovery Planning (52A–52E)](#recovery-planning-52a52e) — task, session, governance, lock, corruption recovery
+- [Runtime Hardening (52F–52I)](#runtime-hardening-52f52i) — contract, sandbox, timeout, output integrity
+- [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
+- [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
+
+---
+
+# Core Governance
+
 ## health
 
 - `pcae health`
@@ -14,6 +39,10 @@
 
 - `pcae inspect`
 - `pcae inspect --json`
+
+---
+
+# Task and Session Management
 
 ## task
 
@@ -78,6 +107,10 @@
 - `pcae runtime snapshot validate-restore <path>`
 - `pcae runtime snapshot validate-restore <path> --json`
 
+---
+
+# Orchestration
+
 ## orchestration
 
 - `pcae orchestration policy`
@@ -99,6 +132,10 @@
 
 - `pcae context pack --preview`
 - `pcae context pack --preview --json`
+
+---
+
+# Provenance and Architecture
 
 ## provenance
 
@@ -130,6 +167,10 @@
 - `pcae analytics trends --json`
 - `pcae analytics risk`
 - `pcae analytics risk --json`
+
+---
+
+# Export, Fleet, and Infrastructure
 
 ## export/import
 
@@ -206,6 +247,10 @@
 - `pcae docs architecture --force`
 - `pcae docs glossary --dry-run`
 - `pcae docs glossary --force`
+
+---
+
+# Design and Prototype Scaffolds
 
 ## planning-execution-design
 
@@ -292,6 +337,10 @@
 - `pcae adapter-registry-design`
 - `pcae adapter-registry-design --json`
 
+---
+
+# Roadmap and Prompt Governance
+
 ## roadmap-generation-design
 
 - `pcae roadmap-generation-design`
@@ -371,6 +420,10 @@
 
 - `pcae prompt-execution-dry-run`
 - `pcae prompt-execution-dry-run --json`
+
+---
+
+# Invocation Governance Scaffolds
 
 ## human-agent-execution-design
 
@@ -537,6 +590,10 @@
 - `pcae live-write-pilot`
 - `pcae live-write-pilot --json`
 
+---
+
+# Runtime and Invocation Governance
+
 ## runtime-contracts
 
 - `pcae runtime-contracts`
@@ -602,6 +659,10 @@
 - `pcae multi-agent-governance-audit`
 - `pcae multi-agent-governance-audit --json`
 
+---
+
+# Governance State and Invariants
+
 ## governance-state-audit
 
 - `pcae governance-state-audit`
@@ -656,6 +717,10 @@
 
 - `pcae governance-recovery-plan`
 - `pcae governance-recovery-plan --json`
+
+---
+
+# Controlled Write Governance (50A–50K)
 
 ## write-authorization
 
@@ -712,6 +777,10 @@
 - `pcae write-recommendation`
 - `pcae write-recommendation --json`
 
+---
+
+# Controlled Execution Orchestration (51A–51K)
+
 ## execution-request
 
 - `pcae execution-request`
@@ -767,6 +836,10 @@
 - `pcae execution-recommendation`
 - `pcae execution-recommendation --json`
 
+---
+
+# Recovery Planning (52A–52E)
+
 ## task-lifecycle-hardening
 
 - `pcae task-lifecycle-hardening`
@@ -792,6 +865,10 @@
 - `pcae corruption-recovery`
 - `pcae corruption-recovery --json`
 
+---
+
+# Runtime Hardening (52F–52I)
+
 ## runtime-contract-hardening
 
 - `pcae runtime-contract-hardening`
@@ -812,6 +889,10 @@
 - `pcae output-integrity-verification`
 - `pcae output-integrity-verification --json`
 
+---
+
+# Concurrency and Multi-Agent Coordination (52J–52M)
+
 ## concurrency-safety
 
 - `pcae concurrency-safety`
@@ -831,6 +912,10 @@
 
 - `pcae conflict-resolution-engine`
 - `pcae conflict-resolution-engine --json`
+
+---
+
+# Chaos Engineering and Resilience (52N–52Q)
 
 ## chaos-testing
 

@@ -2,7 +2,7 @@
 
 **Policy Controlled Autonomous Execution**
 
-*Version 1.0 — Phase 48X.6*
+*Version 1.1 — Phase 53A*
 
 ---
 
@@ -310,72 +310,71 @@ been invoked.
 
 ## 10. Current Safety State
 
-As of Phase 48X.6, PCAE is in the controlled scaffolding phase of the
-read-only invocation track. The following safety invariants are enforced
-by architecture and are not configurable:
+As of Phase 53A, PCAE is at the Post-52Q Architecture Checkpoint. Governance
+scaffolding is complete across all six architecture layers. Runtime integration
+has not yet begun. The following safety invariants are enforced by architecture
+and are not configurable:
 
 | Capability | Status | Mechanism |
 |---|---|---|
 | Runtime execution | **Disabled** | `execution_allowed=False` for all runtimes in all invocation commands |
 | Prompt execution | **Disabled** | No PCAE command submits a prompt to any runtime |
-| Write execution | **Disabled** | Write execution gate (Phase 50A) not yet implemented |
+| Write execution | **Disabled** | `authorization_allowed=False` and `execution_allowed=False` for all write commands |
+| Failure injection | **Disabled** | `injection_allowed=False` for all failure injection commands |
+| Corruption simulation | **Disabled** | `simulation_allowed=False` for all corruption simulation commands |
+| Recovery execution | **Disabled** | `recovery_allowed=False` and `recovery_execution_allowed=False` for all recovery commands |
 | Human review | **Required** | `human_review_required=True` for all invocation-related commands |
 | Auto-commit | **Disabled** | No PCAE command triggers `git commit` automatically |
 | Auto-push | **Disabled** | No PCAE command triggers `git push` automatically |
 
 These are not warnings or recommendations — they are structural invariants.
-No PCAE command, flag, or policy configuration overrides them in the current
-phase.
+No PCAE command, flag, or policy configuration overrides them.
 
-**Invocation-related commands are scaffolds.** `pcae readonly-invocation`,
-`pcae readonly-runtime-pilot`, `pcae invocation-audit`,
-`pcae invocation-result-review`, `pcae invocation-evidence`, and
-`pcae invocation-authorization-enforcement` all produce structured scaffolds
-that evaluate readiness and surface blockers. None of them invoke a runtime,
-submit a prompt, or modify repository files.
+**All invocation-related commands are scaffolds.** Commands from all six
+architecture layers (Governance, Execution, Recovery, Runtime Hardening,
+Concurrency, Resilience) produce structured scaffolds that evaluate readiness
+and surface blockers. None of them invoke a runtime, submit a prompt, inject
+failures, simulate corruption, execute recovery, or modify repository files.
 
 ---
 
 ## 11. Governance Maturity
 
-**Overall maturity.** The governance infrastructure is complete at the
-scaffolding level. All eight governance domains have defined models,
-CLI commands, and test coverage. No domain is missing its structural
-foundation. Runtime execution is the next capability to be enabled, and it
-requires the invocation execution gate (Phase 49A) to be implemented and
-validated first.
+**Overall maturity.** The governance infrastructure is complete across all
+six architecture layers (Governance, Execution, Recovery, Runtime Hardening,
+Concurrency, Resilience). 4201 tests pass. The project is at the Post-52Q
+Architecture Checkpoint. Runtime integration begins at Phase 54A.
 
-**Major completed milestones:**
+**PCAE Post-52Q Architecture Checkpoint:**
+
+- 4201 passing tests
+- Apache 2.0 license
+- Six complete architecture layers
+- Real runtime invocation: **disabled**
+- Real write execution: **disabled**
+- Real failure injection: **disabled**
+- Real corruption simulation: **disabled**
+- Human review: **required** for all invocation-related commands
+
+**Completed milestones:**
 
 - Task contracts and policy checks (`pcae check`) — change governance enforced
 - Architecture zone dependency enforcement — layer separation validated
-- Rollback design, dry-run validation, and write pilot scaffold — rollback
-  governance foundation complete
-- Prompt generation, rendering, and preflight — prompt governance scaffolded
+- Rollback governance and write pilot scaffold — rollback governance complete
+- Prompt generation, rendering, and preflight — prompt governance complete
 - 8-step invocation lifecycle — execution governance gate chain complete
-- Runtime contract enforcement and trust assessment — runtime governance
-  operational
-- Multi-agent registry, orchestration policy, capability matrix, and advisory
-  selection — multi-agent governance operational
-- Invocation audit record, result capture, result review, evidence model —
-  audit and evidence governance scaffolded
-- Architecture Decision Records, architecture memory, and governance audit —
-  architecture governance operational
-- Session bootstrap, continuity packs, runtime snapshots — session governance
-  operational
-- Documentation program (commands, architecture, glossary, white paper,
-  architecture diagrams, contributor guide, project vision) — complete
-
-**Remaining milestones:**
-
-- Phase 49A: Invocation execution gate — clear `execution_allowed` when all
-  8 lifecycle gates pass; first live runtime invocation
-- Phase 48X.T: Parallel test execution standardization — complete; three
-  execution profiles documented in the
-  [Test Execution Guide](../testing/TEST_EXECUTION.md)
-- Phase 50A: Controlled write authorization — introduce write execution with
-  rollback planning as a precondition
-- Phase 51A: Goal-based planning — governed roadmap and prompt generation
+- Runtime contract enforcement and trust assessment — runtime governance complete
+- Multi-agent registry, orchestration policy, capability matrix — multi-agent governance complete
+- Invocation audit record, result capture, result review, evidence model — complete
+- Architecture Decision Records, architecture memory, governance audit — complete
+- Session bootstrap, continuity packs, runtime snapshots — complete
+- Documentation program (commands, architecture, glossary, white paper, diagrams) — complete
+- Controlled write governance chain (50A–50K) — complete
+- Controlled execution orchestration chain (51A–51K) — complete
+- Recovery planning (52A–52E) — task, session, governance, lock, corruption recovery complete
+- Runtime hardening (52F–52I) — contract, sandbox, timeout, output integrity complete
+- Concurrency and multi-agent coordination (52J–52M) — concurrency safety, parallel coordination, state consistency, conflict resolution complete
+- Chaos engineering and resilience (52N–52Q) — chaos testing, failure injection, corruption simulation, recovery validation complete
 
 ---
 
@@ -386,10 +385,13 @@ soundness before the next phase introduces new execution capability.
 
 | Phase | Track | Description |
 |---|---|---|
-| 48X.T | Test infrastructure | Parallel Test Execution Standardization — complete; three profiles (fast: `-n auto`, battery: `-n 4`/`-n 6`, release: serial); see [Test Execution Guide](../testing/TEST_EXECUTION.md) |
-| 49A | Execution gate | Multi-Agent Read-Only Pilot — implement the invocation execution gate that conditionally clears `execution_allowed`; first live governed read-only runtime invocation |
-| 50A | Write authorization | Controlled Write Authorization — introduce write execution with explicit rollback planning as a precondition; no write without a validated rollback artifact |
-| 51A | Planning | Goal-Based Planning — governed roadmap and prompt generation; proposals are artifacts subject to human approval before execution |
+| 54A | Runtime integration | Runtime Integration Readiness — verify all prerequisites before live invocation |
+| 55A | Runtime integration | Controlled Read-Only Runtime Invocation — first live governed runtime invocation, read-only, sandboxed |
+| 56A | Runtime integration | Runtime Output Capture Persistence — persist captured output as governed artifacts |
+| 57A | Runtime integration | Human Review of Runtime Output — formal review workflow for captured runtime output |
+| 58A | Multi-agent execution | Multi-Agent Read-Only Execution Pilot — extend to multi-agent workflows |
+| 59A | Write execution | Controlled Write Dry-Run — validate the complete write gate chain without modifying files |
+| 60A | Write execution | First Controlled Single-File Write Pilot — first governed single-file write with pre-declared rollback |
 
 The sequencing is deliberate. No phase skips a gate. Evidence of governance
 soundness at each phase is the precondition for the next phase beginning.

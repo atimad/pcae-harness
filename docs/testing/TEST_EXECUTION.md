@@ -35,8 +35,8 @@ core, distributing the full test suite across all cores in parallel.
 
 | Metric | Value |
 |---|---|
-| Test count | 3429 |
-| Wall-clock time | ~64 seconds |
+| Test count | 4201 |
+| Wall-clock time | ~90 seconds |
 | Approximate speedup | ~4× faster than serial |
 
 This is the **preferred validation path** for all normal phase work. It is
@@ -208,7 +208,7 @@ mismatch between any parallel run and the serial baseline, that mismatch is
 a test isolation failure and must be fixed before parallel profiles are used
 for validation.
 
-**Test count is the integrity signal.** The current reference count is 3429
+**Test count is the integrity signal.** The current reference count is 4201
 tests. If `python -m pytest -n auto` reports a different count than
 `python -m pytest`, investigate immediately. Do not accept a parallel result
 with a different test count as valid.
