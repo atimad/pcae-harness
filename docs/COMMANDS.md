@@ -771,3 +771,8 @@
 
 - `pcae task-lifecycle-hardening`
 - `pcae task-lifecycle-hardening --json`
+
+## session-recovery
+
+- `pcae session-recovery`
+- `pcae session-recovery --json`

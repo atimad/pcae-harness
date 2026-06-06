@@ -46681,6 +46681,495 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+SESSION_RECOVERY_ADVISORY = (
+    "Session recovery is informational; session state may be inspected and "
+    "recovery steps recommended, but no automatic recovery occurs and no session "
+    "or task files are modified. No runtimes are invoked and no prompts are "
+    "executed. recovery_allowed=False in Phase 52B. "
+    "Recovery is advisory only and requires human review."
+)
+
+_SREC_RECOVERY_DOMAINS: tuple[str, ...] = (
+    "missing_session_recovery",
+    "stale_session_reference_recovery",
+    "active_task_mismatch_recovery",
+    "orphaned_session_state_recovery",
+    "session_refresh_recommendation",
+    "continuity_pack_recovery",
+    "agent_handoff_recovery",
+    "session_recovery_escalation",
+)
+
+_SREC_PLAN_STATUSES: tuple[str, ...] = (
+    "not_required",
+    "advisory",
+    "pending_human_review",
+    "blocked",
+)
+
+_SREC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session recovery candidate.",
+    },
+    {
+        "name": "session_id",
+        "type": "str",
+        "required": True,
+        "description": "The session this candidate addresses.",
+    },
+    {
+        "name": "active_task_id",
+        "type": "str",
+        "required": True,
+        "description": "The active task associated with this recovery candidate.",
+    },
+    {
+        "name": "recovery_domain",
+        "type": "str",
+        "required": True,
+        "description": "The recovery domain this candidate belongs to.",
+    },
+    {
+        "name": "recovery_reason",
+        "type": "str",
+        "required": True,
+        "description": "The reason recovery is recommended for this domain.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "The human-reviewed action recommended to resolve this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52B.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52B.",
+    },
+)
+
+_SREC_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session recovery plan.",
+    },
+    {
+        "name": "recovery_candidates",
+        "type": "list[SessionRecoveryCandidate]",
+        "required": True,
+        "description": "List of recovery candidates produced for all assessed domains.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates in the plan.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker-severity recovery reason.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning-severity recovery reason.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52B.",
+    },
+)
+
+_SREC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this session recovery summary.",
+    },
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The recovery plan this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery domains assessed.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker-severity recovery reason.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning-severity recovery reason.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52B.",
+    },
+)
+
+_SREC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect session state",
+        "detect missing/stale/orphaned session state",
+        "recommend human-reviewed recovery steps",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "rewrite session files",
+        "move task files",
+        "clear locks",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_allowed": False,
+    "human_review_required": True,
+    "recovery_automatic": False,
+    "read_only": True,
+    "phase": "52B",
+}
+
+_SREC_INPUT_SOURCES: tuple[str, ...] = (
+    "session state",
+    "active task state",
+    "done task state",
+    "task lifecycle hardening",
+    "session continuity governance",
+    "governance state audit",
+    "governance recovery planning",
+)
+
+_SREC_DOMAIN_CANDIDATES: tuple[dict, ...] = (
+    {
+        "recovery_domain": "missing_session_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "No session state file found. Session continuity is broken and "
+            "agent context cannot be verified without a valid session record."
+        ),
+        "recommended_action": (
+            "Human must run `pcae session bootstrap` to establish a fresh "
+            "governed session with verified health and active task alignment."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "stale_session_reference_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Session state references a task that is no longer current. "
+            "Stale session references contaminate agent continuity and "
+            "handoff governance."
+        ),
+        "recommended_action": (
+            "Human must verify the active task, update session references "
+            "to the current task, and run `pcae session bootstrap` to "
+            "re-establish continuity."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "active_task_mismatch_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Session active task does not match the task found in tasks/active/. "
+            "This mismatch allows agents to act on different task state than "
+            "the governance record expects."
+        ),
+        "recommended_action": (
+            "Human must reconcile session task reference with tasks/active/ "
+            "contents and re-run session bootstrap to restore alignment."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "orphaned_session_state_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "Session state exists but no corresponding active task is present. "
+            "Orphaned session state creates ambiguous context for agents."
+        ),
+        "recommended_action": (
+            "Human must determine whether session state should be archived "
+            "or whether a task should be promoted to active to match it."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "session_refresh_recommendation",
+        "severity": "warning",
+        "recovery_reason": (
+            "Session bootstrap prompt or continuity pack has not been refreshed "
+            "since the last phase transition. Context may be stale."
+        ),
+        "recommended_action": (
+            "Human should run `pcae session bootstrap --compact` to regenerate "
+            "a current context pack before the next agent session."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "continuity_pack_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "Continuity pack is missing or predates the current phase. "
+            "Agents operating without a current continuity pack risk acting "
+            "on outdated governance context."
+        ),
+        "recommended_action": (
+            "Human should regenerate the continuity pack with `pcae session "
+            "bootstrap` and verify it reflects the current phase and active task."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "agent_handoff_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Agent handoff state references a stale or missing session. "
+            "Handoffs carrying broken session references contaminate the "
+            "next agent session with invalid governance context."
+        ),
+        "recommended_action": (
+            "Human must clear the stale handoff reference, verify the "
+            "current session, and re-run `pcae phase handoff` with current "
+            "session state before the next agent engagement."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "session_recovery_escalation",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Multiple session recovery signals are present simultaneously. "
+            "Compound session state failure requires escalated human review "
+            "before any agent session can be trusted."
+        ),
+        "recommended_action": (
+            "Human must resolve all blocking recovery candidates in order, "
+            "verify governance health with `pcae health`, run `pcae check`, "
+            "and confirm session alignment before resuming agent work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+)
+
+
+def build_session_recovery() -> dict:
+    """Define session recovery planning. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    plan_id_ref = f"srec-{ts}"
+
+    candidate_fields = [dict(f) for f in _SREC_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _SREC_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _SREC_SUMMARY_FIELDS]
+
+    domain_candidates: list[dict] = []
+    for i, d in enumerate(_SREC_DOMAIN_CANDIDATES):
+        entry = dict(d)
+        entry["recovery_id"] = f"srec-cand-{ts}-{i:02d}"
+        entry["session_id"] = f"sess-{ts}"
+        entry["active_task_id"] = f"task-{ts}"
+        domain_candidates.append(entry)
+
+    blocker_count = sum(1 for d in domain_candidates if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_candidates if d["severity"] == "warning")
+    candidate_count = len(domain_candidates)
+    domain_count = len(_SREC_RECOVERY_DOMAINS)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    sample_candidate = {
+        "recovery_id": f"srec-cand-{ts}-00",
+        "session_id": f"sess-{ts}",
+        "active_task_id": f"task-{ts}",
+        "recovery_domain": "stale_session_reference_recovery",
+        "recovery_reason": (
+            "Session state references a task that is no longer current."
+        ),
+        "recommended_action": (
+            "Human must verify the active task and run `pcae session bootstrap`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    }
+
+    sample_plan = {
+        "recovery_plan_id": plan_id_ref,
+        "recovery_candidates": domain_candidates,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"srecsum-{ts}",
+        "recovery_plan_id": plan_id_ref,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "SessionRecoveryCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "recovery_allowed_always_false_in_52b": True,
+        "human_review_required_always_true_in_52b": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "SessionRecoveryPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_plan_statuses": list(_SREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52b": True,
+        "human_review_required_always_true_in_52b": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "SessionRecoverySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_SREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52b": True,
+        "human_review_required_always_true_in_52b": True,
+        "fields": summary_fields,
+    }
+
+    session_recovery_overview = {
+        "overview_id": f"52b-{ts}",
+        "generated_at": generated_at,
+        "phase": "52B",
+        "title": "Session Recovery",
+        "summary": (
+            "Defines recovery planning for stale, missing, mismatched, or orphaned "
+            "PCAE session state. Eight recovery domains are assessed: "
+            "missing_session_recovery, stale_session_reference_recovery, "
+            "active_task_mismatch_recovery, orphaned_session_state_recovery, "
+            "session_refresh_recommendation, continuity_pack_recovery, "
+            "agent_handoff_recovery, and session_recovery_escalation. "
+            f"domain_count={domain_count}, candidate_count={candidate_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Session recovery is advisory and read-only. "
+            "No session or task files are modified. "
+            "recovery_allowed=False. recovery_automatic=False."
+        ),
+        "recovery_domain_count": domain_count,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "session_recovery_overview": session_recovery_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "domain_candidates": domain_candidates,
+        "sample_candidate": sample_candidate,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_SREC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_SREC_INPUT_SOURCES),
+        "advisory": SESSION_RECOVERY_ADVISORY,
+    }
+
+
 TASK_LIFECYCLE_HARDENING_ADVISORY = (
     "Task lifecycle hardening is informational; lifecycle state may be inspected "
     "and signals reported, but no automatic repair occurs and no tasks are moved "

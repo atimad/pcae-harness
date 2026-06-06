@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52A: Task Lifecycle Hardening.
+Phase 52B: Session Recovery.
 
 ## Governance Coherence Note
 

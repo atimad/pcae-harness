@@ -135,6 +135,7 @@ from pcae.commands.agent import (
     run_execution_chain_governance_audit,
     run_execution_recommendation,
     run_task_lifecycle_hardening,
+    run_session_recovery,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4036,6 +4037,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     task_lifecycle_hardening_parser.set_defaults(handler=run_task_lifecycle_hardening)
+
+    session_recovery_parser = subparsers.add_parser(
+        "session-recovery",
+        help="Define recovery planning for stale, missing, mismatched, or orphaned PCAE session state (Phase 52B).",
+    )
+    session_recovery_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    session_recovery_parser.set_defaults(handler=run_session_recovery)
 
     return parser
 
