@@ -142,6 +142,7 @@ from pcae.commands.agent import (
     run_runtime_contract_hardening,
     run_sandbox_hardening,
     run_timeout_hardening,
+    run_output_integrity_verification,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4120,6 +4121,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     timeout_hardening_parser.set_defaults(handler=run_timeout_hardening)
+
+    output_integrity_verification_parser = subparsers.add_parser(
+        "output-integrity-verification",
+        help="Define and validate output integrity requirements for deterministic, attributable runtime outputs (Phase 52I).",
+    )
+    output_integrity_verification_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    output_integrity_verification_parser.set_defaults(
+        handler=run_output_integrity_verification
+    )
 
     return parser
 

@@ -39868,3 +39868,244 @@ def test_52h_human_output_shows_all_sections(capsys) -> None:
     assert "Governance boundaries" in output
     assert "execution_allowed=False" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52I: Output Integrity Verification ---
+
+
+def test_52i_json_structure(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "output_integrity_verification_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "sample_signal",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52i_overview_and_execution_constraints(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["output_integrity_verification_overview"]
+    assert overview["phase"] == "52I"
+    assert overview["hardening_domain_count"] == 8
+    assert overview["domain_count"] == 8
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+    assert overview["hardening_status"] in {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_52i_models(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    signal_model = data["signal_model"]
+    assert signal_model["model_name"] == "OutputIntegritySignal"
+    assert signal_model["field_count"] == 8
+    assert signal_model["field_count"] == signal_model["required_field_count"]
+    assert set(signal_model["severity_values"]) == {"info", "warning", "blocker"}
+    assert signal_model["human_review_required_always_true_in_52i"] is True
+
+    assessment_model = data["assessment_model"]
+    assert assessment_model["model_name"] == "OutputIntegrityAssessment"
+    assert assessment_model["field_count"] == 8
+    assert assessment_model["field_count"] == assessment_model["required_field_count"]
+    assert assessment_model["execution_allowed_always_false_in_52i"] is True
+    assert assessment_model["human_review_required_always_true_in_52i"] is True
+
+    summary_model = data["summary_model"]
+    assert summary_model["model_name"] == "OutputIntegritySummary"
+    assert summary_model["field_count"] == 10
+    assert summary_model["field_count"] == summary_model["required_field_count"]
+    assert summary_model["execution_allowed_always_false_in_52i"] is True
+    assert summary_model["human_review_required_always_true_in_52i"] is True
+
+    expected_statuses = {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert set(assessment_model["supported_hardening_statuses"]) == expected_statuses
+    assert set(summary_model["supported_hardening_statuses"]) == expected_statuses
+
+
+def test_52i_model_field_names(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert [field["name"] for field in data["signal_model"]["fields"]] == [
+        "signal_id",
+        "output_id",
+        "hardening_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["assessment_model"]["fields"]] == [
+        "assessment_id",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "hardening_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["summary_model"]["fields"]] == [
+        "summary_id",
+        "assessment_id",
+        "domain_count",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "hardening_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+
+
+def test_52i_all_hardening_domains_defined(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {signal["domain"] for signal in data["domain_signals"]}
+    assert domains == {
+        "output_completeness_validation",
+        "output_schema_validation",
+        "output_attribution_validation",
+        "output_traceability_validation",
+        "output_consistency_validation",
+        "output_tamper_detection",
+        "output_governance_alignment",
+        "output_integrity_escalation",
+    }
+
+
+def test_52i_required_integrity_validations_are_blockers(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signals = {signal["domain"]: signal for signal in data["domain_signals"]}
+    for domain in (
+        "output_schema_validation",
+        "output_traceability_validation",
+        "output_tamper_detection",
+    ):
+        assert signals[domain]["severity"] == "blocker"
+        assert signals[domain]["human_review_required"] is True
+        assert signals[domain]["detected_state"]
+        assert signals[domain]["expected_state"]
+
+
+def test_52i_signal_and_summary_instances(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signal = data["sample_signal"]
+    assert set(signal) == {
+        "signal_id",
+        "output_id",
+        "hardening_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    }
+    assert signal["human_review_required"] is True
+
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["domain_signals"])
+    assert summary["signal_count"] == assessment["signal_count"]
+    assert summary["blocker_count"] == assessment["blocker_count"]
+    assert summary["warning_count"] == assessment["warning_count"]
+    assert summary["domain_count"] == 8
+    assert summary["assessment_id"] == assessment["assessment_id"]
+
+
+def test_52i_remediation_is_advisory(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_assessment"]["remediation_recommended"] is True
+    assert data["sample_summary"]["remediation_recommended"] is True
+    boundaries = data["governance_boundaries"]
+    assert boundaries["remediation_automatic"] is False
+    assert boundaries["read_only"] is True
+    assert "no automatic remediation" in data["advisory"].lower()
+    assert "assessed only" in data["advisory"].lower()
+
+
+def test_52i_governance_boundaries(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52I"
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+
+    allowed = " ".join(boundaries["may"]).lower()
+    for value in (
+        "inspect output integrity requirements",
+        "detect incomplete outputs",
+        "detect schema inconsistencies",
+        "detect attribution or traceability gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ):
+        assert value in allowed
+
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for value in (
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify outputs",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert value in forbidden
+
+
+def test_52i_input_sources(capsys) -> None:
+    main(["output-integrity-verification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "TimeoutHardeningAssessment",
+        "RuntimeSafetyInvariantAssessment",
+        "GovernanceInvariantAssessment",
+        "ExecutionPlanSummary",
+        "ExecutionReadinessSummary",
+        "ExecutionAuditSummary",
+    ]
+
+
+def test_52i_human_output_shows_all_sections(capsys) -> None:
+    main(["output-integrity-verification"])
+    output = capsys.readouterr().out
+    assert "Output integrity verification" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "execution_allowed=False" in output
+    assert "informational" in output.lower()

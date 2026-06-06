@@ -806,3 +806,8 @@
 
 - `pcae timeout-hardening`
 - `pcae timeout-hardening --json`
+
+## output-integrity-verification
+
+- `pcae output-integrity-verification`
+- `pcae output-integrity-verification --json`

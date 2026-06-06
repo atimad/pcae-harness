@@ -52645,3 +52645,490 @@ def build_timeout_hardening() -> dict:
         "input_sources": list(_TOHD_INPUT_SOURCES),
         "advisory": TIMEOUT_HARDENING_ADVISORY,
     }
+
+
+# --- Phase 52I: Output Integrity Verification ---
+
+OUTPUT_INTEGRITY_VERIFICATION_ADVISORY = (
+    "Output integrity verification is informational; output integrity requirements "
+    "may be inspected and remediation recommended, but no automatic remediation "
+    "occurs and no outputs or repository files are modified. No runtimes are "
+    "invoked, no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52I. Outputs are assessed only, and "
+    "remediation requires human review."
+)
+
+_OIV_HARDENING_DOMAINS: tuple[str, ...] = (
+    "output_completeness_validation",
+    "output_schema_validation",
+    "output_attribution_validation",
+    "output_traceability_validation",
+    "output_consistency_validation",
+    "output_tamper_detection",
+    "output_governance_alignment",
+    "output_integrity_escalation",
+)
+
+_OIV_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_OIV_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_OIV_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this output integrity signal.",
+    },
+    {
+        "name": "output_id",
+        "type": "str",
+        "required": True,
+        "description": "The output artifact associated with this signal.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The output integrity domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of output integrity signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The output integrity state observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The output integrity state required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52I.",
+    },
+)
+
+_OIV_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this output integrity assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of output integrity signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52I.",
+    },
+)
+
+_OIV_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this output integrity summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of output integrity domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of output integrity signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52I.",
+    },
+)
+
+_OIV_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect output integrity requirements",
+        "detect incomplete outputs",
+        "detect schema inconsistencies",
+        "detect attribution or traceability gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify outputs",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52I",
+}
+
+_OIV_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "TimeoutHardeningAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionAuditSummary",
+)
+
+_OIV_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "output_completeness_validation",
+        "signal_type": "output_completeness_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — required output sections not validated",
+        "expected_state": "all required output sections and terminal markers are present",
+        "finding": (
+            "Output completeness has not been validated. Missing sections, truncated "
+            "streams, or absent terminal markers can produce an apparently successful "
+            "result that is incomplete."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_schema_validation",
+        "signal_type": "output_schema_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — output schema conformance not validated",
+        "expected_state": "output conforms exactly to its declared versioned schema",
+        "finding": (
+            "Output schema conformance has not been validated. Required fields, "
+            "types, cardinality, version, and unknown-field behavior must be "
+            "deterministic before outputs can be consumed safely."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_attribution_validation",
+        "signal_type": "output_attribution_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — producer and execution attribution not validated",
+        "expected_state": "output identifies its runtime, agent, execution, and producer",
+        "finding": (
+            "Output attribution has not been validated. An output without stable "
+            "runtime, agent, execution, and producer identifiers cannot be assigned "
+            "to an accountable execution context."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_traceability_validation",
+        "signal_type": "output_traceability_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — plan, request, evidence, and audit links not validated",
+        "expected_state": "output traces to the governed request, plan, evidence, and audit",
+        "finding": (
+            "Output traceability has not been validated. The output must preserve "
+            "stable references to its governed request, execution plan, evidence, "
+            "and audit record."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_consistency_validation",
+        "signal_type": "output_consistency_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — cross-field and repeated-output consistency not validated",
+        "expected_state": "output fields are internally consistent and reproducibly ordered",
+        "finding": (
+            "Output consistency has not been validated. Contradictory fields, "
+            "unstable ordering, duplicate records, or inconsistent summaries can "
+            "undermine deterministic downstream processing."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_tamper_detection",
+        "signal_type": "output_tamper_detection_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — integrity digest and mutation detection not validated",
+        "expected_state": "output integrity is verifiable and post-capture mutation is detectable",
+        "finding": (
+            "Output tamper detection has not been validated. Integrity metadata, "
+            "canonical serialization, and immutable capture references are required "
+            "to detect corruption or post-capture modification."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_governance_alignment",
+        "signal_type": "output_governance_alignment_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — output controls not mapped to governance invariants",
+        "expected_state": "output integrity controls align with execution and audit governance",
+        "finding": (
+            "Output integrity controls have not been aligned with governance "
+            "invariants. Schema, attribution, traceability, retention, and audit "
+            "expectations must describe the same governed artifact."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "output_integrity_escalation",
+        "signal_type": "compound_output_integrity_failure",
+        "severity": "blocker",
+        "detected_state": "multiple output integrity domains remain unvalidated",
+        "expected_state": "no compound output integrity weakness remains unresolved",
+        "finding": (
+            "Multiple output integrity controls remain unvalidated. Compound "
+            "completeness, schema, attribution, traceability, or tamper weaknesses "
+            "require escalated human review and keep execution blocked."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_output_integrity_verification() -> dict:
+    """Define output integrity verification requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _OIV_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _OIV_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _OIV_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _OIV_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_OIV_HARDENING_DOMAINS)
+
+    if blocker_count:
+        hardening_status = "hardening_required"
+        remediation_recommended = True
+    elif warning_count:
+        hardening_status = "hardened_with_warnings"
+        remediation_recommended = True
+    else:
+        hardening_status = "hardened"
+        remediation_recommended = False
+
+    assessment_id = f"oiva-{ts}"
+    sample_signal = {
+        "signal_id": f"oivs-{ts}",
+        "output_id": f"output-{ts}",
+        "hardening_domain": "output_schema_validation",
+        "signal_type": "output_schema_not_validated",
+        "severity": "blocker",
+        "detected_state": "output schema conformance has not been validated",
+        "expected_state": "output conforms exactly to its declared versioned schema",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"oivsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "OutputIntegritySignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_OIV_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52i": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "OutputIntegrityAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_hardening_statuses": list(_OIV_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52i": True,
+        "human_review_required_always_true_in_52i": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "OutputIntegritySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_hardening_statuses": list(_OIV_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52i": True,
+        "human_review_required_always_true_in_52i": True,
+        "fields": summary_fields,
+    }
+
+    output_integrity_verification_overview = {
+        "overview_id": f"52i-{ts}",
+        "generated_at": generated_at,
+        "phase": "52I",
+        "title": "Output Integrity Verification",
+        "summary": (
+            "Defines and validates output integrity requirements so future runtime "
+            "execution outputs remain deterministic, attributable, complete, and "
+            "resistant to corruption or tampering. Completeness, schema, attribution, "
+            "traceability, consistency, tamper detection, governance alignment, and "
+            "integrity escalation domains are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. hardening_status={hardening_status}. "
+            "Outputs are assessed only; no runtime invocation, prompt execution, "
+            "execution authorization, remediation, output mutation, or repository "
+            "modification occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "hardening_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "output_integrity_verification_overview": (
+            output_integrity_verification_overview
+        ),
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_OIV_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_OIV_INPUT_SOURCES),
+        "advisory": OUTPUT_INTEGRITY_VERIFICATION_ADVISORY,
+    }
