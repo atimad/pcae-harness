@@ -143,6 +143,7 @@ from pcae.commands.agent import (
     run_sandbox_hardening,
     run_timeout_hardening,
     run_output_integrity_verification,
+    run_concurrency_safety,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4134,6 +4135,17 @@ def build_parser() -> argparse.ArgumentParser:
     output_integrity_verification_parser.set_defaults(
         handler=run_output_integrity_verification
     )
+
+    concurrency_safety_parser = subparsers.add_parser(
+        "concurrency-safety",
+        help="Define and validate concurrency safety for simultaneous agents, sessions, and governance workflows (Phase 52J).",
+    )
+    concurrency_safety_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    concurrency_safety_parser.set_defaults(handler=run_concurrency_safety)
 
     return parser
 

@@ -53132,3 +53132,485 @@ def build_output_integrity_verification() -> dict:
         "input_sources": list(_OIV_INPUT_SOURCES),
         "advisory": OUTPUT_INTEGRITY_VERIFICATION_ADVISORY,
     }
+
+
+# --- Phase 52J: Concurrency Safety ---
+
+CONCURRENCY_SAFETY_ADVISORY = (
+    "Concurrency safety is informational; concurrency requirements may be inspected "
+    "and remediation recommended, but no automatic remediation occurs and no locks, "
+    "tasks, sessions, or repository files are modified. No runtimes are invoked, "
+    "no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52J. Concurrency state is assessed only, "
+    "and remediation requires human review."
+)
+
+_CNSF_CONCURRENCY_DOMAINS: tuple[str, ...] = (
+    "concurrent_task_access_validation",
+    "concurrent_session_access_validation",
+    "concurrent_agent_access_validation",
+    "concurrent_governance_access_validation",
+    "lock_contention_validation",
+    "shared_state_validation",
+    "concurrency_boundary_validation",
+    "concurrency_escalation",
+)
+
+_CNSF_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CNSF_SAFETY_STATUSES: tuple[str, ...] = (
+    "safe",
+    "safe_with_warnings",
+    "safety_required",
+    "blocked",
+)
+
+_CNSF_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this concurrency safety signal.",
+    },
+    {
+        "name": "concurrency_id",
+        "type": "str",
+        "required": True,
+        "description": "The concurrency context associated with this signal.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The concurrency safety domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of concurrency safety signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The concurrency state observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The concurrency state required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52J.",
+    },
+)
+
+_CNSF_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this concurrency safety assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of concurrency safety signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "safety_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: safe, safe_with_warnings, safety_required, or blocked.",
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52J.",
+    },
+)
+
+_CNSF_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this concurrency safety summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of concurrency safety domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of concurrency safety signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "safety_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: safe, safe_with_warnings, safety_required, or blocked.",
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52J.",
+    },
+)
+
+_CNSF_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect concurrency requirements",
+        "detect contention risks",
+        "detect shared-state risks",
+        "detect concurrent governance risks",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "lock_modification_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52J",
+}
+
+_CNSF_INPUT_SOURCES: tuple[str, ...] = (
+    "AgentLockAssessment",
+    "AgentLockConflictAssessment",
+    "AgentLockRecoveryPlan",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+)
+
+_CNSF_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "concurrent_task_access_validation",
+        "signal_type": "concurrent_task_access_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — simultaneous task access controls not validated",
+        "expected_state": "task ownership and write access are exclusive and deterministic",
+        "finding": (
+            "Concurrent task access has not been validated. Multiple agents or "
+            "sessions must not mutate the same task lifecycle state without a "
+            "deterministic ownership and serialization contract."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "concurrent_session_access_validation",
+        "signal_type": "concurrent_session_access_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — simultaneous session access controls not validated",
+        "expected_state": "session ownership, handoff, and continuity updates are serialized",
+        "finding": (
+            "Concurrent session access has not been validated. Session bootstrap, "
+            "handoff, recovery, and end operations require ordering guarantees to "
+            "prevent stale or conflicting continuity state."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "concurrent_agent_access_validation",
+        "signal_type": "concurrent_agent_access_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — simultaneous agent ownership rules not validated",
+        "expected_state": "agent ownership is unique per governed resource and operation",
+        "finding": (
+            "Concurrent agent access rules have not been validated. Agent identity, "
+            "ownership transfer, and stale-agent behavior must remain unambiguous "
+            "when multiple agents are active."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "concurrent_governance_access_validation",
+        "signal_type": "concurrent_governance_access_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — concurrent governance updates not validated",
+        "expected_state": "governance reads and writes are ordered, atomic, and conflict detectable",
+        "finding": (
+            "Concurrent governance access has not been validated. Policy, status, "
+            "provenance, and lifecycle updates need atomicity or conflict detection "
+            "so one workflow cannot silently overwrite another."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "lock_contention_validation",
+        "signal_type": "lock_contention_handling_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — lock contention and fairness behavior not validated",
+        "expected_state": "lock contention is detected, bounded, attributable, and non-mutating",
+        "finding": (
+            "Lock contention handling has not been validated. Competing acquisition, "
+            "stale ownership, fairness, timeout, and conflict reporting must be "
+            "deterministic without this assessment modifying any lock."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "shared_state_validation",
+        "signal_type": "shared_state_coordination_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — shared state consistency controls not validated",
+        "expected_state": "shared state uses atomic updates, version checks, and conflict detection",
+        "finding": (
+            "Shared-state coordination has not been validated. Task, session, lock, "
+            "provenance, and governance artifacts require atomic update or version "
+            "checks to prevent lost updates and partial writes."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "concurrency_boundary_validation",
+        "signal_type": "concurrency_boundaries_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — concurrency limits and resource boundaries not validated",
+        "expected_state": "concurrency limits are explicit, finite, and policy bounded",
+        "finding": (
+            "Concurrency boundaries have not been validated. Maximum agents, "
+            "sessions, workflows, wait durations, and shared-resource scopes need "
+            "explicit finite limits."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "concurrency_escalation",
+        "signal_type": "compound_concurrency_failure",
+        "severity": "blocker",
+        "detected_state": "multiple concurrency safety domains remain unvalidated",
+        "expected_state": "no compound contention or shared-state weakness remains unresolved",
+        "finding": (
+            "Multiple concurrency safety controls remain unvalidated. Compound task, "
+            "session, governance, lock, or shared-state risks require escalated human "
+            "review and keep execution blocked."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_concurrency_safety() -> dict:
+    """Define concurrency safety requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _CNSF_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _CNSF_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _CNSF_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _CNSF_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_CNSF_CONCURRENCY_DOMAINS)
+
+    if blocker_count:
+        safety_status = "safety_required"
+        remediation_recommended = True
+    elif warning_count:
+        safety_status = "safe_with_warnings"
+        remediation_recommended = True
+    else:
+        safety_status = "safe"
+        remediation_recommended = False
+
+    assessment_id = f"cnsfa-{ts}"
+    sample_signal = {
+        "signal_id": f"cnsfs-{ts}",
+        "concurrency_id": f"concurrency-{ts}",
+        "hardening_domain": "lock_contention_validation",
+        "signal_type": "lock_contention_handling_not_validated",
+        "severity": "blocker",
+        "detected_state": "lock contention handling has not been validated",
+        "expected_state": "lock contention is detected and reported without mutation",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "safety_status": safety_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"cnsfsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "safety_status": safety_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "ConcurrencySafetySignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_CNSF_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52j": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "ConcurrencySafetyAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_safety_statuses": list(_CNSF_SAFETY_STATUSES),
+        "execution_allowed_always_false_in_52j": True,
+        "human_review_required_always_true_in_52j": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "ConcurrencySafetySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_safety_statuses": list(_CNSF_SAFETY_STATUSES),
+        "execution_allowed_always_false_in_52j": True,
+        "human_review_required_always_true_in_52j": True,
+        "fields": summary_fields,
+    }
+
+    concurrency_safety_overview = {
+        "overview_id": f"52j-{ts}",
+        "generated_at": generated_at,
+        "phase": "52J",
+        "title": "Concurrency Safety",
+        "summary": (
+            "Defines and validates concurrency safety requirements for multiple "
+            "agents, sessions, and governance workflows operating simultaneously. "
+            "Task, session, agent, governance, lock contention, shared state, "
+            "boundary, and escalation domains are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. safety_status={safety_status}. "
+            "Concurrency state is assessed only; no lock, task, session, runtime, "
+            "prompt, authorization, remediation, or repository mutation occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "concurrency_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "safety_status": safety_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "concurrency_safety_overview": concurrency_safety_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CNSF_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CNSF_INPUT_SOURCES),
+        "advisory": CONCURRENCY_SAFETY_ADVISORY,
+    }

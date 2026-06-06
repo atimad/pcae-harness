@@ -811,3 +811,8 @@
 
 - `pcae output-integrity-verification`
 - `pcae output-integrity-verification --json`
+
+## concurrency-safety
+
+- `pcae concurrency-safety`
+- `pcae concurrency-safety --json`
