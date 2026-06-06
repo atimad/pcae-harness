@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50K: Controlled Write Recommendation Engine.
+Phase 51A: Execution Request Model.
 
 ## Governance Coherence Note
 
@@ -3580,13 +3580,36 @@ WriteGovernanceAuditSummary; write recommendation is advisory only; no
 authorization occurs; no write execution occurs; no files are modified;
 `docs/COMMANDS.md` regenerated; 15 new tests; 3838 total tests passing
 
+`pcae execution-request` and `--json`; defines the governed execution
+request artifact that serves as the entry point for future controlled
+execution orchestration; three models — ExecutionRequestCandidate (9
+fields: request_id, request_title, execution_intent, execution_scope,
+execution_target, selected_runtime, selected_agent, human_review_required,
+request_allowed), ExecutionRequestRecord (12 fields: request_id,
+execution_intent, execution_scope, execution_target, selected_runtime,
+selected_agent, constraint_count, risk_count, justification_present,
+request_status, execution_allowed, human_review_required),
+ExecutionRequestSummary (9 fields: summary_id, request_id, domain_count,
+blocker_count, warning_count, request_status, request_allowed,
+execution_allowed, human_review_required); four request statuses: draft,
+pending_human_review, blocked, ready_for_review; eight request domains:
+execution_intent, execution_scope, execution_target, runtime_selection,
+agent_selection, execution_constraints, execution_risk,
+execution_justification; eight blockers; request_status=pending_human_review;
+request_allowed=False; execution_allowed=False; human_review_required=True;
+inputs: WriteRecommendationSummary, WriteGovernanceAuditSummary,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment,
+GovernanceRecoveryPlan; execution request definition is advisory and
+read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3853 total tests passing
+
 ## Current Phase
 
-Phase 50K: Controlled Write Recommendation Engine.
+Phase 51A: Execution Request Model.
 
 ## Next
 
-- TBD: Future phases (50L and beyond).
+- TBD: Future phases (51B and beyond).
 
 ## Future Explorations
 

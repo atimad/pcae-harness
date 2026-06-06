@@ -43572,3 +43572,470 @@ def build_write_recommendation() -> dict:
         "input_sources": list(_WRE_INPUT_SOURCES),
         "advisory": WRITE_RECOMMENDATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 51A — Execution Request Model
+# ---------------------------------------------------------------------------
+
+EXECUTION_REQUEST_ADVISORY = (
+    "Execution request is informational; execution request models may be defined "
+    "and completeness assessed, but no execution occurs and no authorization is "
+    "granted. No files are modified, no runtimes are invoked, and no prompts are "
+    "executed. request_allowed=False and execution_allowed=False in Phase 51A."
+)
+
+_ERA_REQUEST_DOMAINS: tuple[str, ...] = (
+    "execution_intent",
+    "execution_scope",
+    "execution_target",
+    "runtime_selection",
+    "agent_selection",
+    "execution_constraints",
+    "execution_risk",
+    "execution_justification",
+)
+
+_ERA_REQUEST_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "ready_for_review",
+)
+
+_ERA_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution request candidate.",
+    },
+    {
+        "name": "request_title",
+        "type": "str",
+        "required": True,
+        "description": "Human-readable title describing the intended execution.",
+    },
+    {
+        "name": "execution_intent",
+        "type": "str",
+        "required": True,
+        "description": "Declared intent of the execution (what should happen and why).",
+    },
+    {
+        "name": "execution_scope",
+        "type": "str",
+        "required": True,
+        "description": "Scope of files, resources, or systems affected by the execution.",
+    },
+    {
+        "name": "execution_target",
+        "type": "str",
+        "required": True,
+        "description": "The specific target (file, endpoint, or resource) to be acted on.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for execution (e.g. claude-local, codex-local).",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected to carry out the execution.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51A.",
+    },
+    {
+        "name": "request_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51A.",
+    },
+)
+
+_ERA_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution request record.",
+    },
+    {
+        "name": "execution_intent",
+        "type": "str",
+        "required": True,
+        "description": "Declared intent of the execution.",
+    },
+    {
+        "name": "execution_scope",
+        "type": "str",
+        "required": True,
+        "description": "Scope of files, resources, or systems affected.",
+    },
+    {
+        "name": "execution_target",
+        "type": "str",
+        "required": True,
+        "description": "The specific target to be acted on.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected to carry out the execution.",
+    },
+    {
+        "name": "constraint_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of execution constraints declared for this request.",
+    },
+    {
+        "name": "risk_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of identified risks associated with this execution request.",
+    },
+    {
+        "name": "justification_present",
+        "type": "bool",
+        "required": True,
+        "description": "Whether a human-authored justification has been provided.",
+    },
+    {
+        "name": "request_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: draft, pending_human_review, blocked, or ready_for_review.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51A.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51A.",
+    },
+)
+
+_ERA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution request summary.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of request domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of request domains with missing or blocking artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of request domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "request_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: draft, pending_human_review, blocked, or ready_for_review.",
+    },
+    {
+        "name": "request_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51A.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51A.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51A.",
+    },
+)
+
+_ERA_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define execution request models",
+        "assess execution request completeness",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "request_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51A",
+}
+
+_ERA_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteRecommendationSummary",
+    "WriteGovernanceAuditSummary",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_ERA_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "execution_intent",
+        "severity": "blocker",
+        "finding": (
+            "No execution intent has been declared. "
+            "A clear statement of what the execution should accomplish and why "
+            "must be present before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "execution_scope",
+        "severity": "blocker",
+        "finding": (
+            "No execution scope has been defined. "
+            "The files, resources, or systems affected by the execution must be "
+            "explicitly bounded before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "execution_target",
+        "severity": "blocker",
+        "finding": (
+            "No execution target has been specified. "
+            "The specific file, endpoint, or resource to be acted on must be "
+            "identified before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "runtime_selection",
+        "severity": "blocker",
+        "finding": (
+            "No runtime has been selected. "
+            "A governed runtime (e.g. claude-local, codex-local) must be nominated "
+            "and confirmed before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "agent_selection",
+        "severity": "blocker",
+        "finding": (
+            "No agent has been selected. "
+            "The agent responsible for carrying out the execution must be identified "
+            "before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "execution_constraints",
+        "severity": "blocker",
+        "finding": (
+            "No execution constraints have been declared. "
+            "Constraints limiting the execution (forbidden operations, file boundaries, "
+            "time limits) must be documented before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "execution_risk",
+        "severity": "blocker",
+        "finding": (
+            "No execution risk assessment has been completed. "
+            "Known risks and mitigations associated with the execution must be "
+            "documented before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+    {
+        "domain": "execution_justification",
+        "severity": "blocker",
+        "finding": (
+            "No execution justification has been provided. "
+            "A human-authored justification explaining why this execution is "
+            "necessary must be present before an execution request can be reviewed."
+        ),
+        "request_allowed": False,
+    },
+)
+
+
+def build_execution_request() -> dict:
+    """Define the governed execution request artifact. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    request_id_ref = f"era-{ts}"
+
+    candidate_fields = [dict(f) for f in _ERA_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _ERA_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _ERA_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _ERA_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        request_status = "pending_human_review"
+    elif warning_count > 0:
+        request_status = "draft"
+    else:
+        request_status = "blocked"
+
+    record_id_ref = f"erar-{ts}"
+
+    sample_candidate = {
+        "request_id": request_id_ref,
+        "request_title": "Governed execution request (scaffold)",
+        "execution_intent": "pending",
+        "execution_scope": "pending",
+        "execution_target": "pending",
+        "selected_runtime": "pending",
+        "selected_agent": "pending",
+        "human_review_required": True,
+        "request_allowed": False,
+    }
+
+    sample_record = {
+        "request_id": record_id_ref,
+        "execution_intent": "pending",
+        "execution_scope": "pending",
+        "execution_target": "pending",
+        "selected_runtime": "pending",
+        "selected_agent": "pending",
+        "constraint_count": 0,
+        "risk_count": 0,
+        "justification_present": False,
+        "request_status": request_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"eras-{ts}",
+        "request_id": record_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "request_status": request_status,
+        "request_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionRequestCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_request_statuses": list(_ERA_REQUEST_STATUSES),
+        "request_allowed_always_false_in_51a": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "ExecutionRequestRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_request_statuses": list(_ERA_REQUEST_STATUSES),
+        "execution_allowed_always_false_in_51a": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionRequestSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_request_statuses": list(_ERA_REQUEST_STATUSES),
+        "request_allowed_always_false_in_51a": True,
+        "execution_allowed_always_false_in_51a": True,
+        "fields": summary_fields,
+    }
+
+    execution_request_overview = {
+        "overview_id": f"51a-{ts}",
+        "generated_at": generated_at,
+        "phase": "51A",
+        "title": "Execution Request Model",
+        "summary": (
+            "Defines the governed execution request artifact that serves as the "
+            "entry point for future controlled execution orchestration. "
+            "Eight request domains are assessed: "
+            "execution_intent, execution_scope, execution_target, runtime_selection, "
+            "agent_selection, execution_constraints, execution_risk, and "
+            "execution_justification. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"request_status={request_status}. "
+            "Execution request definition is advisory and read-only. "
+            "No execution occurs. request_allowed=False. execution_allowed=False."
+        ),
+        "request_domain_count": len(_ERA_REQUEST_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "request_status": request_status,
+        "request_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_request_overview": execution_request_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ERA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ERA_INPUT_SOURCES),
+        "advisory": EXECUTION_REQUEST_ADVISORY,
+    }

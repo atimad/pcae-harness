@@ -732,6 +732,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-recommendation`
 - `pcae write-recommendation --json`
+
+## execution-request
+
+- `pcae execution-request`
+- `pcae execution-request --json`
 """
 
 

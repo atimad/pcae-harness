@@ -711,3 +711,8 @@
 
 - `pcae write-recommendation`
 - `pcae write-recommendation --json`
+
+## execution-request
+
+- `pcae execution-request`
+- `pcae execution-request --json`

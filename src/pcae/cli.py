@@ -123,6 +123,7 @@ from pcae.commands.agent import (
     run_write_rollback_verification,
     run_write_governance_audit,
     run_write_recommendation,
+    run_execution_request,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3888,6 +3889,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_recommendation_parser.set_defaults(handler=run_write_recommendation)
+
+    execution_request_parser = subparsers.add_parser(
+        "execution-request",
+        help="Define the governed execution request artifact that serves as the entry point for future controlled execution orchestration (Phase 51A).",
+    )
+    execution_request_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_request_parser.set_defaults(handler=run_execution_request)
 
     return parser
 
