@@ -133,6 +133,7 @@ from pcae.commands.agent import (
     run_execution_audit,
     run_execution_rollback_verification,
     run_execution_chain_governance_audit,
+    run_execution_recommendation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4012,6 +4013,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_governance_audit_parser.set_defaults(handler=run_execution_chain_governance_audit)
+
+    execution_recommendation_parser = subparsers.add_parser(
+        "execution-recommendation",
+        help="Determine whether a governed execution plan should be recommended based on the 51A–51J governance chain (Phase 51K).",
+    )
+    execution_recommendation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_recommendation_parser.set_defaults(handler=run_execution_recommendation)
 
     return parser
 

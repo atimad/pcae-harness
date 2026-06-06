@@ -761,3 +761,8 @@
 
 - `pcae execution-governance-audit`
 - `pcae execution-governance-audit --json`
+
+## execution-recommendation
+
+- `pcae execution-recommendation`
+- `pcae execution-recommendation --json`

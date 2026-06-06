@@ -46681,6 +46681,473 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+EXECUTION_RECOMMENDATION_ADVISORY = (
+    "Execution recommendation is informational; recommendation domains may be "
+    "assessed, but no execution occurs and no authorization is granted. "
+    "No files are modified, no runtimes are invoked, and no prompts are executed. "
+    "recommendation_allowed=False and execution_allowed=False in Phase 51K."
+)
+
+_EREC_RECOMMENDATION_DOMAINS: tuple[str, ...] = (
+    "request_recommendation",
+    "review_recommendation",
+    "decision_recommendation",
+    "lifecycle_recommendation",
+    "planning_recommendation",
+    "readiness_recommendation",
+    "evidence_recommendation",
+    "audit_recommendation",
+    "rollback_recommendation",
+    "governance_recommendation",
+)
+
+_EREC_RECOMMENDATION_STATUSES: tuple[str, ...] = (
+    "not_recommended",
+    "recommended_with_warnings",
+    "pending_human_review",
+    "recommended",
+)
+
+_EREC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recommendation_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution recommendation candidate.",
+    },
+    {
+        "name": "execution_chain_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution governance chain this recommendation covers.",
+    },
+    {
+        "name": "recommendation_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of recommendation domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51K.",
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51K.",
+    },
+)
+
+_EREC_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution recommendation assessment.",
+    },
+    {
+        "name": "recommendation_id",
+        "type": "str",
+        "required": True,
+        "description": "The recommendation candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recommendation domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with non-blocking warnings.",
+    },
+    {
+        "name": "recommendation_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_recommended, recommended_with_warnings, "
+            "pending_human_review, or recommended."
+        ),
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51K.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51K.",
+    },
+)
+
+_EREC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution recommendation summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recommendation domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of recommendation domains with non-blocking warnings.",
+    },
+    {
+        "name": "recommendation_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_recommended, recommended_with_warnings, "
+            "pending_human_review, or recommended."
+        ),
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51K.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51K.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51K.",
+    },
+)
+
+_EREC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess execution recommendation domains",
+        "identify missing prerequisites",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recommendation_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51K",
+}
+
+_EREC_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "ExecutionAuditSummary",
+    "ExecutionRollbackVerificationSummary",
+    "ExecutionGovernanceAuditSummary",
+)
+
+_EREC_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "request_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionRequestSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution request is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "review_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionReviewSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution review is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "decision_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionDecisionSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution decision is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "lifecycle_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionLifecycleSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution lifecycle record is required "
+            "before an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "planning_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionPlanSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution plan is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "readiness_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionReadinessSummary has been verified for recommendation. "
+            "A complete and human-reviewed readiness assessment is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "evidence_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionEvidenceSummary has been verified for recommendation. "
+            "Complete and human-reviewed execution evidence is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "audit_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionAuditSummary has been verified for recommendation. "
+            "A complete and human-reviewed execution audit is required before "
+            "an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionRollbackVerificationSummary has been verified for "
+            "recommendation. Complete and human-reviewed rollback verification "
+            "is required before an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "governance_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No ExecutionGovernanceAuditSummary has been verified for "
+            "recommendation. A complete and human-reviewed governance audit "
+            "is required before an execution plan can be recommended."
+        ),
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_recommendation() -> dict:
+    """Determine whether a governed execution plan should be recommended. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    recommendation_id_ref = f"erec-{ts}"
+
+    candidate_fields = [dict(f) for f in _EREC_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _EREC_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _EREC_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EREC_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        recommendation_status = "pending_human_review"
+    elif warning_count > 0:
+        recommendation_status = "recommended_with_warnings"
+    else:
+        recommendation_status = "not_recommended"
+
+    assessment_id_ref = f"ereca-{ts}"
+
+    sample_candidate = {
+        "recommendation_id": recommendation_id_ref,
+        "execution_chain_id": f"ech-{ts}",
+        "recommendation_domains": list(_EREC_RECOMMENDATION_DOMAINS),
+        "human_review_required": True,
+        "recommendation_allowed": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "recommendation_id": recommendation_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"erecsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionRecommendationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_recommendation_statuses": list(_EREC_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_51k": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionRecommendationAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_recommendation_statuses": list(_EREC_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_51k": True,
+        "execution_allowed_always_false_in_51k": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionRecommendationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_recommendation_statuses": list(_EREC_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_51k": True,
+        "execution_allowed_always_false_in_51k": True,
+        "fields": summary_fields,
+    }
+
+    execution_recommendation_overview = {
+        "overview_id": f"51k-{ts}",
+        "generated_at": generated_at,
+        "phase": "51K",
+        "title": "Execution Recommendation Engine",
+        "summary": (
+            "Determines whether a governed execution plan should be recommended for "
+            "future consideration based on the complete 51A–51J execution governance "
+            "chain. Ten recommendation domains are assessed: request_recommendation, "
+            "review_recommendation, decision_recommendation, lifecycle_recommendation, "
+            "planning_recommendation, readiness_recommendation, evidence_recommendation, "
+            "audit_recommendation, rollback_recommendation, and governance_recommendation. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"recommendation_status={recommendation_status}. "
+            "Execution recommendation is advisory and read-only. "
+            "No execution occurs. recommendation_allowed=False. execution_allowed=False."
+        ),
+        "recommendation_domain_count": len(_EREC_RECOMMENDATION_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_recommendation_overview": execution_recommendation_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EREC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EREC_INPUT_SOURCES),
+        "advisory": EXECUTION_RECOMMENDATION_ADVISORY,
+    }
+
+
 EXECUTION_CHAIN_GOVERNANCE_AUDIT_ADVISORY = (
     "Execution governance audit is informational; the governance chain may be "
     "assessed for completeness, but no execution occurs and no authorization is "
