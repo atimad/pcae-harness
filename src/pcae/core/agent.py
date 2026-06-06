@@ -46681,6 +46681,463 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+EXECUTION_AUDIT_ADVISORY = (
+    "Execution audit is informational; audit requirements may be defined "
+    "and assessed, but no execution occurs and no authorization is granted. "
+    "No files are modified, no runtimes are invoked, and no prompts are executed. "
+    "audit_complete=False and execution_allowed=False in Phase 51H."
+)
+
+_EAU_AUDIT_DOMAINS: tuple[str, ...] = (
+    "execution_request_audit",
+    "execution_review_audit",
+    "execution_decision_audit",
+    "execution_lifecycle_audit",
+    "execution_plan_audit",
+    "execution_readiness_audit",
+    "execution_evidence_audit",
+    "execution_trace_audit",
+)
+
+_EAU_AUDIT_STATUSES: tuple[str, ...] = (
+    "insufficient_audit",
+    "audit_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_EAU_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution audit candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this audit candidate is associated with.",
+    },
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution plan this audit candidate is associated with.",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of audit domains to be assessed.",
+    },
+    {
+        "name": "audit_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit items declared for this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51H.",
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51H.",
+    },
+)
+
+_EAU_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution audit assessment.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The audit candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with non-blocking warnings.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_audit, audit_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51H.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51H.",
+    },
+)
+
+_EAU_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution audit summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit domains with non-blocking warnings.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_audit, audit_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51H.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51H.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51H.",
+    },
+)
+
+_EAU_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess audit requirements",
+        "identify missing audit artifacts",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "audit_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51H",
+}
+
+_EAU_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_EAU_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "execution_request_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution request audit record has been declared. "
+            "A documented execution request reviewed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_review_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution review audit record has been declared. "
+            "A documented execution review completed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_decision_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution decision audit record has been declared. "
+            "A documented execution decision reviewed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_lifecycle_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution lifecycle audit record has been declared. "
+            "Documented lifecycle state transitions reviewed by a human are required "
+            "before audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_plan_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution plan audit record has been declared. "
+            "A documented execution plan reviewed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_readiness_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution readiness audit record has been declared. "
+            "A documented readiness assessment reviewed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_evidence_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution evidence audit record has been declared. "
+            "Documented evidence artifacts reviewed by a human are required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_trace_audit",
+        "severity": "blocker",
+        "finding": (
+            "No execution trace audit record has been declared. "
+            "A documented execution trace reviewed by a human is required before "
+            "audit can be considered complete."
+        ),
+        "audit_complete": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_audit() -> dict:
+    """Define execution audit requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"eau-{ts}"
+
+    candidate_fields = [dict(f) for f in _EAU_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _EAU_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _EAU_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EAU_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        audit_status = "pending_human_review"
+    elif warning_count > 0:
+        audit_status = "audit_with_warnings"
+    else:
+        audit_status = "insufficient_audit"
+
+    assessment_id_ref = f"eaua-{ts}"
+
+    sample_candidate = {
+        "audit_id": audit_id_ref,
+        "request_id": f"era-{ts}",
+        "plan_id": f"epl-{ts}",
+        "audit_domains": list(_EAU_AUDIT_DOMAINS),
+        "audit_count": 0,
+        "human_review_required": True,
+        "audit_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "audit_id": audit_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"eausum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionAuditCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_audit_statuses": list(_EAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51h": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionAuditAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_audit_statuses": list(_EAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51h": True,
+        "execution_allowed_always_false_in_51h": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionAuditSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_audit_statuses": list(_EAU_AUDIT_STATUSES),
+        "audit_complete_always_false_in_51h": True,
+        "execution_allowed_always_false_in_51h": True,
+        "fields": summary_fields,
+    }
+
+    execution_audit_overview = {
+        "overview_id": f"51h-{ts}",
+        "generated_at": generated_at,
+        "phase": "51H",
+        "title": "Execution Audit Requirements",
+        "summary": (
+            "Defines the audit requirements that must exist before an execution "
+            "plan can ever be considered eligible for future controlled execution. "
+            "Eight audit domains are assessed: execution_request_audit, "
+            "execution_review_audit, execution_decision_audit, execution_lifecycle_audit, "
+            "execution_plan_audit, execution_readiness_audit, execution_evidence_audit, "
+            "and execution_trace_audit. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"audit_status={audit_status}. "
+            "Execution audit assessment is advisory and read-only. "
+            "No execution occurs. audit_complete=False. execution_allowed=False."
+        ),
+        "audit_domain_count": len(_EAU_AUDIT_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_audit_overview": execution_audit_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EAU_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EAU_INPUT_SOURCES),
+        "advisory": EXECUTION_AUDIT_ADVISORY,
+    }
+
+
 def build_execution_evidence() -> dict:
     """Define execution evidence requirements. Advisory only."""
     generated_at = datetime.now(timezone.utc).isoformat()

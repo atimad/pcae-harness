@@ -37102,3 +37102,230 @@ def test_51g_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 51H: Execution Audit Requirements ---
+
+
+def test_51h_json_structure(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "execution_audit_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_51h_overview_fields(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_audit_overview"]
+    assert ov["phase"] == "51H"
+    assert ov["audit_complete"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["audit_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert isinstance(ov["compliant_count"], int)
+    assert ov["audit_status"] in (
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete",
+    )
+
+
+def test_51h_audit_always_incomplete(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_audit_overview"]
+    assert ov["audit_complete"] is False
+    assert ov["execution_allowed"] is False
+    assert data["sample_candidate"]["audit_complete"] is False
+    assert data["sample_assessment"]["audit_complete"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["audit_complete"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    gb = data["governance_boundaries"]
+    assert gb["audit_complete"] is False
+    assert gb["execution_allowed"] is False
+    assert data["candidate_model"]["audit_complete_always_false_in_51h"] is True
+    assert data["assessment_model"]["audit_complete_always_false_in_51h"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_51h"] is True
+    assert data["summary_model"]["audit_complete_always_false_in_51h"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_51h"] is True
+
+
+def test_51h_human_review_always_required(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["execution_audit_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_51h_candidate_model(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "ExecutionAuditCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 7
+    assert set(cm["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete",
+    }
+    assert cm["audit_complete_always_false_in_51h"] is True
+
+
+def test_51h_assessment_model(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "ExecutionAuditAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 9
+    assert set(am["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete",
+    }
+    assert am["audit_complete_always_false_in_51h"] is True
+    assert am["execution_allowed_always_false_in_51h"] is True
+
+
+def test_51h_summary_model(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "ExecutionAuditSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_audit_statuses"]) == {
+        "insufficient_audit", "audit_with_warnings",
+        "pending_human_review", "complete",
+    }
+    assert sm["audit_complete_always_false_in_51h"] is True
+    assert sm["execution_allowed_always_false_in_51h"] is True
+
+
+def test_51h_all_audit_domains_covered(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "execution_request_audit", "execution_review_audit",
+        "execution_decision_audit", "execution_lifecycle_audit",
+        "execution_plan_audit", "execution_readiness_audit",
+        "execution_evidence_audit", "execution_trace_audit",
+    ):
+        assert expected in domains, f"missing audit domain: {expected}"
+
+
+def test_51h_domain_assessment_structure(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "audit_complete", "execution_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["audit_complete"] is False
+        assert d["execution_allowed"] is False
+
+
+def test_51h_sample_candidate_fields(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "audit_id", "request_id", "plan_id", "audit_domains",
+        "audit_count", "human_review_required", "audit_complete",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["audit_complete"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["audit_domains"], list)
+    assert len(sc["audit_domains"]) == 8
+
+
+def test_51h_sample_assessment_fields(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "audit_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "audit_status",
+        "audit_complete", "execution_allowed",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["audit_complete"] is False
+    assert sa["execution_allowed"] is False
+    assert isinstance(sa["compliant_count"], int)
+
+
+def test_51h_sample_summary_fields(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "audit_status",
+        "audit_complete", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["audit_complete"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_51h_input_sources(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ExecutionRequestSummary", "ExecutionReviewSummary",
+        "ExecutionDecisionSummary", "ExecutionLifecycleSummary",
+        "ExecutionPlanSummary", "ExecutionReadinessSummary",
+        "ExecutionEvidenceSummary", "GovernanceInvariantAssessment",
+        "RuntimeSafetyInvariantAssessment", "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_51h_governance_boundaries(capsys) -> None:
+    main(["execution-audit", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["audit_complete"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "51H"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess audit requirements",
+        "identify missing audit artifacts",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_51h_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-audit"])
+    output = capsys.readouterr().out
+    assert "Execution audit requirements" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

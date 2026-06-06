@@ -746,3 +746,8 @@
 
 - `pcae execution-evidence`
 - `pcae execution-evidence --json`
+
+## execution-audit
+
+- `pcae execution-audit`
+- `pcae execution-audit --json`
