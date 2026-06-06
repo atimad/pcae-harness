@@ -145,6 +145,7 @@ from pcae.commands.agent import (
     run_output_integrity_verification,
     run_concurrency_safety,
     run_parallel_agent_coordination,
+    run_multi_agent_state_consistency,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4159,6 +4160,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parallel_agent_coordination_parser.set_defaults(
         handler=run_parallel_agent_coordination
+    )
+
+    multi_agent_state_consistency_parser = subparsers.add_parser(
+        "multi-agent-state-consistency",
+        help="Define and validate shared-state consistency across coordinated agents (Phase 52L).",
+    )
+    multi_agent_state_consistency_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    multi_agent_state_consistency_parser.set_defaults(
+        handler=run_multi_agent_state_consistency
     )
 
     return parser

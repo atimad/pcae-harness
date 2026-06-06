@@ -54111,3 +54111,507 @@ def build_parallel_agent_coordination() -> dict:
         "input_sources": list(_PACD_INPUT_SOURCES),
         "advisory": PARALLEL_AGENT_COORDINATION_ADVISORY,
     }
+
+
+# --- Phase 52L: Multi-Agent State Consistency ---
+
+MULTI_AGENT_STATE_CONSISTENCY_ADVISORY = (
+    "Multi-agent state consistency is informational; shared-state consistency "
+    "requirements may be inspected and remediation recommended, but no automatic "
+    "remediation occurs and no lock, task, session, governance, runtime, evidence, "
+    "or repository state is modified. No runtimes are invoked, no prompts are "
+    "executed, and no execution is authorized. execution_allowed=False in Phase "
+    "52L. Consistency is assessed only, and remediation requires human review."
+)
+
+_MASC_CONSISTENCY_DOMAINS: tuple[str, ...] = (
+    "task_state_consistency",
+    "session_state_consistency",
+    "lock_state_consistency",
+    "governance_state_consistency",
+    "runtime_state_consistency",
+    "evidence_state_consistency",
+    "handoff_state_consistency",
+    "recovery_state_consistency",
+)
+
+_MASC_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MASC_CONSISTENCY_STATUSES: tuple[str, ...] = (
+    "consistent",
+    "consistent_with_warnings",
+    "consistency_required",
+    "blocked",
+)
+
+_MASC_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this state consistency signal.",
+    },
+    {
+        "name": "consistency_id",
+        "type": "str",
+        "required": True,
+        "description": "The shared-state consistency context for this signal.",
+    },
+    {
+        "name": "agent_id",
+        "type": "str",
+        "required": True,
+        "description": "The agent associated with this consistency signal.",
+    },
+    {
+        "name": "consistency_domain",
+        "type": "str",
+        "required": True,
+        "description": "The multi-agent state consistency domain producing this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of state consistency signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The shared-state condition observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The shared-state condition required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52L.",
+    },
+)
+
+_MASC_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this consistency assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of consistency signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "consistency_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: consistent, consistent_with_warnings, "
+            "consistency_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52L.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52L.",
+    },
+)
+
+_MASC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this consistency summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of consistency domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of consistency signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "consistency_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: consistent, consistent_with_warnings, "
+            "consistency_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52L.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52L.",
+    },
+)
+
+_MASC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect multi-agent shared-state consistency requirements",
+        "detect state consistency risks",
+        "detect handoff and recovery consistency gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "modify governance state",
+        "modify runtime state",
+        "modify evidence state",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "lock_modification_allowed": False,
+    "task_modification_allowed": False,
+    "session_modification_allowed": False,
+    "governance_mutation_allowed": False,
+    "runtime_mutation_allowed": False,
+    "evidence_mutation_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52L",
+}
+
+_MASC_INPUT_SOURCES: tuple[str, ...] = (
+    "ConcurrencySafetyAssessment",
+    "ParallelAgentCoordinationAssessment",
+    "AgentLockAssessment",
+    "AgentLockConflictAssessment",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_MASC_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "task_state_consistency",
+        "signal_type": "task_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — cross-agent task state agreement not validated",
+        "expected_state": "all agents observe one versioned task lifecycle and owner",
+        "finding": (
+            "Task state consistency has not been validated. Active status, ownership, "
+            "scope, and lifecycle transitions must resolve to one versioned state "
+            "across all coordinated agents."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "session_state_consistency",
+        "signal_type": "session_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — cross-agent session continuity not validated",
+        "expected_state": "session identity, owner, task, and continuity references agree",
+        "finding": (
+            "Session state consistency has not been validated. Bootstrap, handoff, "
+            "recovery, and end-state records must agree on the same agent, task, and "
+            "continuity chain."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "lock_state_consistency",
+        "signal_type": "lock_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — lock ownership views not validated",
+        "expected_state": "all agents observe one current lock owner and lock version",
+        "finding": (
+            "Lock state consistency has not been validated. Agents must not act on "
+            "stale, conflicting, or partially transferred lock ownership views, and "
+            "this assessment does not alter any lock."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "governance_state_consistency",
+        "signal_type": "governance_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — governance artifact agreement not validated",
+        "expected_state": "policy, project status, provenance, and task governance agree",
+        "finding": (
+            "Governance state consistency has not been validated. Policy, project "
+            "status, provenance, task contracts, and phase memory must describe the "
+            "same governed workflow state."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_state_consistency",
+        "signal_type": "runtime_state_consistency_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — runtime state references not validated",
+        "expected_state": "runtime identity, contract, and readiness references are consistent",
+        "finding": (
+            "Runtime state consistency has not been validated. Coordinated agents "
+            "must reference the same runtime identity, contract version, readiness "
+            "state, and execution prohibition."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "evidence_state_consistency",
+        "signal_type": "evidence_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — evidence identity and completeness not validated",
+        "expected_state": "all agents reference one immutable, attributable evidence set",
+        "finding": (
+            "Evidence state consistency has not been validated. Evidence identifiers, "
+            "content digests, completeness, attribution, and audit references must "
+            "remain stable across agents."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "handoff_state_consistency",
+        "signal_type": "handoff_state_consistency_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — handoff pre-state and post-state agreement not validated",
+        "expected_state": "handoff records preserve one ordered ownership transition",
+        "finding": (
+            "Handoff state consistency has not been validated. The outgoing and "
+            "incoming views of task, session, lock, provenance, and phase state must "
+            "describe one ordered transfer."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "recovery_state_consistency",
+        "signal_type": "recovery_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — recovery plan and active state agreement not validated",
+        "expected_state": "recovery plans use one consistent pre-state and intended post-state",
+        "finding": (
+            "Recovery state consistency has not been validated. Lock, task, session, "
+            "governance, runtime, and evidence recovery plans must not be based on "
+            "conflicting snapshots or race with active coordination."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_multi_agent_state_consistency() -> dict:
+    """Define multi-agent shared-state consistency requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _MASC_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _MASC_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _MASC_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _MASC_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_MASC_CONSISTENCY_DOMAINS)
+
+    if blocker_count:
+        consistency_status = "consistency_required"
+        remediation_recommended = True
+    elif warning_count:
+        consistency_status = "consistent_with_warnings"
+        remediation_recommended = True
+    else:
+        consistency_status = "consistent"
+        remediation_recommended = False
+
+    assessment_id = f"masca-{ts}"
+    sample_signal = {
+        "signal_id": f"mascs-{ts}",
+        "consistency_id": f"consistency-{ts}",
+        "agent_id": "agent-unassigned",
+        "consistency_domain": "lock_state_consistency",
+        "signal_type": "lock_state_consistency_not_validated",
+        "severity": "blocker",
+        "detected_state": "lock ownership views have not been validated",
+        "expected_state": "all agents observe one current lock owner and version",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "consistency_status": consistency_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mascsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "consistency_status": consistency_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "MultiAgentStateConsistencySignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_MASC_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52l": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "MultiAgentStateConsistencyAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_consistency_statuses": list(_MASC_CONSISTENCY_STATUSES),
+        "execution_allowed_always_false_in_52l": True,
+        "human_review_required_always_true_in_52l": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "MultiAgentStateConsistencySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_consistency_statuses": list(_MASC_CONSISTENCY_STATUSES),
+        "execution_allowed_always_false_in_52l": True,
+        "human_review_required_always_true_in_52l": True,
+        "fields": summary_fields,
+    }
+
+    multi_agent_state_consistency_overview = {
+        "overview_id": f"52l-{ts}",
+        "generated_at": generated_at,
+        "phase": "52L",
+        "title": "Multi-Agent State Consistency",
+        "summary": (
+            "Defines consistency requirements for shared state across multiple agents "
+            "operating in coordinated workflows. Task, session, lock, governance, "
+            "runtime, evidence, handoff, and recovery state domains are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. consistency_status={consistency_status}. "
+            "Consistency is assessed only; no lock, task, session, governance, "
+            "runtime, evidence, prompt, authorization, remediation, or repository "
+            "mutation occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "consistency_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "consistency_status": consistency_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "multi_agent_state_consistency_overview": (
+            multi_agent_state_consistency_overview
+        ),
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_MASC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_MASC_INPUT_SOURCES),
+        "advisory": MULTI_AGENT_STATE_CONSISTENCY_ADVISORY,
+    }

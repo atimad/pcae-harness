@@ -40612,3 +40612,291 @@ def test_52k_human_output_shows_all_sections(capsys) -> None:
     assert "Session modification:  False" in output
     assert "execution_allowed=False" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52L: Multi-Agent State Consistency ---
+
+
+def test_52l_json_structure(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "multi_agent_state_consistency_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "sample_signal",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52l_overview_and_execution_constraints(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["multi_agent_state_consistency_overview"]
+    assert overview["phase"] == "52L"
+    assert overview["consistency_domain_count"] == 8
+    assert overview["domain_count"] == 8
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+    assert overview["consistency_status"] in {
+        "consistent",
+        "consistent_with_warnings",
+        "consistency_required",
+        "blocked",
+    }
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    for key in (
+        "lock_modification_allowed",
+        "task_modification_allowed",
+        "session_modification_allowed",
+        "governance_mutation_allowed",
+        "runtime_mutation_allowed",
+        "evidence_mutation_allowed",
+    ):
+        assert boundaries[key] is False
+
+
+def test_52l_models(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    signal_model = data["signal_model"]
+    assert signal_model["model_name"] == "MultiAgentStateConsistencySignal"
+    assert signal_model["field_count"] == 9
+    assert signal_model["field_count"] == signal_model["required_field_count"]
+    assert set(signal_model["severity_values"]) == {"info", "warning", "blocker"}
+    assert signal_model["human_review_required_always_true_in_52l"] is True
+
+    assessment_model = data["assessment_model"]
+    assert assessment_model["model_name"] == "MultiAgentStateConsistencyAssessment"
+    assert assessment_model["field_count"] == 8
+    assert assessment_model["field_count"] == assessment_model["required_field_count"]
+    assert assessment_model["execution_allowed_always_false_in_52l"] is True
+    assert assessment_model["human_review_required_always_true_in_52l"] is True
+
+    summary_model = data["summary_model"]
+    assert summary_model["model_name"] == "MultiAgentStateConsistencySummary"
+    assert summary_model["field_count"] == 10
+    assert summary_model["field_count"] == summary_model["required_field_count"]
+    assert summary_model["execution_allowed_always_false_in_52l"] is True
+    assert summary_model["human_review_required_always_true_in_52l"] is True
+
+    statuses = {
+        "consistent",
+        "consistent_with_warnings",
+        "consistency_required",
+        "blocked",
+    }
+    assert set(assessment_model["supported_consistency_statuses"]) == statuses
+    assert set(summary_model["supported_consistency_statuses"]) == statuses
+
+
+def test_52l_model_field_names(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert [field["name"] for field in data["signal_model"]["fields"]] == [
+        "signal_id",
+        "consistency_id",
+        "agent_id",
+        "consistency_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["assessment_model"]["fields"]] == [
+        "assessment_id",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "consistency_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["summary_model"]["fields"]] == [
+        "summary_id",
+        "assessment_id",
+        "domain_count",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "consistency_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+
+
+def test_52l_all_consistency_domains_defined(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {signal["domain"] for signal in data["domain_signals"]}
+    assert domains == {
+        "task_state_consistency",
+        "session_state_consistency",
+        "lock_state_consistency",
+        "governance_state_consistency",
+        "runtime_state_consistency",
+        "evidence_state_consistency",
+        "handoff_state_consistency",
+        "recovery_state_consistency",
+    }
+
+
+def test_52l_required_consistency_domains_present(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signals = {signal["domain"]: signal for signal in data["domain_signals"]}
+    for domain in (
+        "lock_state_consistency",
+        "session_state_consistency",
+        "governance_state_consistency",
+        "evidence_state_consistency",
+        "handoff_state_consistency",
+        "recovery_state_consistency",
+    ):
+        assert signals[domain]["human_review_required"] is True
+        assert signals[domain]["detected_state"]
+        assert signals[domain]["expected_state"]
+    for domain in (
+        "lock_state_consistency",
+        "session_state_consistency",
+        "governance_state_consistency",
+        "evidence_state_consistency",
+        "recovery_state_consistency",
+    ):
+        assert signals[domain]["severity"] == "blocker"
+
+
+def test_52l_signal_and_summary_instances(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signal = data["sample_signal"]
+    assert set(signal) == {
+        "signal_id",
+        "consistency_id",
+        "agent_id",
+        "consistency_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    }
+    assert signal["agent_id"]
+    assert signal["human_review_required"] is True
+
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["domain_signals"])
+    assert summary["signal_count"] == assessment["signal_count"]
+    assert summary["blocker_count"] == assessment["blocker_count"]
+    assert summary["warning_count"] == assessment["warning_count"]
+    assert summary["domain_count"] == 8
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["consistency_status"] == assessment["consistency_status"]
+
+
+def test_52l_remediation_is_advisory_and_state_unchanged(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_assessment"]["remediation_recommended"] is True
+    assert data["sample_summary"]["remediation_recommended"] is True
+    boundaries = data["governance_boundaries"]
+    assert boundaries["remediation_automatic"] is False
+    assert boundaries["read_only"] is True
+    for key in (
+        "lock_modification_allowed",
+        "task_modification_allowed",
+        "session_modification_allowed",
+        "governance_mutation_allowed",
+        "runtime_mutation_allowed",
+        "evidence_mutation_allowed",
+    ):
+        assert boundaries[key] is False
+    assert "no automatic remediation" in data["advisory"].lower()
+    assert "consistency is assessed only" in data["advisory"].lower()
+
+
+def test_52l_governance_boundaries(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52L"
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+
+    allowed = " ".join(boundaries["may"]).lower()
+    for value in (
+        "inspect multi-agent shared-state consistency requirements",
+        "detect state consistency risks",
+        "detect handoff and recovery consistency gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ):
+        assert value in allowed
+
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for value in (
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "modify governance state",
+        "modify runtime state",
+        "modify evidence state",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert value in forbidden
+
+
+def test_52l_input_sources(capsys) -> None:
+    main(["multi-agent-state-consistency", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ConcurrencySafetyAssessment",
+        "ParallelAgentCoordinationAssessment",
+        "AgentLockAssessment",
+        "AgentLockConflictAssessment",
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "RuntimeSafetyInvariantAssessment",
+    ]
+
+
+def test_52l_human_output_shows_all_sections(capsys) -> None:
+    main(["multi-agent-state-consistency"])
+    output = capsys.readouterr().out
+    assert "Multi-agent state consistency" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "Lock modification:     False" in output
+    assert "Governance mutation:   False" in output
+    assert "Runtime mutation:      False" in output
+    assert "Evidence mutation:     False" in output
+    assert "execution_allowed=False" in output
+    assert "informational" in output.lower()

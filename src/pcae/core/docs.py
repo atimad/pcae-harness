@@ -842,6 +842,11 @@ def render_commands_reference() -> str:
 
 - `pcae parallel-agent-coordination`
 - `pcae parallel-agent-coordination --json`
+
+## multi-agent-state-consistency
+
+- `pcae multi-agent-state-consistency`
+- `pcae multi-agent-state-consistency --json`
 """
 
 
