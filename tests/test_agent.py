@@ -34209,3 +34209,225 @@ def test_50e_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# Phase 50F — Controlled Write Readiness Assessment tests
+# ---------------------------------------------------------------------------
+
+def test_50f_json_structure(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_readiness_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50f_overview_fields(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_readiness_overview"]
+    assert ov["phase"] == "50F"
+    assert ov["readiness_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["readiness_domain_count"] == 8
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["compliant_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["readiness_status"] in (
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked"
+    )
+
+
+def test_50f_readiness_always_blocked(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_readiness_overview"]["readiness_allowed"] is False
+    assert data["write_readiness_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["readiness_allowed"] is False
+    assert data["sample_assessment"]["readiness_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["readiness_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["readiness_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["readiness_allowed_always_false_in_50f"] is True
+    assert data["assessment_model"]["readiness_allowed_always_false_in_50f"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_50f"] is True
+    assert data["summary_model"]["readiness_allowed_always_false_in_50f"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50f"] is True
+    for d in data["domain_assessments"]:
+        assert d["readiness_allowed"] is False
+
+
+def test_50f_human_review_always_required(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_readiness_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50f_candidate_model(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteReadinessCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 8
+    assert set(cm["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked"
+    }
+
+
+def test_50f_assessment_model(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "WriteReadinessAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 10
+    assert set(am["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked"
+    }
+
+
+def test_50f_summary_model(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteReadinessSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_readiness_statuses"]) == {
+        "not_ready", "ready_with_warnings", "pending_human_review", "blocked"
+    }
+
+
+def test_50f_all_readiness_domains_covered(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "authorization_readiness", "review_readiness", "decision_readiness",
+        "lifecycle_readiness", "write_plan_readiness", "runtime_safety_readiness",
+        "rollback_readiness", "audit_readiness",
+    ):
+        assert expected in domains, f"missing readiness domain: {expected}"
+
+
+def test_50f_domain_assessment_structure(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "readiness_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["readiness_allowed"] is False
+
+
+def test_50f_sample_candidate_fields(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "readiness_id", "write_plan_id", "write_authorization_id",
+        "selected_runtime", "selected_agent", "readiness_domains",
+        "human_review_required", "readiness_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["readiness_allowed"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["readiness_domains"], list)
+    assert len(sc["readiness_domains"]) == 8
+
+
+def test_50f_sample_assessment_fields(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "readiness_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "readiness_status",
+        "readiness_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["readiness_allowed"] is False
+    assert sa["execution_allowed"] is False
+    assert sa["human_review_required"] is True
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+
+
+def test_50f_sample_summary_fields(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "readiness_status",
+        "domain_count", "compliant_count", "blocker_count", "warning_count",
+        "readiness_allowed", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["readiness_allowed"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_50f_input_sources(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationCandidate", "WriteAuthorizationReviewRecord",
+        "WriteAuthorizationDecisionRecord", "WriteAuthorizationLifecycleRecord",
+        "WritePlanCandidate", "WritePlanPolicy",
+        "GovernanceInvariantAssessment", "RuntimeSafetyInvariantAssessment",
+        "GovernanceRecoveryPlan",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50f_governance_boundaries(capsys) -> None:
+    main(["write-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["readiness_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50F"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess readiness domains", "report blockers and warnings",
+        "identify missing prerequisites", "recommend future readiness workflow",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50f_human_output_shows_all_sections(capsys) -> None:
+    main(["write-readiness"])
+    output = capsys.readouterr().out
+    assert "Controlled write readiness assessment" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

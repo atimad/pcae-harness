@@ -209,6 +209,8 @@ from pcae.core.agent import (
     WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY,
     build_write_plan,
     WRITE_PLAN_ADVISORY,
+    build_write_readiness,
+    WRITE_READINESS_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8252,6 +8254,89 @@ def run_write_plan(args: argparse.Namespace) -> int:
         print(f"  May:                   {', '.join(gb['may'])}")
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Plan allowed:          {gb['plan_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_readiness(args: argparse.Namespace) -> int:
+    data = build_write_readiness()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_readiness_overview"]
+        print("Controlled write readiness assessment")
+        print(f"Readiness: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Readiness domains:      {ov['readiness_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Compliant:              {ov['compliant_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Readiness status:       {ov['readiness_status']}")
+        print(f"Readiness allowed:      {'yes' if ov['readiness_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_readiness_statuses'])}")
+        print(f"  readiness_allowed always False in 50F: {cm['readiness_allowed_always_false_in_50f']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print(f"  readiness_allowed always False in 50F: {am['readiness_allowed_always_false_in_50f']}")
+        print(f"  execution_allowed always False in 50F: {am['execution_allowed_always_false_in_50f']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  readiness_allowed always False in 50F: {sm['readiness_allowed_always_false_in_50f']}")
+        print(f"  execution_allowed always False in 50F: {sm['execution_allowed_always_false_in_50f']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  readiness_allowed:     {sc['readiness_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  selected_runtime:      {sc['selected_runtime']}")
+        print(f"  selected_agent:        {sc['selected_agent']}")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  readiness_status:      {sa['readiness_status']}")
+        print(f"  domain_count:          {sa['domain_count']}")
+        print(f"  compliant_count:       {sa['compliant_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  readiness_allowed:     {sa['readiness_allowed']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print(f"  human_review_required: {sa['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  readiness_status:      {ss['readiness_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  compliant_count:       {ss['compliant_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  readiness_allowed:     {ss['readiness_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Readiness allowed:     {gb['readiness_allowed']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()

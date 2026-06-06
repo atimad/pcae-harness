@@ -40808,3 +40808,464 @@ def build_write_plan() -> dict:
         "input_sources": list(_WP_INPUT_SOURCES),
         "advisory": WRITE_PLAN_ADVISORY,
     }
+
+
+# Phase 50F — Controlled Write Readiness Assessment
+# ---------------------------------------------------------------------------
+
+WRITE_READINESS_ADVISORY = (
+    "Write readiness assessment is informational; readiness domains may be assessed "
+    "and blockers and warnings reported, but no automatic execution authorization occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. readiness_allowed=False and "
+    "execution_allowed=False in Phase 50F."
+)
+
+_WR_READINESS_DOMAINS: tuple[str, ...] = (
+    "authorization_readiness",
+    "review_readiness",
+    "decision_readiness",
+    "lifecycle_readiness",
+    "write_plan_readiness",
+    "runtime_safety_readiness",
+    "rollback_readiness",
+    "audit_readiness",
+)
+
+_WR_READINESS_STATUSES: tuple[str, ...] = (
+    "not_ready",
+    "ready_with_warnings",
+    "pending_human_review",
+    "blocked",
+)
+
+_WR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write readiness candidate.",
+    },
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The write plan candidate being assessed for readiness.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this readiness check is governed by.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for write execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for write execution.",
+    },
+    {
+        "name": "readiness_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of readiness domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50F.",
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50F.",
+    },
+)
+
+_WR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write readiness assessment.",
+    },
+    {
+        "name": "readiness_id",
+        "type": "str",
+        "required": True,
+        "description": "The write readiness candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of readiness domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains that are fully compliant.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with warning severity.",
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: not_ready, ready_with_warnings, pending_human_review, or blocked.",
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50F.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50F.",
+    },
+)
+
+_WR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write readiness summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The write readiness assessment this summary is associated with.",
+    },
+    {
+        "name": "readiness_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: not_ready, ready_with_warnings, pending_human_review, or blocked.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of readiness domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains that are fully compliant.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of readiness domains with warning severity.",
+    },
+    {
+        "name": "readiness_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50F.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50F.",
+    },
+)
+
+_WR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess readiness domains",
+        "report blockers and warnings",
+        "identify missing prerequisites",
+        "recommend future readiness workflow",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "readiness_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50F",
+}
+
+_WR_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationCandidate",
+    "WriteAuthorizationReviewRecord",
+    "WriteAuthorizationDecisionRecord",
+    "WriteAuthorizationLifecycleRecord",
+    "WritePlanCandidate",
+    "WritePlanPolicy",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WR_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "authorization_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization candidate has been linked. "
+            "A valid WriteAuthorizationCandidate with authorization_allowed=False "
+            "must be present before readiness can be assessed."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "review_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization review record has been linked. "
+            "A WriteAuthorizationReviewRecord must exist before readiness "
+            "can proceed to the next gate."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "decision_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization decision record has been linked. "
+            "A WriteAuthorizationDecisionRecord must exist with human_review_required=True "
+            "before readiness is considered."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "lifecycle_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization lifecycle record has been linked. "
+            "A WriteAuthorizationLifecycleRecord must confirm expiration and "
+            "revocation policy before readiness can proceed."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "write_plan_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No write plan candidate has been linked or its plan_allowed=False "
+            "has not been verified. A WritePlanCandidate must be present with "
+            "all planning domains assessed."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "runtime_safety_readiness",
+        "severity": "blocker",
+        "finding": (
+            "Runtime safety invariants have not been assessed. "
+            "A RuntimeSafetyInvariantAssessment must confirm no implicit write "
+            "paths exist before readiness can proceed."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "rollback_readiness",
+        "severity": "blocker",
+        "finding": (
+            "No rollback plan has been confirmed ready. "
+            "A valid rollback plan must be linked and confirmed available "
+            "before write readiness can be established."
+        ),
+        "readiness_allowed": False,
+    },
+    {
+        "domain": "audit_readiness",
+        "severity": "warning",
+        "finding": (
+            "Audit plan readiness has not been confirmed. "
+            "An audit plan should be linked and verified before write execution "
+            "proceeds to ensure full governance traceability."
+        ),
+        "readiness_allowed": False,
+    },
+)
+
+
+def build_write_readiness() -> dict:
+    """Assess write readiness against all governed prerequisites. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    readiness_id_ref = f"wr-{ts}"
+
+    candidate_fields = [dict(f) for f in _WR_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WR_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WR_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WR_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        readiness_status = "pending_human_review"
+    elif warning_count > 0:
+        readiness_status = "ready_with_warnings"
+    else:
+        readiness_status = "not_ready"
+
+    assessment_id_ref = f"wra-{ts}"
+
+    sample_candidate = {
+        "readiness_id": readiness_id_ref,
+        "write_plan_id": f"wp-{ts}",
+        "write_authorization_id": f"wac-{ts}",
+        "selected_runtime": "unset",
+        "selected_agent": "unset",
+        "readiness_domains": list(_WR_READINESS_DOMAINS),
+        "human_review_required": True,
+        "readiness_allowed": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "readiness_id": readiness_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wrs-{ts}",
+        "assessment_id": assessment_id_ref,
+        "readiness_status": readiness_status,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteReadinessCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_readiness_statuses": list(_WR_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_50f": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteReadinessAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_readiness_statuses": list(_WR_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_50f": True,
+        "execution_allowed_always_false_in_50f": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteReadinessSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_readiness_statuses": list(_WR_READINESS_STATUSES),
+        "readiness_allowed_always_false_in_50f": True,
+        "execution_allowed_always_false_in_50f": True,
+        "fields": summary_fields,
+    }
+
+    write_readiness_overview = {
+        "overview_id": f"50f-{ts}",
+        "generated_at": generated_at,
+        "phase": "50F",
+        "title": "Controlled Write Readiness Assessment",
+        "summary": (
+            "Assesses whether a governed write plan satisfies all prerequisites "
+            "required for future controlled write execution. "
+            "Eight readiness domains are assessed: "
+            "authorization_readiness, review_readiness, decision_readiness, "
+            "lifecycle_readiness, write_plan_readiness, runtime_safety_readiness, "
+            "rollback_readiness, and audit_readiness. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"readiness_status={readiness_status}. "
+            "Write readiness assessment is advisory and read-only. No write execution occurs. "
+            "readiness_allowed=False. execution_allowed=False."
+        ),
+        "readiness_domain_count": len(_WR_READINESS_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "readiness_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_readiness_overview": write_readiness_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WR_INPUT_SOURCES),
+        "advisory": WRITE_READINESS_ADVISORY,
+    }

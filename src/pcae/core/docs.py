@@ -702,6 +702,11 @@ def render_commands_reference() -> str:
 
 - `pcae write-plan`
 - `pcae write-plan --json`
+
+## write-readiness
+
+- `pcae write-readiness`
+- `pcae write-readiness --json`
 """
 
 
