@@ -129,6 +129,7 @@ from pcae.commands.agent import (
     run_execution_lifecycle,
     run_execution_plan,
     run_execution_readiness_assessment,
+    run_execution_evidence,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3962,6 +3963,17 @@ def build_parser() -> argparse.ArgumentParser:
     execution_readiness_assessment_parser.set_defaults(
         handler=run_execution_readiness_assessment
     )
+
+    execution_evidence_parser = subparsers.add_parser(
+        "execution-evidence",
+        help="Define evidence requirements that must exist before an execution plan can be eligible for future controlled execution (Phase 51G).",
+    )
+    execution_evidence_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_evidence_parser.set_defaults(handler=run_execution_evidence)
 
     return parser
 

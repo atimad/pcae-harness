@@ -3722,6 +3722,29 @@ GovernanceRecoveryPlan; execution readiness assessment is advisory and
 read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
 regenerated; 15 new tests; 3928 total tests passing
 
+`pcae execution-evidence` and `--json`; defines evidence requirements that
+must exist before an execution plan can be eligible for future controlled
+execution; three models — ExecutionEvidenceCandidate (7 fields: evidence_id,
+request_id, plan_id, evidence_domains, evidence_count, human_review_required,
+evidence_complete), ExecutionEvidenceAssessment (9 fields: assessment_id,
+evidence_id, domain_count, compliant_count, blocker_count, warning_count,
+evidence_status, evidence_complete, execution_allowed), ExecutionEvidenceSummary
+(10 fields: summary_id, assessment_id, domain_count, compliant_count,
+blocker_count, warning_count, evidence_status, evidence_complete,
+execution_allowed, human_review_required); four evidence statuses:
+insufficient_evidence, evidence_with_warnings, pending_human_review, complete;
+eight evidence domains: execution_intent_evidence, execution_scope_evidence,
+execution_target_evidence, runtime_evidence, agent_evidence, rollback_evidence,
+approval_evidence, risk_evidence; eight blockers;
+evidence_status=pending_human_review; evidence_complete=False;
+execution_allowed=False; human_review_required=True; inputs:
+ExecutionRequestSummary, ExecutionReviewSummary, ExecutionDecisionSummary,
+ExecutionLifecycleSummary, ExecutionPlanSummary, ExecutionReadinessSummary,
+GovernanceInvariantAssessment, RuntimeSafetyInvariantAssessment,
+GovernanceRecoveryPlan; execution evidence assessment is advisory and read-only;
+no execution occurs; no files are modified; `docs/COMMANDS.md` regenerated;
+15 new tests; 3943 total tests passing
+
 ## Phase 51F: Execution Readiness Assessment
 
 Implemented `pcae execution-readiness-assessment` and `--json`. Assesses
@@ -3749,9 +3772,35 @@ modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3928 total tests
 passing. Note: command is `execution-readiness-assessment` (not
 `execution-readiness`) to avoid conflict with Phase 44Y.
 
+## Phase 51G: Execution Evidence Requirements
+
+Implemented `pcae execution-evidence` and `--json`. Defines the evidence
+requirements that must exist before an execution plan can ever be considered
+eligible for future controlled execution. Three models —
+ExecutionEvidenceCandidate (7 fields: evidence_id, request_id, plan_id,
+evidence_domains, evidence_count, human_review_required, evidence_complete),
+ExecutionEvidenceAssessment (9 fields: assessment_id, evidence_id, domain_count,
+compliant_count, blocker_count, warning_count, evidence_status, evidence_complete,
+execution_allowed), ExecutionEvidenceSummary (10 fields: summary_id,
+assessment_id, domain_count, compliant_count, blocker_count, warning_count,
+evidence_status, evidence_complete, execution_allowed, human_review_required);
+four evidence statuses: insufficient_evidence, evidence_with_warnings,
+pending_human_review, complete; eight evidence domains:
+execution_intent_evidence, execution_scope_evidence, execution_target_evidence,
+runtime_evidence, agent_evidence, rollback_evidence, approval_evidence,
+risk_evidence; eight blockers; evidence_status=pending_human_review;
+evidence_complete=False; execution_allowed=False; human_review_required=True;
+inputs: ExecutionRequestSummary, ExecutionReviewSummary,
+ExecutionDecisionSummary, ExecutionLifecycleSummary, ExecutionPlanSummary,
+ExecutionReadinessSummary, GovernanceInvariantAssessment,
+RuntimeSafetyInvariantAssessment, GovernanceRecoveryPlan; execution evidence
+assessment is advisory and read-only; no execution occurs; no files are
+modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3943 total tests
+passing
+
 ## Current Phase
 
-Phase 51F: Execution Readiness Assessment.
+Phase 51G: Execution Evidence Requirements.
 
 ## Next
 

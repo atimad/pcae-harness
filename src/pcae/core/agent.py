@@ -46357,3 +46357,458 @@ def build_execution_readiness_assessment() -> dict:
         "input_sources": list(_ERDA_INPUT_SOURCES),
         "advisory": EXECUTION_READINESS_ASSESSMENT_ADVISORY,
     }
+
+
+EXECUTION_EVIDENCE_ADVISORY = (
+    "Execution evidence is informational; evidence requirements may be defined "
+    "and assessed, but no execution occurs and no authorization is granted. "
+    "No files are modified, no runtimes are invoked, and no prompts are executed. "
+    "evidence_complete=False and execution_allowed=False in Phase 51G."
+)
+
+_EEV_EVIDENCE_DOMAINS: tuple[str, ...] = (
+    "execution_intent_evidence",
+    "execution_scope_evidence",
+    "execution_target_evidence",
+    "runtime_evidence",
+    "agent_evidence",
+    "rollback_evidence",
+    "approval_evidence",
+    "risk_evidence",
+)
+
+_EEV_EVIDENCE_STATUSES: tuple[str, ...] = (
+    "insufficient_evidence",
+    "evidence_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_EEV_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution evidence candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this evidence candidate is associated with.",
+    },
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution plan this evidence candidate is associated with.",
+    },
+    {
+        "name": "evidence_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of evidence domains to be assessed.",
+    },
+    {
+        "name": "evidence_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence items declared for this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51G.",
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51G.",
+    },
+)
+
+_EEV_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution evidence assessment.",
+    },
+    {
+        "name": "evidence_id",
+        "type": "str",
+        "required": True,
+        "description": "The evidence candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of evidence domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with non-blocking warnings.",
+    },
+    {
+        "name": "evidence_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_evidence, evidence_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51G.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51G.",
+    },
+)
+
+_EEV_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution evidence summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of evidence domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of evidence domains with non-blocking warnings.",
+    },
+    {
+        "name": "evidence_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_evidence, evidence_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "evidence_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51G.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51G.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51G.",
+    },
+)
+
+_EEV_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess evidence requirements",
+        "identify missing evidence",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "evidence_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51G",
+}
+
+_EEV_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "execution_intent_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No evidence of execution intent has been declared. "
+            "Documented execution intent reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_scope_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No evidence of execution scope has been declared. "
+            "Documented execution scope reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_target_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No evidence of execution target has been declared. "
+            "Documented execution target reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "runtime_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No runtime evidence has been declared. "
+            "Documented runtime selection reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "agent_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No agent evidence has been declared. "
+            "Documented agent selection reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No rollback evidence has been declared. "
+            "A documented rollback plan reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "approval_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No approval evidence has been declared. "
+            "Human approval documentation is required before evidence can be "
+            "considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "risk_evidence",
+        "severity": "blocker",
+        "finding": (
+            "No risk evidence has been declared. "
+            "A documented risk assessment reviewed by a human is required before "
+            "evidence can be considered complete."
+        ),
+        "evidence_complete": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_evidence() -> dict:
+    """Define execution evidence requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    evidence_id_ref = f"eev-{ts}"
+
+    candidate_fields = [dict(f) for f in _EEV_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _EEV_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _EEV_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EEV_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        evidence_status = "pending_human_review"
+    elif warning_count > 0:
+        evidence_status = "evidence_with_warnings"
+    else:
+        evidence_status = "insufficient_evidence"
+
+    assessment_id_ref = f"eeva-{ts}"
+
+    sample_candidate = {
+        "evidence_id": evidence_id_ref,
+        "request_id": f"era-{ts}",
+        "plan_id": f"epl-{ts}",
+        "evidence_domains": list(_EEV_EVIDENCE_DOMAINS),
+        "evidence_count": 0,
+        "human_review_required": True,
+        "evidence_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "evidence_id": evidence_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"eevsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionEvidenceCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_evidence_statuses": list(_EEV_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_51g": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionEvidenceAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_evidence_statuses": list(_EEV_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_51g": True,
+        "execution_allowed_always_false_in_51g": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionEvidenceSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_evidence_statuses": list(_EEV_EVIDENCE_STATUSES),
+        "evidence_complete_always_false_in_51g": True,
+        "execution_allowed_always_false_in_51g": True,
+        "fields": summary_fields,
+    }
+
+    execution_evidence_overview = {
+        "overview_id": f"51g-{ts}",
+        "generated_at": generated_at,
+        "phase": "51G",
+        "title": "Execution Evidence Requirements",
+        "summary": (
+            "Defines the evidence requirements that must exist before an execution "
+            "plan can ever be considered eligible for future controlled execution. "
+            "Eight evidence domains are assessed: execution_intent_evidence, "
+            "execution_scope_evidence, execution_target_evidence, runtime_evidence, "
+            "agent_evidence, rollback_evidence, approval_evidence, and risk_evidence. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"evidence_status={evidence_status}. "
+            "Execution evidence assessment is advisory and read-only. "
+            "No execution occurs. evidence_complete=False. execution_allowed=False."
+        ),
+        "evidence_domain_count": len(_EEV_EVIDENCE_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "evidence_status": evidence_status,
+        "evidence_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_evidence_overview": execution_evidence_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EEV_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EEV_INPUT_SOURCES),
+        "advisory": EXECUTION_EVIDENCE_ADVISORY,
+    }

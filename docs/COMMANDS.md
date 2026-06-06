@@ -741,3 +741,8 @@
 
 - `pcae execution-readiness-assessment`
 - `pcae execution-readiness-assessment --json`
+
+## execution-evidence
+
+- `pcae execution-evidence`
+- `pcae execution-evidence --json`
