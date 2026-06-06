@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52E: Corruption Recovery.
+Phase 52F: Runtime Contract Hardening.
 
 ## Governance Coherence Note
 

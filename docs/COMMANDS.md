@@ -791,3 +791,8 @@
 
 - `pcae corruption-recovery`
 - `pcae corruption-recovery --json`
+
+## runtime-contract-hardening
+
+- `pcae runtime-contract-hardening`
+- `pcae runtime-contract-hardening --json`

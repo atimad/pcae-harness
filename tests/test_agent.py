@@ -39154,3 +39154,238 @@ def test_52e_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52F: Runtime Contract Hardening ---
+
+
+def test_52f_json_structure(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "runtime_contract_hardening_overview", "signal_model", "assessment_model",
+        "summary_model", "domain_signals", "sample_signal", "sample_assessment",
+        "sample_summary", "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52f_overview_fields(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["runtime_contract_hardening_overview"]
+    assert ov["phase"] == "52F"
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["hardening_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert isinstance(ov["signal_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert isinstance(ov["info_count"], int)
+    assert ov["hardening_status"] in (
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    )
+
+
+def test_52f_execution_always_blocked(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_contract_hardening_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["remediation_automatic"] is False
+    assert data["assessment_model"]["execution_allowed_always_false_in_52f"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_52f"] is True
+
+
+def test_52f_human_review_always_required(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_contract_hardening_overview"]["human_review_required"] is True
+    assert data["sample_signal"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["signal_model"]["human_review_required_always_true_in_52f"] is True
+    assert data["assessment_model"]["human_review_required_always_true_in_52f"] is True
+    assert data["summary_model"]["human_review_required_always_true_in_52f"] is True
+
+
+def test_52f_signal_model(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["signal_model"]
+    assert sm["model_name"] == "RuntimeContractHardeningSignal"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 8
+    assert set(sm["severity_values"]) == {"info", "warning", "blocker"}
+    assert sm["human_review_required_always_true_in_52f"] is True
+
+
+def test_52f_assessment_model(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "RuntimeContractHardeningAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 8
+    assert set(am["supported_hardening_statuses"]) == {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert am["execution_allowed_always_false_in_52f"] is True
+    assert am["human_review_required_always_true_in_52f"] is True
+
+
+def test_52f_summary_model(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "RuntimeContractHardeningSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 10
+    assert set(sm["supported_hardening_statuses"]) == {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert sm["execution_allowed_always_false_in_52f"] is True
+    assert sm["human_review_required_always_true_in_52f"] is True
+
+
+def test_52f_all_hardening_domains_covered(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_signals"]}
+    for expected in (
+        "runtime_identity_validation",
+        "runtime_capability_validation",
+        "runtime_contract_completeness",
+        "runtime_contract_consistency",
+        "runtime_parameter_validation",
+        "runtime_response_contract_validation",
+        "runtime_governance_alignment",
+        "runtime_contract_escalation",
+    ):
+        assert expected in domains, f"missing hardening domain: {expected}"
+
+
+def test_52f_runtime_parameter_validation_present(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_signals"]}
+    assert "runtime_parameter_validation" in domains
+    signal = next(
+        d for d in data["domain_signals"]
+        if d["domain"] == "runtime_parameter_validation"
+    )
+    assert signal["severity"] == "blocker"
+    assert signal["human_review_required"] is True
+
+
+def test_52f_response_contract_validation_present(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_signals"]}
+    assert "runtime_response_contract_validation" in domains
+    signal = next(
+        d for d in data["domain_signals"]
+        if d["domain"] == "runtime_response_contract_validation"
+    )
+    assert signal["severity"] == "blocker"
+    assert signal["human_review_required"] is True
+
+
+def test_52f_domain_signal_structure(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_signals"]:
+        for field in (
+            "domain", "signal_type", "severity", "detected_state",
+            "expected_state", "finding", "human_review_required",
+        ):
+            assert field in d, f"missing field {field!r} in domain signal"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["human_review_required"] is True
+
+
+def test_52f_sample_signal_fields(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sig = data["sample_signal"]
+    for field in (
+        "signal_id", "runtime_id", "hardening_domain", "signal_type",
+        "severity", "detected_state", "expected_state", "human_review_required",
+    ):
+        assert field in sig, f"missing field {field!r} in sample_signal"
+    assert sig["human_review_required"] is True
+
+
+def test_52f_sample_assessment_fields(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "signal_count", "blocker_count", "warning_count",
+        "hardening_status", "remediation_recommended",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["execution_allowed"] is False
+    assert sa["human_review_required"] is True
+
+
+def test_52f_sample_summary_fields(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "signal_count",
+        "blocker_count", "warning_count", "hardening_status",
+        "remediation_recommended", "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["domain_count"] == 8
+
+
+def test_52f_governance_boundaries(capsys) -> None:
+    main(["runtime-contract-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["remediation_automatic"] is False
+    assert gb["read_only"] is True
+    assert gb["phase"] == "52F"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "inspect runtime contract definitions",
+        "detect missing contract requirements",
+        "detect malformed runtime contracts",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "invoke runtimes", "execute prompts", "modify runtime definitions",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_52f_human_output_shows_all_sections(capsys) -> None:
+    main(["runtime-contract-hardening"])
+    output = capsys.readouterr().out
+    assert "Runtime contract hardening" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

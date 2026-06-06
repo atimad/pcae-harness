@@ -51189,3 +51189,496 @@ def build_corruption_recovery() -> dict:
         "input_sources": list(_CREC_INPUT_SOURCES),
         "advisory": CORRUPTION_RECOVERY_ADVISORY,
     }
+
+
+# --- Phase 52F: Runtime Contract Hardening ---
+
+RUNTIME_CONTRACT_HARDENING_ADVISORY = (
+    "Runtime contract hardening is informational; runtime contract definitions "
+    "may be inspected and remediation recommended, but no automatic remediation "
+    "occurs and no runtime definitions or files are modified. No runtimes are "
+    "invoked and no prompts are executed. execution_allowed=False in Phase 52F. "
+    "Remediation is advisory only and requires human review."
+)
+
+_RCHD_HARDENING_DOMAINS: tuple[str, ...] = (
+    "runtime_identity_validation",
+    "runtime_capability_validation",
+    "runtime_contract_completeness",
+    "runtime_contract_consistency",
+    "runtime_parameter_validation",
+    "runtime_response_contract_validation",
+    "runtime_governance_alignment",
+    "runtime_contract_escalation",
+)
+
+_RCHD_SEVERITY_VALUES: tuple[str, ...] = (
+    "info",
+    "warning",
+    "blocker",
+)
+
+_RCHD_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_RCHD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening signal.",
+    },
+    {
+        "name": "runtime_id",
+        "type": "str",
+        "required": True,
+        "description": "The runtime this signal is associated with.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The hardening domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of hardening signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The actual contract state observed during inspection.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The expected contract state according to governance policy.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52F.",
+    },
+)
+
+_RCHD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True when blockers or warnings are present; remediation is advisory only.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52F.",
+    },
+)
+
+_RCHD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this hardening summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "True when blockers or warnings are present; remediation is advisory only.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52F.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52F.",
+    },
+)
+
+_RCHD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect runtime contract definitions",
+        "detect missing contract requirements",
+        "detect malformed runtime contracts",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify runtime definitions",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52F",
+}
+
+_RCHD_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeSafetyInvariantAssessment",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "ExecutionAuditSummary",
+    "ExecutionRollbackVerificationSummary",
+    "GovernanceInvariantAssessment",
+)
+
+_RCHD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_identity_validation",
+        "signal_type": "missing_runtime_identity",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime identity fields not yet validated",
+        "expected_state": "each runtime declares a unique, stable identity with version",
+        "finding": (
+            "Runtime identity fields have not been validated. "
+            "Runtimes without a declared unique identity cannot be governed "
+            "deterministically and may be confused with other runtimes. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_capability_validation",
+        "signal_type": "undeclared_runtime_capability",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime capability declarations not yet validated",
+        "expected_state": "all runtime capabilities are explicitly declared and bounded",
+        "finding": (
+            "Runtime capability declarations have not been validated. "
+            "Runtimes with undeclared or unbounded capabilities allow agents to "
+            "issue requests outside the governed execution envelope. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_contract_completeness",
+        "signal_type": "incomplete_runtime_contract",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime contract completeness not yet assessed",
+        "expected_state": "runtime contract defines all required fields and invariants",
+        "finding": (
+            "Runtime contract completeness has not been assessed. "
+            "Incomplete contracts allow malformed execution requests to reach "
+            "the runtime without rejection. Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_contract_consistency",
+        "signal_type": "inconsistent_runtime_contract",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime contract consistency not yet validated",
+        "expected_state": "runtime contract fields are internally consistent",
+        "finding": (
+            "Runtime contract consistency has not been validated. "
+            "Contracts with internally contradictory fields produce unpredictable "
+            "runtime behavior and undermine governance guarantees. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_parameter_validation",
+        "signal_type": "unvalidated_runtime_parameters",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime parameter validation not yet performed",
+        "expected_state": "all runtime parameters are validated against declared contract",
+        "finding": (
+            "Runtime parameter validation has not been performed. "
+            "Parameters that are not validated against the declared contract allow "
+            "malformed execution requests to cause undefined runtime behavior. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_response_contract_validation",
+        "signal_type": "unvalidated_response_contract",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime response contract not yet validated",
+        "expected_state": "runtime declares and enforces a response contract",
+        "finding": (
+            "Runtime response contract has not been validated. "
+            "Runtimes without a declared response contract may return malformed "
+            "output that governance and audit consumers cannot process reliably. "
+            "Human review is required."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_governance_alignment",
+        "signal_type": "governance_misaligned_runtime",
+        "severity": "warning",
+        "detected_state": "unknown — runtime governance alignment not yet assessed",
+        "expected_state": "runtime contract aligns with current governance policy",
+        "finding": (
+            "Runtime governance alignment has not been assessed. "
+            "Runtimes whose contracts were authored under a previous governance "
+            "policy may no longer satisfy current requirements. "
+            "Human review is recommended."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_contract_escalation",
+        "signal_type": "compound_contract_failure",
+        "severity": "blocker",
+        "detected_state": "unknown — compound contract failure check not yet performed",
+        "expected_state": "no simultaneous contract violations across multiple domains",
+        "finding": (
+            "Compound contract failure check has not been performed. "
+            "Multiple simultaneous contract violations indicate systemic contract "
+            "breakdown requiring escalated human review before any runtime can "
+            "be trusted for governed execution."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_runtime_contract_hardening() -> dict:
+    """Define runtime contract hardening. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(f) for f in _RCHD_SIGNAL_FIELDS]
+    assessment_fields = [dict(f) for f in _RCHD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _RCHD_SUMMARY_FIELDS]
+
+    domain_signals: list[dict] = [dict(d) for d in _RCHD_DOMAIN_SIGNALS]
+
+    blocker_count = sum(1 for d in domain_signals if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_signals if d["severity"] == "warning")
+    info_count = sum(1 for d in domain_signals if d["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_RCHD_HARDENING_DOMAINS)
+
+    if blocker_count > 0:
+        hardening_status = "hardening_required"
+        remediation_recommended = True
+    elif warning_count > 0:
+        hardening_status = "hardened_with_warnings"
+        remediation_recommended = True
+    else:
+        hardening_status = "hardened"
+        remediation_recommended = False
+
+    assessment_id_ref = f"rchda-{ts}"
+
+    sample_signal = {
+        "signal_id": f"rchds-{ts}",
+        "runtime_id": f"runtime-{ts}",
+        "hardening_domain": "runtime_parameter_validation",
+        "signal_type": "unvalidated_runtime_parameters",
+        "severity": "blocker",
+        "detected_state": "runtime parameters have not been validated against contract",
+        "expected_state": "all runtime parameters are validated against declared contract",
+        "human_review_required": True,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"rchdsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "RuntimeContractHardeningSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for f in signal_fields if f["required"]),
+        "severity_values": list(_RCHD_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52f": True,
+        "fields": signal_fields,
+    }
+
+    assessment_model = {
+        "model_name": "RuntimeContractHardeningAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_hardening_statuses": list(_RCHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52f": True,
+        "human_review_required_always_true_in_52f": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "RuntimeContractHardeningSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_hardening_statuses": list(_RCHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52f": True,
+        "human_review_required_always_true_in_52f": True,
+        "fields": summary_fields,
+    }
+
+    runtime_contract_hardening_overview = {
+        "overview_id": f"52f-{ts}",
+        "generated_at": generated_at,
+        "phase": "52F",
+        "title": "Runtime Contract Hardening",
+        "summary": (
+            "Defines and validates runtime contract requirements so runtime "
+            "execution interfaces remain deterministic, governable, and resistant "
+            "to malformed execution requests. Eight hardening domains are assessed: "
+            "runtime_identity_validation, runtime_capability_validation, "
+            "runtime_contract_completeness, runtime_contract_consistency, "
+            "runtime_parameter_validation, runtime_response_contract_validation, "
+            "runtime_governance_alignment, and runtime_contract_escalation. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. hardening_status={hardening_status}. "
+            "Runtime contract hardening is advisory and read-only. "
+            "No runtime definitions or files are modified. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "hardening_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_contract_hardening_overview": runtime_contract_hardening_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RCHD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RCHD_INPUT_SOURCES),
+        "advisory": RUNTIME_CONTRACT_HARDENING_ADVISORY,
+    }

@@ -139,6 +139,7 @@ from pcae.commands.agent import (
     run_governance_state_recovery,
     run_agent_lock_recovery,
     run_corruption_recovery,
+    run_runtime_contract_hardening,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4084,6 +4085,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     corruption_recovery_parser.set_defaults(handler=run_corruption_recovery)
+
+    runtime_contract_hardening_parser = subparsers.add_parser(
+        "runtime-contract-hardening",
+        help="Define and validate runtime contract requirements for deterministic, governable execution interfaces (Phase 52F).",
+    )
+    runtime_contract_hardening_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    runtime_contract_hardening_parser.set_defaults(handler=run_runtime_contract_hardening)
 
     return parser
 
