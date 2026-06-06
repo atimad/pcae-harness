@@ -207,6 +207,8 @@ from pcae.core.agent import (
     WRITE_AUTHORIZATION_DECISION_ADVISORY,
     build_write_authorization_lifecycle,
     WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY,
+    build_write_plan,
+    WRITE_PLAN_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8172,6 +8174,85 @@ def run_write_authorization_lifecycle(args: argparse.Namespace) -> int:
         print(f"  Authorization allowed: {gb['authorization_allowed']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Automatic renewal:     {gb['automatic_renewal_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_plan(args: argparse.Namespace) -> int:
+    data = build_write_plan()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_plan_overview"]
+        print("Controlled write planning")
+        print(f"Plan: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Planning domains:       {ov['planning_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Plan status:            {ov['plan_status']}")
+        print(f"Plan allowed:           {'yes' if ov['plan_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_plan_statuses'])}")
+        print(f"  plan_allowed always False in 50E: {cm['plan_allowed_always_false_in_50e']}")
+        print()
+        pm = data["policy_model"]
+        print(f"Policy model: {pm['model_name']} ({pm['field_count']} fields)")
+        print(f"  automatic_plan_approval_allowed always False in 50E: {pm['automatic_plan_approval_allowed_always_false_in_50e']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  plan_allowed always False in 50E:      {sm['plan_allowed_always_false_in_50e']}")
+        print(f"  execution_allowed always False in 50E: {sm['execution_allowed_always_false_in_50e']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  plan_allowed:          {sc['plan_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  selected_runtime:      {sc['selected_runtime']}")
+        print(f"  selected_agent:        {sc['selected_agent']}")
+        print(f"  file_scope:            {sc['file_scope']}")
+        print()
+        sp = data["sample_policy"]
+        print("Sample policy:")
+        print(f"  human_approval_required:          {sp['human_approval_required']}")
+        print(f"  automatic_plan_approval_allowed:  {sp['automatic_plan_approval_allowed']}")
+        print(f"  file_scope_required:              {sp['file_scope_required']}")
+        print(f"  rollback_required:                {sp['rollback_required']}")
+        print(f"  audit_required:                   {sp['audit_required']}")
+        print(f"  evidence_required:                {sp['evidence_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  plan_status:           {ss['plan_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  plan_allowed:          {ss['plan_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Plan allowed:          {gb['plan_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()
         print(data["advisory"])

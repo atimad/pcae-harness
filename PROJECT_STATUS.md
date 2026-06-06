@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50D: Write Authorization Expiration and Revocation Policy.
+Phase 50E: Controlled Write Planning.
 
 ## Governance Coherence Note
 
@@ -3501,11 +3501,11 @@ regenerated; 15 new tests; 3685 total tests passing
 
 ## Current Phase
 
-Phase 50D: Write Authorization Expiration and Revocation Policy.
+Phase 50E: Controlled Write Planning.
 
 ## Next
 
-- TBD: Future phases (50E and beyond).
+- TBD: Future phases (50F and beyond).
 
 ## Future Explorations
 

@@ -116,6 +116,7 @@ from pcae.commands.agent import (
     run_write_authorization_review,
     run_write_authorization_decision,
     run_write_authorization_lifecycle,
+    run_write_plan,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3804,6 +3805,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_authorization_lifecycle_parser.set_defaults(handler=run_write_authorization_lifecycle)
+
+    write_plan_parser = subparsers.add_parser(
+        "write-plan",
+        help="Define the governed write plan model required before any future write-capable execution (Phase 50E).",
+    )
+    write_plan_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_plan_parser.set_defaults(handler=run_write_plan)
 
     return parser
 

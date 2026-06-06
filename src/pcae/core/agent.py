@@ -40346,3 +40346,465 @@ def build_write_authorization_lifecycle() -> dict:
         "input_sources": list(_WAL_INPUT_SOURCES),
         "advisory": WRITE_AUTHORIZATION_LIFECYCLE_ADVISORY,
     }
+
+
+# Phase 50E — Controlled Write Planning
+# ---------------------------------------------------------------------------
+
+WRITE_PLAN_ADVISORY = (
+    "Write planning is informational; planning domains may be assessed and "
+    "blockers and warnings reported, but no automatic plan approval occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. plan_allowed=False and "
+    "execution_allowed=False in Phase 50E."
+)
+
+_WP_PLANNING_DOMAINS: tuple[str, ...] = (
+    "file_scope_planning",
+    "allowed_operation_planning",
+    "forbidden_operation_planning",
+    "rollback_planning",
+    "audit_planning",
+    "evidence_planning",
+    "review_planning",
+    "human_approval_planning",
+)
+
+_WP_PLAN_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "approved_for_future_execution",
+)
+
+_WP_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write plan candidate.",
+    },
+    {
+        "name": "write_authorization_id",
+        "type": "str",
+        "required": True,
+        "description": "The write authorization candidate this plan is governed by.",
+    },
+    {
+        "name": "prompt_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the prompt requesting write execution.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for write execution.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for write execution.",
+    },
+    {
+        "name": "file_scope",
+        "type": "list[str]",
+        "required": True,
+        "description": "Explicit list of files this write plan is authorized to modify.",
+    },
+    {
+        "name": "allowed_operations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Explicit list of write operations permitted under this plan.",
+    },
+    {
+        "name": "forbidden_operations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Explicit list of write operations forbidden under this plan.",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the rollback plan linked to this write plan.",
+    },
+    {
+        "name": "audit_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier of the audit plan linked to this write plan.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50E.",
+    },
+    {
+        "name": "plan_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50E.",
+    },
+)
+
+_WP_POLICY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "policy_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write plan policy.",
+    },
+    {
+        "name": "required_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Planning domains that must all be satisfied before a plan is approved.",
+    },
+    {
+        "name": "file_scope_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether an explicit file scope must be declared in the write plan.",
+    },
+    {
+        "name": "rollback_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether a rollback plan must be linked before plan approval.",
+    },
+    {
+        "name": "audit_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether an audit plan must be linked before plan approval.",
+    },
+    {
+        "name": "evidence_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether evidence collection must be planned before plan approval.",
+    },
+    {
+        "name": "human_approval_required",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human approval is required before any plan proceeds.",
+    },
+    {
+        "name": "automatic_plan_approval_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50E.",
+    },
+)
+
+_WP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write plan summary.",
+    },
+    {
+        "name": "write_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The write plan candidate this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of planning domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of planning domains with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of planning domains with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: draft, pending_human_review, blocked, or approved_for_future_execution.",
+    },
+    {
+        "name": "plan_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50E.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50E.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50E.",
+    },
+)
+
+_WP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define write plan models",
+        "assess planning domains",
+        "report blockers and warnings",
+        "recommend future planning workflow",
+    ],
+    "may_not": [
+        "approve plans automatically",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "plan_allowed": False,
+    "execution_allowed": False,
+    "automatic_plan_approval_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50E",
+}
+
+_WP_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationCandidate",
+    "WriteAuthorizationReviewRecord",
+    "WriteAuthorizationDecisionRecord",
+    "WriteAuthorizationLifecycleRecord",
+    "GovernedWriteCandidate",
+    "ControlledWritePlan",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_WP_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "file_scope_planning",
+        "severity": "blocker",
+        "finding": (
+            "No explicit file scope has been declared in the write plan. "
+            "A complete list of files to be modified must be provided before "
+            "plan approval can be considered."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "allowed_operation_planning",
+        "severity": "blocker",
+        "finding": (
+            "Allowed write operations have not been enumerated. "
+            "Each permitted operation must be explicitly listed and approved "
+            "before the plan can proceed."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "forbidden_operation_planning",
+        "severity": "blocker",
+        "finding": (
+            "Forbidden write operations have not been declared. "
+            "All prohibited operations must be enumerated to establish "
+            "clear boundaries for the governed write plan."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "rollback_planning",
+        "severity": "blocker",
+        "finding": (
+            "No rollback plan has been linked to this write plan. "
+            "A valid rollback plan must be in place before any write plan "
+            "can be approved."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "audit_planning",
+        "severity": "blocker",
+        "finding": (
+            "No audit plan has been linked to this write plan. "
+            "All write operations must be auditable; an audit plan is required "
+            "before plan approval."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "evidence_planning",
+        "severity": "warning",
+        "finding": (
+            "Evidence collection plan has not been defined. "
+            "Planning for evidence capture is recommended to support "
+            "governance audit and post-execution review."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "review_planning",
+        "severity": "blocker",
+        "finding": (
+            "No review plan has been defined for post-execution verification. "
+            "A review plan must be established before plan approval to ensure "
+            "execution outcomes can be validated."
+        ),
+        "plan_allowed": False,
+    },
+    {
+        "domain": "human_approval_planning",
+        "severity": "blocker",
+        "finding": (
+            "Human approval has not been recorded for this write plan. "
+            "Explicit human approval is required before any write plan "
+            "can be approved for future execution."
+        ),
+        "plan_allowed": False,
+    },
+)
+
+
+def build_write_plan() -> dict:
+    """Define controlled write plan model. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    write_plan_id_ref = f"wp-{ts}"
+
+    candidate_fields = [dict(f) for f in _WP_CANDIDATE_FIELDS]
+    policy_fields = [dict(f) for f in _WP_POLICY_FIELDS]
+    summary_fields = [dict(f) for f in _WP_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WP_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "draft"
+    else:
+        plan_status = "approved_for_future_execution"
+
+    sample_candidate = {
+        "write_plan_id": write_plan_id_ref,
+        "write_authorization_id": f"wac-{ts}",
+        "prompt_id": f"prompt-{ts}",
+        "selected_runtime": "unset",
+        "selected_agent": "unset",
+        "file_scope": [],
+        "allowed_operations": [],
+        "forbidden_operations": [],
+        "rollback_plan_id": "unset",
+        "audit_plan_id": "unset",
+        "human_review_required": True,
+        "plan_allowed": False,
+    }
+
+    sample_policy = {
+        "policy_id": f"wpp-{ts}",
+        "required_domains": list(_WP_PLANNING_DOMAINS),
+        "file_scope_required": True,
+        "rollback_required": True,
+        "audit_required": True,
+        "evidence_required": True,
+        "human_approval_required": True,
+        "automatic_plan_approval_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"wps-{ts}",
+        "write_plan_id": write_plan_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "plan_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WritePlanCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_plan_statuses": list(_WP_PLAN_STATUSES),
+        "plan_allowed_always_false_in_50e": True,
+        "fields": candidate_fields,
+    }
+
+    policy_model = {
+        "model_name": "WritePlanPolicy",
+        "field_count": len(policy_fields),
+        "required_field_count": sum(1 for f in policy_fields if f["required"]),
+        "automatic_plan_approval_allowed_always_false_in_50e": True,
+        "fields": policy_fields,
+    }
+
+    summary_model = {
+        "model_name": "WritePlanSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_WP_PLAN_STATUSES),
+        "plan_allowed_always_false_in_50e": True,
+        "execution_allowed_always_false_in_50e": True,
+        "fields": summary_fields,
+    }
+
+    write_plan_overview = {
+        "overview_id": f"50e-{ts}",
+        "generated_at": generated_at,
+        "phase": "50E",
+        "title": "Controlled Write Planning",
+        "summary": (
+            "Defines the governed write plan model required before any future "
+            "write-capable execution. Eight planning domains are assessed: "
+            "file_scope_planning, allowed_operation_planning, "
+            "forbidden_operation_planning, rollback_planning, audit_planning, "
+            "evidence_planning, review_planning, and human_approval_planning. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Write planning assessment is advisory and read-only. No write execution occurs. "
+            "plan_allowed=False. execution_allowed=False."
+        ),
+        "planning_domain_count": len(_WP_PLANNING_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "plan_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+        "automatic_plan_approval_allowed": False,
+    }
+
+    return {
+        "write_plan_overview": write_plan_overview,
+        "candidate_model": candidate_model,
+        "policy_model": policy_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_policy": sample_policy,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WP_INPUT_SOURCES),
+        "advisory": WRITE_PLAN_ADVISORY,
+    }

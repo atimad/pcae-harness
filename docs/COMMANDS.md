@@ -676,3 +676,8 @@
 
 - `pcae write-authorization-lifecycle`
 - `pcae write-authorization-lifecycle --json`
+
+## write-plan
+
+- `pcae write-plan`
+- `pcae write-plan --json`
