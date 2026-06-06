@@ -227,6 +227,8 @@ from pcae.core.agent import (
     EXECUTION_REVIEW_ADVISORY,
     build_execution_decision,
     EXECUTION_DECISION_ADVISORY,
+    build_execution_lifecycle,
+    EXECUTION_LIFECYCLE_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8844,6 +8846,84 @@ def run_execution_decision(args: argparse.Namespace) -> int:
         print(f"  May:                   {', '.join(gb['may'])}")
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Decision allowed:      {gb['decision_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_lifecycle(args: argparse.Namespace) -> int:
+    data = build_execution_lifecycle()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["execution_lifecycle_overview"]
+        print("Execution lifecycle")
+        print(f"Lifecycle: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Lifecycle domains:      {ov['lifecycle_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Lifecycle status:       {ov['lifecycle_status']}")
+        print(f"Lifecycle allowed:      {'yes' if ov['lifecycle_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_lifecycle_statuses'])}")
+        print(f"  lifecycle_allowed always False in 51D: {cm['lifecycle_allowed_always_false_in_51d']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  execution_allowed always False in 51D: {rm['execution_allowed_always_false_in_51d']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  lifecycle_allowed always False in 51D: {sm['lifecycle_allowed_always_false_in_51d']}")
+        print(f"  execution_allowed always False in 51D: {sm['execution_allowed_always_false_in_51d']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  lifecycle_allowed:     {sc['lifecycle_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  lifecycle_id:          {sc['lifecycle_id']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  current_status:        {sr['current_status']}")
+        print(f"  expiration_status:     {sr['expiration_status']}")
+        print(f"  revocation_status:     {sr['revocation_status']}")
+        print(f"  renewal_status:        {sr['renewal_status']}")
+        print(f"  supersession_status:   {sr['supersession_status']}")
+        print(f"  execution_allowed:     {sr['execution_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  lifecycle_status:      {ss['lifecycle_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  lifecycle_allowed:     {ss['lifecycle_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Lifecycle allowed:     {gb['lifecycle_allowed']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()

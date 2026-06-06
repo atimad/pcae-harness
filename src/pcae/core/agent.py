@@ -44984,3 +44984,454 @@ def build_execution_decision() -> dict:
         "input_sources": list(_EDR_INPUT_SOURCES),
         "advisory": EXECUTION_DECISION_ADVISORY,
     }
+
+
+EXECUTION_LIFECYCLE_ADVISORY = (
+    "Execution lifecycle is informational; lifecycle models may be defined and "
+    "lifecycle completeness assessed, but no execution occurs and no authorization "
+    "is granted. No files are modified, no runtimes are invoked, and no prompts "
+    "are executed. lifecycle_allowed=False and execution_allowed=False in Phase 51D."
+)
+
+_ELR_LIFECYCLE_DOMAINS: tuple[str, ...] = (
+    "request_lifecycle",
+    "review_lifecycle",
+    "decision_lifecycle",
+    "expiration_policy",
+    "revocation_policy",
+    "supersession_policy",
+    "renewal_policy",
+    "lifecycle_audit",
+)
+
+_ELR_LIFECYCLE_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "approved",
+    "expired",
+    "revoked",
+    "superseded",
+    "blocked",
+)
+
+_ELR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "lifecycle_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution lifecycle candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this lifecycle candidate is associated with.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution review this lifecycle candidate is associated with.",
+    },
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution decision this lifecycle candidate is associated with.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51D.",
+    },
+    {
+        "name": "lifecycle_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51D.",
+    },
+)
+
+_ELR_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "lifecycle_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution lifecycle record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this lifecycle record is associated with.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution review this lifecycle record is associated with.",
+    },
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution decision this lifecycle record is associated with.",
+    },
+    {
+        "name": "current_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Current lifecycle status: draft, pending_human_review, approved, expired, "
+            "revoked, superseded, or blocked."
+        ),
+    },
+    {
+        "name": "expiration_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the expiration policy assessment for this lifecycle.",
+    },
+    {
+        "name": "revocation_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the revocation policy assessment for this lifecycle.",
+    },
+    {
+        "name": "renewal_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the renewal policy assessment for this lifecycle.",
+    },
+    {
+        "name": "supersession_status",
+        "type": "str",
+        "required": True,
+        "description": "Status of the supersession policy assessment for this lifecycle.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51D.",
+    },
+)
+
+_ELR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution lifecycle summary.",
+    },
+    {
+        "name": "lifecycle_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution lifecycle record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of lifecycle domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lifecycle domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of lifecycle domains with non-blocking warnings.",
+    },
+    {
+        "name": "lifecycle_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: draft, pending_human_review, approved, expired, "
+            "revoked, superseded, or blocked."
+        ),
+    },
+    {
+        "name": "lifecycle_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51D.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51D.",
+    },
+)
+
+_ELR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define lifecycle models",
+        "assess lifecycle completeness",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "lifecycle_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51D",
+}
+
+_ELR_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestRecord",
+    "ExecutionReviewRecord",
+    "ExecutionDecisionRecord",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_ELR_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "request_lifecycle",
+        "severity": "blocker",
+        "finding": (
+            "No request lifecycle policy has been declared. "
+            "The request lifecycle must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "review_lifecycle",
+        "severity": "blocker",
+        "finding": (
+            "No review lifecycle policy has been declared. "
+            "The review lifecycle must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "decision_lifecycle",
+        "severity": "blocker",
+        "finding": (
+            "No decision lifecycle policy has been declared. "
+            "The decision lifecycle must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "expiration_policy",
+        "severity": "blocker",
+        "finding": (
+            "No expiration policy has been declared. "
+            "An expiration policy must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "revocation_policy",
+        "severity": "blocker",
+        "finding": (
+            "No revocation policy has been declared. "
+            "A revocation policy must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "supersession_policy",
+        "severity": "blocker",
+        "finding": (
+            "No supersession policy has been declared. "
+            "A supersession policy must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "renewal_policy",
+        "severity": "blocker",
+        "finding": (
+            "No renewal policy has been declared. "
+            "A renewal policy must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "lifecycle_audit",
+        "severity": "blocker",
+        "finding": (
+            "No lifecycle audit policy has been declared. "
+            "A lifecycle audit policy must be defined by a human reviewer before "
+            "lifecycle governance can proceed."
+        ),
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_lifecycle() -> dict:
+    """Define the governed execution lifecycle artifact. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    lifecycle_id_ref = f"elr-{ts}"
+
+    candidate_fields = [dict(f) for f in _ELR_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _ELR_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _ELR_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _ELR_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        lifecycle_status = "pending_human_review"
+    elif warning_count > 0:
+        lifecycle_status = "draft"
+    else:
+        lifecycle_status = "blocked"
+
+    record_id_ref = f"elrr-{ts}"
+
+    sample_candidate = {
+        "lifecycle_id": lifecycle_id_ref,
+        "request_id": f"era-{ts}",
+        "review_id": f"erw-{ts}",
+        "decision_id": f"edr-{ts}",
+        "human_review_required": True,
+        "lifecycle_allowed": False,
+    }
+
+    sample_record = {
+        "lifecycle_id": record_id_ref,
+        "request_id": f"era-{ts}",
+        "review_id": f"erw-{ts}",
+        "decision_id": f"edr-{ts}",
+        "current_status": lifecycle_status,
+        "expiration_status": "pending_human_review",
+        "revocation_status": "pending_human_review",
+        "renewal_status": "pending_human_review",
+        "supersession_status": "pending_human_review",
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"elrsum-{ts}",
+        "lifecycle_id": record_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "lifecycle_status": lifecycle_status,
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionLifecycleCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_ELR_LIFECYCLE_STATUSES),
+        "lifecycle_allowed_always_false_in_51d": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "ExecutionLifecycleRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_ELR_LIFECYCLE_STATUSES),
+        "execution_allowed_always_false_in_51d": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionLifecycleSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_lifecycle_statuses": list(_ELR_LIFECYCLE_STATUSES),
+        "lifecycle_allowed_always_false_in_51d": True,
+        "execution_allowed_always_false_in_51d": True,
+        "fields": summary_fields,
+    }
+
+    execution_lifecycle_overview = {
+        "overview_id": f"51d-{ts}",
+        "generated_at": generated_at,
+        "phase": "51D",
+        "title": "Execution Lifecycle",
+        "summary": (
+            "Defines the governed execution lifecycle artifact that tracks the state "
+            "of execution requests, reviews, and decisions across their full lifecycle. "
+            "Eight lifecycle domains are assessed: "
+            "request_lifecycle, review_lifecycle, decision_lifecycle, expiration_policy, "
+            "revocation_policy, supersession_policy, renewal_policy, and lifecycle_audit. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"lifecycle_status={lifecycle_status}. "
+            "Execution lifecycle definition is advisory and read-only. "
+            "No execution occurs. lifecycle_allowed=False. execution_allowed=False."
+        ),
+        "lifecycle_domain_count": len(_ELR_LIFECYCLE_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "lifecycle_status": lifecycle_status,
+        "lifecycle_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_lifecycle_overview": execution_lifecycle_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ELR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ELR_INPUT_SOURCES),
+        "advisory": EXECUTION_LIFECYCLE_ADVISORY,
+    }

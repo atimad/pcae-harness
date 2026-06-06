@@ -726,3 +726,8 @@
 
 - `pcae execution-decision`
 - `pcae execution-decision --json`
+
+## execution-lifecycle
+
+- `pcae execution-lifecycle`
+- `pcae execution-lifecycle --json`

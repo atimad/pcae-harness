@@ -36232,4 +36232,217 @@ def test_51c_human_output_shows_all_sections(capsys) -> None:
     assert "Sample record" in output
     assert "Sample summary" in output
     assert "Governance boundaries" in output
+
+
+# --- Phase 51D: Execution Lifecycle ---
+
+
+def test_51d_json_structure(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "execution_lifecycle_overview", "candidate_model", "record_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_record", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_51d_overview_fields(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_lifecycle_overview"]
+    assert ov["phase"] == "51D"
+    assert ov["lifecycle_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["lifecycle_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert ov["lifecycle_status"] in (
+        "draft", "pending_human_review", "approved", "expired",
+        "revoked", "superseded", "blocked",
+    )
+
+
+def test_51d_always_blocked(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["execution_lifecycle_overview"]
+    assert ov["lifecycle_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert data["sample_candidate"]["lifecycle_allowed"] is False
+    assert data["sample_record"]["execution_allowed"] is False
+    assert data["sample_summary"]["lifecycle_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    gb = data["governance_boundaries"]
+    assert gb["lifecycle_allowed"] is False
+    assert gb["execution_allowed"] is False
+
+
+def test_51d_human_review_always_required(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["execution_lifecycle_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_record"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_51d_candidate_model(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "ExecutionLifecycleCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 6
+    assert set(cm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "approved",
+        "expired", "revoked", "superseded", "blocked",
+    }
+    assert cm["lifecycle_allowed_always_false_in_51d"] is True
+
+
+def test_51d_record_model(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rm = data["record_model"]
+    assert rm["model_name"] == "ExecutionLifecycleRecord"
+    assert rm["field_count"] == rm["required_field_count"]
+    assert rm["field_count"] == 11
+    assert set(rm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "approved",
+        "expired", "revoked", "superseded", "blocked",
+    }
+    assert rm["execution_allowed_always_false_in_51d"] is True
+
+
+def test_51d_summary_model(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "ExecutionLifecycleSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 9
+    assert set(sm["supported_lifecycle_statuses"]) == {
+        "draft", "pending_human_review", "approved",
+        "expired", "revoked", "superseded", "blocked",
+    }
+    assert sm["lifecycle_allowed_always_false_in_51d"] is True
+    assert sm["execution_allowed_always_false_in_51d"] is True
+
+
+def test_51d_all_lifecycle_domains_covered(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "request_lifecycle", "review_lifecycle", "decision_lifecycle",
+        "expiration_policy", "revocation_policy", "supersession_policy",
+        "renewal_policy", "lifecycle_audit",
+    ):
+        assert expected in domains, f"missing lifecycle domain: {expected}"
+
+
+def test_51d_domain_assessment_structure(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "lifecycle_allowed", "execution_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["lifecycle_allowed"] is False
+        assert d["execution_allowed"] is False
+
+
+def test_51d_sample_candidate_fields(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "lifecycle_id", "request_id", "review_id", "decision_id",
+        "human_review_required", "lifecycle_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["lifecycle_allowed"] is False
+    assert sc["human_review_required"] is True
+
+
+def test_51d_sample_record_fields(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sr = data["sample_record"]
+    for field in (
+        "lifecycle_id", "request_id", "review_id", "decision_id",
+        "current_status", "expiration_status", "revocation_status",
+        "renewal_status", "supersession_status",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in sr, f"missing field {field!r} in sample_record"
+    assert sr["execution_allowed"] is False
+    assert sr["human_review_required"] is True
+
+
+def test_51d_sample_summary_fields(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "lifecycle_id", "domain_count", "blocker_count",
+        "warning_count", "lifecycle_status", "lifecycle_allowed",
+        "execution_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["lifecycle_allowed"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_51d_input_sources(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "ExecutionRequestRecord", "ExecutionReviewRecord", "ExecutionDecisionRecord",
+        "GovernanceInvariantAssessment", "RuntimeSafetyInvariantAssessment",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_51d_governance_boundaries(capsys) -> None:
+    main(["execution-lifecycle", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["lifecycle_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "51D"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "define lifecycle models",
+        "assess lifecycle completeness",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_51d_human_output_shows_all_sections(capsys) -> None:
+    main(["execution-lifecycle"])
+    output = capsys.readouterr().out
+    assert "Execution lifecycle" in output
+    assert "Candidate model" in output
+    assert "Record model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample record" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
     assert "informational" in output.lower()

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 51C: Execution Decision Record.
+Phase 51D: Execution Lifecycle.
 
 ## Governance Coherence Note
 
@@ -3651,13 +3651,37 @@ decision definition is advisory and read-only; no execution occurs; no files
 are modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3883 total tests
 passing
 
+## Phase 51D: Execution Lifecycle
+
+Implemented `pcae execution-lifecycle` and `--json`. Defines the governed
+execution lifecycle artifact that tracks the state of execution requests,
+reviews, and decisions across their full lifecycle. Three models —
+ExecutionLifecycleCandidate (6 fields: lifecycle_id, request_id, review_id,
+decision_id, human_review_required, lifecycle_allowed),
+ExecutionLifecycleRecord (11 fields: lifecycle_id, request_id, review_id,
+decision_id, current_status, expiration_status, revocation_status,
+renewal_status, supersession_status, execution_allowed, human_review_required),
+ExecutionLifecycleSummary (9 fields: summary_id, lifecycle_id, domain_count,
+blocker_count, warning_count, lifecycle_status, lifecycle_allowed,
+execution_allowed, human_review_required); seven lifecycle statuses: draft,
+pending_human_review, approved, expired, revoked, superseded, blocked; eight
+lifecycle domains: request_lifecycle, review_lifecycle, decision_lifecycle,
+expiration_policy, revocation_policy, supersession_policy, renewal_policy,
+lifecycle_audit; eight blockers; lifecycle_status=pending_human_review;
+lifecycle_allowed=False; execution_allowed=False; human_review_required=True;
+inputs: ExecutionRequestRecord, ExecutionReviewRecord, ExecutionDecisionRecord,
+GovernanceInvariantAssessment, RuntimeSafetyInvariantAssessment; execution
+lifecycle definition is advisory and read-only; no execution occurs; no files
+are modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3898 total tests
+passing
+
 ## Current Phase
 
-Phase 51A: Execution Request Model.
+Phase 51D: Execution Lifecycle.
 
 ## Next
 
-- TBD: Future phases (51D and beyond).
+- TBD: Future phases (52A and beyond).
 
 ## Future Explorations
 
