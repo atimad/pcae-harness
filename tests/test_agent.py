@@ -40900,3 +40900,195 @@ def test_52l_human_output_shows_all_sections(capsys) -> None:
     assert "Evidence mutation:     False" in output
     assert "execution_allowed=False" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52M: Conflict Resolution Engine ---
+
+
+def test_52m_json_structure_and_constraints(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "conflict_resolution_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "resolution_plans",
+        "sample_signal",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["conflict_resolution_overview"]
+    assert overview["phase"] == "52M"
+    assert overview["domain_count"] == 8
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+    assert overview["resolution_recommended"] is True
+
+
+def test_52m_models_and_exact_fields(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "ConflictResolutionSignal",
+            [
+                "signal_id", "conflict_id", "conflict_domain", "conflict_type",
+                "severity", "involved_agents", "involved_artifacts",
+                "detected_state", "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "ConflictResolutionAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count", "warning_count",
+                "conflict_status", "resolution_recommended", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "ConflictResolutionSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "conflict_status",
+                "resolution_recommended", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_52m_domains_and_statuses(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {signal["domain"] for signal in data["domain_signals"]} == {
+        "task_conflict_resolution",
+        "session_conflict_resolution",
+        "lock_conflict_resolution",
+        "governance_conflict_resolution",
+        "runtime_conflict_resolution",
+        "evidence_conflict_resolution",
+        "handoff_conflict_resolution",
+        "recovery_conflict_resolution",
+    }
+    statuses = {
+        "no_conflict",
+        "conflict_with_warnings",
+        "resolution_required",
+        "blocked",
+    }
+    assert set(data["assessment_model"]["supported_conflict_statuses"]) == statuses
+    assert set(data["summary_model"]["supported_conflict_statuses"]) == statuses
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+
+
+def test_52m_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["involved_agents"]
+        assert signal["involved_artifacts"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_52m_resolution_plans_are_advisory(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["resolution_plans"]) == 8
+    for plan in data["resolution_plans"]:
+        assert plan["recommended_resolution_path"]
+        assert plan["automatic_resolution"] is False
+        assert plan["execution_allowed"] is False
+        assert plan["human_review_required"] is True
+    assert data["governance_boundaries"]["resolution_automatic"] is False
+    assert "no resolution occurs automatically" in data["advisory"].lower()
+
+
+def test_52m_assessment_and_summary(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["conflict_status"] == "resolution_required"
+    assert assessment["resolution_recommended"] is True
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_52m_input_sources(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ConcurrencySafetyAssessment",
+        "ParallelAgentCoordinationAssessment",
+        "MultiAgentStateConsistencyAssessment",
+        "AgentLockConflictAssessment",
+        "AgentLockRecoveryPlan",
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "GovernanceRecoveryPlan",
+    ]
+
+
+def test_52m_governance_boundaries(capsys) -> None:
+    main(["conflict-resolution-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52M"
+    assert boundaries["read_only"] is True
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for key in (
+        "lock_modification_allowed",
+        "task_modification_allowed",
+        "session_modification_allowed",
+        "governance_mutation_allowed",
+        "runtime_mutation_allowed",
+        "evidence_mutation_allowed",
+    ):
+        assert boundaries[key] is False
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "authorize execution",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_52m_human_output(capsys) -> None:
+    main(["conflict-resolution-engine"])
+    output = capsys.readouterr().out
+    for text in (
+        "Conflict resolution engine",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Conflict signals",
+        "Advisory resolution plans",
+        "Governance boundaries",
+        "Resolution automatic:  False",
+        "Execution allowed:     False",
+        "advisory only",
+    ):
+        assert text in output

@@ -18,7 +18,8 @@ implementation
 
 ## Goal
 
-Audit the complete multi-agent governance chain and clean up stale task lifecycle state.
+Implement Phase 52M only: a read-only, advisory conflict resolution engine
+scaffold for multi-agent and concurrent PCAE workflows.
 
 ## Allowed Files
 
@@ -60,11 +61,21 @@ TBD
 
 ## Forbidden Changes
 
-- TBD
+- Runtime invocation or prompt execution.
+- Execution authorization.
+- Automatic conflict resolution.
+- Lock, task, session, governance, runtime, or evidence mutation.
+- Commit, push, or rollback.
 
 ## Acceptance Checks
 
-- TBD
+- `pcae conflict-resolution-engine` works.
+- `pcae conflict-resolution-engine --json` works.
+- Conflict signal, assessment, and summary models are defined.
+- All eight conflict resolution domains are represented.
+- Resolution remains advisory and execution remains blocked.
+- `pcae check` passes.
+- `python -m pytest -n auto` passes.
 
 ## Documentation Requirements
 

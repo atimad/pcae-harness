@@ -847,6 +847,11 @@ def render_commands_reference() -> str:
 
 - `pcae multi-agent-state-consistency`
 - `pcae multi-agent-state-consistency --json`
+
+## conflict-resolution-engine
+
+- `pcae conflict-resolution-engine`
+- `pcae conflict-resolution-engine --json`
 """
 
 

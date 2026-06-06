@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52L: Multi-Agent State Consistency.
+Phase 52M: Conflict Resolution Engine.
 
 ## Governance Coherence Note
 
@@ -3800,11 +3800,11 @@ passing
 
 ## Current Phase
 
-Phase 51G: Execution Evidence Requirements.
+Phase 52M: Conflict Resolution Engine.
 
 ## Next
 
-- TBD: Future phases (52A and beyond).
+- TBD: Future phases (52N and beyond).
 
 ## Future Explorations
 

@@ -54615,3 +54615,322 @@ def build_multi_agent_state_consistency() -> dict:
         "input_sources": list(_MASC_INPUT_SOURCES),
         "advisory": MULTI_AGENT_STATE_CONSISTENCY_ADVISORY,
     }
+
+
+# --- Phase 52M: Conflict Resolution Engine ---
+
+CONFLICT_RESOLUTION_ENGINE_ADVISORY = (
+    "Conflict resolution is advisory only; conflicts may be detected, classified, "
+    "escalated, and paired with human-reviewed resolution plans, but no resolution "
+    "occurs automatically. No task, session, lock, governance, runtime, evidence, "
+    "handoff, recovery, or repository state is modified. No runtimes are invoked, "
+    "no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52M. Human review is always required."
+)
+
+_CRE_CONFLICT_DOMAINS: tuple[str, ...] = (
+    "task_conflict_resolution",
+    "session_conflict_resolution",
+    "lock_conflict_resolution",
+    "governance_conflict_resolution",
+    "runtime_conflict_resolution",
+    "evidence_conflict_resolution",
+    "handoff_conflict_resolution",
+    "recovery_conflict_resolution",
+)
+
+_CRE_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CRE_CONFLICT_STATUSES: tuple[str, ...] = (
+    "no_conflict",
+    "conflict_with_warnings",
+    "resolution_required",
+    "blocked",
+)
+
+_CRE_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "conflict_id", "type": "str", "required": True},
+    {"name": "conflict_domain", "type": "str", "required": True},
+    {"name": "conflict_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "involved_agents", "type": "list[str]", "required": True},
+    {"name": "involved_artifacts", "type": "list[str]", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CRE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "conflict_status", "type": "str", "required": True},
+    {"name": "resolution_recommended", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CRE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "conflict_status", "type": "str", "required": True},
+    {"name": "resolution_recommended", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CRE_INPUT_SOURCES: tuple[str, ...] = (
+    "ConcurrencySafetyAssessment",
+    "ParallelAgentCoordinationAssessment",
+    "MultiAgentStateConsistencyAssessment",
+    "AgentLockConflictAssessment",
+    "AgentLockRecoveryPlan",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "GovernanceRecoveryPlan",
+)
+
+_CRE_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "task_conflict_resolution",
+        "conflict_type": "task_ownership_or_lifecycle_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["active_task", "task_lifecycle"],
+        "detected_state": "task ownership and lifecycle agreement not established",
+        "expected_state": "one authoritative task owner, scope, and lifecycle state",
+        "resolution_path": "compare task versions and ownership evidence; select an authoritative state through human review",
+    },
+    {
+        "domain": "session_conflict_resolution",
+        "conflict_type": "session_identity_or_continuity_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["session_state", "continuity_record"],
+        "detected_state": "session identity and continuity agreement not established",
+        "expected_state": "one session identity and ordered continuity chain",
+        "resolution_path": "reconcile session references against provenance and active task evidence through human review",
+    },
+    {
+        "domain": "lock_conflict_resolution",
+        "conflict_type": "lock_ownership_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["agent_lock", "lock_recovery_plan"],
+        "detected_state": "exclusive lock ownership agreement not established",
+        "expected_state": "one current lock owner with validated task and session alignment",
+        "resolution_path": "freeze concurrent action and review lock history before any separately authorized lock recovery",
+    },
+    {
+        "domain": "governance_conflict_resolution",
+        "conflict_type": "governance_authority_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["policy", "project_status", "provenance"],
+        "detected_state": "governance authority and artifact agreement not established",
+        "expected_state": "policy and governance memory identify one authoritative workflow state",
+        "resolution_path": "compare governance records and provenance; document the human-selected authoritative state",
+    },
+    {
+        "domain": "runtime_conflict_resolution",
+        "conflict_type": "runtime_contract_or_readiness_conflict",
+        "severity": "warning",
+        "involved_artifacts": ["runtime_contract", "runtime_readiness"],
+        "detected_state": "runtime contract and readiness agreement not established",
+        "expected_state": "all agents reference the same non-executable runtime contract state",
+        "resolution_path": "review runtime references and retain the Phase 52M execution prohibition",
+    },
+    {
+        "domain": "evidence_conflict_resolution",
+        "conflict_type": "evidence_identity_or_integrity_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["execution_evidence", "audit_evidence"],
+        "detected_state": "evidence identity, attribution, and integrity agreement not established",
+        "expected_state": "one immutable and attributable evidence set",
+        "resolution_path": "preserve all evidence variants and select or reject them through human review",
+    },
+    {
+        "domain": "handoff_conflict_resolution",
+        "conflict_type": "handoff_ownership_transition_conflict",
+        "severity": "warning",
+        "involved_artifacts": ["handoff_record", "agent_lock", "session_state"],
+        "detected_state": "handoff pre-state and post-state agreement not established",
+        "expected_state": "one ordered and attributable ownership transition",
+        "resolution_path": "compare outgoing and incoming records and require explicit human confirmation of the accepted handoff",
+    },
+    {
+        "domain": "recovery_conflict_resolution",
+        "conflict_type": "recovery_plan_or_target_state_conflict",
+        "severity": "blocker",
+        "involved_artifacts": ["lock_recovery_plan", "session_recovery_plan", "governance_recovery_plan"],
+        "detected_state": "recovery plan inputs and intended target state agreement not established",
+        "expected_state": "recovery plans share one validated pre-state and non-conflicting target state",
+        "resolution_path": "halt recovery activity and reconcile plans through human review before any separate recovery authorization",
+    },
+)
+
+_CRE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect multi-agent and concurrent conflict signals",
+        "classify conflict severity",
+        "recommend human-reviewed resolution paths",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "modify governance state",
+        "modify runtime state",
+        "modify evidence state",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "lock_modification_allowed": False,
+    "task_modification_allowed": False,
+    "session_modification_allowed": False,
+    "governance_mutation_allowed": False,
+    "runtime_mutation_allowed": False,
+    "evidence_mutation_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "resolution_automatic": False,
+    "read_only": True,
+    "phase": "52M",
+}
+
+
+def build_conflict_resolution_engine() -> dict:
+    """Build a read-only conflict assessment and advisory resolution plan."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(signal) for signal in _CRE_DOMAIN_SIGNALS]
+    blocker_count = sum(signal["severity"] == "blocker" for signal in domain_signals)
+    warning_count = sum(signal["severity"] == "warning" for signal in domain_signals)
+    info_count = sum(signal["severity"] == "info" for signal in domain_signals)
+    signal_count = len(domain_signals)
+    domain_count = len(_CRE_CONFLICT_DOMAINS)
+
+    if blocker_count:
+        conflict_status = "resolution_required"
+    elif warning_count:
+        conflict_status = "conflict_with_warnings"
+    else:
+        conflict_status = "no_conflict"
+    resolution_recommended = bool(blocker_count or warning_count)
+
+    conflict_id = f"conflict-{ts}"
+    signals = [
+        {
+            "signal_id": f"cres-{ts}-{index:02d}",
+            "conflict_id": conflict_id,
+            "conflict_domain": signal["domain"],
+            "conflict_type": signal["conflict_type"],
+            "severity": signal["severity"],
+            "involved_agents": ["agent-unassigned"],
+            "involved_artifacts": list(signal["involved_artifacts"]),
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+    resolution_plans = [
+        {
+            "conflict_domain": signal["domain"],
+            "severity": signal["severity"],
+            "recommended_resolution_path": signal["resolution_path"],
+            "automatic_resolution": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+        }
+        for signal in domain_signals
+    ]
+
+    assessment_id = f"cra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "conflict_status": conflict_status,
+        "resolution_recommended": resolution_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"crsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        **{key: sample_assessment[key] for key in (
+            "signal_count", "blocker_count", "warning_count", "conflict_status",
+            "resolution_recommended", "execution_allowed", "human_review_required",
+        )},
+    }
+
+    return {
+        "conflict_resolution_overview": {
+            "overview_id": f"52m-{ts}",
+            "generated_at": generated_at,
+            "phase": "52M",
+            "title": "Conflict Resolution Engine",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "conflict_status": conflict_status,
+            "resolution_recommended": resolution_recommended,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Detects and classifies multi-agent conflict signals and produces "
+                "human-reviewed advisory resolution paths. No conflict is resolved, "
+                "no governed state is modified, and no runtime is invoked. "
+                f"conflict_status={conflict_status}. execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "ConflictResolutionSignal",
+            "field_count": len(_CRE_SIGNAL_FIELDS),
+            "required_field_count": len(_CRE_SIGNAL_FIELDS),
+            "severity_values": list(_CRE_SEVERITY_VALUES),
+            "human_review_required_always_true_in_52m": True,
+            "fields": [dict(field) for field in _CRE_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "ConflictResolutionAssessment",
+            "field_count": len(_CRE_ASSESSMENT_FIELDS),
+            "required_field_count": len(_CRE_ASSESSMENT_FIELDS),
+            "supported_conflict_statuses": list(_CRE_CONFLICT_STATUSES),
+            "execution_allowed_always_false_in_52m": True,
+            "human_review_required_always_true_in_52m": True,
+            "fields": [dict(field) for field in _CRE_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "ConflictResolutionSummary",
+            "field_count": len(_CRE_SUMMARY_FIELDS),
+            "required_field_count": len(_CRE_SUMMARY_FIELDS),
+            "supported_conflict_statuses": list(_CRE_CONFLICT_STATUSES),
+            "execution_allowed_always_false_in_52m": True,
+            "human_review_required_always_true_in_52m": True,
+            "fields": [dict(field) for field in _CRE_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "resolution_plans": resolution_plans,
+        "sample_signal": signals[0],
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CRE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CRE_INPUT_SOURCES),
+        "advisory": CONFLICT_RESOLUTION_ENGINE_ADVISORY,
+    }

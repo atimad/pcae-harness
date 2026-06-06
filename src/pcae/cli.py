@@ -146,6 +146,7 @@ from pcae.commands.agent import (
     run_concurrency_safety,
     run_parallel_agent_coordination,
     run_multi_agent_state_consistency,
+    run_conflict_resolution_engine,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4173,6 +4174,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     multi_agent_state_consistency_parser.set_defaults(
         handler=run_multi_agent_state_consistency
+    )
+
+    conflict_resolution_engine_parser = subparsers.add_parser(
+        "conflict-resolution-engine",
+        help="Detect, classify, escalate, and plan advisory resolution for multi-agent conflicts (Phase 52M).",
+    )
+    conflict_resolution_engine_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    conflict_resolution_engine_parser.set_defaults(
+        handler=run_conflict_resolution_engine
     )
 
     return parser
