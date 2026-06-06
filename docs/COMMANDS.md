@@ -781,3 +781,8 @@
 
 - `pcae governance-state-recovery`
 - `pcae governance-state-recovery --json`
+
+## agent-lock-recovery
+
+- `pcae agent-lock-recovery`
+- `pcae agent-lock-recovery --json`

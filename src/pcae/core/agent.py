@@ -50144,3 +50144,528 @@ def build_execution_evidence() -> dict:
         "input_sources": list(_EEV_INPUT_SOURCES),
         "advisory": EXECUTION_EVIDENCE_ADVISORY,
     }
+
+
+# --- Phase 52D: Agent Lock Recovery ---
+
+AGENT_LOCK_RECOVERY_ADVISORY = (
+    "Agent lock recovery is informational; agent lock state may be inspected "
+    "and recovery steps recommended, but no automatic recovery occurs and no "
+    "lock files, session files, or task files are modified. No runtimes are "
+    "invoked and no prompts are executed. recovery_allowed=False in Phase 52D. "
+    "Recovery is advisory only and requires human review."
+)
+
+_ALREC_RECOVERY_DOMAINS: tuple[str, ...] = (
+    "stale_lock_recovery",
+    "lock_owner_mismatch_recovery",
+    "orphaned_lock_recovery",
+    "multi_agent_lock_conflict_recovery",
+    "handoff_lock_recovery",
+    "lock_session_alignment_recovery",
+    "lock_task_alignment_recovery",
+    "lock_recovery_escalation",
+)
+
+_ALREC_PLAN_STATUSES: tuple[str, ...] = (
+    "not_required",
+    "advisory",
+    "pending_human_review",
+    "blocked",
+)
+
+_ALREC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock recovery candidate.",
+    },
+    {
+        "name": "lock_id",
+        "type": "str",
+        "required": True,
+        "description": "The agent lock this candidate addresses.",
+    },
+    {
+        "name": "agent_id",
+        "type": "str",
+        "required": True,
+        "description": "The agent ID associated with the lock under assessment.",
+    },
+    {
+        "name": "task_id",
+        "type": "str",
+        "required": True,
+        "description": "The task ID associated with the lock under assessment.",
+    },
+    {
+        "name": "recovery_domain",
+        "type": "str",
+        "required": True,
+        "description": "The recovery domain this candidate belongs to.",
+    },
+    {
+        "name": "recovery_reason",
+        "type": "str",
+        "required": True,
+        "description": "The reason recovery is recommended for this domain.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "recommended_action",
+        "type": "str",
+        "required": True,
+        "description": "The human-reviewed action recommended to resolve this candidate.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52D.",
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52D.",
+    },
+)
+
+_ALREC_PLAN_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock recovery plan.",
+    },
+    {
+        "name": "recovery_candidates",
+        "type": "list[AgentLockRecoveryCandidate]",
+        "required": True,
+        "description": "List of recovery candidates produced for all assessed domains.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates in the plan.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52D.",
+    },
+)
+
+_ALREC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this agent lock recovery summary.",
+    },
+    {
+        "name": "recovery_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The recovery plan this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery domains assessed.",
+    },
+    {
+        "name": "candidate_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recovery candidates produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with blocker severity.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of candidates with warning severity.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_required, advisory, pending_human_review, or blocked."
+        ),
+    },
+    {
+        "name": "recovery_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52D.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52D.",
+    },
+)
+
+_ALREC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect agent lock state",
+        "detect stale/orphaned/conflicting locks",
+        "recommend human-reviewed recovery steps",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "clear locks",
+        "rewrite lock files",
+        "rewrite session files",
+        "move task files",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_allowed": False,
+    "human_review_required": True,
+    "recovery_automatic": False,
+    "read_only": True,
+    "phase": "52D",
+}
+
+_ALREC_INPUT_SOURCES: tuple[str, ...] = (
+    "AgentLockAssessment",
+    "AgentLockConflictAssessment",
+    "GovernanceRecoveryPlan",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "task lifecycle state",
+    "session state",
+    "active lock state",
+)
+
+_ALREC_DOMAIN_CANDIDATES: tuple[dict, ...] = (
+    {
+        "recovery_domain": "stale_lock_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "The agent lock has exceeded its TTL and is no longer considered "
+            "active. Stale locks block new agent sessions and prevent safe "
+            "handoffs from completing."
+        ),
+        "recommended_action": (
+            "Human must verify that no agent session is actively using the "
+            "lock, confirm the lock is truly stale, and manually release it "
+            "via `pcae agent release` after confirming no work is in progress."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "lock_owner_mismatch_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "The agent ID recorded in the lock file does not match the agent "
+            "ID of the current session. Owner mismatches indicate an "
+            "unauthorized lock acquisition or a session that was not properly "
+            "terminated."
+        ),
+        "recommended_action": (
+            "Human must identify which agent session is authoritative, verify "
+            "that the current session is legitimate, and manually reconcile "
+            "the lock owner before resuming any governed work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "orphaned_lock_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "The agent lock references a session or task that no longer exists "
+            "or has been completed. Orphaned locks prevent new agents from "
+            "acquiring the lock and indicate a session that was not cleanly "
+            "terminated."
+        ),
+        "recommended_action": (
+            "Human must verify that the referenced session and task are "
+            "genuinely gone or complete, confirm no work is in progress, and "
+            "manually release the orphaned lock via `pcae agent release`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "multi_agent_lock_conflict_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Multiple agents are attempting to hold or claim the same lock "
+            "simultaneously. Multi-agent lock conflicts indicate a coordination "
+            "failure and risk data corruption or governance violation."
+        ),
+        "recommended_action": (
+            "Human must identify all agents involved in the conflict, "
+            "determine which if any has legitimate ownership, terminate "
+            "unauthorized sessions, and ensure only one agent holds the lock "
+            "before resuming governed operations."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "handoff_lock_recovery",
+        "severity": "blocker",
+        "recovery_reason": (
+            "A lock transfer initiated during a phase handoff did not complete "
+            "successfully. An incomplete handoff leaves the lock in an "
+            "indeterminate state that prevents the incoming agent from "
+            "safely acquiring governance."
+        ),
+        "recommended_action": (
+            "Human must review the handoff record, verify the state of both "
+            "the outgoing and incoming agent sessions, and manually complete "
+            "or abort the handoff using `pcae phase handoff` under direct "
+            "supervision."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "lock_session_alignment_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "The agent lock state is inconsistent with the current session "
+            "state. The session references a different lock owner or lock "
+            "timestamp than is recorded in the lock file."
+        ),
+        "recommended_action": (
+            "Human must compare the lock file and session file, identify "
+            "which is authoritative, and reconcile the mismatch by updating "
+            "the non-authoritative record under direct supervision."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "lock_task_alignment_recovery",
+        "severity": "warning",
+        "recovery_reason": (
+            "The agent lock is held by a session whose active task does not "
+            "match the task currently registered as active. Task misalignment "
+            "under a held lock indicates the lock was not refreshed after a "
+            "task transition."
+        ),
+        "recommended_action": (
+            "Human must verify the active task, confirm that the lock-holding "
+            "session is aligned with the correct task, and refresh the lock "
+            "association via `pcae session bootstrap` if the task transition "
+            "was legitimate."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+    {
+        "recovery_domain": "lock_recovery_escalation",
+        "severity": "blocker",
+        "recovery_reason": (
+            "Multiple agent lock recovery signals are present simultaneously. "
+            "Compound lock failure requires escalated human review before any "
+            "governed operation can be trusted."
+        ),
+        "recommended_action": (
+            "Human must resolve all blocking lock recovery candidates in "
+            "priority order, verify full governance health with `pcae health`, "
+            "run `pcae check`, and confirm session coherence with "
+            "`pcae session bootstrap` before allowing any agent to resume work."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    },
+)
+
+
+def build_agent_lock_recovery() -> dict:
+    """Define agent lock recovery planning. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    plan_id_ref = f"alrec-{ts}"
+
+    candidate_fields = [dict(f) for f in _ALREC_CANDIDATE_FIELDS]
+    plan_fields = [dict(f) for f in _ALREC_PLAN_FIELDS]
+    summary_fields = [dict(f) for f in _ALREC_SUMMARY_FIELDS]
+
+    domain_candidates: list[dict] = []
+    for i, d in enumerate(_ALREC_DOMAIN_CANDIDATES):
+        entry = dict(d)
+        entry["recovery_id"] = f"alrec-cand-{ts}-{i:02d}"
+        entry["lock_id"] = f"lock-{ts}"
+        entry["agent_id"] = f"agent-{ts}"
+        entry["task_id"] = f"task-{ts}"
+        domain_candidates.append(entry)
+
+    blocker_count = sum(1 for d in domain_candidates if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_candidates if d["severity"] == "warning")
+    candidate_count = len(domain_candidates)
+    domain_count = len(_ALREC_RECOVERY_DOMAINS)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "advisory"
+    else:
+        plan_status = "not_required"
+
+    sample_candidate = {
+        "recovery_id": f"alrec-cand-{ts}-00",
+        "lock_id": f"lock-{ts}",
+        "agent_id": f"agent-{ts}",
+        "task_id": f"task-{ts}",
+        "recovery_domain": "stale_lock_recovery",
+        "recovery_reason": (
+            "The agent lock has exceeded its TTL and is no longer considered active."
+        ),
+        "severity": "blocker",
+        "recommended_action": (
+            "Human must verify that no agent session is actively using the lock "
+            "and manually release it via `pcae agent release`."
+        ),
+        "human_review_required": True,
+        "recovery_allowed": False,
+    }
+
+    sample_plan = {
+        "recovery_plan_id": plan_id_ref,
+        "recovery_candidates": domain_candidates,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"alrecsum-{ts}",
+        "recovery_plan_id": plan_id_ref,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "AgentLockRecoveryCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "recovery_allowed_always_false_in_52d": True,
+        "human_review_required_always_true_in_52d": True,
+        "fields": candidate_fields,
+    }
+
+    plan_model = {
+        "model_name": "AgentLockRecoveryPlan",
+        "field_count": len(plan_fields),
+        "required_field_count": sum(1 for f in plan_fields if f["required"]),
+        "supported_plan_statuses": list(_ALREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52d": True,
+        "human_review_required_always_true_in_52d": True,
+        "fields": plan_fields,
+    }
+
+    summary_model = {
+        "model_name": "AgentLockRecoverySummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_ALREC_PLAN_STATUSES),
+        "recovery_allowed_always_false_in_52d": True,
+        "human_review_required_always_true_in_52d": True,
+        "fields": summary_fields,
+    }
+
+    agent_lock_recovery_overview = {
+        "overview_id": f"52d-{ts}",
+        "generated_at": generated_at,
+        "phase": "52D",
+        "title": "Agent Lock Recovery",
+        "summary": (
+            "Defines recovery planning for stale, conflicting, orphaned, or "
+            "mismatched agent lock state. Eight recovery domains are assessed: "
+            "stale_lock_recovery, lock_owner_mismatch_recovery, "
+            "orphaned_lock_recovery, multi_agent_lock_conflict_recovery, "
+            "handoff_lock_recovery, lock_session_alignment_recovery, "
+            "lock_task_alignment_recovery, and lock_recovery_escalation. "
+            f"domain_count={domain_count}, candidate_count={candidate_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Agent lock recovery is advisory and read-only. "
+            "No lock, session, or task files are modified. "
+            "recovery_allowed=False. recovery_automatic=False."
+        ),
+        "recovery_domain_count": domain_count,
+        "domain_count": domain_count,
+        "candidate_count": candidate_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "recovery_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "agent_lock_recovery_overview": agent_lock_recovery_overview,
+        "candidate_model": candidate_model,
+        "plan_model": plan_model,
+        "summary_model": summary_model,
+        "domain_candidates": domain_candidates,
+        "sample_candidate": sample_candidate,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ALREC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ALREC_INPUT_SOURCES),
+        "advisory": AGENT_LOCK_RECOVERY_ADVISORY,
+    }

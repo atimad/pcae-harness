@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52C: Governance State Recovery.
+Phase 52D: Agent Lock Recovery.
 
 ## Governance Coherence Note
 

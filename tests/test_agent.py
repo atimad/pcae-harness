@@ -38692,3 +38692,234 @@ def test_52c_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52D: Agent Lock Recovery ---
+
+
+def test_52d_json_structure(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "agent_lock_recovery_overview", "candidate_model", "plan_model",
+        "summary_model", "domain_candidates", "sample_candidate",
+        "sample_plan", "sample_summary", "governance_boundaries",
+        "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52d_overview_fields(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["agent_lock_recovery_overview"]
+    assert ov["phase"] == "52D"
+    assert ov["recovery_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["recovery_domain_count"] == 8
+    assert ov["domain_count"] == 8
+    assert isinstance(ov["candidate_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["plan_status"] in (
+        "not_required", "advisory", "pending_human_review", "blocked",
+    )
+
+
+def test_52d_recovery_always_blocked(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["agent_lock_recovery_overview"]["recovery_allowed"] is False
+    assert data["sample_candidate"]["recovery_allowed"] is False
+    assert data["sample_plan"]["recovery_allowed"] is False
+    assert data["sample_summary"]["recovery_allowed"] is False
+    gb = data["governance_boundaries"]
+    assert gb["recovery_allowed"] is False
+    assert gb["recovery_automatic"] is False
+    assert data["candidate_model"]["recovery_allowed_always_false_in_52d"] is True
+    assert data["plan_model"]["recovery_allowed_always_false_in_52d"] is True
+    assert data["summary_model"]["recovery_allowed_always_false_in_52d"] is True
+
+
+def test_52d_human_review_always_required(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["agent_lock_recovery_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_plan"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    assert data["candidate_model"]["human_review_required_always_true_in_52d"] is True
+    assert data["plan_model"]["human_review_required_always_true_in_52d"] is True
+    assert data["summary_model"]["human_review_required_always_true_in_52d"] is True
+
+
+def test_52d_candidate_model(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "AgentLockRecoveryCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 10
+    assert cm["recovery_allowed_always_false_in_52d"] is True
+    assert cm["human_review_required_always_true_in_52d"] is True
+
+
+def test_52d_plan_model(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    pm = data["plan_model"]
+    assert pm["model_name"] == "AgentLockRecoveryPlan"
+    assert pm["field_count"] == pm["required_field_count"]
+    assert pm["field_count"] == 8
+    assert set(pm["supported_plan_statuses"]) == {
+        "not_required", "advisory", "pending_human_review", "blocked",
+    }
+    assert pm["recovery_allowed_always_false_in_52d"] is True
+    assert pm["human_review_required_always_true_in_52d"] is True
+
+
+def test_52d_summary_model(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "AgentLockRecoverySummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 9
+    assert set(sm["supported_plan_statuses"]) == {
+        "not_required", "advisory", "pending_human_review", "blocked",
+    }
+    assert sm["recovery_allowed_always_false_in_52d"] is True
+    assert sm["human_review_required_always_true_in_52d"] is True
+
+
+def test_52d_all_recovery_domains_covered(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["recovery_domain"] for d in data["domain_candidates"]}
+    for expected in (
+        "stale_lock_recovery",
+        "lock_owner_mismatch_recovery",
+        "orphaned_lock_recovery",
+        "multi_agent_lock_conflict_recovery",
+        "handoff_lock_recovery",
+        "lock_session_alignment_recovery",
+        "lock_task_alignment_recovery",
+        "lock_recovery_escalation",
+    ):
+        assert expected in domains, f"missing recovery domain: {expected}"
+
+
+def test_52d_stale_lock_recovery_present(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["recovery_domain"] for d in data["domain_candidates"]}
+    assert "stale_lock_recovery" in domains
+    stale = next(
+        d for d in data["domain_candidates"]
+        if d["recovery_domain"] == "stale_lock_recovery"
+    )
+    assert stale["severity"] == "blocker"
+    assert stale["human_review_required"] is True
+    assert stale["recovery_allowed"] is False
+
+
+def test_52d_domain_candidate_structure(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_candidates"]:
+        for field in (
+            "recovery_id", "lock_id", "agent_id", "task_id",
+            "recovery_domain", "recovery_reason", "severity",
+            "recommended_action", "human_review_required", "recovery_allowed",
+        ):
+            assert field in d, f"missing field {field!r} in domain candidate"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["human_review_required"] is True
+        assert d["recovery_allowed"] is False
+
+
+def test_52d_sample_candidate_fields(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "recovery_id", "lock_id", "agent_id", "task_id",
+        "recovery_domain", "recovery_reason", "severity",
+        "recommended_action", "human_review_required", "recovery_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["recovery_allowed"] is False
+    assert sc["human_review_required"] is True
+
+
+def test_52d_sample_plan_fields(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sp = data["sample_plan"]
+    for field in (
+        "recovery_plan_id", "recovery_candidates", "candidate_count",
+        "blocker_count", "warning_count", "plan_status",
+        "recovery_allowed", "human_review_required",
+    ):
+        assert field in sp, f"missing field {field!r} in sample_plan"
+    assert sp["recovery_allowed"] is False
+    assert sp["human_review_required"] is True
+    assert isinstance(sp["recovery_candidates"], list)
+    assert sp["candidate_count"] == len(sp["recovery_candidates"])
+
+
+def test_52d_sample_summary_fields(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "recovery_plan_id", "domain_count", "candidate_count",
+        "blocker_count", "warning_count", "plan_status",
+        "recovery_allowed", "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["recovery_allowed"] is False
+    assert ss["human_review_required"] is True
+    assert ss["domain_count"] == 8
+
+
+def test_52d_governance_boundaries(capsys) -> None:
+    main(["agent-lock-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["recovery_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["recovery_automatic"] is False
+    assert gb["read_only"] is True
+    assert gb["phase"] == "52D"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "inspect agent lock state",
+        "detect stale/orphaned/conflicting locks",
+        "recommend human-reviewed recovery steps",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "clear locks", "rewrite lock files", "rewrite session files",
+        "move task files", "invoke runtimes", "execute prompts",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_52d_human_output_shows_all_sections(capsys) -> None:
+    main(["agent-lock-recovery"])
+    output = capsys.readouterr().out
+    assert "Agent lock recovery" in output
+    assert "Candidate model" in output
+    assert "Plan model" in output
+    assert "Summary model" in output
+    assert "Domain candidates" in output
+    assert "Sample candidate" in output
+    assert "Sample plan" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

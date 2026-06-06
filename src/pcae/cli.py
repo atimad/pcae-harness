@@ -137,6 +137,7 @@ from pcae.commands.agent import (
     run_task_lifecycle_hardening,
     run_session_recovery,
     run_governance_state_recovery,
+    run_agent_lock_recovery,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4060,6 +4061,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     governance_state_recovery_parser.set_defaults(handler=run_governance_state_recovery)
+
+    agent_lock_recovery_parser = subparsers.add_parser(
+        "agent-lock-recovery",
+        help="Define recovery planning for stale, conflicting, orphaned, or mismatched agent lock state (Phase 52D).",
+    )
+    agent_lock_recovery_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    agent_lock_recovery_parser.set_defaults(handler=run_agent_lock_recovery)
 
     return parser
 
