@@ -41264,3 +41264,178 @@ def test_52n_human_output(capsys) -> None:
         "scaffold and audit only",
     ):
         assert text in output
+
+
+# --- Phase 52O: Failure Injection ---
+
+
+def test_52o_json_structure_and_constraints(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "failure_injection_overview",
+        "scenario_model",
+        "plan_model",
+        "summary_model",
+        "domain_scenarios",
+        "scenarios",
+        "sample_plan",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["failure_injection_overview"]
+    assert overview["phase"] == "52O"
+    assert overview["domain_count"] == 10
+    assert overview["injection_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_52o_models_and_exact_fields(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "scenario_model": (
+            "FailureInjectionScenario",
+            [
+                "scenario_id", "failure_domain", "failure_type", "severity",
+                "injected_failure", "expected_detection",
+                "expected_recovery_path", "human_review_required",
+                "injection_allowed",
+            ],
+        ),
+        "plan_model": (
+            "FailureInjectionPlan",
+            [
+                "injection_plan_id", "scenarios", "scenario_count", "blocker_count",
+                "warning_count", "plan_status", "injection_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "FailureInjectionSummary",
+            [
+                "summary_id", "injection_plan_id", "domain_count", "scenario_count",
+                "blocker_count", "warning_count", "plan_status",
+                "injection_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_52o_all_failure_domains_defined(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_scenarios"]} == {
+        "task_lifecycle_failure",
+        "session_continuity_failure",
+        "governance_state_failure",
+        "agent_lock_failure",
+        "runtime_contract_failure",
+        "sandbox_boundary_failure",
+        "timeout_failure",
+        "output_integrity_failure",
+        "concurrency_failure",
+        "conflict_resolution_failure",
+    }
+    assert set(data["scenario_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["plan_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+    assert set(data["summary_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+
+
+def test_52o_scenarios_are_defined_not_injected(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["scenarios"]) == 10
+    for scenario in data["scenarios"]:
+        assert scenario["failure_domain"]
+        assert scenario["failure_type"]
+        assert scenario["injected_failure"]
+        assert scenario["expected_detection"]
+        assert scenario["expected_recovery_path"]
+        assert scenario["injection_allowed"] is False
+        assert scenario["human_review_required"] is True
+
+
+def test_52o_plan_and_summary(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["sample_plan"]
+    summary = data["sample_summary"]
+    assert plan["scenario_count"] == len(data["scenarios"])
+    assert plan["blocker_count"] > 0
+    assert plan["injection_allowed"] is False
+    assert plan["human_review_required"] is True
+    assert plan["plan_status"] in {"draft", "pending_human_review", "blocked", "ready_for_review"}
+    assert summary["injection_plan_id"] == plan["injection_plan_id"]
+    assert summary["domain_count"] == 10
+    assert summary["injection_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_52o_input_sources(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ChaosTestPlan",
+        "ChaosTestSummary",
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "AgentLockRecoveryPlan",
+        "CorruptionRecoveryPlan",
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "TimeoutHardeningAssessment",
+        "OutputIntegrityAssessment",
+        "ConcurrencySafetyAssessment",
+        "ParallelAgentCoordinationAssessment",
+        "MultiAgentStateConsistencyAssessment",
+        "ConflictResolutionAssessment",
+    ]
+
+
+def test_52o_governance_boundaries(capsys) -> None:
+    main(["failure-injection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52O"
+    assert boundaries["read_only"] is True
+    assert boundaries["injection_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "inject failures", "corrupt files", "clear locks", "move tasks",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_52o_human_output(capsys) -> None:
+    main(["failure-injection"])
+    output = capsys.readouterr().out
+    for text in (
+        "Failure injection",
+        "Scenario model",
+        "Plan model",
+        "Summary model",
+        "Failure scenarios",
+        "Governance boundaries",
+        "Injection allowed:      False",
+        "Execution allowed:      False",
+        "scaffold and audit only",
+    ):
+        assert text in output

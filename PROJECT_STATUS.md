@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52N: Chaos Testing.
+Phase 52O: Failure Injection.
 
 ## Governance Coherence Note
 
@@ -3798,6 +3798,35 @@ assessment is advisory and read-only; no execution occurs; no files are
 modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3943 total tests
 passing
 
+## Phase 52O: Failure Injection
+
+Implemented `pcae failure-injection` and `--json`. Defines controlled
+failure-injection scenarios for validating PCAE detection, escalation, and
+recovery planning without injecting failures. Three models —
+FailureInjectionScenario (9 fields: scenario_id, failure_domain, failure_type,
+severity, injected_failure, expected_detection, expected_recovery_path,
+human_review_required, injection_allowed), FailureInjectionPlan (8 fields:
+injection_plan_id, scenarios, scenario_count, blocker_count, warning_count,
+plan_status, injection_allowed, human_review_required), FailureInjectionSummary
+(9 fields: summary_id, injection_plan_id, domain_count, scenario_count,
+blocker_count, warning_count, plan_status, injection_allowed,
+human_review_required); severity values: info, warning, blocker; plan statuses:
+draft, pending_human_review, blocked, ready_for_review; ten failure domains:
+task_lifecycle_failure, session_continuity_failure, governance_state_failure,
+agent_lock_failure, runtime_contract_failure, sandbox_boundary_failure,
+timeout_failure, output_integrity_failure, concurrency_failure,
+conflict_resolution_failure; scenarios are defined but not executed; no failure
+injection, no file corruption, no lock clearing, no task movement, no session
+or governance state rewrite; injection_allowed=False; execution_allowed=False;
+human_review_required=True; read_only=True; inputs: ChaosTestPlan,
+ChaosTestSummary, TaskLifecycleHardeningAssessment, SessionRecoveryPlan,
+GovernanceStateRecoveryPlan, AgentLockRecoveryPlan, CorruptionRecoveryPlan,
+RuntimeContractHardeningAssessment, SandboxHardeningAssessment,
+TimeoutHardeningAssessment, OutputIntegrityAssessment,
+ConcurrencySafetyAssessment, ParallelAgentCoordinationAssessment,
+MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
+`docs/COMMANDS.md` regenerated; 8 new tests; 4185 total tests passing.
+
 ## Phase 52N: Chaos Testing
 
 Implemented `pcae chaos-testing` and `--json`. Defines chaos testing scenarios
@@ -3828,11 +3857,11 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 52N: Chaos Testing.
+Phase 52O: Failure Injection.
 
 ## Next
 
-- TBD: Future phases (52O and beyond).
+- TBD: Future phases (52P and beyond).
 
 ## Future Explorations
 

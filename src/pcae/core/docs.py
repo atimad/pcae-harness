@@ -857,6 +857,11 @@ def render_commands_reference() -> str:
 
 - `pcae chaos-testing`
 - `pcae chaos-testing --json`
+
+## failure-injection
+
+- `pcae failure-injection`
+- `pcae failure-injection --json`
 """
 
 

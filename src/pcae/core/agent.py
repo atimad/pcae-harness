@@ -55242,3 +55242,309 @@ def build_chaos_testing() -> dict:
         "input_sources": list(_CT_INPUT_SOURCES),
         "advisory": CHAOS_TESTING_ADVISORY,
     }
+
+
+# --- Phase 52O: Failure Injection ---
+
+FAILURE_INJECTION_ADVISORY = (
+    "Failure injection is a scaffold and audit only; scenarios are defined, not executed. "
+    "No actual failure is injected, no files are corrupted, no locks are cleared, "
+    "no tasks are moved, no session or governance state is rewritten, "
+    "no runtime is invoked, no prompt is executed, no repository modification occurs. "
+    "injection_allowed=False in Phase 52O. Human review is always required."
+)
+
+_FI_FAILURE_DOMAINS: tuple[str, ...] = (
+    "task_lifecycle_failure",
+    "session_continuity_failure",
+    "governance_state_failure",
+    "agent_lock_failure",
+    "runtime_contract_failure",
+    "sandbox_boundary_failure",
+    "timeout_failure",
+    "output_integrity_failure",
+    "concurrency_failure",
+    "conflict_resolution_failure",
+)
+
+_FI_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_FI_PLAN_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "ready_for_review",
+)
+
+_FI_SCENARIO_FIELDS: tuple[dict, ...] = (
+    {"name": "scenario_id", "type": "str", "required": True},
+    {"name": "failure_domain", "type": "str", "required": True},
+    {"name": "failure_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "injected_failure", "type": "str", "required": True},
+    {"name": "expected_detection", "type": "str", "required": True},
+    {"name": "expected_recovery_path", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "injection_allowed", "type": "bool", "required": True},
+)
+
+_FI_PLAN_FIELDS: tuple[dict, ...] = (
+    {"name": "injection_plan_id", "type": "str", "required": True},
+    {"name": "scenarios", "type": "list[FailureInjectionScenario]", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "injection_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_FI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "injection_plan_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "injection_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_FI_INPUT_SOURCES: tuple[str, ...] = (
+    "ChaosTestPlan",
+    "ChaosTestSummary",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "AgentLockRecoveryPlan",
+    "CorruptionRecoveryPlan",
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "TimeoutHardeningAssessment",
+    "OutputIntegrityAssessment",
+    "ConcurrencySafetyAssessment",
+    "ParallelAgentCoordinationAssessment",
+    "MultiAgentStateConsistencyAssessment",
+    "ConflictResolutionAssessment",
+)
+
+_FI_DOMAIN_SCENARIOS: tuple[dict, ...] = (
+    {
+        "domain": "task_lifecycle_failure",
+        "failure_type": "task_state_write_failure",
+        "severity": "blocker",
+        "injected_failure": "task lifecycle state file write fails mid-transition",
+        "expected_detection": "pcae check detects incomplete or inconsistent task lifecycle state",
+        "expected_recovery_path": "abort transition, restore last known good state from provenance, require human review before retrying",
+    },
+    {
+        "domain": "session_continuity_failure",
+        "failure_type": "session_record_write_failure",
+        "severity": "blocker",
+        "injected_failure": "session continuity record write is interrupted, leaving a partial record",
+        "expected_detection": "session bootstrap detects partial or inconsistent continuity record on resume",
+        "expected_recovery_path": "discard partial record, rebuild continuity chain from provenance timeline, require human review to confirm identity",
+    },
+    {
+        "domain": "governance_state_failure",
+        "failure_type": "policy_write_failure",
+        "severity": "blocker",
+        "injected_failure": "policy file write fails, leaving governance state inconsistent",
+        "expected_detection": "pcae check detects schema violation or missing policy artifact",
+        "expected_recovery_path": "freeze all governed activity, restore last committed policy from provenance, require human review before resuming",
+    },
+    {
+        "domain": "agent_lock_failure",
+        "failure_type": "lock_write_failure",
+        "severity": "blocker",
+        "injected_failure": "agent lock file write fails during acquisition, leaving lock in an ambiguous state",
+        "expected_detection": "lock governance detects ambiguous or unresolvable lock ownership on bootstrap",
+        "expected_recovery_path": "block all writes, escalate to human review, apply lock recovery plan before any resumption",
+    },
+    {
+        "domain": "runtime_contract_failure",
+        "failure_type": "contract_file_read_failure",
+        "severity": "warning",
+        "injected_failure": "runtime contract file is unreadable or returns a parse error",
+        "expected_detection": "runtime contract hardening check detects unreadable or malformed contract artifact",
+        "expected_recovery_path": "retain execution prohibition, surface read failure to human review, re-validate contract before any execution gate",
+    },
+    {
+        "domain": "sandbox_boundary_failure",
+        "failure_type": "allowed_zone_enforcement_failure",
+        "severity": "blocker",
+        "injected_failure": "sandbox allowed-zone enforcement check fails, permitting an out-of-zone write attempt",
+        "expected_detection": "sandbox hardening boundary audit detects unenforced or bypassed zone restriction",
+        "expected_recovery_path": "reject write, emit provenance event, require human review and explicit re-authorization before any sandbox activity resumes",
+    },
+    {
+        "domain": "timeout_failure",
+        "failure_type": "checkpoint_write_timeout",
+        "severity": "warning",
+        "injected_failure": "checkpoint write times out, leaving no recoverable state marker",
+        "expected_detection": "timeout hardening detects missing checkpoint artifact after operation deadline",
+        "expected_recovery_path": "discard in-progress state, revert to last verified checkpoint, require human review before retrying the timed-out operation",
+    },
+    {
+        "domain": "output_integrity_failure",
+        "failure_type": "artifact_write_integrity_failure",
+        "severity": "blocker",
+        "injected_failure": "output artifact is written but hash recording fails, leaving integrity unverifiable",
+        "expected_detection": "output integrity verification detects missing or unverifiable hash for artifact",
+        "expected_recovery_path": "quarantine artifact, block all downstream use, require re-generation and human review before any artifact is accepted",
+    },
+    {
+        "domain": "concurrency_failure",
+        "failure_type": "lock_acquisition_race_failure",
+        "severity": "blocker",
+        "injected_failure": "two agents race to acquire the lock and both observe a successful acquisition",
+        "expected_detection": "concurrency safety check detects dual lock acquisition and conflicting ownership records",
+        "expected_recovery_path": "invalidate both acquisitions, freeze all concurrent activity, require human arbitration to designate one authoritative owner",
+    },
+    {
+        "domain": "conflict_resolution_failure",
+        "failure_type": "resolution_engine_divergence_failure",
+        "severity": "blocker",
+        "injected_failure": "conflict resolution engine receives irreconcilable signals and cannot produce a convergent resolution path",
+        "expected_detection": "conflict resolution engine classifies scenario as blocked with no automatic resolution available",
+        "expected_recovery_path": "halt all governed activity, escalate full signal set to human review, resume only after authoritative state is confirmed and all signals resolved",
+    },
+)
+
+_FI_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define failure-injection scenarios",
+        "define expected detection behavior",
+        "define expected recovery paths",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "inject failures",
+        "corrupt files",
+        "clear locks",
+        "move tasks",
+        "rewrite session or governance state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "injection_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "52O",
+}
+
+
+def build_failure_injection() -> dict:
+    """Build a read-only failure-injection scaffold with scenarios defined but not executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_scenarios = [dict(s) for s in _FI_DOMAIN_SCENARIOS]
+    blocker_count = sum(s["severity"] == "blocker" for s in domain_scenarios)
+    warning_count = sum(s["severity"] == "warning" for s in domain_scenarios)
+    info_count = sum(s["severity"] == "info" for s in domain_scenarios)
+    scenario_count = len(domain_scenarios)
+    domain_count = len(_FI_FAILURE_DOMAINS)
+
+    plan_status = "pending_human_review" if (blocker_count or warning_count) else "draft"
+
+    injection_plan_id = f"fi-plan-{ts}"
+    scenarios = [
+        {
+            "scenario_id": f"fi-{ts}-{index:02d}",
+            "failure_domain": scenario["domain"],
+            "failure_type": scenario["failure_type"],
+            "severity": scenario["severity"],
+            "injected_failure": scenario["injected_failure"],
+            "expected_detection": scenario["expected_detection"],
+            "expected_recovery_path": scenario["expected_recovery_path"],
+            "human_review_required": True,
+            "injection_allowed": False,
+        }
+        for index, scenario in enumerate(domain_scenarios, start=1)
+    ]
+
+    sample_plan = {
+        "injection_plan_id": injection_plan_id,
+        "scenarios": scenarios,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "injection_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"fi-sum-{ts}",
+        "injection_plan_id": injection_plan_id,
+        "domain_count": domain_count,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "injection_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "failure_injection_overview": {
+            "overview_id": f"52o-{ts}",
+            "generated_at": generated_at,
+            "phase": "52O",
+            "title": "Failure Injection",
+            "domain_count": domain_count,
+            "scenario_count": scenario_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "plan_status": plan_status,
+            "injection_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines controlled failure-injection scenarios for validating PCAE "
+                "detection, escalation, and recovery planning. "
+                "Scenarios are defined but not executed. No failure is injected. "
+                f"plan_status={plan_status}. injection_allowed=False."
+            ),
+        },
+        "scenario_model": {
+            "model_name": "FailureInjectionScenario",
+            "field_count": len(_FI_SCENARIO_FIELDS),
+            "required_field_count": len(_FI_SCENARIO_FIELDS),
+            "severity_values": list(_FI_SEVERITY_VALUES),
+            "injection_allowed_always_false_in_52o": True,
+            "human_review_required_always_true_in_52o": True,
+            "fields": [dict(field) for field in _FI_SCENARIO_FIELDS],
+        },
+        "plan_model": {
+            "model_name": "FailureInjectionPlan",
+            "field_count": len(_FI_PLAN_FIELDS),
+            "required_field_count": len(_FI_PLAN_FIELDS),
+            "supported_plan_statuses": list(_FI_PLAN_STATUSES),
+            "injection_allowed_always_false_in_52o": True,
+            "human_review_required_always_true_in_52o": True,
+            "fields": [dict(field) for field in _FI_PLAN_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "FailureInjectionSummary",
+            "field_count": len(_FI_SUMMARY_FIELDS),
+            "required_field_count": len(_FI_SUMMARY_FIELDS),
+            "supported_plan_statuses": list(_FI_PLAN_STATUSES),
+            "injection_allowed_always_false_in_52o": True,
+            "human_review_required_always_true_in_52o": True,
+            "fields": [dict(field) for field in _FI_SUMMARY_FIELDS],
+        },
+        "domain_scenarios": domain_scenarios,
+        "scenarios": scenarios,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_FI_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_FI_INPUT_SOURCES),
+        "advisory": FAILURE_INJECTION_ADVISORY,
+    }

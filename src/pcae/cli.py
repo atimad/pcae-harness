@@ -148,6 +148,7 @@ from pcae.commands.agent import (
     run_multi_agent_state_consistency,
     run_conflict_resolution_engine,
     run_chaos_testing,
+    run_failure_injection,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4200,6 +4201,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     chaos_testing_parser.set_defaults(handler=run_chaos_testing)
+
+    failure_injection_parser = subparsers.add_parser(
+        "failure-injection",
+        help="Define controlled failure-injection scenarios for PCAE detection and recovery validation (Phase 52O).",
+    )
+    failure_injection_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    failure_injection_parser.set_defaults(handler=run_failure_injection)
 
     return parser
 
