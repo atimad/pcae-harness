@@ -124,6 +124,7 @@ from pcae.commands.agent import (
     run_write_governance_audit,
     run_write_recommendation,
     run_execution_request,
+    run_execution_review,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3900,6 +3901,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_request_parser.set_defaults(handler=run_execution_request)
+
+    execution_review_parser = subparsers.add_parser(
+        "execution-review",
+        help="Define the governed execution review workflow for assessing execution requests against policy (Phase 51B).",
+    )
+    execution_review_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_review_parser.set_defaults(handler=run_execution_review)
 
     return parser
 

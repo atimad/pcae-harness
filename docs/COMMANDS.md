@@ -716,3 +716,8 @@
 
 - `pcae execution-request`
 - `pcae execution-request --json`
+
+## execution-review
+
+- `pcae execution-review`
+- `pcae execution-review --json`

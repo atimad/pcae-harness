@@ -44039,3 +44039,470 @@ def build_execution_request() -> dict:
         "input_sources": list(_ERA_INPUT_SOURCES),
         "advisory": EXECUTION_REQUEST_ADVISORY,
     }
+
+
+# Phase 51B — Execution Review Workflow
+# ---------------------------------------------------------------------------
+
+EXECUTION_REVIEW_ADVISORY = (
+    "Execution review is informational; review models may be defined and "
+    "review outcomes classified, but no execution occurs and no authorization "
+    "is granted. No files are modified, no runtimes are invoked, and no prompts "
+    "are executed. review_allowed=False and execution_allowed=False in Phase 51B."
+)
+
+_ERW_REVIEW_DOMAINS: tuple[str, ...] = (
+    "intent_review",
+    "scope_review",
+    "target_review",
+    "runtime_review",
+    "agent_review",
+    "constraint_review",
+    "risk_review",
+    "justification_review",
+)
+
+_ERW_REVIEW_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "reviewed",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_ERW_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution review candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this review candidate is associated with.",
+    },
+    {
+        "name": "execution_intent",
+        "type": "str",
+        "required": True,
+        "description": "Declared intent of the execution carried forward from the request.",
+    },
+    {
+        "name": "execution_scope",
+        "type": "str",
+        "required": True,
+        "description": "Scope of files, resources, or systems carried forward from the request.",
+    },
+    {
+        "name": "execution_target",
+        "type": "str",
+        "required": True,
+        "description": "The specific target carried forward from the execution request.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime nominated for review.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent nominated for review.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51B.",
+    },
+    {
+        "name": "review_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51B.",
+    },
+)
+
+_ERW_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution review record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this review record is associated with.",
+    },
+    {
+        "name": "reviewed_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "The set of review domains that have been assessed.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: pending_human_review, reviewed, changes_requested, "
+            "escalated, or blocked."
+        ),
+    },
+    {
+        "name": "accepted_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Findings from domain review that have been accepted.",
+    },
+    {
+        "name": "rejected_findings",
+        "type": "list[str]",
+        "required": True,
+        "description": "Findings from domain review that have been rejected.",
+    },
+    {
+        "name": "requested_changes",
+        "type": "list[str]",
+        "required": True,
+        "description": "Changes requested before execution can be reconsidered.",
+    },
+    {
+        "name": "escalations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Escalation paths identified during review.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51B.",
+    },
+)
+
+_ERW_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution review summary.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution review record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of review domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of review domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of review domains with non-blocking warnings.",
+    },
+    {
+        "name": "review_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: pending_human_review, reviewed, changes_requested, "
+            "escalated, or blocked."
+        ),
+    },
+    {
+        "name": "review_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51B.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51B.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51B.",
+    },
+)
+
+_ERW_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define execution review models",
+        "classify review outcomes",
+        "recommend requested changes",
+        "recommend escalation paths",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "review_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51B",
+}
+
+_ERW_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestCandidate",
+    "ExecutionRequestRecord",
+    "ExecutionRequestSummary",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_ERW_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "intent_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution intent has not been reviewed. "
+            "The declared intent of the execution must be assessed for clarity "
+            "and alignment with governance policy before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "scope_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution scope has not been reviewed. "
+            "The files, resources, or systems affected must be examined for "
+            "boundary violations before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "target_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution target has not been reviewed. "
+            "The specific target must be confirmed as governed and within policy "
+            "before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "runtime_review",
+        "severity": "blocker",
+        "finding": (
+            "Selected runtime has not been reviewed. "
+            "The nominated runtime must be verified as governed and trusted "
+            "before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "agent_review",
+        "severity": "blocker",
+        "finding": (
+            "Selected agent has not been reviewed. "
+            "The nominated agent must be confirmed as registered and authorized "
+            "for this execution type before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "constraint_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution constraints have not been reviewed. "
+            "Declared constraints must be assessed for completeness and enforceability "
+            "before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "risk_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution risk assessment has not been reviewed. "
+            "Identified risks and mitigations must be evaluated for adequacy "
+            "before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "justification_review",
+        "severity": "blocker",
+        "finding": (
+            "Execution justification has not been reviewed. "
+            "The human-authored justification must be examined for sufficiency "
+            "before review can proceed."
+        ),
+        "review_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_review() -> dict:
+    """Define the governed execution review workflow artifact. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    review_id_ref = f"erw-{ts}"
+
+    candidate_fields = [dict(f) for f in _ERW_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _ERW_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _ERW_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _ERW_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        review_status = "pending_human_review"
+    elif warning_count > 0:
+        review_status = "changes_requested"
+    else:
+        review_status = "blocked"
+
+    record_id_ref = f"erwr-{ts}"
+
+    sample_candidate = {
+        "review_id": review_id_ref,
+        "request_id": f"era-{ts}",
+        "execution_intent": "pending",
+        "execution_scope": "pending",
+        "execution_target": "pending",
+        "selected_runtime": "pending",
+        "selected_agent": "pending",
+        "human_review_required": True,
+        "review_allowed": False,
+    }
+
+    sample_record = {
+        "review_id": record_id_ref,
+        "request_id": f"era-{ts}",
+        "reviewed_domains": [],
+        "review_status": review_status,
+        "accepted_findings": [],
+        "rejected_findings": [],
+        "requested_changes": [],
+        "escalations": [],
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"erwsum-{ts}",
+        "review_id": record_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionReviewCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_review_statuses": list(_ERW_REVIEW_STATUSES),
+        "review_allowed_always_false_in_51b": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "ExecutionReviewRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_review_statuses": list(_ERW_REVIEW_STATUSES),
+        "execution_allowed_always_false_in_51b": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionReviewSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_review_statuses": list(_ERW_REVIEW_STATUSES),
+        "review_allowed_always_false_in_51b": True,
+        "execution_allowed_always_false_in_51b": True,
+        "fields": summary_fields,
+    }
+
+    execution_review_overview = {
+        "overview_id": f"51b-{ts}",
+        "generated_at": generated_at,
+        "phase": "51B",
+        "title": "Execution Review Workflow",
+        "summary": (
+            "Defines the governed execution review workflow for assessing execution "
+            "requests against policy. Eight review domains are evaluated: "
+            "intent_review, scope_review, target_review, runtime_review, "
+            "agent_review, constraint_review, risk_review, and justification_review. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"review_status={review_status}. "
+            "Execution review definition is advisory and read-only. "
+            "No execution occurs. review_allowed=False. execution_allowed=False."
+        ),
+        "review_domain_count": len(_ERW_REVIEW_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_review_overview": execution_review_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ERW_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ERW_INPUT_SOURCES),
+        "advisory": EXECUTION_REVIEW_ADVISORY,
+    }

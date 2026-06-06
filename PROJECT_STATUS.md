@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 51A: Execution Request Model.
+Phase 51B: Execution Review Workflow.
 
 ## Governance Coherence Note
 
@@ -3603,13 +3603,36 @@ GovernanceRecoveryPlan; execution request definition is advisory and
 read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
 regenerated; 15 new tests; 3853 total tests passing
 
+## Phase 51B: Execution Review Workflow
+
+Implemented `pcae execution-review` and `--json`. Defines the governed review
+workflow for execution requests. Three models — ExecutionReviewCandidate (9
+fields: review_id, request_id, execution_intent, execution_scope,
+execution_target, selected_runtime, selected_agent, human_review_required,
+review_allowed), ExecutionReviewRecord (10 fields: review_id, request_id,
+reviewed_domains, review_status, accepted_findings, rejected_findings,
+requested_changes, escalations, execution_allowed, human_review_required),
+ExecutionReviewSummary (9 fields: summary_id, review_id, domain_count,
+blocker_count, warning_count, review_status, review_allowed, execution_allowed,
+human_review_required); five review statuses: pending_human_review, reviewed,
+changes_requested, escalated, blocked; eight review domains: intent_review,
+scope_review, target_review, runtime_review, agent_review, constraint_review,
+risk_review, justification_review; eight blockers;
+review_status=pending_human_review; review_allowed=False;
+execution_allowed=False; human_review_required=True; inputs:
+ExecutionRequestCandidate, ExecutionRequestRecord, ExecutionRequestSummary,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment,
+GovernanceRecoveryPlan; execution review definition is advisory and
+read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
+regenerated; 15 new tests; 3868 total tests passing
+
 ## Current Phase
 
 Phase 51A: Execution Request Model.
 
 ## Next
 
-- TBD: Future phases (51B and beyond).
+- TBD: Future phases (51C and beyond).
 
 ## Future Explorations
 

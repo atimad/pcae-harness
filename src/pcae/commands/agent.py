@@ -223,6 +223,8 @@ from pcae.core.agent import (
     WRITE_RECOMMENDATION_ADVISORY,
     build_execution_request,
     EXECUTION_REQUEST_ADVISORY,
+    build_execution_review,
+    EXECUTION_REVIEW_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8764,6 +8766,85 @@ def run_write_recommendation(args: argparse.Namespace) -> int:
         print(f"  Authorization allowed:  {gb['authorization_allowed']}")
         print(f"  Execution allowed:      {gb['execution_allowed']}")
         print(f"  Human review req'd:     {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_review(args: argparse.Namespace) -> int:
+    data = build_execution_review()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["execution_review_overview"]
+        print("Execution review workflow")
+        print(f"Review: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Review domains:         {ov['review_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Review status:          {ov['review_status']}")
+        print(f"Review allowed:         {'yes' if ov['review_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_review_statuses'])}")
+        print(f"  review_allowed always False in 51B: {cm['review_allowed_always_false_in_51b']}")
+        print()
+        rm = data["record_model"]
+        print(f"Record model: {rm['model_name']} ({rm['field_count']} fields)")
+        print(f"  execution_allowed always False in 51B: {rm['execution_allowed_always_false_in_51b']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  review_allowed always False in 51B:    {sm['review_allowed_always_false_in_51b']}")
+        print(f"  execution_allowed always False in 51B: {sm['execution_allowed_always_false_in_51b']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  review_allowed:        {sc['review_allowed']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  review_id:             {sc['review_id']}")
+        print()
+        sr = data["sample_record"]
+        print("Sample record:")
+        print(f"  review_status:         {sr['review_status']}")
+        print(f"  reviewed_domains:      {sr['reviewed_domains']}")
+        print(f"  accepted_findings:     {sr['accepted_findings']}")
+        print(f"  rejected_findings:     {sr['rejected_findings']}")
+        print(f"  requested_changes:     {sr['requested_changes']}")
+        print(f"  escalations:           {sr['escalations']}")
+        print(f"  execution_allowed:     {sr['execution_allowed']}")
+        print(f"  human_review_required: {sr['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  review_status:         {ss['review_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  review_allowed:        {ss['review_allowed']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Review allowed:        {gb['review_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0
