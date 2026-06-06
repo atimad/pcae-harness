@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52G: Sandbox Hardening.
+Phase 52H: Timeout Hardening.
 
 ## Governance Coherence Note
 

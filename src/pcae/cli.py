@@ -141,6 +141,7 @@ from pcae.commands.agent import (
     run_corruption_recovery,
     run_runtime_contract_hardening,
     run_sandbox_hardening,
+    run_timeout_hardening,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4108,6 +4109,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     sandbox_hardening_parser.set_defaults(handler=run_sandbox_hardening)
+
+    timeout_hardening_parser = subparsers.add_parser(
+        "timeout-hardening",
+        help="Define and validate timeout governance requirements for bounded, recoverable runtime execution (Phase 52H).",
+    )
+    timeout_hardening_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    timeout_hardening_parser.set_defaults(handler=run_timeout_hardening)
 
     return parser
 

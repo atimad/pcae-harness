@@ -822,6 +822,11 @@ def render_commands_reference() -> str:
 
 - `pcae sandbox-hardening`
 - `pcae sandbox-hardening --json`
+
+## timeout-hardening
+
+- `pcae timeout-hardening`
+- `pcae timeout-hardening --json`
 """
 
 

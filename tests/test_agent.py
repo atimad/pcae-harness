@@ -39629,3 +39629,242 @@ def test_52g_human_output_shows_all_sections(capsys) -> None:
     assert "Governance boundaries" in output
     assert "execution_allowed=False" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52H: Timeout Hardening ---
+
+
+def test_52h_json_structure(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "timeout_hardening_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "sample_signal",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52h_overview_and_execution_constraints(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["timeout_hardening_overview"]
+    assert overview["phase"] == "52H"
+    assert overview["hardening_domain_count"] == 8
+    assert overview["domain_count"] == 8
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+    assert overview["hardening_status"] in {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_52h_models(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    signal_model = data["signal_model"]
+    assert signal_model["model_name"] == "TimeoutHardeningSignal"
+    assert signal_model["field_count"] == 8
+    assert signal_model["field_count"] == signal_model["required_field_count"]
+    assert set(signal_model["severity_values"]) == {"info", "warning", "blocker"}
+    assert signal_model["human_review_required_always_true_in_52h"] is True
+
+    assessment_model = data["assessment_model"]
+    assert assessment_model["model_name"] == "TimeoutHardeningAssessment"
+    assert assessment_model["field_count"] == 8
+    assert assessment_model["field_count"] == assessment_model["required_field_count"]
+    assert assessment_model["execution_allowed_always_false_in_52h"] is True
+    assert assessment_model["human_review_required_always_true_in_52h"] is True
+
+    summary_model = data["summary_model"]
+    assert summary_model["model_name"] == "TimeoutHardeningSummary"
+    assert summary_model["field_count"] == 10
+    assert summary_model["field_count"] == summary_model["required_field_count"]
+    assert summary_model["execution_allowed_always_false_in_52h"] is True
+    assert summary_model["human_review_required_always_true_in_52h"] is True
+
+    expected_statuses = {
+        "hardened", "hardened_with_warnings", "hardening_required", "blocked",
+    }
+    assert set(assessment_model["supported_hardening_statuses"]) == expected_statuses
+    assert set(summary_model["supported_hardening_statuses"]) == expected_statuses
+
+
+def test_52h_model_field_names(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert [field["name"] for field in data["signal_model"]["fields"]] == [
+        "signal_id",
+        "timeout_id",
+        "hardening_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["assessment_model"]["fields"]] == [
+        "assessment_id",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "hardening_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["summary_model"]["fields"]] == [
+        "summary_id",
+        "assessment_id",
+        "domain_count",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "hardening_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+
+
+def test_52h_all_hardening_domains_defined(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {signal["domain"] for signal in data["domain_signals"]}
+    assert domains == {
+        "execution_timeout_validation",
+        "step_timeout_validation",
+        "agent_timeout_validation",
+        "runtime_timeout_validation",
+        "timeout_escalation_validation",
+        "timeout_recovery_validation",
+        "timeout_governance_alignment",
+        "timeout_boundary_validation",
+    }
+
+
+def test_52h_required_timeout_validations_are_blockers(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signals = {signal["domain"]: signal for signal in data["domain_signals"]}
+    for domain in (
+        "execution_timeout_validation",
+        "step_timeout_validation",
+        "timeout_recovery_validation",
+    ):
+        assert signals[domain]["severity"] == "blocker"
+        assert signals[domain]["human_review_required"] is True
+        assert signals[domain]["detected_state"]
+        assert signals[domain]["expected_state"]
+
+
+def test_52h_signal_and_summary_instances(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signal = data["sample_signal"]
+    assert set(signal) == {
+        "signal_id",
+        "timeout_id",
+        "hardening_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    }
+    assert signal["human_review_required"] is True
+
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["domain_signals"])
+    assert summary["signal_count"] == assessment["signal_count"]
+    assert summary["blocker_count"] == assessment["blocker_count"]
+    assert summary["warning_count"] == assessment["warning_count"]
+    assert summary["domain_count"] == 8
+    assert summary["assessment_id"] == assessment["assessment_id"]
+
+
+def test_52h_remediation_is_advisory(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_assessment"]["remediation_recommended"] is True
+    assert data["sample_summary"]["remediation_recommended"] is True
+    boundaries = data["governance_boundaries"]
+    assert boundaries["remediation_automatic"] is False
+    assert boundaries["read_only"] is True
+    assert "no automatic remediation" in data["advisory"].lower()
+    assert "assessed only" in data["advisory"].lower()
+
+
+def test_52h_governance_boundaries(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52H"
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+
+    allowed = " ".join(boundaries["may"]).lower()
+    for value in (
+        "inspect timeout requirements",
+        "detect missing timeout controls",
+        "detect runaway execution risk",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ):
+        assert value in allowed
+
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for value in (
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify timeout definitions",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert value in forbidden
+
+
+def test_52h_input_sources(capsys) -> None:
+    main(["timeout-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "RuntimeSafetyInvariantAssessment",
+        "GovernanceInvariantAssessment",
+        "ExecutionPlanSummary",
+        "ExecutionReadinessSummary",
+        "GovernanceRecoveryPlan",
+    ]
+
+
+def test_52h_human_output_shows_all_sections(capsys) -> None:
+    main(["timeout-hardening"])
+    output = capsys.readouterr().out
+    assert "Timeout hardening" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "execution_allowed=False" in output
+    assert "informational" in output.lower()

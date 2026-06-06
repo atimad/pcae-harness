@@ -52163,3 +52163,485 @@ def build_sandbox_hardening() -> dict:
         "input_sources": list(_SBHD_INPUT_SOURCES),
         "advisory": SANDBOX_HARDENING_ADVISORY,
     }
+
+
+# --- Phase 52H: Timeout Hardening ---
+
+TIMEOUT_HARDENING_ADVISORY = (
+    "Timeout hardening is informational; timeout governance requirements may be "
+    "inspected and remediation recommended, but no automatic remediation occurs "
+    "and no timeout definitions or repository files are modified. No runtimes are "
+    "invoked, no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52H. Timeout controls are assessed only, "
+    "and remediation requires human review."
+)
+
+_TOHD_HARDENING_DOMAINS: tuple[str, ...] = (
+    "execution_timeout_validation",
+    "step_timeout_validation",
+    "agent_timeout_validation",
+    "runtime_timeout_validation",
+    "timeout_escalation_validation",
+    "timeout_recovery_validation",
+    "timeout_governance_alignment",
+    "timeout_boundary_validation",
+)
+
+_TOHD_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_TOHD_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_TOHD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this timeout hardening signal.",
+    },
+    {
+        "name": "timeout_id",
+        "type": "str",
+        "required": True,
+        "description": "The timeout control associated with this signal.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The timeout hardening domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of timeout governance signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The timeout control state observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The bounded execution state required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52H.",
+    },
+)
+
+_TOHD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this timeout hardening assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of timeout hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52H.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52H.",
+    },
+)
+
+_TOHD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this timeout hardening summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of timeout hardening domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of timeout hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52H.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52H.",
+    },
+)
+
+_TOHD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect timeout requirements",
+        "detect missing timeout controls",
+        "detect runaway execution risk",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify timeout definitions",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52H",
+}
+
+_TOHD_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "GovernanceRecoveryPlan",
+)
+
+_TOHD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "execution_timeout_validation",
+        "signal_type": "execution_deadline_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — end-to-end execution timeout not validated",
+        "expected_state": "every execution has a finite governed deadline",
+        "finding": (
+            "End-to-end execution timeout controls have not been validated. "
+            "An execution without a finite deadline can consume resources "
+            "indefinitely and cannot be considered bounded."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "step_timeout_validation",
+        "signal_type": "step_deadlines_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — per-step timeout coverage not validated",
+        "expected_state": "every execution step has a finite timeout within the total deadline",
+        "finding": (
+            "Per-step timeout coverage has not been validated. A single blocked "
+            "step can prevent the overall execution deadline from being enforced "
+            "predictably unless each step is independently bounded."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "agent_timeout_validation",
+        "signal_type": "agent_deadline_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — agent response and cancellation deadlines not validated",
+        "expected_state": "agent operations have explicit response and cancellation deadlines",
+        "finding": (
+            "Agent timeout controls have not been validated. Agent response, "
+            "handoff, and cancellation waits require finite limits to prevent "
+            "orchestration stalls."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "runtime_timeout_validation",
+        "signal_type": "runtime_timeout_contract_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — runtime timeout enforcement contract not validated",
+        "expected_state": "runtime adapter enforces and reports the declared timeout",
+        "finding": (
+            "Runtime timeout enforcement has not been validated. The adapter must "
+            "apply the declared deadline, terminate overdue work, and report the "
+            "timeout outcome deterministically."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "timeout_escalation_validation",
+        "signal_type": "timeout_escalation_path_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — repeated timeout escalation policy not validated",
+        "expected_state": "repeated or compound timeouts trigger governed human escalation",
+        "finding": (
+            "Timeout escalation policy has not been validated. Repeated, nested, "
+            "or compound timeouts require a deterministic human-review path rather "
+            "than automatic retries without limit."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "timeout_recovery_validation",
+        "signal_type": "timeout_recovery_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — cleanup and recovery after timeout not validated",
+        "expected_state": "timed-out work is terminated, cleaned up, and recoverable",
+        "finding": (
+            "Timeout recovery has not been validated. Timed-out processes, locks, "
+            "partial outputs, and session state must be handled without automatic "
+            "execution continuation or silent state corruption."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "timeout_governance_alignment",
+        "signal_type": "timeout_policy_alignment_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — timeout controls not mapped to governance invariants",
+        "expected_state": "timeout controls align with execution, recovery, and audit governance",
+        "finding": (
+            "Timeout controls have not been aligned with governance invariants. "
+            "Deadlines, cancellation, recovery, evidence, and escalation must remain "
+            "coherent across the execution chain."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "timeout_boundary_validation",
+        "signal_type": "timeout_bounds_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — minimum, maximum, and nesting bounds not validated",
+        "expected_state": "timeout values are finite, positive, ordered, and policy bounded",
+        "finding": (
+            "Timeout value boundaries have not been validated. Zero, negative, "
+            "unbounded, contradictory, or improperly nested timeout values must be "
+            "rejected before execution can be authorized."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_timeout_hardening() -> dict:
+    """Define timeout governance hardening requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _TOHD_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _TOHD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _TOHD_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _TOHD_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_TOHD_HARDENING_DOMAINS)
+
+    if blocker_count:
+        hardening_status = "hardening_required"
+        remediation_recommended = True
+    elif warning_count:
+        hardening_status = "hardened_with_warnings"
+        remediation_recommended = True
+    else:
+        hardening_status = "hardened"
+        remediation_recommended = False
+
+    assessment_id = f"tohda-{ts}"
+    sample_signal = {
+        "signal_id": f"tohds-{ts}",
+        "timeout_id": f"timeout-{ts}",
+        "hardening_domain": "execution_timeout_validation",
+        "signal_type": "execution_deadline_not_validated",
+        "severity": "blocker",
+        "detected_state": "end-to-end execution timeout has not been validated",
+        "expected_state": "every execution has a finite governed deadline",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"tohdsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "TimeoutHardeningSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_TOHD_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52h": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "TimeoutHardeningAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_hardening_statuses": list(_TOHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52h": True,
+        "human_review_required_always_true_in_52h": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "TimeoutHardeningSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_hardening_statuses": list(_TOHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52h": True,
+        "human_review_required_always_true_in_52h": True,
+        "fields": summary_fields,
+    }
+
+    timeout_hardening_overview = {
+        "overview_id": f"52h-{ts}",
+        "generated_at": generated_at,
+        "phase": "52H",
+        "title": "Timeout Hardening",
+        "summary": (
+            "Defines and validates timeout governance requirements so future runtime "
+            "execution remains bounded, recoverable, and resistant to runaway "
+            "execution. Execution, step, agent, runtime, escalation, recovery, "
+            "governance alignment, and timeout boundary domains are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. hardening_status={hardening_status}. "
+            "Timeout controls are assessed only; no runtime invocation, prompt "
+            "execution, execution authorization, remediation, or repository "
+            "modification occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "hardening_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "timeout_hardening_overview": timeout_hardening_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_TOHD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_TOHD_INPUT_SOURCES),
+        "advisory": TIMEOUT_HARDENING_ADVISORY,
+    }
