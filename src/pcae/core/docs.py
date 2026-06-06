@@ -752,6 +752,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-lifecycle`
 - `pcae execution-lifecycle --json`
+
+## execution-plan
+
+- `pcae execution-plan`
+- `pcae execution-plan --json`
 """
 
 

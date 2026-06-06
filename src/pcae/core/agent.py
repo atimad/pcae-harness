@@ -45435,3 +45435,458 @@ def build_execution_lifecycle() -> dict:
         "input_sources": list(_ELR_INPUT_SOURCES),
         "advisory": EXECUTION_LIFECYCLE_ADVISORY,
     }
+
+
+EXECUTION_PLAN_ADVISORY = (
+    "Execution plan is informational; execution plan models may be defined and "
+    "planning completeness assessed, but no execution occurs and no authorization "
+    "is granted. No files are modified, no runtimes are invoked, and no prompts "
+    "are executed. plan_allowed=False and execution_allowed=False in Phase 51E."
+)
+
+_EPL_PLAN_DOMAINS: tuple[str, ...] = (
+    "runtime_selection",
+    "agent_selection",
+    "execution_steps",
+    "execution_checkpoints",
+    "expected_outputs",
+    "rollback_points",
+    "execution_constraints",
+    "execution_audit_requirements",
+)
+
+_EPL_PLAN_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "ready_for_review",
+)
+
+_EPL_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution plan candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this plan candidate is associated with.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for this execution plan.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for this execution plan.",
+    },
+    {
+        "name": "execution_steps",
+        "type": "list[str]",
+        "required": True,
+        "description": "Ordered list of execution steps described in this plan.",
+    },
+    {
+        "name": "checkpoint_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of execution checkpoints declared in this plan.",
+    },
+    {
+        "name": "rollback_point_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback points declared in this plan.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51E.",
+    },
+    {
+        "name": "plan_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51E.",
+    },
+)
+
+_EPL_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution plan record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this plan record is associated with.",
+    },
+    {
+        "name": "step_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of execution steps in this plan.",
+    },
+    {
+        "name": "checkpoint_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of execution checkpoints in this plan.",
+    },
+    {
+        "name": "expected_output_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of expected outputs declared in this plan.",
+    },
+    {
+        "name": "rollback_point_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback points declared in this plan.",
+    },
+    {
+        "name": "constraint_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of execution constraints declared in this plan.",
+    },
+    {
+        "name": "audit_requirement_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of audit requirements declared in this plan.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51E.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51E.",
+    },
+)
+
+_EPL_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution plan summary.",
+    },
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution plan record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of plan domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of plan domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of plan domains with non-blocking warnings.",
+    },
+    {
+        "name": "plan_status",
+        "type": "str",
+        "required": True,
+        "description": "Status: draft, pending_human_review, blocked, or ready_for_review.",
+    },
+    {
+        "name": "plan_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51E.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51E.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51E.",
+    },
+)
+
+_EPL_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define execution plan models",
+        "assess execution planning completeness",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "plan_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51E",
+}
+
+_EPL_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestRecord",
+    "ExecutionReviewRecord",
+    "ExecutionDecisionRecord",
+    "ExecutionLifecycleRecord",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_EPL_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_selection",
+        "severity": "blocker",
+        "finding": (
+            "No runtime has been selected for this execution plan. "
+            "A human reviewer must confirm the runtime before the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "agent_selection",
+        "severity": "blocker",
+        "finding": (
+            "No agent has been selected for this execution plan. "
+            "A human reviewer must confirm the agent before the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_steps",
+        "severity": "blocker",
+        "finding": (
+            "No execution steps have been declared. "
+            "Execution steps must be defined and reviewed by a human before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_checkpoints",
+        "severity": "blocker",
+        "finding": (
+            "No execution checkpoints have been declared. "
+            "At least one checkpoint must be defined by a human reviewer before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "expected_outputs",
+        "severity": "blocker",
+        "finding": (
+            "No expected outputs have been declared. "
+            "Expected outputs must be defined and reviewed by a human before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_points",
+        "severity": "blocker",
+        "finding": (
+            "No rollback points have been declared. "
+            "Rollback points must be defined by a human reviewer before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_constraints",
+        "severity": "blocker",
+        "finding": (
+            "No execution constraints have been declared. "
+            "Execution constraints must be defined by a human reviewer before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "execution_audit_requirements",
+        "severity": "blocker",
+        "finding": (
+            "No execution audit requirements have been declared. "
+            "Audit requirements must be defined by a human reviewer before "
+            "the plan can proceed."
+        ),
+        "plan_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_plan() -> dict:
+    """Define the governed execution plan artifact. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    plan_id_ref = f"epl-{ts}"
+
+    candidate_fields = [dict(f) for f in _EPL_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _EPL_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _EPL_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EPL_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        plan_status = "pending_human_review"
+    elif warning_count > 0:
+        plan_status = "draft"
+    else:
+        plan_status = "blocked"
+
+    record_id_ref = f"eplr-{ts}"
+
+    sample_candidate = {
+        "plan_id": plan_id_ref,
+        "request_id": f"era-{ts}",
+        "selected_runtime": "pending_human_review",
+        "selected_agent": "pending_human_review",
+        "execution_steps": [],
+        "checkpoint_count": 0,
+        "rollback_point_count": 0,
+        "human_review_required": True,
+        "plan_allowed": False,
+    }
+
+    sample_record = {
+        "plan_id": record_id_ref,
+        "request_id": f"era-{ts}",
+        "step_count": 0,
+        "checkpoint_count": 0,
+        "expected_output_count": 0,
+        "rollback_point_count": 0,
+        "constraint_count": 0,
+        "audit_requirement_count": 0,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"eplsum-{ts}",
+        "plan_id": record_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "plan_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionPlanCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_plan_statuses": list(_EPL_PLAN_STATUSES),
+        "plan_allowed_always_false_in_51e": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "ExecutionPlanRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "execution_allowed_always_false_in_51e": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionPlanSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_plan_statuses": list(_EPL_PLAN_STATUSES),
+        "plan_allowed_always_false_in_51e": True,
+        "execution_allowed_always_false_in_51e": True,
+        "fields": summary_fields,
+    }
+
+    execution_plan_overview = {
+        "overview_id": f"51e-{ts}",
+        "generated_at": generated_at,
+        "phase": "51E",
+        "title": "Execution Plan",
+        "summary": (
+            "Defines the governed execution plan artifact that describes how a future "
+            "execution would occur. Eight plan domains are assessed: "
+            "runtime_selection, agent_selection, execution_steps, "
+            "execution_checkpoints, expected_outputs, rollback_points, "
+            "execution_constraints, and execution_audit_requirements. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"plan_status={plan_status}. "
+            "Execution plan definition is advisory and read-only. "
+            "No execution occurs. plan_allowed=False. execution_allowed=False."
+        ),
+        "plan_domain_count": len(_EPL_PLAN_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "plan_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_plan_overview": execution_plan_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EPL_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EPL_INPUT_SOURCES),
+        "advisory": EXECUTION_PLAN_ADVISORY,
+    }

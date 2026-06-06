@@ -3675,9 +3675,33 @@ lifecycle definition is advisory and read-only; no execution occurs; no files
 are modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3898 total tests
 passing
 
+## Phase 51E: Execution Plan
+
+Implemented `pcae execution-plan` and `--json`. Defines the governed execution
+plan artifact that describes how a future execution would occur. Three models —
+ExecutionPlanCandidate (9 fields: plan_id, request_id, selected_runtime,
+selected_agent, execution_steps, checkpoint_count, rollback_point_count,
+human_review_required, plan_allowed), ExecutionPlanRecord (10 fields: plan_id,
+request_id, step_count, checkpoint_count, expected_output_count,
+rollback_point_count, constraint_count, audit_requirement_count,
+execution_allowed, human_review_required), ExecutionPlanSummary (9 fields:
+summary_id, plan_id, domain_count, blocker_count, warning_count, plan_status,
+plan_allowed, execution_allowed, human_review_required); four plan statuses:
+draft, pending_human_review, blocked, ready_for_review; eight plan domains:
+runtime_selection, agent_selection, execution_steps, execution_checkpoints,
+expected_outputs, rollback_points, execution_constraints,
+execution_audit_requirements; eight blockers;
+plan_status=pending_human_review; plan_allowed=False; execution_allowed=False;
+human_review_required=True; inputs: ExecutionRequestRecord,
+ExecutionReviewRecord, ExecutionDecisionRecord, ExecutionLifecycleRecord,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment,
+GovernanceRecoveryPlan; execution plan definition is advisory and read-only;
+no execution occurs; no files are modified; `docs/COMMANDS.md` regenerated;
+15 new tests; 3913 total tests passing
+
 ## Current Phase
 
-Phase 51D: Execution Lifecycle.
+Phase 51E: Execution Plan.
 
 ## Next
 
