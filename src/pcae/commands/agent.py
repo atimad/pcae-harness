@@ -253,6 +253,8 @@ from pcae.core.agent import (
     MULTI_AGENT_STATE_CONSISTENCY_ADVISORY,
     build_conflict_resolution_engine,
     CONFLICT_RESOLUTION_ENGINE_ADVISORY,
+    build_chaos_testing,
+    CHAOS_TESTING_ADVISORY,
     build_governance_state_recovery,
     GOVERNANCE_STATE_RECOVERY_ADVISORY,
     build_session_recovery,
@@ -10999,4 +11001,51 @@ def run_conflict_resolution_engine(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:     {boundaries['execution_allowed']}")
     print()
     print(CONFLICT_RESOLUTION_ENGINE_ADVISORY)
+    return 0
+
+
+def run_chaos_testing(args: argparse.Namespace) -> int:
+    data = build_chaos_testing()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["chaos_testing_overview"]
+    print("Chaos testing")
+    print(f"Plan: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Chaos domains:          {overview['domain_count']}")
+    print(f"Scenarios defined:      {overview['scenario_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Plan status:            {overview['plan_status']}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("scenario_model", "Scenario model"),
+        ("plan_model", "Plan model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Chaos scenarios:")
+    for scenario in data["scenarios"]:
+        print(
+            f"  [{scenario['severity'].upper()}] "
+            f"{scenario['chaos_domain']} — {scenario['scenario_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                      {', '.join(boundaries['may'])}")
+    print(f"  May not:                  {', '.join(boundaries['may_not'])}")
+    print(f"  Failure injection:        {boundaries['failure_injection_allowed']}")
+    print(f"  Execution allowed:        {boundaries['execution_allowed']}")
+    print()
+    print(CHAOS_TESTING_ADVISORY)
     return 0

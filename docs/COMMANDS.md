@@ -831,3 +831,8 @@
 
 - `pcae conflict-resolution-engine`
 - `pcae conflict-resolution-engine --json`
+
+## chaos-testing
+
+- `pcae chaos-testing`
+- `pcae chaos-testing --json`

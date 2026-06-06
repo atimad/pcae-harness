@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52M: Conflict Resolution Engine.
+Phase 52N: Chaos Testing.
 
 ## Governance Coherence Note
 
@@ -3798,13 +3798,41 @@ assessment is advisory and read-only; no execution occurs; no files are
 modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3943 total tests
 passing
 
+## Phase 52N: Chaos Testing
+
+Implemented `pcae chaos-testing` and `--json`. Defines chaos testing scenarios
+for PCAE governance, recovery, runtime hardening, concurrency, and
+conflict-resolution workflows. Three models — ChaosScenario (9 fields:
+scenario_id, chaos_domain, scenario_type, severity, injected_condition,
+expected_detection, expected_recovery_path, human_review_required,
+execution_allowed), ChaosTestPlan (8 fields: chaos_plan_id, scenarios,
+scenario_count, blocker_count, warning_count, plan_status, execution_allowed,
+human_review_required), ChaosTestSummary (9 fields: summary_id, chaos_plan_id,
+domain_count, scenario_count, blocker_count, warning_count, plan_status,
+execution_allowed, human_review_required); severity values: info, warning,
+blocker; plan statuses: draft, pending_human_review, blocked, ready_for_review;
+ten chaos domains: task_lifecycle_chaos, session_continuity_chaos,
+governance_state_chaos, agent_lock_chaos, runtime_contract_chaos,
+sandbox_boundary_chaos, timeout_chaos, output_integrity_chaos,
+concurrency_chaos, conflict_resolution_chaos; scenarios are defined but not
+executed; no failure injection, no file corruption, no lock clearing, no task
+movement, no session or governance state rewrite; failure_injection_allowed=False;
+execution_allowed=False; human_review_required=True; read_only=True; inputs:
+TaskLifecycleHardeningAssessment, SessionRecoveryPlan,
+GovernanceStateRecoveryPlan, AgentLockRecoveryPlan, CorruptionRecoveryPlan,
+RuntimeContractHardeningAssessment, SandboxHardeningAssessment,
+TimeoutHardeningAssessment, OutputIntegrityAssessment,
+ConcurrencySafetyAssessment, ParallelAgentCoordinationAssessment,
+MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
+`docs/COMMANDS.md` regenerated; 8 new tests; 4177 total tests passing.
+
 ## Current Phase
 
-Phase 52M: Conflict Resolution Engine.
+Phase 52N: Chaos Testing.
 
 ## Next
 
-- TBD: Future phases (52N and beyond).
+- TBD: Future phases (52O and beyond).
 
 ## Future Explorations
 

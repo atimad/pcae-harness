@@ -41092,3 +41092,175 @@ def test_52m_human_output(capsys) -> None:
         "advisory only",
     ):
         assert text in output
+
+
+# --- Phase 52N: Chaos Testing ---
+
+
+def test_52n_json_structure_and_constraints(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "chaos_testing_overview",
+        "scenario_model",
+        "plan_model",
+        "summary_model",
+        "domain_scenarios",
+        "scenarios",
+        "sample_plan",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["chaos_testing_overview"]
+    assert overview["phase"] == "52N"
+    assert overview["domain_count"] == 10
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_52n_models_and_exact_fields(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "scenario_model": (
+            "ChaosScenario",
+            [
+                "scenario_id", "chaos_domain", "scenario_type", "severity",
+                "injected_condition", "expected_detection",
+                "expected_recovery_path", "human_review_required",
+                "execution_allowed",
+            ],
+        ),
+        "plan_model": (
+            "ChaosTestPlan",
+            [
+                "chaos_plan_id", "scenarios", "scenario_count", "blocker_count",
+                "warning_count", "plan_status", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "ChaosTestSummary",
+            [
+                "summary_id", "chaos_plan_id", "domain_count", "scenario_count",
+                "blocker_count", "warning_count", "plan_status",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_52n_all_chaos_domains_defined(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_scenarios"]} == {
+        "task_lifecycle_chaos",
+        "session_continuity_chaos",
+        "governance_state_chaos",
+        "agent_lock_chaos",
+        "runtime_contract_chaos",
+        "sandbox_boundary_chaos",
+        "timeout_chaos",
+        "output_integrity_chaos",
+        "concurrency_chaos",
+        "conflict_resolution_chaos",
+    }
+    assert set(data["scenario_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["plan_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+    assert set(data["summary_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+
+
+def test_52n_scenarios_are_defined_not_executed(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["scenarios"]) == 10
+    for scenario in data["scenarios"]:
+        assert scenario["chaos_domain"]
+        assert scenario["scenario_type"]
+        assert scenario["injected_condition"]
+        assert scenario["expected_detection"]
+        assert scenario["expected_recovery_path"]
+        assert scenario["execution_allowed"] is False
+        assert scenario["human_review_required"] is True
+
+
+def test_52n_plan_and_summary(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["sample_plan"]
+    summary = data["sample_summary"]
+    assert plan["scenario_count"] == len(data["scenarios"])
+    assert plan["blocker_count"] > 0
+    assert plan["execution_allowed"] is False
+    assert plan["human_review_required"] is True
+    assert plan["plan_status"] in {"draft", "pending_human_review", "blocked", "ready_for_review"}
+    assert summary["chaos_plan_id"] == plan["chaos_plan_id"]
+    assert summary["domain_count"] == 10
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_52n_input_sources(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "AgentLockRecoveryPlan",
+        "CorruptionRecoveryPlan",
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "TimeoutHardeningAssessment",
+        "OutputIntegrityAssessment",
+        "ConcurrencySafetyAssessment",
+        "ParallelAgentCoordinationAssessment",
+        "MultiAgentStateConsistencyAssessment",
+        "ConflictResolutionAssessment",
+    ]
+
+
+def test_52n_governance_boundaries(capsys) -> None:
+    main(["chaos-testing", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52N"
+    assert boundaries["read_only"] is True
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["failure_injection_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "inject failures", "corrupt files", "clear locks", "move tasks",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_52n_human_output(capsys) -> None:
+    main(["chaos-testing"])
+    output = capsys.readouterr().out
+    for text in (
+        "Chaos testing",
+        "Scenario model",
+        "Plan model",
+        "Summary model",
+        "Chaos scenarios",
+        "Governance boundaries",
+        "Failure injection:        False",
+        "Execution allowed:        False",
+        "scaffold and audit only",
+    ):
+        assert text in output

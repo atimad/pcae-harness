@@ -147,6 +147,7 @@ from pcae.commands.agent import (
     run_parallel_agent_coordination,
     run_multi_agent_state_consistency,
     run_conflict_resolution_engine,
+    run_chaos_testing,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4188,6 +4189,17 @@ def build_parser() -> argparse.ArgumentParser:
     conflict_resolution_engine_parser.set_defaults(
         handler=run_conflict_resolution_engine
     )
+
+    chaos_testing_parser = subparsers.add_parser(
+        "chaos-testing",
+        help="Define chaos testing scenarios for PCAE governance and recovery workflows (Phase 52N).",
+    )
+    chaos_testing_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    chaos_testing_parser.set_defaults(handler=run_chaos_testing)
 
     return parser
 

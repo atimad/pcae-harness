@@ -54934,3 +54934,311 @@ def build_conflict_resolution_engine() -> dict:
         "input_sources": list(_CRE_INPUT_SOURCES),
         "advisory": CONFLICT_RESOLUTION_ENGINE_ADVISORY,
     }
+
+
+# --- Phase 52N: Chaos Testing ---
+
+CHAOS_TESTING_ADVISORY = (
+    "Chaos testing is a scaffold and audit only; scenarios are defined, not executed. "
+    "No failure injection, no file corruption, no lock clearing, no task movement, "
+    "no session or governance state rewrite, no runtime invocation, no prompt execution, "
+    "no repository modification occurs. "
+    "execution_allowed=False in Phase 52N. Human review is always required."
+)
+
+_CT_CHAOS_DOMAINS: tuple[str, ...] = (
+    "task_lifecycle_chaos",
+    "session_continuity_chaos",
+    "governance_state_chaos",
+    "agent_lock_chaos",
+    "runtime_contract_chaos",
+    "sandbox_boundary_chaos",
+    "timeout_chaos",
+    "output_integrity_chaos",
+    "concurrency_chaos",
+    "conflict_resolution_chaos",
+)
+
+_CT_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CT_PLAN_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "ready_for_review",
+)
+
+_CT_SCENARIO_FIELDS: tuple[dict, ...] = (
+    {"name": "scenario_id", "type": "str", "required": True},
+    {"name": "chaos_domain", "type": "str", "required": True},
+    {"name": "scenario_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "injected_condition", "type": "str", "required": True},
+    {"name": "expected_detection", "type": "str", "required": True},
+    {"name": "expected_recovery_path", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+)
+
+_CT_PLAN_FIELDS: tuple[dict, ...] = (
+    {"name": "chaos_plan_id", "type": "str", "required": True},
+    {"name": "scenarios", "type": "list[ChaosScenario]", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CT_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "chaos_plan_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CT_INPUT_SOURCES: tuple[str, ...] = (
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "AgentLockRecoveryPlan",
+    "CorruptionRecoveryPlan",
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "TimeoutHardeningAssessment",
+    "OutputIntegrityAssessment",
+    "ConcurrencySafetyAssessment",
+    "ParallelAgentCoordinationAssessment",
+    "MultiAgentStateConsistencyAssessment",
+    "ConflictResolutionAssessment",
+)
+
+_CT_DOMAIN_SCENARIOS: tuple[dict, ...] = (
+    {
+        "domain": "task_lifecycle_chaos",
+        "scenario_type": "task_state_corruption",
+        "severity": "blocker",
+        "injected_condition": "active task file is truncated or contains invalid state",
+        "expected_detection": "pcae check detects missing or invalid task lifecycle state",
+        "expected_recovery_path": "halt work, restore task state from provenance, require human review before resuming",
+    },
+    {
+        "domain": "session_continuity_chaos",
+        "scenario_type": "session_record_loss",
+        "severity": "blocker",
+        "injected_condition": "session continuity record is deleted or overwritten",
+        "expected_detection": "session bootstrap detects missing continuity record",
+        "expected_recovery_path": "reconstruct session chain from provenance timeline, require human review to confirm identity",
+    },
+    {
+        "domain": "governance_state_chaos",
+        "scenario_type": "governance_policy_conflict",
+        "severity": "blocker",
+        "injected_condition": "policy file contains conflicting or malformed governance rules",
+        "expected_detection": "pcae check detects policy schema violation or authority conflict",
+        "expected_recovery_path": "freeze governed activity and restore last known good policy through human-reviewed recovery plan",
+    },
+    {
+        "domain": "agent_lock_chaos",
+        "scenario_type": "lock_owner_mismatch",
+        "severity": "blocker",
+        "injected_condition": "agent lock file reports a different owner than the active session",
+        "expected_detection": "lock governance detects owner identity mismatch on bootstrap or check",
+        "expected_recovery_path": "block all writes, escalate to human review, apply lock recovery plan before any resumption",
+    },
+    {
+        "domain": "runtime_contract_chaos",
+        "scenario_type": "contract_version_drift",
+        "severity": "warning",
+        "injected_condition": "runtime contract version referenced by agent diverges from harness version",
+        "expected_detection": "runtime contract hardening check detects version or schema mismatch",
+        "expected_recovery_path": "retain execution prohibition, surface drift to human review, re-align contract before any execution gate",
+    },
+    {
+        "domain": "sandbox_boundary_chaos",
+        "scenario_type": "sandbox_escape_attempt",
+        "severity": "blocker",
+        "injected_condition": "agent attempts to write outside the declared allowed zone",
+        "expected_detection": "sandbox hardening boundary check detects out-of-zone write attempt",
+        "expected_recovery_path": "reject write, emit provenance event, require human review and explicit re-authorization",
+    },
+    {
+        "domain": "timeout_chaos",
+        "scenario_type": "operation_timeout_with_partial_state",
+        "severity": "warning",
+        "injected_condition": "an operation times out leaving partial governance state on disk",
+        "expected_detection": "timeout hardening detects partial-write artifact and incomplete state marker",
+        "expected_recovery_path": "discard partial state, restore from last verified checkpoint, require human review before retrying",
+    },
+    {
+        "domain": "output_integrity_chaos",
+        "scenario_type": "output_hash_mismatch",
+        "severity": "blocker",
+        "injected_condition": "output artifact hash does not match the recorded provenance hash",
+        "expected_detection": "output integrity verification detects hash mismatch on artifact read",
+        "expected_recovery_path": "quarantine artifact, block any downstream use, require human review and re-generation",
+    },
+    {
+        "domain": "concurrency_chaos",
+        "scenario_type": "concurrent_task_claim",
+        "severity": "blocker",
+        "injected_condition": "two agents simultaneously attempt to claim the same active task",
+        "expected_detection": "concurrency safety check detects duplicate claim attempt and lock contention",
+        "expected_recovery_path": "deny both claims, freeze concurrent activity, require human arbitration to assign authoritative owner",
+    },
+    {
+        "domain": "conflict_resolution_chaos",
+        "scenario_type": "unresolvable_state_divergence",
+        "severity": "blocker",
+        "injected_condition": "conflict resolution engine receives contradictory signals with no convergent resolution path",
+        "expected_detection": "conflict resolution engine classifies scenario as blocked with no automatic resolution",
+        "expected_recovery_path": "halt all governed activity, escalate full signal set to human review, resume only after authoritative state is confirmed",
+    },
+)
+
+_CT_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define chaos scenarios",
+        "define expected detection behavior",
+        "define expected recovery paths",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "inject failures",
+        "corrupt files",
+        "clear locks",
+        "move tasks",
+        "rewrite session or governance state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "failure_injection_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "52N",
+}
+
+
+def build_chaos_testing() -> dict:
+    """Build a read-only chaos testing scaffold with scenarios defined but not executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_scenarios = [dict(s) for s in _CT_DOMAIN_SCENARIOS]
+    blocker_count = sum(s["severity"] == "blocker" for s in domain_scenarios)
+    warning_count = sum(s["severity"] == "warning" for s in domain_scenarios)
+    info_count = sum(s["severity"] == "info" for s in domain_scenarios)
+    scenario_count = len(domain_scenarios)
+    domain_count = len(_CT_CHAOS_DOMAINS)
+
+    if blocker_count:
+        plan_status = "pending_human_review"
+    elif warning_count:
+        plan_status = "pending_human_review"
+    else:
+        plan_status = "draft"
+
+    chaos_plan_id = f"ct-plan-{ts}"
+    scenarios = [
+        {
+            "scenario_id": f"ct-{ts}-{index:02d}",
+            "chaos_domain": scenario["domain"],
+            "scenario_type": scenario["scenario_type"],
+            "severity": scenario["severity"],
+            "injected_condition": scenario["injected_condition"],
+            "expected_detection": scenario["expected_detection"],
+            "expected_recovery_path": scenario["expected_recovery_path"],
+            "human_review_required": True,
+            "execution_allowed": False,
+        }
+        for index, scenario in enumerate(domain_scenarios, start=1)
+    ]
+
+    sample_plan = {
+        "chaos_plan_id": chaos_plan_id,
+        "scenarios": scenarios,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ct-sum-{ts}",
+        "chaos_plan_id": chaos_plan_id,
+        "domain_count": domain_count,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "chaos_testing_overview": {
+            "overview_id": f"52n-{ts}",
+            "generated_at": generated_at,
+            "phase": "52N",
+            "title": "Chaos Testing",
+            "domain_count": domain_count,
+            "scenario_count": scenario_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "plan_status": plan_status,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines chaos testing scenarios for PCAE governance, recovery, "
+                "runtime hardening, concurrency, and conflict-resolution workflows. "
+                "Scenarios are defined but not executed. No failure is injected. "
+                f"plan_status={plan_status}. execution_allowed=False."
+            ),
+        },
+        "scenario_model": {
+            "model_name": "ChaosScenario",
+            "field_count": len(_CT_SCENARIO_FIELDS),
+            "required_field_count": len(_CT_SCENARIO_FIELDS),
+            "severity_values": list(_CT_SEVERITY_VALUES),
+            "execution_allowed_always_false_in_52n": True,
+            "human_review_required_always_true_in_52n": True,
+            "fields": [dict(field) for field in _CT_SCENARIO_FIELDS],
+        },
+        "plan_model": {
+            "model_name": "ChaosTestPlan",
+            "field_count": len(_CT_PLAN_FIELDS),
+            "required_field_count": len(_CT_PLAN_FIELDS),
+            "supported_plan_statuses": list(_CT_PLAN_STATUSES),
+            "execution_allowed_always_false_in_52n": True,
+            "human_review_required_always_true_in_52n": True,
+            "fields": [dict(field) for field in _CT_PLAN_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "ChaosTestSummary",
+            "field_count": len(_CT_SUMMARY_FIELDS),
+            "required_field_count": len(_CT_SUMMARY_FIELDS),
+            "supported_plan_statuses": list(_CT_PLAN_STATUSES),
+            "execution_allowed_always_false_in_52n": True,
+            "human_review_required_always_true_in_52n": True,
+            "fields": [dict(field) for field in _CT_SUMMARY_FIELDS],
+        },
+        "domain_scenarios": domain_scenarios,
+        "scenarios": scenarios,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CT_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CT_INPUT_SOURCES),
+        "advisory": CHAOS_TESTING_ADVISORY,
+    }

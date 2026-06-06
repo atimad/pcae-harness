@@ -852,6 +852,11 @@ def render_commands_reference() -> str:
 
 - `pcae conflict-resolution-engine`
 - `pcae conflict-resolution-engine --json`
+
+## chaos-testing
+
+- `pcae chaos-testing`
+- `pcae chaos-testing --json`
 """
 
 
