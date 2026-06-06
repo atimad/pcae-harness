@@ -150,6 +150,7 @@ from pcae.commands.agent import (
     run_chaos_testing,
     run_failure_injection,
     run_corruption_simulation,
+    run_recovery_validation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4224,6 +4225,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     corruption_simulation_parser.set_defaults(handler=run_corruption_simulation)
+
+    recovery_validation_parser = subparsers.add_parser(
+        "recovery-validation",
+        help="Validate recovery plan completeness for chaos, failure, and corruption scenarios (Phase 52Q).",
+    )
+    recovery_validation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    recovery_validation_parser.set_defaults(handler=run_recovery_validation)
 
     return parser
 

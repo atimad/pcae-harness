@@ -846,3 +846,8 @@
 
 - `pcae corruption-simulation`
 - `pcae corruption-simulation --json`
+
+## recovery-validation
+
+- `pcae recovery-validation`
+- `pcae recovery-validation --json`

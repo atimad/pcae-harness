@@ -55850,3 +55850,317 @@ def build_corruption_simulation() -> dict:
         "input_sources": list(_CS_INPUT_SOURCES),
         "advisory": CORRUPTION_SIMULATION_ADVISORY,
     }
+
+
+# --- Phase 52Q: Recovery Validation ---
+
+RECOVERY_VALIDATION_ADVISORY = (
+    "Recovery validation is informational and audit only; recovery paths are validated "
+    "for completeness and human-review requirements, but no recovery is executed. "
+    "No failures are injected, no files are corrupted, no locks are cleared, "
+    "no tasks are moved, no session or governance state is rewritten, "
+    "no runtime is invoked, no prompt is executed, no repository modification occurs. "
+    "recovery_ready=False and execution_allowed=False in Phase 52Q. "
+    "Human review is always required."
+)
+
+_RV_VALIDATION_DOMAINS: tuple[str, ...] = (
+    "session_recovery_validation",
+    "governance_state_recovery_validation",
+    "agent_lock_recovery_validation",
+    "corruption_recovery_validation",
+    "governance_recovery_validation",
+    "chaos_recovery_validation",
+    "failure_injection_recovery_validation",
+    "corruption_simulation_recovery_validation",
+    "conflict_resolution_recovery_validation",
+    "multi_agent_state_recovery_validation",
+)
+
+_RV_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RV_VALIDATION_STATUSES: tuple[str, ...] = (
+    "recovery_ready",
+    "recovery_ready_with_warnings",
+    "recovery_validation_required",
+    "blocked",
+)
+
+_RV_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "validation_domain", "type": "str", "required": True},
+    {"name": "source_plan_id", "type": "str", "required": True},
+    {"name": "validation_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RV_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "validation_signals", "type": "list[RecoveryValidationSignal]", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "validation_status", "type": "str", "required": True},
+    {"name": "recovery_ready", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RV_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "validation_status", "type": "str", "required": True},
+    {"name": "recovery_ready", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RV_INPUT_SOURCES: tuple[str, ...] = (
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "AgentLockRecoveryPlan",
+    "CorruptionRecoveryPlan",
+    "GovernanceRecoveryPlan",
+    "ChaosTestPlan",
+    "FailureInjectionPlan",
+    "CorruptionSimulationPlan",
+    "ConflictResolutionAssessment",
+    "MultiAgentStateConsistencyAssessment",
+)
+
+_RV_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "session_recovery_validation",
+        "source_plan_id": "SessionRecoveryPlan",
+        "validation_type": "session_recovery_path_completeness",
+        "severity": "blocker",
+        "detected_state": "session recovery path completeness and human review linkage not validated",
+        "expected_state": "session recovery plan has complete path, escalation, and human-review gate",
+    },
+    {
+        "domain": "governance_state_recovery_validation",
+        "source_plan_id": "GovernanceStateRecoveryPlan",
+        "validation_type": "governance_state_recovery_path_completeness",
+        "severity": "blocker",
+        "detected_state": "governance state recovery path completeness and human review linkage not validated",
+        "expected_state": "governance state recovery plan has complete path, authority freeze, and human-review gate",
+    },
+    {
+        "domain": "agent_lock_recovery_validation",
+        "source_plan_id": "AgentLockRecoveryPlan",
+        "validation_type": "lock_recovery_path_completeness",
+        "severity": "blocker",
+        "detected_state": "agent lock recovery path completeness and human review linkage not validated",
+        "expected_state": "agent lock recovery plan has complete ownership reconciliation path and human-review gate",
+    },
+    {
+        "domain": "corruption_recovery_validation",
+        "source_plan_id": "CorruptionRecoveryPlan",
+        "validation_type": "corruption_recovery_path_completeness",
+        "severity": "blocker",
+        "detected_state": "corruption recovery path completeness and human review linkage not validated",
+        "expected_state": "corruption recovery plan has complete artifact restoration path and human-review gate",
+    },
+    {
+        "domain": "governance_recovery_validation",
+        "source_plan_id": "GovernanceRecoveryPlan",
+        "validation_type": "governance_recovery_path_completeness",
+        "severity": "blocker",
+        "detected_state": "governance recovery path completeness and human review linkage not validated",
+        "expected_state": "governance recovery plan has complete authority restoration path and human-review gate",
+    },
+    {
+        "domain": "chaos_recovery_validation",
+        "source_plan_id": "ChaosTestPlan",
+        "validation_type": "chaos_scenario_recovery_path_coverage",
+        "severity": "blocker",
+        "detected_state": "chaos test plan recovery path coverage and human review linkage not validated",
+        "expected_state": "every chaos scenario has a linked recovery path and human-review requirement",
+    },
+    {
+        "domain": "failure_injection_recovery_validation",
+        "source_plan_id": "FailureInjectionPlan",
+        "validation_type": "failure_injection_recovery_path_coverage",
+        "severity": "blocker",
+        "detected_state": "failure injection plan recovery path coverage and human review linkage not validated",
+        "expected_state": "every failure injection scenario has a linked recovery path and human-review requirement",
+    },
+    {
+        "domain": "corruption_simulation_recovery_validation",
+        "source_plan_id": "CorruptionSimulationPlan",
+        "validation_type": "corruption_simulation_recovery_path_coverage",
+        "severity": "blocker",
+        "detected_state": "corruption simulation plan recovery path coverage and human review linkage not validated",
+        "expected_state": "every corruption simulation scenario has a linked recovery path and human-review requirement",
+    },
+    {
+        "domain": "conflict_resolution_recovery_validation",
+        "source_plan_id": "ConflictResolutionAssessment",
+        "validation_type": "conflict_resolution_recovery_path_coverage",
+        "severity": "warning",
+        "detected_state": "conflict resolution assessment recovery path coverage not validated",
+        "expected_state": "all conflict resolution signals have advisory recovery paths with human-review gates",
+    },
+    {
+        "domain": "multi_agent_state_recovery_validation",
+        "source_plan_id": "MultiAgentStateConsistencyAssessment",
+        "validation_type": "multi_agent_state_recovery_path_coverage",
+        "severity": "warning",
+        "detected_state": "multi-agent state consistency assessment recovery path coverage not validated",
+        "expected_state": "all consistency signals have remediation paths with human-review gates",
+    },
+)
+
+_RV_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "validate recovery path completeness",
+        "validate escalation path presence",
+        "validate human review requirements",
+        "identify missing recovery links",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "execute recovery",
+        "inject failures",
+        "corrupt files",
+        "clear locks",
+        "move tasks",
+        "rewrite session or governance state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recovery_execution_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "52Q",
+}
+
+
+def build_recovery_validation() -> dict:
+    """Build a read-only recovery validation scaffold assessing plan completeness without executing recovery."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RV_DOMAIN_SIGNALS]
+    blocker_count = sum(s["severity"] == "blocker" for s in domain_signals)
+    warning_count = sum(s["severity"] == "warning" for s in domain_signals)
+    info_count = sum(s["severity"] == "info" for s in domain_signals)
+    signal_count = len(domain_signals)
+    domain_count = len(_RV_VALIDATION_DOMAINS)
+
+    if blocker_count:
+        validation_status = "recovery_validation_required"
+    elif warning_count:
+        validation_status = "recovery_ready_with_warnings"
+    else:
+        validation_status = "recovery_ready"
+
+    validation_id = f"rv-{ts}"
+    signals = [
+        {
+            "signal_id": f"rvs-{ts}-{index:02d}",
+            "validation_domain": signal["domain"],
+            "source_plan_id": signal["source_plan_id"],
+            "validation_type": signal["validation_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rva-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "validation_signals": signals,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "validation_status": validation_status,
+        "recovery_ready": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rvsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "validation_status": validation_status,
+        "recovery_ready": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "recovery_validation_overview": {
+            "overview_id": f"52q-{ts}",
+            "generated_at": generated_at,
+            "phase": "52Q",
+            "title": "Recovery Validation",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "validation_status": validation_status,
+            "recovery_ready": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Validates that PCAE recovery plans, chaos scenarios, failure-injection "
+                "scenarios, and corruption-simulation scenarios have complete, governed, "
+                "human-reviewed recovery paths. No recovery is executed. "
+                f"validation_status={validation_status}. recovery_ready=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RecoveryValidationSignal",
+            "field_count": len(_RV_SIGNAL_FIELDS),
+            "required_field_count": len(_RV_SIGNAL_FIELDS),
+            "severity_values": list(_RV_SEVERITY_VALUES),
+            "human_review_required_always_true_in_52q": True,
+            "fields": [dict(field) for field in _RV_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RecoveryValidationAssessment",
+            "field_count": len(_RV_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RV_ASSESSMENT_FIELDS),
+            "supported_validation_statuses": list(_RV_VALIDATION_STATUSES),
+            "recovery_ready_always_false_in_52q": True,
+            "execution_allowed_always_false_in_52q": True,
+            "human_review_required_always_true_in_52q": True,
+            "fields": [dict(field) for field in _RV_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RecoveryValidationSummary",
+            "field_count": len(_RV_SUMMARY_FIELDS),
+            "required_field_count": len(_RV_SUMMARY_FIELDS),
+            "supported_validation_statuses": list(_RV_VALIDATION_STATUSES),
+            "recovery_ready_always_false_in_52q": True,
+            "execution_allowed_always_false_in_52q": True,
+            "human_review_required_always_true_in_52q": True,
+            "fields": [dict(field) for field in _RV_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RV_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RV_INPUT_SOURCES),
+        "advisory": RECOVERY_VALIDATION_ADVISORY,
+    }

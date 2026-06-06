@@ -41610,3 +41610,175 @@ def test_52p_human_output(capsys) -> None:
         "scaffold and audit only",
     ):
         assert text in output
+
+
+# --- Phase 52Q: Recovery Validation ---
+
+
+def test_52q_json_structure_and_constraints(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "recovery_validation_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["recovery_validation_overview"]
+    assert overview["phase"] == "52Q"
+    assert overview["domain_count"] == 10
+    assert overview["recovery_ready"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_52q_models_and_exact_fields(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RecoveryValidationSignal",
+            [
+                "signal_id", "validation_domain", "source_plan_id",
+                "validation_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RecoveryValidationAssessment",
+            [
+                "assessment_id", "validation_signals", "signal_count",
+                "blocker_count", "warning_count", "validation_status",
+                "recovery_ready", "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RecoveryValidationSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "validation_status",
+                "recovery_ready", "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_52q_all_validation_domains_defined(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "session_recovery_validation",
+        "governance_state_recovery_validation",
+        "agent_lock_recovery_validation",
+        "corruption_recovery_validation",
+        "governance_recovery_validation",
+        "chaos_recovery_validation",
+        "failure_injection_recovery_validation",
+        "corruption_simulation_recovery_validation",
+        "conflict_resolution_recovery_validation",
+        "multi_agent_state_recovery_validation",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_validation_statuses"]) == {
+        "recovery_ready", "recovery_ready_with_warnings",
+        "recovery_validation_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_validation_statuses"]) == {
+        "recovery_ready", "recovery_ready_with_warnings",
+        "recovery_validation_required", "blocked",
+    }
+
+
+def test_52q_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 10
+    for signal in data["signals"]:
+        assert signal["validation_domain"]
+        assert signal["source_plan_id"]
+        assert signal["validation_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_52q_assessment_and_summary(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["validation_status"] == "recovery_validation_required"
+    assert assessment["recovery_ready"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 10
+    assert summary["recovery_ready"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_52q_input_sources(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "AgentLockRecoveryPlan",
+        "CorruptionRecoveryPlan",
+        "GovernanceRecoveryPlan",
+        "ChaosTestPlan",
+        "FailureInjectionPlan",
+        "CorruptionSimulationPlan",
+        "ConflictResolutionAssessment",
+        "MultiAgentStateConsistencyAssessment",
+    ]
+
+
+def test_52q_governance_boundaries(capsys) -> None:
+    main(["recovery-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52Q"
+    assert boundaries["read_only"] is True
+    assert boundaries["recovery_execution_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "execute recovery", "inject failures", "corrupt files", "clear locks",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_52q_human_output(capsys) -> None:
+    main(["recovery-validation"])
+    output = capsys.readouterr().out
+    for text in (
+        "Recovery validation",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Validation signals",
+        "Governance boundaries",
+        "Recovery ready:         no",
+        "Execution allowed:      no",
+        "recovery_ready=False",
+    ):
+        assert text in output

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52P: Corruption Simulation.
+Phase 52Q: Recovery Validation.
 
 ## Governance Coherence Note
 
@@ -3798,6 +3798,37 @@ assessment is advisory and read-only; no execution occurs; no files are
 modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3943 total tests
 passing
 
+## Phase 52Q: Recovery Validation
+
+Implemented `pcae recovery-validation` and `--json`. Validates that PCAE
+recovery plans, chaos scenarios, failure-injection scenarios, and
+corruption-simulation scenarios have complete, governed, human-reviewed
+recovery paths. Three models — RecoveryValidationSignal (8 fields: signal_id,
+validation_domain, source_plan_id, validation_type, severity, detected_state,
+expected_state, human_review_required), RecoveryValidationAssessment (9 fields:
+assessment_id, validation_signals, signal_count, blocker_count, warning_count,
+validation_status, recovery_ready, execution_allowed, human_review_required),
+RecoveryValidationSummary (10 fields: summary_id, assessment_id, domain_count,
+signal_count, blocker_count, warning_count, validation_status, recovery_ready,
+execution_allowed, human_review_required); severity values: info, warning,
+blocker; validation statuses: recovery_ready, recovery_ready_with_warnings,
+recovery_validation_required, blocked; ten validation domains:
+session_recovery_validation, governance_state_recovery_validation,
+agent_lock_recovery_validation, corruption_recovery_validation,
+governance_recovery_validation, chaos_recovery_validation,
+failure_injection_recovery_validation,
+corruption_simulation_recovery_validation,
+conflict_resolution_recovery_validation,
+multi_agent_state_recovery_validation; recovery paths validated but not
+executed; no failures injected, no files corrupted; recovery_ready=False;
+execution_allowed=False; recovery_execution_allowed=False;
+human_review_required=True; read_only=True; inputs: SessionRecoveryPlan,
+GovernanceStateRecoveryPlan, AgentLockRecoveryPlan, CorruptionRecoveryPlan,
+GovernanceRecoveryPlan, ChaosTestPlan, FailureInjectionPlan,
+CorruptionSimulationPlan, ConflictResolutionAssessment,
+MultiAgentStateConsistencyAssessment; `docs/COMMANDS.md` regenerated;
+8 new tests; 4201 total tests passing.
+
 ## Phase 52P: Corruption Simulation
 
 Implemented `pcae corruption-simulation` and `--json`. Defines controlled
@@ -3891,7 +3922,7 @@ Phase 52O: Failure Injection.
 
 ## Next
 
-- TBD: Future phases (52Q and beyond).
+- TBD: Future phases (52R and beyond).
 
 ## Future Explorations
 
