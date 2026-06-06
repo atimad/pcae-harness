@@ -42621,3 +42621,471 @@ def build_write_rollback_verification() -> dict:
         "input_sources": list(_WRV_INPUT_SOURCES),
         "advisory": WRITE_ROLLBACK_VERIFICATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 50J — Controlled Write Governance Audit
+# ---------------------------------------------------------------------------
+
+WRITE_GOVERNANCE_AUDIT_ADVISORY = (
+    "Write governance audit is informational; governance completeness may be assessed "
+    "and blockers and warnings reported, but no automatic audit acceptance occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. audit_complete=False and "
+    "execution_allowed=False in Phase 50J."
+)
+
+_WGA_AUDIT_DOMAINS: tuple[str, ...] = (
+    "authorization_chain_audit",
+    "review_chain_audit",
+    "decision_chain_audit",
+    "lifecycle_chain_audit",
+    "planning_chain_audit",
+    "readiness_chain_audit",
+    "evidence_chain_audit",
+    "audit_chain_audit",
+    "rollback_chain_audit",
+    "governance_consistency_audit",
+)
+
+_WGA_AUDIT_STATUSES: tuple[str, ...] = (
+    "insufficient_governance",
+    "governance_with_warnings",
+    "pending_human_review",
+    "complete",
+)
+
+_WGA_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write governance audit candidate.",
+    },
+    {
+        "name": "governance_chain_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier for the complete governance chain being audited (50A–50I).",
+    },
+    {
+        "name": "audit_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of governance audit domains to be assessed.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of governance audit domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50J.",
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50J.",
+    },
+)
+
+_WGA_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write governance audit assessment.",
+    },
+    {
+        "name": "audit_id",
+        "type": "str",
+        "required": True,
+        "description": "The write governance audit candidate this assessment is associated with.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with sufficient artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with missing or blocking artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_governance, governance_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50J.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50J.",
+    },
+)
+
+_WGA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write governance audit summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The write governance audit assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of governance audit domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with sufficient artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with missing or blocking artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of governance chain domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "audit_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_governance, governance_with_warnings, "
+            "pending_human_review, or complete."
+        ),
+    },
+    {
+        "name": "audit_complete",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50J.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50J.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50J.",
+    },
+)
+
+_WGA_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess governance completeness",
+        "identify missing governance controls",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "audit_complete": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50J",
+}
+
+_WGA_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationSummary",
+    "WriteAuthorizationReviewSummary",
+    "WriteAuthorizationDecisionSummary",
+    "WriteAuthorizationLifecycleSummary",
+    "WritePlanSummary",
+    "WriteReadinessSummary",
+    "WriteEvidenceSummary",
+    "WriteAuditSummary",
+    "WriteRollbackVerificationSummary",
+)
+
+_WGA_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "authorization_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization summary has been established. "
+            "A WriteAuthorizationSummary confirming authorization chain integrity "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "review_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization review summary has been established. "
+            "A WriteAuthorizationReviewSummary confirming all reviewer decisions "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "decision_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization decision summary has been established. "
+            "A WriteAuthorizationDecisionSummary confirming all decision domain "
+            "outcomes must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "lifecycle_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write authorization lifecycle summary has been established. "
+            "A WriteAuthorizationLifecycleSummary confirming lifecycle state "
+            "transitions must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "planning_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write plan summary has been established. "
+            "A WritePlanSummary confirming file scope, allowed and forbidden "
+            "operations must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "readiness_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write readiness summary has been established. "
+            "A WriteReadinessSummary confirming all prerequisite readiness domains "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "evidence_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write evidence summary has been established. "
+            "A WriteEvidenceSummary confirming all required evidence domains "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "audit_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write audit summary has been established. "
+            "A WriteAuditSummary confirming all audit trail domains "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "rollback_chain_audit",
+        "severity": "blocker",
+        "finding": (
+            "No write rollback verification summary has been established. "
+            "A WriteRollbackVerificationSummary confirming rollback plan readiness "
+            "must be present before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+    {
+        "domain": "governance_consistency_audit",
+        "severity": "blocker",
+        "finding": (
+            "Governance chain consistency cannot be verified until all prior chain "
+            "summaries are present. Cross-chain consistency checks require all nine "
+            "upstream summaries (50A–50I) before the governance chain audit can proceed."
+        ),
+        "audit_complete": False,
+    },
+)
+
+
+def build_write_governance_audit() -> dict:
+    """Audit the complete controlled-write governance chain (50A–50I). Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    audit_id_ref = f"wga-{ts}"
+
+    candidate_fields = [dict(f) for f in _WGA_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WGA_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WGA_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WGA_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        audit_status = "pending_human_review"
+    elif warning_count > 0:
+        audit_status = "governance_with_warnings"
+    else:
+        audit_status = "insufficient_governance"
+
+    assessment_id_ref = f"wgaa-{ts}"
+
+    sample_candidate = {
+        "audit_id": audit_id_ref,
+        "governance_chain_id": f"gc-50a-50i-{ts}",
+        "audit_domains": list(_WGA_AUDIT_DOMAINS),
+        "domain_count": len(_WGA_AUDIT_DOMAINS),
+        "human_review_required": True,
+        "audit_complete": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "audit_id": audit_id_ref,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"wgas-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteGovernanceAuditCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_audit_statuses": list(_WGA_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50j": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteGovernanceAuditAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_audit_statuses": list(_WGA_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50j": True,
+        "execution_allowed_always_false_in_50j": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteGovernanceAuditSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_audit_statuses": list(_WGA_AUDIT_STATUSES),
+        "audit_complete_always_false_in_50j": True,
+        "execution_allowed_always_false_in_50j": True,
+        "fields": summary_fields,
+    }
+
+    write_governance_audit_overview = {
+        "overview_id": f"50j-{ts}",
+        "generated_at": generated_at,
+        "phase": "50J",
+        "title": "Controlled Write Governance Audit",
+        "summary": (
+            "Audits the complete controlled-write governance chain established in "
+            "phases 50A–50I. Ten governance chain domains are assessed: "
+            "authorization_chain_audit, review_chain_audit, decision_chain_audit, "
+            "lifecycle_chain_audit, planning_chain_audit, readiness_chain_audit, "
+            "evidence_chain_audit, audit_chain_audit, rollback_chain_audit, and "
+            "governance_consistency_audit. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"audit_status={audit_status}. "
+            "Write governance audit is advisory and read-only. No write execution occurs. "
+            "audit_complete=False. execution_allowed=False."
+        ),
+        "audit_domain_count": len(_WGA_AUDIT_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": audit_status,
+        "audit_complete": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_governance_audit_overview": write_governance_audit_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WGA_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WGA_INPUT_SOURCES),
+        "advisory": WRITE_GOVERNANCE_AUDIT_ADVISORY,
+    }

@@ -121,6 +121,7 @@ from pcae.commands.agent import (
     run_write_evidence,
     run_write_audit,
     run_write_rollback_verification,
+    run_write_governance_audit,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3864,6 +3865,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_rollback_verification_parser.set_defaults(handler=run_write_rollback_verification)
+
+    write_governance_audit_parser = subparsers.add_parser(
+        "write-governance-audit",
+        help="Audit the complete controlled-write governance chain established in phases 50A–50I (Phase 50J).",
+    )
+    write_governance_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_governance_audit_parser.set_defaults(handler=run_write_governance_audit)
 
     return parser
 

@@ -217,6 +217,8 @@ from pcae.core.agent import (
     WRITE_AUDIT_ADVISORY,
     build_write_rollback_verification,
     WRITE_ROLLBACK_VERIFICATION_ADVISORY,
+    build_write_governance_audit,
+    WRITE_GOVERNANCE_AUDIT_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8588,6 +8590,87 @@ def run_write_rollback_verification(args: argparse.Namespace) -> int:
         print(f"  May:                   {', '.join(gb['may'])}")
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Rollback verified:     {gb['rollback_verified']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_governance_audit(args: argparse.Namespace) -> int:
+    data = build_write_governance_audit()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_governance_audit_overview"]
+        print("Controlled write governance audit")
+        print(f"Audit: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Audit domains:          {ov['audit_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Compliant:              {ov['compliant_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Audit status:           {ov['audit_status']}")
+        print(f"Audit complete:         {'yes' if ov['audit_complete'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_audit_statuses'])}")
+        print(f"  audit_complete always False in 50J: {cm['audit_complete_always_false_in_50j']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print(f"  audit_complete always False in 50J:    {am['audit_complete_always_false_in_50j']}")
+        print(f"  execution_allowed always False in 50J: {am['execution_allowed_always_false_in_50j']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  audit_complete always False in 50J:    {sm['audit_complete_always_false_in_50j']}")
+        print(f"  execution_allowed always False in 50J: {sm['execution_allowed_always_false_in_50j']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  audit_complete:        {sc['audit_complete']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  domain_count:          {sc['domain_count']}")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  audit_status:          {sa['audit_status']}")
+        print(f"  compliant_count:       {sa['compliant_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  audit_complete:        {sa['audit_complete']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print(f"  human_review_required: {sa['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  audit_status:          {ss['audit_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  compliant_count:       {ss['compliant_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  audit_complete:        {ss['audit_complete']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Audit complete:        {gb['audit_complete']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()

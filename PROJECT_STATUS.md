@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50I: Controlled Write Rollback Verification.
+Phase 50J: Controlled Write Governance Audit.
 
 ## Governance Coherence Note
 
@@ -3526,13 +3526,39 @@ GovernanceRecoveryPlan; write rollback verification is advisory and read-only;
 no write execution occurs; no files are modified; `docs/COMMANDS.md`
 regenerated; 15 new tests; 3808 total tests passing
 
+`pcae write-governance-audit` and `--json`; audits the complete
+controlled-write governance chain established in phases 50A–50I; three
+models — WriteGovernanceAuditCandidate (6 fields: audit_id,
+governance_chain_id, audit_domains, domain_count, human_review_required,
+audit_complete), WriteGovernanceAuditAssessment (9 fields: assessment_id,
+audit_id, compliant_count, blocker_count, warning_count, audit_status,
+audit_complete, execution_allowed, human_review_required),
+WriteGovernanceAuditSummary (10 fields: summary_id, assessment_id,
+domain_count, compliant_count, blocker_count, warning_count, audit_status,
+audit_complete, execution_allowed, human_review_required); four audit
+statuses: insufficient_governance, governance_with_warnings,
+pending_human_review, complete; ten audit domains:
+authorization_chain_audit, review_chain_audit, decision_chain_audit,
+lifecycle_chain_audit, planning_chain_audit, readiness_chain_audit,
+evidence_chain_audit, audit_chain_audit, rollback_chain_audit,
+governance_consistency_audit; ten blockers;
+audit_status=pending_human_review; audit_complete=False;
+execution_allowed=False; human_review_required=True; inputs:
+WriteAuthorizationSummary, WriteAuthorizationReviewSummary,
+WriteAuthorizationDecisionSummary, WriteAuthorizationLifecycleSummary,
+WritePlanSummary, WriteReadinessSummary, WriteEvidenceSummary,
+WriteAuditSummary, WriteRollbackVerificationSummary; write governance
+audit is advisory and read-only; no write execution occurs; no files are
+modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3823 total tests
+passing
+
 ## Current Phase
 
-Phase 50I: Controlled Write Rollback Verification.
+Phase 50J: Controlled Write Governance Audit.
 
 ## Next
 
-- TBD: Future phases (50J and beyond).
+- TBD: Future phases (50K and beyond).
 
 ## Future Explorations
 

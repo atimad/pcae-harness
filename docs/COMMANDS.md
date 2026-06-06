@@ -701,3 +701,8 @@
 
 - `pcae write-rollback-verification`
 - `pcae write-rollback-verification --json`
+
+## write-governance-audit
+
+- `pcae write-governance-audit`
+- `pcae write-governance-audit --json`
