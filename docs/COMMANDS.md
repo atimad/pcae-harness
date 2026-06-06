@@ -796,3 +796,8 @@
 
 - `pcae runtime-contract-hardening`
 - `pcae runtime-contract-hardening --json`
+
+## sandbox-hardening
+
+- `pcae sandbox-hardening`
+- `pcae sandbox-hardening --json`

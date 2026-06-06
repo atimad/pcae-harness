@@ -239,6 +239,8 @@ from pcae.core.agent import (
     CORRUPTION_RECOVERY_ADVISORY,
     build_runtime_contract_hardening,
     RUNTIME_CONTRACT_HARDENING_ADVISORY,
+    build_sandbox_hardening,
+    SANDBOX_HARDENING_ADVISORY,
     build_governance_state_recovery,
     GOVERNANCE_STATE_RECOVERY_ADVISORY,
     build_session_recovery,
@@ -10160,6 +10162,114 @@ def run_runtime_contract_hardening(args: argparse.Namespace) -> int:
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Remediation automatic: {gb['remediation_automatic']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_sandbox_hardening(args: argparse.Namespace) -> int:
+    data = build_sandbox_hardening()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["sandbox_hardening_overview"]
+        print("Sandbox hardening")
+        print(f"Hardening: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Hardening domains:      {ov['hardening_domain_count']}")
+        print(f"Signals produced:       {ov['signal_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Info:                   {ov['info_count']}")
+        print(f"Hardening status:       {ov['hardening_status']}")
+        print(f"Remediation recommended:{'yes' if ov['remediation_recommended'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        signal_model = data["signal_model"]
+        print(f"Signal model: {signal_model['model_name']} ({signal_model['field_count']} fields)")
+        print(f"  Severity values:     {', '.join(signal_model['severity_values'])}")
+        print(
+            "  human_review_required always True in 52G: "
+            f"{signal_model['human_review_required_always_true_in_52g']}"
+        )
+        print()
+        assessment_model = data["assessment_model"]
+        print(
+            f"Assessment model: {assessment_model['model_name']} "
+            f"({assessment_model['field_count']} fields)"
+        )
+        print(
+            "  execution_allowed always False in 52G: "
+            f"{assessment_model['execution_allowed_always_false_in_52g']}"
+        )
+        print(
+            "  human_review_required always True in 52G: "
+            f"{assessment_model['human_review_required_always_true_in_52g']}"
+        )
+        print()
+        summary_model = data["summary_model"]
+        print(
+            f"Summary model: {summary_model['model_name']} "
+            f"({summary_model['field_count']} fields)"
+        )
+        print(
+            "  execution_allowed always False in 52G: "
+            f"{summary_model['execution_allowed_always_false_in_52g']}"
+        )
+        print(
+            "  human_review_required always True in 52G: "
+            f"{summary_model['human_review_required_always_true_in_52g']}"
+        )
+        print()
+        print("Domain signals:")
+        for signal in data["domain_signals"]:
+            print(
+                f"  [{signal['severity'].upper()}] "
+                f"{signal['domain']} — {signal['signal_type']}"
+            )
+            print(f"    {signal['finding'][:80]}...")
+        print()
+        signal = data["sample_signal"]
+        print("Sample signal:")
+        print(f"  hardening_domain:      {signal['hardening_domain']}")
+        print(f"  signal_type:           {signal['signal_type']}")
+        print(f"  severity:              {signal['severity']}")
+        print(f"  detected_state:        {signal['detected_state']}")
+        print(f"  expected_state:        {signal['expected_state']}")
+        print(f"  human_review_required: {signal['human_review_required']}")
+        print()
+        assessment = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  hardening_status:      {assessment['hardening_status']}")
+        print(f"  signal_count:          {assessment['signal_count']}")
+        print(f"  blocker_count:         {assessment['blocker_count']}")
+        print(f"  warning_count:         {assessment['warning_count']}")
+        print(f"  remediation_recommended:{assessment['remediation_recommended']}")
+        print(f"  execution_allowed:     {assessment['execution_allowed']}")
+        print(f"  human_review_required: {assessment['human_review_required']}")
+        print()
+        summary = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  hardening_status:      {summary['hardening_status']}")
+        print(f"  domain_count:          {summary['domain_count']}")
+        print(f"  signal_count:          {summary['signal_count']}")
+        print(f"  blocker_count:         {summary['blocker_count']}")
+        print(f"  warning_count:         {summary['warning_count']}")
+        print(f"  remediation_recommended:{summary['remediation_recommended']}")
+        print(f"  execution_allowed:     {summary['execution_allowed']}")
+        print(f"  human_review_required: {summary['human_review_required']}")
+        print()
+        boundaries = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(boundaries['may'])}")
+        print(f"  May not:               {', '.join(boundaries['may_not'])}")
+        print(f"  Execution allowed:     {boundaries['execution_allowed']}")
+        print(f"  Remediation automatic: {boundaries['remediation_automatic']}")
+        print(f"  Human review req'd:    {boundaries['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

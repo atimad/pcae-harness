@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52F: Runtime Contract Hardening.
+Phase 52G: Sandbox Hardening.
 
 ## Governance Coherence Note
 

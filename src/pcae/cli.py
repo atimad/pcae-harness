@@ -140,6 +140,7 @@ from pcae.commands.agent import (
     run_agent_lock_recovery,
     run_corruption_recovery,
     run_runtime_contract_hardening,
+    run_sandbox_hardening,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4096,6 +4097,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     runtime_contract_hardening_parser.set_defaults(handler=run_runtime_contract_hardening)
+
+    sandbox_hardening_parser = subparsers.add_parser(
+        "sandbox-hardening",
+        help="Define and validate sandbox isolation requirements for constrained, deterministic runtime execution (Phase 52G).",
+    )
+    sandbox_hardening_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    sandbox_hardening_parser.set_defaults(handler=run_sandbox_hardening)
 
     return parser
 

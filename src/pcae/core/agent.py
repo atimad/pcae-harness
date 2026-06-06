@@ -51682,3 +51682,484 @@ def build_runtime_contract_hardening() -> dict:
         "input_sources": list(_RCHD_INPUT_SOURCES),
         "advisory": RUNTIME_CONTRACT_HARDENING_ADVISORY,
     }
+
+
+# --- Phase 52G: Sandbox Hardening ---
+
+SANDBOX_HARDENING_ADVISORY = (
+    "Sandbox hardening is informational; sandbox isolation requirements may be "
+    "inspected and remediation recommended, but no automatic remediation occurs "
+    "and no sandbox definitions or repository files are modified. No runtimes are "
+    "invoked, no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52G. Remediation is advisory only and "
+    "requires human review."
+)
+
+_SBHD_HARDENING_DOMAINS: tuple[str, ...] = (
+    "filesystem_boundary_validation",
+    "process_boundary_validation",
+    "network_boundary_validation",
+    "environment_boundary_validation",
+    "dependency_boundary_validation",
+    "sandbox_escape_validation",
+    "governance_boundary_alignment",
+    "sandbox_escalation",
+)
+
+_SBHD_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_SBHD_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_SBHD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this sandbox hardening signal.",
+    },
+    {
+        "name": "sandbox_id",
+        "type": "str",
+        "required": True,
+        "description": "The sandbox definition associated with this signal.",
+    },
+    {
+        "name": "hardening_domain",
+        "type": "str",
+        "required": True,
+        "description": "The sandbox hardening domain that produced this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of sandbox isolation signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The sandbox isolation state observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The isolation state required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52G.",
+    },
+)
+
+_SBHD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this sandbox hardening assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of sandbox hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52G.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52G.",
+    },
+)
+
+_SBHD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this sandbox hardening summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of sandbox hardening domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of sandbox hardening signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "hardening_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: hardened, hardened_with_warnings, hardening_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52G.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52G.",
+    },
+)
+
+_SBHD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect sandbox requirements",
+        "detect missing isolation controls",
+        "detect sandbox boundary weaknesses",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify sandbox definitions",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52G",
+}
+
+_SBHD_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContractHardeningAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "ExecutionAuditSummary",
+)
+
+_SBHD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "filesystem_boundary_validation",
+        "signal_type": "filesystem_scope_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — allowed and denied filesystem paths not validated",
+        "expected_state": "filesystem access is deny-by-default and limited to declared paths",
+        "finding": (
+            "Filesystem boundary controls have not been validated against declared "
+            "read and write scopes. Path traversal, symlink resolution, and access "
+            "outside the workspace must be rejected before execution."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "process_boundary_validation",
+        "signal_type": "process_isolation_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — process creation and signaling limits not validated",
+        "expected_state": "process creation, inheritance, signaling, and lifetime are constrained",
+        "finding": (
+            "Process isolation has not been validated. Child process creation, "
+            "process-group escape, inherited descriptors, and termination behavior "
+            "must be bounded deterministically."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "network_boundary_validation",
+        "signal_type": "network_isolation_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — outbound and inbound network policy not validated",
+        "expected_state": "network access is denied by default with explicit governed exceptions",
+        "finding": (
+            "Network isolation has not been validated. DNS, loopback, inbound, and "
+            "outbound connectivity require explicit deny-by-default controls before "
+            "a sandbox can be considered hardened."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "environment_boundary_validation",
+        "signal_type": "environment_isolation_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — environment inheritance and secret filtering not validated",
+        "expected_state": "environment is allowlisted, deterministic, and free of undeclared secrets",
+        "finding": (
+            "Environment isolation has not been validated. Inherited variables, "
+            "credentials, locale, time zone, and search paths may introduce data "
+            "exposure or nondeterministic behavior."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "dependency_boundary_validation",
+        "signal_type": "dependency_isolation_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — dependency resolution and executable provenance not validated",
+        "expected_state": "dependencies are pinned, provenance-checked, and resolved within policy",
+        "finding": (
+            "Dependency isolation has not been validated. Unpinned tools, implicit "
+            "package resolution, or executables outside governed paths can change "
+            "sandbox behavior between otherwise identical assessments."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "sandbox_escape_validation",
+        "signal_type": "escape_resistance_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — sandbox escape paths and privilege boundaries not validated",
+        "expected_state": "known escape vectors are blocked and privilege gain is impossible",
+        "finding": (
+            "Sandbox escape resistance has not been validated. Namespace, mount, "
+            "device, descriptor, interpreter, and privilege escalation paths require "
+            "human-reviewed evidence before execution."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "governance_boundary_alignment",
+        "signal_type": "sandbox_governance_alignment_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — sandbox controls not mapped to governance invariants",
+        "expected_state": "sandbox controls enforce task, runtime, and execution governance boundaries",
+        "finding": (
+            "Sandbox controls have not been aligned with governance invariants. "
+            "Technical isolation must enforce the active task scope and runtime "
+            "contract rather than relying on advisory instructions alone."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "sandbox_escalation",
+        "signal_type": "compound_boundary_failure",
+        "severity": "blocker",
+        "detected_state": "multiple isolation domains remain unvalidated",
+        "expected_state": "no compound sandbox boundary weakness remains unresolved",
+        "finding": (
+            "Multiple sandbox boundaries remain unvalidated. Compound isolation "
+            "weaknesses require escalated human review and keep execution blocked; "
+            "no automatic remediation or authorization is permitted."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_sandbox_hardening() -> dict:
+    """Define sandbox isolation hardening requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _SBHD_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _SBHD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _SBHD_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _SBHD_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_SBHD_HARDENING_DOMAINS)
+
+    if blocker_count:
+        hardening_status = "hardening_required"
+        remediation_recommended = True
+    elif warning_count:
+        hardening_status = "hardened_with_warnings"
+        remediation_recommended = True
+    else:
+        hardening_status = "hardened"
+        remediation_recommended = False
+
+    assessment_id = f"sbhda-{ts}"
+    sample_signal = {
+        "signal_id": f"sbhds-{ts}",
+        "sandbox_id": f"sandbox-{ts}",
+        "hardening_domain": "filesystem_boundary_validation",
+        "signal_type": "filesystem_scope_not_validated",
+        "severity": "blocker",
+        "detected_state": "filesystem isolation controls have not been validated",
+        "expected_state": "filesystem access is deny-by-default and scope constrained",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"sbhdsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "SandboxHardeningSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_SBHD_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52g": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "SandboxHardeningAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_hardening_statuses": list(_SBHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52g": True,
+        "human_review_required_always_true_in_52g": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "SandboxHardeningSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_hardening_statuses": list(_SBHD_HARDENING_STATUSES),
+        "execution_allowed_always_false_in_52g": True,
+        "human_review_required_always_true_in_52g": True,
+        "fields": summary_fields,
+    }
+
+    sandbox_hardening_overview = {
+        "overview_id": f"52g-{ts}",
+        "generated_at": generated_at,
+        "phase": "52G",
+        "title": "Sandbox Hardening",
+        "summary": (
+            "Defines and validates sandbox isolation requirements so future runtime "
+            "execution remains constrained, deterministic, and resistant to boundary "
+            "violations. Filesystem, process, network, environment, dependency, "
+            "escape, governance alignment, and escalation domains are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. hardening_status={hardening_status}. "
+            "Sandboxes are assessed only; no runtime invocation, prompt execution, "
+            "execution authorization, remediation, or repository modification occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "hardening_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "hardening_status": hardening_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "sandbox_hardening_overview": sandbox_hardening_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_SBHD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_SBHD_INPUT_SOURCES),
+        "advisory": SANDBOX_HARDENING_ADVISORY,
+    }
