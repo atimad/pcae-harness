@@ -40353,3 +40353,262 @@ def test_52j_human_output_shows_all_sections(capsys) -> None:
     assert "Lock modification:     False" in output
     assert "execution_allowed=False" in output
     assert "informational" in output.lower()
+
+
+# --- Phase 52K: Parallel Agent Coordination ---
+
+
+def test_52k_json_structure(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "parallel_agent_coordination_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "sample_signal",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key!r}"
+
+
+def test_52k_overview_and_execution_constraints(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["parallel_agent_coordination_overview"]
+    assert overview["phase"] == "52K"
+    assert overview["coordination_domain_count"] == 8
+    assert overview["domain_count"] == 8
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+    assert overview["coordination_status"] in {
+        "coordinated",
+        "coordinated_with_warnings",
+        "coordination_required",
+        "blocked",
+    }
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["lock_modification_allowed"] is False
+    assert boundaries["task_modification_allowed"] is False
+    assert boundaries["session_modification_allowed"] is False
+
+
+def test_52k_models(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    signal_model = data["signal_model"]
+    assert signal_model["model_name"] == "ParallelAgentCoordinationSignal"
+    assert signal_model["field_count"] == 9
+    assert signal_model["field_count"] == signal_model["required_field_count"]
+    assert set(signal_model["severity_values"]) == {"info", "warning", "blocker"}
+    assert signal_model["human_review_required_always_true_in_52k"] is True
+
+    assessment_model = data["assessment_model"]
+    assert assessment_model["model_name"] == "ParallelAgentCoordinationAssessment"
+    assert assessment_model["field_count"] == 8
+    assert assessment_model["field_count"] == assessment_model["required_field_count"]
+    assert assessment_model["execution_allowed_always_false_in_52k"] is True
+    assert assessment_model["human_review_required_always_true_in_52k"] is True
+
+    summary_model = data["summary_model"]
+    assert summary_model["model_name"] == "ParallelAgentCoordinationSummary"
+    assert summary_model["field_count"] == 10
+    assert summary_model["field_count"] == summary_model["required_field_count"]
+    assert summary_model["execution_allowed_always_false_in_52k"] is True
+    assert summary_model["human_review_required_always_true_in_52k"] is True
+
+    statuses = {
+        "coordinated",
+        "coordinated_with_warnings",
+        "coordination_required",
+        "blocked",
+    }
+    assert set(assessment_model["supported_coordination_statuses"]) == statuses
+    assert set(summary_model["supported_coordination_statuses"]) == statuses
+
+
+def test_52k_model_field_names(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert [field["name"] for field in data["signal_model"]["fields"]] == [
+        "signal_id",
+        "coordination_id",
+        "agent_id",
+        "coordination_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["assessment_model"]["fields"]] == [
+        "assessment_id",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "coordination_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+    assert [field["name"] for field in data["summary_model"]["fields"]] == [
+        "summary_id",
+        "assessment_id",
+        "domain_count",
+        "signal_count",
+        "blocker_count",
+        "warning_count",
+        "coordination_status",
+        "remediation_recommended",
+        "execution_allowed",
+        "human_review_required",
+    ]
+
+
+def test_52k_all_coordination_domains_defined(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {signal["domain"] for signal in data["domain_signals"]}
+    assert domains == {
+        "parallel_agent_registration",
+        "parallel_task_claiming",
+        "parallel_session_alignment",
+        "parallel_lock_coordination",
+        "parallel_governance_write_coordination",
+        "parallel_handoff_coordination",
+        "parallel_conflict_escalation",
+        "parallel_recovery_coordination",
+    }
+
+
+def test_52k_lock_and_handoff_coordination_are_blockers(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signals = {signal["domain"]: signal for signal in data["domain_signals"]}
+    for domain in ("parallel_lock_coordination", "parallel_handoff_coordination"):
+        assert signals[domain]["severity"] == "blocker"
+        assert signals[domain]["human_review_required"] is True
+        assert signals[domain]["detected_state"]
+        assert signals[domain]["expected_state"]
+
+
+def test_52k_signal_and_summary_instances(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    signal = data["sample_signal"]
+    assert set(signal) == {
+        "signal_id",
+        "coordination_id",
+        "agent_id",
+        "coordination_domain",
+        "signal_type",
+        "severity",
+        "detected_state",
+        "expected_state",
+        "human_review_required",
+    }
+    assert signal["agent_id"]
+    assert signal["human_review_required"] is True
+
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["domain_signals"])
+    assert summary["signal_count"] == assessment["signal_count"]
+    assert summary["blocker_count"] == assessment["blocker_count"]
+    assert summary["warning_count"] == assessment["warning_count"]
+    assert summary["domain_count"] == 8
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["coordination_status"] == assessment["coordination_status"]
+
+
+def test_52k_remediation_is_advisory_and_state_unchanged(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["sample_assessment"]["remediation_recommended"] is True
+    assert data["sample_summary"]["remediation_recommended"] is True
+    boundaries = data["governance_boundaries"]
+    assert boundaries["remediation_automatic"] is False
+    assert boundaries["read_only"] is True
+    assert boundaries["lock_modification_allowed"] is False
+    assert boundaries["task_modification_allowed"] is False
+    assert boundaries["session_modification_allowed"] is False
+    assert "no automatic remediation" in data["advisory"].lower()
+    assert "no locks, tasks, sessions" in data["advisory"].lower()
+    assert "assessed only" in data["advisory"].lower()
+
+
+def test_52k_governance_boundaries(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52K"
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+
+    allowed = " ".join(boundaries["may"]).lower()
+    for value in (
+        "inspect parallel-agent coordination requirements",
+        "detect coordination risks",
+        "detect handoff and lock coordination gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ):
+        assert value in allowed
+
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for value in (
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert value in forbidden
+
+
+def test_52k_input_sources(capsys) -> None:
+    main(["parallel-agent-coordination", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ConcurrencySafetyAssessment",
+        "AgentLockAssessment",
+        "AgentLockConflictAssessment",
+        "AgentLockRecoveryPlan",
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "RuntimeSafetyInvariantAssessment",
+    ]
+
+
+def test_52k_human_output_shows_all_sections(capsys) -> None:
+    main(["parallel-agent-coordination"])
+    output = capsys.readouterr().out
+    assert "Parallel agent coordination" in output
+    assert "Signal model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain signals" in output
+    assert "Sample signal" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "Lock modification:     False" in output
+    assert "Task modification:     False" in output
+    assert "Session modification:  False" in output
+    assert "execution_allowed=False" in output
+    assert "informational" in output.lower()

@@ -53614,3 +53614,500 @@ def build_concurrency_safety() -> dict:
         "input_sources": list(_CNSF_INPUT_SOURCES),
         "advisory": CONCURRENCY_SAFETY_ADVISORY,
     }
+
+
+# --- Phase 52K: Parallel Agent Coordination ---
+
+PARALLEL_AGENT_COORDINATION_ADVISORY = (
+    "Parallel agent coordination is informational; coordination requirements may be "
+    "inspected and remediation recommended, but no automatic remediation occurs and "
+    "no locks, tasks, sessions, or repository files are modified. No runtimes are "
+    "invoked, no prompts are executed, and no execution is authorized. "
+    "execution_allowed=False in Phase 52K. Coordination is assessed only, and "
+    "remediation requires human review."
+)
+
+_PACD_COORDINATION_DOMAINS: tuple[str, ...] = (
+    "parallel_agent_registration",
+    "parallel_task_claiming",
+    "parallel_session_alignment",
+    "parallel_lock_coordination",
+    "parallel_governance_write_coordination",
+    "parallel_handoff_coordination",
+    "parallel_conflict_escalation",
+    "parallel_recovery_coordination",
+)
+
+_PACD_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_PACD_COORDINATION_STATUSES: tuple[str, ...] = (
+    "coordinated",
+    "coordinated_with_warnings",
+    "coordination_required",
+    "blocked",
+)
+
+_PACD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "signal_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this coordination signal.",
+    },
+    {
+        "name": "coordination_id",
+        "type": "str",
+        "required": True,
+        "description": "The parallel coordination context associated with this signal.",
+    },
+    {
+        "name": "agent_id",
+        "type": "str",
+        "required": True,
+        "description": "The agent associated with this coordination signal.",
+    },
+    {
+        "name": "coordination_domain",
+        "type": "str",
+        "required": True,
+        "description": "The parallel-agent coordination domain producing this signal.",
+    },
+    {
+        "name": "signal_type",
+        "type": "str",
+        "required": True,
+        "description": "The type of coordination signal detected.",
+    },
+    {
+        "name": "severity",
+        "type": "str",
+        "required": True,
+        "description": "Signal severity: info, warning, or blocker.",
+    },
+    {
+        "name": "detected_state",
+        "type": "str",
+        "required": True,
+        "description": "The coordination state observed during assessment.",
+    },
+    {
+        "name": "expected_state",
+        "type": "str",
+        "required": True,
+        "description": "The coordination state required by governance.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52K.",
+    },
+)
+
+_PACD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this coordination assessment.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of coordination signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "coordination_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: coordinated, coordinated_with_warnings, "
+            "coordination_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52K.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52K.",
+    },
+)
+
+_PACD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this coordination summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment represented by this summary.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of coordination domains assessed.",
+    },
+    {
+        "name": "signal_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of coordination signals produced.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of blocker-severity signals.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of warning-severity signals.",
+    },
+    {
+        "name": "coordination_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: coordinated, coordinated_with_warnings, "
+            "coordination_required, or blocked."
+        ),
+    },
+    {
+        "name": "remediation_recommended",
+        "type": "bool",
+        "required": True,
+        "description": "Whether human-reviewed remediation is recommended.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 52K.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 52K.",
+    },
+)
+
+_PACD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect parallel-agent coordination requirements",
+        "detect coordination risks",
+        "detect handoff and lock coordination gaps",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "modify locks",
+        "modify tasks",
+        "modify sessions",
+        "invoke runtimes",
+        "execute prompts",
+        "authorize execution",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "lock_modification_allowed": False,
+    "task_modification_allowed": False,
+    "session_modification_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "remediation_automatic": False,
+    "read_only": True,
+    "phase": "52K",
+}
+
+_PACD_INPUT_SOURCES: tuple[str, ...] = (
+    "ConcurrencySafetyAssessment",
+    "AgentLockAssessment",
+    "AgentLockConflictAssessment",
+    "AgentLockRecoveryPlan",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "RuntimeSafetyInvariantAssessment",
+)
+
+_PACD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "parallel_agent_registration",
+        "signal_type": "parallel_agent_registration_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — parallel agent registration rules not validated",
+        "expected_state": "each active agent has a unique identity and declared coordination role",
+        "finding": (
+            "Parallel agent registration has not been validated. Agent identity, "
+            "capabilities, ownership scope, and lifecycle state must remain unique "
+            "and discoverable without this assessment registering any agent."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_task_claiming",
+        "signal_type": "parallel_task_claiming_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — atomic task claiming controls not validated",
+        "expected_state": "task claims are exclusive, atomic, attributable, and conflict detectable",
+        "finding": (
+            "Parallel task claiming has not been validated. Competing agents must "
+            "not acquire or mutate the same task through stale reads or non-atomic "
+            "ownership updates."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_session_alignment",
+        "signal_type": "parallel_session_alignment_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — agent, task, and session alignment not validated",
+        "expected_state": "each session aligns to one agent, task claim, and continuity record",
+        "finding": (
+            "Parallel session alignment has not been validated. Agent identity, task "
+            "ownership, session continuity, and provenance must reference the same "
+            "governed coordination context."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_lock_coordination",
+        "signal_type": "parallel_lock_coordination_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — parallel lock ownership and transfer not validated",
+        "expected_state": "lock ownership is exclusive, ordered, attributable, and safely transferable",
+        "finding": (
+            "Parallel lock coordination has not been validated. Acquisition, "
+            "contention, handoff, stale ownership, and recovery require deterministic "
+            "contracts without this assessment modifying any lock."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_governance_write_coordination",
+        "signal_type": "parallel_governance_writes_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — concurrent governance write ordering not validated",
+        "expected_state": "governance writes are atomic, version checked, and conflict detectable",
+        "finding": (
+            "Parallel governance write coordination has not been validated. Policy, "
+            "task, session, provenance, and project memory updates must reject stale "
+            "or conflicting writes."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_handoff_coordination",
+        "signal_type": "parallel_handoff_coordination_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — handoff ordering and ownership transfer not validated",
+        "expected_state": "handoff transfers task, session, and lock ownership atomically",
+        "finding": (
+            "Parallel handoff coordination has not been validated. The outgoing and "
+            "incoming agents need an ordered, attributable transfer that cannot leave "
+            "split ownership or stale session state."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_conflict_escalation",
+        "signal_type": "parallel_conflict_escalation_not_validated",
+        "severity": "warning",
+        "detected_state": "unknown — coordination conflict escalation not validated",
+        "expected_state": "unresolved coordination conflicts stop work and require human review",
+        "finding": (
+            "Parallel conflict escalation has not been validated. Repeated claims, "
+            "lock conflicts, stale sessions, or governance write conflicts must halt "
+            "coordination rather than trigger automatic mutation."
+        ),
+        "human_review_required": True,
+    },
+    {
+        "domain": "parallel_recovery_coordination",
+        "signal_type": "parallel_recovery_coordination_not_validated",
+        "severity": "blocker",
+        "detected_state": "unknown — coordinated recovery ordering not validated",
+        "expected_state": "recovery preserves ownership, ordering, and shared-state consistency",
+        "finding": (
+            "Parallel recovery coordination has not been validated. Lock, task, "
+            "session, and governance recovery plans must not race with active agents "
+            "or each other."
+        ),
+        "human_review_required": True,
+    },
+)
+
+
+def build_parallel_agent_coordination() -> dict:
+    """Define parallel-agent coordination requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    signal_fields = [dict(field) for field in _PACD_SIGNAL_FIELDS]
+    assessment_fields = [dict(field) for field in _PACD_ASSESSMENT_FIELDS]
+    summary_fields = [dict(field) for field in _PACD_SUMMARY_FIELDS]
+    domain_signals = [dict(signal) for signal in _PACD_DOMAIN_SIGNALS]
+
+    blocker_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "blocker"
+    )
+    warning_count = sum(
+        1 for signal in domain_signals if signal["severity"] == "warning"
+    )
+    info_count = sum(1 for signal in domain_signals if signal["severity"] == "info")
+    signal_count = len(domain_signals)
+    domain_count = len(_PACD_COORDINATION_DOMAINS)
+
+    if blocker_count:
+        coordination_status = "coordination_required"
+        remediation_recommended = True
+    elif warning_count:
+        coordination_status = "coordinated_with_warnings"
+        remediation_recommended = True
+    else:
+        coordination_status = "coordinated"
+        remediation_recommended = False
+
+    assessment_id = f"pacda-{ts}"
+    sample_signal = {
+        "signal_id": f"pacds-{ts}",
+        "coordination_id": f"coordination-{ts}",
+        "agent_id": "agent-unassigned",
+        "coordination_domain": "parallel_lock_coordination",
+        "signal_type": "parallel_lock_coordination_not_validated",
+        "severity": "blocker",
+        "detected_state": "parallel lock coordination has not been validated",
+        "expected_state": "lock ownership is exclusive and safely transferable",
+        "human_review_required": True,
+    }
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "coordination_status": coordination_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"pacdsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "coordination_status": coordination_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    signal_model = {
+        "model_name": "ParallelAgentCoordinationSignal",
+        "field_count": len(signal_fields),
+        "required_field_count": sum(1 for field in signal_fields if field["required"]),
+        "severity_values": list(_PACD_SEVERITY_VALUES),
+        "human_review_required_always_true_in_52k": True,
+        "fields": signal_fields,
+    }
+    assessment_model = {
+        "model_name": "ParallelAgentCoordinationAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(
+            1 for field in assessment_fields if field["required"]
+        ),
+        "supported_coordination_statuses": list(_PACD_COORDINATION_STATUSES),
+        "execution_allowed_always_false_in_52k": True,
+        "human_review_required_always_true_in_52k": True,
+        "fields": assessment_fields,
+    }
+    summary_model = {
+        "model_name": "ParallelAgentCoordinationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for field in summary_fields if field["required"]),
+        "supported_coordination_statuses": list(_PACD_COORDINATION_STATUSES),
+        "execution_allowed_always_false_in_52k": True,
+        "human_review_required_always_true_in_52k": True,
+        "fields": summary_fields,
+    }
+
+    parallel_agent_coordination_overview = {
+        "overview_id": f"52k-{ts}",
+        "generated_at": generated_at,
+        "phase": "52K",
+        "title": "Parallel Agent Coordination",
+        "summary": (
+            "Defines coordination requirements for multiple agents operating in "
+            "parallel without corrupting shared task, session, lock, or governance "
+            "state. Registration, task claiming, session alignment, lock coordination, "
+            "governance writes, handoff, conflict escalation, and recovery domains "
+            "are assessed. "
+            f"domain_count={domain_count}, signal_count={signal_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}, "
+            f"info_count={info_count}. coordination_status={coordination_status}. "
+            "Coordination is assessed only; no lock, task, session, runtime, prompt, "
+            "authorization, remediation, or repository mutation occurs. "
+            f"remediation_recommended={remediation_recommended}. "
+            "execution_allowed=False."
+        ),
+        "coordination_domain_count": domain_count,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "info_count": info_count,
+        "coordination_status": coordination_status,
+        "remediation_recommended": remediation_recommended,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "parallel_agent_coordination_overview": parallel_agent_coordination_overview,
+        "signal_model": signal_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_signals": domain_signals,
+        "sample_signal": sample_signal,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_PACD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_PACD_INPUT_SOURCES),
+        "advisory": PARALLEL_AGENT_COORDINATION_ADVISORY,
+    }

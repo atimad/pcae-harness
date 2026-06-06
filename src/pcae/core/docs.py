@@ -837,6 +837,11 @@ def render_commands_reference() -> str:
 
 - `pcae concurrency-safety`
 - `pcae concurrency-safety --json`
+
+## parallel-agent-coordination
+
+- `pcae parallel-agent-coordination`
+- `pcae parallel-agent-coordination --json`
 """
 
 

@@ -816,3 +816,8 @@
 
 - `pcae concurrency-safety`
 - `pcae concurrency-safety --json`
+
+## parallel-agent-coordination
+
+- `pcae parallel-agent-coordination`
+- `pcae parallel-agent-coordination --json`

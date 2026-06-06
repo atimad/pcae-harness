@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 52J: Concurrency Safety.
+Phase 52K: Parallel Agent Coordination.
 
 ## Governance Coherence Note
 

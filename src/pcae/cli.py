@@ -144,6 +144,7 @@ from pcae.commands.agent import (
     run_timeout_hardening,
     run_output_integrity_verification,
     run_concurrency_safety,
+    run_parallel_agent_coordination,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4146,6 +4147,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     concurrency_safety_parser.set_defaults(handler=run_concurrency_safety)
+
+    parallel_agent_coordination_parser = subparsers.add_parser(
+        "parallel-agent-coordination",
+        help="Define and validate coordination requirements for agents operating in parallel (Phase 52K).",
+    )
+    parallel_agent_coordination_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    parallel_agent_coordination_parser.set_defaults(
+        handler=run_parallel_agent_coordination
+    )
 
     return parser
 
