@@ -721,3 +721,8 @@
 
 - `pcae execution-review`
 - `pcae execution-review --json`
+
+## execution-decision
+
+- `pcae execution-decision`
+- `pcae execution-decision --json`

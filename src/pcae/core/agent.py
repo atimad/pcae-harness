@@ -44506,3 +44506,481 @@ def build_execution_review() -> dict:
         "input_sources": list(_ERW_INPUT_SOURCES),
         "advisory": EXECUTION_REVIEW_ADVISORY,
     }
+
+
+# Phase 51C — Execution Decision Record
+# ---------------------------------------------------------------------------
+
+EXECUTION_DECISION_ADVISORY = (
+    "Execution decision is informational; decision models may be defined and "
+    "decision outcomes classified, but no execution occurs and no authorization "
+    "is granted. No files are modified, no runtimes are invoked, and no prompts "
+    "are executed. decision_allowed=False and execution_allowed=False in Phase 51C."
+)
+
+_EDR_DECISION_DOMAINS: tuple[str, ...] = (
+    "intent_decision",
+    "scope_decision",
+    "target_decision",
+    "runtime_decision",
+    "agent_decision",
+    "constraint_decision",
+    "risk_decision",
+    "final_execution_decision",
+)
+
+_EDR_DECISION_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "approved",
+    "rejected",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_EDR_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution decision candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this decision candidate is associated with.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution review this decision candidate is based on.",
+    },
+    {
+        "name": "execution_intent",
+        "type": "str",
+        "required": True,
+        "description": "Declared intent carried forward from the execution request.",
+    },
+    {
+        "name": "execution_scope",
+        "type": "str",
+        "required": True,
+        "description": "Scope of files, resources, or systems carried forward from the request.",
+    },
+    {
+        "name": "execution_target",
+        "type": "str",
+        "required": True,
+        "description": "The specific target carried forward from the execution request.",
+    },
+    {
+        "name": "selected_runtime",
+        "type": "str",
+        "required": True,
+        "description": "The runtime selected for execution carried forward from review.",
+    },
+    {
+        "name": "selected_agent",
+        "type": "str",
+        "required": True,
+        "description": "The agent selected for execution carried forward from review.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51C.",
+    },
+    {
+        "name": "decision_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51C.",
+    },
+)
+
+_EDR_RECORD_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution decision record.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this decision record is associated with.",
+    },
+    {
+        "name": "review_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution review this decision record is based on.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: draft, pending_human_review, approved, rejected, "
+            "changes_requested, escalated, or blocked."
+        ),
+    },
+    {
+        "name": "accepted_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Decision domains where the execution intent was accepted.",
+    },
+    {
+        "name": "rejected_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "Decision domains where the execution intent was rejected.",
+    },
+    {
+        "name": "requested_changes",
+        "type": "list[str]",
+        "required": True,
+        "description": "Changes requested before execution can be reconsidered.",
+    },
+    {
+        "name": "escalations",
+        "type": "list[str]",
+        "required": True,
+        "description": "Escalation paths identified during the decision process.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51C.",
+    },
+)
+
+_EDR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this execution decision summary.",
+    },
+    {
+        "name": "decision_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution decision record this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of decision domains assessed.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of decision domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of decision domains with non-blocking warnings.",
+    },
+    {
+        "name": "decision_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: draft, pending_human_review, approved, rejected, "
+            "changes_requested, escalated, or blocked."
+        ),
+    },
+    {
+        "name": "decision_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51C.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51C.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51C.",
+    },
+)
+
+_EDR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define execution decision models",
+        "classify decision outcomes",
+        "recommend requested changes",
+        "recommend escalation paths",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "decision_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51C",
+}
+
+_EDR_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestCandidate",
+    "ExecutionRequestRecord",
+    "ExecutionRequestSummary",
+    "ExecutionReviewRecord",
+    "ExecutionReviewSummary",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceInvariantAssessment",
+)
+
+_EDR_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "intent_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for execution intent. "
+            "The declared intent must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "scope_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for execution scope. "
+            "The declared scope must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "target_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for execution target. "
+            "The nominated target must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "runtime_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for runtime selection. "
+            "The nominated runtime must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "agent_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for agent selection. "
+            "The nominated agent must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "constraint_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for execution constraints. "
+            "Declared constraints must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "risk_decision",
+        "severity": "blocker",
+        "finding": (
+            "No decision has been recorded for execution risk. "
+            "The risk assessment must be formally accepted or rejected by a human "
+            "reviewer before an execution decision can be issued."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "final_execution_decision",
+        "severity": "blocker",
+        "finding": (
+            "No final execution decision has been recorded. "
+            "All domain decisions must be accepted and a final human-authorized "
+            "execution decision must be present before execution can proceed."
+        ),
+        "decision_allowed": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_decision() -> dict:
+    """Define the governed execution decision artifact. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    decision_id_ref = f"edr-{ts}"
+
+    candidate_fields = [dict(f) for f in _EDR_CANDIDATE_FIELDS]
+    record_fields = [dict(f) for f in _EDR_RECORD_FIELDS]
+    summary_fields = [dict(f) for f in _EDR_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _EDR_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        decision_status = "pending_human_review"
+    elif warning_count > 0:
+        decision_status = "changes_requested"
+    else:
+        decision_status = "blocked"
+
+    record_id_ref = f"edrr-{ts}"
+
+    sample_candidate = {
+        "decision_id": decision_id_ref,
+        "request_id": f"era-{ts}",
+        "review_id": f"erw-{ts}",
+        "execution_intent": "pending",
+        "execution_scope": "pending",
+        "execution_target": "pending",
+        "selected_runtime": "pending",
+        "selected_agent": "pending",
+        "human_review_required": True,
+        "decision_allowed": False,
+    }
+
+    sample_record = {
+        "decision_id": record_id_ref,
+        "request_id": f"era-{ts}",
+        "review_id": f"erw-{ts}",
+        "decision_status": decision_status,
+        "accepted_domains": [],
+        "rejected_domains": [],
+        "requested_changes": [],
+        "escalations": [],
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"edrsum-{ts}",
+        "decision_id": record_id_ref,
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "decision_status": decision_status,
+        "decision_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionDecisionCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_decision_statuses": list(_EDR_DECISION_STATUSES),
+        "decision_allowed_always_false_in_51c": True,
+        "fields": candidate_fields,
+    }
+
+    record_model = {
+        "model_name": "ExecutionDecisionRecord",
+        "field_count": len(record_fields),
+        "required_field_count": sum(1 for f in record_fields if f["required"]),
+        "supported_decision_statuses": list(_EDR_DECISION_STATUSES),
+        "execution_allowed_always_false_in_51c": True,
+        "fields": record_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionDecisionSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_decision_statuses": list(_EDR_DECISION_STATUSES),
+        "decision_allowed_always_false_in_51c": True,
+        "execution_allowed_always_false_in_51c": True,
+        "fields": summary_fields,
+    }
+
+    execution_decision_overview = {
+        "overview_id": f"51c-{ts}",
+        "generated_at": generated_at,
+        "phase": "51C",
+        "title": "Execution Decision Record",
+        "summary": (
+            "Defines the governed execution decision artifact produced after execution "
+            "review. Eight decision domains are assessed: "
+            "intent_decision, scope_decision, target_decision, runtime_decision, "
+            "agent_decision, constraint_decision, risk_decision, and "
+            "final_execution_decision. "
+            f"domain_count={domain_count}, blocker_count={blocker_count}, "
+            f"warning_count={warning_count}. "
+            f"decision_status={decision_status}. "
+            "Execution decision definition is advisory and read-only. "
+            "No execution occurs. decision_allowed=False. execution_allowed=False."
+        ),
+        "decision_domain_count": len(_EDR_DECISION_DOMAINS),
+        "domain_count": domain_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "decision_status": decision_status,
+        "decision_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_decision_overview": execution_decision_overview,
+        "candidate_model": candidate_model,
+        "record_model": record_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_record": sample_record,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_EDR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_EDR_INPUT_SOURCES),
+        "advisory": EXECUTION_DECISION_ADVISORY,
+    }

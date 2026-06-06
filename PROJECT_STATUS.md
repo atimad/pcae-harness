@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 51B: Execution Review Workflow.
+Phase 51C: Execution Decision Record.
 
 ## Governance Coherence Note
 
@@ -3626,13 +3626,38 @@ GovernanceRecoveryPlan; execution review definition is advisory and
 read-only; no execution occurs; no files are modified; `docs/COMMANDS.md`
 regenerated; 15 new tests; 3868 total tests passing
 
+## Phase 51C: Execution Decision Record
+
+Implemented `pcae execution-decision` and `--json`. Defines the governed
+execution decision artifact produced after execution review. Three models —
+ExecutionDecisionCandidate (10 fields: decision_id, request_id, review_id,
+execution_intent, execution_scope, execution_target, selected_runtime,
+selected_agent, human_review_required, decision_allowed),
+ExecutionDecisionRecord (10 fields: decision_id, request_id, review_id,
+decision_status, accepted_domains, rejected_domains, requested_changes,
+escalations, execution_allowed, human_review_required), ExecutionDecisionSummary
+(9 fields: summary_id, decision_id, domain_count, blocker_count, warning_count,
+decision_status, decision_allowed, execution_allowed, human_review_required);
+seven decision statuses: draft, pending_human_review, approved, rejected,
+changes_requested, escalated, blocked; eight decision domains: intent_decision,
+scope_decision, target_decision, runtime_decision, agent_decision,
+constraint_decision, risk_decision, final_execution_decision; eight blockers;
+decision_status=pending_human_review; decision_allowed=False;
+execution_allowed=False; human_review_required=True; inputs:
+ExecutionRequestCandidate, ExecutionRequestRecord, ExecutionRequestSummary,
+ExecutionReviewRecord, ExecutionReviewSummary,
+RuntimeSafetyInvariantAssessment, GovernanceInvariantAssessment; execution
+decision definition is advisory and read-only; no execution occurs; no files
+are modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3883 total tests
+passing
+
 ## Current Phase
 
 Phase 51A: Execution Request Model.
 
 ## Next
 
-- TBD: Future phases (51C and beyond).
+- TBD: Future phases (51D and beyond).
 
 ## Future Explorations
 

@@ -125,6 +125,7 @@ from pcae.commands.agent import (
     run_write_recommendation,
     run_execution_request,
     run_execution_review,
+    run_execution_decision,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3912,6 +3913,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_review_parser.set_defaults(handler=run_execution_review)
+
+    execution_decision_parser = subparsers.add_parser(
+        "execution-decision",
+        help="Define the governed execution decision artifact produced after execution review (Phase 51C).",
+    )
+    execution_decision_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_decision_parser.set_defaults(handler=run_execution_decision)
 
     return parser
 

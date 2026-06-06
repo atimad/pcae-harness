@@ -742,6 +742,11 @@ def render_commands_reference() -> str:
 
 - `pcae execution-review`
 - `pcae execution-review --json`
+
+## execution-decision
+
+- `pcae execution-decision`
+- `pcae execution-decision --json`
 """
 
 
