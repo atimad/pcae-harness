@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 50J: Controlled Write Governance Audit.
+Phase 50K: Controlled Write Recommendation Engine.
 
 ## Governance Coherence Note
 
@@ -3552,13 +3552,41 @@ audit is advisory and read-only; no write execution occurs; no files are
 modified; `docs/COMMANDS.md` regenerated; 15 new tests; 3823 total tests
 passing
 
+`pcae write-recommendation` and `--json`; determines whether a governed
+write should be recommended for future consideration based on governance
+readiness; three models — WriteRecommendationCandidate (5 fields:
+recommendation_id, governance_chain_id, recommendation_domains,
+human_review_required, recommendation_allowed),
+WriteRecommendationAssessment (10 fields: assessment_id, recommendation_id,
+domain_count, compliant_count, blocker_count, warning_count,
+recommendation_status, recommendation_allowed, authorization_allowed,
+execution_allowed), WriteRecommendationSummary (11 fields: summary_id,
+assessment_id, domain_count, compliant_count, blocker_count, warning_count,
+recommendation_status, recommendation_allowed, authorization_allowed,
+execution_allowed, human_review_required); four recommendation statuses:
+not_recommended, recommended_with_warnings, pending_human_review,
+recommended; ten recommendation domains: authorization_recommendation,
+review_recommendation, decision_recommendation, lifecycle_recommendation,
+planning_recommendation, readiness_recommendation, evidence_recommendation,
+audit_recommendation, rollback_recommendation, governance_recommendation;
+ten blockers; recommendation_status=pending_human_review;
+recommendation_allowed=False; authorization_allowed=False;
+execution_allowed=False; human_review_required=True; inputs:
+WriteAuthorizationSummary, WriteAuthorizationReviewSummary,
+WriteAuthorizationDecisionSummary, WriteAuthorizationLifecycleSummary,
+WritePlanSummary, WriteReadinessSummary, WriteEvidenceSummary,
+WriteAuditSummary, WriteRollbackVerificationSummary,
+WriteGovernanceAuditSummary; write recommendation is advisory only; no
+authorization occurs; no write execution occurs; no files are modified;
+`docs/COMMANDS.md` regenerated; 15 new tests; 3838 total tests passing
+
 ## Current Phase
 
-Phase 50J: Controlled Write Governance Audit.
+Phase 50K: Controlled Write Recommendation Engine.
 
 ## Next
 
-- TBD: Future phases (50K and beyond).
+- TBD: Future phases (50L and beyond).
 
 ## Future Explorations
 

@@ -43089,3 +43089,486 @@ def build_write_governance_audit() -> dict:
         "input_sources": list(_WGA_INPUT_SOURCES),
         "advisory": WRITE_GOVERNANCE_AUDIT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 50K — Controlled Write Recommendation Engine
+# ---------------------------------------------------------------------------
+
+WRITE_RECOMMENDATION_ADVISORY = (
+    "Write recommendation is informational; governance readiness may be assessed "
+    "and a recommendation issued, but no automatic authorization occurs. "
+    "No write execution occurs, no files are modified, no runtimes are invoked, "
+    "and no prompts are executed. recommendation_allowed=False, "
+    "authorization_allowed=False, and execution_allowed=False in Phase 50K."
+)
+
+_WRE_RECOMMENDATION_DOMAINS: tuple[str, ...] = (
+    "authorization_recommendation",
+    "review_recommendation",
+    "decision_recommendation",
+    "lifecycle_recommendation",
+    "planning_recommendation",
+    "readiness_recommendation",
+    "evidence_recommendation",
+    "audit_recommendation",
+    "rollback_recommendation",
+    "governance_recommendation",
+)
+
+_WRE_RECOMMENDATION_STATUSES: tuple[str, ...] = (
+    "not_recommended",
+    "recommended_with_warnings",
+    "pending_human_review",
+    "recommended",
+)
+
+_WRE_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "recommendation_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write recommendation candidate.",
+    },
+    {
+        "name": "governance_chain_id",
+        "type": "str",
+        "required": True,
+        "description": "Identifier for the governance chain being evaluated (50A–50J).",
+    },
+    {
+        "name": "recommendation_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of recommendation domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50K.",
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+)
+
+_WRE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write recommendation assessment.",
+    },
+    {
+        "name": "recommendation_id",
+        "type": "str",
+        "required": True,
+        "description": "The write recommendation candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recommendation domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with sufficient governance artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with missing or blocking governance artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "recommendation_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_recommended, recommended_with_warnings, "
+            "pending_human_review, or recommended."
+        ),
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+)
+
+_WRE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this write recommendation summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The write recommendation assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of recommendation domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with sufficient governance artifacts.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with missing or blocking governance artifacts.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of domains with incomplete but non-blocking artifacts.",
+    },
+    {
+        "name": "recommendation_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: not_recommended, recommended_with_warnings, "
+            "pending_human_review, or recommended."
+        ),
+    },
+    {
+        "name": "recommendation_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+    {
+        "name": "authorization_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 50K.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 50K.",
+    },
+)
+
+_WRE_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess governance completeness",
+        "identify missing governance controls",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "recommendation_allowed": False,
+    "authorization_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "50K",
+}
+
+_WRE_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteAuthorizationSummary",
+    "WriteAuthorizationReviewSummary",
+    "WriteAuthorizationDecisionSummary",
+    "WriteAuthorizationLifecycleSummary",
+    "WritePlanSummary",
+    "WriteReadinessSummary",
+    "WriteEvidenceSummary",
+    "WriteAuditSummary",
+    "WriteRollbackVerificationSummary",
+    "WriteGovernanceAuditSummary",
+)
+
+_WRE_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "authorization_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteAuthorizationSummary is available. "
+            "A completed write authorization summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "review_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteAuthorizationReviewSummary is available. "
+            "A completed write authorization review summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "decision_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteAuthorizationDecisionSummary is available. "
+            "A completed write authorization decision summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "lifecycle_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteAuthorizationLifecycleSummary is available. "
+            "A completed write authorization lifecycle summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "planning_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WritePlanSummary is available. "
+            "A completed write plan summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "readiness_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteReadinessSummary is available. "
+            "A completed write readiness summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "evidence_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteEvidenceSummary is available. "
+            "A completed write evidence summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "audit_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteAuditSummary is available. "
+            "A completed write audit summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "rollback_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteRollbackVerificationSummary is available. "
+            "A completed write rollback verification summary is required before "
+            "a recommendation for this governance domain can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+    {
+        "domain": "governance_recommendation",
+        "severity": "blocker",
+        "finding": (
+            "No WriteGovernanceAuditSummary is available. "
+            "A completed write governance audit summary is required before "
+            "a cross-chain recommendation can be issued."
+        ),
+        "recommendation_allowed": False,
+    },
+)
+
+
+def build_write_recommendation() -> dict:
+    """Determine write recommendation based on governance readiness. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    recommendation_id_ref = f"wre-{ts}"
+
+    candidate_fields = [dict(f) for f in _WRE_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _WRE_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _WRE_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _WRE_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        recommendation_status = "pending_human_review"
+    elif warning_count > 0:
+        recommendation_status = "recommended_with_warnings"
+    else:
+        recommendation_status = "not_recommended"
+
+    assessment_id_ref = f"wrea-{ts}"
+
+    sample_candidate = {
+        "recommendation_id": recommendation_id_ref,
+        "governance_chain_id": f"gc-50a-50j-{ts}",
+        "recommendation_domains": list(_WRE_RECOMMENDATION_DOMAINS),
+        "human_review_required": True,
+        "recommendation_allowed": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "recommendation_id": recommendation_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+    }
+
+    sample_summary = {
+        "summary_id": f"wres-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "WriteRecommendationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_recommendation_statuses": list(_WRE_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_50k": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "WriteRecommendationAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_recommendation_statuses": list(_WRE_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_50k": True,
+        "authorization_allowed_always_false_in_50k": True,
+        "execution_allowed_always_false_in_50k": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "WriteRecommendationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_recommendation_statuses": list(_WRE_RECOMMENDATION_STATUSES),
+        "recommendation_allowed_always_false_in_50k": True,
+        "authorization_allowed_always_false_in_50k": True,
+        "execution_allowed_always_false_in_50k": True,
+        "fields": summary_fields,
+    }
+
+    write_recommendation_overview = {
+        "overview_id": f"50k-{ts}",
+        "generated_at": generated_at,
+        "phase": "50K",
+        "title": "Controlled Write Recommendation Engine",
+        "summary": (
+            "Determines whether a governed write should be recommended for future "
+            "consideration based on governance readiness assessed across the complete "
+            "50A–50J chain. Ten recommendation domains are assessed: "
+            "authorization_recommendation, review_recommendation, "
+            "decision_recommendation, lifecycle_recommendation, "
+            "planning_recommendation, readiness_recommendation, "
+            "evidence_recommendation, audit_recommendation, "
+            "rollback_recommendation, and governance_recommendation. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"recommendation_status={recommendation_status}. "
+            "Write recommendation is advisory only. No authorization occurs. "
+            "recommendation_allowed=False. authorization_allowed=False. "
+            "execution_allowed=False."
+        ),
+        "recommendation_domain_count": len(_WRE_RECOMMENDATION_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recommendation_status": recommendation_status,
+        "recommendation_allowed": False,
+        "authorization_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "write_recommendation_overview": write_recommendation_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_WRE_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_WRE_INPUT_SOURCES),
+        "advisory": WRITE_RECOMMENDATION_ADVISORY,
+    }

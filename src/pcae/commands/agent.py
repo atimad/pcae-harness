@@ -219,6 +219,8 @@ from pcae.core.agent import (
     WRITE_ROLLBACK_VERIFICATION_ADVISORY,
     build_write_governance_audit,
     WRITE_GOVERNANCE_AUDIT_ADVISORY,
+    build_write_recommendation,
+    WRITE_RECOMMENDATION_ADVISORY,
     WRITE_ROLLBACK_DRY_RUN_ADVISORY,
     build_planning_execution_design,
     build_planning_prototype_design,
@@ -8673,6 +8675,93 @@ def run_write_governance_audit(args: argparse.Namespace) -> int:
         print(f"  Audit complete:        {gb['audit_complete']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_write_recommendation(args: argparse.Namespace) -> int:
+    data = build_write_recommendation()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["write_recommendation_overview"]
+        print("Controlled write recommendation engine")
+        print(f"Recommendation: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Recommendation domains: {ov['recommendation_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Compliant:              {ov['compliant_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Recommendation status:  {ov['recommendation_status']}")
+        print(f"Recommendation allowed: {'yes' if ov['recommendation_allowed'] else 'no'}")
+        print(f"Authorization allowed:  {'yes' if ov['authorization_allowed'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_recommendation_statuses'])}")
+        print(f"  recommendation_allowed always False in 50K: {cm['recommendation_allowed_always_false_in_50k']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print(f"  recommendation_allowed always False in 50K: {am['recommendation_allowed_always_false_in_50k']}")
+        print(f"  authorization_allowed always False in 50K:  {am['authorization_allowed_always_false_in_50k']}")
+        print(f"  execution_allowed always False in 50K:      {am['execution_allowed_always_false_in_50k']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  recommendation_allowed always False in 50K: {sm['recommendation_allowed_always_false_in_50k']}")
+        print(f"  authorization_allowed always False in 50K:  {sm['authorization_allowed_always_false_in_50k']}")
+        print(f"  execution_allowed always False in 50K:      {sm['execution_allowed_always_false_in_50k']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  recommendation_allowed: {sc['recommendation_allowed']}")
+        print(f"  human_review_required:  {sc['human_review_required']}")
+        print(f"  domains:                {len(sc['recommendation_domains'])}")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  recommendation_status:  {sa['recommendation_status']}")
+        print(f"  domain_count:           {sa['domain_count']}")
+        print(f"  compliant_count:        {sa['compliant_count']}")
+        print(f"  blocker_count:          {sa['blocker_count']}")
+        print(f"  warning_count:          {sa['warning_count']}")
+        print(f"  recommendation_allowed: {sa['recommendation_allowed']}")
+        print(f"  authorization_allowed:  {sa['authorization_allowed']}")
+        print(f"  execution_allowed:      {sa['execution_allowed']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  recommendation_status:  {ss['recommendation_status']}")
+        print(f"  domain_count:           {ss['domain_count']}")
+        print(f"  compliant_count:        {ss['compliant_count']}")
+        print(f"  blocker_count:          {ss['blocker_count']}")
+        print(f"  warning_count:          {ss['warning_count']}")
+        print(f"  recommendation_allowed: {ss['recommendation_allowed']}")
+        print(f"  authorization_allowed:  {ss['authorization_allowed']}")
+        print(f"  execution_allowed:      {ss['execution_allowed']}")
+        print(f"  human_review_required:  {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                    {', '.join(gb['may'])}")
+        print(f"  May not:                {', '.join(gb['may_not'])}")
+        print(f"  Recommendation allowed: {gb['recommendation_allowed']}")
+        print(f"  Authorization allowed:  {gb['authorization_allowed']}")
+        print(f"  Execution allowed:      {gb['execution_allowed']}")
+        print(f"  Human review req'd:     {gb['human_review_required']}")
         print()
         print(data["advisory"])
     return 0

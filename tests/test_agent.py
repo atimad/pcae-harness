@@ -35336,3 +35336,239 @@ def test_50j_human_output_shows_all_sections(capsys) -> None:
     assert "Sample summary" in output
     assert "Governance boundaries" in output
     assert "informational" in output.lower()
+
+# Phase 50K — Controlled Write Recommendation Engine tests
+# ---------------------------------------------------------------------------
+
+def test_50k_json_structure(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "write_recommendation_overview", "candidate_model", "assessment_model",
+        "summary_model", "domain_assessments", "sample_candidate",
+        "sample_assessment", "sample_summary",
+        "governance_boundaries", "input_sources", "advisory",
+    ):
+        assert key in data, f"missing top-level key: {key}"
+
+
+def test_50k_overview_fields(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ov = data["write_recommendation_overview"]
+    assert ov["phase"] == "50K"
+    assert ov["recommendation_allowed"] is False
+    assert ov["authorization_allowed"] is False
+    assert ov["execution_allowed"] is False
+    assert ov["human_review_required"] is True
+    assert ov["recommendation_domain_count"] == 10
+    assert isinstance(ov["domain_count"], int)
+    assert isinstance(ov["compliant_count"], int)
+    assert isinstance(ov["blocker_count"], int)
+    assert isinstance(ov["warning_count"], int)
+    assert ov["recommendation_status"] in (
+        "not_recommended", "recommended_with_warnings",
+        "pending_human_review", "recommended"
+    )
+
+
+def test_50k_always_blocked(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_recommendation_overview"]["recommendation_allowed"] is False
+    assert data["write_recommendation_overview"]["authorization_allowed"] is False
+    assert data["write_recommendation_overview"]["execution_allowed"] is False
+    assert data["sample_candidate"]["recommendation_allowed"] is False
+    assert data["sample_assessment"]["recommendation_allowed"] is False
+    assert data["sample_assessment"]["authorization_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["recommendation_allowed"] is False
+    assert data["sample_summary"]["authorization_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["recommendation_allowed"] is False
+    assert data["governance_boundaries"]["authorization_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+    assert data["candidate_model"]["recommendation_allowed_always_false_in_50k"] is True
+    assert data["assessment_model"]["recommendation_allowed_always_false_in_50k"] is True
+    assert data["assessment_model"]["authorization_allowed_always_false_in_50k"] is True
+    assert data["assessment_model"]["execution_allowed_always_false_in_50k"] is True
+    assert data["summary_model"]["recommendation_allowed_always_false_in_50k"] is True
+    assert data["summary_model"]["authorization_allowed_always_false_in_50k"] is True
+    assert data["summary_model"]["execution_allowed_always_false_in_50k"] is True
+    for d in data["domain_assessments"]:
+        assert d["recommendation_allowed"] is False
+
+
+def test_50k_human_review_always_required(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["write_recommendation_overview"]["human_review_required"] is True
+    assert data["sample_candidate"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+
+
+def test_50k_candidate_model(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    cm = data["candidate_model"]
+    assert cm["model_name"] == "WriteRecommendationCandidate"
+    assert cm["field_count"] == cm["required_field_count"]
+    assert cm["field_count"] == 5
+    assert set(cm["supported_recommendation_statuses"]) == {
+        "not_recommended", "recommended_with_warnings",
+        "pending_human_review", "recommended"
+    }
+
+
+def test_50k_assessment_model(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    am = data["assessment_model"]
+    assert am["model_name"] == "WriteRecommendationAssessment"
+    assert am["field_count"] == am["required_field_count"]
+    assert am["field_count"] == 10
+    assert set(am["supported_recommendation_statuses"]) == {
+        "not_recommended", "recommended_with_warnings",
+        "pending_human_review", "recommended"
+    }
+
+
+def test_50k_summary_model(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sm = data["summary_model"]
+    assert sm["model_name"] == "WriteRecommendationSummary"
+    assert sm["field_count"] == sm["required_field_count"]
+    assert sm["field_count"] == 11
+    assert set(sm["supported_recommendation_statuses"]) == {
+        "not_recommended", "recommended_with_warnings",
+        "pending_human_review", "recommended"
+    }
+
+
+def test_50k_all_recommendation_domains_covered(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {d["domain"] for d in data["domain_assessments"]}
+    for expected in (
+        "authorization_recommendation", "review_recommendation",
+        "decision_recommendation", "lifecycle_recommendation",
+        "planning_recommendation", "readiness_recommendation",
+        "evidence_recommendation", "audit_recommendation",
+        "rollback_recommendation", "governance_recommendation",
+    ):
+        assert expected in domains, f"missing recommendation domain: {expected}"
+
+
+def test_50k_domain_assessment_structure(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for d in data["domain_assessments"]:
+        for field in ("domain", "severity", "finding", "recommendation_allowed"):
+            assert field in d, f"missing field {field!r} in domain assessment"
+        assert d["severity"] in ("info", "warning", "blocker")
+        assert d["recommendation_allowed"] is False
+
+
+def test_50k_sample_candidate_fields(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sc = data["sample_candidate"]
+    for field in (
+        "recommendation_id", "governance_chain_id", "recommendation_domains",
+        "human_review_required", "recommendation_allowed",
+    ):
+        assert field in sc, f"missing field {field!r} in sample_candidate"
+    assert sc["recommendation_allowed"] is False
+    assert sc["human_review_required"] is True
+    assert isinstance(sc["recommendation_domains"], list)
+    assert len(sc["recommendation_domains"]) == 10
+
+
+def test_50k_sample_assessment_fields(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    sa = data["sample_assessment"]
+    for field in (
+        "assessment_id", "recommendation_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "recommendation_status",
+        "recommendation_allowed", "authorization_allowed", "execution_allowed",
+    ):
+        assert field in sa, f"missing field {field!r} in sample_assessment"
+    assert sa["recommendation_allowed"] is False
+    assert sa["authorization_allowed"] is False
+    assert sa["execution_allowed"] is False
+    assert isinstance(sa["compliant_count"], int)
+    assert isinstance(sa["blocker_count"], int)
+    assert isinstance(sa["warning_count"], int)
+
+
+def test_50k_sample_summary_fields(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    ss = data["sample_summary"]
+    for field in (
+        "summary_id", "assessment_id", "domain_count", "compliant_count",
+        "blocker_count", "warning_count", "recommendation_status",
+        "recommendation_allowed", "authorization_allowed", "execution_allowed",
+        "human_review_required",
+    ):
+        assert field in ss, f"missing field {field!r} in sample_summary"
+    assert ss["recommendation_allowed"] is False
+    assert ss["authorization_allowed"] is False
+    assert ss["execution_allowed"] is False
+    assert ss["human_review_required"] is True
+
+
+def test_50k_input_sources(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for expected in (
+        "WriteAuthorizationSummary", "WriteAuthorizationReviewSummary",
+        "WriteAuthorizationDecisionSummary", "WriteAuthorizationLifecycleSummary",
+        "WritePlanSummary", "WriteReadinessSummary",
+        "WriteEvidenceSummary", "WriteAuditSummary",
+        "WriteRollbackVerificationSummary", "WriteGovernanceAuditSummary",
+    ):
+        assert expected in data["input_sources"], f"missing input source: {expected}"
+
+
+def test_50k_governance_boundaries(capsys) -> None:
+    main(["write-recommendation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    gb = data["governance_boundaries"]
+    assert gb["recommendation_allowed"] is False
+    assert gb["authorization_allowed"] is False
+    assert gb["execution_allowed"] is False
+    assert gb["human_review_required"] is True
+    assert gb["read_only"] is True
+    assert gb["phase"] == "50K"
+    may = " ".join(gb["may"]).lower()
+    for allowed in (
+        "assess governance completeness",
+        "identify missing governance controls",
+        "report blockers and warnings",
+    ):
+        assert allowed in may, f"missing may: {allowed}"
+    may_not = " ".join(gb["may_not"]).lower()
+    for forbidden in (
+        "authorize execution", "invoke runtimes", "execute prompts",
+        "modify files", "commit", "push", "rollback",
+    ):
+        assert forbidden in may_not, f"missing may_not: {forbidden}"
+
+
+def test_50k_human_output_shows_all_sections(capsys) -> None:
+    main(["write-recommendation"])
+    output = capsys.readouterr().out
+    assert "Controlled write recommendation engine" in output
+    assert "Candidate model" in output
+    assert "Assessment model" in output
+    assert "Summary model" in output
+    assert "Domain assessments" in output
+    assert "Sample candidate" in output
+    assert "Sample assessment" in output
+    assert "Sample summary" in output
+    assert "Governance boundaries" in output
+    assert "informational" in output.lower()

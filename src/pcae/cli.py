@@ -122,6 +122,7 @@ from pcae.commands.agent import (
     run_write_audit,
     run_write_rollback_verification,
     run_write_governance_audit,
+    run_write_recommendation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3876,6 +3877,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     write_governance_audit_parser.set_defaults(handler=run_write_governance_audit)
+
+    write_recommendation_parser = subparsers.add_parser(
+        "write-recommendation",
+        help="Determine whether a governed write should be recommended for future consideration based on governance readiness (Phase 50K).",
+    )
+    write_recommendation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    write_recommendation_parser.set_defaults(handler=run_write_recommendation)
 
     return parser
 
