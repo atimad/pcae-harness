@@ -41439,3 +41439,174 @@ def test_52o_human_output(capsys) -> None:
         "scaffold and audit only",
     ):
         assert text in output
+
+
+# --- Phase 52P: Corruption Simulation ---
+
+
+def test_52p_json_structure_and_constraints(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "corruption_simulation_overview",
+        "scenario_model",
+        "plan_model",
+        "summary_model",
+        "domain_scenarios",
+        "scenarios",
+        "sample_plan",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["corruption_simulation_overview"]
+    assert overview["phase"] == "52P"
+    assert overview["domain_count"] == 10
+    assert overview["simulation_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_52p_models_and_exact_fields(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "scenario_model": (
+            "CorruptionSimulationScenario",
+            [
+                "scenario_id", "corruption_domain", "corruption_type", "severity",
+                "simulated_corruption", "expected_detection",
+                "expected_recovery_path", "human_review_required",
+                "simulation_allowed",
+            ],
+        ),
+        "plan_model": (
+            "CorruptionSimulationPlan",
+            [
+                "simulation_plan_id", "scenarios", "scenario_count", "blocker_count",
+                "warning_count", "plan_status", "simulation_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "CorruptionSimulationSummary",
+            [
+                "summary_id", "simulation_plan_id", "domain_count", "scenario_count",
+                "blocker_count", "warning_count", "plan_status",
+                "simulation_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_52p_all_corruption_domains_defined(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_scenarios"]} == {
+        "task_file_corruption_simulation",
+        "session_file_corruption_simulation",
+        "governance_record_corruption_simulation",
+        "command_catalog_corruption_simulation",
+        "project_status_corruption_simulation",
+        "changelog_corruption_simulation",
+        "lock_file_corruption_simulation",
+        "artifact_reference_corruption_simulation",
+        "output_artifact_corruption_simulation",
+        "multi_agent_state_corruption_simulation",
+    }
+    assert set(data["scenario_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["plan_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+    assert set(data["summary_model"]["supported_plan_statuses"]) == {
+        "draft", "pending_human_review", "blocked", "ready_for_review",
+    }
+
+
+def test_52p_scenarios_are_defined_not_simulated(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["scenarios"]) == 10
+    for scenario in data["scenarios"]:
+        assert scenario["corruption_domain"]
+        assert scenario["corruption_type"]
+        assert scenario["simulated_corruption"]
+        assert scenario["expected_detection"]
+        assert scenario["expected_recovery_path"]
+        assert scenario["simulation_allowed"] is False
+        assert scenario["human_review_required"] is True
+
+
+def test_52p_plan_and_summary(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    plan = data["sample_plan"]
+    summary = data["sample_summary"]
+    assert plan["scenario_count"] == len(data["scenarios"])
+    assert plan["blocker_count"] > 0
+    assert plan["simulation_allowed"] is False
+    assert plan["human_review_required"] is True
+    assert plan["plan_status"] in {"draft", "pending_human_review", "blocked", "ready_for_review"}
+    assert summary["simulation_plan_id"] == plan["simulation_plan_id"]
+    assert summary["domain_count"] == 10
+    assert summary["simulation_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_52p_input_sources(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ChaosTestPlan",
+        "FailureInjectionPlan",
+        "CorruptionRecoveryPlan",
+        "TaskLifecycleHardeningAssessment",
+        "SessionRecoveryPlan",
+        "GovernanceStateRecoveryPlan",
+        "AgentLockRecoveryPlan",
+        "RuntimeContractHardeningAssessment",
+        "OutputIntegrityAssessment",
+        "MultiAgentStateConsistencyAssessment",
+        "ConflictResolutionAssessment",
+    ]
+
+
+def test_52p_governance_boundaries(capsys) -> None:
+    main(["corruption-simulation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "52P"
+    assert boundaries["read_only"] is True
+    assert boundaries["simulation_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "corrupt files", "rewrite files", "clear locks", "move tasks",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_52p_human_output(capsys) -> None:
+    main(["corruption-simulation"])
+    output = capsys.readouterr().out
+    for text in (
+        "Corruption simulation",
+        "Scenario model",
+        "Plan model",
+        "Summary model",
+        "Corruption scenarios",
+        "Governance boundaries",
+        "Simulation allowed:     False",
+        "Execution allowed:      False",
+        "scaffold and audit only",
+    ):
+        assert text in output

@@ -862,6 +862,11 @@ def render_commands_reference() -> str:
 
 - `pcae failure-injection`
 - `pcae failure-injection --json`
+
+## corruption-simulation
+
+- `pcae corruption-simulation`
+- `pcae corruption-simulation --json`
 """
 
 

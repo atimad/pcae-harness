@@ -841,3 +841,8 @@
 
 - `pcae failure-injection`
 - `pcae failure-injection --json`
+
+## corruption-simulation
+
+- `pcae corruption-simulation`
+- `pcae corruption-simulation --json`

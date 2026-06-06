@@ -55548,3 +55548,305 @@ def build_failure_injection() -> dict:
         "input_sources": list(_FI_INPUT_SOURCES),
         "advisory": FAILURE_INJECTION_ADVISORY,
     }
+
+
+# --- Phase 52P: Corruption Simulation ---
+
+CORRUPTION_SIMULATION_ADVISORY = (
+    "Corruption simulation is a scaffold and audit only; scenarios are defined, not executed. "
+    "No files are corrupted or rewritten, no locks are cleared, no tasks are moved, "
+    "no session or governance state is rewritten, no runtime is invoked, "
+    "no prompt is executed, no repository modification occurs. "
+    "simulation_allowed=False in Phase 52P. Human review is always required."
+)
+
+_CS_CORRUPTION_DOMAINS: tuple[str, ...] = (
+    "task_file_corruption_simulation",
+    "session_file_corruption_simulation",
+    "governance_record_corruption_simulation",
+    "command_catalog_corruption_simulation",
+    "project_status_corruption_simulation",
+    "changelog_corruption_simulation",
+    "lock_file_corruption_simulation",
+    "artifact_reference_corruption_simulation",
+    "output_artifact_corruption_simulation",
+    "multi_agent_state_corruption_simulation",
+)
+
+_CS_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CS_PLAN_STATUSES: tuple[str, ...] = (
+    "draft",
+    "pending_human_review",
+    "blocked",
+    "ready_for_review",
+)
+
+_CS_SCENARIO_FIELDS: tuple[dict, ...] = (
+    {"name": "scenario_id", "type": "str", "required": True},
+    {"name": "corruption_domain", "type": "str", "required": True},
+    {"name": "corruption_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "simulated_corruption", "type": "str", "required": True},
+    {"name": "expected_detection", "type": "str", "required": True},
+    {"name": "expected_recovery_path", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "simulation_allowed", "type": "bool", "required": True},
+)
+
+_CS_PLAN_FIELDS: tuple[dict, ...] = (
+    {"name": "simulation_plan_id", "type": "str", "required": True},
+    {"name": "scenarios", "type": "list[CorruptionSimulationScenario]", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "simulation_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CS_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "simulation_plan_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "scenario_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "plan_status", "type": "str", "required": True},
+    {"name": "simulation_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CS_INPUT_SOURCES: tuple[str, ...] = (
+    "ChaosTestPlan",
+    "FailureInjectionPlan",
+    "CorruptionRecoveryPlan",
+    "TaskLifecycleHardeningAssessment",
+    "SessionRecoveryPlan",
+    "GovernanceStateRecoveryPlan",
+    "AgentLockRecoveryPlan",
+    "RuntimeContractHardeningAssessment",
+    "OutputIntegrityAssessment",
+    "MultiAgentStateConsistencyAssessment",
+    "ConflictResolutionAssessment",
+)
+
+_CS_DOMAIN_SCENARIOS: tuple[dict, ...] = (
+    {
+        "domain": "task_file_corruption_simulation",
+        "corruption_type": "task_lifecycle_file_truncation",
+        "severity": "blocker",
+        "simulated_corruption": "active task file is truncated to zero bytes mid-write",
+        "expected_detection": "pcae check detects missing or empty task lifecycle artifact",
+        "expected_recovery_path": "halt all work, restore task file from last verified provenance snapshot, require human review before resuming",
+    },
+    {
+        "domain": "session_file_corruption_simulation",
+        "corruption_type": "session_record_schema_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "session continuity record is overwritten with invalid JSON",
+        "expected_detection": "session bootstrap detects schema parse failure on continuity record load",
+        "expected_recovery_path": "discard corrupted record, rebuild session chain from provenance timeline, require human review to confirm identity before resuming",
+    },
+    {
+        "domain": "governance_record_corruption_simulation",
+        "corruption_type": "policy_file_partial_overwrite",
+        "severity": "blocker",
+        "simulated_corruption": "policy file is partially overwritten, leaving an inconsistent governance rule set",
+        "expected_detection": "pcae check detects policy schema violation or authority conflict",
+        "expected_recovery_path": "freeze all governed activity, restore last committed policy from provenance, require human review before any governance activity resumes",
+    },
+    {
+        "domain": "command_catalog_corruption_simulation",
+        "corruption_type": "commands_reference_file_corruption",
+        "severity": "warning",
+        "simulated_corruption": "docs/COMMANDS.md is overwritten with malformed content",
+        "expected_detection": "pcae check detects command reference documentation mismatch or parse failure",
+        "expected_recovery_path": "regenerate command catalog from source via pcae docs commands --force, require human review to confirm regenerated content",
+    },
+    {
+        "domain": "project_status_corruption_simulation",
+        "corruption_type": "project_status_file_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "PROJECT_STATUS.md is truncated or overwritten with invalid content",
+        "expected_detection": "pcae check detects PROJECT_STATUS.md content violation or missing phase marker",
+        "expected_recovery_path": "restore PROJECT_STATUS.md from git history, require human review before any phase transition or governance activity",
+    },
+    {
+        "domain": "changelog_corruption_simulation",
+        "corruption_type": "changelog_file_corruption",
+        "severity": "warning",
+        "simulated_corruption": "CHANGELOG.md unreleased section is truncated or overwritten",
+        "expected_detection": "pcae check detects CHANGELOG.md content violation or missing unreleased section",
+        "expected_recovery_path": "restore CHANGELOG.md from git history, require human review before any commit or release activity",
+    },
+    {
+        "domain": "lock_file_corruption_simulation",
+        "corruption_type": "agent_lock_file_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "agent lock file is overwritten with invalid or conflicting ownership data",
+        "expected_detection": "lock governance detects unresolvable ownership record on bootstrap or check",
+        "expected_recovery_path": "block all writes, escalate to human review, apply lock recovery plan before any lock activity resumes",
+    },
+    {
+        "domain": "artifact_reference_corruption_simulation",
+        "corruption_type": "provenance_artifact_reference_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "provenance event log references are rewritten to point to non-existent or wrong artifacts",
+        "expected_detection": "provenance integrity check detects broken or mismatched artifact references",
+        "expected_recovery_path": "quarantine affected provenance segment, require human review and re-attestation before any artifact-dependent activity",
+    },
+    {
+        "domain": "output_artifact_corruption_simulation",
+        "corruption_type": "output_artifact_content_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "output artifact content is silently modified after hash recording",
+        "expected_detection": "output integrity verification detects hash mismatch between recorded and actual artifact content",
+        "expected_recovery_path": "quarantine artifact, block all downstream use, require re-generation and human review before the artifact is accepted",
+    },
+    {
+        "domain": "multi_agent_state_corruption_simulation",
+        "corruption_type": "shared_state_divergence_corruption",
+        "severity": "blocker",
+        "simulated_corruption": "shared governance state diverges across agents due to a partial write, leaving inconsistent views",
+        "expected_detection": "multi-agent state consistency check detects divergent or conflicting state records across agents",
+        "expected_recovery_path": "freeze all agent activity, escalate divergence to human review, reconcile state before any agent resumes",
+    },
+)
+
+_CS_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define corruption simulation scenarios",
+        "define expected detection behavior",
+        "define expected recovery paths",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "corrupt files",
+        "rewrite files",
+        "clear locks",
+        "move tasks",
+        "rewrite session or governance state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "simulation_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "52P",
+}
+
+
+def build_corruption_simulation() -> dict:
+    """Build a read-only corruption simulation scaffold with scenarios defined but not executed."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_scenarios = [dict(s) for s in _CS_DOMAIN_SCENARIOS]
+    blocker_count = sum(s["severity"] == "blocker" for s in domain_scenarios)
+    warning_count = sum(s["severity"] == "warning" for s in domain_scenarios)
+    info_count = sum(s["severity"] == "info" for s in domain_scenarios)
+    scenario_count = len(domain_scenarios)
+    domain_count = len(_CS_CORRUPTION_DOMAINS)
+
+    plan_status = "pending_human_review" if (blocker_count or warning_count) else "draft"
+
+    simulation_plan_id = f"cs-plan-{ts}"
+    scenarios = [
+        {
+            "scenario_id": f"cs-{ts}-{index:02d}",
+            "corruption_domain": scenario["domain"],
+            "corruption_type": scenario["corruption_type"],
+            "severity": scenario["severity"],
+            "simulated_corruption": scenario["simulated_corruption"],
+            "expected_detection": scenario["expected_detection"],
+            "expected_recovery_path": scenario["expected_recovery_path"],
+            "human_review_required": True,
+            "simulation_allowed": False,
+        }
+        for index, scenario in enumerate(domain_scenarios, start=1)
+    ]
+
+    sample_plan = {
+        "simulation_plan_id": simulation_plan_id,
+        "scenarios": scenarios,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "simulation_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"cs-sum-{ts}",
+        "simulation_plan_id": simulation_plan_id,
+        "domain_count": domain_count,
+        "scenario_count": scenario_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "plan_status": plan_status,
+        "simulation_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "corruption_simulation_overview": {
+            "overview_id": f"52p-{ts}",
+            "generated_at": generated_at,
+            "phase": "52P",
+            "title": "Corruption Simulation",
+            "domain_count": domain_count,
+            "scenario_count": scenario_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "plan_status": plan_status,
+            "simulation_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines controlled corruption simulation scenarios for validating "
+                "PCAE corruption detection, escalation, and recovery planning. "
+                "Scenarios are defined but not executed. No files are corrupted. "
+                f"plan_status={plan_status}. simulation_allowed=False."
+            ),
+        },
+        "scenario_model": {
+            "model_name": "CorruptionSimulationScenario",
+            "field_count": len(_CS_SCENARIO_FIELDS),
+            "required_field_count": len(_CS_SCENARIO_FIELDS),
+            "severity_values": list(_CS_SEVERITY_VALUES),
+            "simulation_allowed_always_false_in_52p": True,
+            "human_review_required_always_true_in_52p": True,
+            "fields": [dict(field) for field in _CS_SCENARIO_FIELDS],
+        },
+        "plan_model": {
+            "model_name": "CorruptionSimulationPlan",
+            "field_count": len(_CS_PLAN_FIELDS),
+            "required_field_count": len(_CS_PLAN_FIELDS),
+            "supported_plan_statuses": list(_CS_PLAN_STATUSES),
+            "simulation_allowed_always_false_in_52p": True,
+            "human_review_required_always_true_in_52p": True,
+            "fields": [dict(field) for field in _CS_PLAN_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "CorruptionSimulationSummary",
+            "field_count": len(_CS_SUMMARY_FIELDS),
+            "required_field_count": len(_CS_SUMMARY_FIELDS),
+            "supported_plan_statuses": list(_CS_PLAN_STATUSES),
+            "simulation_allowed_always_false_in_52p": True,
+            "human_review_required_always_true_in_52p": True,
+            "fields": [dict(field) for field in _CS_SUMMARY_FIELDS],
+        },
+        "domain_scenarios": domain_scenarios,
+        "scenarios": scenarios,
+        "sample_plan": sample_plan,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CS_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CS_INPUT_SOURCES),
+        "advisory": CORRUPTION_SIMULATION_ADVISORY,
+    }

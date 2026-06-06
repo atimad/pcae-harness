@@ -149,6 +149,7 @@ from pcae.commands.agent import (
     run_conflict_resolution_engine,
     run_chaos_testing,
     run_failure_injection,
+    run_corruption_simulation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4212,6 +4213,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     failure_injection_parser.set_defaults(handler=run_failure_injection)
+
+    corruption_simulation_parser = subparsers.add_parser(
+        "corruption-simulation",
+        help="Define controlled corruption simulation scenarios for PCAE detection and recovery validation (Phase 52P).",
+    )
+    corruption_simulation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    corruption_simulation_parser.set_defaults(handler=run_corruption_simulation)
 
     return parser
 
