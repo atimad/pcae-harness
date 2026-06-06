@@ -233,6 +233,8 @@ from pcae.core.agent import (
     EXECUTION_PLAN_ADVISORY,
     build_execution_readiness_assessment,
     EXECUTION_READINESS_ASSESSMENT_ADVISORY,
+    build_execution_rollback_verification,
+    EXECUTION_ROLLBACK_VERIFICATION_ADVISORY,
     build_execution_audit,
     EXECUTION_AUDIT_ADVISORY,
     build_execution_evidence,
@@ -8854,6 +8856,88 @@ def run_execution_decision(args: argparse.Namespace) -> int:
         print(f"  May:                   {', '.join(gb['may'])}")
         print(f"  May not:               {', '.join(gb['may_not'])}")
         print(f"  Decision allowed:      {gb['decision_allowed']}")
+        print(f"  Execution allowed:     {gb['execution_allowed']}")
+        print(f"  Human review req'd:    {gb['human_review_required']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_rollback_verification(args: argparse.Namespace) -> int:
+    data = build_execution_rollback_verification()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        ov = data["execution_rollback_verification_overview"]
+        print("Execution rollback verification requirements")
+        print(f"Verification: {ov['overview_id']}  Generated: {ov['generated_at']}")
+        print(f"Phase: {ov['phase']} — {ov['title']}")
+        print()
+        print(ov["summary"])
+        print()
+        print(f"Verification domains:   {ov['verification_domain_count']}")
+        print(f"Domains assessed:       {ov['domain_count']}")
+        print(f"Compliant:              {ov['compliant_count']}")
+        print(f"Blockers:               {ov['blocker_count']}")
+        print(f"Warnings:               {ov['warning_count']}")
+        print(f"Verification status:    {ov['verification_status']}")
+        print(f"Rollback verified:      {'yes' if ov['rollback_verified'] else 'no'}")
+        print(f"Execution allowed:      {'yes' if ov['execution_allowed'] else 'no'}")
+        print(f"Human review req'd:     {'yes' if ov['human_review_required'] else 'no'}")
+        print()
+        cm = data["candidate_model"]
+        print(f"Candidate model: {cm['model_name']} ({cm['field_count']} fields)")
+        print(f"  Supported statuses:  {', '.join(cm['supported_verification_statuses'])}")
+        print(f"  rollback_verified always False in 51I: {cm['rollback_verified_always_false_in_51i']}")
+        print()
+        am = data["assessment_model"]
+        print(f"Assessment model: {am['model_name']} ({am['field_count']} fields)")
+        print(f"  rollback_verified always False in 51I: {am['rollback_verified_always_false_in_51i']}")
+        print(f"  execution_allowed always False in 51I: {am['execution_allowed_always_false_in_51i']}")
+        print()
+        sm = data["summary_model"]
+        print(f"Summary model: {sm['model_name']} ({sm['field_count']} fields)")
+        print(f"  rollback_verified always False in 51I: {sm['rollback_verified_always_false_in_51i']}")
+        print(f"  execution_allowed always False in 51I: {sm['execution_allowed_always_false_in_51i']}")
+        print()
+        print("Domain assessments:")
+        for d in data["domain_assessments"]:
+            print(f"  [{d['severity'].upper()}] {d['domain']}")
+            print(f"    {d['finding'][:80]}...")
+        print()
+        sc = data["sample_candidate"]
+        print("Sample candidate:")
+        print(f"  rollback_verified:     {sc['rollback_verified']}")
+        print(f"  human_review_required: {sc['human_review_required']}")
+        print(f"  rollback_plan_id:      {sc['rollback_plan_id']}")
+        print()
+        sa = data["sample_assessment"]
+        print("Sample assessment:")
+        print(f"  verification_status:   {sa['verification_status']}")
+        print(f"  domain_count:          {sa['domain_count']}")
+        print(f"  compliant_count:       {sa['compliant_count']}")
+        print(f"  blocker_count:         {sa['blocker_count']}")
+        print(f"  warning_count:         {sa['warning_count']}")
+        print(f"  rollback_verified:     {sa['rollback_verified']}")
+        print(f"  execution_allowed:     {sa['execution_allowed']}")
+        print(f"  human_review_required: {sa['human_review_required']}")
+        print()
+        ss = data["sample_summary"]
+        print("Sample summary:")
+        print(f"  verification_status:   {ss['verification_status']}")
+        print(f"  domain_count:          {ss['domain_count']}")
+        print(f"  compliant_count:       {ss['compliant_count']}")
+        print(f"  blocker_count:         {ss['blocker_count']}")
+        print(f"  warning_count:         {ss['warning_count']}")
+        print(f"  rollback_verified:     {ss['rollback_verified']}")
+        print(f"  execution_allowed:     {ss['execution_allowed']}")
+        print(f"  human_review_required: {ss['human_review_required']}")
+        print()
+        gb = data["governance_boundaries"]
+        print("Governance boundaries:")
+        print(f"  May:                   {', '.join(gb['may'])}")
+        print(f"  May not:               {', '.join(gb['may_not'])}")
+        print(f"  Rollback verified:     {gb['rollback_verified']}")
         print(f"  Execution allowed:     {gb['execution_allowed']}")
         print(f"  Human review req'd:    {gb['human_review_required']}")
         print()

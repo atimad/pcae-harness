@@ -131,6 +131,7 @@ from pcae.commands.agent import (
     run_execution_readiness_assessment,
     run_execution_evidence,
     run_execution_audit,
+    run_execution_rollback_verification,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -3986,6 +3987,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     execution_audit_parser.set_defaults(handler=run_execution_audit)
+
+    execution_rollback_verification_parser = subparsers.add_parser(
+        "execution-rollback-verification",
+        help="Define rollback verification requirements that must exist before an execution plan can be eligible for future controlled execution (Phase 51I).",
+    )
+    execution_rollback_verification_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    execution_rollback_verification_parser.set_defaults(
+        handler=run_execution_rollback_verification
+    )
 
     return parser
 

@@ -46681,6 +46681,473 @@ _EEV_DOMAIN_FINDINGS: tuple[dict, ...] = (
 )
 
 
+EXECUTION_ROLLBACK_VERIFICATION_ADVISORY = (
+    "Execution rollback verification is informational; rollback requirements may be "
+    "defined and assessed, but no execution occurs and no authorization is granted. "
+    "No files are modified, no runtimes are invoked, no prompts are executed, and "
+    "no rollback execution occurs. "
+    "rollback_verified=False and execution_allowed=False in Phase 51I."
+)
+
+_ERVF_VERIFICATION_DOMAINS: tuple[str, ...] = (
+    "rollback_plan_verification",
+    "rollback_scope_verification",
+    "rollback_target_verification",
+    "rollback_mode_verification",
+    "rollback_audit_verification",
+    "rollback_risk_verification",
+    "rollback_human_approval_verification",
+    "rollback_execution_blocking",
+)
+
+_ERVF_VERIFICATION_STATUSES: tuple[str, ...] = (
+    "insufficient_rollback",
+    "rollback_with_warnings",
+    "pending_human_review",
+    "verified",
+)
+
+_ERVF_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "verification_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this rollback verification candidate.",
+    },
+    {
+        "name": "request_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution request this verification candidate is associated with.",
+    },
+    {
+        "name": "plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The execution plan this verification candidate is associated with.",
+    },
+    {
+        "name": "rollback_plan_id",
+        "type": "str",
+        "required": True,
+        "description": "The rollback plan this verification candidate is associated with.",
+    },
+    {
+        "name": "verification_domains",
+        "type": "list[str]",
+        "required": True,
+        "description": "List of rollback verification domains to be assessed.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51I.",
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51I.",
+    },
+)
+
+_ERVF_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this rollback verification assessment.",
+    },
+    {
+        "name": "verification_id",
+        "type": "str",
+        "required": True,
+        "description": "The verification candidate this assessment is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of rollback verification domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with non-blocking warnings.",
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_rollback, rollback_with_warnings, "
+            "pending_human_review, or verified."
+        ),
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51I.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51I.",
+    },
+)
+
+_ERVF_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {
+        "name": "summary_id",
+        "type": "str",
+        "required": True,
+        "description": "Unique identifier for this rollback verification summary.",
+    },
+    {
+        "name": "assessment_id",
+        "type": "str",
+        "required": True,
+        "description": "The assessment this summary is associated with.",
+    },
+    {
+        "name": "domain_count",
+        "type": "int",
+        "required": True,
+        "description": "Total number of rollback verification domains assessed.",
+    },
+    {
+        "name": "compliant_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with compliant findings.",
+    },
+    {
+        "name": "blocker_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with blocking findings.",
+    },
+    {
+        "name": "warning_count",
+        "type": "int",
+        "required": True,
+        "description": "Number of rollback domains with non-blocking warnings.",
+    },
+    {
+        "name": "verification_status",
+        "type": "str",
+        "required": True,
+        "description": (
+            "Status: insufficient_rollback, rollback_with_warnings, "
+            "pending_human_review, or verified."
+        ),
+    },
+    {
+        "name": "rollback_verified",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51I.",
+    },
+    {
+        "name": "execution_allowed",
+        "type": "bool",
+        "required": True,
+        "description": "Always False in Phase 51I.",
+    },
+    {
+        "name": "human_review_required",
+        "type": "bool",
+        "required": True,
+        "description": "Always True in Phase 51I.",
+    },
+)
+
+_ERVF_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess rollback requirements",
+        "identify missing rollback artifacts",
+        "report blockers and warnings",
+    ],
+    "may_not": [
+        "authorize execution",
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "execute rollback",
+        "commit",
+        "push",
+    ],
+    "rollback_verified": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "51I",
+}
+
+_ERVF_INPUT_SOURCES: tuple[str, ...] = (
+    "ExecutionRequestSummary",
+    "ExecutionReviewSummary",
+    "ExecutionDecisionSummary",
+    "ExecutionLifecycleSummary",
+    "ExecutionPlanSummary",
+    "ExecutionReadinessSummary",
+    "ExecutionEvidenceSummary",
+    "ExecutionAuditSummary",
+    "GovernanceInvariantAssessment",
+    "RuntimeSafetyInvariantAssessment",
+    "GovernanceRecoveryPlan",
+)
+
+_ERVF_DOMAIN_FINDINGS: tuple[dict, ...] = (
+    {
+        "domain": "rollback_plan_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback plan has been declared for this execution plan. "
+            "A documented rollback plan reviewed by a human is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_scope_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback scope has been declared. "
+            "Documented rollback scope reviewed by a human is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_target_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback target has been declared. "
+            "Documented rollback target reviewed by a human is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_mode_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback mode has been declared. "
+            "Documented rollback mode reviewed by a human is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_audit_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback audit record has been declared. "
+            "Documented rollback audit trail reviewed by a human is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_risk_verification",
+        "severity": "blocker",
+        "finding": (
+            "No rollback risk assessment has been declared. "
+            "A documented rollback risk assessment reviewed by a human is required "
+            "before rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_human_approval_verification",
+        "severity": "blocker",
+        "finding": (
+            "No human approval has been recorded for the rollback plan. "
+            "Explicit human approval of the rollback plan is required before "
+            "rollback verification can be considered complete."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+    {
+        "domain": "rollback_execution_blocking",
+        "severity": "blocker",
+        "finding": (
+            "Rollback execution is explicitly blocked pending complete verification. "
+            "All rollback verification domains must be satisfied and human-reviewed "
+            "before rollback execution can ever be considered."
+        ),
+        "rollback_verified": False,
+        "execution_allowed": False,
+    },
+)
+
+
+def build_execution_rollback_verification() -> dict:
+    """Define execution rollback verification requirements. Advisory only."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    verification_id_ref = f"ervf-{ts}"
+
+    candidate_fields = [dict(f) for f in _ERVF_CANDIDATE_FIELDS]
+    assessment_fields = [dict(f) for f in _ERVF_ASSESSMENT_FIELDS]
+    summary_fields = [dict(f) for f in _ERVF_SUMMARY_FIELDS]
+
+    domain_assessments: list[dict] = [dict(d) for d in _ERVF_DOMAIN_FINDINGS]
+
+    blocker_count = sum(1 for d in domain_assessments if d["severity"] == "blocker")
+    warning_count = sum(1 for d in domain_assessments if d["severity"] == "warning")
+    compliant_count = sum(1 for d in domain_assessments if d["severity"] == "info")
+    domain_count = len(domain_assessments)
+
+    if blocker_count > 0:
+        verification_status = "pending_human_review"
+    elif warning_count > 0:
+        verification_status = "rollback_with_warnings"
+    else:
+        verification_status = "insufficient_rollback"
+
+    assessment_id_ref = f"ervfa-{ts}"
+
+    sample_candidate = {
+        "verification_id": verification_id_ref,
+        "request_id": f"era-{ts}",
+        "plan_id": f"epl-{ts}",
+        "rollback_plan_id": f"erbp-{ts}",
+        "verification_domains": list(_ERVF_VERIFICATION_DOMAINS),
+        "human_review_required": True,
+        "rollback_verified": False,
+    }
+
+    sample_assessment = {
+        "assessment_id": assessment_id_ref,
+        "verification_id": verification_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"ervfsum-{ts}",
+        "assessment_id": assessment_id_ref,
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    candidate_model = {
+        "model_name": "ExecutionRollbackVerificationCandidate",
+        "field_count": len(candidate_fields),
+        "required_field_count": sum(1 for f in candidate_fields if f["required"]),
+        "supported_verification_statuses": list(_ERVF_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_51i": True,
+        "fields": candidate_fields,
+    }
+
+    assessment_model = {
+        "model_name": "ExecutionRollbackVerificationAssessment",
+        "field_count": len(assessment_fields),
+        "required_field_count": sum(1 for f in assessment_fields if f["required"]),
+        "supported_verification_statuses": list(_ERVF_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_51i": True,
+        "execution_allowed_always_false_in_51i": True,
+        "fields": assessment_fields,
+    }
+
+    summary_model = {
+        "model_name": "ExecutionRollbackVerificationSummary",
+        "field_count": len(summary_fields),
+        "required_field_count": sum(1 for f in summary_fields if f["required"]),
+        "supported_verification_statuses": list(_ERVF_VERIFICATION_STATUSES),
+        "rollback_verified_always_false_in_51i": True,
+        "execution_allowed_always_false_in_51i": True,
+        "fields": summary_fields,
+    }
+
+    execution_rollback_verification_overview = {
+        "overview_id": f"51i-{ts}",
+        "generated_at": generated_at,
+        "phase": "51I",
+        "title": "Execution Rollback Verification Requirements",
+        "summary": (
+            "Defines the rollback verification requirements that must exist before an "
+            "execution plan can ever be considered eligible for future controlled "
+            "execution. Eight rollback verification domains are assessed: "
+            "rollback_plan_verification, rollback_scope_verification, "
+            "rollback_target_verification, rollback_mode_verification, "
+            "rollback_audit_verification, rollback_risk_verification, "
+            "rollback_human_approval_verification, and rollback_execution_blocking. "
+            f"domain_count={domain_count}, compliant_count={compliant_count}, "
+            f"blocker_count={blocker_count}, warning_count={warning_count}. "
+            f"verification_status={verification_status}. "
+            "Execution rollback verification is advisory and read-only. "
+            "No execution occurs. rollback_verified=False. execution_allowed=False."
+        ),
+        "verification_domain_count": len(_ERVF_VERIFICATION_DOMAINS),
+        "domain_count": domain_count,
+        "compliant_count": compliant_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "verification_status": verification_status,
+        "rollback_verified": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "execution_rollback_verification_overview": execution_rollback_verification_overview,
+        "candidate_model": candidate_model,
+        "assessment_model": assessment_model,
+        "summary_model": summary_model,
+        "domain_assessments": domain_assessments,
+        "sample_candidate": sample_candidate,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ERVF_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ERVF_INPUT_SOURCES),
+        "advisory": EXECUTION_ROLLBACK_VERIFICATION_ADVISORY,
+    }
+
+
 EXECUTION_AUDIT_ADVISORY = (
     "Execution audit is informational; audit requirements may be defined "
     "and assessed, but no execution occurs and no authorization is granted. "
