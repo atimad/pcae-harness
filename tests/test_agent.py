@@ -42435,3 +42435,170 @@ def test_57a_human_output(capsys) -> None:
         "review_allowed=False",
     ):
         assert text in output
+
+
+def test_58a_json_top_level_keys(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "multi_agent_read_only_execution_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["multi_agent_read_only_execution_overview"]
+    assert overview["phase"] == "58A"
+    assert overview["domain_count"] == 8
+    assert overview["pilot_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_58a_models_and_exact_fields(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "MultiAgentReadOnlyExecutionSignal",
+            [
+                "signal_id", "pilot_id", "agent_id", "runtime_id",
+                "pilot_domain", "signal_type", "severity",
+                "detected_state", "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "MultiAgentReadOnlyExecutionAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "pilot_status", "pilot_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "MultiAgentReadOnlyExecutionSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "pilot_status",
+                "pilot_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_58a_all_pilot_domains_defined(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "agent_selection_validation",
+        "runtime_selection_validation",
+        "read_only_boundary_validation",
+        "parallel_invocation_validation",
+        "consensus_validation",
+        "arbitration_validation",
+        "output_review_validation",
+        "audit_trace_validation",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_pilot_statuses"]) == {
+        "ready", "ready_with_warnings", "pilot_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_pilot_statuses"]) == {
+        "ready", "ready_with_warnings", "pilot_required", "blocked",
+    }
+
+
+def test_58a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["pilot_id"]
+        assert signal["agent_id"]
+        assert signal["runtime_id"]
+        assert signal["pilot_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_58a_assessment_and_summary(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["pilot_status"] == "pilot_required"
+    assert assessment["pilot_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["pilot_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_58a_input_sources(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeIntegrationReadinessAssessment",
+        "ReadOnlyRuntimeInvocationAssessment",
+        "RuntimeOutputPersistenceAssessment",
+        "RuntimeOutputReviewAssessment",
+        "ExecutionGovernanceAuditSummary",
+        "MultiAgentReadOnlyPilotResult",
+        "ConsensusResult",
+        "ArbitrationDecision",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_58a_governance_boundaries(capsys) -> None:
+    main(["multi-agent-read-only-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "58A"
+    assert boundaries["read_only"] is True
+    assert boundaries["pilot_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "persist outputs", "approve outputs",
+        "register runtimes", "modify runtime configuration",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_58a_human_output(capsys) -> None:
+    main(["multi-agent-read-only-execution"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-agent read-only execution pilot",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Pilot signals",
+        "Governance boundaries",
+        "Pilot allowed:          no",
+        "Execution allowed:      no",
+        "pilot_allowed=False",
+    ):
+        assert text in output

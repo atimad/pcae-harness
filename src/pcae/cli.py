@@ -155,6 +155,7 @@ from pcae.commands.agent import (
     run_read_only_runtime_invocation,
     run_runtime_output_persistence,
     run_runtime_output_review,
+    run_multi_agent_read_only_execution,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4284,6 +4285,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     ror_parser.set_defaults(handler=run_runtime_output_review)
+
+    marep_parser = subparsers.add_parser(
+        "multi-agent-read-only-execution",
+        help="Define governed multi-agent read-only execution pilot model (Phase 58A).",
+    )
+    marep_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    marep_parser.set_defaults(handler=run_multi_agent_read_only_execution)
 
     return parser
 

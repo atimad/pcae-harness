@@ -982,6 +982,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-output-review`
 - `pcae runtime-output-review --json`
+
+## multi-agent-read-only-execution
+
+- `pcae multi-agent-read-only-execution`
+- `pcae multi-agent-read-only-execution --json`
 """
 
 

@@ -56620,6 +56620,306 @@ _RORI_GOVERNANCE_BOUNDARIES: dict = {
 }
 
 
+MULTI_AGENT_READ_ONLY_EXECUTION_ADVISORY = (
+    "Multi-agent read-only execution pilot is informational and planning only; "
+    "pilot prerequisites are evaluated and blockers reported, but no runtime is invoked, "
+    "no prompt is executed, no output is persisted or approved, "
+    "no execution authorization occurs, no repository modification occurs. "
+    "pilot_allowed=False and execution_allowed=False in Phase 58A. "
+    "Human review is always required."
+)
+
+_MAREP_PILOT_DOMAINS: tuple[str, ...] = (
+    "agent_selection_validation",
+    "runtime_selection_validation",
+    "read_only_boundary_validation",
+    "parallel_invocation_validation",
+    "consensus_validation",
+    "arbitration_validation",
+    "output_review_validation",
+    "audit_trace_validation",
+)
+
+_MAREP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MAREP_PILOT_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "pilot_required",
+    "blocked",
+)
+
+_MAREP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "pilot_id", "type": "str", "required": True},
+    {"name": "agent_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "pilot_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MAREP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "pilot_status", "type": "str", "required": True},
+    {"name": "pilot_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MAREP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "pilot_status", "type": "str", "required": True},
+    {"name": "pilot_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MAREP_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeIntegrationReadinessAssessment",
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeOutputPersistenceAssessment",
+    "RuntimeOutputReviewAssessment",
+    "ExecutionGovernanceAuditSummary",
+    "MultiAgentReadOnlyPilotResult",
+    "ConsensusResult",
+    "ArbitrationDecision",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_MAREP_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "agent_selection_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "agent_selection_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "candidate agents not validated against governance selection criteria for read-only pilot participation",
+        "expected_state": "each participating agent satisfies governance identity, capability, and policy constraints before pilot proceeds",
+    },
+    {
+        "domain": "runtime_selection_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_selection_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime selection governance criteria not validated for multi-agent pilot context",
+        "expected_state": "selected runtimes are validated against governance policy and confirmed compatible with multi-agent read-only constraints",
+    },
+    {
+        "domain": "read_only_boundary_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "read_only_boundary_multi_agent_enforcement",
+        "severity": "blocker",
+        "detected_state": "read-only execution boundary not confirmed enforced across all agents and runtimes in the pilot",
+        "expected_state": "all agents and runtimes confirm read-only boundary: no writes, commits, pushes, or side-effects permitted during pilot",
+    },
+    {
+        "domain": "parallel_invocation_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "parallel_invocation_safety_readiness",
+        "severity": "blocker",
+        "detected_state": "parallel invocation safety requirements not confirmed for simultaneous multi-agent read-only execution",
+        "expected_state": "parallel invocation is governed: concurrency safety, lock coordination, and isolation are confirmed before any agent proceeds",
+    },
+    {
+        "domain": "consensus_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "consensus_mechanism_readiness",
+        "severity": "blocker",
+        "detected_state": "consensus mechanism for multi-agent output agreement not validated before pilot proceeds",
+        "expected_state": "consensus model is defined, governed, and linked to human review gate before any output is accepted from the pilot",
+    },
+    {
+        "domain": "arbitration_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "arbitration_mechanism_readiness",
+        "severity": "blocker",
+        "detected_state": "arbitration mechanism for resolving agent disagreements not validated before pilot proceeds",
+        "expected_state": "arbitration model is defined, governed, escalates to human review on conflict, and is confirmed active before pilot proceeds",
+    },
+    {
+        "domain": "output_review_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "output_review_gate_readiness",
+        "severity": "blocker",
+        "detected_state": "human output review gate not confirmed active for all agent outputs before acceptance in the pilot",
+        "expected_state": "every agent output passes through the governed human review gate with full attribution before acceptance",
+    },
+    {
+        "domain": "audit_trace_validation",
+        "agent_id": "all_pilot_agents",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "audit_trace_completeness_readiness",
+        "severity": "blocker",
+        "detected_state": "complete audit trace across all agents, runtimes, consensus, and arbitration events not confirmed before pilot proceeds",
+        "expected_state": "audit trace captures all pilot events with per-agent attribution, timestamps, consensus/arbitration outcomes, and human review gate",
+    },
+)
+
+_MAREP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess multi-agent read-only pilot prerequisites",
+        "assess consensus and arbitration readiness",
+        "assess read-only and audit readiness",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "persist outputs",
+        "approve outputs",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "pilot_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "58A",
+}
+
+
+def build_multi_agent_read_only_execution() -> dict:
+    """Build a multi-agent read-only execution pilot scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _MAREP_DOMAIN_SIGNALS]
+
+    domain_count = len(_MAREP_PILOT_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        pilot_status = "pilot_required"
+    elif warning_count > 0:
+        pilot_status = "ready_with_warnings"
+    else:
+        pilot_status = "ready"
+
+    pilot_id = f"marep-{ts}"
+    signals = [
+        {
+            "signal_id": f"mareps-{ts}-{index:02d}",
+            "pilot_id": pilot_id,
+            "agent_id": signal["agent_id"],
+            "runtime_id": signal["runtime_id"],
+            "pilot_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"marepa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "pilot_status": pilot_status,
+        "pilot_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"marepsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "pilot_status": pilot_status,
+        "pilot_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "multi_agent_read_only_execution_overview": {
+            "overview_id": f"58a-{ts}",
+            "generated_at": generated_at,
+            "phase": "58A",
+            "title": "Multi-Agent Read-Only Execution Pilot",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "pilot_status": pilot_status,
+            "pilot_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed multi-agent read-only execution pilot model. "
+                "No runtime is invoked, no prompt is executed, no output is persisted or approved. "
+                f"pilot_status={pilot_status}. pilot_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "MultiAgentReadOnlyExecutionSignal",
+            "field_count": len(_MAREP_SIGNAL_FIELDS),
+            "required_field_count": len(_MAREP_SIGNAL_FIELDS),
+            "severity_values": list(_MAREP_SEVERITY_VALUES),
+            "pilot_allowed_always_false_in_58a": True,
+            "fields": [dict(field) for field in _MAREP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiAgentReadOnlyExecutionAssessment",
+            "field_count": len(_MAREP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MAREP_ASSESSMENT_FIELDS),
+            "supported_pilot_statuses": list(_MAREP_PILOT_STATUSES),
+            "pilot_allowed_always_false_in_58a": True,
+            "execution_allowed_always_false_in_58a": True,
+            "human_review_required_always_true_in_58a": True,
+            "fields": [dict(field) for field in _MAREP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiAgentReadOnlyExecutionSummary",
+            "field_count": len(_MAREP_SUMMARY_FIELDS),
+            "required_field_count": len(_MAREP_SUMMARY_FIELDS),
+            "supported_pilot_statuses": list(_MAREP_PILOT_STATUSES),
+            "pilot_allowed_always_false_in_58a": True,
+            "human_review_required_always_true_in_58a": True,
+            "fields": [dict(field) for field in _MAREP_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_MAREP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_MAREP_INPUT_SOURCES),
+        "advisory": MULTI_AGENT_READ_ONLY_EXECUTION_ADVISORY,
+    }
+
+
 RUNTIME_OUTPUT_REVIEW_ADVISORY = (
     "Runtime output review is informational and planning only; "
     "review requirements are evaluated and blockers reported, but no runtime output "
