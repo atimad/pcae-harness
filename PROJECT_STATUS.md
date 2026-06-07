@@ -2,14 +2,25 @@
 
 ## Current Phase
 
-Phase 61I: Handoff State Refresh.
+Phase 62B: Runtime Output Capture.
+
+62A completed: first real governed execution (pwd, shell-local, stdout/stderr/exit code
+captured). 62A.1 completed: task transition idempotency hardened — duplicate active/done
+phase state is now blocked. 62B is next.
+
+## Post-61J Runtime Registry Checkpoint
+
+PCAE completed the Phase 61 series (61A–61J) covering runtime registry, discovery,
+capability inventory, trust modeling, task lifecycle governance, agent handoff
+modernization, roadmap continuity validation, automated task transition, handoff state
+refresh, and phase test selection hardening.
 
 ## Post-52Q Architecture Checkpoint
 
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4338 passing tests.
+**Test count:** 4348 passing tests.
 
 **License:** Apache License 2.0.
 

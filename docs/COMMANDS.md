@@ -21,8 +21,6 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
 - [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
 - [Runtime Integration (54A+)](#runtime-integration-54a) — runtime integration readiness
-- [Handoff State Refresh (61I)](#handoff-state-refresh-61i) — handoff state refresh, bootstrap modernization
-- [Phase Test Selection Hardening (61J)](#phase-test-selection-hardening-61j) — phase test selection strategy, test naming convention
 
 ---
 
@@ -1017,22 +1015,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae roadmap-continuity`
 - `pcae roadmap-continuity --json`
 
----
-
-# Handoff State Refresh (61I)
-
 ## handoff-state-refresh
 
 - `pcae handoff-state-refresh`
 - `pcae handoff-state-refresh --json`
-
----
-
-# Phase Test Selection Hardening (61J)
 
 ## phase-test-selection
 
 - `pcae phase-test-selection`
 - `pcae phase-test-selection --json`
 
-**Phase validation strategy:** Tests follow `test_{phase_id}_{description}` naming. Use `python -m pytest -k {phase_id}` to run all tests for a phase. Zero-collection is a validation failure.
+## runtime-execution-pilot
+
+- `pcae runtime-execution-pilot`
+- `pcae runtime-execution-pilot --json`

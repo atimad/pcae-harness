@@ -2,6 +2,7 @@
 
 ## Accepted
 
+- Phase 62A (Controlled Runtime Execution Pilot) is the first PCAE phase where execution_allowed=True. Execution is conditionally permitted only when: runtime is shell-local, command is on the allowlist (pwd, ls, ls -la, git status, python --version, python3 --version), command is not on the denylist, no write or network operations are involved, the 30s timeout is enforced, the 100 KB output limit is enforced, and human_review_required=True. All other governance restrictions (no write execution, no network, no AI runtime invocation, no commit/push/rollback) remain in force.
 - Use Python and `pathlib` for cross-platform filesystem behavior.
 - Use Markdown files as the only persistence mechanism for the MVP.
 - Defer databases, LLM calls, and vector search.

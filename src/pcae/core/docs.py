@@ -1045,6 +1045,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae phase-test-selection`
 - `pcae phase-test-selection --json`
+
+## runtime-execution-pilot
+
+- `pcae runtime-execution-pilot`
+- `pcae runtime-execution-pilot --json`
 """
 
 

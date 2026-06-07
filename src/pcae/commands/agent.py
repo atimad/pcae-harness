@@ -356,6 +356,10 @@ from pcae.core.agent import (
     build_agent_handoff_modernization,
     build_handoff_state_refresh,
     build_phase_test_selection,
+    build_runtime_execution_pilot,
+    RUNTIME_EXECUTION_PILOT_ADVISORY,
+    build_task_transition_idempotency,
+    TASK_TRANSITION_IDEMPOTENCY_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12031,4 +12035,75 @@ def run_phase_test_selection(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:{boundaries['execution_allowed']}")
     print()
     print(PHASE_TEST_SELECTION_ADVISORY)
+    return 0
+
+
+def run_runtime_execution_pilot(args: argparse.Namespace) -> int:
+    data = build_runtime_execution_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_execution_pilot_overview"]
+    print("Controlled runtime execution pilot")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Execution domains:      {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Execution status:       {overview['execution_status']}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["execution_record"]
+    print("Execution record:")
+    print(f"  Execution ID:       {rec['execution_id']}")
+    print(f"  Runtime:            {rec['runtime_id']}")
+    print(f"  Command:            {rec['command']}")
+    print(f"  Command hash:       {rec['command_hash']}")
+    print(f"  Status:             {rec['execution_status']}")
+    print(f"  stdout present:     {'yes' if rec['stdout_present'] else 'no'}")
+    print(f"  stderr present:     {'yes' if rec['stderr_present'] else 'no'}")
+    print(f"  exit code present:  {'yes' if rec['exit_code_present'] else 'no'}")
+    print(f"  audit present:      {'yes' if rec['audit_record_present'] else 'no'}")
+    print()
+    out = data["execution_output"]
+    print("Execution output:")
+    print(f"  exit code: {out['exit_code']}")
+    if out["stdout"]:
+        print(f"  stdout:    {out['stdout'].strip()}")
+    if out["stderr"]:
+        print(f"  stderr:    {out['stderr'].strip()}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Execution signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['execution_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:              {', '.join(boundaries['may'])}")
+    print(f"  May not:          {', '.join(boundaries['may_not'])}")
+    print(f"  Execution allowed:{boundaries['execution_allowed']}")
+    print(f"  Human review:     {boundaries['human_review_required']}")
+    print(f"  Read only:        {boundaries['read_only']}")
+    print()
+    print(f"Allowed commands:   {', '.join(data['allowed_commands'])}")
+    print()
+    print(RUNTIME_EXECUTION_PILOT_ADVISORY)
     return 0

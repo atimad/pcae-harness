@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-1939-next-governed-task
+20260607-2105-62b-runtime-output-capture
 
 ## Title
 
-Next governed task
+62B runtime output capture
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Next governed task
+62B runtime output capture
 
 ## Allowed Files
 
@@ -33,19 +33,11 @@ Next governed task
 - docs/COMMANDS.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
-- src/pcae/commands/task.py
 - src/pcae/core/agent.py
-- src/pcae/core/context.py
 - src/pcae/core/docs.py
 - src/pcae/core/tasks.py
-- pyproject.toml
 - tests/test_agent.py
-- tests/test_context.py
 - tests/test_task.py
-
-## Override Protected Files
-
-- pyproject.toml
 
 ## Forbidden Files
 
@@ -95,4 +87,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-07T19:39:38.896567+02:00
+2026-06-07T21:05:50.937852+02:00

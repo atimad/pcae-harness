@@ -43680,7 +43680,7 @@ def test_61e_json_top_level_keys(capsys) -> None:
     }
     overview = data["task_lifecycle_governance_overview"]
     assert overview["phase"] == "61E"
-    assert overview["domain_count"] == 8
+    assert overview["domain_count"] == 9
     assert overview["task_update_allowed"] is False
     assert overview["session_update_allowed"] is False
     assert overview["human_review_required"] is True
@@ -43736,6 +43736,7 @@ def test_61e_all_governance_domains_defined(capsys) -> None:
         "session_task_consistency",
         "task_handoff_freshness",
         "stale_task_contamination_prevention",
+        "duplicate_active_done_phase_detection",
     }
     assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
     assert set(data["assessment_model"]["supported_governance_statuses"]) == {
@@ -43749,7 +43750,7 @@ def test_61e_all_governance_domains_defined(capsys) -> None:
 def test_61e_signals_are_attributable_and_human_reviewed(capsys) -> None:
     main(["task-lifecycle-governance", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert len(data["signals"]) == 8
+    assert len(data["signals"]) == 9
     for signal in data["signals"]:
         assert signal["signal_id"]
         assert signal["task_id"]
@@ -43775,7 +43776,7 @@ def test_61e_assessment_and_summary(capsys) -> None:
     assert assessment["session_update_allowed"] is False
     assert assessment["human_review_required"] is True
     assert summary["assessment_id"] == assessment["assessment_id"]
-    assert summary["domain_count"] == 8
+    assert summary["domain_count"] == 9
     assert summary["remediation_recommended"] is True
     assert summary["task_update_allowed"] is False
     assert summary["session_update_allowed"] is False
@@ -44032,7 +44033,7 @@ def test_61g_json_top_level_keys(capsys) -> None:
     }
     overview = data["roadmap_continuity_overview"]
     assert overview["phase"] == "61G"
-    assert overview["domain_count"] == 10
+    assert overview["domain_count"] == 11
     assert overview["roadmap_update_allowed"] is False
     assert overview["task_update_allowed"] is False
     assert overview["session_update_allowed"] is False
@@ -44093,6 +44094,7 @@ def test_61g_all_continuity_domains_defined(capsys) -> None:
         "runtime_roadmap_alignment",
         "handoff_roadmap_alignment",
         "pre_execution_transition_readiness",
+        "duplicate_phase_transition_detection",
     }
     assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
     assert set(data["assessment_model"]["supported_continuity_statuses"]) == {
@@ -44106,7 +44108,7 @@ def test_61g_all_continuity_domains_defined(capsys) -> None:
 def test_61g_signals_are_attributable_and_human_reviewed(capsys) -> None:
     main(["roadmap-continuity", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert len(data["signals"]) == 10
+    assert len(data["signals"]) == 11
     for signal in data["signals"]:
         assert signal["signal_id"]
         assert signal["roadmap_id"]
@@ -44133,7 +44135,7 @@ def test_61g_assessment_and_summary(capsys) -> None:
     assert assessment["execution_allowed"] is False
     assert assessment["human_review_required"] is True
     assert summary["assessment_id"] == assessment["assessment_id"]
-    assert summary["domain_count"] == 10
+    assert summary["domain_count"] == 11
     assert summary["roadmap_update_allowed"] is False
     assert summary["task_update_allowed"] is False
     assert summary["session_update_allowed"] is False
@@ -44356,3 +44358,288 @@ def test_61j_human_output(capsys) -> None:
         "Execution allowed:",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62A: Controlled Runtime Execution Pilot
+# ---------------------------------------------------------------------------
+
+
+def test_62a_json_top_level_keys(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "runtime_execution_pilot_overview",
+        "execution_record",
+        "execution_output",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "allowed_commands",
+        "forbidden_commands",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62a_models_and_exact_fields(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["record_model"]["model_name"] == "RuntimeExecutionPilotRecord"
+    assert data["record_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "RuntimeExecutionPilotSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeExecutionPilotAssessment"
+    assert data["assessment_model"]["field_count"] == 7
+    assert data["summary_model"]["model_name"] == "RuntimeExecutionPilotSummary"
+    assert data["summary_model"]["field_count"] == 9
+    for field_name in (
+        "execution_id", "runtime_id", "command", "command_hash",
+        "execution_timestamp", "execution_status", "stdout_present",
+        "stderr_present", "exit_code_present", "audit_record_present",
+        "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62a_all_execution_domains_defined(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "runtime_selection_validation",
+        "command_validation",
+        "read_only_boundary_validation",
+        "execution_authorization_validation",
+        "stdout_capture_validation",
+        "stderr_capture_validation",
+        "exit_code_validation",
+        "audit_trace_validation",
+        "human_review_validation",
+        "rollback_boundary_validation",
+    }
+    actual = {s["execution_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62a_real_execution_occurs(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    out = data["execution_output"]
+    assert out["exit_code"] == 0
+    assert out["stdout"].strip() != ""
+    rec = data["execution_record"]
+    assert rec["execution_status"] == "completed"
+    assert rec["stdout_present"] is True
+    assert rec["exit_code_present"] is True
+    assert rec["audit_record_present"] is True
+
+
+def test_62a_execution_record_fields(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["execution_record"]
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+    assert rec["human_review_required"] is True
+    assert rec["audit_record_present"] is True
+
+
+def test_62a_execution_allowed_true_for_approved_command(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["runtime_execution_pilot_overview"]
+    assert overview["execution_allowed"] is True
+    assert overview["execution_status"] == "completed"
+    assert overview["blocker_count"] == 0
+    assessment = data["sample_assessment"]
+    assert assessment["execution_allowed"] is True
+    summary = data["sample_summary"]
+    assert summary["execution_allowed"] is True
+    assert summary["execution_count"] == 1
+
+
+def test_62a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for signal in data["signals"]:
+        assert "execution_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62a_governance_boundaries(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is True
+    assert boundaries["human_review_required"] is True
+    assert boundaries["read_only"] is True
+    for action in (
+        "modify files", "modify repository", "access network",
+        "execute prompts", "invoke AI runtimes", "commit", "push",
+        "rollback", "bypass governance",
+    ):
+        assert action in boundaries["may_not"]
+    assert "execute approved read-only local commands" in boundaries["may"]
+    assert "capture stdout" in boundaries["may"]
+
+
+def test_62a_allowlist_and_denylist_present(capsys) -> None:
+    main(["runtime-execution-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    allowed = data["allowed_commands"]
+    assert "pwd" in allowed
+    assert "ls" in allowed
+    assert "git status" in allowed
+    forbidden = data["forbidden_commands"]
+    assert "rm" in forbidden
+    assert "git commit" in forbidden
+    assert "curl" in forbidden
+
+
+def test_62a_human_output(capsys) -> None:
+    main(["runtime-execution-pilot"])
+    output = capsys.readouterr().out
+    for text in (
+        "Controlled runtime execution pilot",
+        "Execution record",
+        "Execution output",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Execution signals",
+        "Governance boundaries",
+        "Execution allowed:",
+        "Allowed commands:",
+    ):
+        assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62A.1: Task Transition Idempotency Hardening
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_task_transition_idempotency  # noqa: E402
+
+
+def test_62a1_json_top_level_keys(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True)
+    from pcae.core.paths import HarnessPath
+    data = build_task_transition_idempotency(HarnessPath(tmp_path))
+    for key in (
+        "task_transition_idempotency_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "duplicate_pairs",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing key: {key}"
+
+
+def test_62a1_models_and_exact_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True)
+    from pcae.core.paths import HarnessPath
+    data = build_task_transition_idempotency(HarnessPath(tmp_path))
+    assert data["signal_model"]["model_name"] == "TaskTransitionIdempotencySignal"
+    assert data["signal_model"]["field_count"] == 9
+    assert data["assessment_model"]["model_name"] == "TaskTransitionIdempotencyAssessment"
+    assert data["assessment_model"]["field_count"] == 8
+    assert data["summary_model"]["model_name"] == "TaskTransitionIdempotencySummary"
+    assert data["summary_model"]["field_count"] == 9
+    for field_name in (
+        "signal_id", "completed_task_id", "active_task_id", "phase_id",
+        "signal_type", "severity", "detected_state", "expected_state",
+        "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["signal_model"]["fields"]
+        ), f"Missing signal field: {field_name}"
+
+
+def test_62a1_no_duplicate_detected_when_clean(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True)
+    (tmp_path / "tasks" / "active" / "20260607-1000-alpha-task.md").write_text("", encoding="utf-8")
+    (tmp_path / "tasks" / "done" / "20260607-0900-beta-task.md").write_text("", encoding="utf-8")
+    from pcae.core.paths import HarnessPath
+    data = build_task_transition_idempotency(HarnessPath(tmp_path))
+    assert data["task_transition_idempotency_overview"]["duplicate_detected"] is False
+    assert data["task_transition_idempotency_overview"]["idempotency_status"] == "valid"
+    assert data["sample_assessment"]["duplicate_detected"] is False
+    assert data["sample_assessment"]["repair_recommended"] is False
+    assert len(data["duplicate_pairs"]) == 0
+
+
+def test_62a1_duplicate_detected_when_same_slug(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True)
+    (tmp_path / "tasks" / "active" / "20260607-2033-62a-pilot.md").write_text("", encoding="utf-8")
+    (tmp_path / "tasks" / "done" / "20260607-2023-62a-pilot.md").write_text("", encoding="utf-8")
+    from pcae.core.paths import HarnessPath
+    data = build_task_transition_idempotency(HarnessPath(tmp_path))
+    assert data["task_transition_idempotency_overview"]["duplicate_detected"] is True
+    assert data["task_transition_idempotency_overview"]["idempotency_status"] == "duplicate_detected"
+    assert data["sample_assessment"]["repair_recommended"] is True
+    assert len(data["duplicate_pairs"]) == 1
+    pair = data["duplicate_pairs"][0]
+    assert "62a-pilot" in pair["done_task_id"]
+    assert "62a-pilot" in pair["active_task_id"]
+    assert data["signals"][0]["severity"] == "blocker"
+    assert data["signals"][0]["human_review_required"] is True
+
+
+def test_62a1_tlg_includes_duplicate_detection_domain(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {s["governance_domain"] for s in data["domain_signals"]}
+    assert "duplicate_active_done_phase_detection" in domains
+    dup_signal = next(
+        s for s in data["domain_signals"]
+        if s["governance_domain"] == "duplicate_active_done_phase_detection"
+    )
+    assert dup_signal["severity"] == "blocker"
+
+
+def test_62a1_rmc_includes_duplicate_detection_domain(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    domains = {s["continuity_domain"] for s in data["domain_signals"]}
+    assert "duplicate_phase_transition_detection" in domains
+    dup_signal = next(
+        s for s in data["domain_signals"]
+        if s["continuity_domain"] == "duplicate_phase_transition_detection"
+    )
+    assert dup_signal["severity"] == "blocker"
+
+
+def test_62a1_governance_boundaries(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True)
+    from pcae.core.paths import HarnessPath
+    data = build_task_transition_idempotency(HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["repair_automatic"] is False
+    assert boundaries["human_review_required"] is True
+    assert "delete task files" in boundaries["may_not"]
+    assert "scan tasks/active and tasks/done for slug overlaps" in boundaries["may"]

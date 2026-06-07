@@ -332,6 +332,19 @@ def slugify_title(title: str) -> str:
     return slug or "task"
 
 
+def _slug_from_task_stem(stem: str) -> str:
+    """Extract the slug portion from a task file stem (YYYYMMDD-HHMM-{slug} → {slug})."""
+    parts = stem.split("-", 2)
+    return parts[2] if len(parts) >= 3 else stem
+
+
+def list_task_slugs_in_dir(dir_path: Path) -> frozenset[str]:
+    """Return slugs for all task files in a directory."""
+    if not dir_path.is_dir():
+        return frozenset()
+    return frozenset(_slug_from_task_stem(f.stem) for f in dir_path.glob("*.md"))
+
+
 def render_task_contract(
     task_id: str,
     title: str,
@@ -484,6 +497,32 @@ def validate_task_transition(
         blockers.append("Unable to determine the next task title.")
     elif next_title is None:
         warnings.append("Next task title resolved automatically from governance context.")
+
+    if resolved_next_title is not None and active_task is not None:
+        next_slug = slugify_title(resolved_next_title)
+
+        if resolved_next_title.strip().lower() == active_task.title.strip().lower():
+            blockers.append(
+                f"Next task title '{resolved_next_title}' is the same as the current "
+                "active task. Transitioning to the same phase is not allowed."
+            )
+
+        done_dir = root.join(Path("tasks") / "done")
+        done_slugs = list_task_slugs_in_dir(done_dir)
+        if next_slug in done_slugs:
+            blockers.append(
+                f"Next task title '{resolved_next_title}' matches a completed task in "
+                "tasks/done/. Transitioning to a completed phase is not allowed."
+            )
+
+        active_dir = root.join(Path("tasks") / "active")
+        current_slug = _slug_from_task_stem(active_task.path.stem)
+        active_slugs = list_task_slugs_in_dir(active_dir) - {current_slug}
+        if next_slug in active_slugs:
+            blockers.append(
+                f"An active task with title '{resolved_next_title}' already exists. "
+                "Use a different title for the next task."
+            )
 
     return TaskTransitionValidation(
         active_task=active_task,

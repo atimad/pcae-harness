@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -59518,6 +59519,7 @@ _TLG_GOVERNANCE_DOMAINS: tuple[str, ...] = (
     "session_task_consistency",
     "task_handoff_freshness",
     "stale_task_contamination_prevention",
+    "duplicate_active_done_phase_detection",
 )
 
 _TLG_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
@@ -59636,6 +59638,13 @@ _TLG_DOMAIN_SIGNALS: tuple[dict, ...] = (
         "severity": "blocker",
         "detected_state": "stale task contamination prevention has not been explicitly validated across active tasks, done tasks, roadmap state, and session continuity",
         "expected_state": "stale task references are isolated before continuation so future agents cannot inherit contaminated task context",
+    },
+    {
+        "governance_domain": "duplicate_active_done_phase_detection",
+        "signal_type": "duplicate_active_done_phase_check",
+        "severity": "blocker",
+        "detected_state": "task transition does not validate next-task title uniqueness against completed done tasks; a task with the same normalized title as a done task can be created as active, producing duplicate done/active phase state",
+        "expected_state": "task transition must reject next-task titles that match any completed done task; duplicate active/done phase state must be detected and blocked before the new task file is created",
     },
 )
 
@@ -60113,6 +60122,7 @@ _RMC_CONTINUITY_DOMAINS: tuple[str, ...] = (
     "runtime_roadmap_alignment",
     "handoff_roadmap_alignment",
     "pre_execution_transition_readiness",
+    "duplicate_phase_transition_detection",
 )
 
 _RMC_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
@@ -60251,6 +60261,13 @@ _RMC_DOMAIN_SIGNALS: tuple[dict, ...] = (
         "severity": "blocker",
         "detected_state": "pre-execution transition readiness has not been explicitly validated before entering real runtime invocation work",
         "expected_state": "pre-execution transition readiness is validated across roadmap, task, session, handoff, and runtime posture before any real runtime invocation work is attempted",
+    },
+    {
+        "continuity_domain": "duplicate_phase_transition_detection",
+        "signal_type": "duplicate_phase_transition_check",
+        "severity": "blocker",
+        "detected_state": "roadmap continuity does not validate that an active task title is unique relative to completed done tasks; duplicate active/done phase state violates roadmap advancement invariants",
+        "expected_state": "roadmap continuity must verify that no active task shares a normalized title with a done task; each phase should appear exactly once across active and done task records",
     },
 )
 
@@ -61075,4 +61092,690 @@ def build_phase_test_selection() -> dict:
         "governance_boundaries": dict(_PTSS_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_PTSS_INPUT_SOURCES),
         "advisory": PHASE_TEST_SELECTION_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62A: Controlled Runtime Execution Pilot
+# ---------------------------------------------------------------------------
+
+RUNTIME_EXECUTION_PILOT_ADVISORY = (
+    "Phase 62A is the first PCAE phase that performs actual runtime execution under "
+    "governance. Execution is limited to approved read-only local commands. "
+    "Write operations, network operations, and AI runtime invocation remain blocked. "
+    "Human review is always required."
+)
+
+_REP_ALLOWED_COMMANDS: frozenset[str] = frozenset({
+    "pwd",
+    "ls",
+    "ls -la",
+    "git status",
+    "python --version",
+    "python3 --version",
+})
+
+_REP_FORBIDDEN_PREFIXES: tuple[str, ...] = (
+    "rm",
+    "mv",
+    "cp",
+    "chmod",
+    "chown",
+    "sudo",
+    "curl",
+    "wget",
+    "ssh",
+    "scp",
+    "rsync",
+    "git add",
+    "git commit",
+    "git push",
+    "git reset",
+    "git clean",
+    "git checkout",
+    "git restore",
+)
+
+_REP_EXECUTION_DOMAINS: tuple[str, ...] = (
+    "runtime_selection_validation",
+    "command_validation",
+    "read_only_boundary_validation",
+    "execution_authorization_validation",
+    "stdout_capture_validation",
+    "stderr_capture_validation",
+    "exit_code_validation",
+    "audit_trace_validation",
+    "human_review_validation",
+    "rollback_boundary_validation",
+)
+
+_REP_EXECUTION_STATUSES: tuple[str, ...] = (
+    "ready",
+    "executing",
+    "completed",
+    "blocked",
+    "failed",
+)
+
+_REP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_REP_MAX_TIMEOUT_SECONDS: int = 30
+_REP_MAX_OUTPUT_BYTES: int = 100 * 1024
+_REP_DEFAULT_COMMAND: str = "pwd"
+_REP_RUNTIME_ID: str = "shell-local"
+
+_REP_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "execution_timestamp", "type": "str", "required": True},
+    {"name": "execution_status", "type": "str", "required": True},
+    {"name": "stdout_present", "type": "bool", "required": True},
+    {"name": "stderr_present", "type": "bool", "required": True},
+    {"name": "exit_code_present", "type": "bool", "required": True},
+    {"name": "audit_record_present", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_REP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "execution_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_REP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "execution_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_REP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "execution_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "execution_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def _rep_command_allowed(command: str) -> bool:
+    return command in _REP_ALLOWED_COMMANDS
+
+
+def _rep_command_forbidden(command: str) -> bool:
+    for prefix in _REP_FORBIDDEN_PREFIXES:
+        if command == prefix or command.startswith(f"{prefix} "):
+            return True
+    return False
+
+
+def build_runtime_execution_pilot() -> dict:
+    """Execute one approved read-only local command and return the governed execution record."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    command = _REP_DEFAULT_COMMAND
+    execution_id = f"rep-{ts}"
+
+    command_allowed = _rep_command_allowed(command)
+    command_forbidden = _rep_command_forbidden(command)
+    execution_allowed = command_allowed and not command_forbidden
+
+    stdout_value = ""
+    stderr_value = ""
+    exit_code: int = -1
+    execution_status = "failed"
+
+    if execution_allowed:
+        try:
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=_REP_MAX_TIMEOUT_SECONDS,
+            )
+            raw_stdout = proc.stdout
+            raw_stderr = proc.stderr
+            if len(raw_stdout.encode()) > _REP_MAX_OUTPUT_BYTES:
+                raw_stdout = raw_stdout.encode()[:_REP_MAX_OUTPUT_BYTES].decode(errors="replace")
+            if len(raw_stderr.encode()) > _REP_MAX_OUTPUT_BYTES:
+                raw_stderr = raw_stderr.encode()[:_REP_MAX_OUTPUT_BYTES].decode(errors="replace")
+            stdout_value = raw_stdout
+            stderr_value = raw_stderr
+            exit_code = proc.returncode
+            execution_status = "completed" if exit_code == 0 else "failed"
+        except subprocess.TimeoutExpired:
+            execution_status = "failed"
+            stderr_value = f"Command exceeded timeout of {_REP_MAX_TIMEOUT_SECONDS}s"
+        except Exception as exc:
+            execution_status = "failed"
+            stderr_value = str(exc)
+    else:
+        execution_status = "blocked"
+
+    command_hash = hashlib.sha256(command.encode()).hexdigest()[:16]
+
+    execution_record = {
+        "execution_id": execution_id,
+        "runtime_id": _REP_RUNTIME_ID,
+        "command": command,
+        "command_hash": command_hash,
+        "execution_timestamp": generated_at,
+        "execution_status": execution_status,
+        "stdout_present": bool(stdout_value),
+        "stderr_present": bool(stderr_value),
+        "exit_code_present": exit_code != -1,
+        "audit_record_present": True,
+        "human_review_required": True,
+    }
+
+    domain_signal_defs = [
+        {
+            "execution_domain": "runtime_selection_validation",
+            "signal_type": "runtime_selection_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime={_REP_RUNTIME_ID}; shell-local runtime selected and validated"
+            ),
+            "expected_state": "runtime must be shell-local; other runtimes are blocked",
+        },
+        {
+            "execution_domain": "command_validation",
+            "signal_type": "command_allowlist_check",
+            "severity": "info" if command_allowed and not command_forbidden else "blocker",
+            "detected_state": (
+                f"command='{command}'; allowlist_check={'pass' if command_allowed else 'fail'}; "
+                f"denylist_check={'pass' if not command_forbidden else 'fail'}"
+            ),
+            "expected_state": (
+                "command must appear in the allowlist and must not match any denylist entry"
+            ),
+        },
+        {
+            "execution_domain": "read_only_boundary_validation",
+            "signal_type": "read_only_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                f"command='{command}'; read-only boundary holds; no write operations detected"
+            ),
+            "expected_state": (
+                "executed command must not modify files, repository, or any persistent state"
+            ),
+        },
+        {
+            "execution_domain": "execution_authorization_validation",
+            "signal_type": "execution_authorization_check",
+            "severity": "info" if execution_allowed else "blocker",
+            "detected_state": (
+                f"execution_allowed={execution_allowed}; "
+                "all authorization preconditions evaluated"
+            ),
+            "expected_state": (
+                "execution_allowed=True only when runtime, command, boundary, and "
+                "review conditions all pass"
+            ),
+        },
+        {
+            "execution_domain": "stdout_capture_validation",
+            "signal_type": "stdout_capture_check",
+            "severity": "info",
+            "detected_state": (
+                f"stdout_present={bool(stdout_value)}; "
+                f"stdout captured from '{command}' execution"
+            ),
+            "expected_state": "stdout must be captured and available in the execution record",
+        },
+        {
+            "execution_domain": "stderr_capture_validation",
+            "signal_type": "stderr_capture_check",
+            "severity": "info",
+            "detected_state": (
+                f"stderr_present={bool(stderr_value)}; "
+                f"stderr captured from '{command}' execution"
+            ),
+            "expected_state": "stderr must be captured and available in the execution record",
+        },
+        {
+            "execution_domain": "exit_code_validation",
+            "signal_type": "exit_code_check",
+            "severity": "info" if exit_code != -1 else "warning",
+            "detected_state": (
+                f"exit_code={exit_code}; exit code captured from '{command}' execution"
+            ),
+            "expected_state": "exit code must be captured and present in the execution record",
+        },
+        {
+            "execution_domain": "audit_trace_validation",
+            "signal_type": "audit_trace_check",
+            "severity": "info",
+            "detected_state": (
+                f"audit_record_present=True; execution_id={execution_id}; "
+                "audit trace generated"
+            ),
+            "expected_state": (
+                "audit record must be generated for every execution with "
+                "execution_id, command, and timestamp"
+            ),
+        },
+        {
+            "execution_domain": "human_review_validation",
+            "signal_type": "human_review_check",
+            "severity": "info",
+            "detected_state": "human_review_required=True; human review requirement enforced",
+            "expected_state": "human_review_required must always be True in Phase 62A",
+        },
+        {
+            "execution_domain": "rollback_boundary_validation",
+            "signal_type": "rollback_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                f"command='{command}'; no repository mutation; rollback boundary holds"
+            ),
+            "expected_state": (
+                "executed command must not require rollback; "
+                "read-only commands produce no side effects"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rep-sig-{ts}-{i:02d}",
+            "execution_id": execution_id,
+            "execution_domain": sig["execution_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    final_execution_allowed = execution_allowed and blocker_count == 0
+    final_execution_status = execution_status
+
+    assessment_id = f"repa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "execution_status": final_execution_status,
+        "execution_allowed": final_execution_allowed,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"repsum-{ts}",
+        "assessment_id": assessment_id,
+        "execution_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "execution_status": final_execution_status,
+        "execution_allowed": final_execution_allowed,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_REP_EXECUTION_DOMAINS)
+
+    return {
+        "runtime_execution_pilot_overview": {
+            "overview_id": f"62a-{ts}",
+            "generated_at": generated_at,
+            "phase": "62A",
+            "title": "Controlled Runtime Execution Pilot",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "execution_status": final_execution_status,
+            "execution_allowed": final_execution_allowed,
+            "human_review_required": True,
+            "summary": (
+                "Phase 62A: the first PCAE phase that performs actual runtime execution "
+                "under governance. Executes one approved read-only local command "
+                f"('{command}') on the {_REP_RUNTIME_ID} runtime. Captures stdout, stderr, "
+                "and exit code. Generates an execution record and audit trace. "
+                "Write operations, network operations, and AI runtime invocation remain "
+                f"blocked. execution_status={final_execution_status}. "
+                f"execution_allowed={final_execution_allowed}. "
+                "human_review_required=True."
+            ),
+        },
+        "execution_record": execution_record,
+        "execution_output": {
+            "stdout": stdout_value,
+            "stderr": stderr_value,
+            "exit_code": exit_code,
+        },
+        "record_model": {
+            "model_name": "RuntimeExecutionPilotRecord",
+            "field_count": len(_REP_RECORD_FIELDS),
+            "required_field_count": len(_REP_RECORD_FIELDS),
+            "supported_execution_statuses": list(_REP_EXECUTION_STATUSES),
+            "execution_allowed_conditional_in_62a": True,
+            "human_review_required_always_true_in_62a": True,
+            "fields": [dict(f) for f in _REP_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeExecutionPilotSignal",
+            "field_count": len(_REP_SIGNAL_FIELDS),
+            "required_field_count": len(_REP_SIGNAL_FIELDS),
+            "severity_values": list(_REP_SEVERITY_VALUES),
+            "execution_allowed_conditional_in_62a": True,
+            "human_review_required_always_true_in_62a": True,
+            "fields": [dict(f) for f in _REP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeExecutionPilotAssessment",
+            "field_count": len(_REP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_REP_ASSESSMENT_FIELDS),
+            "supported_execution_statuses": list(_REP_EXECUTION_STATUSES),
+            "execution_allowed_conditional_in_62a": True,
+            "human_review_required_always_true_in_62a": True,
+            "fields": [dict(f) for f in _REP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeExecutionPilotSummary",
+            "field_count": len(_REP_SUMMARY_FIELDS),
+            "required_field_count": len(_REP_SUMMARY_FIELDS),
+            "supported_execution_statuses": list(_REP_EXECUTION_STATUSES),
+            "execution_allowed_conditional_in_62a": True,
+            "human_review_required_always_true_in_62a": True,
+            "fields": [dict(f) for f in _REP_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "execute approved read-only local commands",
+                "capture stdout",
+                "capture stderr",
+                "capture exit code",
+                "generate execution records",
+                "generate audit records",
+            ],
+            "may_not": [
+                "modify files",
+                "modify repository",
+                "access network",
+                "execute prompts",
+                "invoke AI runtimes",
+                "commit",
+                "push",
+                "rollback",
+                "bypass governance",
+            ],
+            "execution_allowed": final_execution_allowed,
+            "human_review_required": True,
+            "read_only": True,
+            "phase": "62A",
+        },
+        "allowed_commands": sorted(_REP_ALLOWED_COMMANDS),
+        "forbidden_commands": list(_REP_FORBIDDEN_PREFIXES),
+        "advisory": RUNTIME_EXECUTION_PILOT_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62A.1: Task Transition Idempotency Hardening
+# ---------------------------------------------------------------------------
+
+TASK_TRANSITION_IDEMPOTENCY_ADVISORY = (
+    "Phase 62A.1 hardens task transition so PCAE cannot create a duplicate active task "
+    "for a phase that is already completed. Three new guards are enforced in "
+    "validate_task_transition: same-title guard, completed-title guard, and "
+    "existing-active guard. Human review is always required."
+)
+
+_TTI_EXECUTION_DOMAINS: tuple[str, ...] = (
+    "same_title_guard",
+    "completed_title_guard",
+    "existing_active_guard",
+    "session_consistency_validation",
+    "duplicate_state_detection",
+)
+
+_TTI_IDEMPOTENCY_STATUSES: tuple[str, ...] = (
+    "valid",
+    "valid_with_warnings",
+    "duplicate_detected",
+    "blocked",
+)
+
+_TTI_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_TTI_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "completed_task_id", "type": "str", "required": True},
+    {"name": "active_task_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TTI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "idempotency_status", "type": "str", "required": True},
+    {"name": "duplicate_detected", "type": "bool", "required": True},
+    {"name": "repair_recommended", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TTI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "idempotency_status", "type": "str", "required": True},
+    {"name": "duplicate_detected", "type": "bool", "required": True},
+    {"name": "repair_recommended", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def _tti_extract_slug(stem: str) -> str:
+    parts = stem.split("-", 2)
+    return parts[2] if len(parts) >= 3 else stem
+
+
+def build_task_transition_idempotency(root: HarnessPath | None = None) -> dict:
+    """Scan tasks/active and tasks/done for duplicate phase titles and return an assessment."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    active_dir = root.join(Path("tasks") / "active")
+    done_dir = root.join(Path("tasks") / "done")
+
+    active_files = sorted(active_dir.glob("*.md")) if active_dir.is_dir() else []
+    done_files = sorted(done_dir.glob("*.md")) if done_dir.is_dir() else []
+
+    done_slugs: dict[str, str] = {
+        _tti_extract_slug(f.stem): f.stem for f in done_files
+    }
+    active_slugs: dict[str, str] = {
+        _tti_extract_slug(f.stem): f.stem for f in active_files
+    }
+
+    duplicate_pairs: list[tuple[str, str]] = [
+        (done_slugs[slug], active_slugs[slug])
+        for slug in done_slugs
+        if slug in active_slugs
+    ]
+
+    duplicate_detected = bool(duplicate_pairs)
+    repair_recommended = duplicate_detected
+
+    signals: list[dict] = []
+    for i, (done_stem, active_stem) in enumerate(duplicate_pairs, start=1):
+        signals.append({
+            "signal_id": f"tti-sig-{ts}-{i:02d}",
+            "completed_task_id": done_stem,
+            "active_task_id": active_stem,
+            "phase_id": "62A.1",
+            "signal_type": "duplicate_active_done_phase_signal",
+            "severity": "blocker",
+            "detected_state": (
+                f"active task '{active_stem}' shares its normalized title slug with "
+                f"completed done task '{done_stem}'; duplicate done/active phase state detected"
+            ),
+            "expected_state": (
+                "each phase must appear exactly once across active and done task records; "
+                "no active task should share its normalized title with a done task"
+            ),
+            "human_review_required": True,
+        })
+
+    if not duplicate_detected:
+        signals.append({
+            "signal_id": f"tti-sig-{ts}-00",
+            "completed_task_id": "none",
+            "active_task_id": "none",
+            "phase_id": "62A.1",
+            "signal_type": "idempotency_check",
+            "severity": "info",
+            "detected_state": "no duplicate active/done phase tasks detected; idempotency is valid",
+            "expected_state": "no active task shares its normalized title with a done task",
+            "human_review_required": True,
+        })
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+
+    if blocker_count > 0:
+        idempotency_status = "duplicate_detected"
+    elif warning_count > 0:
+        idempotency_status = "valid_with_warnings"
+    else:
+        idempotency_status = "valid"
+
+    assessment_id = f"ttia-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "idempotency_status": idempotency_status,
+        "duplicate_detected": duplicate_detected,
+        "repair_recommended": repair_recommended,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ttisum-{ts}",
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "idempotency_status": idempotency_status,
+        "duplicate_detected": duplicate_detected,
+        "repair_recommended": repair_recommended,
+        "human_review_required": True,
+    }
+
+    return {
+        "task_transition_idempotency_overview": {
+            "overview_id": f"62a1-{ts}",
+            "generated_at": generated_at,
+            "phase": "62A.1",
+            "title": "Task Transition Idempotency Hardening",
+            "duplicate_pair_count": len(duplicate_pairs),
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "idempotency_status": idempotency_status,
+            "duplicate_detected": duplicate_detected,
+            "repair_recommended": repair_recommended,
+            "human_review_required": True,
+            "summary": (
+                "Phase 62A.1: hardens task transition to prevent duplicate active/done phase state. "
+                "Scans tasks/active and tasks/done for slug overlaps. Three new guards enforced: "
+                "same-title guard (next_title must differ from active), "
+                "completed-title guard (next_title must not match any done task slug), "
+                "existing-active guard (next_title must not match any other active task slug). "
+                f"duplicate_detected={duplicate_detected}. "
+                f"idempotency_status={idempotency_status}. "
+                "human_review_required=True."
+            ),
+        },
+        "signal_model": {
+            "model_name": "TaskTransitionIdempotencySignal",
+            "field_count": len(_TTI_SIGNAL_FIELDS),
+            "required_field_count": len(_TTI_SIGNAL_FIELDS),
+            "severity_values": list(_TTI_SEVERITY_VALUES),
+            "fields": [dict(f) for f in _TTI_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "TaskTransitionIdempotencyAssessment",
+            "field_count": len(_TTI_ASSESSMENT_FIELDS),
+            "required_field_count": len(_TTI_ASSESSMENT_FIELDS),
+            "supported_idempotency_statuses": list(_TTI_IDEMPOTENCY_STATUSES),
+            "fields": [dict(f) for f in _TTI_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "TaskTransitionIdempotencySummary",
+            "field_count": len(_TTI_SUMMARY_FIELDS),
+            "required_field_count": len(_TTI_SUMMARY_FIELDS),
+            "supported_idempotency_statuses": list(_TTI_IDEMPOTENCY_STATUSES),
+            "fields": [dict(f) for f in _TTI_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "duplicate_pairs": [
+            {"done_task_id": d, "active_task_id": a} for d, a in duplicate_pairs
+        ],
+        "governance_boundaries": {
+            "may": [
+                "scan tasks/active and tasks/done for slug overlaps",
+                "report duplicate pairs as blocker signals",
+                "recommend human-reviewed repair",
+            ],
+            "may_not": [
+                "delete task files",
+                "move task files",
+                "rewrite session state",
+                "invoke runtimes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "duplicate_detected": duplicate_detected,
+            "repair_automatic": False,
+            "human_review_required": True,
+            "phase": "62A.1",
+        },
+        "advisory": TASK_TRANSITION_IDEMPOTENCY_ADVISORY,
     }

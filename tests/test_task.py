@@ -1364,6 +1364,132 @@ def test_61h_task_transition_scopes_dirty_source_into_next_task(
 
 
 # ---------------------------------------------------------------------------
+# Phase 62A.1: Task Transition Idempotency Hardening tests
+# ---------------------------------------------------------------------------
+
+from pcae.core.tasks import list_task_slugs_in_dir, _slug_from_task_stem  # noqa: E402
+
+
+def test_62a1_transition_blocks_same_title(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "62A controlled runtime execution pilot",
+        created_at=datetime(2026, 6, 7, 20, 23, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["task", "transition", "--next", "62A controlled runtime execution pilot"]
+    )
+
+    capsys.readouterr()
+    assert exit_code == 1
+    active_files = list((tmp_path / "tasks" / "active").glob("*.md"))
+    assert len(active_files) == 1, "No new active task should have been created"
+
+
+def test_62a1_transition_blocks_same_title_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "62A controlled runtime execution pilot",
+        created_at=datetime(2026, 6, 7, 20, 23, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["task", "transition", "--next", "62A controlled runtime execution pilot"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "same as the current active task" in output
+    assert not (
+        tmp_path / "tasks" / "done" / "20260607-2023-62a-controlled-runtime-execution-pilot.md"
+    ).exists()
+
+
+def test_62a1_transition_blocks_completed_title(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    done_dir = tmp_path / "tasks" / "done"
+    done_dir.mkdir(parents=True, exist_ok=True)
+    (done_dir / "20260607-2023-62a-controlled-runtime-execution-pilot.md").write_text(
+        "# Task Contract\n\n## Status\n\ndone\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "62A.1 task transition idempotency hardening",
+        created_at=datetime(2026, 6, 7, 20, 40, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["task", "transition", "--next", "62A controlled runtime execution pilot"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "matches a completed task" in output
+    active_files = list((tmp_path / "tasks" / "active").glob("*.md"))
+    assert len(active_files) == 1, "No new duplicate active task should have been created"
+
+
+def test_62a1_transition_blocks_existing_active_duplicate(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    # Earlier task (will be the alphabetically-last active task after write_session_snapshot)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "62C governance cleanup",
+        created_at=datetime(2026, 6, 7, 20, 50, tzinfo=timezone.utc),
+    )
+    # Earlier existing active task with a title we'll try to transition to
+    (tmp_path / "tasks" / "active" / "20260607-2040-62b-runtime-output-capture.md").write_text(
+        "# Task Contract\n\n## Status\n\nactive\n", encoding="utf-8"
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["task", "transition", "--next", "62B runtime output capture"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "already exists" in output
+
+
+def test_62a1_slug_helpers() -> None:
+    assert _slug_from_task_stem("20260607-2023-62a-pilot") == "62a-pilot"
+    assert _slug_from_task_stem("20260101-1200-my-task-title") == "my-task-title"
+    assert _slug_from_task_stem("nodash") == "nodash"
+
+
+def test_62a1_list_task_slugs_in_dir(tmp_path: Path) -> None:
+    task_dir = tmp_path / "tasks" / "active"
+    task_dir.mkdir(parents=True)
+    (task_dir / "20260607-2023-62a-pilot.md").write_text("", encoding="utf-8")
+    (task_dir / "20260607-2033-62b-output-capture.md").write_text("", encoding="utf-8")
+    slugs = list_task_slugs_in_dir(task_dir)
+    assert "62a-pilot" in slugs
+    assert "62b-output-capture" in slugs
+    assert len(slugs) == 2
+
+
+# ---------------------------------------------------------------------------
 # Phase 61I: Handoff State Refresh tests
 # ---------------------------------------------------------------------------
 

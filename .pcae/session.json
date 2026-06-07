@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260607-1939-next-governed-task",
-    "title": "Next governed task"
+    "id": "20260607-2105-62b-runtime-output-capture",
+    "title": "62B runtime output capture"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "Next governed task",
+  "current_objective": "62B runtime output capture",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -34,15 +34,7 @@
         "status": " M"
       },
       {
-        "path": "src/pcae/commands/task.py",
-        "status": " M"
-      },
-      {
         "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/context.py",
         "status": " M"
       },
       {
@@ -62,11 +54,11 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260607-1400-61g-roadmap-continuity.md",
+        "path": "tasks/active/20260607-1939-next-governed-task.md",
         "status": " D"
       },
       {
-        "path": "tests/test_context.py",
+        "path": "tests/test_agent.py",
         "status": " M"
       },
       {
@@ -74,22 +66,26 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260607-1939-next-governed-task.md",
+        "path": "tasks/active/20260607-2105-62b-runtime-output-capture.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260607-1400-61h-automated-task-transition.md",
+        "path": "tasks/done/20260607-1939-next-governed-task.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260607-1854-61i-handoff-state-refresh.md",
+        "path": "tasks/done/20260607-2023-62a-controlled-runtime-execution-pilot.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260607-2050-62a-1-task-transition-idempotency-hardening.md",
         "status": "??"
       }
     ],
-    "status_summary": "19 changed files"
+    "status_summary": "18 changed files"
   },
-  "last_completed_step": "Completed task 20260607-1854-61i-handoff-state-refresh: 61I: Handoff State Refresh",
-  "next_recommended_step": "Continue active task 20260607-1939-next-governed-task.",
-  "timestamp": "2026-06-07T17:39:38.911624+00:00",
+  "last_completed_step": "Completed task 20260607-2050-62a-1-task-transition-idempotency-hardening: 62A.1 task transition idempotency hardening",
+  "next_recommended_step": "Continue active task 20260607-2105-62b-runtime-output-capture.",
+  "timestamp": "2026-06-07T19:05:50.954340+00:00",
   "warnings": []
 }

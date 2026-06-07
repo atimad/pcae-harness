@@ -166,6 +166,7 @@ from pcae.commands.agent import (
     run_agent_handoff_modernization,
     run_handoff_state_refresh,
     run_phase_test_selection,
+    run_runtime_execution_pilot,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4444,6 +4445,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     ptss_parser.set_defaults(handler=run_phase_test_selection)
+
+    rep_parser = subparsers.add_parser(
+        "runtime-execution-pilot",
+        help="Execute one approved read-only local command under PCAE governance and capture stdout, stderr, and exit code (Phase 62A).",
+    )
+    rep_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rep_parser.set_defaults(handler=run_runtime_execution_pilot)
 
     return parser
 
