@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-1400-61f-agent-handoff-modernization
+20260607-1400-61g-roadmap-continuity
 
 ## Title
 
-Agent Handoff Modernization (Phase 61F)
+Roadmap Continuity Validation (Phase 61G)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement pcae agent-handoff-modernization: 3 models (AgentHandoffModernizationSignal, AgentHandoffModernizationAssessment, AgentHandoffModernizationSummary), 10 modernization domains, handoff_update_allowed=False, session_update_allowed=False, human_review_required=True in Phase 61F.
+Implement pcae roadmap-continuity: 3 models (RoadmapContinuitySignal, RoadmapContinuityAssessment, RoadmapContinuitySummary), 10 continuity domains, roadmap_update_allowed=False, task_update_allowed=False, session_update_allowed=False, execution_allowed=False, human_review_required=True in Phase 61G.
 
 ## Allowed Files
 
@@ -62,27 +62,29 @@ strict
 
 - No runtime invocation
 - No prompt execution
-- No automatic handoff rewrite
-- No task movement
+- No automatic roadmap rewrite
+- No automatic task completion
+- No automatic task creation
 - No session rewrite
 - No repository modification by agents
 
 ## Acceptance Checks
 
-- pcae agent-handoff-modernization works
-- pcae agent-handoff-modernization --json works
-- AgentHandoffModernizationSignal implemented
-- AgentHandoffModernizationAssessment implemented
-- AgentHandoffModernizationSummary implemented
-- all modernization domains defined
-- completed phase summary included
-- active phase summary included
-- next phase recommendation included
-- roadmap position summary included
-- runtime status summary included
-- governance status summary included
-- handoff_update_allowed remains false
+- pcae roadmap-continuity works
+- pcae roadmap-continuity --json works
+- RoadmapContinuitySignal implemented
+- RoadmapContinuityAssessment implemented
+- RoadmapContinuitySummary implemented
+- all continuity domains defined
+- completed phase alignment included
+- active phase alignment included
+- next phase alignment included
+- handoff roadmap alignment included
+- pre-execution transition readiness included
+- roadmap_update_allowed remains false
+- task_update_allowed remains false
 - session_update_allowed remains false
+- execution_allowed remains false
 - human review required
 - pcae status coherence passes
 - pcae health passes

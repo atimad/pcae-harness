@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61F: Agent Handoff Modernization.
+Phase 61G: Roadmap Continuity Validation.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -98,7 +98,11 @@ PCAE can inspect governed agent handoff modernization requirements with
 `pcae agent-handoff-modernization --json`, defining handoff continuity
 domains, roadmap-aware continuity checks, runtime/governance summary
 requirements, and human-review boundaries while keeping handoff and session
-updates disabled.
+updates disabled. PCAE can validate governed roadmap continuity with
+`pcae roadmap-continuity` and `pcae roadmap-continuity --json`, defining
+roadmap/task/session continuity domains, handoff/roadmap alignment, and
+pre-execution transition readiness while keeping roadmap, task, session, and
+execution updates disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -4003,7 +4007,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61F: Agent Handoff Modernization.
+Phase 61G: Roadmap Continuity Validation.
 
 ## Next
 

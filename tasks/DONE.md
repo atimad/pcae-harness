@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Implemented Roadmap Continuity Validation (Phase 61G): `pcae roadmap-continuity` and `--json`; added RoadmapContinuitySignal, RoadmapContinuityAssessment, and RoadmapContinuitySummary; defined all ten continuity domains including completed phase alignment, active phase alignment, next phase alignment, handoff roadmap alignment, and pre-execution transition readiness; kept roadmap_update_allowed=False, task_update_allowed=False, session_update_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
+
 - Implemented Agent Handoff Modernization (Phase 61F): `pcae agent-handoff-modernization` and `--json`; added AgentHandoffModernizationSignal, AgentHandoffModernizationAssessment, and AgentHandoffModernizationSummary; defined all ten modernization domains including completed phase summary, active phase summary, next phase recommendation, roadmap position summary, runtime status summary, and governance status summary; kept handoff_update_allowed=False, session_update_allowed=False, and human_review_required=True; added focused tests.
 
 - Implemented Task Lifecycle Governance Hardening (Phase 61E): `pcae task-lifecycle-governance` and `--json`; added TaskLifecycleGovernanceSignal, TaskLifecycleGovernanceAssessment, and TaskLifecycleGovernanceSummary; defined all eight governance domains including stale task contamination prevention and next-task recommendation alignment; kept task_update_allowed=False, session_update_allowed=False, and human_review_required=True; added focused tests.

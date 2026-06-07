@@ -164,6 +164,7 @@ from pcae.commands.agent import (
     run_runtime_trust_model,
     run_task_lifecycle_governance,
     run_agent_handoff_modernization,
+    run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4392,6 +4393,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     ahm_parser.set_defaults(handler=run_agent_handoff_modernization)
+
+    rcv_parser = subparsers.add_parser(
+        "roadmap-continuity",
+        help="Validate roadmap/task/session continuity before real runtime invocation work (Phase 61G).",
+    )
+    rcv_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rcv_parser.set_defaults(handler=run_roadmap_continuity)
 
     return parser
 

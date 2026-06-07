@@ -12,6 +12,7 @@ from pcae.core.agent import (
     REVIEW_ADVISORY,
     REVIEW_WORKFLOWS,
     AGENT_HANDOFF_MODERNIZATION_ADVISORY,
+    ROADMAP_CONTINUITY_ADVISORY,
     RUNTIME_CAPABILITY_INVENTORY_ADVISORY,
     RUNTIME_DISCOVERY_ADVISORY,
     RUNTIME_DISCOVERY_PHASE_ADVISORY,
@@ -351,6 +352,7 @@ from pcae.core.agent import (
     build_remote_status,
     build_review_workflows,
     build_agent_handoff_modernization,
+    build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
     build_runtime_trust_model,
@@ -11862,4 +11864,56 @@ def run_agent_handoff_modernization(args: argparse.Namespace) -> int:
     print(f"  Session update allowed: {boundaries['session_update_allowed']}")
     print()
     print(AGENT_HANDOFF_MODERNIZATION_ADVISORY)
+    return 0
+
+
+def run_roadmap_continuity(args: argparse.Namespace) -> int:
+    data = build_roadmap_continuity()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["roadmap_continuity_overview"]
+    print("Roadmap continuity")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Continuity domains:     {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Continuity status:      {overview['continuity_status']}")
+    print(f"Roadmap update allowed: {'yes' if overview['roadmap_update_allowed'] else 'no'}")
+    print(f"Task update allowed:    {'yes' if overview['task_update_allowed'] else 'no'}")
+    print(f"Session update allowed: {'yes' if overview['session_update_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Continuity signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['continuity_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                    {', '.join(boundaries['may'])}")
+    print(f"  May not:                {', '.join(boundaries['may_not'])}")
+    print(f"  Roadmap update allowed: {boundaries['roadmap_update_allowed']}")
+    print(f"  Task update allowed:    {boundaries['task_update_allowed']}")
+    print(f"  Session update allowed: {boundaries['session_update_allowed']}")
+    print(f"  Execution allowed:      {boundaries['execution_allowed']}")
+    print()
+    print(ROADMAP_CONTINUITY_ADVISORY)
     return 0

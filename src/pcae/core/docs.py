@@ -1027,6 +1027,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae agent-handoff-modernization`
 - `pcae agent-handoff-modernization --json`
+
+## roadmap-continuity
+
+- `pcae roadmap-continuity`
+- `pcae roadmap-continuity --json`
 """
 
 

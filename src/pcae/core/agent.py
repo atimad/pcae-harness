@@ -58275,6 +58275,15 @@ AGENT_HANDOFF_MODERNIZATION_ADVISORY = (
     "and human_review_required=True in Phase 61F. Human review is always required."
 )
 
+ROADMAP_CONTINUITY_ADVISORY = (
+    "Roadmap continuity validation is assessment and reporting only; "
+    "roadmap/task/session continuity requirements are inspected and blockers reported, but no roadmap files are rewritten, "
+    "no tasks are completed, created, moved, or renamed, no session state is rewritten, "
+    "no runtimes are invoked, no prompts are executed, and no repository modification occurs. "
+    "roadmap_update_allowed=False, task_update_allowed=False, session_update_allowed=False, "
+    "execution_allowed=False, and human_review_required=True in Phase 61G. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -60084,4 +60093,325 @@ def build_agent_handoff_modernization() -> dict:
         "governance_boundaries": dict(_AHM_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_AHM_INPUT_SOURCES),
         "advisory": AGENT_HANDOFF_MODERNIZATION_ADVISORY,
+    }
+
+
+_RMC_CONTINUITY_DOMAINS: tuple[str, ...] = (
+    "completed_phase_alignment",
+    "active_phase_alignment",
+    "next_phase_alignment",
+    "active_task_roadmap_alignment",
+    "session_roadmap_alignment",
+    "changelog_project_status_alignment",
+    "done_todo_decision_alignment",
+    "runtime_roadmap_alignment",
+    "handoff_roadmap_alignment",
+    "pre_execution_transition_readiness",
+)
+
+_RMC_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RMC_CONTINUITY_STATUSES: tuple[str, ...] = (
+    "aligned",
+    "aligned_with_warnings",
+    "update_required",
+    "blocked",
+)
+
+_RMC_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "roadmap_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "continuity_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RMC_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "continuity_status", "type": "str", "required": True},
+    {"name": "roadmap_update_allowed", "type": "bool", "required": True},
+    {"name": "task_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RMC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "continuity_status", "type": "str", "required": True},
+    {"name": "roadmap_update_allowed", "type": "bool", "required": True},
+    {"name": "task_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RMC_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/DECISIONS.md",
+    "RuntimeRegistrySummary",
+    "RuntimeDiscoverySummary",
+    "RuntimeCapabilityInventorySummary",
+    "RuntimeTrustSummary",
+    "TaskLifecycleGovernanceSummary",
+    "AgentHandoffModernizationSummary",
+)
+
+_RMC_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "continuity_domain": "completed_phase_alignment",
+        "signal_type": "completed_phase_alignment_check",
+        "severity": "warning",
+        "detected_state": "completed-phase alignment has not been fully validated across roadmap documentation and governed completion records",
+        "expected_state": "completed phases align across roadmap documentation and governed completion records before transition guidance is trusted",
+    },
+    {
+        "continuity_domain": "active_phase_alignment",
+        "signal_type": "active_phase_alignment_check",
+        "severity": "blocker",
+        "detected_state": "active-phase alignment has not been explicitly validated across roadmap, active task, and session state",
+        "expected_state": "active phase aligns across roadmap, active task, and session state before future transition work is trusted",
+    },
+    {
+        "continuity_domain": "next_phase_alignment",
+        "signal_type": "next_phase_alignment_check",
+        "severity": "warning",
+        "detected_state": "next-phase alignment has not been fully validated against roadmap recommendations and current completion posture",
+        "expected_state": "next recommended phase aligns with current completion posture and roadmap guidance before pre-execution transition planning proceeds",
+    },
+    {
+        "continuity_domain": "active_task_roadmap_alignment",
+        "signal_type": "active_task_roadmap_alignment_check",
+        "severity": "blocker",
+        "detected_state": "active-task/roadmap alignment has not been explicitly validated against the current governed roadmap position",
+        "expected_state": "active task aligns with the current governed roadmap position before continuity is considered reliable",
+    },
+    {
+        "continuity_domain": "session_roadmap_alignment",
+        "signal_type": "session_roadmap_alignment_check",
+        "severity": "blocker",
+        "detected_state": "session/roadmap alignment has not been explicitly validated for continuity into future runtime work",
+        "expected_state": "session state aligns with the authoritative roadmap position before future runtime transition work is trusted",
+    },
+    {
+        "continuity_domain": "changelog_project_status_alignment",
+        "signal_type": "changelog_project_status_alignment_check",
+        "severity": "warning",
+        "detected_state": "changelog/project-status alignment has not been fully validated for current roadmap continuity posture",
+        "expected_state": "changelog and project status agree on the current roadmap continuity posture before future agents rely on them",
+    },
+    {
+        "continuity_domain": "done_todo_decision_alignment",
+        "signal_type": "done_todo_decision_alignment_check",
+        "severity": "warning",
+        "detected_state": "done/todo/decision alignment has not been fully validated for roadmap continuity references",
+        "expected_state": "done, todo, and decision records align with roadmap continuity references before pre-execution transition work is trusted",
+    },
+    {
+        "continuity_domain": "runtime_roadmap_alignment",
+        "signal_type": "runtime_roadmap_alignment_check",
+        "severity": "blocker",
+        "detected_state": "runtime/roadmap alignment has not been explicitly validated against runtime registry, discovery, capability, and trust posture",
+        "expected_state": "runtime governance posture aligns with the roadmap position before real runtime invocation work is considered",
+    },
+    {
+        "continuity_domain": "handoff_roadmap_alignment",
+        "signal_type": "handoff_roadmap_alignment_check",
+        "severity": "blocker",
+        "detected_state": "handoff/roadmap alignment has not been explicitly validated for current continuity artifacts",
+        "expected_state": "handoff continuity artifacts align with the authoritative roadmap position before future agents resume work",
+    },
+    {
+        "continuity_domain": "pre_execution_transition_readiness",
+        "signal_type": "pre_execution_transition_readiness_check",
+        "severity": "blocker",
+        "detected_state": "pre-execution transition readiness has not been explicitly validated before entering real runtime invocation work",
+        "expected_state": "pre-execution transition readiness is validated across roadmap, task, session, handoff, and runtime posture before any real runtime invocation work is attempted",
+    },
+)
+
+_RMC_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect roadmap continuity",
+        "detect completed/active/next phase mismatch",
+        "detect roadmap/task/session mismatch",
+        "detect handoff/roadmap mismatch",
+        "detect pre-execution transition risks",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "rewrite roadmap files",
+        "complete tasks",
+        "create tasks",
+        "move task files",
+        "rename active tasks",
+        "rewrite session state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "roadmap_update_allowed": False,
+    "task_update_allowed": False,
+    "session_update_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61G",
+}
+
+
+def build_roadmap_continuity() -> dict:
+    """Build a governed roadmap continuity validation scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RMC_DOMAIN_SIGNALS]
+
+    domain_count = len(_RMC_CONTINUITY_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        continuity_status = "update_required"
+    elif warning_count > 0:
+        continuity_status = "aligned_with_warnings"
+    else:
+        continuity_status = "aligned"
+
+    roadmap_id = f"roadmap-{ts}"
+    phase_id = "61G"
+    signals = [
+        {
+            "signal_id": f"rcvs-{ts}-{index:02d}",
+            "roadmap_id": roadmap_id,
+            "phase_id": phase_id,
+            "continuity_domain": signal["continuity_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rcva-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "continuity_status": continuity_status,
+        "roadmap_update_allowed": False,
+        "task_update_allowed": False,
+        "session_update_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rcvsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "continuity_status": continuity_status,
+        "roadmap_update_allowed": False,
+        "task_update_allowed": False,
+        "session_update_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "roadmap_continuity_overview": {
+            "overview_id": f"61g-{ts}",
+            "generated_at": generated_at,
+            "phase": "61G",
+            "title": "Roadmap Continuity Validation",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "continuity_status": continuity_status,
+            "roadmap_update_allowed": False,
+            "task_update_allowed": False,
+            "session_update_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Validates that completed phases, active phase, next recommended phase, active task, "
+                "session state, and roadmap documentation remain aligned before PCAE enters real runtime "
+                "invocation work. No roadmap files are rewritten, no tasks are moved or completed, "
+                "no session state is rewritten, and no repository modification occurs. "
+                f"continuity_status={continuity_status}. roadmap_update_allowed=False. "
+                "task_update_allowed=False. session_update_allowed=False. execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RoadmapContinuitySignal",
+            "field_count": len(_RMC_SIGNAL_FIELDS),
+            "required_field_count": len(_RMC_SIGNAL_FIELDS),
+            "severity_values": list(_RMC_SEVERITY_VALUES),
+            "roadmap_update_allowed_always_false_in_61g": True,
+            "task_update_allowed_always_false_in_61g": True,
+            "session_update_allowed_always_false_in_61g": True,
+            "execution_allowed_always_false_in_61g": True,
+            "fields": [dict(field) for field in _RMC_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RoadmapContinuityAssessment",
+            "field_count": len(_RMC_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RMC_ASSESSMENT_FIELDS),
+            "supported_continuity_statuses": list(_RMC_CONTINUITY_STATUSES),
+            "roadmap_update_allowed_always_false_in_61g": True,
+            "task_update_allowed_always_false_in_61g": True,
+            "session_update_allowed_always_false_in_61g": True,
+            "execution_allowed_always_false_in_61g": True,
+            "human_review_required_always_true_in_61g": True,
+            "fields": [dict(field) for field in _RMC_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RoadmapContinuitySummary",
+            "field_count": len(_RMC_SUMMARY_FIELDS),
+            "required_field_count": len(_RMC_SUMMARY_FIELDS),
+            "supported_continuity_statuses": list(_RMC_CONTINUITY_STATUSES),
+            "roadmap_update_allowed_always_false_in_61g": True,
+            "task_update_allowed_always_false_in_61g": True,
+            "session_update_allowed_always_false_in_61g": True,
+            "execution_allowed_always_false_in_61g": True,
+            "human_review_required_always_true_in_61g": True,
+            "fields": [dict(field) for field in _RMC_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RMC_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RMC_INPUT_SOURCES),
+        "advisory": ROADMAP_CONTINUITY_ADVISORY,
     }

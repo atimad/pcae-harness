@@ -44012,3 +44012,191 @@ def test_61f_human_output(capsys) -> None:
         "handoff_update_allowed=False",
     ):
         assert text in output
+
+
+def test_61g_json_top_level_keys(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "roadmap_continuity_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["roadmap_continuity_overview"]
+    assert overview["phase"] == "61G"
+    assert overview["domain_count"] == 10
+    assert overview["roadmap_update_allowed"] is False
+    assert overview["task_update_allowed"] is False
+    assert overview["session_update_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61g_models_and_exact_fields(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RoadmapContinuitySignal",
+            [
+                "signal_id", "roadmap_id", "phase_id", "continuity_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RoadmapContinuityAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "continuity_status", "roadmap_update_allowed",
+                "task_update_allowed", "session_update_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RoadmapContinuitySummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "continuity_status",
+                "roadmap_update_allowed", "task_update_allowed",
+                "session_update_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61g_all_continuity_domains_defined(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["continuity_domain"] for s in data["domain_signals"]} == {
+        "completed_phase_alignment",
+        "active_phase_alignment",
+        "next_phase_alignment",
+        "active_task_roadmap_alignment",
+        "session_roadmap_alignment",
+        "changelog_project_status_alignment",
+        "done_todo_decision_alignment",
+        "runtime_roadmap_alignment",
+        "handoff_roadmap_alignment",
+        "pre_execution_transition_readiness",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_continuity_statuses"]) == {
+        "aligned", "aligned_with_warnings", "update_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_continuity_statuses"]) == {
+        "aligned", "aligned_with_warnings", "update_required", "blocked",
+    }
+
+
+def test_61g_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 10
+    for signal in data["signals"]:
+        assert signal["signal_id"]
+        assert signal["roadmap_id"]
+        assert signal["phase_id"]
+        assert signal["continuity_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61g_assessment_and_summary(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["continuity_status"] == "update_required"
+    assert assessment["roadmap_update_allowed"] is False
+    assert assessment["task_update_allowed"] is False
+    assert assessment["session_update_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 10
+    assert summary["roadmap_update_allowed"] is False
+    assert summary["task_update_allowed"] is False
+    assert summary["session_update_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61g_input_sources(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "active task state",
+        "done task state",
+        "session state",
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md",
+        "tasks/DONE.md",
+        "tasks/TODO.md",
+        "tasks/DECISIONS.md",
+        "RuntimeRegistrySummary",
+        "RuntimeDiscoverySummary",
+        "RuntimeCapabilityInventorySummary",
+        "RuntimeTrustSummary",
+        "TaskLifecycleGovernanceSummary",
+        "AgentHandoffModernizationSummary",
+    ]
+
+
+def test_61g_governance_boundaries(capsys) -> None:
+    main(["roadmap-continuity", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61G"
+    assert boundaries["read_only"] is True
+    assert boundaries["roadmap_update_allowed"] is False
+    assert boundaries["task_update_allowed"] is False
+    assert boundaries["session_update_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "rewrite roadmap files", "complete tasks", "create tasks",
+        "move task files", "rename active tasks", "rewrite session state",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61g_human_output(capsys) -> None:
+    main(["roadmap-continuity"])
+    output = capsys.readouterr().out
+    for text in (
+        "Roadmap continuity",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Continuity signals",
+        "Governance boundaries",
+        "Roadmap update allowed: no",
+        "Task update allowed:    no",
+        "Session update allowed: no",
+        "Execution allowed:      no",
+        "roadmap_update_allowed=False",
+    ):
+        assert text in output
