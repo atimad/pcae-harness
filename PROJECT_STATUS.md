@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61C: Runtime Capability Inventory.
+Phase 61D: Runtime Trust Model.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -84,7 +84,11 @@ governed runtime capability inventory readiness with
 `pcae runtime-capability-inventory --json`, defining capability domains,
 capability classifications, assessment status, governance boundaries, and
 human-review requirements while keeping inventory, registration, and execution
-disabled.
+disabled. PCAE can assess governed runtime trust readiness with
+`pcae runtime-trust-model` and `pcae runtime-trust-model --json`, defining
+trust domains, trust signals, assessment status, governance boundaries, and
+human-review requirements while keeping trust assignment, registration, and
+execution disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -3989,7 +3993,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61C: Runtime Capability Inventory.
+Phase 61D: Runtime Trust Model.
 
 ## Next
 

@@ -14,6 +14,7 @@ from pcae.core.agent import (
     RUNTIME_CAPABILITY_INVENTORY_ADVISORY,
     RUNTIME_DISCOVERY_ADVISORY,
     RUNTIME_DISCOVERY_PHASE_ADVISORY,
+    RUNTIME_TRUST_MODEL_ADVISORY,
     VALID_AGENT_STATUSES,
     VALID_REVIEW_STATUSES,
     acquire_agent_lock,
@@ -349,6 +350,7 @@ from pcae.core.agent import (
     build_review_workflows,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
+    build_runtime_trust_model,
     build_runtime_discovery,
     get_agent_adapter,
     get_agent_by_id,
@@ -11707,4 +11709,54 @@ def run_runtime_capability_inventory(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:      {boundaries['execution_allowed']}")
     print()
     print(RUNTIME_CAPABILITY_INVENTORY_ADVISORY)
+    return 0
+
+
+def run_runtime_trust_model(args: argparse.Namespace) -> int:
+    data = build_runtime_trust_model()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_trust_model_overview"]
+    print("Runtime trust model")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Trust domains:          {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Trust status:           {overview['trust_status']}")
+    print(f"Trust assignment:       {'yes' if overview['trust_assignment_allowed'] else 'no'}")
+    print(f"Registration allowed:   {'yes' if overview['registration_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Trust signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['trust_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                    {', '.join(boundaries['may'])}")
+    print(f"  May not:                {', '.join(boundaries['may_not'])}")
+    print(f"  Trust assignment:       {boundaries['trust_assignment_allowed']}")
+    print(f"  Registration allowed:   {boundaries['registration_allowed']}")
+    print(f"  Execution allowed:      {boundaries['execution_allowed']}")
+    print()
+    print(RUNTIME_TRUST_MODEL_ADVISORY)
     return 0

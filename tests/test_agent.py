@@ -43482,3 +43482,181 @@ def test_61c_human_output(capsys) -> None:
         "inventory_allowed=False",
     ):
         assert text in output
+
+
+def test_61d_json_top_level_keys(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "runtime_trust_model_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["runtime_trust_model_overview"]
+    assert overview["phase"] == "61D"
+    assert overview["domain_count"] == 8
+    assert overview["trust_assignment_allowed"] is False
+    assert overview["registration_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61d_models_and_exact_fields(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RuntimeTrustSignal",
+            [
+                "signal_id", "runtime_id", "trust_domain", "signal_type",
+                "severity", "detected_state", "expected_state",
+                "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RuntimeTrustAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "trust_status", "trust_assignment_allowed",
+                "registration_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RuntimeTrustSummary",
+            [
+                "summary_id", "assessment_id", "domain_count",
+                "signal_count", "blocker_count", "warning_count",
+                "trust_status", "trust_assignment_allowed",
+                "registration_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61d_all_trust_domains_defined(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["trust_domain"] for s in data["domain_signals"]} == {
+        "runtime_identity_trust",
+        "runtime_capability_trust",
+        "runtime_sandbox_trust",
+        "runtime_timeout_trust",
+        "runtime_output_trust",
+        "runtime_audit_trust",
+        "runtime_human_review_trust",
+        "runtime_lifecycle_trust",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_trust_statuses"]) == {
+        "ready", "ready_with_warnings", "trust_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_trust_statuses"]) == {
+        "ready", "ready_with_warnings", "trust_required", "blocked",
+    }
+    assert set(data["assessment_model"]["supported_runtime_trust_levels"]) == {
+        "trusted", "restricted", "experimental", "blocked",
+    }
+    assert set(data["summary_model"]["supported_runtime_trust_levels"]) == {
+        "trusted", "restricted", "experimental", "blocked",
+    }
+
+
+def test_61d_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["signal_id"]
+        assert signal["runtime_id"]
+        assert signal["trust_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61d_assessment_and_summary(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["trust_status"] == "trust_required"
+    assert assessment["trust_assignment_allowed"] is False
+    assert assessment["registration_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["trust_assignment_allowed"] is False
+    assert summary["registration_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61d_input_sources(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeRegistryAssessment",
+        "RuntimeDiscoveryAssessment",
+        "RuntimeCapabilityInventoryAssessment",
+        "RuntimeIntegrationReadinessAssessment",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_61d_governance_boundaries(capsys) -> None:
+    main(["runtime-trust-model", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61D"
+    assert boundaries["read_only"] is True
+    assert boundaries["trust_assignment_allowed"] is False
+    assert boundaries["registration_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "assign trust automatically", "discover runtimes on host",
+        "register runtimes", "invoke runtimes", "execute prompts",
+        "modify runtime configuration", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61d_human_output(capsys) -> None:
+    main(["runtime-trust-model"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime trust model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Trust signals",
+        "Governance boundaries",
+        "Trust assignment:       no",
+        "Registration allowed:   no",
+        "Execution allowed:      no",
+        "trust_assignment_allowed=False",
+    ):
+        assert text in output

@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-1400-61c-runtime-capability-inventory
+20260607-1400-61d-runtime-trust-model
 
 ## Title
 
-Runtime Capability Inventory (Phase 61C)
+Runtime Trust Model (Phase 61D)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement pcae runtime-capability-inventory: 3 models (RuntimeCapability, RuntimeCapabilityInventoryAssessment, RuntimeCapabilityInventorySummary), 10 capability domains, inventory_allowed=False, registration_allowed=False, execution_allowed=False, human_review_required=True in Phase 61C.
+Implement pcae runtime-trust-model: 3 models (RuntimeTrustSignal, RuntimeTrustAssessment, RuntimeTrustSummary), 8 trust domains, trust_assignment_allowed=False, registration_allowed=False, execution_allowed=False, human_review_required=True in Phase 61D.
 
 ## Allowed Files
 
@@ -70,13 +70,13 @@ strict
 
 ## Acceptance Checks
 
-- pcae runtime-capability-inventory works
-- pcae runtime-capability-inventory --json works
-- RuntimeCapability implemented
-- RuntimeCapabilityInventoryAssessment implemented
-- RuntimeCapabilityInventorySummary implemented
-- all capability domains defined
-- inventory_allowed remains false
+- pcae runtime-trust-model works
+- pcae runtime-trust-model --json works
+- RuntimeTrustSignal implemented
+- RuntimeTrustAssessment implemented
+- RuntimeTrustSummary implemented
+- all trust domains defined
+- trust_assignment_allowed remains false
 - registration_allowed remains false
 - execution_allowed remains false
 - human review required

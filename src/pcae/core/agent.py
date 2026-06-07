@@ -58247,6 +58247,16 @@ RUNTIME_CAPABILITY_INVENTORY_ADVISORY = (
     "and human_review_required=True in Phase 61C. Human review is always required."
 )
 
+RUNTIME_TRUST_MODEL_ADVISORY = (
+    "Runtime trust modeling is assessment and reporting only; "
+    "trust requirements are defined and blockers reported, but no trust is assigned automatically, "
+    "no runtimes are discovered on the host, no runtimes are registered, no runtimes are invoked, "
+    "no prompts are executed, no execution authorization occurs, no runtime configuration is modified, "
+    "and no repository modification occurs. "
+    "trust_assignment_allowed=False, registration_allowed=False, execution_allowed=False, "
+    "and human_review_required=True in Phase 61D. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -59177,4 +59187,290 @@ def build_runtime_capability_inventory() -> dict:
         "input_sources": list(_RCI_INPUT_SOURCES),
         "severity_values": list(_RCI_SEVERITY_VALUES),
         "advisory": RUNTIME_CAPABILITY_INVENTORY_ADVISORY,
+    }
+
+
+_RTM_TRUST_DOMAINS: tuple[str, ...] = (
+    "runtime_identity_trust",
+    "runtime_capability_trust",
+    "runtime_sandbox_trust",
+    "runtime_timeout_trust",
+    "runtime_output_trust",
+    "runtime_audit_trust",
+    "runtime_human_review_trust",
+    "runtime_lifecycle_trust",
+)
+
+_RTM_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RTM_TRUST_STATUSES: tuple[str, ...] = (
+    "trusted",
+    "restricted",
+    "experimental",
+    "blocked",
+)
+
+_RTM_ASSESSMENT_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "trust_required",
+    "blocked",
+)
+
+_RTM_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "trust_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RTM_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "trust_status", "type": "str", "required": True},
+    {"name": "trust_assignment_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RTM_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "trust_status", "type": "str", "required": True},
+    {"name": "trust_assignment_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RTM_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeRegistryAssessment",
+    "RuntimeDiscoveryAssessment",
+    "RuntimeCapabilityInventoryAssessment",
+    "RuntimeIntegrationReadinessAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_RTM_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "trust_domain": "runtime_identity_trust",
+        "signal_type": "runtime_identity_trust_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime identity trust prerequisites are not yet confirmed with stable identity evidence, provenance linkage, and reviewer confirmation",
+        "expected_state": "runtime identity trust defines stable identity evidence, provenance linkage, and reviewer confirmation before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_capability_trust",
+        "signal_type": "runtime_capability_trust_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime capability trust prerequisites are not yet confirmed with capability inventory evidence and domain-specific trust thresholds",
+        "expected_state": "runtime capability trust uses capability inventory evidence and domain-specific trust thresholds before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_sandbox_trust",
+        "signal_type": "runtime_sandbox_trust_readiness",
+        "severity": "warning",
+        "detected_state": "runtime sandbox trust guidance exists, but runtime-specific trust evidence and review checkpoints remain incomplete",
+        "expected_state": "runtime sandbox trust combines sandbox hardening guidance with runtime-specific trust evidence and review checkpoints before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_timeout_trust",
+        "signal_type": "runtime_timeout_trust_readiness",
+        "severity": "warning",
+        "detected_state": "runtime timeout trust guidance exists, but runtime-specific timeout trust evidence remains incomplete",
+        "expected_state": "runtime timeout trust combines timeout hardening guidance with runtime-specific trust evidence before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_output_trust",
+        "signal_type": "runtime_output_trust_readiness",
+        "severity": "warning",
+        "detected_state": "runtime output trust prerequisites are partially defined, but output integrity evidence and reviewer thresholds remain incomplete",
+        "expected_state": "runtime output trust defines output integrity evidence and reviewer thresholds before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_audit_trust",
+        "signal_type": "runtime_audit_trust_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime audit trust prerequisites are not yet confirmed with immutable audit trails, attribution boundaries, and human-review checkpoints",
+        "expected_state": "runtime audit trust requires immutable audit trails, attribution boundaries, and human-review checkpoints before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_human_review_trust",
+        "signal_type": "runtime_human_review_trust_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime human-review trust prerequisites are not yet confirmed with reviewer authority boundaries and mandatory escalation rules",
+        "expected_state": "runtime human-review trust defines reviewer authority boundaries and mandatory escalation rules before any trust classification is proposed",
+    },
+    {
+        "trust_domain": "runtime_lifecycle_trust",
+        "signal_type": "runtime_lifecycle_trust_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime lifecycle trust prerequisites are not yet confirmed with lifecycle evidence, downgrade rules, and trust revalidation checkpoints",
+        "expected_state": "runtime lifecycle trust defines lifecycle evidence, downgrade rules, and trust revalidation checkpoints before any trust classification is proposed",
+    },
+)
+
+_RTM_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define runtime trust requirements",
+        "assess runtime trust prerequisites",
+        "classify trust signals",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "assign trust automatically",
+        "discover runtimes on host",
+        "register runtimes",
+        "invoke runtimes",
+        "execute prompts",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "trust_assignment_allowed": False,
+    "registration_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61D",
+}
+
+
+def build_runtime_trust_model() -> dict:
+    """Build a governed runtime trust model scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RTM_DOMAIN_SIGNALS]
+
+    domain_count = len(_RTM_TRUST_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        trust_status = "trust_required"
+    elif warning_count > 0:
+        trust_status = "ready_with_warnings"
+    else:
+        trust_status = "ready"
+
+    signals = [
+        {
+            "signal_id": f"rts-{ts}-{index:02d}",
+            "runtime_id": "candidate_runtime_id",
+            "trust_domain": signal["trust_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rta-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "trust_status": trust_status,
+        "trust_assignment_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rtsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "trust_status": trust_status,
+        "trust_assignment_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_trust_model_overview": {
+            "overview_id": f"61d-{ts}",
+            "generated_at": generated_at,
+            "phase": "61D",
+            "title": "Runtime Trust Model",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "trust_status": trust_status,
+            "trust_assignment_allowed": False,
+            "registration_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed runtime trust model for PCAE. "
+                "No runtime discovery occurs, no runtimes are registered, no runtimes are invoked, "
+                "no runtime configuration is modified, and no repository modification occurs. "
+                f"trust_status={trust_status}. trust_assignment_allowed=False. "
+                "registration_allowed=False. execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeTrustSignal",
+            "field_count": len(_RTM_SIGNAL_FIELDS),
+            "required_field_count": len(_RTM_SIGNAL_FIELDS),
+            "severity_values": list(_RTM_SEVERITY_VALUES),
+            "trust_assignment_allowed_always_false_in_61d": True,
+            "fields": [dict(field) for field in _RTM_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeTrustAssessment",
+            "field_count": len(_RTM_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RTM_ASSESSMENT_FIELDS),
+            "supported_trust_statuses": list(_RTM_ASSESSMENT_STATUSES),
+            "supported_runtime_trust_levels": list(_RTM_TRUST_STATUSES),
+            "trust_assignment_allowed_always_false_in_61d": True,
+            "registration_allowed_always_false_in_61d": True,
+            "execution_allowed_always_false_in_61d": True,
+            "human_review_required_always_true_in_61d": True,
+            "fields": [dict(field) for field in _RTM_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeTrustSummary",
+            "field_count": len(_RTM_SUMMARY_FIELDS),
+            "required_field_count": len(_RTM_SUMMARY_FIELDS),
+            "supported_trust_statuses": list(_RTM_ASSESSMENT_STATUSES),
+            "supported_runtime_trust_levels": list(_RTM_TRUST_STATUSES),
+            "trust_assignment_allowed_always_false_in_61d": True,
+            "registration_allowed_always_false_in_61d": True,
+            "execution_allowed_always_false_in_61d": True,
+            "human_review_required_always_true_in_61d": True,
+            "fields": [dict(field) for field in _RTM_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RTM_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RTM_INPUT_SOURCES),
+        "advisory": RUNTIME_TRUST_MODEL_ADVISORY,
     }
