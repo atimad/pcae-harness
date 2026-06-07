@@ -9,7 +9,7 @@ Phase 61I: Handoff State Refresh.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4328 passing tests.
+**Test count:** 4338 passing tests.
 
 **License:** Apache License 2.0.
 
@@ -110,6 +110,13 @@ task with populated governance defaults, refreshing `.pcae/session.json`,
 updating governance memory files, and revalidating status coherence, health,
 and check state while keeping runtime invocation, prompt execution, execution
 authorization, commit, push, and rollback disabled.
+PCAE can harden phase-level test selection with
+`pcae phase-test-selection` and `pcae phase-test-selection --json`,
+defining eight hardening domains, documenting the `test_{phase_id}_{description}`
+naming convention so `python -m pytest -k {phase_id}` reliably selects all tests
+for any governed phase, renaming 61H and 61I tests to follow the convention, and
+documenting zero-collection as a validation failure; execution, runtime invocation,
+and prompt execution remain disabled.
 PCAE can refresh and modernize governed handoff state with
 `pcae handoff-state-refresh` and `pcae handoff-state-refresh --json`,
 defining ten refresh domains (active_task_summary_refresh,

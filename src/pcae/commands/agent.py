@@ -9,6 +9,7 @@ from pcae.core.agent import (
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
     HANDOFF_STATE_REFRESH_ADVISORY,
+    PHASE_TEST_SELECTION_ADVISORY,
     MULTI_AGENT_REGISTRY,
     REVIEW_ADVISORY,
     REVIEW_WORKFLOWS,
@@ -354,6 +355,7 @@ from pcae.core.agent import (
     build_review_workflows,
     build_agent_handoff_modernization,
     build_handoff_state_refresh,
+    build_phase_test_selection,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -11974,4 +11976,59 @@ def run_handoff_state_refresh(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:      {boundaries['execution_allowed']}")
     print()
     print(HANDOFF_STATE_REFRESH_ADVISORY)
+    return 0
+
+
+def run_phase_test_selection(args: argparse.Namespace) -> int:
+    data = build_phase_test_selection()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["phase_test_selection_overview"]
+    print("Phase test selection hardening")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Hardening domains:      {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Hardening status:       {overview['hardening_status']}")
+    print(f"Selector valid:         {'yes' if overview['selector_valid'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Hardening signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['hardening_domain']} — {signal['signal_type']}"
+        )
+    print()
+    strategy = data["selection_strategy"]
+    print("Phase test selection strategy:")
+    print(f"  Strategy:       {strategy['strategy_name']}")
+    print(f"  Naming pattern: {strategy['naming_pattern']}")
+    print(f"  Selector:       {strategy['selector_command']}")
+    print(f"  Examples:       {', '.join(strategy['examples'])}")
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:              {', '.join(boundaries['may'])}")
+    print(f"  May not:          {', '.join(boundaries['may_not'])}")
+    print(f"  Selector valid:   {boundaries['selector_valid']}")
+    print(f"  Execution allowed:{boundaries['execution_allowed']}")
+    print()
+    print(PHASE_TEST_SELECTION_ADVISORY)
     return 0

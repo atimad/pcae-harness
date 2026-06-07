@@ -32,3 +32,11 @@ packages = ["src/pcae"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+# Phase test selection strategy (Phase 61J):
+# Tests follow test_{phase_id}_{description} naming convention.
+# Use `python -m pytest -k {phase_id}` to run all tests for a phase.
+# Examples: python -m pytest -k 61h  (Phase 61H: Automated Task Transition)
+#           python -m pytest -k 61i  (Phase 61I: Handoff State Refresh)
+#           python -m pytest -k 61j  (Phase 61J: Phase Test Selection Hardening)
+# Zero-collection is a validation failure — always verify selector finds > 0 tests.

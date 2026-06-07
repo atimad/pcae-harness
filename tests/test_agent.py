@@ -44200,3 +44200,159 @@ def test_61g_human_output(capsys) -> None:
         "roadmap_update_allowed=False",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 61H: Automated Task Transition (selector validation only)
+# ---------------------------------------------------------------------------
+# Full 61H tests live in tests/test_task.py as test_61h_* functions.
+# This stub ensures -k 61h finds at least one test in test_agent.py too,
+# matching the agent-test pattern used by 61C-61G.
+
+
+def test_61h_selector_is_valid() -> None:
+    # Confirms the 61H selector produces > 0 results.
+    # Full task-transition tests are in test_task.py::test_61h_*.
+    from pcae.core.tasks import TRANSITION_ACCEPTANCE_CHECKS
+
+    assert "python -m pytest -n auto passes" in TRANSITION_ACCEPTANCE_CHECKS
+
+
+# ---------------------------------------------------------------------------
+# Phase 61I: Handoff State Refresh (selector validation only)
+# ---------------------------------------------------------------------------
+# Full 61I tests live in tests/test_task.py as test_61i_* functions.
+
+
+def test_61i_selector_is_valid() -> None:
+    # Confirms the 61I selector produces > 0 results.
+    # Full handoff-state-refresh tests are in test_task.py::test_61i_*.
+    from pcae.core.agent import HANDOFF_STATE_REFRESH_ADVISORY
+
+    assert "Handoff state refresh is read-only" in HANDOFF_STATE_REFRESH_ADVISORY
+
+
+# ---------------------------------------------------------------------------
+# Phase 61J: Phase Test Selection Hardening
+# ---------------------------------------------------------------------------
+
+
+def test_61j_json_top_level_keys(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    output = capsys.readouterr().out
+    data = json.loads(output)
+    for key in (
+        "phase_test_selection_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "selection_strategy",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_61j_models_and_exact_fields(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["signal_model"]["model_name"] == "PhaseTestSelectionSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "PhaseTestSelectionAssessment"
+    assert data["assessment_model"]["field_count"] == 7
+    assert data["summary_model"]["model_name"] == "PhaseTestSelectionSummary"
+    assert data["summary_model"]["field_count"] == 9
+    for field_name in ("signal_id", "phase_id", "hardening_domain", "signal_type",
+                       "severity", "detected_state", "expected_state",
+                       "human_review_required"):
+        assert any(
+            f["name"] == field_name
+            for f in data["signal_model"]["fields"]
+        ), f"Missing signal field: {field_name}"
+
+
+def test_61j_all_hardening_domains_defined(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "phase_test_discovery",
+        "phase_test_selection",
+        "phase_test_coverage",
+        "phase_test_naming",
+        "phase_test_marker_validation",
+        "phase_validation_consistency",
+        "focused_test_execution_validation",
+        "future_phase_test_readiness",
+    }
+    actual = {s["hardening_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_61j_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for signal in data["signals"]:
+        assert signal["phase_id"] == "61J"
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_61j_selection_strategy(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    strategy = data["selection_strategy"]
+    assert strategy["strategy_name"] == "phase_id_prefix_naming_convention"
+    assert "{phase_id}" in strategy["naming_pattern"]
+    assert "{phase_id}" in strategy["selector_command"]
+    examples = strategy["examples"]
+    assert any("61h" in e for e in examples)
+    assert any("61i" in e for e in examples)
+    assert any("61j" in e for e in examples)
+
+
+def test_61j_assessment_and_summary(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    assert "assessment_id" in assessment
+    assert "hardening_status" in assessment
+    assert "selector_valid" in assessment
+    assert assessment["human_review_required"] is True
+    summary = data["sample_summary"]
+    assert "summary_id" in summary
+    assert "domain_count" in summary
+    assert summary["selector_valid"] is True
+
+
+def test_61j_governance_boundaries(capsys) -> None:
+    main(["phase-test-selection", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["selector_valid"] is True
+    for action in ("invoke runtimes", "execute prompts", "enable execution", "commit"):
+        assert action in boundaries["may_not"]
+    assert "improve test selection reliability" in boundaries["may"]
+
+
+def test_61j_human_output(capsys) -> None:
+    main(["phase-test-selection"])
+    output = capsys.readouterr().out
+    for text in (
+        "Phase test selection hardening",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Hardening signals",
+        "Phase test selection strategy",
+        "Governance boundaries",
+        "Selector valid:",
+        "Execution allowed:",
+    ):
+        assert text in output

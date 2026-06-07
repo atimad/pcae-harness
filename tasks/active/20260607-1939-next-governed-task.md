@@ -38,8 +38,14 @@ Next governed task
 - src/pcae/core/context.py
 - src/pcae/core/docs.py
 - src/pcae/core/tasks.py
+- pyproject.toml
+- tests/test_agent.py
 - tests/test_context.py
 - tests/test_task.py
+
+## Override Protected Files
+
+- pyproject.toml
 
 ## Forbidden Files
 

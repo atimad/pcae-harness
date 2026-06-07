@@ -1181,7 +1181,7 @@ def test_task_close_command_still_closes_latest_task(
     ).is_file()
 
 
-def test_task_transition_command_creates_next_task_and_refreshes_session(
+def test_61h_task_transition_command_creates_next_task_and_refreshes_session(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -1249,7 +1249,7 @@ def test_task_transition_command_creates_next_task_and_refreshes_session(
     assert run_checks(HarnessPath(tmp_path)).passed is True
 
 
-def test_task_transition_command_supports_explicit_next_title_json(
+def test_61h_task_transition_command_supports_explicit_next_title_json(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -1290,7 +1290,7 @@ def test_task_transition_command_supports_explicit_next_title_json(
     assert data["session_path"] == ".pcae/session.json"
 
 
-def test_task_transition_command_blocks_on_stale_session(
+def test_61h_task_transition_command_blocks_on_stale_session(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -1321,7 +1321,7 @@ def test_task_transition_command_blocks_on_stale_session(
     ).exists()
 
 
-def test_task_transition_scopes_dirty_source_into_next_task(
+def test_61h_task_transition_scopes_dirty_source_into_next_task(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -1368,7 +1368,7 @@ def test_task_transition_scopes_dirty_source_into_next_task(
 # ---------------------------------------------------------------------------
 
 
-def test_build_handoff_state_refresh_overview_fields() -> None:
+def test_61i_handoff_state_refresh_overview_fields() -> None:
     data = build_handoff_state_refresh()
     overview = data["handoff_state_refresh_overview"]
     assert overview["phase"] == "61I"
@@ -1380,7 +1380,7 @@ def test_build_handoff_state_refresh_overview_fields() -> None:
     assert overview["human_review_required"] is True
 
 
-def test_build_handoff_state_refresh_models() -> None:
+def test_61i_handoff_state_refresh_models() -> None:
     data = build_handoff_state_refresh()
     assert data["signal_model"]["model_name"] == "HandoffStateRefreshSignal"
     assert data["signal_model"]["field_count"] == 8
@@ -1390,7 +1390,7 @@ def test_build_handoff_state_refresh_models() -> None:
     assert data["summary_model"]["field_count"] == 9
 
 
-def test_build_handoff_state_refresh_signals_have_required_fields() -> None:
+def test_61i_handoff_state_refresh_signals_have_required_fields() -> None:
     data = build_handoff_state_refresh()
     for signal in data["signals"]:
         assert "signal_id" in signal
@@ -1403,7 +1403,7 @@ def test_build_handoff_state_refresh_signals_have_required_fields() -> None:
         assert signal["human_review_required"] is True
 
 
-def test_build_handoff_state_refresh_all_domains_covered() -> None:
+def test_61i_handoff_state_refresh_all_domains_covered() -> None:
     data = build_handoff_state_refresh()
     domains = {s["refresh_domain"] for s in data["signals"]}
     expected = {
@@ -1421,7 +1421,7 @@ def test_build_handoff_state_refresh_all_domains_covered() -> None:
     assert domains == expected
 
 
-def test_build_handoff_state_refresh_bootstrap_modernization() -> None:
+def test_61i_handoff_state_refresh_bootstrap_modernization() -> None:
     data = build_handoff_state_refresh()
     bm = data["bootstrap_modernization"]
     assert bm["modern_test_command"] == "python -m pytest -n auto"
@@ -1433,7 +1433,7 @@ def test_build_handoff_state_refresh_bootstrap_modernization() -> None:
     assert "compatibility workflows" in contexts
 
 
-def test_build_handoff_state_refresh_governance_boundaries() -> None:
+def test_61i_handoff_state_refresh_governance_boundaries() -> None:
     data = build_handoff_state_refresh()
     boundaries = data["governance_boundaries"]
     assert boundaries["handoff_update_allowed"] is True
@@ -1444,12 +1444,12 @@ def test_build_handoff_state_refresh_governance_boundaries() -> None:
     assert "refresh handoff state" in boundaries["may"]
 
 
-def test_build_handoff_state_refresh_advisory() -> None:
+def test_61i_handoff_state_refresh_advisory() -> None:
     data = build_handoff_state_refresh()
     assert data["advisory"] == HANDOFF_STATE_REFRESH_ADVISORY
 
 
-def test_build_handoff_state_refresh_sample_assessment_fields() -> None:
+def test_61i_handoff_state_refresh_sample_assessment_fields() -> None:
     data = build_handoff_state_refresh()
     assessment = data["sample_assessment"]
     assert "assessment_id" in assessment
@@ -1461,7 +1461,7 @@ def test_build_handoff_state_refresh_sample_assessment_fields() -> None:
     assert assessment["human_review_required"] is True
 
 
-def test_build_handoff_state_refresh_sample_summary_fields() -> None:
+def test_61i_handoff_state_refresh_sample_summary_fields() -> None:
     data = build_handoff_state_refresh()
     summary = data["sample_summary"]
     assert "summary_id" in summary
@@ -1471,7 +1471,7 @@ def test_build_handoff_state_refresh_sample_summary_fields() -> None:
     assert summary["human_review_required"] is True
 
 
-def test_cli_handoff_state_refresh_exits_zero(
+def test_61i_cli_handoff_state_refresh_exits_zero(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -1486,7 +1486,7 @@ def test_cli_handoff_state_refresh_exits_zero(
     assert "Bootstrap modernization:" in output
 
 
-def test_cli_handoff_state_refresh_json_exits_zero(
+def test_61i_cli_handoff_state_refresh_json_exits_zero(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)

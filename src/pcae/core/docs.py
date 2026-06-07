@@ -1040,6 +1040,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae handoff-state-refresh`
 - `pcae handoff-state-refresh --json`
+
+## phase-test-selection
+
+- `pcae phase-test-selection`
+- `pcae phase-test-selection --json`
 """
 
 

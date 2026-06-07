@@ -60759,3 +60759,320 @@ def build_handoff_state_refresh() -> dict:
         "input_sources": list(_HSR_INPUT_SOURCES),
         "advisory": HANDOFF_STATE_REFRESH_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 61J: Phase Test Selection Hardening
+# ---------------------------------------------------------------------------
+
+PHASE_TEST_SELECTION_ADVISORY = (
+    "Phase test selection hardening is read-only and governance-only. "
+    "Execution, runtime invocation, and prompt execution remain disabled."
+)
+
+_PTSS_HARDENING_DOMAINS: tuple[str, ...] = (
+    "phase_test_discovery",
+    "phase_test_selection",
+    "phase_test_coverage",
+    "phase_test_naming",
+    "phase_test_marker_validation",
+    "phase_validation_consistency",
+    "focused_test_execution_validation",
+    "future_phase_test_readiness",
+)
+
+_PTSS_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_PTSS_HARDENING_STATUSES: tuple[str, ...] = (
+    "hardened",
+    "hardened_with_warnings",
+    "hardening_required",
+    "blocked",
+)
+
+_PTSS_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "hardening_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PTSS_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "hardening_status", "type": "str", "required": True},
+    {"name": "selector_valid", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PTSS_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "hardening_status", "type": "str", "required": True},
+    {"name": "selector_valid", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PTSS_INPUT_SOURCES: tuple[str, ...] = (
+    "tests/**",
+    "pytest configuration",
+    "phase implementation history",
+    "task lifecycle governance outputs",
+    "handoff modernization outputs",
+    "roadmap continuity outputs",
+)
+
+# Selection strategy: tests follow test_{phase_id}_* naming convention.
+# This allows `python -m pytest -k {phase_id}` to select all tests for a phase.
+# Example: `python -m pytest -k 61j` selects all Phase 61J tests.
+_PTSS_SELECTION_STRATEGY: dict = {
+    "strategy_name": "phase_id_prefix_naming_convention",
+    "naming_pattern": "test_{phase_id}_{description}",
+    "selector_command": "python -m pytest -k {phase_id}",
+    "examples": [
+        "python -m pytest -k 61h",
+        "python -m pytest -k 61i",
+        "python -m pytest -k 61j",
+    ],
+    "rationale": (
+        "Phase-prefixed test names allow pytest -k to select all tests for a "
+        "phase without markers or configuration. Consistent naming ensures "
+        "phase validation never silently executes zero tests. "
+        "This matches the existing convention established in test_agent.py "
+        "for phases 61C through 61G."
+    ),
+    "known_exceptions": [
+        {
+            "phase_id": "61H",
+            "fix": "Renamed test_task_transition_* to test_61h_* in test_task.py",
+            "status": "resolved",
+        },
+        {
+            "phase_id": "61I",
+            "fix": "Renamed test_build_handoff_state_refresh_* and "
+                   "test_cli_handoff_state_refresh_* to test_61i_* in test_task.py",
+            "status": "resolved",
+        },
+    ],
+    "enforcement_note": (
+        "All future phase tests must follow test_{phase_id}_* naming. "
+        "Phase validation commands must confirm selector collects > 0 tests."
+    ),
+}
+
+_PTSS_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "hardening_domain": "phase_test_discovery",
+        "signal_type": "phase_test_discovery_check",
+        "severity": "blocker",
+        "detected_state": "phase-specific pytest selectors (-k 61h, -k 61i) collected 0 tests before hardening",
+        "expected_state": "every phase has at least one test discoverable by its phase-id pytest selector",
+    },
+    {
+        "hardening_domain": "phase_test_selection",
+        "signal_type": "phase_test_selection_check",
+        "severity": "blocker",
+        "detected_state": "phase selectors silently succeed with 0 collected and N deselected, giving false confidence",
+        "expected_state": "phase selectors collect > 0 tests; zero-collection is treated as a validation failure",
+    },
+    {
+        "hardening_domain": "phase_test_coverage",
+        "signal_type": "phase_test_coverage_check",
+        "severity": "warning",
+        "detected_state": "phase coverage varies: 61C-61G have 8 tests each; 61H had 4; 61I had 11; no minimum enforced",
+        "expected_state": "each phase has a documented minimum test count and coverage rationale",
+    },
+    {
+        "hardening_domain": "phase_test_naming",
+        "signal_type": "phase_test_naming_check",
+        "severity": "blocker",
+        "detected_state": "61H and 61I tests used descriptive names without phase-id prefix, making them unselectable by phase",
+        "expected_state": "all phase tests follow test_{phase_id}_{description} naming so -k {phase_id} selects them",
+    },
+    {
+        "hardening_domain": "phase_test_marker_validation",
+        "signal_type": "phase_test_marker_validation_check",
+        "severity": "info",
+        "detected_state": "no pytest markers are used; phase selection relies entirely on naming convention",
+        "expected_state": "naming convention is sufficient and documented; markers are optional future enhancement",
+    },
+    {
+        "hardening_domain": "phase_validation_consistency",
+        "signal_type": "phase_validation_consistency_check",
+        "severity": "warning",
+        "detected_state": "phase validation commands across phases 61A-61G are consistent; 61H-61I were inconsistent before hardening",
+        "expected_state": "all phases from 61A onward use consistent test_{phase_id}_* naming and -k {phase_id} validation",
+    },
+    {
+        "hardening_domain": "focused_test_execution_validation",
+        "signal_type": "focused_test_execution_validation_check",
+        "severity": "blocker",
+        "detected_state": "python -m pytest -k 61h and python -m pytest -k 61i silently collected 0 tests before this phase",
+        "expected_state": "python -m pytest -k 61h collects >= 4 tests; python -m pytest -k 61i collects >= 11 tests after renaming",
+    },
+    {
+        "hardening_domain": "future_phase_test_readiness",
+        "signal_type": "future_phase_test_readiness_check",
+        "severity": "info",
+        "detected_state": "future phases have no formal test selection requirement documented before implementation",
+        "expected_state": "test_{phase_id}_* naming convention is documented and required for all future governed phases",
+    },
+)
+
+_PTSS_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "improve test selection reliability",
+        "improve phase validation reliability",
+        "rename tests to follow naming convention",
+        "add markers",
+        "add metadata",
+        "add documentation",
+        "add tests",
+        "detect zero-collection selectors",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "enable execution",
+        "change runtime governance",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "selector_valid": True,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": False,
+    "phase": "61J",
+}
+
+
+def build_phase_test_selection() -> dict:
+    """Build a governed phase test selection hardening scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _PTSS_DOMAIN_SIGNALS]
+
+    domain_count = len(_PTSS_HARDENING_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        hardening_status = "hardening_required"
+    elif warning_count > 0:
+        hardening_status = "hardened_with_warnings"
+    else:
+        hardening_status = "hardened"
+
+    phase_id = "61J"
+    signals = [
+        {
+            "signal_id": f"ptss-{ts}-{index:02d}",
+            "phase_id": phase_id,
+            "hardening_domain": signal["hardening_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"ptssa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "selector_valid": True,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ptsssum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "hardening_status": hardening_status,
+        "selector_valid": True,
+        "human_review_required": True,
+    }
+
+    return {
+        "phase_test_selection_overview": {
+            "overview_id": f"61j-{ts}",
+            "generated_at": generated_at,
+            "phase": "61J",
+            "title": "Phase Test Selection Hardening",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "hardening_status": hardening_status,
+            "selector_valid": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Hardens PCAE phase-level test selection so every phase validation "
+                "command selects and executes meaningful tests. Establishes the "
+                "test_{phase_id}_{description} naming convention so "
+                "`python -m pytest -k {phase_id}` reliably selects all tests for "
+                "that phase. Renames 61H and 61I tests to follow the convention. "
+                "Zero-collection is now a validation failure. "
+                f"hardening_status={hardening_status}. selector_valid=True. "
+                "execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "PhaseTestSelectionSignal",
+            "field_count": len(_PTSS_SIGNAL_FIELDS),
+            "required_field_count": len(_PTSS_SIGNAL_FIELDS),
+            "severity_values": list(_PTSS_SEVERITY_VALUES),
+            "execution_allowed_always_false_in_61j": True,
+            "fields": [dict(field) for field in _PTSS_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "PhaseTestSelectionAssessment",
+            "field_count": len(_PTSS_ASSESSMENT_FIELDS),
+            "required_field_count": len(_PTSS_ASSESSMENT_FIELDS),
+            "supported_hardening_statuses": list(_PTSS_HARDENING_STATUSES),
+            "execution_allowed_always_false_in_61j": True,
+            "human_review_required_always_true_in_61j": True,
+            "fields": [dict(field) for field in _PTSS_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "PhaseTestSelectionSummary",
+            "field_count": len(_PTSS_SUMMARY_FIELDS),
+            "required_field_count": len(_PTSS_SUMMARY_FIELDS),
+            "supported_hardening_statuses": list(_PTSS_HARDENING_STATUSES),
+            "execution_allowed_always_false_in_61j": True,
+            "human_review_required_always_true_in_61j": True,
+            "fields": [dict(field) for field in _PTSS_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "selection_strategy": dict(_PTSS_SELECTION_STRATEGY),
+        "governance_boundaries": dict(_PTSS_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_PTSS_INPUT_SOURCES),
+        "advisory": PHASE_TEST_SELECTION_ADVISORY,
+    }

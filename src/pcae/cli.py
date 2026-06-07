@@ -165,6 +165,7 @@ from pcae.commands.agent import (
     run_task_lifecycle_governance,
     run_agent_handoff_modernization,
     run_handoff_state_refresh,
+    run_phase_test_selection,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4432,6 +4433,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     hsr_parser.set_defaults(handler=run_handoff_state_refresh)
+
+    ptss_parser = subparsers.add_parser(
+        "phase-test-selection",
+        help="Harden phase-level test selection so every phase validation command executes meaningful tests (Phase 61J).",
+    )
+    ptss_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    ptss_parser.set_defaults(handler=run_phase_test_selection)
 
     return parser
 
