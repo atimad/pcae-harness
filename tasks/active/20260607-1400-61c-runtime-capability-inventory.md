@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-1400-61b-runtime-discovery
+20260607-1400-61c-runtime-capability-inventory
 
 ## Title
 
-Runtime Discovery (Phase 61B)
+Runtime Capability Inventory (Phase 61C)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement pcae runtime-discovery: 3 models (RuntimeDiscoverySignal, RuntimeDiscoveryAssessment, RuntimeDiscoverySummary), 8 discovery domains, discovery_allowed=False, registration_allowed=False, execution_allowed=False, human_review_required=True in Phase 61B.
+Implement pcae runtime-capability-inventory: 3 models (RuntimeCapability, RuntimeCapabilityInventoryAssessment, RuntimeCapabilityInventorySummary), 10 capability domains, inventory_allowed=False, registration_allowed=False, execution_allowed=False, human_review_required=True in Phase 61C.
 
 ## Allowed Files
 
@@ -70,13 +70,13 @@ strict
 
 ## Acceptance Checks
 
-- pcae runtime-discovery works
-- pcae runtime-discovery --json works
-- RuntimeDiscoverySignal implemented
-- RuntimeDiscoveryAssessment implemented
-- RuntimeDiscoverySummary implemented
-- all discovery domains defined
-- discovery_allowed remains false
+- pcae runtime-capability-inventory works
+- pcae runtime-capability-inventory --json works
+- RuntimeCapability implemented
+- RuntimeCapabilityInventoryAssessment implemented
+- RuntimeCapabilityInventorySummary implemented
+- all capability domains defined
+- inventory_allowed remains false
 - registration_allowed remains false
 - execution_allowed remains false
 - human review required

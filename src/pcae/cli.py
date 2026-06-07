@@ -160,6 +160,7 @@ from pcae.commands.agent import (
     run_single_file_write_pilot,
     run_runtime_registry,
     run_runtime_discovery_assessment,
+    run_runtime_capability_inventory,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4344,6 +4345,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rd_parser.set_defaults(handler=run_runtime_discovery_assessment)
+
+    rci_parser = subparsers.add_parser(
+        "runtime-capability-inventory",
+        help="Define governed runtime capability inventory model for PCAE (Phase 61C).",
+    )
+    rci_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rci_parser.set_defaults(handler=run_runtime_capability_inventory)
 
     return parser
 

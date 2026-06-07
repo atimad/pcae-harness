@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61B: Runtime Discovery.
+Phase 61C: Runtime Capability Inventory.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -78,7 +78,13 @@ roadmap guidance must remain coherent. When they drift, run
 PCAE can assess governed runtime discovery readiness with `pcae runtime-discovery`
 and `pcae runtime-discovery --json`, defining discovery domains, signals,
 assessment status, governance boundaries, and human-review requirements while
-keeping discovery, registration, and execution disabled.
+keeping discovery, registration, and execution disabled. PCAE can assess
+governed runtime capability inventory readiness with
+`pcae runtime-capability-inventory` and
+`pcae runtime-capability-inventory --json`, defining capability domains,
+capability classifications, assessment status, governance boundaries, and
+human-review requirements while keeping inventory, registration, and execution
+disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -3983,7 +3989,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61B: Runtime Discovery.
+Phase 61C: Runtime Capability Inventory.
 
 ## Next
 

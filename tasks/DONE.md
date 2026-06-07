@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Implemented Runtime Capability Inventory (Phase 61C): `pcae runtime-capability-inventory` and `--json`; added RuntimeCapability, RuntimeCapabilityInventoryAssessment, and RuntimeCapabilityInventorySummary; defined all ten capability domains; kept inventory_allowed=False, registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
+
 - Implemented Runtime Discovery (Phase 61B): `pcae runtime-discovery` and `--json`; added RuntimeDiscoverySignal, RuntimeDiscoveryAssessment, and RuntimeDiscoverySummary; defined all eight discovery domains; kept discovery_allowed=False, registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
 
 - Implemented Runtime Registry (Phase 61A): `pcae runtime-registry` and `--json`; added RuntimeRegistrySignal, RuntimeRegistryEntry, RuntimeRegistryAssessment, and RuntimeRegistrySummary; defined all eight registry domains; kept registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.

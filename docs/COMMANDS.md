@@ -986,3 +986,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-discovery`
 - `pcae runtime-discovery --json`
+
+## runtime-capability-inventory
+
+- `pcae runtime-capability-inventory`
+- `pcae runtime-capability-inventory --json`

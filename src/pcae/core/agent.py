@@ -58237,6 +58237,16 @@ RUNTIME_DISCOVERY_PHASE_ADVISORY = (
     "and human_review_required=True in Phase 61B. Human review is always required."
 )
 
+RUNTIME_CAPABILITY_INVENTORY_ADVISORY = (
+    "Runtime capability inventory is assessment and reporting only; "
+    "capability inventory requirements are defined and blockers reported, but no runtimes are discovered on the host, "
+    "no runtimes are registered, no runtimes are invoked, no prompts are executed, "
+    "no execution authorization occurs, no runtime configuration is modified, "
+    "and no repository modification occurs. "
+    "inventory_allowed=False, registration_allowed=False, execution_allowed=False, "
+    "and human_review_required=True in Phase 61C. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -58839,4 +58849,332 @@ def build_runtime_discovery_assessment() -> dict:
         "governance_boundaries": dict(_RD_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_RD_INPUT_SOURCES),
         "advisory": RUNTIME_DISCOVERY_PHASE_ADVISORY,
+    }
+
+
+_RCI_CAPABILITY_DOMAINS: tuple[str, ...] = (
+    "read_only_execution_capability",
+    "write_execution_capability",
+    "diff_generation_capability",
+    "patch_generation_capability",
+    "review_capability",
+    "audit_tracing_capability",
+    "output_capture_capability",
+    "timeout_enforcement_capability",
+    "sandbox_execution_capability",
+    "multi_agent_coordination_capability",
+)
+
+_RCI_CAPABILITY_STATUSES: tuple[str, ...] = (
+    "supported",
+    "restricted",
+    "unsupported",
+    "unknown",
+)
+
+_RCI_TRUST_LEVELS: tuple[str, ...] = (
+    "trusted",
+    "restricted",
+    "experimental",
+    "blocked",
+)
+
+_RCI_INVENTORY_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "inventory_required",
+    "blocked",
+)
+
+_RCI_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RCI_CAPABILITY_FIELDS: tuple[dict, ...] = (
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "capability_domain", "type": "str", "required": True},
+    {"name": "capability_name", "type": "str", "required": True},
+    {"name": "capability_status", "type": "str", "required": True},
+    {"name": "capability_trust_level", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "capability_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "inventory_status", "type": "str", "required": True},
+    {"name": "inventory_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "capability_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "inventory_status", "type": "str", "required": True},
+    {"name": "inventory_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCI_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeRegistryAssessment",
+    "RuntimeDiscoveryAssessment",
+    "RuntimeIntegrationReadinessAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_RCI_CAPABILITY_TEMPLATES: tuple[dict, ...] = (
+    {
+        "capability_domain": "read_only_execution_capability",
+        "capability_name": "read_only_execution",
+        "capability_status": "unknown",
+        "capability_trust_level": "blocked",
+        "severity": "blocker",
+        "detected_state": "read-only execution capability inventory prerequisites are not yet confirmed against registry, discovery, and governance evidence",
+        "expected_state": "read-only execution capability is inventoried only after registry, discovery, and governance evidence define the capability without invoking a runtime",
+    },
+    {
+        "capability_domain": "write_execution_capability",
+        "capability_name": "write_execution",
+        "capability_status": "unsupported",
+        "capability_trust_level": "blocked",
+        "severity": "blocker",
+        "detected_state": "write execution capability remains blocked and cannot be inventoried as supported in the absence of governed registration and execution authorization",
+        "expected_state": "write execution capability inventory remains blocked until a future governed phase defines and approves write capability evidence",
+    },
+    {
+        "capability_domain": "diff_generation_capability",
+        "capability_name": "diff_generation",
+        "capability_status": "unknown",
+        "capability_trust_level": "restricted",
+        "severity": "warning",
+        "detected_state": "diff generation capability criteria are partially defined, but evidence grading and host-independent validation remain incomplete",
+        "expected_state": "diff generation capability inventory defines evidence grading and host-independent validation before any supported classification is proposed",
+    },
+    {
+        "capability_domain": "patch_generation_capability",
+        "capability_name": "patch_generation",
+        "capability_status": "unknown",
+        "capability_trust_level": "restricted",
+        "severity": "warning",
+        "detected_state": "patch generation capability criteria are partially defined, but artifact validation and review gates remain incomplete",
+        "expected_state": "patch generation capability inventory defines artifact validation and review gates before any supported classification is proposed",
+    },
+    {
+        "capability_domain": "review_capability",
+        "capability_name": "review",
+        "capability_status": "restricted",
+        "capability_trust_level": "experimental",
+        "severity": "warning",
+        "detected_state": "review capability can be described at the scaffold level, but trust evidence and standard reviewer thresholds remain incomplete",
+        "expected_state": "review capability inventory defines trust evidence and reviewer thresholds before any trusted classification is proposed",
+    },
+    {
+        "capability_domain": "audit_tracing_capability",
+        "capability_name": "audit_tracing",
+        "capability_status": "unknown",
+        "capability_trust_level": "blocked",
+        "severity": "blocker",
+        "detected_state": "audit tracing capability inventory prerequisites are not yet confirmed with immutable evidence linkage and runtime attribution boundaries",
+        "expected_state": "audit tracing capability inventory requires immutable evidence linkage and runtime attribution boundaries before any supported classification is proposed",
+    },
+    {
+        "capability_domain": "output_capture_capability",
+        "capability_name": "output_capture",
+        "capability_status": "unknown",
+        "capability_trust_level": "restricted",
+        "severity": "warning",
+        "detected_state": "output capture capability criteria are partially defined, but inventory evidence remains incomplete without governed discovery and registration inputs",
+        "expected_state": "output capture capability inventory uses governed discovery and registration inputs to classify support without invoking a runtime",
+    },
+    {
+        "capability_domain": "timeout_enforcement_capability",
+        "capability_name": "timeout_enforcement",
+        "capability_status": "restricted",
+        "capability_trust_level": "experimental",
+        "severity": "warning",
+        "detected_state": "timeout enforcement capability inherits hardening guidance, but runtime-specific inventory evidence remains incomplete",
+        "expected_state": "timeout enforcement capability inventory combines hardening guidance with runtime-specific inventory evidence before any trusted classification is proposed",
+    },
+    {
+        "capability_domain": "sandbox_execution_capability",
+        "capability_name": "sandbox_execution",
+        "capability_status": "restricted",
+        "capability_trust_level": "restricted",
+        "severity": "blocker",
+        "detected_state": "sandbox execution capability remains blocked from supported inventory because governed runtime boundaries are not yet established",
+        "expected_state": "sandbox execution capability inventory remains restricted until governed runtime boundaries, review gates, and evidence standards are established",
+    },
+    {
+        "capability_domain": "multi_agent_coordination_capability",
+        "capability_name": "multi_agent_coordination",
+        "capability_status": "unknown",
+        "capability_trust_level": "restricted",
+        "severity": "blocker",
+        "detected_state": "multi-agent coordination capability inventory prerequisites are not yet confirmed with runtime-specific coordination evidence and non-executing validation rules",
+        "expected_state": "multi-agent coordination capability inventory defines runtime-specific coordination evidence and non-executing validation rules before any supported classification is proposed",
+    },
+)
+
+_RCI_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define runtime capability requirements",
+        "assess capability inventory prerequisites",
+        "classify capability status and trust level",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "discover runtimes on host",
+        "register runtimes",
+        "invoke runtimes",
+        "execute prompts",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "inventory_allowed": False,
+    "registration_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61C",
+}
+
+
+def build_runtime_capability_inventory() -> dict:
+    """Build a governed runtime capability inventory scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_capabilities = [dict(c) for c in _RCI_CAPABILITY_TEMPLATES]
+
+    domain_count = len(_RCI_CAPABILITY_DOMAINS)
+    capability_count = len(domain_capabilities)
+    blocker_count = sum(1 for c in domain_capabilities if c["severity"] == "blocker")
+    warning_count = sum(1 for c in domain_capabilities if c["severity"] == "warning")
+    info_count = sum(1 for c in domain_capabilities if c["severity"] == "info")
+
+    if blocker_count > 0:
+        inventory_status = "inventory_required"
+    elif warning_count > 0:
+        inventory_status = "ready_with_warnings"
+    else:
+        inventory_status = "ready"
+
+    capabilities = [
+        {
+            "capability_id": f"rc-{ts}-{index:02d}",
+            "runtime_id": "candidate_runtime_id",
+            "capability_domain": capability["capability_domain"],
+            "capability_name": capability["capability_name"],
+            "capability_status": capability["capability_status"],
+            "capability_trust_level": capability["capability_trust_level"],
+            "human_review_required": True,
+            "severity": capability["severity"],
+            "detected_state": capability["detected_state"],
+            "expected_state": capability["expected_state"],
+        }
+        for index, capability in enumerate(domain_capabilities, start=1)
+    ]
+
+    assessment_id = f"rcia-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "capability_count": capability_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "inventory_status": inventory_status,
+        "inventory_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rcisum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "capability_count": capability_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "inventory_status": inventory_status,
+        "inventory_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_capability_inventory_overview": {
+            "overview_id": f"61c-{ts}",
+            "generated_at": generated_at,
+            "phase": "61C",
+            "title": "Runtime Capability Inventory",
+            "domain_count": domain_count,
+            "capability_count": capability_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "inventory_status": inventory_status,
+            "inventory_allowed": False,
+            "registration_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed runtime capability inventory model for PCAE. "
+                "No runtime discovery occurs, no runtimes are registered, no runtimes are invoked, "
+                "no runtime configuration is modified, and no repository modification occurs. "
+                f"inventory_status={inventory_status}. inventory_allowed=False. "
+                "registration_allowed=False. execution_allowed=False."
+            ),
+        },
+        "capability_model": {
+            "model_name": "RuntimeCapability",
+            "field_count": len(_RCI_CAPABILITY_FIELDS),
+            "required_field_count": len(_RCI_CAPABILITY_FIELDS),
+            "supported_capability_statuses": list(_RCI_CAPABILITY_STATUSES),
+            "supported_trust_levels": list(_RCI_TRUST_LEVELS),
+            "inventory_allowed_always_false_in_61c": True,
+            "fields": [dict(field) for field in _RCI_CAPABILITY_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeCapabilityInventoryAssessment",
+            "field_count": len(_RCI_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RCI_ASSESSMENT_FIELDS),
+            "supported_inventory_statuses": list(_RCI_INVENTORY_STATUSES),
+            "inventory_allowed_always_false_in_61c": True,
+            "registration_allowed_always_false_in_61c": True,
+            "execution_allowed_always_false_in_61c": True,
+            "human_review_required_always_true_in_61c": True,
+            "fields": [dict(field) for field in _RCI_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeCapabilityInventorySummary",
+            "field_count": len(_RCI_SUMMARY_FIELDS),
+            "required_field_count": len(_RCI_SUMMARY_FIELDS),
+            "supported_inventory_statuses": list(_RCI_INVENTORY_STATUSES),
+            "inventory_allowed_always_false_in_61c": True,
+            "registration_allowed_always_false_in_61c": True,
+            "execution_allowed_always_false_in_61c": True,
+            "human_review_required_always_true_in_61c": True,
+            "fields": [dict(field) for field in _RCI_SUMMARY_FIELDS],
+        },
+        "domain_capabilities": domain_capabilities,
+        "capabilities": capabilities,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RCI_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RCI_INPUT_SOURCES),
+        "severity_values": list(_RCI_SEVERITY_VALUES),
+        "advisory": RUNTIME_CAPABILITY_INVENTORY_ADVISORY,
     }
