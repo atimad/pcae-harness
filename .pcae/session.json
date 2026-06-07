@@ -1,7 +1,7 @@
 {
   "active_task": {
-    "id": "20260607-0241-55a",
-    "title": "Read-Only Runtime Invocation"
+    "id": "20260607-1317-post-60a-roadmap-checkpoint",
+    "title": "Post-60A roadmap checkpoint"
   },
   "architectural_notes": [],
   "blockers": [],
@@ -15,13 +15,21 @@
       },
       {
         "path": "tasks/active/20260607-0241-55a.md",
+        "status": " D"
+      },
+      {
+        "path": "tasks/active/20260607-1317-post-60a-roadmap-checkpoint.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260607-0241-55a.md",
         "status": "??"
       }
     ],
-    "status_summary": "2 changed files"
+    "status_summary": "4 changed files"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-07T00:41:52.827309+00:00",
+  "timestamp": "2026-06-07T11:22:19.560024+00:00",
   "warnings": []
 }
