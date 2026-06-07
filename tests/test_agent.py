@@ -43660,3 +43660,177 @@ def test_61d_human_output(capsys) -> None:
         "trust_assignment_allowed=False",
     ):
         assert text in output
+
+
+def test_61e_json_top_level_keys(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "task_lifecycle_governance_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["task_lifecycle_governance_overview"]
+    assert overview["phase"] == "61E"
+    assert overview["domain_count"] == 8
+    assert overview["task_update_allowed"] is False
+    assert overview["session_update_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61e_models_and_exact_fields(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "TaskLifecycleGovernanceSignal",
+            [
+                "signal_id", "task_id", "phase_id", "governance_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "TaskLifecycleGovernanceAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "governance_status", "remediation_recommended",
+                "task_update_allowed", "session_update_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "TaskLifecycleGovernanceSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "governance_status",
+                "remediation_recommended", "task_update_allowed",
+                "session_update_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61e_all_governance_domains_defined(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["governance_domain"] for s in data["domain_signals"]} == {
+        "active_task_phase_alignment",
+        "completed_phase_task_closure",
+        "done_task_recording_integrity",
+        "next_task_recommendation_alignment",
+        "roadmap_task_consistency",
+        "session_task_consistency",
+        "task_handoff_freshness",
+        "stale_task_contamination_prevention",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_governance_statuses"]) == {
+        "aligned", "aligned_with_warnings", "update_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_governance_statuses"]) == {
+        "aligned", "aligned_with_warnings", "update_required", "blocked",
+    }
+
+
+def test_61e_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["signal_id"]
+        assert signal["task_id"]
+        assert signal["phase_id"]
+        assert signal["governance_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61e_assessment_and_summary(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["governance_status"] == "update_required"
+    assert assessment["remediation_recommended"] is True
+    assert assessment["task_update_allowed"] is False
+    assert assessment["session_update_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["remediation_recommended"] is True
+    assert summary["task_update_allowed"] is False
+    assert summary["session_update_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61e_input_sources(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "active task state",
+        "done task state",
+        "session state",
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md",
+        "tasks/DONE.md",
+        "tasks/TODO.md",
+        "tasks/DECISIONS.md",
+        "runtime roadmap state",
+        "TaskLifecycleHardeningAssessment",
+    ]
+
+
+def test_61e_governance_boundaries(capsys) -> None:
+    main(["task-lifecycle-governance", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61E"
+    assert boundaries["read_only"] is True
+    assert boundaries["remediation_automatic"] is False
+    assert boundaries["task_update_allowed"] is False
+    assert boundaries["session_update_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "complete tasks", "create tasks", "move task files",
+        "rename active tasks", "rewrite session state", "invoke runtimes",
+        "execute prompts", "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61e_human_output(capsys) -> None:
+    main(["task-lifecycle-governance"])
+    output = capsys.readouterr().out
+    for text in (
+        "Task lifecycle governance",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Governance signals",
+        "Governance boundaries",
+        "Task update allowed:    no",
+        "Session update allowed: no",
+        "Remediation rec'd:      yes",
+        "task_update_allowed=False",
+    ):
+        assert text in output

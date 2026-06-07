@@ -996,3 +996,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-trust-model`
 - `pcae runtime-trust-model --json`
+
+## task-lifecycle-governance
+
+- `pcae task-lifecycle-governance`
+- `pcae task-lifecycle-governance --json`

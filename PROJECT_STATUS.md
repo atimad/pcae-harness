@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61D: Runtime Trust Model.
+Phase 61E: Task Lifecycle Governance Hardening.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -88,7 +88,11 @@ disabled. PCAE can assess governed runtime trust readiness with
 `pcae runtime-trust-model` and `pcae runtime-trust-model --json`, defining
 trust domains, trust signals, assessment status, governance boundaries, and
 human-review requirements while keeping trust assignment, registration, and
-execution disabled.
+execution disabled. PCAE can inspect governed task/phase/session lifecycle
+relationships with `pcae task-lifecycle-governance` and
+`pcae task-lifecycle-governance --json`, defining governance domains, stale
+task contamination checks, next-task recommendation alignment, and remediation
+guidance while keeping task and session updates disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -3993,7 +3997,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61D: Runtime Trust Model.
+Phase 61E: Task Lifecycle Governance Hardening.
 
 ## Next
 

@@ -162,6 +162,7 @@ from pcae.commands.agent import (
     run_runtime_discovery_assessment,
     run_runtime_capability_inventory,
     run_runtime_trust_model,
+    run_task_lifecycle_governance,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4368,6 +4369,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rtm_parser.set_defaults(handler=run_runtime_trust_model)
+
+    tlg_parser = subparsers.add_parser(
+        "task-lifecycle-governance",
+        help="Inspect and harden task/phase/session lifecycle governance relationships (Phase 61E).",
+    )
+    tlg_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    tlg_parser.set_defaults(handler=run_task_lifecycle_governance)
 
     return parser
 

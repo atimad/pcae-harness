@@ -58257,6 +58257,15 @@ RUNTIME_TRUST_MODEL_ADVISORY = (
     "and human_review_required=True in Phase 61D. Human review is always required."
 )
 
+TASK_LIFECYCLE_GOVERNANCE_ADVISORY = (
+    "Task lifecycle governance is assessment and reporting only; "
+    "task/session/roadmap lifecycle relationships are inspected and blockers reported, "
+    "but no tasks are completed, created, moved, or renamed, no session state is rewritten, "
+    "no runtimes are invoked, no prompts are executed, and no repository modification occurs. "
+    "remediation may be recommended but task_update_allowed=False, session_update_allowed=False, "
+    "and human_review_required=True in Phase 61E. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -59473,4 +59482,295 @@ def build_runtime_trust_model() -> dict:
         "governance_boundaries": dict(_RTM_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_RTM_INPUT_SOURCES),
         "advisory": RUNTIME_TRUST_MODEL_ADVISORY,
+    }
+
+
+_TLG_GOVERNANCE_DOMAINS: tuple[str, ...] = (
+    "active_task_phase_alignment",
+    "completed_phase_task_closure",
+    "done_task_recording_integrity",
+    "next_task_recommendation_alignment",
+    "roadmap_task_consistency",
+    "session_task_consistency",
+    "task_handoff_freshness",
+    "stale_task_contamination_prevention",
+)
+
+_TLG_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_TLG_GOVERNANCE_STATUSES: tuple[str, ...] = (
+    "aligned",
+    "aligned_with_warnings",
+    "update_required",
+    "blocked",
+)
+
+_TLG_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "task_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "governance_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TLG_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "governance_status", "type": "str", "required": True},
+    {"name": "remediation_recommended", "type": "bool", "required": True},
+    {"name": "task_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TLG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "governance_status", "type": "str", "required": True},
+    {"name": "remediation_recommended", "type": "bool", "required": True},
+    {"name": "task_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TLG_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/DECISIONS.md",
+    "runtime roadmap state",
+    "TaskLifecycleHardeningAssessment",
+)
+
+_TLG_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "governance_domain": "active_task_phase_alignment",
+        "signal_type": "active_task_phase_alignment_check",
+        "severity": "blocker",
+        "detected_state": "active task/phase alignment has not been explicitly validated against the current governed phase and roadmap advancement state",
+        "expected_state": "active task references the current governed phase and matches the phase/roadmap advancement state before handoff or continuation",
+    },
+    {
+        "governance_domain": "completed_phase_task_closure",
+        "signal_type": "completed_phase_task_closure_check",
+        "severity": "blocker",
+        "detected_state": "completed-phase task closure has not been explicitly validated against active and done task records",
+        "expected_state": "completed phases have corresponding task closure evidence before a successor task becomes authoritative",
+    },
+    {
+        "governance_domain": "done_task_recording_integrity",
+        "signal_type": "done_task_recording_integrity_check",
+        "severity": "warning",
+        "detected_state": "done-task recording integrity has not been fully validated against changelog and task memory references",
+        "expected_state": "done-task records align with changelog and task memory references before future agents rely on them",
+    },
+    {
+        "governance_domain": "next_task_recommendation_alignment",
+        "signal_type": "next_task_recommendation_alignment_check",
+        "severity": "warning",
+        "detected_state": "next-task recommendation alignment has not been fully validated against the active task, roadmap state, and phase continuity",
+        "expected_state": "next-task recommendations align with the active task lifecycle, roadmap state, and phase continuity before handoff guidance is trusted",
+    },
+    {
+        "governance_domain": "roadmap_task_consistency",
+        "signal_type": "roadmap_task_consistency_check",
+        "severity": "blocker",
+        "detected_state": "roadmap/task consistency has not been explicitly validated between project status, changelog, and task records",
+        "expected_state": "roadmap state, project status, changelog, and task records agree on the current and completed phases before continuation",
+    },
+    {
+        "governance_domain": "session_task_consistency",
+        "signal_type": "session_task_consistency_check",
+        "severity": "blocker",
+        "detected_state": "session/task consistency has not been explicitly validated against the current active task and handoff context",
+        "expected_state": "session state references the authoritative active task and phase context before future agents resume work",
+    },
+    {
+        "governance_domain": "task_handoff_freshness",
+        "signal_type": "task_handoff_freshness_check",
+        "severity": "warning",
+        "detected_state": "task handoff freshness has not been fully validated for stale phase/task carryover into the next agent context",
+        "expected_state": "handoff state references only current task/phase context and excludes stale phase/task carryover before future agents resume work",
+    },
+    {
+        "governance_domain": "stale_task_contamination_prevention",
+        "signal_type": "stale_task_contamination_prevention_check",
+        "severity": "blocker",
+        "detected_state": "stale task contamination prevention has not been explicitly validated across active tasks, done tasks, roadmap state, and session continuity",
+        "expected_state": "stale task references are isolated before continuation so future agents cannot inherit contaminated task context",
+    },
+)
+
+_TLG_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect active/done task lifecycle state",
+        "detect stale active task conditions",
+        "detect completed phase without task closure",
+        "detect task/roadmap mismatch",
+        "detect next-task recommendation mismatch",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "complete tasks",
+        "create tasks",
+        "move task files",
+        "rename active tasks",
+        "rewrite session state",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "remediation_automatic": False,
+    "task_update_allowed": False,
+    "session_update_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61E",
+}
+
+
+def build_task_lifecycle_governance() -> dict:
+    """Build a governed task lifecycle governance hardening scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _TLG_DOMAIN_SIGNALS]
+
+    domain_count = len(_TLG_GOVERNANCE_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        governance_status = "update_required"
+        remediation_recommended = True
+    elif warning_count > 0:
+        governance_status = "aligned_with_warnings"
+        remediation_recommended = True
+    else:
+        governance_status = "aligned"
+        remediation_recommended = False
+
+    phase_id = "61E"
+    task_id = "current_active_task"
+    signals = [
+        {
+            "signal_id": f"tlgs-{ts}-{index:02d}",
+            "task_id": task_id,
+            "phase_id": phase_id,
+            "governance_domain": signal["governance_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"tlga-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "governance_status": governance_status,
+        "remediation_recommended": remediation_recommended,
+        "task_update_allowed": False,
+        "session_update_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"tlgsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "governance_status": governance_status,
+        "remediation_recommended": remediation_recommended,
+        "task_update_allowed": False,
+        "session_update_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "task_lifecycle_governance_overview": {
+            "overview_id": f"61e-{ts}",
+            "generated_at": generated_at,
+            "phase": "61E",
+            "title": "Task Lifecycle Governance Hardening",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "governance_status": governance_status,
+            "remediation_recommended": remediation_recommended,
+            "task_update_allowed": False,
+            "session_update_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Inspects and hardens the relationship between phase completion, active task state, "
+                "done task state, roadmap advancement, and session continuity so stale task handoff "
+                "does not contaminate future agents. No tasks are completed, created, moved, or renamed; "
+                "no session state is rewritten; and no repository modification occurs. "
+                f"governance_status={governance_status}. remediation_recommended={remediation_recommended}. "
+                "task_update_allowed=False. session_update_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "TaskLifecycleGovernanceSignal",
+            "field_count": len(_TLG_SIGNAL_FIELDS),
+            "required_field_count": len(_TLG_SIGNAL_FIELDS),
+            "severity_values": list(_TLG_SEVERITY_VALUES),
+            "task_update_allowed_always_false_in_61e": True,
+            "session_update_allowed_always_false_in_61e": True,
+            "fields": [dict(field) for field in _TLG_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "TaskLifecycleGovernanceAssessment",
+            "field_count": len(_TLG_ASSESSMENT_FIELDS),
+            "required_field_count": len(_TLG_ASSESSMENT_FIELDS),
+            "supported_governance_statuses": list(_TLG_GOVERNANCE_STATUSES),
+            "task_update_allowed_always_false_in_61e": True,
+            "session_update_allowed_always_false_in_61e": True,
+            "human_review_required_always_true_in_61e": True,
+            "fields": [dict(field) for field in _TLG_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "TaskLifecycleGovernanceSummary",
+            "field_count": len(_TLG_SUMMARY_FIELDS),
+            "required_field_count": len(_TLG_SUMMARY_FIELDS),
+            "supported_governance_statuses": list(_TLG_GOVERNANCE_STATUSES),
+            "task_update_allowed_always_false_in_61e": True,
+            "session_update_allowed_always_false_in_61e": True,
+            "human_review_required_always_true_in_61e": True,
+            "fields": [dict(field) for field in _TLG_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_TLG_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_TLG_INPUT_SOURCES),
+        "advisory": TASK_LIFECYCLE_GOVERNANCE_ADVISORY,
     }

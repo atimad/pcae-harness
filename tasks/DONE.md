@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Implemented Task Lifecycle Governance Hardening (Phase 61E): `pcae task-lifecycle-governance` and `--json`; added TaskLifecycleGovernanceSignal, TaskLifecycleGovernanceAssessment, and TaskLifecycleGovernanceSummary; defined all eight governance domains including stale task contamination prevention and next-task recommendation alignment; kept task_update_allowed=False, session_update_allowed=False, and human_review_required=True; added focused tests.
+
 - Implemented Runtime Trust Model (Phase 61D): `pcae runtime-trust-model` and `--json`; added RuntimeTrustSignal, RuntimeTrustAssessment, and RuntimeTrustSummary; defined all eight trust domains; kept trust_assignment_allowed=False, registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
 
 - Implemented Runtime Capability Inventory (Phase 61C): `pcae runtime-capability-inventory` and `--json`; added RuntimeCapability, RuntimeCapabilityInventoryAssessment, and RuntimeCapabilityInventorySummary; defined all ten capability domains; kept inventory_allowed=False, registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
