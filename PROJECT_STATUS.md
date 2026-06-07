@@ -2,11 +2,15 @@
 
 ## Current Phase
 
-Phase 62B: Runtime Output Capture.
+Phase 62B: Runtime Output Capture — complete.
 
 62A completed: first real governed execution (pwd, shell-local, stdout/stderr/exit code
 captured). 62A.1 completed: task transition idempotency hardened — duplicate active/done
-phase state is now blocked. 62B is next.
+phase state is now blocked. 62B completed: runtime output structured into
+RuntimeOutputCaptureRecord (12 fields: capture_id, execution_id, runtime_id, command,
+command_hash, stdout, stderr, exit_code, output_size_bytes, execution_timestamp,
+audit_record_id, human_review_required); ten capture domains validated; persistence_allowed
+remains False; 4371 tests passing. 62C is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

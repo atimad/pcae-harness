@@ -167,6 +167,7 @@ from pcae.commands.agent import (
     run_handoff_state_refresh,
     run_phase_test_selection,
     run_runtime_execution_pilot,
+    run_runtime_output_capture,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4456,6 +4457,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rep_parser.set_defaults(handler=run_runtime_execution_pilot)
+
+    roc_parser = subparsers.add_parser(
+        "runtime-output-capture",
+        help="Capture and structure stdout, stderr, exit code, and metadata from the 62A execution boundary (Phase 62B).",
+    )
+    roc_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    roc_parser.set_defaults(handler=run_runtime_output_capture)
 
     return parser
 

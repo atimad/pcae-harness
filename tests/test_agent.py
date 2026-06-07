@@ -44643,3 +44643,176 @@ def test_62a1_governance_boundaries(tmp_path, monkeypatch) -> None:
     assert boundaries["human_review_required"] is True
     assert "delete task files" in boundaries["may_not"]
     assert "scan tasks/active and tasks/done for slug overlaps" in boundaries["may"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 62B: Runtime Output Capture
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_output_capture  # noqa: E402
+
+
+def test_62b_json_top_level_keys(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for key in (
+        "runtime_output_capture_overview",
+        "capture_record",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "allowed_commands",
+        "forbidden_commands",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62b_models_and_exact_fields(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["record_model"]["model_name"] == "RuntimeOutputCaptureRecord"
+    assert data["record_model"]["field_count"] == 12
+    assert data["signal_model"]["model_name"] == "RuntimeOutputCaptureSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeOutputCaptureAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "RuntimeOutputCaptureSummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "capture_id", "execution_id", "runtime_id", "command", "command_hash",
+        "stdout", "stderr", "exit_code", "output_size_bytes",
+        "execution_timestamp", "audit_record_id", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62b_all_capture_domains_defined(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "stdout_capture",
+        "stderr_capture",
+        "exit_code_capture",
+        "runtime_metadata_capture",
+        "command_metadata_capture",
+        "execution_timestamp_capture",
+        "audit_linkage_capture",
+        "output_size_boundary_capture",
+        "command_hash_capture",
+        "human_review_capture",
+    }
+    actual = {s["capture_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62b_real_output_captured(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["capture_record"]
+    assert rec["exit_code"] == 0
+    assert rec["stdout"].strip() != ""
+    assert rec["stderr"] == ""
+    assert rec["output_size_bytes"] > 0
+    overview = data["runtime_output_capture_overview"]
+    assert overview["capture_status"] == "captured"
+    assert overview["capture_allowed"] is True
+
+
+def test_62b_capture_record_fields(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    rec = data["capture_record"]
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+    assert rec["human_review_required"] is True
+    assert rec["audit_record_id"].startswith("roc-audit-")
+    assert rec["execution_id"].startswith("rep-")
+    assert rec["capture_id"].startswith("roc-")
+
+
+def test_62b_capture_allowed_true_for_approved_command(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["runtime_output_capture_overview"]
+    assert overview["capture_allowed"] is True
+    assert overview["execution_allowed"] is True
+    assert overview["blocker_count"] == 0
+    assessment = data["sample_assessment"]
+    assert assessment["capture_allowed"] is True
+    assert assessment["execution_allowed"] is True
+    summary = data["sample_summary"]
+    assert summary["capture_allowed"] is True
+    assert summary["capture_count"] == 1
+
+
+def test_62b_persistence_allowed_false(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    overview = data["runtime_output_capture_overview"]
+    assert overview["persistence_allowed"] is False
+    assessment = data["sample_assessment"]
+    assert assessment["persistence_allowed"] is False
+    summary = data["sample_summary"]
+    assert summary["persistence_allowed"] is False
+    boundaries = data["governance_boundaries"]
+    assert boundaries["persistence_allowed"] is False
+
+
+def test_62b_signals_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    for signal in data["signals"]:
+        assert "capture_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62b_governance_boundaries(capsys) -> None:
+    main(["runtime-output-capture", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["capture_allowed"] is True
+    assert boundaries["execution_allowed"] is True
+    assert boundaries["human_review_required"] is True
+    assert boundaries["read_only"] is True
+    assert boundaries["persistence_allowed"] is False
+    for action in (
+        "persist output artifacts beyond in-memory/reporting structures",
+        "invoke AI runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"]
+    assert "capture stdout" in boundaries["may"]
+    assert "capture stderr" in boundaries["may"]
+    assert "capture exit code" in boundaries["may"]
+
+
+def test_62b_human_output(capsys) -> None:
+    main(["runtime-output-capture"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime output capture",
+        "Capture record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Capture signals",
+        "Governance boundaries",
+        "Capture allowed:",
+        "Persistence allowed:",
+        "Allowed commands:",
+    ):
+        assert text in output

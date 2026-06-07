@@ -1050,6 +1050,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-execution-pilot`
 - `pcae runtime-execution-pilot --json`
+
+## runtime-output-capture
+
+- `pcae runtime-output-capture`
+- `pcae runtime-output-capture --json`
 """
 
 

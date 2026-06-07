@@ -360,6 +360,8 @@ from pcae.core.agent import (
     RUNTIME_EXECUTION_PILOT_ADVISORY,
     build_task_transition_idempotency,
     TASK_TRANSITION_IDEMPOTENCY_ADVISORY,
+    build_runtime_output_capture,
+    RUNTIME_OUTPUT_CAPTURE_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12106,4 +12108,74 @@ def run_runtime_execution_pilot(args: argparse.Namespace) -> int:
     print(f"Allowed commands:   {', '.join(data['allowed_commands'])}")
     print()
     print(RUNTIME_EXECUTION_PILOT_ADVISORY)
+    return 0
+
+
+def run_runtime_output_capture(args: argparse.Namespace) -> int:
+    data = build_runtime_output_capture()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_output_capture_overview"]
+    print("Runtime output capture")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Capture domains:        {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Capture status:         {overview['capture_status']}")
+    print(f"Capture allowed:        {'yes' if overview['capture_allowed'] else 'no'}")
+    print(f"Persistence allowed:    {'yes' if overview['persistence_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["capture_record"]
+    print("Capture record:")
+    print(f"  Capture ID:         {rec['capture_id']}")
+    print(f"  Execution ID:       {rec['execution_id']}")
+    print(f"  Runtime:            {rec['runtime_id']}")
+    print(f"  Command:            {rec['command']}")
+    print(f"  Command hash:       {rec['command_hash']}")
+    print(f"  Exit code:          {rec['exit_code']}")
+    print(f"  Output size bytes:  {rec['output_size_bytes']}")
+    print(f"  Audit record ID:    {rec['audit_record_id']}")
+    print(f"  Human review:       {'yes' if rec['human_review_required'] else 'no'}")
+    if rec["stdout"]:
+        print(f"  stdout:             {rec['stdout'].strip()}")
+    if rec["stderr"]:
+        print(f"  stderr:             {rec['stderr'].strip()}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Capture signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['capture_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                {', '.join(boundaries['may'])}")
+    print(f"  May not:            {', '.join(boundaries['may_not'])}")
+    print(f"  Capture allowed:    {boundaries['capture_allowed']}")
+    print(f"  Persistence allowed:{boundaries['persistence_allowed']}")
+    print(f"  Human review:       {boundaries['human_review_required']}")
+    print(f"  Read only:          {boundaries['read_only']}")
+    print()
+    print(f"Allowed commands:   {', '.join(data['allowed_commands'])}")
+    print()
+    print(RUNTIME_OUTPUT_CAPTURE_ADVISORY)
     return 0
