@@ -263,6 +263,8 @@ from pcae.core.agent import (
     RECOVERY_VALIDATION_ADVISORY,
     build_runtime_integration_readiness,
     RUNTIME_INTEGRATION_READINESS_ADVISORY,
+    build_read_only_runtime_invocation,
+    READ_ONLY_RUNTIME_INVOCATION_ADVISORY,
     build_governance_state_recovery,
     GOVERNANCE_STATE_RECOVERY_ADVISORY,
     build_session_recovery,
@@ -11248,4 +11250,52 @@ def run_runtime_integration_readiness(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:      {boundaries['execution_allowed']}")
     print()
     print(RUNTIME_INTEGRATION_READINESS_ADVISORY)
+    return 0
+
+
+def run_read_only_runtime_invocation(args: argparse.Namespace) -> int:
+    data = build_read_only_runtime_invocation()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["read_only_runtime_invocation_overview"]
+    print("Read-only runtime invocation")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Invocation domains:     {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Invocation status:      {overview['invocation_status']}")
+    print(f"Invocation allowed:     {'yes' if overview['invocation_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Invocation signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['invocation_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                    {', '.join(boundaries['may'])}")
+    print(f"  May not:                {', '.join(boundaries['may_not'])}")
+    print(f"  Invocation allowed:     {boundaries['invocation_allowed']}")
+    print(f"  Execution allowed:      {boundaries['execution_allowed']}")
+    print()
+    print(READ_ONLY_RUNTIME_INVOCATION_ADVISORY)
     return 0

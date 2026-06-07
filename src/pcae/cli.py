@@ -152,6 +152,7 @@ from pcae.commands.agent import (
     run_corruption_simulation,
     run_recovery_validation,
     run_runtime_integration_readiness,
+    run_read_only_runtime_invocation,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4248,6 +4249,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rir_parser.set_defaults(handler=run_runtime_integration_readiness)
+
+    rori_parser = subparsers.add_parser(
+        "read-only-runtime-invocation",
+        help="Plan and validate governed read-only runtime invocation requirements (Phase 55A).",
+    )
+    rori_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rori_parser.set_defaults(handler=run_read_only_runtime_invocation)
 
     return parser
 

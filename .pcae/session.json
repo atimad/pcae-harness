@@ -1,7 +1,7 @@
 {
   "active_task": {
-    "id": "20260606-2341-runtime-integration-readiness",
-    "title": "Runtime Integration Readiness"
+    "id": "20260607-0241-55a",
+    "title": "Read-Only Runtime Invocation"
   },
   "architectural_notes": [],
   "blockers": [],
@@ -10,14 +10,18 @@
     "branch": "main",
     "changed_files": [
       {
-        "path": "tasks/active/20260606-2341-runtime-integration-readiness.md",
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260607-0241-55a.md",
         "status": "??"
       }
     ],
-    "status_summary": "1 changed file"
+    "status_summary": "2 changed files"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-06T21:42:09.689561+00:00",
+  "timestamp": "2026-06-07T00:41:52.827309+00:00",
   "warnings": []
 }

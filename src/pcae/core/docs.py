@@ -967,6 +967,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-integration-readiness`
 - `pcae runtime-integration-readiness --json`
+
+## read-only-runtime-invocation
+
+- `pcae read-only-runtime-invocation`
+- `pcae read-only-runtime-invocation --json`
 """
 
 

@@ -41949,3 +41949,166 @@ def test_54a_human_output(capsys) -> None:
         "integration_allowed=False",
     ):
         assert text in output
+
+
+def test_55a_json_top_level_keys(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "read_only_runtime_invocation_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["read_only_runtime_invocation_overview"]
+    assert overview["phase"] == "55A"
+    assert overview["domain_count"] == 8
+    assert overview["invocation_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_55a_models_and_exact_fields(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "ReadOnlyRuntimeInvocationSignal",
+            [
+                "signal_id", "runtime_id", "invocation_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "ReadOnlyRuntimeInvocationAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "invocation_status", "invocation_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "ReadOnlyRuntimeInvocationSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "invocation_status",
+                "invocation_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_55a_all_invocation_domains_defined(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "runtime_selection_validation",
+        "invocation_contract_validation",
+        "read_only_boundary_validation",
+        "prompt_submission_validation",
+        "timeout_enforcement_validation",
+        "output_capture_validation",
+        "invocation_audit_validation",
+        "invocation_governance_validation",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_invocation_statuses"]) == {
+        "ready", "ready_with_warnings", "invocation_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_invocation_statuses"]) == {
+        "ready", "ready_with_warnings", "invocation_required", "blocked",
+    }
+
+
+def test_55a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["runtime_id"]
+        assert signal["invocation_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_55a_assessment_and_summary(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["invocation_status"] == "invocation_required"
+    assert assessment["invocation_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["invocation_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_55a_input_sources(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeIntegrationReadinessAssessment",
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "TimeoutHardeningAssessment",
+        "OutputIntegrityAssessment",
+        "ExecutionReadinessSummary",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_55a_governance_boundaries(capsys) -> None:
+    main(["read-only-runtime-invocation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "55A"
+    assert boundaries["read_only"] is True
+    assert boundaries["invocation_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "register runtimes",
+        "modify runtime configuration", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_55a_human_output(capsys) -> None:
+    main(["read-only-runtime-invocation"])
+    output = capsys.readouterr().out
+    for text in (
+        "Read-only runtime invocation",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Invocation signals",
+        "Governance boundaries",
+        "Invocation allowed:     no",
+        "Execution allowed:      no",
+        "invocation_allowed=False",
+    ):
+        assert text in output

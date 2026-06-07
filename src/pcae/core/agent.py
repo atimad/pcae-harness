@@ -56449,3 +56449,287 @@ def build_runtime_integration_readiness() -> dict:
         "input_sources": list(_RIR_INPUT_SOURCES),
         "advisory": RUNTIME_INTEGRATION_READINESS_ADVISORY,
     }
+
+
+READ_ONLY_RUNTIME_INVOCATION_ADVISORY = (
+    "Read-only runtime invocation is informational and planning only; invocation "
+    "requirements are evaluated and blockers reported, but no runtime is invoked, "
+    "registered, installed, or configured. "
+    "No prompt is executed, no execution authorization occurs, "
+    "no repository modification occurs. "
+    "invocation_allowed=False and execution_allowed=False in Phase 55A. "
+    "Human review is always required."
+)
+
+_RORI_INVOCATION_DOMAINS: tuple[str, ...] = (
+    "runtime_selection_validation",
+    "invocation_contract_validation",
+    "read_only_boundary_validation",
+    "prompt_submission_validation",
+    "timeout_enforcement_validation",
+    "output_capture_validation",
+    "invocation_audit_validation",
+    "invocation_governance_validation",
+)
+
+_RORI_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RORI_INVOCATION_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "invocation_required",
+    "blocked",
+)
+
+_RORI_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "invocation_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RORI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "invocation_status", "type": "str", "required": True},
+    {"name": "invocation_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RORI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "invocation_status", "type": "str", "required": True},
+    {"name": "invocation_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RORI_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeIntegrationReadinessAssessment",
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "TimeoutHardeningAssessment",
+    "OutputIntegrityAssessment",
+    "ExecutionReadinessSummary",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_RORI_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_selection_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_selection_governance",
+        "severity": "blocker",
+        "detected_state": "candidate runtime not validated against governance selection criteria",
+        "expected_state": "selected runtime satisfies governance policy constraints and identity verification",
+    },
+    {
+        "domain": "invocation_contract_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "invocation_contract_completeness",
+        "severity": "blocker",
+        "detected_state": "invocation contract fields and governance artifact linkage not validated",
+        "expected_state": "invocation contract is complete with all required fields and linked to task and governance policy",
+    },
+    {
+        "domain": "read_only_boundary_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "read_only_boundary_enforcement",
+        "severity": "blocker",
+        "detected_state": "read-only execution boundary not confirmed enforced for this invocation path",
+        "expected_state": "invocation is confirmed read-only: no writes, commits, pushes, or side-effects permitted",
+    },
+    {
+        "domain": "prompt_submission_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "prompt_submission_governance",
+        "severity": "blocker",
+        "detected_state": "prompt submission governance and artifact provenance not validated before invocation",
+        "expected_state": "prompt is governed, attributed, and linked to an approved task contract before submission",
+    },
+    {
+        "domain": "timeout_enforcement_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "timeout_enforcement_readiness",
+        "severity": "blocker",
+        "detected_state": "timeout enforcement parameters not confirmed active for this invocation path",
+        "expected_state": "timeout is declared, enforced, and recovery path exists before any invocation proceeds",
+    },
+    {
+        "domain": "output_capture_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "output_capture_path_validation",
+        "severity": "blocker",
+        "detected_state": "output capture path and integrity checks not validated for this invocation",
+        "expected_state": "output capture is confirmed: path exists, integrity checks active, and attribution model present",
+    },
+    {
+        "domain": "invocation_audit_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "invocation_audit_trail_completeness",
+        "severity": "blocker",
+        "detected_state": "invocation audit trail not confirmed complete before execution proceeds",
+        "expected_state": "audit trail captures all invocation events with timestamps, attribution, and human review gate",
+    },
+    {
+        "domain": "invocation_governance_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "invocation_governance_chain_validation",
+        "severity": "blocker",
+        "detected_state": "invocation governance chain prerequisites not satisfied across all six architecture layers",
+        "expected_state": "all governance, execution, recovery, hardening, concurrency, and resilience layers confirm invocation readiness",
+    },
+)
+
+_RORI_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect invocation readiness requirements",
+        "assess read-only execution prerequisites",
+        "assess audit and output capture readiness",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "invocation_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "55A",
+}
+
+
+def build_read_only_runtime_invocation() -> dict:
+    """Build a read-only runtime invocation planning scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RORI_DOMAIN_SIGNALS]
+
+    domain_count = len(_RORI_INVOCATION_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        invocation_status = "invocation_required"
+    elif warning_count > 0:
+        invocation_status = "ready_with_warnings"
+    else:
+        invocation_status = "ready"
+
+    signals = [
+        {
+            "signal_id": f"roris-{ts}-{index:02d}",
+            "runtime_id": signal["runtime_id"],
+            "invocation_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"roria-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "invocation_status": invocation_status,
+        "invocation_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rorisum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "invocation_status": invocation_status,
+        "invocation_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "read_only_runtime_invocation_overview": {
+            "overview_id": f"55a-{ts}",
+            "generated_at": generated_at,
+            "phase": "55A",
+            "title": "Read-Only Runtime Invocation",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "invocation_status": invocation_status,
+            "invocation_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Plans and validates governed read-only runtime invocation requirements. "
+                "No runtime is invoked, registered, installed, or configured. "
+                f"invocation_status={invocation_status}. invocation_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "ReadOnlyRuntimeInvocationSignal",
+            "field_count": len(_RORI_SIGNAL_FIELDS),
+            "required_field_count": len(_RORI_SIGNAL_FIELDS),
+            "severity_values": list(_RORI_SEVERITY_VALUES),
+            "invocation_allowed_always_false_in_55a": True,
+            "fields": [dict(field) for field in _RORI_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "ReadOnlyRuntimeInvocationAssessment",
+            "field_count": len(_RORI_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RORI_ASSESSMENT_FIELDS),
+            "supported_invocation_statuses": list(_RORI_INVOCATION_STATUSES),
+            "invocation_allowed_always_false_in_55a": True,
+            "execution_allowed_always_false_in_55a": True,
+            "human_review_required_always_true_in_55a": True,
+            "fields": [dict(field) for field in _RORI_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "ReadOnlyRuntimeInvocationSummary",
+            "field_count": len(_RORI_SUMMARY_FIELDS),
+            "required_field_count": len(_RORI_SUMMARY_FIELDS),
+            "supported_invocation_statuses": list(_RORI_INVOCATION_STATUSES),
+            "invocation_allowed_always_false_in_55a": True,
+            "human_review_required_always_true_in_55a": True,
+            "fields": [dict(field) for field in _RORI_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RORI_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RORI_INPUT_SOURCES),
+        "advisory": READ_ONLY_RUNTIME_INVOCATION_ADVISORY,
+    }
