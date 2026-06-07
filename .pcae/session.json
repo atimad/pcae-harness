@@ -1,7 +1,7 @@
 {
   "active_task": {
-    "id": "20260607-1317-post-60a-roadmap-checkpoint",
-    "title": "Post-60A roadmap checkpoint"
+    "id": "20260607-1400-61a-runtime-registry",
+    "title": "Runtime Registry (Phase 61A)"
   },
   "architectural_notes": [],
   "blockers": [],
@@ -10,26 +10,46 @@
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/session.json",
+        "path": "CHANGELOG.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260607-0241-55a.md",
-        "status": " D"
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
       },
       {
-        "path": "tasks/active/20260607-1317-post-60a-roadmap-checkpoint.md",
-        "status": "??"
+        "path": "docs/COMMANDS.md",
+        "status": " M"
       },
       {
-        "path": "tasks/done/20260607-0241-55a.md",
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/docs.py",
+        "status": " M"
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260607-1400-61a-runtime-registry.md",
         "status": "??"
       }
     ],
-    "status_summary": "4 changed files"
+    "status_summary": "9 changed files"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-07T11:22:19.560024+00:00",
+  "timestamp": "2026-06-07T13:31:34.632301+00:00",
   "warnings": []
 }

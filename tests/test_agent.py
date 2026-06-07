@@ -42954,3 +42954,184 @@ def test_60a_human_output(capsys) -> None:
         "pilot_allowed=False",
     ):
         assert text in output
+
+
+def test_61a_json_top_level_keys(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "runtime_registry_overview",
+        "signal_model",
+        "entry_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["runtime_registry_overview"]
+    assert overview["phase"] == "61A"
+    assert overview["domain_count"] == 8
+    assert overview["registration_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61a_models_and_exact_fields(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RuntimeRegistrySignal",
+            [
+                "signal_id", "registry_id", "registry_domain", "signal_type",
+                "severity", "runtime_id", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "entry_model": (
+            "RuntimeRegistryEntry",
+            [
+                "runtime_id", "runtime_name", "runtime_type", "runtime_version",
+                "runtime_status", "runtime_trust_level", "capabilities",
+                "governance_managed", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RuntimeRegistryAssessment",
+            [
+                "assessment_id", "registry_entry_count", "signal_count",
+                "blocker_count", "warning_count", "registry_status",
+                "registration_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RuntimeRegistrySummary",
+            [
+                "summary_id", "assessment_id", "registry_entry_count", "domain_count",
+                "signal_count", "blocker_count", "warning_count", "registry_status",
+                "registration_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61a_all_registry_domains_defined(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "runtime_identity_registry",
+        "runtime_metadata_registry",
+        "runtime_capability_registry",
+        "runtime_trust_registry",
+        "runtime_governance_registry",
+        "runtime_audit_registry",
+        "runtime_lifecycle_registry",
+        "runtime_status_registry",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_registry_statuses"]) == {
+        "ready", "ready_with_warnings", "registry_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_registry_statuses"]) == {
+        "ready", "ready_with_warnings", "registry_required", "blocked",
+    }
+    assert set(data["entry_model"]["supported_runtime_statuses"]) == {
+        "discovered", "registered", "restricted", "blocked",
+    }
+    assert set(data["entry_model"]["supported_trust_levels"]) == {
+        "trusted", "restricted", "experimental", "blocked",
+    }
+
+
+def test_61a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["registry_id"]
+        assert signal["registry_domain"]
+        assert signal["signal_type"]
+        assert signal["runtime_id"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61a_assessment_and_summary(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["registry_status"] == "registry_required"
+    assert assessment["registration_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert assessment["registry_entry_count"] == 0
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["registry_entry_count"] == 0
+    assert summary["registration_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61a_input_sources(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeIntegrationReadinessAssessment",
+        "ReadOnlyRuntimeInvocationAssessment",
+        "RuntimeOutputPersistenceAssessment",
+        "RuntimeOutputReviewAssessment",
+        "MultiAgentReadOnlyExecutionAssessment",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_61a_governance_boundaries(capsys) -> None:
+    main(["runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61A"
+    assert boundaries["read_only"] is True
+    assert boundaries["registration_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "discover runtimes",
+        "register runtimes", "modify runtime configuration",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61a_human_output(capsys) -> None:
+    main(["runtime-registry"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime registry",
+        "Signal model",
+        "Entry model",
+        "Assessment model",
+        "Summary model",
+        "Registry signals",
+        "Governance boundaries",
+        "Registration allowed:   no",
+        "Execution allowed:      no",
+        "registration_allowed=False",
+    ):
+        assert text in output

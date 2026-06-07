@@ -158,6 +158,7 @@ from pcae.commands.agent import (
     run_multi_agent_read_only_execution,
     run_controlled_write_dry_run,
     run_single_file_write_pilot,
+    run_runtime_registry,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4320,6 +4321,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     sfwp_parser.set_defaults(handler=run_single_file_write_pilot)
+
+    rr_parser = subparsers.add_parser(
+        "runtime-registry",
+        help="Define governed runtime registry model for PCAE (Phase 61A).",
+    )
+    rr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rr_parser.set_defaults(handler=run_runtime_registry)
 
     return parser
 

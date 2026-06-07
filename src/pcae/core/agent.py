@@ -58215,3 +58215,332 @@ def build_read_only_runtime_invocation() -> dict:
         "input_sources": list(_RORI_INPUT_SOURCES),
         "advisory": READ_ONLY_RUNTIME_INVOCATION_ADVISORY,
     }
+
+
+RUNTIME_REGISTRY_ADVISORY = (
+    "Runtime registry is informational and planning only; "
+    "registry requirements are assessed and blockers reported, but no runtimes are discovered, "
+    "no runtimes are registered, no runtime configuration is modified, "
+    "no runtime is invoked, no prompt is executed, no execution authorization occurs, "
+    "no repository modification occurs. "
+    "registration_allowed=False, execution_allowed=False, and human_review_required=True in Phase 61A. "
+    "Human review is always required."
+)
+
+_RR_REGISTRY_DOMAINS: tuple[str, ...] = (
+    "runtime_identity_registry",
+    "runtime_metadata_registry",
+    "runtime_capability_registry",
+    "runtime_trust_registry",
+    "runtime_governance_registry",
+    "runtime_audit_registry",
+    "runtime_lifecycle_registry",
+    "runtime_status_registry",
+)
+
+_RR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RR_REGISTRY_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "registry_required",
+    "blocked",
+)
+
+_RR_RUNTIME_STATUSES: tuple[str, ...] = (
+    "discovered",
+    "registered",
+    "restricted",
+    "blocked",
+)
+
+_RR_TRUST_LEVELS: tuple[str, ...] = (
+    "trusted",
+    "restricted",
+    "experimental",
+    "blocked",
+)
+
+_RR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "registry_id", "type": "str", "required": True},
+    {"name": "registry_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RR_ENTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "runtime_type", "type": "str", "required": True},
+    {"name": "runtime_version", "type": "str", "required": True},
+    {"name": "runtime_status", "type": "str", "required": True},
+    {"name": "runtime_trust_level", "type": "str", "required": True},
+    {"name": "capabilities", "type": "list", "required": True},
+    {"name": "governance_managed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "registry_entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "registry_status", "type": "str", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "registry_entry_count", "type": "int", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "registry_status", "type": "str", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RR_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeIntegrationReadinessAssessment",
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeOutputPersistenceAssessment",
+    "RuntimeOutputReviewAssessment",
+    "MultiAgentReadOnlyExecutionAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_RR_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_identity_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_identity_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime identity registry requirements not confirmed defined with unique runtime identifiers, name, type, and version before registry proceeds",
+        "expected_state": "runtime identity registry defines unique runtime_id, runtime_name, runtime_type, and runtime_version for every registered runtime entry",
+    },
+    {
+        "domain": "runtime_metadata_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_metadata_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime metadata registry requirements not confirmed defined with governed metadata capture and linkage to the identity record",
+        "expected_state": "runtime metadata registry captures and links all required metadata fields to each runtime identity record before any runtime is registered",
+    },
+    {
+        "domain": "runtime_capability_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_capability_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime capability registry requirements not confirmed defined with capability enumeration, validation, and governance linkage",
+        "expected_state": "runtime capability registry enumerates, validates, and links capabilities to the governing policy and identity record for each runtime entry",
+    },
+    {
+        "domain": "runtime_trust_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_trust_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime trust registry requirements not confirmed defined with trust level assignment, trust justification, and human-review linkage",
+        "expected_state": "runtime trust registry assigns trust_level from {trusted, restricted, experimental, blocked}, records justification, and requires human review for each entry",
+    },
+    {
+        "domain": "runtime_governance_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_governance_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime governance registry requirements not confirmed defined with governance_managed flag, policy linkage, and human-review gate",
+        "expected_state": "runtime governance registry records governance_managed=True, links to the governing policy, and requires human review for every registered runtime entry",
+    },
+    {
+        "domain": "runtime_audit_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_audit_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime audit registry requirements not confirmed defined with audit trail linkage, event capture scope, and immutability guarantee",
+        "expected_state": "runtime audit registry links each entry to an immutable audit trail capturing all registration, status change, and governance events",
+    },
+    {
+        "domain": "runtime_lifecycle_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_lifecycle_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime lifecycle registry requirements not confirmed defined with lifecycle state transitions, blocking conditions, and human-review gates",
+        "expected_state": "runtime lifecycle registry defines valid status transitions among {discovered, registered, restricted, blocked} and requires human review for each transition",
+    },
+    {
+        "domain": "runtime_status_registry",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_status_registry_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime status registry requirements not confirmed defined with authoritative status tracking, staleness detection, and human-review confirmation",
+        "expected_state": "runtime status registry records the authoritative runtime_status for each entry, detects stale status, and requires human review before any status change is accepted",
+    },
+)
+
+_RR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define runtime registry requirements",
+        "assess runtime identity requirements",
+        "assess runtime trust requirements",
+        "assess runtime governance requirements",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "discover runtimes",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "registration_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61A",
+}
+
+
+def build_runtime_registry() -> dict:
+    """Build a governed runtime registry scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RR_DOMAIN_SIGNALS]
+
+    domain_count = len(_RR_REGISTRY_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        registry_status = "registry_required"
+    elif warning_count > 0:
+        registry_status = "ready_with_warnings"
+    else:
+        registry_status = "ready"
+
+    registry_id = f"rr-{ts}"
+    signals = [
+        {
+            "signal_id": f"rrs-{ts}-{index:02d}",
+            "registry_id": registry_id,
+            "registry_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "runtime_id": signal["runtime_id"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "registry_entry_count": 0,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "registry_status": registry_status,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rrsum-{ts}",
+        "assessment_id": assessment_id,
+        "registry_entry_count": 0,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "registry_status": registry_status,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_registry_overview": {
+            "overview_id": f"61a-{ts}",
+            "generated_at": generated_at,
+            "phase": "61A",
+            "title": "Runtime Registry",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "registry_status": registry_status,
+            "registration_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed runtime registry model for PCAE. "
+                "No runtimes are discovered, no runtimes are registered, no runtime configuration is modified, "
+                "no runtime is invoked, no prompt is executed. "
+                f"registry_status={registry_status}. registration_allowed=False. execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeRegistrySignal",
+            "field_count": len(_RR_SIGNAL_FIELDS),
+            "required_field_count": len(_RR_SIGNAL_FIELDS),
+            "severity_values": list(_RR_SEVERITY_VALUES),
+            "registration_allowed_always_false_in_61a": True,
+            "fields": [dict(field) for field in _RR_SIGNAL_FIELDS],
+        },
+        "entry_model": {
+            "model_name": "RuntimeRegistryEntry",
+            "field_count": len(_RR_ENTRY_FIELDS),
+            "required_field_count": len(_RR_ENTRY_FIELDS),
+            "supported_runtime_statuses": list(_RR_RUNTIME_STATUSES),
+            "supported_trust_levels": list(_RR_TRUST_LEVELS),
+            "registration_allowed_always_false_in_61a": True,
+            "fields": [dict(field) for field in _RR_ENTRY_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeRegistryAssessment",
+            "field_count": len(_RR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RR_ASSESSMENT_FIELDS),
+            "supported_registry_statuses": list(_RR_REGISTRY_STATUSES),
+            "registration_allowed_always_false_in_61a": True,
+            "execution_allowed_always_false_in_61a": True,
+            "human_review_required_always_true_in_61a": True,
+            "fields": [dict(field) for field in _RR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeRegistrySummary",
+            "field_count": len(_RR_SUMMARY_FIELDS),
+            "required_field_count": len(_RR_SUMMARY_FIELDS),
+            "supported_registry_statuses": list(_RR_REGISTRY_STATUSES),
+            "registration_allowed_always_false_in_61a": True,
+            "execution_allowed_always_false_in_61a": True,
+            "human_review_required_always_true_in_61a": True,
+            "fields": [dict(field) for field in _RR_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RR_INPUT_SOURCES),
+        "advisory": RUNTIME_REGISTRY_ADVISORY,
+    }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 60A: First Controlled Single-File Write Pilot.
+Phase 61A: Runtime Registry.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -3978,11 +3978,11 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 60A: First Controlled Single-File Write Pilot.
+Phase 61A: Runtime Registry.
 
 ## Next
 
-- 61A and beyond: to be planned
+- 62A and beyond: to be planned
 
 ## Future Explorations
 
