@@ -992,6 +992,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae controlled-write-dry-run`
 - `pcae controlled-write-dry-run --json`
+
+## single-file-write-pilot
+
+- `pcae single-file-write-pilot`
+- `pcae single-file-write-pilot --json`
 """
 
 

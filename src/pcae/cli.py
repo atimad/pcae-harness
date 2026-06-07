@@ -157,6 +157,7 @@ from pcae.commands.agent import (
     run_runtime_output_review,
     run_multi_agent_read_only_execution,
     run_controlled_write_dry_run,
+    run_single_file_write_pilot,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4308,6 +4309,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     cwdr_parser.set_defaults(handler=run_controlled_write_dry_run)
+
+    sfwp_parser = subparsers.add_parser(
+        "single-file-write-pilot",
+        help="Define first governed single-file write pilot model (Phase 60A).",
+    )
+    sfwp_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    sfwp_parser.set_defaults(handler=run_single_file_write_pilot)
 
     return parser
 

@@ -273,6 +273,8 @@ from pcae.core.agent import (
     MULTI_AGENT_READ_ONLY_EXECUTION_ADVISORY,
     build_controlled_write_dry_run,
     CONTROLLED_WRITE_DRY_RUN_ADVISORY,
+    build_single_file_write_pilot,
+    SINGLE_FILE_WRITE_PILOT_ADVISORY,
     build_governance_state_recovery,
     GOVERNANCE_STATE_RECOVERY_ADVISORY,
     build_session_recovery,
@@ -11500,4 +11502,54 @@ def run_controlled_write_dry_run(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:      {boundaries['execution_allowed']}")
     print()
     print(CONTROLLED_WRITE_DRY_RUN_ADVISORY)
+    return 0
+
+
+def run_single_file_write_pilot(args: argparse.Namespace) -> int:
+    data = build_single_file_write_pilot()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["single_file_write_pilot_overview"]
+    print("Single-file write pilot")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Pilot domains:          {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Pilot status:           {overview['pilot_status']}")
+    print(f"Pilot allowed:          {'yes' if overview['pilot_allowed'] else 'no'}")
+    print(f"Write allowed:          {'yes' if overview['write_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Pilot signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['pilot_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                    {', '.join(boundaries['may'])}")
+    print(f"  May not:                {', '.join(boundaries['may_not'])}")
+    print(f"  Pilot allowed:          {boundaries['pilot_allowed']}")
+    print(f"  Write allowed:          {boundaries['write_allowed']}")
+    print(f"  Execution allowed:      {boundaries['execution_allowed']}")
+    print()
+    print(SINGLE_FILE_WRITE_PILOT_ADVISORY)
     return 0

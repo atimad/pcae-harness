@@ -42776,3 +42776,181 @@ def test_59a_human_output(capsys) -> None:
         "dry_run_allowed=False",
     ):
         assert text in output
+
+
+def test_60a_json_top_level_keys(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "single_file_write_pilot_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["single_file_write_pilot_overview"]
+    assert overview["phase"] == "60A"
+    assert overview["domain_count"] == 10
+    assert overview["pilot_allowed"] is False
+    assert overview["write_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_60a_models_and_exact_fields(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "SingleFileWritePilotSignal",
+            [
+                "signal_id", "pilot_id", "pilot_domain", "signal_type",
+                "severity", "target_file", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "SingleFileWritePilotAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "pilot_status", "pilot_allowed",
+                "write_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "SingleFileWritePilotSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "pilot_status",
+                "pilot_allowed", "write_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_60a_all_pilot_domains_defined(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "single_file_scope_validation",
+        "write_intent_validation",
+        "file_target_validation",
+        "diff_preview_validation",
+        "rollback_plan_validation",
+        "evidence_linkage_validation",
+        "audit_trace_validation",
+        "human_approval_gate_validation",
+        "write_execution_blocking_validation",
+        "post_write_review_validation",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_pilot_statuses"]) == {
+        "ready", "ready_with_warnings", "pilot_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_pilot_statuses"]) == {
+        "ready", "ready_with_warnings", "pilot_required", "blocked",
+    }
+
+
+def test_60a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 10
+    for signal in data["signals"]:
+        assert signal["pilot_id"]
+        assert signal["pilot_domain"]
+        assert signal["signal_type"]
+        assert signal["target_file"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_60a_assessment_and_summary(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["pilot_status"] == "pilot_required"
+    assert assessment["pilot_allowed"] is False
+    assert assessment["write_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 10
+    assert summary["pilot_allowed"] is False
+    assert summary["write_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_60a_input_sources(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ControlledWriteDryRunAssessment",
+        "WriteRecommendationSummary",
+        "WriteGovernanceAuditSummary",
+        "WriteReadinessSummary",
+        "WriteEvidenceSummary",
+        "WriteAuditSummary",
+        "WriteRollbackVerificationSummary",
+        "RuntimeIntegrationReadinessAssessment",
+        "ReadOnlyRuntimeInvocationAssessment",
+        "RuntimeOutputPersistenceAssessment",
+        "RuntimeOutputReviewAssessment",
+        "MultiAgentReadOnlyExecutionAssessment",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_60a_governance_boundaries(capsys) -> None:
+    main(["single-file-write-pilot", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "60A"
+    assert boundaries["read_only"] is True
+    assert boundaries["pilot_allowed"] is False
+    assert boundaries["write_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "generate real diffs from changes", "persist outputs",
+        "approve writes", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_60a_human_output(capsys) -> None:
+    main(["single-file-write-pilot"])
+    output = capsys.readouterr().out
+    for text in (
+        "Single-file write pilot",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Pilot signals",
+        "Governance boundaries",
+        "Pilot allowed:          no",
+        "Write allowed:          no",
+        "Execution allowed:      no",
+        "pilot_allowed=False",
+    ):
+        assert text in output

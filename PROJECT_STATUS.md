@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 59A: Controlled Write Dry-Run.
+Phase 60A: First Controlled Single-File Write Pilot.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -3978,11 +3978,11 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 59A: Controlled Write Dry-Run.
+Phase 60A: First Controlled Single-File Write Pilot.
 
 ## Next
 
-- 60A: First Controlled Single-File Write Pilot
+- 61A and beyond: to be planned
 
 ## Future Explorations
 

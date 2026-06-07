@@ -56620,6 +56620,328 @@ _RORI_GOVERNANCE_BOUNDARIES: dict = {
 }
 
 
+SINGLE_FILE_WRITE_PILOT_ADVISORY = (
+    "Single-file write pilot is informational and planning only; "
+    "pilot prerequisites are evaluated and blockers reported, but no files are modified, "
+    "no runtime is invoked, no prompt is executed, no real diffs are generated from changes, "
+    "no write operation occurs, no execution authorization occurs, "
+    "no repository modification occurs. "
+    "pilot_allowed=False, write_allowed=False, and execution_allowed=False in Phase 60A. "
+    "Human review is always required."
+)
+
+_SFWP_PILOT_DOMAINS: tuple[str, ...] = (
+    "single_file_scope_validation",
+    "write_intent_validation",
+    "file_target_validation",
+    "diff_preview_validation",
+    "rollback_plan_validation",
+    "evidence_linkage_validation",
+    "audit_trace_validation",
+    "human_approval_gate_validation",
+    "write_execution_blocking_validation",
+    "post_write_review_validation",
+)
+
+_SFWP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_SFWP_PILOT_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "pilot_required",
+    "blocked",
+)
+
+_SFWP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "pilot_id", "type": "str", "required": True},
+    {"name": "pilot_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "target_file", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SFWP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "pilot_status", "type": "str", "required": True},
+    {"name": "pilot_allowed", "type": "bool", "required": True},
+    {"name": "write_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SFWP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "pilot_status", "type": "str", "required": True},
+    {"name": "pilot_allowed", "type": "bool", "required": True},
+    {"name": "write_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SFWP_INPUT_SOURCES: tuple[str, ...] = (
+    "ControlledWriteDryRunAssessment",
+    "WriteRecommendationSummary",
+    "WriteGovernanceAuditSummary",
+    "WriteReadinessSummary",
+    "WriteEvidenceSummary",
+    "WriteAuditSummary",
+    "WriteRollbackVerificationSummary",
+    "RuntimeIntegrationReadinessAssessment",
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeOutputPersistenceAssessment",
+    "RuntimeOutputReviewAssessment",
+    "MultiAgentReadOnlyExecutionAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_SFWP_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "single_file_scope_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "single_file_scope_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "write scope not confirmed bounded to a single file with governed change limits before pilot proceeds",
+        "expected_state": "write scope is bounded to exactly one file, change limits are defined, and scope is linked to an approved task contract",
+    },
+    {
+        "domain": "write_intent_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "write_intent_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "write intent not confirmed governed with clear rationale, attribution, and task contract linkage",
+        "expected_state": "write intent is documented, attributed to an approved task, and confirmed in scope before pilot proceeds",
+    },
+    {
+        "domain": "file_target_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "file_target_identity_readiness",
+        "severity": "blocker",
+        "detected_state": "target file identity, path, and governance eligibility not confirmed for single-file write pilot",
+        "expected_state": "target file is uniquely identified, path is verified, and file is confirmed eligible for governed write pilot",
+    },
+    {
+        "domain": "diff_preview_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "diff_preview_isolation_readiness",
+        "severity": "blocker",
+        "detected_state": "diff preview for the target file not confirmed isolated from real file modification and available for human review",
+        "expected_state": "diff preview is generated in an isolated read-only context, presented to human reviewer, and approved before write proceeds",
+    },
+    {
+        "domain": "rollback_plan_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "rollback_plan_single_file_readiness",
+        "severity": "blocker",
+        "detected_state": "governed rollback plan for the target file not confirmed available and linked to the pilot record",
+        "expected_state": "rollback plan is defined for the target file, human-reviewed, and linked to the pilot record with a confirmed recovery path",
+    },
+    {
+        "domain": "evidence_linkage_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "evidence_linkage_single_file_readiness",
+        "severity": "blocker",
+        "detected_state": "evidence linkage between the pilot plan and governing write authorization record not confirmed for the target file",
+        "expected_state": "pilot plan is linked to the governing write authorization, task contract, dry-run assessment, and evidence record",
+    },
+    {
+        "domain": "audit_trace_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "audit_trace_single_file_completeness_readiness",
+        "severity": "blocker",
+        "detected_state": "audit trace for the single-file write pilot not confirmed complete with all required events and human review gate",
+        "expected_state": "audit trace captures the full pilot plan including scope, intent, file target, diff preview, rollback, and evidence linkage",
+    },
+    {
+        "domain": "human_approval_gate_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "human_approval_gate_single_file_readiness",
+        "severity": "blocker",
+        "detected_state": "human approval gate for the single-file write pilot plan not confirmed active before write execution may proceed",
+        "expected_state": "human reviewer must approve the full pilot plan for the target file before any write execution is authorized",
+    },
+    {
+        "domain": "write_execution_blocking_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "write_execution_blocking_confirmation_readiness",
+        "severity": "blocker",
+        "detected_state": "write execution blocking confirmation not in place to prevent unreviewed file modification after pilot plan completes",
+        "expected_state": "write execution is confirmed blocked pending human approval; write_allowed=False and pilot_allowed=False until approval is recorded",
+    },
+    {
+        "domain": "post_write_review_validation",
+        "target_file": "candidate_target_file",
+        "signal_type": "post_write_review_gate_readiness",
+        "severity": "blocker",
+        "detected_state": "post-write human review gate not confirmed defined for verifying the result after any future write execution completes",
+        "expected_state": "post-write review gate is defined, linked to the pilot record, and requires human sign-off before the write result is accepted",
+    },
+)
+
+_SFWP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess single-file write pilot prerequisites",
+        "assess target file and diff preview requirements",
+        "assess rollback and audit and evidence linkage",
+        "assess human approval gates",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "generate real diffs from changes",
+        "persist outputs",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "pilot_allowed": False,
+    "write_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "60A",
+}
+
+
+def build_single_file_write_pilot() -> dict:
+    """Build a first controlled single-file write pilot scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _SFWP_DOMAIN_SIGNALS]
+
+    domain_count = len(_SFWP_PILOT_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        pilot_status = "pilot_required"
+    elif warning_count > 0:
+        pilot_status = "ready_with_warnings"
+    else:
+        pilot_status = "ready"
+
+    pilot_id = f"sfwp-{ts}"
+    signals = [
+        {
+            "signal_id": f"sfwps-{ts}-{index:02d}",
+            "pilot_id": pilot_id,
+            "pilot_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "target_file": signal["target_file"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"sfwpa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "pilot_status": pilot_status,
+        "pilot_allowed": False,
+        "write_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"sfwpsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "pilot_status": pilot_status,
+        "pilot_allowed": False,
+        "write_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "single_file_write_pilot_overview": {
+            "overview_id": f"60a-{ts}",
+            "generated_at": generated_at,
+            "phase": "60A",
+            "title": "First Controlled Single-File Write Pilot",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "pilot_status": pilot_status,
+            "pilot_allowed": False,
+            "write_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the first governed single-file write pilot model. "
+                "No files are modified, no runtime is invoked, no prompt is executed, "
+                "no real diffs are generated from changes, no write operation occurs. "
+                f"pilot_status={pilot_status}. pilot_allowed=False. write_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "SingleFileWritePilotSignal",
+            "field_count": len(_SFWP_SIGNAL_FIELDS),
+            "required_field_count": len(_SFWP_SIGNAL_FIELDS),
+            "severity_values": list(_SFWP_SEVERITY_VALUES),
+            "pilot_allowed_always_false_in_60a": True,
+            "fields": [dict(field) for field in _SFWP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "SingleFileWritePilotAssessment",
+            "field_count": len(_SFWP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_SFWP_ASSESSMENT_FIELDS),
+            "supported_pilot_statuses": list(_SFWP_PILOT_STATUSES),
+            "pilot_allowed_always_false_in_60a": True,
+            "write_allowed_always_false_in_60a": True,
+            "execution_allowed_always_false_in_60a": True,
+            "human_review_required_always_true_in_60a": True,
+            "fields": [dict(field) for field in _SFWP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "SingleFileWritePilotSummary",
+            "field_count": len(_SFWP_SUMMARY_FIELDS),
+            "required_field_count": len(_SFWP_SUMMARY_FIELDS),
+            "supported_pilot_statuses": list(_SFWP_PILOT_STATUSES),
+            "pilot_allowed_always_false_in_60a": True,
+            "write_allowed_always_false_in_60a": True,
+            "human_review_required_always_true_in_60a": True,
+            "fields": [dict(field) for field in _SFWP_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_SFWP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_SFWP_INPUT_SOURCES),
+        "advisory": SINGLE_FILE_WRITE_PILOT_ADVISORY,
+    }
+
+
 CONTROLLED_WRITE_DRY_RUN_ADVISORY = (
     "Controlled write dry-run is informational and planning only; "
     "dry-run prerequisites are evaluated and blockers reported, but no files are modified, "
