@@ -1,0 +1,16 @@
+{
+  "audit_record_id": "rap-audit-20260607T200947",
+  "capture_id": "roc-20260607T200947",
+  "command": "pwd",
+  "command_hash": "a1159e9df3670d54",
+  "execution_id": "rep-20260607T200947",
+  "exit_code": 0,
+  "human_review_required": true,
+  "output_size_bytes": 37,
+  "persistence_id": "rap-20260607T200947",
+  "persistence_target": "/Users/atilamadai/repos/pcae-harness/.pcae/audit/runtime/rap-20260607T200947.json",
+  "persistence_timestamp": "2026-06-07T20:09:47.339675+00:00",
+  "runtime_id": "shell-local",
+  "stderr": "",
+  "stdout": "/Users/atilamadai/repos/pcae-harness\n"
+}

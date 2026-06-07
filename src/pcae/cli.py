@@ -168,6 +168,7 @@ from pcae.commands.agent import (
     run_phase_test_selection,
     run_runtime_execution_pilot,
     run_runtime_output_capture,
+    run_runtime_audit_persistence,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4468,6 +4469,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     roc_parser.set_defaults(handler=run_runtime_output_capture)
+
+    rap_parser = subparsers.add_parser(
+        "runtime-audit-persistence",
+        help="Persist governed runtime execution audit records to .pcae/audit/runtime/ (Phase 62C).",
+    )
+    rap_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rap_parser.set_defaults(handler=run_runtime_audit_persistence)
 
     return parser
 

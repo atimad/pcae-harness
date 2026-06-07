@@ -1055,6 +1055,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-output-capture`
 - `pcae runtime-output-capture --json`
+
+## runtime-audit-persistence
+
+- `pcae runtime-audit-persistence`
+- `pcae runtime-audit-persistence --json`
 """
 
 

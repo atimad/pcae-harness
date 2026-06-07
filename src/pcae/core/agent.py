@@ -62192,3 +62192,469 @@ def build_runtime_output_capture() -> dict:
         "forbidden_commands": list(_REP_FORBIDDEN_PREFIXES),
         "advisory": RUNTIME_OUTPUT_CAPTURE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62C: Runtime Audit Persistence
+# ---------------------------------------------------------------------------
+
+RUNTIME_AUDIT_PERSISTENCE_ADVISORY = (
+    "Phase 62C persists governed runtime execution audit records for controlled "
+    "read-only runtime executions. Audit JSON artifacts are written to "
+    ".pcae/audit/runtime/ only. Source files are not modified by runtime commands. "
+    "Write operations, network operations, and AI runtime invocation remain blocked. "
+    "Human review is always required."
+)
+
+_RAP_PERSISTENCE_DOMAINS: tuple[str, ...] = (
+    "execution_record_persistence",
+    "output_capture_persistence",
+    "audit_record_persistence",
+    "command_hash_persistence",
+    "runtime_metadata_persistence",
+    "timestamp_persistence",
+    "human_review_reference_persistence",
+    "integrity_reference_persistence",
+    "persistence_boundary_validation",
+    "audit_retrieval_validation",
+)
+
+_RAP_PERSISTENCE_STATUSES: tuple[str, ...] = (
+    "ready",
+    "persisting",
+    "persisted",
+    "blocked",
+    "failed",
+)
+
+_RAP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RAP_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "persistence_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "capture_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "audit_record_id", "type": "str", "required": True},
+    {"name": "persistence_target", "type": "str", "required": True},
+    {"name": "persisted", "type": "bool", "required": True},
+    {"name": "persistence_timestamp", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "persistence_id", "type": "str", "required": True},
+    {"name": "persistence_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "persistence_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "persistence_status", "type": "str", "required": True},
+    {"name": "persistence_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "persistence_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "persistence_status", "type": "str", "required": True},
+    {"name": "persistence_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAP_AUDIT_DIR: str = ".pcae/audit/runtime"
+
+
+def build_runtime_audit_persistence(root: HarnessPath | None = None) -> dict:
+    """Persist a governed runtime execution audit record under .pcae/audit/runtime/."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    command = _REP_DEFAULT_COMMAND
+    persistence_id = f"rap-{ts}"
+    execution_id = f"rep-{ts}"
+    capture_id = f"roc-{ts}"
+    audit_record_id = f"rap-audit-{ts}"
+    audit_dir = root.join(Path(_RAP_AUDIT_DIR))
+    artifact_path = audit_dir / f"{persistence_id}.json"
+    persistence_target = str(artifact_path)
+
+    command_allowed = _rep_command_allowed(command)
+    command_forbidden = _rep_command_forbidden(command)
+    execution_allowed = command_allowed and not command_forbidden
+
+    stdout_value = ""
+    stderr_value = ""
+    exit_code: int = -1
+
+    if execution_allowed:
+        try:
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=_REP_MAX_TIMEOUT_SECONDS,
+            )
+            raw_stdout = proc.stdout
+            raw_stderr = proc.stderr
+            if len(raw_stdout.encode()) > _REP_MAX_OUTPUT_BYTES:
+                raw_stdout = raw_stdout.encode()[:_REP_MAX_OUTPUT_BYTES].decode(errors="replace")
+            if len(raw_stderr.encode()) > _REP_MAX_OUTPUT_BYTES:
+                raw_stderr = raw_stderr.encode()[:_REP_MAX_OUTPUT_BYTES].decode(errors="replace")
+            stdout_value = raw_stdout
+            stderr_value = raw_stderr
+            exit_code = proc.returncode
+        except subprocess.TimeoutExpired:
+            stderr_value = f"Command exceeded timeout of {_REP_MAX_TIMEOUT_SECONDS}s"
+        except Exception as exc:
+            stderr_value = str(exc)
+
+    command_hash = hashlib.sha256(command.encode()).hexdigest()[:16]
+    output_size_bytes = len(stdout_value.encode()) + len(stderr_value.encode())
+
+    audit_artifact = {
+        "persistence_id": persistence_id,
+        "execution_id": execution_id,
+        "capture_id": capture_id,
+        "runtime_id": _REP_RUNTIME_ID,
+        "command": command,
+        "command_hash": command_hash,
+        "audit_record_id": audit_record_id,
+        "persistence_target": persistence_target,
+        "persistence_timestamp": generated_at,
+        "stdout": stdout_value,
+        "stderr": stderr_value,
+        "exit_code": exit_code,
+        "output_size_bytes": output_size_bytes,
+        "human_review_required": True,
+    }
+
+    persisted = False
+    persistence_status = "failed"
+    readback_ok = False
+    persistence_error = ""
+
+    try:
+        audit_dir.mkdir(parents=True, exist_ok=True)
+        artifact_path.write_text(
+            json.dumps(audit_artifact, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        persisted = True
+        readback_text = artifact_path.read_text(encoding="utf-8")
+        readback_data = json.loads(readback_text)
+        readback_ok = readback_data.get("persistence_id") == persistence_id
+        persistence_status = "persisted" if readback_ok else "failed"
+    except Exception as exc:
+        persistence_error = str(exc)
+        persistence_status = "failed"
+
+    persistence_allowed = execution_allowed and persisted and readback_ok
+    inside_boundary = str(artifact_path).startswith(str(root.join(Path(_RAP_AUDIT_DIR))))
+
+    persistence_record = {
+        "persistence_id": persistence_id,
+        "execution_id": execution_id,
+        "capture_id": capture_id,
+        "runtime_id": _REP_RUNTIME_ID,
+        "command": command,
+        "command_hash": command_hash,
+        "audit_record_id": audit_record_id,
+        "persistence_target": persistence_target,
+        "persisted": persisted,
+        "persistence_timestamp": generated_at,
+        "human_review_required": True,
+    }
+
+    domain_signal_defs = [
+        {
+            "persistence_domain": "execution_record_persistence",
+            "signal_type": "execution_record_persistence_check",
+            "severity": "info" if execution_allowed else "blocker",
+            "detected_state": (
+                f"execution_id={execution_id}; execution_allowed={execution_allowed}; "
+                f"exit_code={exit_code}"
+            ),
+            "expected_state": (
+                "execution record must be present before persistence; "
+                "execution must use 62A read-only boundary"
+            ),
+        },
+        {
+            "persistence_domain": "output_capture_persistence",
+            "signal_type": "output_capture_persistence_check",
+            "severity": "info",
+            "detected_state": (
+                f"capture_id={capture_id}; stdout_len={len(stdout_value)}; "
+                f"stderr_len={len(stderr_value)}; output_size_bytes={output_size_bytes}"
+            ),
+            "expected_state": (
+                "stdout, stderr, and exit code references must be preserved in the audit artifact"
+            ),
+        },
+        {
+            "persistence_domain": "audit_record_persistence",
+            "signal_type": "audit_record_persistence_check",
+            "severity": "info" if persisted else "blocker",
+            "detected_state": (
+                f"audit_record_id={audit_record_id}; persisted={persisted}; "
+                f"persistence_status={persistence_status}"
+                + (f"; error={persistence_error}" if persistence_error else "")
+            ),
+            "expected_state": (
+                "audit record must be persisted as a JSON artifact under .pcae/audit/runtime/"
+            ),
+        },
+        {
+            "persistence_domain": "command_hash_persistence",
+            "signal_type": "command_hash_persistence_check",
+            "severity": "info",
+            "detected_state": (
+                f"command_hash={command_hash}; preserved_in_artifact={persisted}; "
+                "SHA-256 prefix hash present"
+            ),
+            "expected_state": "command hash must be preserved in the persisted audit artifact",
+        },
+        {
+            "persistence_domain": "runtime_metadata_persistence",
+            "signal_type": "runtime_metadata_persistence_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_id={_REP_RUNTIME_ID}; command='{command}'; "
+                f"preserved_in_artifact={persisted}"
+            ),
+            "expected_state": (
+                "runtime metadata (runtime_id, command) must be preserved in the audit artifact"
+            ),
+        },
+        {
+            "persistence_domain": "timestamp_persistence",
+            "signal_type": "timestamp_persistence_check",
+            "severity": "info",
+            "detected_state": (
+                f"persistence_timestamp={generated_at}; ISO 8601 format; "
+                f"preserved_in_artifact={persisted}"
+            ),
+            "expected_state": "persistence timestamp must be preserved in the audit artifact",
+        },
+        {
+            "persistence_domain": "human_review_reference_persistence",
+            "signal_type": "human_review_reference_check",
+            "severity": "info",
+            "detected_state": (
+                "human_review_required=True; "
+                f"human_review_preserved_in_artifact={persisted}"
+            ),
+            "expected_state": (
+                "human_review_required=True must be preserved in the persisted audit artifact"
+            ),
+        },
+        {
+            "persistence_domain": "integrity_reference_persistence",
+            "signal_type": "integrity_reference_check",
+            "severity": "info" if persisted else "warning",
+            "detected_state": (
+                f"artifact_path={persistence_target}; "
+                f"artifact_written={persisted}; readback_ok={readback_ok}"
+            ),
+            "expected_state": (
+                "artifact integrity must be verifiable via JSON structure and persistence_id match"
+            ),
+        },
+        {
+            "persistence_domain": "persistence_boundary_validation",
+            "signal_type": "persistence_boundary_check",
+            "severity": "info" if inside_boundary else "blocker",
+            "detected_state": (
+                f"persistence_target={persistence_target}; "
+                f"inside_boundary={inside_boundary}; "
+                f"allowed_prefix=.pcae/audit/runtime/"
+            ),
+            "expected_state": (
+                "persistence target must be under .pcae/audit/runtime/; "
+                "persistence outside this directory is blocked"
+            ),
+        },
+        {
+            "persistence_domain": "audit_retrieval_validation",
+            "signal_type": "audit_retrieval_check",
+            "severity": "info" if readback_ok else "blocker",
+            "detected_state": (
+                f"readback_ok={readback_ok}; "
+                f"persistence_id_match={readback_ok}; "
+                f"artifact_path={persistence_target}"
+            ),
+            "expected_state": (
+                "persisted artifact must be readable and must contain matching persistence_id"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rap-sig-{ts}-{i:02d}",
+            "persistence_id": persistence_id,
+            "persistence_domain": sig["persistence_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    final_persistence_allowed = persistence_allowed and blocker_count == 0
+    final_execution_allowed = execution_allowed and blocker_count == 0
+
+    assessment_id = f"rapa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "persistence_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "persistence_status": persistence_status,
+        "persistence_allowed": final_persistence_allowed,
+        "execution_allowed": final_execution_allowed,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rapsum-{ts}",
+        "assessment_id": assessment_id,
+        "persistence_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "persistence_status": persistence_status,
+        "persistence_allowed": final_persistence_allowed,
+        "execution_allowed": final_execution_allowed,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RAP_PERSISTENCE_DOMAINS)
+
+    return {
+        "runtime_audit_persistence_overview": {
+            "overview_id": f"62c-{ts}",
+            "generated_at": generated_at,
+            "phase": "62C",
+            "title": "Runtime Audit Persistence",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "persistence_status": persistence_status,
+            "persistence_allowed": final_persistence_allowed,
+            "execution_allowed": final_execution_allowed,
+            "human_review_required": True,
+            "summary": (
+                "Phase 62C persists governed runtime execution audit records for "
+                "controlled read-only runtime executions. Executes one approved "
+                f"read-only local command ('{command}') on the {_REP_RUNTIME_ID} runtime "
+                "via the 62A boundary. Writes a structured audit JSON artifact to "
+                f".pcae/audit/runtime/{persistence_id}.json. Validates read-back integrity. "
+                "Preserves stdout, stderr, exit code, command hash, runtime metadata, "
+                "and human review reference. Persistence is limited to .pcae/audit/runtime/. "
+                "Source files are not modified by runtime commands. "
+                f"persistence_status={persistence_status}. "
+                f"persistence_allowed={final_persistence_allowed}. "
+                "human_review_required=True."
+            ),
+        },
+        "persistence_record": persistence_record,
+        "audit_artifact": audit_artifact,
+        "record_model": {
+            "model_name": "RuntimeAuditPersistenceRecord",
+            "field_count": len(_RAP_RECORD_FIELDS),
+            "required_field_count": len(_RAP_RECORD_FIELDS),
+            "supported_persistence_statuses": list(_RAP_PERSISTENCE_STATUSES),
+            "persistence_allowed_conditional_in_62c": True,
+            "human_review_required_always_true_in_62c": True,
+            "fields": [dict(f) for f in _RAP_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeAuditPersistenceSignal",
+            "field_count": len(_RAP_SIGNAL_FIELDS),
+            "required_field_count": len(_RAP_SIGNAL_FIELDS),
+            "severity_values": list(_RAP_SEVERITY_VALUES),
+            "persistence_allowed_conditional_in_62c": True,
+            "human_review_required_always_true_in_62c": True,
+            "fields": [dict(f) for f in _RAP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeAuditPersistenceAssessment",
+            "field_count": len(_RAP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RAP_ASSESSMENT_FIELDS),
+            "supported_persistence_statuses": list(_RAP_PERSISTENCE_STATUSES),
+            "persistence_allowed_conditional_in_62c": True,
+            "human_review_required_always_true_in_62c": True,
+            "fields": [dict(f) for f in _RAP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeAuditPersistenceSummary",
+            "field_count": len(_RAP_SUMMARY_FIELDS),
+            "required_field_count": len(_RAP_SUMMARY_FIELDS),
+            "supported_persistence_statuses": list(_RAP_PERSISTENCE_STATUSES),
+            "persistence_allowed_conditional_in_62c": True,
+            "human_review_required_always_true_in_62c": True,
+            "fields": [dict(f) for f in _RAP_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "persist runtime audit JSON artifacts under .pcae/audit/runtime/",
+                "read back persisted audit artifacts for validation",
+                "capture persistence metadata",
+                "report audit persistence status",
+            ],
+            "may_not": [
+                "persist outside .pcae/audit/runtime/",
+                "invoke AI runtimes",
+                "execute prompts",
+                "modify source files through executed commands",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "persistence_allowed": final_persistence_allowed,
+            "execution_allowed": final_execution_allowed,
+            "human_review_required": True,
+            "read_only": True,
+            "audit_dir": _RAP_AUDIT_DIR,
+            "phase": "62C",
+        },
+        "allowed_commands": sorted(_REP_ALLOWED_COMMANDS),
+        "forbidden_commands": list(_REP_FORBIDDEN_PREFIXES),
+        "advisory": RUNTIME_AUDIT_PERSISTENCE_ADVISORY,
+    }

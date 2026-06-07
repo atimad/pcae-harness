@@ -44816,3 +44816,160 @@ def test_62b_human_output(capsys) -> None:
         "Allowed commands:",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62C: Runtime Audit Persistence
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath  # noqa: E402
+
+
+def test_62c_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    for key in (
+        "runtime_audit_persistence_overview",
+        "persistence_record",
+        "audit_artifact",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "allowed_commands",
+        "forbidden_commands",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62c_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeAuditPersistenceRecord"
+    assert data["record_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "RuntimeAuditPersistenceSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeAuditPersistenceAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeAuditPersistenceSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "persistence_id", "execution_id", "capture_id", "runtime_id",
+        "command", "command_hash", "audit_record_id", "persistence_target",
+        "persisted", "persistence_timestamp", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62c_all_persistence_domains_defined(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    expected = {
+        "execution_record_persistence",
+        "output_capture_persistence",
+        "audit_record_persistence",
+        "command_hash_persistence",
+        "runtime_metadata_persistence",
+        "timestamp_persistence",
+        "human_review_reference_persistence",
+        "integrity_reference_persistence",
+        "persistence_boundary_validation",
+        "audit_retrieval_validation",
+    }
+    actual = {s["persistence_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62c_artifact_written_and_readable(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    rec = data["persistence_record"]
+    assert rec["persisted"] is True
+    artifact_path = tmp_path / ".pcae" / "audit" / "runtime" / f"{rec['persistence_id']}.json"
+    assert artifact_path.exists()
+    artifact = json.loads(artifact_path.read_text())
+    assert artifact["persistence_id"] == rec["persistence_id"]
+    assert artifact["command_hash"] == rec["command_hash"]
+    assert artifact["exit_code"] == 0
+    assert artifact["stdout"].strip() != ""
+
+
+def test_62c_persistence_allowed_and_status(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    overview = data["runtime_audit_persistence_overview"]
+    assert overview["persistence_status"] == "persisted"
+    assert overview["persistence_allowed"] is True
+    assert overview["execution_allowed"] is True
+    assert overview["blocker_count"] == 0
+    assessment = data["sample_assessment"]
+    assert assessment["persistence_allowed"] is True
+    assert assessment["persistence_count"] == 1
+    summary = data["sample_summary"]
+    assert summary["persistence_allowed"] is True
+
+
+def test_62c_persistence_record_fields(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    rec = data["persistence_record"]
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+    assert rec["human_review_required"] is True
+    assert rec["persistence_id"].startswith("rap-")
+    assert rec["execution_id"].startswith("rep-")
+    assert rec["capture_id"].startswith("roc-")
+    assert rec["audit_record_id"].startswith("rap-audit-")
+    assert ".pcae/audit/runtime/" in rec["persistence_target"]
+
+
+def test_62c_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "persistence_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62c_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["persistence_allowed"] is True
+    assert boundaries["execution_allowed"] is True
+    assert boundaries["human_review_required"] is True
+    assert boundaries["read_only"] is True
+    assert boundaries["audit_dir"] == ".pcae/audit/runtime"
+    for action in (
+        "persist outside .pcae/audit/runtime/",
+        "invoke AI runtimes",
+        "execute prompts",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"]
+    assert "persist runtime audit JSON artifacts under .pcae/audit/runtime/" in boundaries["may"]
+    assert "read back persisted audit artifacts for validation" in boundaries["may"]
+
+
+def test_62c_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-audit-persistence"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime audit persistence",
+        "Persistence record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Persistence signals",
+        "Governance boundaries",
+        "Persistence allowed:",
+        "Audit dir:",
+        "Allowed commands:",
+    ):
+        assert text in output

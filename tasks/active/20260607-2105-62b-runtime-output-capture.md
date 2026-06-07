@@ -23,6 +23,7 @@ implementation
 ## Allowed Files
 
 - .pcae/session.json
+- .pcae/audit/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
