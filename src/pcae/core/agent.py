@@ -56620,6 +56620,288 @@ _RORI_GOVERNANCE_BOUNDARIES: dict = {
 }
 
 
+RUNTIME_OUTPUT_PERSISTENCE_ADVISORY = (
+    "Runtime output capture persistence is informational and planning only; "
+    "persistence requirements are evaluated and blockers reported, but no output "
+    "files are written, no runtime is invoked, no prompt is executed, "
+    "no execution authorization occurs, no repository modification occurs. "
+    "persistence_allowed=False and execution_allowed=False in Phase 56A. "
+    "Human review is always required."
+)
+
+_ROP_PERSISTENCE_DOMAINS: tuple[str, ...] = (
+    "stdout_persistence_validation",
+    "stderr_persistence_validation",
+    "exit_code_persistence_validation",
+    "runtime_metadata_persistence_validation",
+    "prompt_hash_persistence_validation",
+    "authorization_reference_persistence_validation",
+    "audit_reference_persistence_validation",
+    "output_integrity_persistence_validation",
+)
+
+_ROP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_ROP_PERSISTENCE_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "persistence_required",
+    "blocked",
+)
+
+_ROP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "persistence_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "persistence_status", "type": "str", "required": True},
+    {"name": "persistence_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "persistence_status", "type": "str", "required": True},
+    {"name": "persistence_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROP_INPUT_SOURCES: tuple[str, ...] = (
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeIntegrationReadinessAssessment",
+    "OutputIntegrityAssessment",
+    "ExecutionAuditSummary",
+    "RecoveryValidationAssessment",
+    "GovernanceInvariantAssessment",
+)
+
+_ROP_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "stdout_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "stdout_capture_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "stdout capture path and persistence target not validated for governed output storage",
+        "expected_state": "stdout is captured to a governed, attributed, and auditable persistence target before invocation proceeds",
+    },
+    {
+        "domain": "stderr_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "stderr_capture_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "stderr capture path and persistence target not validated for governed output storage",
+        "expected_state": "stderr is captured to a governed, attributed, and auditable persistence target before invocation proceeds",
+    },
+    {
+        "domain": "exit_code_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "exit_code_record_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "exit code recording and persistence linkage to invocation record not confirmed",
+        "expected_state": "exit code is recorded, linked to the invocation record, and persisted with human-reviewed attribution",
+    },
+    {
+        "domain": "runtime_metadata_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_metadata_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime identity, version, and invocation metadata persistence fields not confirmed present",
+        "expected_state": "runtime metadata including identity, version, and invocation context is persisted alongside captured output",
+    },
+    {
+        "domain": "prompt_hash_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "prompt_hash_attribution_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "prompt hash and provenance attribution not confirmed stored alongside persisted output",
+        "expected_state": "prompt hash is stored with persisted output to ensure attribution integrity and non-repudiation",
+    },
+    {
+        "domain": "authorization_reference_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "authorization_reference_linkage_readiness",
+        "severity": "blocker",
+        "detected_state": "authorization record reference not confirmed linked in the persisted output artifact",
+        "expected_state": "persisted output includes a verified reference to the governing authorization record and task contract",
+    },
+    {
+        "domain": "audit_reference_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "audit_trail_reference_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "audit trail reference not confirmed included in the persisted output artifact",
+        "expected_state": "persisted output includes a reference to the complete audit trail entry with timestamps and human review gate",
+    },
+    {
+        "domain": "output_integrity_persistence_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "output_integrity_verification_persistence_readiness",
+        "severity": "blocker",
+        "detected_state": "output integrity verification record not confirmed persisted alongside captured output",
+        "expected_state": "integrity verification result is persisted with captured output to detect post-capture tampering",
+    },
+)
+
+_ROP_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect output persistence requirements",
+        "assess future persistence prerequisites",
+        "assess audit and output integrity linkage",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "persist outputs",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "persistence_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "56A",
+}
+
+
+def build_runtime_output_persistence() -> dict:
+    """Build a runtime output capture persistence scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _ROP_DOMAIN_SIGNALS]
+
+    domain_count = len(_ROP_PERSISTENCE_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        persistence_status = "persistence_required"
+    elif warning_count > 0:
+        persistence_status = "ready_with_warnings"
+    else:
+        persistence_status = "ready"
+
+    signals = [
+        {
+            "signal_id": f"rops-{ts}-{index:02d}",
+            "runtime_id": signal["runtime_id"],
+            "persistence_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"ropa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "persistence_status": persistence_status,
+        "persistence_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ropsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "persistence_status": persistence_status,
+        "persistence_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_output_persistence_overview": {
+            "overview_id": f"56a-{ts}",
+            "generated_at": generated_at,
+            "phase": "56A",
+            "title": "Runtime Output Capture Persistence",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "persistence_status": persistence_status,
+            "persistence_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines persistence requirements for future runtime invocation outputs. "
+                "No output files are written, no runtime is invoked, no prompt is executed. "
+                f"persistence_status={persistence_status}. persistence_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeOutputPersistenceSignal",
+            "field_count": len(_ROP_SIGNAL_FIELDS),
+            "required_field_count": len(_ROP_SIGNAL_FIELDS),
+            "severity_values": list(_ROP_SEVERITY_VALUES),
+            "persistence_allowed_always_false_in_56a": True,
+            "fields": [dict(field) for field in _ROP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeOutputPersistenceAssessment",
+            "field_count": len(_ROP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_ROP_ASSESSMENT_FIELDS),
+            "supported_persistence_statuses": list(_ROP_PERSISTENCE_STATUSES),
+            "persistence_allowed_always_false_in_56a": True,
+            "execution_allowed_always_false_in_56a": True,
+            "human_review_required_always_true_in_56a": True,
+            "fields": [dict(field) for field in _ROP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeOutputPersistenceSummary",
+            "field_count": len(_ROP_SUMMARY_FIELDS),
+            "required_field_count": len(_ROP_SUMMARY_FIELDS),
+            "supported_persistence_statuses": list(_ROP_PERSISTENCE_STATUSES),
+            "persistence_allowed_always_false_in_56a": True,
+            "human_review_required_always_true_in_56a": True,
+            "fields": [dict(field) for field in _ROP_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ROP_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ROP_INPUT_SOURCES),
+        "advisory": RUNTIME_OUTPUT_PERSISTENCE_ADVISORY,
+    }
+
+
 def build_read_only_runtime_invocation() -> dict:
     """Build a read-only runtime invocation planning scaffold."""
     generated_at = datetime.now(timezone.utc).isoformat()

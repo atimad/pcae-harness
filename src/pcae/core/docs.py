@@ -972,6 +972,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae read-only-runtime-invocation`
 - `pcae read-only-runtime-invocation --json`
+
+## runtime-output-persistence
+
+- `pcae runtime-output-persistence`
+- `pcae runtime-output-persistence --json`
 """
 
 

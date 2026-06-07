@@ -42112,3 +42112,164 @@ def test_55a_human_output(capsys) -> None:
         "invocation_allowed=False",
     ):
         assert text in output
+
+
+def test_56a_json_top_level_keys(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "runtime_output_persistence_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["runtime_output_persistence_overview"]
+    assert overview["phase"] == "56A"
+    assert overview["domain_count"] == 8
+    assert overview["persistence_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_56a_models_and_exact_fields(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RuntimeOutputPersistenceSignal",
+            [
+                "signal_id", "runtime_id", "persistence_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RuntimeOutputPersistenceAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "persistence_status", "persistence_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RuntimeOutputPersistenceSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "persistence_status",
+                "persistence_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_56a_all_persistence_domains_defined(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "stdout_persistence_validation",
+        "stderr_persistence_validation",
+        "exit_code_persistence_validation",
+        "runtime_metadata_persistence_validation",
+        "prompt_hash_persistence_validation",
+        "authorization_reference_persistence_validation",
+        "audit_reference_persistence_validation",
+        "output_integrity_persistence_validation",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_persistence_statuses"]) == {
+        "ready", "ready_with_warnings", "persistence_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_persistence_statuses"]) == {
+        "ready", "ready_with_warnings", "persistence_required", "blocked",
+    }
+
+
+def test_56a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["runtime_id"]
+        assert signal["persistence_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_56a_assessment_and_summary(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["persistence_status"] == "persistence_required"
+    assert assessment["persistence_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["persistence_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_56a_input_sources(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "ReadOnlyRuntimeInvocationAssessment",
+        "RuntimeIntegrationReadinessAssessment",
+        "OutputIntegrityAssessment",
+        "ExecutionAuditSummary",
+        "RecoveryValidationAssessment",
+        "GovernanceInvariantAssessment",
+    ]
+
+
+def test_56a_governance_boundaries(capsys) -> None:
+    main(["runtime-output-persistence", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "56A"
+    assert boundaries["read_only"] is True
+    assert boundaries["persistence_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "persist outputs",
+        "register runtimes", "modify runtime configuration",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_56a_human_output(capsys) -> None:
+    main(["runtime-output-persistence"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime output capture persistence",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Persistence signals",
+        "Governance boundaries",
+        "Persistence allowed:    no",
+        "Execution allowed:      no",
+        "persistence_allowed=False",
+    ):
+        assert text in output
