@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import json
 from pathlib import Path
 import re
 import unicodedata
@@ -66,12 +67,84 @@ class TaskUpdate:
     acceptance_checks: tuple[str, ...] | None = None
 
 
+@dataclass(frozen=True)
+class TaskTransitionValidation:
+    active_task: ActiveTask | None
+    next_title: str | None
+    blockers: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+    @property
+    def safe_to_complete(self) -> bool:
+        return not self.blockers
+
+
+@dataclass(frozen=True)
+class TaskTransitionRecord:
+    completed_task: ClosedTask
+    next_task: TaskContract
+    next_title: str
+    updated_files: tuple[Path, ...]
+    warnings: tuple[str, ...]
+
+
+TRANSITION_ALLOWED_FILES: tuple[str, ...] = (
+    ".pcae/session.json",
+    "tasks/active/**",
+    "tasks/done/**",
+    "tasks/TODO.md",
+    "tasks/DONE.md",
+    "tasks/DECISIONS.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+)
+
+TRANSITION_ACCEPTANCE_CHECKS: tuple[str, ...] = (
+    "pcae status coherence passes",
+    "pcae health passes",
+    "pcae check passes",
+    "python -m pytest -n auto passes",
+)
+
+TRANSITION_FORBIDDEN_CHANGES: tuple[str, ...] = (
+    "No runtime invocation",
+    "No prompt execution",
+    "No source behavior changes outside task/session/handoff governance",
+    "No execution authorization",
+    "No commit",
+    "No push",
+    "No rollback",
+)
+
+TRANSITION_DOCUMENTATION_REQUIREMENTS: tuple[str, ...] = (
+    "Update project memory files when workflow-visible behavior changes.",
+)
+
+TRANSITION_SESSION_RELATIVE_PATH = Path(".pcae") / "session.json"
+TODO_RELATIVE_PATH = Path("tasks") / "TODO.md"
+DONE_RELATIVE_PATH = Path("tasks") / "DONE.md"
+DECISIONS_RELATIVE_PATH = Path("tasks") / "DECISIONS.md"
+PROJECT_STATUS_RELATIVE_PATH = Path("PROJECT_STATUS.md")
+CHANGELOG_RELATIVE_PATH = Path("CHANGELOG.md")
+
+
 def create_task_contract(
     root: HarnessPath,
     title: str,
     created_at: datetime | None = None,
+    mode: str = "implementation",
+    goal: str = "TBD",
+    allowed_files: tuple[str, ...] = (),
+    forbidden_files: tuple[str, ...] = (),
+    override_protected_files: tuple[str, ...] = (),
     allowed_zones: tuple[str, ...] = (),
     forbidden_zones: tuple[str, ...] = (),
+    allowed_dependencies: tuple[str, ...] = (),
+    forbidden_dependencies: tuple[str, ...] = (),
+    enforcement_mode: str = "TBD",
+    forbidden_changes: tuple[str, ...] = ("TBD",),
+    acceptance_checks: tuple[str, ...] = (),
+    documentation_requirements: tuple[str, ...] = TRANSITION_DOCUMENTATION_REQUIREMENTS,
 ) -> TaskContract:
     timestamp = created_at or datetime.now().astimezone()
     slug = slugify_title(title)
@@ -81,8 +154,19 @@ def create_task_contract(
         task_id=task_id,
         title=title,
         created_at=timestamp,
+        mode=mode,
+        goal=goal,
+        allowed_files=allowed_files,
+        forbidden_files=forbidden_files,
+        override_protected_files=override_protected_files,
         allowed_zones=allowed_zones,
         forbidden_zones=forbidden_zones,
+        allowed_dependencies=allowed_dependencies,
+        forbidden_dependencies=forbidden_dependencies,
+        enforcement_mode=enforcement_mode,
+        forbidden_changes=forbidden_changes,
+        acceptance_checks=acceptance_checks,
+        documentation_requirements=documentation_requirements,
     )
 
     target = root.join(relative_path)
@@ -252,11 +336,26 @@ def render_task_contract(
     task_id: str,
     title: str,
     created_at: datetime,
+    mode: str = "implementation",
+    goal: str = "TBD",
+    allowed_files: tuple[str, ...] = (),
+    forbidden_files: tuple[str, ...] = (),
+    override_protected_files: tuple[str, ...] = (),
     allowed_zones: tuple[str, ...] = (),
     forbidden_zones: tuple[str, ...] = (),
+    allowed_dependencies: tuple[str, ...] = (),
+    forbidden_dependencies: tuple[str, ...] = (),
+    enforcement_mode: str = "TBD",
+    forbidden_changes: tuple[str, ...] = ("TBD",),
+    acceptance_checks: tuple[str, ...] = (),
+    documentation_requirements: tuple[str, ...] = TRANSITION_DOCUMENTATION_REQUIREMENTS,
 ) -> str:
-    allowed_zone_items = render_task_items(allowed_zones)
-    forbidden_zone_items = render_task_items(forbidden_zones)
+    optional_override_section = ""
+    if override_protected_files:
+        optional_override_section = (
+            "\n## Override Protected Files\n\n"
+            f"{render_task_items(override_protected_files)}\n"
+        )
     return f"""# Task Contract
 
 ## Task ID
@@ -273,51 +372,52 @@ active
 
 ## Mode
 
-implementation
+{mode}
 
 ## Goal
 
-TBD
+{goal}
 
 ## Allowed Files
 
-- TBD
+{render_task_items(allowed_files)}
 
 ## Forbidden Files
 
-- TBD
+{render_task_items(forbidden_files)}
+{optional_override_section}
 
 ## Allowed Zones
 
-{allowed_zone_items}
+{render_task_items(allowed_zones)}
 
 ## Forbidden Zones
 
-{forbidden_zone_items}
+{render_task_items(forbidden_zones)}
 
 ## Allowed Dependencies
 
-- TBD
+{render_task_items(allowed_dependencies)}
 
 ## Forbidden Dependencies
 
-- TBD
+{render_task_items(forbidden_dependencies)}
 
 ## Enforcement Mode
 
-TBD
+{enforcement_mode}
 
 ## Forbidden Changes
 
-- TBD
+{render_task_items(forbidden_changes)}
 
 ## Acceptance Checks
 
-- TBD
+{render_task_items(acceptance_checks)}
 
 ## Documentation Requirements
 
-- Update project memory files when workflow-visible behavior changes.
+{render_task_items(documentation_requirements)}
 
 ## Created Timestamp
 
@@ -357,6 +457,99 @@ def find_latest_active_task_with_status(
     return None
 
 
+def validate_task_transition(
+    root: HarnessPath,
+    next_title: str | None = None,
+) -> TaskTransitionValidation:
+    blockers: list[str] = []
+    warnings: list[str] = []
+    active_task = find_latest_active_task_with_status(root, "active")
+    resolved_next_title = resolve_next_task_title(root, next_title)
+
+    if active_task is None:
+        blockers.append("No active task contract found to transition.")
+    else:
+        session_issue = validate_transition_session(root, active_task)
+        if session_issue is not None:
+            blockers.append(session_issue)
+
+        done_path = root.join(Path("tasks") / "done" / active_task.path.name)
+        if done_path.exists():
+            blockers.append(
+                f"Done task already exists for {active_task.task_id} at "
+                f"{done_path.relative_to(root.path).as_posix()}."
+            )
+
+    if resolved_next_title is None:
+        blockers.append("Unable to determine the next task title.")
+    elif next_title is None:
+        warnings.append("Next task title resolved automatically from governance context.")
+
+    return TaskTransitionValidation(
+        active_task=active_task,
+        next_title=resolved_next_title,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+    )
+
+
+def transition_active_task(
+    root: HarnessPath,
+    next_title: str | None = None,
+    created_at: datetime | None = None,
+) -> TaskTransitionRecord:
+    validation = validate_task_transition(root, next_title)
+    if not validation.safe_to_complete or validation.active_task is None or validation.next_title is None:
+        raise ValueError(validation.blockers[0] if validation.blockers else "Task transition is blocked.")
+
+    timestamp = created_at or datetime.now().astimezone()
+    active_task = validation.active_task
+    enforcement_mode = active_task.enforcement_mode
+    if enforcement_mode in {None, "", "TBD"}:
+        enforcement_mode = "strict"
+    completed_task = close_active_task(active_task)
+    changed_files = changed_paths_for_transition(root)
+    next_task = create_task_contract(
+        root,
+        validation.next_title,
+        created_at=timestamp,
+        mode=active_task.mode or "implementation",
+        goal=default_next_task_goal(validation.next_title),
+        allowed_files=build_transition_allowed_files(changed_files),
+        forbidden_files=(),
+        override_protected_files=active_task.override_protected_files,
+        allowed_zones=(),
+        forbidden_zones=(),
+        allowed_dependencies=(),
+        forbidden_dependencies=(),
+        enforcement_mode=enforcement_mode,
+        forbidden_changes=TRANSITION_FORBIDDEN_CHANGES,
+        acceptance_checks=TRANSITION_ACCEPTANCE_CHECKS,
+        documentation_requirements=TRANSITION_DOCUMENTATION_REQUIREMENTS,
+    )
+
+    updated_files = [
+        completed_task.destination_path.relative_to(root.path),
+        next_task.relative_path,
+    ]
+    if update_done_memory(root, completed_task):
+        updated_files.append(DONE_RELATIVE_PATH)
+    if update_todo_memory(root, active_task.title, validation.next_title):
+        updated_files.append(TODO_RELATIVE_PATH)
+    if update_project_status_phase(root, validation.next_title):
+        updated_files.append(PROJECT_STATUS_RELATIVE_PATH)
+    if update_changelog_transition(root, active_task.title, validation.next_title):
+        updated_files.append(CHANGELOG_RELATIVE_PATH)
+
+    return TaskTransitionRecord(
+        completed_task=completed_task,
+        next_task=next_task,
+        next_title=validation.next_title,
+        updated_files=tuple(_unique_paths(updated_files)),
+        warnings=validation.warnings,
+    )
+
+
 def read_active_task(task_path: Path) -> ActiveTask:
     content = task_path.read_text(encoding="utf-8")
     return ActiveTask(
@@ -392,6 +585,275 @@ def read_active_task(task_path: Path) -> ActiveTask:
             "Documentation Requirements",
         ),
     )
+
+
+def resolve_next_task_title(root: HarnessPath, explicit_title: str | None) -> str | None:
+    if explicit_title is not None:
+        title = explicit_title.strip()
+        return title or None
+
+    todo_title = first_pending_todo_title(root)
+    if todo_title is not None:
+        return todo_title
+
+    roadmap_title = first_next_roadmap_title(root)
+    if roadmap_title is not None:
+        return roadmap_title
+
+    return "Next governed task"
+
+
+def first_pending_todo_title(root: HarnessPath) -> str | None:
+    path = root.join(TODO_RELATIVE_PATH)
+    if not path.is_file():
+        return None
+    content = path.read_text(encoding="utf-8")
+    return first_markdown_bullet_in_section(content, "Pending")
+
+
+def first_next_roadmap_title(root: HarnessPath) -> str | None:
+    path = root.join(PROJECT_STATUS_RELATIVE_PATH)
+    if not path.is_file():
+        return None
+    content = path.read_text(encoding="utf-8")
+    return first_markdown_bullet_in_section(content, "Next Roadmap")
+
+
+def first_markdown_bullet_in_section(content: str, section_name: str) -> str | None:
+    for item in read_markdown_section_items(content, section_name):
+        if item != "TBD":
+            return item
+    return None
+
+
+def read_markdown_section_items(content: str, section_name: str) -> tuple[str, ...]:
+    lines = content.splitlines()
+    in_section = False
+    items: list[str] = []
+
+    for line in lines:
+        if line.startswith("## "):
+            current_section = line.removeprefix("## ").strip()
+            if in_section:
+                break
+            in_section = current_section == section_name
+            continue
+        if not in_section:
+            continue
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            items.append(stripped.removeprefix("- ").strip())
+
+    return tuple(items)
+
+
+def validate_transition_session(root: HarnessPath, active_task: ActiveTask) -> str | None:
+    path = root.join(TRANSITION_SESSION_RELATIVE_PATH)
+    if not path.is_file():
+        return "Session snapshot missing at .pcae/session.json."
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return f"Invalid session JSON: {error.msg}."
+
+    session_task = data.get("active_task")
+    current_task = {"id": active_task.task_id, "title": active_task.title}
+    if session_task != current_task:
+        return (
+            "Session active task does not match current active task. "
+            "Run `pcae session write` before transitioning."
+        )
+    return None
+
+
+def changed_paths_for_transition(root: HarnessPath) -> tuple[str, ...]:
+    git_dir = root.join(Path(".git"))
+    if not git_dir.exists():
+        return ()
+
+    from pcae.core.git_status import read_git_changes
+
+    paths = [
+        change.path.as_posix()
+        for change in read_git_changes(root)
+        if not is_transition_documentation_path(change.path)
+    ]
+    return tuple(_unique_strings(paths))
+
+
+def is_transition_documentation_path(path: Path) -> bool:
+    path_text = path.as_posix()
+    return (
+        path_text == ".pcae/session.json"
+        or path_text == "tasks/TODO.md"
+        or path_text == "tasks/DONE.md"
+        or path_text == "tasks/DECISIONS.md"
+        or path_text == "PROJECT_STATUS.md"
+        or path_text == "CHANGELOG.md"
+        or path_text.startswith("tasks/active/")
+        or path_text.startswith("tasks/done/")
+    )
+
+
+def build_transition_allowed_files(changed_paths: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(_unique_strings((*TRANSITION_ALLOWED_FILES, *changed_paths)))
+
+
+def default_next_task_goal(title: str) -> str:
+    return title
+
+
+def update_done_memory(root: HarnessPath, completed_task: ClosedTask) -> bool:
+    line = f"- {completed_task.title} ({completed_task.task_id})"
+    return ensure_bullet_in_section(
+        root.join(DONE_RELATIVE_PATH),
+        "Done",
+        "Completed",
+        line,
+    )
+
+
+def update_todo_memory(root: HarnessPath, previous_title: str, next_title: str) -> bool:
+    path = root.join(TODO_RELATIVE_PATH)
+    if not path.is_file():
+        return False
+    original = path.read_text(encoding="utf-8")
+    updated = remove_exact_bullets(original, {previous_title, next_title})
+    if updated == original:
+        return False
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(updated)
+    return True
+
+
+def update_project_status_phase(root: HarnessPath, next_title: str) -> bool:
+    path = root.join(PROJECT_STATUS_RELATIVE_PATH)
+    if not path.is_file():
+        return False
+    phase_text = phase_text_from_title(next_title)
+    if phase_text is None:
+        return False
+    original = path.read_text(encoding="utf-8")
+    updated = replace_markdown_section_text(original, "Current Phase", phase_text)
+    updated = remove_exact_bullets(updated, {next_title})
+    if updated == original:
+        return False
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(updated)
+    return True
+
+
+def update_changelog_transition(root: HarnessPath, previous_title: str, next_title: str) -> bool:
+    line = f"- Transitioned active task from {previous_title} to {next_title}; session refreshed and governance continuity revalidated."
+    return ensure_bullet_in_section(
+        root.join(CHANGELOG_RELATIVE_PATH),
+        "Changelog",
+        "Unreleased",
+        line,
+    )
+
+
+def ensure_bullet_in_section(
+    path: Path,
+    document_title: str,
+    section_name: str,
+    bullet: str,
+) -> bool:
+    if path.is_file():
+        original = path.read_text(encoding="utf-8")
+    else:
+        original = f"# {document_title}\n\n## {section_name}\n\n"
+    existing_items = read_markdown_section_items(original, section_name)
+    if bullet.removeprefix("- ").strip() in existing_items:
+        return False
+    updated = insert_bullet_in_section(original, section_name, bullet)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(updated)
+    return True
+
+
+def insert_bullet_in_section(content: str, section_name: str, bullet: str) -> str:
+    lines = content.splitlines()
+    normalized_bullet = bullet if bullet.startswith("- ") else f"- {bullet}"
+    start_index = None
+    end_index = len(lines)
+    for index, line in enumerate(lines):
+        if not line.startswith("## "):
+            continue
+        current_section = line.removeprefix("## ").strip()
+        if current_section == section_name:
+            start_index = index
+            continue
+        if start_index is not None:
+            end_index = index
+            break
+    if start_index is None:
+        if lines and lines[-1] != "":
+            lines.append("")
+        lines.extend([f"## {section_name}", "", normalized_bullet])
+        return "\n".join(lines).rstrip() + "\n"
+
+    insertion_index = start_index + 1
+    while insertion_index < len(lines) and lines[insertion_index] == "":
+        insertion_index += 1
+    updated_lines = lines[:insertion_index] + [normalized_bullet] + lines[insertion_index:end_index]
+    return "\n".join(updated_lines).rstrip() + "\n"
+
+
+def remove_exact_bullets(content: str, titles: set[str]) -> str:
+    lines = content.splitlines()
+    filtered = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("- ") and stripped.removeprefix("- ").strip() in titles:
+            continue
+        filtered.append(line)
+    return "\n".join(filtered).rstrip() + "\n"
+
+
+def replace_markdown_section_text(content: str, section_name: str, value: str) -> str:
+    return replace_task_section(content, section_name, (value,))
+
+
+def phase_text_from_title(title: str) -> str | None:
+    match = re.match(r"(?P<phase>\d+[A-Z])\s*:\s*(?P<label>.+)", title)
+    if match is not None:
+        label = match.group("label").rstrip(".").strip()
+        return f"Phase {match.group('phase')}: {label}."
+
+    match = re.search(r"\(Phase (?P<phase>[^)]+)\)", title)
+    if match is None:
+        return None
+    phase = match.group("phase").strip()
+    label = title[: match.start()].strip().rstrip("-: ")
+    if not label:
+        return f"Phase {phase}."
+    return f"Phase {phase}: {label}."
+
+
+def _unique_strings(items: tuple[str, ...] | list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in items:
+        normalized = item.strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        ordered.append(normalized)
+    return ordered
+
+
+def _unique_paths(items: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    ordered: list[Path] = []
+    for item in items:
+        key = item.as_posix()
+        if key in seen:
+            continue
+        seen.add(key)
+        ordered.append(item)
+    return ordered
 
 
 def read_task_section_items(task_path: Path, section_name: str) -> tuple[str, ...]:

@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 61I: Handoff State Refresh (20260607-1854-61i-handoff-state-refresh)
+- Implemented Automated Task Transition (Phase 61H): `pcae task transition`, `pcae task transition --next "<task title>"`, and `pcae task transition --json`; safely completes the current active task, moves it to `tasks/done/`, creates the next governed task contract with populated scope and acceptance defaults, refreshes `.pcae/session.json`, updates task memory files, and validates `pcae status coherence`, `pcae health`, and `pcae check`; added focused task-transition tests including stale-session blocking and dirty-source scope preservation.
 - Implemented Roadmap Continuity Validation (Phase 61G): `pcae roadmap-continuity` and `--json`; added RoadmapContinuitySignal, RoadmapContinuityAssessment, and RoadmapContinuitySummary; defined all ten continuity domains including completed phase alignment, active phase alignment, next phase alignment, handoff roadmap alignment, and pre-execution transition readiness; kept roadmap_update_allowed=False, task_update_allowed=False, session_update_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
 
 - Implemented Agent Handoff Modernization (Phase 61F): `pcae agent-handoff-modernization` and `--json`; added AgentHandoffModernizationSignal, AgentHandoffModernizationAssessment, and AgentHandoffModernizationSummary; defined all ten modernization domains including completed phase summary, active phase summary, next phase recommendation, roadmap position summary, runtime status summary, and governance status summary; kept handoff_update_allowed=False, session_update_allowed=False, and human_review_required=True; added focused tests.

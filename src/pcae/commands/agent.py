@@ -8,6 +8,7 @@ from pcae.core.agent import (
     COLLABORATION_ADVISORY,
     COLLABORATION_WORKFLOWS,
     CONFIG_ADVISORY,
+    HANDOFF_STATE_REFRESH_ADVISORY,
     MULTI_AGENT_REGISTRY,
     REVIEW_ADVISORY,
     REVIEW_WORKFLOWS,
@@ -352,6 +353,7 @@ from pcae.core.agent import (
     build_remote_status,
     build_review_workflows,
     build_agent_handoff_modernization,
+    build_handoff_state_refresh,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -11916,4 +11918,60 @@ def run_roadmap_continuity(args: argparse.Namespace) -> int:
     print(f"  Execution allowed:      {boundaries['execution_allowed']}")
     print()
     print(ROADMAP_CONTINUITY_ADVISORY)
+    return 0
+
+
+def run_handoff_state_refresh(args: argparse.Namespace) -> int:
+    data = build_handoff_state_refresh()
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["handoff_state_refresh_overview"]
+    print("Handoff state refresh")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Refresh domains:        {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Refresh status:         {overview['refresh_status']}")
+    print(f"Handoff update allowed: {'yes' if overview['handoff_update_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Refresh signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['refresh_domain']} — {signal['signal_type']}"
+        )
+    print()
+    bm = data["bootstrap_modernization"]
+    print("Bootstrap modernization:")
+    print(f"  Modern test command:   {bm['modern_test_command']}")
+    print(f"  Battery-conscious:     {bm['battery_conscious_command']}")
+    print(f"  Retained uses:         {len(bm['retained_uses'])} documented exception(s)")
+    for retained in bm["retained_uses"]:
+        print(f"    - {retained['context']}: {retained['rationale']}")
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                    {', '.join(boundaries['may'])}")
+    print(f"  May not:                {', '.join(boundaries['may_not'])}")
+    print(f"  Handoff update allowed: {boundaries['handoff_update_allowed']}")
+    print(f"  Execution allowed:      {boundaries['execution_allowed']}")
+    print()
+    print(HANDOFF_STATE_REFRESH_ADVISORY)
     return 0

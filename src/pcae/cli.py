@@ -164,6 +164,7 @@ from pcae.commands.agent import (
     run_runtime_trust_model,
     run_task_lifecycle_governance,
     run_agent_handoff_modernization,
+    run_handoff_state_refresh,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -322,6 +323,7 @@ from pcae.commands.task import (
     run_task_pause,
     run_task_resume,
     run_task_show,
+    run_task_transition,
     run_task_update,
 )
 
@@ -3414,6 +3416,21 @@ def build_parser() -> argparse.ArgumentParser:
     task_update_parser.add_argument("--acceptance-check", action="append")
     task_update_parser.set_defaults(handler=run_task_update)
 
+    task_transition_parser = task_subparsers.add_parser(
+        "transition",
+        help="Complete the current task, create the next one, and refresh session continuity.",
+    )
+    task_transition_parser.add_argument(
+        "--next",
+        help="Explicit title for the next active task.",
+    )
+    task_transition_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    task_transition_parser.set_defaults(handler=run_task_transition)
+
     hooks_parser = subparsers.add_parser(
         "hooks",
         help="Manage PCAE Git hook integration.",
@@ -4404,6 +4421,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rcv_parser.set_defaults(handler=run_roadmap_continuity)
+
+    hsr_parser = subparsers.add_parser(
+        "handoff-state-refresh",
+        help="Refresh and modernize PCAE handoff state for accurate, current, roadmap-aware continuation guidance (Phase 61I).",
+    )
+    hsr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    hsr_parser.set_defaults(handler=run_handoff_state_refresh)
 
     return parser
 

@@ -2,14 +2,14 @@
 
 ## Current Phase
 
-Phase 61G: Roadmap Continuity Validation.
+Phase 61I: Handoff State Refresh.
 
 ## Post-52Q Architecture Checkpoint
 
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4201 passing tests.
+**Test count:** 4328 passing tests.
 
 **License:** Apache License 2.0.
 
@@ -102,7 +102,26 @@ updates disabled. PCAE can validate governed roadmap continuity with
 `pcae roadmap-continuity` and `pcae roadmap-continuity --json`, defining
 roadmap/task/session continuity domains, handoff/roadmap alignment, and
 pre-execution transition readiness while keeping roadmap, task, session, and
-execution updates disabled.
+execution updates disabled. PCAE can automate governed task transition with
+`pcae task transition`, `pcae task transition --next "<task title>"`, and
+`pcae task transition --json`, validating the current active task and session,
+moving completed task contracts into `tasks/done/`, creating the next active
+task with populated governance defaults, refreshing `.pcae/session.json`,
+updating governance memory files, and revalidating status coherence, health,
+and check state while keeping runtime invocation, prompt execution, execution
+authorization, commit, push, and rollback disabled.
+PCAE can refresh and modernize governed handoff state with
+`pcae handoff-state-refresh` and `pcae handoff-state-refresh --json`,
+defining ten refresh domains (active_task_summary_refresh,
+completed_phase_summary_refresh, next_phase_summary_refresh,
+roadmap_position_refresh, governance_status_refresh, runtime_status_refresh,
+bootstrap_profile_refresh, bootstrap_validation_refresh,
+handoff_freshness_refresh, agent_context_refresh), standardizing
+implementation-oriented bootstrap guidance on `python -m pytest -n auto`,
+and documenting intentionally retained uses of `python -m pytest` for release
+verification, debugging, and compatibility workflows; handoff artifacts and
+bootstrap guidance may be refreshed; execution, runtime invocation, and
+prompt execution remain disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task

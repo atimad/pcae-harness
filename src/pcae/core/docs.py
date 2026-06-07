@@ -76,6 +76,9 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae task resume`
 - `pcae task complete`
 - `pcae task close [task-id]`
+- `pcae task transition`
+- `pcae task transition --next "<task title>"`
+- `pcae task transition --json`
 
 ## session
 
@@ -1032,6 +1035,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae roadmap-continuity`
 - `pcae roadmap-continuity --json`
+
+## handoff-state-refresh
+
+- `pcae handoff-state-refresh`
+- `pcae handoff-state-refresh --json`
 """
 
 

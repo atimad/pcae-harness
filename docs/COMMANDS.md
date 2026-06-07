@@ -21,6 +21,7 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
 - [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
 - [Runtime Integration (54A+)](#runtime-integration-54a) — runtime integration readiness
+- [Handoff State Refresh (61I)](#handoff-state-refresh-61i) — handoff state refresh, bootstrap modernization
 
 ---
 
@@ -55,6 +56,9 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae task resume`
 - `pcae task complete`
 - `pcae task close [task-id]`
+- `pcae task transition`
+- `pcae task transition --next "<task title>"`
+- `pcae task transition --json`
 
 ## session
 
@@ -1011,3 +1015,12 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae roadmap-continuity`
 - `pcae roadmap-continuity --json`
+
+---
+
+# Handoff State Refresh (61I)
+
+## handoff-state-refresh
+
+- `pcae handoff-state-refresh`
+- `pcae handoff-state-refresh --json`

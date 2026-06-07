@@ -223,7 +223,7 @@ def test_build_context_pack_validation_commands(tmp_path: Path) -> None:
     assert result.validation_commands == CONTEXT_PACK_VALIDATION_COMMANDS
     assert "pcae health" in result.validation_commands
     assert "pcae check" in result.validation_commands
-    assert "python -m pytest" in result.validation_commands
+    assert "python -m pytest -n auto" in result.validation_commands
     assert "git status" in result.validation_commands
 
 

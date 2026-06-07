@@ -1,14 +1,18 @@
 {
   "active_task": {
-    "id": "20260607-1400-61g-roadmap-continuity",
-    "title": "Roadmap Continuity Validation (Phase 61G)"
+    "id": "20260607-1939-next-governed-task",
+    "title": "Next governed task"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "",
+  "current_objective": "Next governed task",
   "git": {
     "branch": "main",
     "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
@@ -30,7 +34,15 @@
         "status": " M"
       },
       {
+        "path": "src/pcae/commands/task.py",
+        "status": " M"
+      },
+      {
         "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/context.py",
         "status": " M"
       },
       {
@@ -38,18 +50,46 @@
         "status": " M"
       },
       {
-        "path": "tests/test_agent.py",
+        "path": "src/pcae/core/tasks.py",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260607-1400-61a-runtime-registry.md",
+        "path": "tasks/DECISIONS.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260607-1400-61g-roadmap-continuity.md",
+        "status": " D"
+      },
+      {
+        "path": "tests/test_context.py",
+        "status": " M"
+      },
+      {
+        "path": "tests/test_task.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260607-1939-next-governed-task.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260607-1400-61h-automated-task-transition.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260607-1854-61i-handoff-state-refresh.md",
         "status": "??"
       }
     ],
-    "status_summary": "9 changed files"
+    "status_summary": "19 changed files"
   },
-  "last_completed_step": "",
-  "next_recommended_step": "",
-  "timestamp": "2026-06-07T13:31:34.632301+00:00",
+  "last_completed_step": "Completed task 20260607-1854-61i-handoff-state-refresh: 61I: Handoff State Refresh",
+  "next_recommended_step": "Continue active task 20260607-1939-next-governed-task.",
+  "timestamp": "2026-06-07T17:39:38.911624+00:00",
   "warnings": []
 }

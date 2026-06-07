@@ -1,17 +1,25 @@
 from __future__ import annotations
 
 import argparse
+import json
 
+from pcae.core.check import run_checks
+from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.session import SessionUpdate, update_session_snapshot, write_session_snapshot
+from pcae.core.status import check_project_status_coherence
 from pcae.core.policy import load_policy
 from pcae.core.tasks import (
     ActiveTask,
+    TaskTransitionRecord,
     TaskUpdate,
     close_active_task_by_identifier,
     close_latest_active_task,
     complete_latest_active_task,
     create_task_contract,
     find_latest_active_task,
+    transition_active_task,
+    validate_task_transition,
     pause_latest_active_task,
     read_task_summaries,
     resume_latest_paused_task,
@@ -203,6 +211,65 @@ def run_task_update(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_task_transition(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    validation = validate_task_transition(root, args.next)
+    if not validation.safe_to_complete:
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "blockers": list(validation.blockers),
+                        "next_title": validation.next_title,
+                        "safe_to_complete": False,
+                        "warnings": list(validation.warnings),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print("Task transition blocked.")
+            for blocker in validation.blockers:
+                print(f"  - {blocker}")
+        return 1
+
+    try:
+        transition = transition_active_task(root, args.next)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    session_snapshot = write_session_snapshot(root)
+    session_snapshot = update_session_snapshot(
+        root,
+        SessionUpdate(
+            objective=transition.next_task.title,
+            completed_step=(
+                f"Completed task {transition.completed_task.task_id}: "
+                f"{transition.completed_task.title}"
+            ),
+            next_step=f"Continue active task {transition.next_task.task_id}.",
+        ),
+    )
+    coherence = check_project_status_coherence(root)
+    health = build_health_data(root)
+    check_result = run_checks(root)
+
+    if args.json:
+        print(json.dumps(task_transition_json(transition, session_snapshot.relative_path.as_posix(), coherence.coherent, health, check_result), indent=2, sort_keys=True))
+    else:
+        print_task_transition_summary(
+            transition,
+            session_snapshot.relative_path.as_posix(),
+            coherence.coherent,
+            health,
+            check_result,
+        )
+
+    return 0 if coherence.coherent and health["overall_status"] == "healthy" and check_result.passed else 1
+
+
 def print_task_section(title: str, tasks: tuple[TaskSummary, ...]) -> None:
     print(f"{title}:")
     if not tasks:
@@ -246,3 +313,62 @@ def format_items(items: tuple[str, ...]) -> list[str]:
     if not items:
         return ["  - none"]
     return [f"  - {item}" for item in items]
+
+
+def print_task_transition_summary(
+    transition: TaskTransitionRecord,
+    session_path: str,
+    coherence_passed: bool,
+    health: dict,
+    check_result,
+) -> None:
+    print("Task transition complete.")
+    print(f"Completed task: {transition.completed_task.task_id}")
+    print(f"Completed title: {transition.completed_task.title}")
+    print(
+        "Moved to: "
+        f"{transition.completed_task.destination_path.relative_to(HarnessPath.cwd().path).as_posix()}"
+    )
+    print(f"Next active task: {transition.next_task.task_id}")
+    print(f"Next title: {transition.next_task.title}")
+    print(f"Created: {transition.next_task.relative_path.as_posix()}")
+    print(f"Session refreshed: {session_path}")
+    print(f"Status coherence: {'passed' if coherence_passed else 'failed'}")
+    print(f"Health: {health['overall_status']}")
+    print(f"Check: {'passed' if check_result.passed else 'failed'}")
+    if transition.warnings:
+        print("Warnings:")
+        for warning in transition.warnings:
+            print(f"  - {warning}")
+    print("Updated files:")
+    for path in transition.updated_files:
+        print(f"  - {path.as_posix()}")
+
+
+def task_transition_json(
+    transition: TaskTransitionRecord,
+    session_path: str,
+    coherence_passed: bool,
+    health: dict,
+    check_result,
+) -> dict[str, object]:
+    return {
+        "check_passed": check_result.passed,
+        "completed_task": {
+            "id": transition.completed_task.task_id,
+            "title": transition.completed_task.title,
+            "path": transition.completed_task.destination_path.relative_to(
+                HarnessPath.cwd().path
+            ).as_posix(),
+        },
+        "health_status": health["overall_status"],
+        "next_active_task": {
+            "id": transition.next_task.task_id,
+            "title": transition.next_task.title,
+            "path": transition.next_task.relative_path.as_posix(),
+        },
+        "session_path": session_path,
+        "status_coherence_passed": coherence_passed,
+        "updated_files": [path.as_posix() for path in transition.updated_files],
+        "warnings": list(transition.warnings),
+    }

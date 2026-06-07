@@ -248,13 +248,13 @@ CONTEXT_PACK_OPERATIONAL_RULES: tuple[str, ...] = (
     "PROJECT_STATUS.md is background context, not a source of truth when conflicting with the phase prompt.",
     "Do not infer stale tasks from older governance documents.",
     "Do not modify files outside the active task scope.",
-    "Always run pcae check and python -m pytest before committing.",
+    "Always run pcae check and python -m pytest -n auto before committing.",
 )
 
 CONTEXT_PACK_VALIDATION_COMMANDS: tuple[str, ...] = (
     "pcae health",
     "pcae check",
-    "python -m pytest",
+    "python -m pytest -n auto",
     "git status",
 )
 

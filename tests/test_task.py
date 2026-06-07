@@ -1,10 +1,20 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import json
 from pathlib import Path
+import subprocess
 
 from pcae.cli import main
+from pcae.commands.init import init_harness
+from pcae.core.agent import (
+    HANDOFF_STATE_REFRESH_ADVISORY,
+    build_handoff_state_refresh,
+)
+from pcae.core.check import run_checks
 from pcae.core.paths import HarnessPath
+from pcae.core.session import read_session_snapshot, write_session_snapshot
+from pcae.core.status import check_project_status_coherence
 from pcae.core.tasks import (
     close_active_task_by_identifier,
     close_latest_active_task,
@@ -13,6 +23,32 @@ from pcae.core.tasks import (
     read_task_summaries,
     slugify_title,
 )
+
+
+def init_git_repo(tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+
+def commit_all(tmp_path: Path, message: str) -> None:
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
 
 
 def test_slugify_title_uses_safe_filename_parts() -> None:
@@ -1143,3 +1179,327 @@ def test_task_close_command_still_closes_latest_task(
     assert (
         tmp_path / "tasks" / "done" / "20260522-1930-close-lifecycle-task.md"
     ).is_file()
+
+
+def test_task_transition_command_creates_next_task_and_refreshes_session(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        "Phase 61H: Automated Task Transition.\n\n"
+        "## Next Roadmap\n\n"
+        "- 61I: Session Bootstrap Automation\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n"
+        "## Pending\n\n"
+        "- 61I: Session Bootstrap Automation\n",
+        encoding="utf-8",
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Automated Task Transition (Phase 61H)",
+        created_at=datetime(2026, 6, 7, 14, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "transition"])
+
+    output = capsys.readouterr().out
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    session = read_session_snapshot(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert "Task transition complete." in output
+    assert "Completed task: 20260607-1400-automated-task-transition-phase-61h" in output
+    assert active_task is not None
+    assert active_task.title == "61I: Session Bootstrap Automation"
+    assert active_task.enforcement_mode == "strict"
+    assert ".pcae/session.json" in active_task.allowed_files
+    assert "tasks/active/**" in active_task.allowed_files
+    assert "tasks/done/**" in active_task.allowed_files
+    assert session is not None
+    assert session.data["active_task"]["title"] == "61I: Session Bootstrap Automation"
+    assert session.data["current_objective"] == "61I: Session Bootstrap Automation"
+    assert (
+        tmp_path
+        / "tasks"
+        / "done"
+        / "20260607-1400-automated-task-transition-phase-61h.md"
+    ).is_file()
+    assert (
+        "Automated Task Transition (Phase 61H) "
+        "(20260607-1400-automated-task-transition-phase-61h)"
+        in (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    )
+    assert "61I: Session Bootstrap Automation" not in (
+        tmp_path / "tasks" / "TODO.md"
+    ).read_text(encoding="utf-8")
+    assert "Phase 61I: Session Bootstrap Automation." in (
+        tmp_path / "PROJECT_STATUS.md"
+    ).read_text(encoding="utf-8")
+    assert "Transitioned active task from Automated Task Transition (Phase 61H)" in (
+        tmp_path / "CHANGELOG.md"
+    ).read_text(encoding="utf-8")
+    assert check_project_status_coherence(HarnessPath(tmp_path)).coherent is True
+    assert run_checks(HarnessPath(tmp_path)).passed is True
+
+
+def test_task_transition_command_supports_explicit_next_title_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        "Phase 61H: Automated Task Transition.\n\n"
+        "## Next Roadmap\n\n"
+        "- 61I: Explicit Next Task\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n"
+        "## Pending\n\n"
+        "- 61I: Explicit Next Task\n",
+        encoding="utf-8",
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Current phase task",
+        created_at=datetime(2026, 6, 7, 14, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["task", "transition", "--next", "61I: Explicit Next Task", "--json"]
+    )
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["status_coherence_passed"] is True
+    assert data["health_status"] == "healthy"
+    assert data["check_passed"] is True
+    assert data["next_active_task"]["title"] == "61I: Explicit Next Task"
+    assert data["completed_task"]["title"] == "Current phase task"
+    assert data["session_path"] == ".pcae/session.json"
+
+
+def test_task_transition_command_blocks_on_stale_session(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Current phase task",
+        created_at=datetime(2026, 6, 7, 14, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    session_path = tmp_path / ".pcae" / "session.json"
+    data = json.loads(session_path.read_text(encoding="utf-8"))
+    data["active_task"] = {"id": "different-task", "title": "Different task"}
+    session_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "transition", "--next", "61I: Explicit Next Task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Task transition blocked." in output
+    assert "Session active task does not match current active task." in output
+    assert (
+        tmp_path / "tasks" / "active" / "20260607-1400-current-phase-task.md"
+    ).is_file()
+    assert not (
+        tmp_path / "tasks" / "done" / "20260607-1400-current-phase-task.md"
+    ).exists()
+
+
+def test_task_transition_scopes_dirty_source_into_next_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        "Phase 61H: Automated Task Transition.\n\n"
+        "## Next Roadmap\n\n"
+        "- 61I: Explicit Next Task\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n"
+        "## Pending\n\n"
+        "- 61I: Explicit Next Task\n",
+        encoding="utf-8",
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Current phase task",
+        created_at=datetime(2026, 6, 7, 14, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    dirty_source = tmp_path / "src" / "dirty_feature.py"
+    dirty_source.parent.mkdir(parents=True, exist_ok=True)
+    dirty_source.write_text("before\n", encoding="utf-8")
+    commit_all(tmp_path, "baseline")
+    dirty_source.write_text("after\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "transition", "--next", "61I: Explicit Next Task"])
+
+    capsys.readouterr()
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert exit_code == 0
+    assert active_task is not None
+    assert "src/dirty_feature.py" in active_task.allowed_files
+    assert run_checks(HarnessPath(tmp_path)).passed is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 61I: Handoff State Refresh tests
+# ---------------------------------------------------------------------------
+
+
+def test_build_handoff_state_refresh_overview_fields() -> None:
+    data = build_handoff_state_refresh()
+    overview = data["handoff_state_refresh_overview"]
+    assert overview["phase"] == "61I"
+    assert overview["title"] == "Handoff State Refresh"
+    assert overview["domain_count"] == 10
+    assert overview["signal_count"] == 10
+    assert overview["handoff_update_allowed"] is True
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_build_handoff_state_refresh_models() -> None:
+    data = build_handoff_state_refresh()
+    assert data["signal_model"]["model_name"] == "HandoffStateRefreshSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "HandoffStateRefreshAssessment"
+    assert data["assessment_model"]["field_count"] == 7
+    assert data["summary_model"]["model_name"] == "HandoffStateRefreshSummary"
+    assert data["summary_model"]["field_count"] == 9
+
+
+def test_build_handoff_state_refresh_signals_have_required_fields() -> None:
+    data = build_handoff_state_refresh()
+    for signal in data["signals"]:
+        assert "signal_id" in signal
+        assert "handoff_id" in signal
+        assert "refresh_domain" in signal
+        assert "signal_type" in signal
+        assert "severity" in signal
+        assert "detected_state" in signal
+        assert "expected_state" in signal
+        assert signal["human_review_required"] is True
+
+
+def test_build_handoff_state_refresh_all_domains_covered() -> None:
+    data = build_handoff_state_refresh()
+    domains = {s["refresh_domain"] for s in data["signals"]}
+    expected = {
+        "active_task_summary_refresh",
+        "completed_phase_summary_refresh",
+        "next_phase_summary_refresh",
+        "roadmap_position_refresh",
+        "governance_status_refresh",
+        "runtime_status_refresh",
+        "bootstrap_profile_refresh",
+        "bootstrap_validation_refresh",
+        "handoff_freshness_refresh",
+        "agent_context_refresh",
+    }
+    assert domains == expected
+
+
+def test_build_handoff_state_refresh_bootstrap_modernization() -> None:
+    data = build_handoff_state_refresh()
+    bm = data["bootstrap_modernization"]
+    assert bm["modern_test_command"] == "python -m pytest -n auto"
+    assert bm["battery_conscious_command"] == "python -m pytest -n 4"
+    assert len(bm["retained_uses"]) >= 3
+    contexts = {r["context"] for r in bm["retained_uses"]}
+    assert "release verification workflows" in contexts
+    assert "debugging workflows" in contexts
+    assert "compatibility workflows" in contexts
+
+
+def test_build_handoff_state_refresh_governance_boundaries() -> None:
+    data = build_handoff_state_refresh()
+    boundaries = data["governance_boundaries"]
+    assert boundaries["handoff_update_allowed"] is True
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert "commit" in boundaries["may_not"]
+    assert "invoke runtimes" in boundaries["may_not"]
+    assert "refresh handoff state" in boundaries["may"]
+
+
+def test_build_handoff_state_refresh_advisory() -> None:
+    data = build_handoff_state_refresh()
+    assert data["advisory"] == HANDOFF_STATE_REFRESH_ADVISORY
+
+
+def test_build_handoff_state_refresh_sample_assessment_fields() -> None:
+    data = build_handoff_state_refresh()
+    assessment = data["sample_assessment"]
+    assert "assessment_id" in assessment
+    assert "signal_count" in assessment
+    assert "blocker_count" in assessment
+    assert "warning_count" in assessment
+    assert "refresh_status" in assessment
+    assert assessment["handoff_update_allowed"] is True
+    assert assessment["human_review_required"] is True
+
+
+def test_build_handoff_state_refresh_sample_summary_fields() -> None:
+    data = build_handoff_state_refresh()
+    summary = data["sample_summary"]
+    assert "summary_id" in summary
+    assert "assessment_id" in summary
+    assert "domain_count" in summary
+    assert summary["handoff_update_allowed"] is True
+    assert summary["human_review_required"] is True
+
+
+def test_cli_handoff_state_refresh_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["handoff-state-refresh"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Handoff state refresh" in output
+    assert "Refresh domains:" in output
+    assert "Bootstrap modernization:" in output
+
+
+def test_cli_handoff_state_refresh_json_exits_zero(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["handoff-state-refresh", "--json"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert "handoff_state_refresh_overview" in parsed
+    assert "signal_model" in parsed
+    assert "assessment_model" in parsed
+    assert "summary_model" in parsed
+    assert "bootstrap_modernization" in parsed
+    assert parsed["handoff_state_refresh_overview"]["phase"] == "61I"

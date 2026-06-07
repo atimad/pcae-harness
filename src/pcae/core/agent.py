@@ -4040,7 +4040,7 @@ _FILE_GOVERNANCE_COMMIT_GOVERNANCE: dict = {
         "Human must approve the diff at the after_execution checkpoint.",
         "Human must confirm the commit message before commit is created.",
         "pcae check must pass on the post-execution working tree.",
-        "python -m pytest must pass on the post-execution working tree.",
+        "python -m pytest -n auto must pass on the post-execution working tree.",
     ],
     "commit_metadata_requirements": [
         "Commit message must identify the governed job ID.",
@@ -12585,12 +12585,12 @@ _APPP_CANONICAL_ACCEPTANCE_CRITERIA: tuple[str, ...] = (
     "human_review_required=true in all outputs.",
     "no prompt execution occurs.",
     "pcae check passes.",
-    "python -m pytest passes.",
+    "python -m pytest -n auto passes.",
 )
 
 _APPP_VALIDATION_COMMANDS: tuple[str, ...] = (
     "pcae check",
-    "python -m pytest",
+    "python -m pytest -n auto",
     "git status",
 )
 
@@ -12612,7 +12612,7 @@ _APPP_ADAPTED_PROMPT_ENTRIES: tuple[dict, ...] = (
             "Objective: {objective}\n"
             "Focus: Implement all required builder functions, runners, CLI parser entries, "
             "and tests. Use step-by-step file-and-change-scoped instructions. "
-            "Run pcae check and python -m pytest before committing."
+            "Run pcae check and python -m pytest -n auto before committing."
         ),
         "preserved_sections": [
             "objective",
@@ -58275,6 +58275,12 @@ AGENT_HANDOFF_MODERNIZATION_ADVISORY = (
     "and human_review_required=True in Phase 61F. Human review is always required."
 )
 
+HANDOFF_STATE_REFRESH_ADVISORY = (
+    "Handoff state refresh is read-only. "
+    "Handoff artifacts, bootstrap guidance, and roadmap summaries may be refreshed. "
+    "Execution, runtime invocation, and prompt execution remain disabled."
+)
+
 ROADMAP_CONTINUITY_ADVISORY = (
     "Roadmap continuity validation is assessment and reporting only; "
     "roadmap/task/session continuity requirements are inspected and blockers reported, but no roadmap files are rewritten, "
@@ -60414,4 +60420,342 @@ def build_roadmap_continuity() -> dict:
         "governance_boundaries": dict(_RMC_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_RMC_INPUT_SOURCES),
         "advisory": ROADMAP_CONTINUITY_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 61I: Handoff State Refresh
+# ---------------------------------------------------------------------------
+
+_HSR_REFRESH_DOMAINS: tuple[str, ...] = (
+    "active_task_summary_refresh",
+    "completed_phase_summary_refresh",
+    "next_phase_summary_refresh",
+    "roadmap_position_refresh",
+    "governance_status_refresh",
+    "runtime_status_refresh",
+    "bootstrap_profile_refresh",
+    "bootstrap_validation_refresh",
+    "handoff_freshness_refresh",
+    "agent_context_refresh",
+)
+
+_HSR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_HSR_REFRESH_STATUSES: tuple[str, ...] = (
+    "refreshed",
+    "refreshed_with_warnings",
+    "refresh_required",
+    "blocked",
+)
+
+_HSR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "handoff_id", "type": "str", "required": True},
+    {"name": "refresh_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_HSR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "refresh_status", "type": "str", "required": True},
+    {"name": "handoff_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_HSR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "refresh_status", "type": "str", "required": True},
+    {"name": "handoff_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_HSR_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/DECISIONS.md",
+    "AgentHandoffModernizationSummary",
+    "RoadmapContinuitySummary",
+    "AutomatedTaskTransitionSummary",
+)
+
+_HSR_BOOTSTRAP_MODERNIZATION: dict = {
+    "modern_test_command": "python -m pytest -n auto",
+    "battery_conscious_command": "python -m pytest -n 4",
+    "retained_uses": [
+        {
+            "command": "python -m pytest",
+            "context": "release verification workflows",
+            "rationale": "Serial execution is ground truth for release gating; parallel count must match.",
+        },
+        {
+            "command": "python -m pytest",
+            "context": "debugging workflows",
+            "rationale": "Serial execution aids isolation of failures during debugging.",
+        },
+        {
+            "command": "python -m pytest",
+            "context": "compatibility workflows",
+            "rationale": "Serial baseline required when verifying parallel/serial count parity.",
+        },
+    ],
+    "modernized_paths": [
+        "bootstrap output (implementation profile)",
+        "bootstrap templates",
+        "handoff templates",
+        "implementation profile guidance",
+        "session bootstrap guidance",
+        "continuation guidance",
+        "operational rules",
+        "validation commands",
+        "autonomous-prompt-proposal acceptance criteria",
+        "autonomous-prompt-proposal validation commands",
+        "commit governance requirements",
+        "implementation-profile prompt templates",
+    ],
+    "advisory": (
+        "Bootstrap modernization ensures implementation-oriented agents receive "
+        "python -m pytest -n auto as the standard test command. "
+        "Serial python -m pytest is intentionally retained for release verification, "
+        "debugging, and compatibility workflows."
+    ),
+}
+
+_HSR_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "refresh_domain": "active_task_summary_refresh",
+        "signal_type": "active_task_summary_refresh_check",
+        "severity": "warning",
+        "detected_state": "active task summary in handoff artifacts has not been explicitly refreshed against the current active task state",
+        "expected_state": "handoff artifacts reflect the current active task id, title, and status before agents resume work",
+    },
+    {
+        "refresh_domain": "completed_phase_summary_refresh",
+        "signal_type": "completed_phase_summary_refresh_check",
+        "severity": "warning",
+        "detected_state": "completed phase summary in handoff artifacts has not been explicitly refreshed against done task records and changelog",
+        "expected_state": "handoff artifacts accurately reflect which phases are completed before agents build continuation plans",
+    },
+    {
+        "refresh_domain": "next_phase_summary_refresh",
+        "signal_type": "next_phase_summary_refresh_check",
+        "severity": "warning",
+        "detected_state": "next phase summary in handoff artifacts has not been explicitly validated against current roadmap position",
+        "expected_state": "next phase guidance in handoff artifacts aligns with the authoritative roadmap position before agents proceed",
+    },
+    {
+        "refresh_domain": "roadmap_position_refresh",
+        "signal_type": "roadmap_position_refresh_check",
+        "severity": "blocker",
+        "detected_state": "roadmap position in handoff artifacts has not been explicitly refreshed against PROJECT_STATUS.md and CHANGELOG.md",
+        "expected_state": "roadmap position in handoff artifacts accurately reflects the current governed roadmap position before agent resumption",
+    },
+    {
+        "refresh_domain": "governance_status_refresh",
+        "signal_type": "governance_status_refresh_check",
+        "severity": "blocker",
+        "detected_state": "governance status in handoff artifacts has not been explicitly refreshed against current health, check, and session state",
+        "expected_state": "governance status in handoff artifacts accurately reflects current health=healthy, check=passed, session=verified posture",
+    },
+    {
+        "refresh_domain": "runtime_status_refresh",
+        "signal_type": "runtime_status_refresh_check",
+        "severity": "warning",
+        "detected_state": "runtime status in handoff artifacts has not been explicitly refreshed against current runtime governance posture",
+        "expected_state": "runtime status in handoff artifacts accurately reflects current runtime governance posture before agents plan runtime work",
+    },
+    {
+        "refresh_domain": "bootstrap_profile_refresh",
+        "signal_type": "bootstrap_profile_refresh_check",
+        "severity": "blocker",
+        "detected_state": "bootstrap profile guidance uses python -m pytest instead of python -m pytest -n auto in implementation-oriented paths",
+        "expected_state": "implementation bootstrap profile consistently uses python -m pytest -n auto as the standard test command",
+    },
+    {
+        "refresh_domain": "bootstrap_validation_refresh",
+        "signal_type": "bootstrap_validation_refresh_check",
+        "severity": "blocker",
+        "detected_state": "bootstrap validation commands include python -m pytest without -n auto in implementation workflow paths",
+        "expected_state": "bootstrap validation commands use python -m pytest -n auto in all implementation workflow paths",
+    },
+    {
+        "refresh_domain": "handoff_freshness_refresh",
+        "signal_type": "handoff_freshness_refresh_check",
+        "severity": "warning",
+        "detected_state": "handoff artifact freshness has not been explicitly validated since the last completed phase transition",
+        "expected_state": "handoff artifacts are fresh and accurately reflect current state after each phase transition",
+    },
+    {
+        "refresh_domain": "agent_context_refresh",
+        "signal_type": "agent_context_refresh_check",
+        "severity": "warning",
+        "detected_state": "agent context guidance has not been explicitly refreshed to reflect current roadmap, task, and session state",
+        "expected_state": "agent context guidance accurately reflects current roadmap position, active task, and session state for incoming agents",
+    },
+)
+
+_HSR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "refresh handoff state",
+        "refresh bootstrap guidance",
+        "refresh implementation profile guidance",
+        "refresh roadmap summaries",
+        "refresh continuation summaries",
+        "modernize testing guidance",
+        "detect stale handoff artifacts",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify runtime governance",
+        "modify execution governance",
+        "enable execution",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "handoff_update_allowed": True,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": False,
+    "phase": "61I",
+}
+
+
+def build_handoff_state_refresh() -> dict:
+    """Build a governed handoff state refresh scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _HSR_DOMAIN_SIGNALS]
+
+    domain_count = len(_HSR_REFRESH_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        refresh_status = "refresh_required"
+    elif warning_count > 0:
+        refresh_status = "refreshed_with_warnings"
+    else:
+        refresh_status = "refreshed"
+
+    handoff_id = f"hsr-{ts}"
+    signals = [
+        {
+            "signal_id": f"hsrs-{ts}-{index:02d}",
+            "handoff_id": handoff_id,
+            "refresh_domain": signal["refresh_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"hsra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "refresh_status": refresh_status,
+        "handoff_update_allowed": True,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"hsrsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "refresh_status": refresh_status,
+        "handoff_update_allowed": True,
+        "human_review_required": True,
+    }
+
+    return {
+        "handoff_state_refresh_overview": {
+            "overview_id": f"61i-{ts}",
+            "generated_at": generated_at,
+            "phase": "61I",
+            "title": "Handoff State Refresh",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "refresh_status": refresh_status,
+            "handoff_update_allowed": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Refreshes and modernizes PCAE handoff state so future agents receive accurate, "
+                "current, roadmap-aware continuation guidance and bootstrap instructions. "
+                "Handoff artifacts, bootstrap guidance, and roadmap summaries may be refreshed. "
+                "Execution remains disabled. Runtime invocation remains disabled. "
+                f"refresh_status={refresh_status}. handoff_update_allowed=True. "
+                "execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "HandoffStateRefreshSignal",
+            "field_count": len(_HSR_SIGNAL_FIELDS),
+            "required_field_count": len(_HSR_SIGNAL_FIELDS),
+            "severity_values": list(_HSR_SEVERITY_VALUES),
+            "handoff_update_allowed_in_61i": True,
+            "execution_allowed_always_false_in_61i": True,
+            "fields": [dict(field) for field in _HSR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "HandoffStateRefreshAssessment",
+            "field_count": len(_HSR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_HSR_ASSESSMENT_FIELDS),
+            "supported_refresh_statuses": list(_HSR_REFRESH_STATUSES),
+            "handoff_update_allowed_in_61i": True,
+            "execution_allowed_always_false_in_61i": True,
+            "human_review_required_always_true_in_61i": True,
+            "fields": [dict(field) for field in _HSR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "HandoffStateRefreshSummary",
+            "field_count": len(_HSR_SUMMARY_FIELDS),
+            "required_field_count": len(_HSR_SUMMARY_FIELDS),
+            "supported_refresh_statuses": list(_HSR_REFRESH_STATUSES),
+            "handoff_update_allowed_in_61i": True,
+            "execution_allowed_always_false_in_61i": True,
+            "human_review_required_always_true_in_61i": True,
+            "fields": [dict(field) for field in _HSR_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "bootstrap_modernization": dict(_HSR_BOOTSTRAP_MODERNIZATION),
+        "governance_boundaries": dict(_HSR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_HSR_INPUT_SOURCES),
+        "advisory": HANDOFF_STATE_REFRESH_ADVISORY,
     }
