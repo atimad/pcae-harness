@@ -1,7 +1,7 @@
 {
   "active_task": {
-    "id": "20260606-2117-documentation-refresh-and-release-checkpoint",
-    "title": "Documentation refresh and release checkpoint"
+    "id": "20260606-2341-runtime-integration-readiness",
+    "title": "Runtime Integration Readiness"
   },
   "architectural_notes": [],
   "blockers": [],
@@ -10,26 +10,14 @@
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/session.json",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260605-1052-multi-agent-governance-audit.md",
-        "status": " D"
-      },
-      {
-        "path": "tasks/active/20260606-2117-documentation-refresh-and-release-checkpoint.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260605-1052-multi-agent-governance-audit.md",
+        "path": "tasks/active/20260606-2341-runtime-integration-readiness.md",
         "status": "??"
       }
     ],
-    "status_summary": "4 changed files"
+    "status_summary": "1 changed file"
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-06T19:38:08.429418+00:00",
+  "timestamp": "2026-06-06T21:42:09.689561+00:00",
   "warnings": []
 }

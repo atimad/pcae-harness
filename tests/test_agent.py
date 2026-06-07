@@ -41782,3 +41782,170 @@ def test_52q_human_output(capsys) -> None:
         "recovery_ready=False",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 54A — Runtime Integration Readiness
+# ---------------------------------------------------------------------------
+
+
+def test_54a_json_top_level_keys(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "runtime_integration_readiness_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["runtime_integration_readiness_overview"]
+    assert overview["phase"] == "54A"
+    assert overview["domain_count"] == 8
+    assert overview["integration_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_54a_models_and_exact_fields(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RuntimeIntegrationReadinessSignal",
+            [
+                "signal_id", "runtime_id", "readiness_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RuntimeIntegrationReadinessAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "readiness_status", "integration_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RuntimeIntegrationReadinessSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "readiness_status",
+                "integration_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_54a_all_readiness_domains_defined(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "runtime_discovery_readiness",
+        "runtime_registration_readiness",
+        "runtime_identity_readiness",
+        "runtime_capability_readiness",
+        "runtime_sandbox_readiness",
+        "runtime_timeout_readiness",
+        "runtime_output_capture_readiness",
+        "runtime_governance_readiness",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_readiness_statuses"]) == {
+        "ready", "ready_with_warnings", "readiness_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_readiness_statuses"]) == {
+        "ready", "ready_with_warnings", "readiness_required", "blocked",
+    }
+
+
+def test_54a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["runtime_id"]
+        assert signal["readiness_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_54a_assessment_and_summary(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["readiness_status"] == "readiness_required"
+    assert assessment["integration_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["integration_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_54a_input_sources(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeContractHardeningAssessment",
+        "SandboxHardeningAssessment",
+        "TimeoutHardeningAssessment",
+        "OutputIntegrityAssessment",
+        "ExecutionReadinessSummary",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+        "ConflictResolutionAssessment",
+    ]
+
+
+def test_54a_governance_boundaries(capsys) -> None:
+    main(["runtime-integration-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "54A"
+    assert boundaries["read_only"] is True
+    assert boundaries["integration_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "register runtimes",
+        "modify runtime configuration", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_54a_human_output(capsys) -> None:
+    main(["runtime-integration-readiness"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime integration readiness",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Readiness signals",
+        "Governance boundaries",
+        "Integration allowed:    no",
+        "Execution allowed:      no",
+        "integration_allowed=False",
+    ):
+        assert text in output

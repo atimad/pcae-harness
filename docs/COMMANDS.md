@@ -20,6 +20,7 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Runtime Hardening (52F–52I)](#runtime-hardening-52f52i) — contract, sandbox, timeout, output integrity
 - [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
 - [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
+- [Runtime Integration (54A+)](#runtime-integration-54a) — runtime integration readiness
 
 ---
 
@@ -936,3 +937,12 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae recovery-validation`
 - `pcae recovery-validation --json`
+
+---
+
+# Runtime Integration (54A+)
+
+## runtime-integration-readiness
+
+- `pcae runtime-integration-readiness`
+- `pcae runtime-integration-readiness --json`

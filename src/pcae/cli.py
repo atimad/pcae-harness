@@ -151,6 +151,7 @@ from pcae.commands.agent import (
     run_failure_injection,
     run_corruption_simulation,
     run_recovery_validation,
+    run_runtime_integration_readiness,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4236,6 +4237,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     recovery_validation_parser.set_defaults(handler=run_recovery_validation)
+
+    rir_parser = subparsers.add_parser(
+        "runtime-integration-readiness",
+        help="Assess readiness for runtime integration across all governance layers (Phase 54A).",
+    )
+    rir_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rir_parser.set_defaults(handler=run_runtime_integration_readiness)
 
     return parser
 

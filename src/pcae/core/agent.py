@@ -56164,3 +56164,288 @@ def build_recovery_validation() -> dict:
         "input_sources": list(_RV_INPUT_SOURCES),
         "advisory": RECOVERY_VALIDATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 54A — Runtime Integration Readiness
+# ---------------------------------------------------------------------------
+
+RUNTIME_INTEGRATION_READINESS_ADVISORY = (
+    "Runtime integration readiness is informational and assessment only; readiness "
+    "requirements are evaluated and blockers reported, but no runtime is invoked, "
+    "registered, installed, or configured. "
+    "No prompt is executed, no execution authorization occurs, "
+    "no repository modification occurs. "
+    "integration_allowed=False and execution_allowed=False in Phase 54A. "
+    "Human review is always required."
+)
+
+_RIR_READINESS_DOMAINS: tuple[str, ...] = (
+    "runtime_discovery_readiness",
+    "runtime_registration_readiness",
+    "runtime_identity_readiness",
+    "runtime_capability_readiness",
+    "runtime_sandbox_readiness",
+    "runtime_timeout_readiness",
+    "runtime_output_capture_readiness",
+    "runtime_governance_readiness",
+)
+
+_RIR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RIR_READINESS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "readiness_required",
+    "blocked",
+)
+
+_RIR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "readiness_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RIR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "integration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RIR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "integration_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RIR_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeContractHardeningAssessment",
+    "SandboxHardeningAssessment",
+    "TimeoutHardeningAssessment",
+    "OutputIntegrityAssessment",
+    "ExecutionReadinessSummary",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+    "ConflictResolutionAssessment",
+)
+
+_RIR_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_discovery_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_discovery_completeness",
+        "severity": "blocker",
+        "detected_state": "runtime discovery mechanism and registry not validated for integration",
+        "expected_state": "all configured runtimes are discoverable and registry is coherent before integration",
+    },
+    {
+        "domain": "runtime_registration_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_registration_completeness",
+        "severity": "blocker",
+        "detected_state": "runtime registration workflow and governance artifact linkage not validated",
+        "expected_state": "runtime registration produces governed artifacts linked to policy and human review gate",
+    },
+    {
+        "domain": "runtime_identity_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_identity_verification",
+        "severity": "blocker",
+        "detected_state": "runtime identity and provenance not verified for integration eligibility",
+        "expected_state": "each runtime has verified identity, version, and provenance before integration begins",
+    },
+    {
+        "domain": "runtime_capability_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_capability_assessment",
+        "severity": "blocker",
+        "detected_state": "runtime capability scope not assessed against governance policy constraints",
+        "expected_state": "runtime capabilities are scoped, declared, and validated against task contract constraints",
+    },
+    {
+        "domain": "runtime_sandbox_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "sandbox_boundary_readiness",
+        "severity": "blocker",
+        "detected_state": "sandbox isolation boundaries not verified ready for live runtime integration",
+        "expected_state": "sandbox contracts are confirmed: filesystem, process, network, and environment boundaries enforced",
+    },
+    {
+        "domain": "runtime_timeout_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "timeout_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "timeout governance contracts not verified ready for live runtime integration",
+        "expected_state": "timeout parameters are declared, enforced, and recovery paths exist for every timeout domain",
+    },
+    {
+        "domain": "runtime_output_capture_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "output_capture_path_readiness",
+        "severity": "blocker",
+        "detected_state": "output capture paths and integrity verification not validated for integration",
+        "expected_state": "output capture is confirmed: path exists, integrity checks defined, and attribution model present",
+    },
+    {
+        "domain": "runtime_governance_readiness",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "governance_chain_integration_readiness",
+        "severity": "blocker",
+        "detected_state": "governance chain integration prerequisites not satisfied across all six architecture layers",
+        "expected_state": "all governance, execution, recovery, hardening, concurrency, and resilience layers confirm integration readiness",
+    },
+)
+
+_RTIR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect runtime readiness requirements",
+        "assess runtime integration prerequisites",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "integration_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "54A",
+}
+
+
+def build_runtime_integration_readiness() -> dict:
+    """Build a read-only runtime integration readiness assessment scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RIR_DOMAIN_SIGNALS]
+
+    domain_count = len(_RIR_READINESS_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        readiness_status = "readiness_required"
+    elif warning_count > 0:
+        readiness_status = "ready_with_warnings"
+    else:
+        readiness_status = "ready"
+
+    signals = [
+        {
+            "signal_id": f"rirs-{ts}-{index:02d}",
+            "runtime_id": signal["runtime_id"],
+            "readiness_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rira-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "integration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rirsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": readiness_status,
+        "integration_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_integration_readiness_overview": {
+            "overview_id": f"54a-{ts}",
+            "generated_at": generated_at,
+            "phase": "54A",
+            "title": "Runtime Integration Readiness",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "readiness_status": readiness_status,
+            "integration_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Assesses readiness for integrating real runtimes into PCAE. "
+                "No runtime is invoked, registered, installed, or configured. "
+                f"readiness_status={readiness_status}. integration_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeIntegrationReadinessSignal",
+            "field_count": len(_RIR_SIGNAL_FIELDS),
+            "required_field_count": len(_RIR_SIGNAL_FIELDS),
+            "severity_values": list(_RIR_SEVERITY_VALUES),
+            "integration_allowed_always_false_in_54a": True,
+            "fields": [dict(field) for field in _RIR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeIntegrationReadinessAssessment",
+            "field_count": len(_RIR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RIR_ASSESSMENT_FIELDS),
+            "supported_readiness_statuses": list(_RIR_READINESS_STATUSES),
+            "integration_allowed_always_false_in_54a": True,
+            "execution_allowed_always_false_in_54a": True,
+            "human_review_required_always_true_in_54a": True,
+            "fields": [dict(field) for field in _RIR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeIntegrationReadinessSummary",
+            "field_count": len(_RIR_SUMMARY_FIELDS),
+            "required_field_count": len(_RIR_SUMMARY_FIELDS),
+            "supported_readiness_statuses": list(_RIR_READINESS_STATUSES),
+            "integration_allowed_always_false_in_54a": True,
+            "human_review_required_always_true_in_54a": True,
+            "fields": [dict(field) for field in _RIR_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RTIR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RIR_INPUT_SOURCES),
+        "advisory": RUNTIME_INTEGRATION_READINESS_ADVISORY,
+    }
