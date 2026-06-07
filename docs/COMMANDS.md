@@ -1001,3 +1001,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae task-lifecycle-governance`
 - `pcae task-lifecycle-governance --json`
+
+## agent-handoff-modernization
+
+- `pcae agent-handoff-modernization`
+- `pcae agent-handoff-modernization --json`

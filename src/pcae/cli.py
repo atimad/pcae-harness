@@ -163,6 +163,7 @@ from pcae.commands.agent import (
     run_runtime_capability_inventory,
     run_runtime_trust_model,
     run_task_lifecycle_governance,
+    run_agent_handoff_modernization,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4380,6 +4381,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     tlg_parser.set_defaults(handler=run_task_lifecycle_governance)
+
+    ahm_parser = subparsers.add_parser(
+        "agent-handoff-modernization",
+        help="Modernize PCAE agent handoff continuity requirements without rewriting handoff state (Phase 61F).",
+    )
+    ahm_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    ahm_parser.set_defaults(handler=run_agent_handoff_modernization)
 
     return parser
 

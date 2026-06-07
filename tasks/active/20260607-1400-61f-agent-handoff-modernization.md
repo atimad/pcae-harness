@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-1400-61e-task-lifecycle-governance
+20260607-1400-61f-agent-handoff-modernization
 
 ## Title
 
-Task Lifecycle Governance Hardening (Phase 61E)
+Agent Handoff Modernization (Phase 61F)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement pcae task-lifecycle-governance: 3 models (TaskLifecycleGovernanceSignal, TaskLifecycleGovernanceAssessment, TaskLifecycleGovernanceSummary), 8 governance domains, task_update_allowed=False, session_update_allowed=False, human_review_required=True in Phase 61E.
+Implement pcae agent-handoff-modernization: 3 models (AgentHandoffModernizationSignal, AgentHandoffModernizationAssessment, AgentHandoffModernizationSummary), 10 modernization domains, handoff_update_allowed=False, session_update_allowed=False, human_review_required=True in Phase 61F.
 
 ## Allowed Files
 
@@ -62,24 +62,26 @@ strict
 
 - No runtime invocation
 - No prompt execution
-- No execution authorization
-- No automatic task completion
-- No automatic task creation
+- No automatic handoff rewrite
 - No task movement
 - No session rewrite
 - No repository modification by agents
 
 ## Acceptance Checks
 
-- pcae task-lifecycle-governance works
-- pcae task-lifecycle-governance --json works
-- TaskLifecycleGovernanceSignal implemented
-- TaskLifecycleGovernanceAssessment implemented
-- TaskLifecycleGovernanceSummary implemented
-- all governance domains defined
-- stale task contamination prevention included
-- next task recommendation alignment included
-- task_update_allowed remains false
+- pcae agent-handoff-modernization works
+- pcae agent-handoff-modernization --json works
+- AgentHandoffModernizationSignal implemented
+- AgentHandoffModernizationAssessment implemented
+- AgentHandoffModernizationSummary implemented
+- all modernization domains defined
+- completed phase summary included
+- active phase summary included
+- next phase recommendation included
+- roadmap position summary included
+- runtime status summary included
+- governance status summary included
+- handoff_update_allowed remains false
 - session_update_allowed remains false
 - human review required
 - pcae status coherence passes

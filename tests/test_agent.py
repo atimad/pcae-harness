@@ -43834,3 +43834,181 @@ def test_61e_human_output(capsys) -> None:
         "task_update_allowed=False",
     ):
         assert text in output
+
+
+def test_61f_json_top_level_keys(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "agent_handoff_modernization_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["agent_handoff_modernization_overview"]
+    assert overview["phase"] == "61F"
+    assert overview["domain_count"] == 10
+    assert overview["handoff_update_allowed"] is False
+    assert overview["session_update_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61f_models_and_exact_fields(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "AgentHandoffModernizationSignal",
+            [
+                "signal_id", "handoff_id", "agent_id", "modernization_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "AgentHandoffModernizationAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "modernization_status", "handoff_update_allowed",
+                "session_update_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "AgentHandoffModernizationSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "modernization_status",
+                "handoff_update_allowed", "session_update_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61f_all_modernization_domains_defined(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["modernization_domain"] for s in data["domain_signals"]} == {
+        "completed_phase_summary",
+        "active_phase_summary",
+        "next_phase_recommendation",
+        "roadmap_position_summary",
+        "active_task_alignment",
+        "runtime_status_summary",
+        "governance_status_summary",
+        "handoff_freshness_validation",
+        "agent_specific_context",
+        "human_review_boundary",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_modernization_statuses"]) == {
+        "modernized", "modernized_with_warnings", "modernization_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_modernization_statuses"]) == {
+        "modernized", "modernized_with_warnings", "modernization_required", "blocked",
+    }
+
+
+def test_61f_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 10
+    for signal in data["signals"]:
+        assert signal["signal_id"]
+        assert signal["handoff_id"]
+        assert signal["agent_id"]
+        assert signal["modernization_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61f_assessment_and_summary(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["modernization_status"] == "modernization_required"
+    assert assessment["handoff_update_allowed"] is False
+    assert assessment["session_update_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 10
+    assert summary["handoff_update_allowed"] is False
+    assert summary["session_update_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61f_input_sources(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "active task state",
+        "done task state",
+        "session state",
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md",
+        "tasks/DONE.md",
+        "tasks/TODO.md",
+        "tasks/DECISIONS.md",
+        "runtime roadmap state",
+        "TaskLifecycleGovernanceAssessment",
+        "RuntimeRegistrySummary",
+        "RuntimeDiscoverySummary",
+        "RuntimeCapabilityInventorySummary",
+        "RuntimeTrustSummary",
+    ]
+
+
+def test_61f_governance_boundaries(capsys) -> None:
+    main(["agent-handoff-modernization", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61F"
+    assert boundaries["read_only"] is True
+    assert boundaries["modernization_automatic"] is False
+    assert boundaries["handoff_update_allowed"] is False
+    assert boundaries["session_update_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "rewrite handoff artifacts", "rewrite session state", "complete tasks",
+        "create tasks", "move task files", "rename active tasks",
+        "invoke runtimes", "execute prompts", "modify repository",
+        "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61f_human_output(capsys) -> None:
+    main(["agent-handoff-modernization"])
+    output = capsys.readouterr().out
+    for text in (
+        "Agent handoff modernization",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Modernization signals",
+        "Governance boundaries",
+        "Handoff update allowed: no",
+        "Session update allowed: no",
+        "Modernization status:   modernization_required",
+        "handoff_update_allowed=False",
+    ):
+        assert text in output

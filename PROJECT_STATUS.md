@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61E: Task Lifecycle Governance Hardening.
+Phase 61F: Agent Handoff Modernization.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -93,6 +93,12 @@ relationships with `pcae task-lifecycle-governance` and
 `pcae task-lifecycle-governance --json`, defining governance domains, stale
 task contamination checks, next-task recommendation alignment, and remediation
 guidance while keeping task and session updates disabled.
+PCAE can inspect governed agent handoff modernization requirements with
+`pcae agent-handoff-modernization` and
+`pcae agent-handoff-modernization --json`, defining handoff continuity
+domains, roadmap-aware continuity checks, runtime/governance summary
+requirements, and human-review boundaries while keeping handoff and session
+updates disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -3997,7 +4003,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61E: Task Lifecycle Governance Hardening.
+Phase 61F: Agent Handoff Modernization.
 
 ## Next
 

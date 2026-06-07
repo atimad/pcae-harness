@@ -58266,6 +58266,15 @@ TASK_LIFECYCLE_GOVERNANCE_ADVISORY = (
     "and human_review_required=True in Phase 61E. Human review is always required."
 )
 
+AGENT_HANDOFF_MODERNIZATION_ADVISORY = (
+    "Agent handoff modernization is assessment and reporting only; "
+    "handoff continuity requirements are inspected and blockers reported, but no handoff artifacts are rewritten, "
+    "no session state is rewritten, no tasks are completed, created, moved, or renamed, "
+    "no runtimes are invoked, no prompts are executed, and no repository modification occurs. "
+    "modernization may be recommended but handoff_update_allowed=False, session_update_allowed=False, "
+    "and human_review_required=True in Phase 61F. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -59773,4 +59782,306 @@ def build_task_lifecycle_governance() -> dict:
         "governance_boundaries": dict(_TLG_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_TLG_INPUT_SOURCES),
         "advisory": TASK_LIFECYCLE_GOVERNANCE_ADVISORY,
+    }
+
+
+_AHM_MODERNIZATION_DOMAINS: tuple[str, ...] = (
+    "completed_phase_summary",
+    "active_phase_summary",
+    "next_phase_recommendation",
+    "roadmap_position_summary",
+    "active_task_alignment",
+    "runtime_status_summary",
+    "governance_status_summary",
+    "handoff_freshness_validation",
+    "agent_specific_context",
+    "human_review_boundary",
+)
+
+_AHM_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_AHM_MODERNIZATION_STATUSES: tuple[str, ...] = (
+    "modernized",
+    "modernized_with_warnings",
+    "modernization_required",
+    "blocked",
+)
+
+_AHM_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "handoff_id", "type": "str", "required": True},
+    {"name": "agent_id", "type": "str", "required": True},
+    {"name": "modernization_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_AHM_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "modernization_status", "type": "str", "required": True},
+    {"name": "handoff_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_AHM_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "modernization_status", "type": "str", "required": True},
+    {"name": "handoff_update_allowed", "type": "bool", "required": True},
+    {"name": "session_update_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_AHM_INPUT_SOURCES: tuple[str, ...] = (
+    "active task state",
+    "done task state",
+    "session state",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/DECISIONS.md",
+    "runtime roadmap state",
+    "TaskLifecycleGovernanceAssessment",
+    "RuntimeRegistrySummary",
+    "RuntimeDiscoverySummary",
+    "RuntimeCapabilityInventorySummary",
+    "RuntimeTrustSummary",
+)
+
+_AHM_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "modernization_domain": "completed_phase_summary",
+        "signal_type": "completed_phase_summary_check",
+        "severity": "warning",
+        "detected_state": "completed-phase summary requirements have not been fully validated for freshness and handoff readability",
+        "expected_state": "handoff continuity includes a fresh completed-phase summary before future agents rely on historical completion context",
+    },
+    {
+        "modernization_domain": "active_phase_summary",
+        "signal_type": "active_phase_summary_check",
+        "severity": "blocker",
+        "detected_state": "active-phase summary requirements have not been explicitly validated against current task and roadmap state",
+        "expected_state": "handoff continuity includes an accurate active-phase summary aligned with current task and roadmap state",
+    },
+    {
+        "modernization_domain": "next_phase_recommendation",
+        "signal_type": "next_phase_recommendation_check",
+        "severity": "warning",
+        "detected_state": "next-phase recommendation requirements have not been fully validated for roadmap-aware continuity guidance",
+        "expected_state": "handoff continuity includes a roadmap-aware next-phase recommendation before future agents rely on transition guidance",
+    },
+    {
+        "modernization_domain": "roadmap_position_summary",
+        "signal_type": "roadmap_position_summary_check",
+        "severity": "blocker",
+        "detected_state": "roadmap-position summary requirements have not been explicitly validated against current phase and completed phase history",
+        "expected_state": "handoff continuity summarizes current roadmap position using authoritative current and completed phase context",
+    },
+    {
+        "modernization_domain": "active_task_alignment",
+        "signal_type": "active_task_alignment_check",
+        "severity": "blocker",
+        "detected_state": "active-task alignment requirements have not been explicitly validated for handoff continuity artifacts",
+        "expected_state": "handoff continuity aligns active task identifiers, titles, and current phase references before future agents resume work",
+    },
+    {
+        "modernization_domain": "runtime_status_summary",
+        "signal_type": "runtime_status_summary_check",
+        "severity": "warning",
+        "detected_state": "runtime-status summary requirements have not been fully validated against current runtime governance outputs",
+        "expected_state": "handoff continuity includes current runtime registry, discovery, capability, and trust summary posture before future agents rely on runtime context",
+    },
+    {
+        "modernization_domain": "governance_status_summary",
+        "signal_type": "governance_status_summary_check",
+        "severity": "blocker",
+        "detected_state": "governance-status summary requirements have not been explicitly validated against session, task, and roadmap governance outputs",
+        "expected_state": "handoff continuity includes current governance status across session, task, and roadmap posture before future agents resume work",
+    },
+    {
+        "modernization_domain": "handoff_freshness_validation",
+        "signal_type": "handoff_freshness_validation_check",
+        "severity": "blocker",
+        "detected_state": "handoff freshness validation has not been explicitly performed against stale or incomplete continuity state",
+        "expected_state": "handoff continuity is validated for freshness so future agents receive current, non-stale continuity information",
+    },
+    {
+        "modernization_domain": "agent_specific_context",
+        "signal_type": "agent_specific_context_check",
+        "severity": "warning",
+        "detected_state": "agent-specific continuity context requirements have not been fully validated for current agent role and bootstrap expectations",
+        "expected_state": "handoff continuity provides current agent-specific context without embedding stale role or bootstrap assumptions",
+    },
+    {
+        "modernization_domain": "human_review_boundary",
+        "signal_type": "human_review_boundary_check",
+        "severity": "blocker",
+        "detected_state": "human-review boundary requirements have not been explicitly validated for handoff modernization guidance",
+        "expected_state": "handoff modernization guidance preserves explicit human-review boundaries before any future agent acts on the continuity information",
+    },
+)
+
+_AHM_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect agent handoff requirements",
+        "detect stale or incomplete handoff state",
+        "detect missing next-phase recommendations",
+        "detect missing runtime/governance summaries",
+        "report blockers and warnings",
+        "recommend human-reviewed modernization",
+    ],
+    "may_not": [
+        "rewrite handoff artifacts",
+        "rewrite session state",
+        "complete tasks",
+        "create tasks",
+        "move task files",
+        "rename active tasks",
+        "invoke runtimes",
+        "execute prompts",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "modernization_automatic": False,
+    "handoff_update_allowed": False,
+    "session_update_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61F",
+}
+
+
+def build_agent_handoff_modernization() -> dict:
+    """Build a governed agent handoff modernization scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _AHM_DOMAIN_SIGNALS]
+
+    domain_count = len(_AHM_MODERNIZATION_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        modernization_status = "modernization_required"
+    elif warning_count > 0:
+        modernization_status = "modernized_with_warnings"
+    else:
+        modernization_status = "modernized"
+
+    handoff_id = f"ahm-{ts}"
+    agent_id = "current_agent"
+    signals = [
+        {
+            "signal_id": f"ahms-{ts}-{index:02d}",
+            "handoff_id": handoff_id,
+            "agent_id": agent_id,
+            "modernization_domain": signal["modernization_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"ahma-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "modernization_status": modernization_status,
+        "handoff_update_allowed": False,
+        "session_update_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ahmsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "modernization_status": modernization_status,
+        "handoff_update_allowed": False,
+        "session_update_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "agent_handoff_modernization_overview": {
+            "overview_id": f"61f-{ts}",
+            "generated_at": generated_at,
+            "phase": "61F",
+            "title": "Agent Handoff Modernization",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "modernization_status": modernization_status,
+            "handoff_update_allowed": False,
+            "session_update_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Modernizes the PCAE agent handoff model so future agents receive accurate, current, "
+                "roadmap-aware continuity information. No handoff artifacts are rewritten, no session state "
+                "is rewritten, no task files are moved or renamed, and no repository modification occurs. "
+                f"modernization_status={modernization_status}. handoff_update_allowed=False. "
+                "session_update_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "AgentHandoffModernizationSignal",
+            "field_count": len(_AHM_SIGNAL_FIELDS),
+            "required_field_count": len(_AHM_SIGNAL_FIELDS),
+            "severity_values": list(_AHM_SEVERITY_VALUES),
+            "handoff_update_allowed_always_false_in_61f": True,
+            "session_update_allowed_always_false_in_61f": True,
+            "fields": [dict(field) for field in _AHM_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "AgentHandoffModernizationAssessment",
+            "field_count": len(_AHM_ASSESSMENT_FIELDS),
+            "required_field_count": len(_AHM_ASSESSMENT_FIELDS),
+            "supported_modernization_statuses": list(_AHM_MODERNIZATION_STATUSES),
+            "handoff_update_allowed_always_false_in_61f": True,
+            "session_update_allowed_always_false_in_61f": True,
+            "human_review_required_always_true_in_61f": True,
+            "fields": [dict(field) for field in _AHM_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "AgentHandoffModernizationSummary",
+            "field_count": len(_AHM_SUMMARY_FIELDS),
+            "required_field_count": len(_AHM_SUMMARY_FIELDS),
+            "supported_modernization_statuses": list(_AHM_MODERNIZATION_STATUSES),
+            "handoff_update_allowed_always_false_in_61f": True,
+            "session_update_allowed_always_false_in_61f": True,
+            "human_review_required_always_true_in_61f": True,
+            "fields": [dict(field) for field in _AHM_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_AHM_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_AHM_INPUT_SOURCES),
+        "advisory": AGENT_HANDOFF_MODERNIZATION_ADVISORY,
     }
