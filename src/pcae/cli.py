@@ -156,6 +156,7 @@ from pcae.commands.agent import (
     run_runtime_output_persistence,
     run_runtime_output_review,
     run_multi_agent_read_only_execution,
+    run_controlled_write_dry_run,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4296,6 +4297,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     marep_parser.set_defaults(handler=run_multi_agent_read_only_execution)
+
+    cwdr_parser = subparsers.add_parser(
+        "controlled-write-dry-run",
+        help="Define governed dry-run model for future controlled write execution (Phase 59A).",
+    )
+    cwdr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    cwdr_parser.set_defaults(handler=run_controlled_write_dry_run)
 
     return parser
 

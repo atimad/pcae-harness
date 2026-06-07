@@ -966,3 +966,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae multi-agent-read-only-execution`
 - `pcae multi-agent-read-only-execution --json`
+
+## controlled-write-dry-run
+
+- `pcae controlled-write-dry-run`
+- `pcae controlled-write-dry-run --json`

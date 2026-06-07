@@ -42602,3 +42602,177 @@ def test_58a_human_output(capsys) -> None:
         "pilot_allowed=False",
     ):
         assert text in output
+
+
+def test_59a_json_top_level_keys(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "controlled_write_dry_run_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["controlled_write_dry_run_overview"]
+    assert overview["phase"] == "59A"
+    assert overview["domain_count"] == 8
+    assert overview["dry_run_allowed"] is False
+    assert overview["write_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_59a_models_and_exact_fields(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "ControlledWriteDryRunSignal",
+            [
+                "signal_id", "dry_run_id", "dry_run_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "ControlledWriteDryRunAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "dry_run_status", "dry_run_allowed",
+                "write_allowed", "execution_allowed", "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "ControlledWriteDryRunSummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "dry_run_status",
+                "dry_run_allowed", "write_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_59a_all_dry_run_domains_defined(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "write_scope_dry_run",
+        "file_impact_dry_run",
+        "diff_preview_dry_run",
+        "rollback_plan_dry_run",
+        "audit_trace_dry_run",
+        "evidence_linkage_dry_run",
+        "human_approval_gate_dry_run",
+        "execution_blocking_dry_run",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_dry_run_statuses"]) == {
+        "ready", "ready_with_warnings", "dry_run_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_dry_run_statuses"]) == {
+        "ready", "ready_with_warnings", "dry_run_required", "blocked",
+    }
+
+
+def test_59a_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["dry_run_id"]
+        assert signal["dry_run_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_59a_assessment_and_summary(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["dry_run_status"] == "dry_run_required"
+    assert assessment["dry_run_allowed"] is False
+    assert assessment["write_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["dry_run_allowed"] is False
+    assert summary["write_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_59a_input_sources(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "WriteRecommendationSummary",
+        "WriteGovernanceAuditSummary",
+        "WriteReadinessSummary",
+        "WriteEvidenceSummary",
+        "WriteAuditSummary",
+        "WriteRollbackVerificationSummary",
+        "RuntimeIntegrationReadinessAssessment",
+        "ReadOnlyRuntimeInvocationAssessment",
+        "RuntimeOutputPersistenceAssessment",
+        "RuntimeOutputReviewAssessment",
+        "MultiAgentReadOnlyExecutionAssessment",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_59a_governance_boundaries(capsys) -> None:
+    main(["controlled-write-dry-run", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "59A"
+    assert boundaries["read_only"] is True
+    assert boundaries["dry_run_allowed"] is False
+    assert boundaries["write_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "modify files",
+        "generate actual diffs from changes", "persist outputs",
+        "approve writes", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_59a_human_output(capsys) -> None:
+    main(["controlled-write-dry-run"])
+    output = capsys.readouterr().out
+    for text in (
+        "Controlled write dry-run",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Dry-run signals",
+        "Governance boundaries",
+        "Dry-run allowed:        no",
+        "Write allowed:          no",
+        "Execution allowed:      no",
+        "dry_run_allowed=False",
+    ):
+        assert text in output

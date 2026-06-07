@@ -56620,6 +56620,298 @@ _RORI_GOVERNANCE_BOUNDARIES: dict = {
 }
 
 
+CONTROLLED_WRITE_DRY_RUN_ADVISORY = (
+    "Controlled write dry-run is informational and planning only; "
+    "dry-run prerequisites are evaluated and blockers reported, but no files are modified, "
+    "no runtime is invoked, no prompt is executed, no actual diffs are generated from changes, "
+    "no execution authorization occurs, no repository modification occurs. "
+    "dry_run_allowed=False, write_allowed=False, and execution_allowed=False in Phase 59A. "
+    "Human review is always required."
+)
+
+_CWDR_DRY_RUN_DOMAINS: tuple[str, ...] = (
+    "write_scope_dry_run",
+    "file_impact_dry_run",
+    "diff_preview_dry_run",
+    "rollback_plan_dry_run",
+    "audit_trace_dry_run",
+    "evidence_linkage_dry_run",
+    "human_approval_gate_dry_run",
+    "execution_blocking_dry_run",
+)
+
+_CWDR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CWDR_DRY_RUN_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "dry_run_required",
+    "blocked",
+)
+
+_CWDR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "dry_run_id", "type": "str", "required": True},
+    {"name": "dry_run_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CWDR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "dry_run_status", "type": "str", "required": True},
+    {"name": "dry_run_allowed", "type": "bool", "required": True},
+    {"name": "write_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CWDR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "dry_run_status", "type": "str", "required": True},
+    {"name": "dry_run_allowed", "type": "bool", "required": True},
+    {"name": "write_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CWDR_INPUT_SOURCES: tuple[str, ...] = (
+    "WriteRecommendationSummary",
+    "WriteGovernanceAuditSummary",
+    "WriteReadinessSummary",
+    "WriteEvidenceSummary",
+    "WriteAuditSummary",
+    "WriteRollbackVerificationSummary",
+    "RuntimeIntegrationReadinessAssessment",
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeOutputPersistenceAssessment",
+    "RuntimeOutputReviewAssessment",
+    "MultiAgentReadOnlyExecutionAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_CWDR_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "write_scope_dry_run",
+        "signal_type": "write_scope_definition_readiness",
+        "severity": "blocker",
+        "detected_state": "write scope not defined with governed boundaries, target files, and change limits for dry-run validation",
+        "expected_state": "write scope is defined, bounded, and linked to an approved task contract before any dry-run proceeds",
+    },
+    {
+        "domain": "file_impact_dry_run",
+        "signal_type": "file_impact_preview_readiness",
+        "severity": "blocker",
+        "detected_state": "file impact preview not available for human review prior to any write execution",
+        "expected_state": "file impact preview lists all candidate files, change types, and risk classifications for human reviewer approval",
+    },
+    {
+        "domain": "diff_preview_dry_run",
+        "signal_type": "diff_preview_governance_readiness",
+        "severity": "blocker",
+        "detected_state": "diff preview mechanism not confirmed governance-compliant and isolated from real file modification",
+        "expected_state": "diff preview is generated in an isolated, read-only context with no actual file modification and presented for human review",
+    },
+    {
+        "domain": "rollback_plan_dry_run",
+        "signal_type": "rollback_plan_availability_readiness",
+        "severity": "blocker",
+        "detected_state": "governed rollback plan not confirmed available and linked to the dry-run record before write execution may proceed",
+        "expected_state": "rollback plan is defined, human-reviewed, and linked to the dry-run record with a confirmed recovery path",
+    },
+    {
+        "domain": "audit_trace_dry_run",
+        "signal_type": "audit_trace_dry_run_completeness_readiness",
+        "severity": "blocker",
+        "detected_state": "audit trace for the dry-run plan not confirmed complete with all required events and human review gate",
+        "expected_state": "audit trace captures the full dry-run plan including scope, file impact, diff preview, rollback, and evidence linkage events",
+    },
+    {
+        "domain": "evidence_linkage_dry_run",
+        "signal_type": "evidence_linkage_dry_run_readiness",
+        "severity": "blocker",
+        "detected_state": "evidence linkage between the dry-run plan and the governing write authorization record not confirmed",
+        "expected_state": "dry-run plan is linked to the governing write authorization, task contract, and evidence record before write execution may proceed",
+    },
+    {
+        "domain": "human_approval_gate_dry_run",
+        "signal_type": "human_approval_gate_readiness",
+        "severity": "blocker",
+        "detected_state": "human approval gate for the dry-run plan not confirmed active before write execution may proceed",
+        "expected_state": "human reviewer must approve the full dry-run plan before any controlled write execution is authorized",
+    },
+    {
+        "domain": "execution_blocking_dry_run",
+        "signal_type": "execution_blocking_confirmation_readiness",
+        "severity": "blocker",
+        "detected_state": "execution blocking confirmation not in place to prevent unreviewed write execution after dry-run plan completes",
+        "expected_state": "execution is confirmed blocked pending human approval of the dry-run plan; write_allowed=False until approval is recorded",
+    },
+)
+
+_CWDR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "assess controlled write dry-run prerequisites",
+        "assess file impact preview requirements",
+        "assess diff preview requirements",
+        "assess rollback and audit and evidence linkage",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "modify files",
+        "generate actual diffs from changes",
+        "persist outputs",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "dry_run_allowed": False,
+    "write_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "59A",
+}
+
+
+def build_controlled_write_dry_run() -> dict:
+    """Build a controlled write dry-run scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _CWDR_DOMAIN_SIGNALS]
+
+    domain_count = len(_CWDR_DRY_RUN_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        dry_run_status = "dry_run_required"
+    elif warning_count > 0:
+        dry_run_status = "ready_with_warnings"
+    else:
+        dry_run_status = "ready"
+
+    dry_run_id = f"cwdr-{ts}"
+    signals = [
+        {
+            "signal_id": f"cwdrs-{ts}-{index:02d}",
+            "dry_run_id": dry_run_id,
+            "dry_run_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"cwdra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "dry_run_status": dry_run_status,
+        "dry_run_allowed": False,
+        "write_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"cwdrsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "dry_run_status": dry_run_status,
+        "dry_run_allowed": False,
+        "write_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "controlled_write_dry_run_overview": {
+            "overview_id": f"59a-{ts}",
+            "generated_at": generated_at,
+            "phase": "59A",
+            "title": "Controlled Write Dry-Run",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "dry_run_status": dry_run_status,
+            "dry_run_allowed": False,
+            "write_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed dry-run model for future controlled write execution. "
+                "No files are modified, no runtime is invoked, no prompt is executed, "
+                "no actual diffs are generated from changes. "
+                f"dry_run_status={dry_run_status}. dry_run_allowed=False. write_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "ControlledWriteDryRunSignal",
+            "field_count": len(_CWDR_SIGNAL_FIELDS),
+            "required_field_count": len(_CWDR_SIGNAL_FIELDS),
+            "severity_values": list(_CWDR_SEVERITY_VALUES),
+            "dry_run_allowed_always_false_in_59a": True,
+            "fields": [dict(field) for field in _CWDR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "ControlledWriteDryRunAssessment",
+            "field_count": len(_CWDR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_CWDR_ASSESSMENT_FIELDS),
+            "supported_dry_run_statuses": list(_CWDR_DRY_RUN_STATUSES),
+            "dry_run_allowed_always_false_in_59a": True,
+            "write_allowed_always_false_in_59a": True,
+            "execution_allowed_always_false_in_59a": True,
+            "human_review_required_always_true_in_59a": True,
+            "fields": [dict(field) for field in _CWDR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "ControlledWriteDryRunSummary",
+            "field_count": len(_CWDR_SUMMARY_FIELDS),
+            "required_field_count": len(_CWDR_SUMMARY_FIELDS),
+            "supported_dry_run_statuses": list(_CWDR_DRY_RUN_STATUSES),
+            "dry_run_allowed_always_false_in_59a": True,
+            "write_allowed_always_false_in_59a": True,
+            "human_review_required_always_true_in_59a": True,
+            "fields": [dict(field) for field in _CWDR_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_CWDR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_CWDR_INPUT_SOURCES),
+        "advisory": CONTROLLED_WRITE_DRY_RUN_ADVISORY,
+    }
+
+
 MULTI_AGENT_READ_ONLY_EXECUTION_ADVISORY = (
     "Multi-agent read-only execution pilot is informational and planning only; "
     "pilot prerequisites are evaluated and blockers reported, but no runtime is invoked, "
