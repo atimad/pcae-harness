@@ -154,6 +154,7 @@ from pcae.commands.agent import (
     run_runtime_integration_readiness,
     run_read_only_runtime_invocation,
     run_runtime_output_persistence,
+    run_runtime_output_review,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4272,6 +4273,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rop_parser.set_defaults(handler=run_runtime_output_persistence)
+
+    ror_parser = subparsers.add_parser(
+        "runtime-output-review",
+        help="Define governed human review workflow for future runtime invocation outputs (Phase 57A).",
+    )
+    ror_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    ror_parser.set_defaults(handler=run_runtime_output_review)
 
     return parser
 

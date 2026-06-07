@@ -56620,6 +56620,292 @@ _RORI_GOVERNANCE_BOUNDARIES: dict = {
 }
 
 
+RUNTIME_OUTPUT_REVIEW_ADVISORY = (
+    "Runtime output review is informational and planning only; "
+    "review requirements are evaluated and blockers reported, but no runtime output "
+    "is reviewed or accepted, no output files are written, no runtime is invoked, "
+    "no prompt is executed, no execution authorization occurs, "
+    "no repository modification occurs. "
+    "review_allowed=False and execution_allowed=False in Phase 57A. "
+    "Human review is always required."
+)
+
+_ROR_REVIEW_DOMAINS: tuple[str, ...] = (
+    "stdout_review_validation",
+    "stderr_review_validation",
+    "exit_code_review_validation",
+    "runtime_metadata_review_validation",
+    "prompt_hash_review_validation",
+    "authorization_reference_review_validation",
+    "audit_reference_review_validation",
+    "output_integrity_review_validation",
+)
+
+_ROR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_ROR_REVIEW_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "review_required",
+    "blocked",
+)
+
+_ROR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "review_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "review_status", "type": "str", "required": True},
+    {"name": "review_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "review_status", "type": "str", "required": True},
+    {"name": "review_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ROR_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeOutputPersistenceAssessment",
+    "ReadOnlyRuntimeInvocationAssessment",
+    "RuntimeIntegrationReadinessAssessment",
+    "OutputIntegrityAssessment",
+    "ExecutionAuditSummary",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_ROR_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "stdout_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "stdout_human_review_readiness",
+        "severity": "blocker",
+        "detected_state": "stdout capture not available for governed human review prior to acceptance",
+        "expected_state": "captured stdout is staged for human review with full attribution and audit linkage before acceptance",
+    },
+    {
+        "domain": "stderr_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "stderr_human_review_readiness",
+        "severity": "blocker",
+        "detected_state": "stderr capture not available for governed human review prior to acceptance",
+        "expected_state": "captured stderr is staged for human review with full attribution and audit linkage before acceptance",
+    },
+    {
+        "domain": "exit_code_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "exit_code_human_review_readiness",
+        "severity": "blocker",
+        "detected_state": "exit code record not available for human review and acceptance gate confirmation",
+        "expected_state": "exit code is reviewed by a human reviewer and confirmed against expected invocation outcome before acceptance",
+    },
+    {
+        "domain": "runtime_metadata_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "runtime_metadata_human_review_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime identity and metadata fields not confirmed available for human review",
+        "expected_state": "runtime metadata is presented to human reviewer for identity and version verification before output acceptance",
+    },
+    {
+        "domain": "prompt_hash_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "prompt_hash_attribution_review_readiness",
+        "severity": "blocker",
+        "detected_state": "prompt hash and provenance attribution not confirmed available for human review verification",
+        "expected_state": "prompt hash is verified by human reviewer against the governed task contract before output acceptance",
+    },
+    {
+        "domain": "authorization_reference_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "authorization_reference_review_readiness",
+        "severity": "blocker",
+        "detected_state": "authorization record reference not confirmed available for human review linkage verification",
+        "expected_state": "human reviewer confirms authorization record links correctly to the output before acceptance",
+    },
+    {
+        "domain": "audit_reference_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "audit_trail_reference_review_readiness",
+        "severity": "blocker",
+        "detected_state": "audit trail reference not confirmed available for human review completeness check",
+        "expected_state": "human reviewer verifies audit trail reference is complete and unbroken before output acceptance",
+    },
+    {
+        "domain": "output_integrity_review_validation",
+        "runtime_id": "all_configured_runtimes",
+        "signal_type": "output_integrity_human_review_readiness",
+        "severity": "blocker",
+        "detected_state": "output integrity verification result not confirmed available for human review confirmation",
+        "expected_state": "human reviewer confirms integrity verification passed and no post-capture tampering detected before acceptance",
+    },
+)
+
+_ROR_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "inspect runtime output review requirements",
+        "assess future review prerequisites",
+        "assess audit and output integrity linkage",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "persist outputs",
+        "approve outputs",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "review_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "57A",
+}
+
+
+def build_runtime_output_review() -> dict:
+    """Build a runtime output human review scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _ROR_DOMAIN_SIGNALS]
+
+    domain_count = len(_ROR_REVIEW_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        review_status = "review_required"
+    elif warning_count > 0:
+        review_status = "ready_with_warnings"
+    else:
+        review_status = "ready"
+
+    signals = [
+        {
+            "signal_id": f"rors-{ts}-{index:02d}",
+            "runtime_id": signal["runtime_id"],
+            "review_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rora-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rorsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_output_review_overview": {
+            "overview_id": f"57a-{ts}",
+            "generated_at": generated_at,
+            "phase": "57A",
+            "title": "Human Review of Runtime Output",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "review_status": review_status,
+            "review_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed human review workflow for future runtime invocation outputs. "
+                "No runtime output is reviewed or accepted, no output files are written, "
+                "no runtime is invoked, no prompt is executed. "
+                f"review_status={review_status}. review_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeOutputReviewSignal",
+            "field_count": len(_ROR_SIGNAL_FIELDS),
+            "required_field_count": len(_ROR_SIGNAL_FIELDS),
+            "severity_values": list(_ROR_SEVERITY_VALUES),
+            "review_allowed_always_false_in_57a": True,
+            "fields": [dict(field) for field in _ROR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeOutputReviewAssessment",
+            "field_count": len(_ROR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_ROR_ASSESSMENT_FIELDS),
+            "supported_review_statuses": list(_ROR_REVIEW_STATUSES),
+            "review_allowed_always_false_in_57a": True,
+            "execution_allowed_always_false_in_57a": True,
+            "human_review_required_always_true_in_57a": True,
+            "fields": [dict(field) for field in _ROR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeOutputReviewSummary",
+            "field_count": len(_ROR_SUMMARY_FIELDS),
+            "required_field_count": len(_ROR_SUMMARY_FIELDS),
+            "supported_review_statuses": list(_ROR_REVIEW_STATUSES),
+            "review_allowed_always_false_in_57a": True,
+            "human_review_required_always_true_in_57a": True,
+            "fields": [dict(field) for field in _ROR_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_ROR_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_ROR_INPUT_SOURCES),
+        "advisory": RUNTIME_OUTPUT_REVIEW_ADVISORY,
+    }
+
+
 RUNTIME_OUTPUT_PERSISTENCE_ADVISORY = (
     "Runtime output capture persistence is informational and planning only; "
     "persistence requirements are evaluated and blockers reported, but no output "

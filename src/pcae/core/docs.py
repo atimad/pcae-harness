@@ -977,6 +977,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-output-persistence`
 - `pcae runtime-output-persistence --json`
+
+## runtime-output-review
+
+- `pcae runtime-output-review`
+- `pcae runtime-output-review --json`
 """
 
 
