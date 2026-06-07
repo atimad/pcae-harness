@@ -1002,6 +1002,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-registry`
 - `pcae runtime-registry --json`
+
+## runtime-discovery
+
+- `pcae runtime-discovery`
+- `pcae runtime-discovery --json`
 """
 
 

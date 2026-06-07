@@ -43135,3 +43135,171 @@ def test_61a_human_output(capsys) -> None:
         "registration_allowed=False",
     ):
         assert text in output
+
+
+def test_61b_json_top_level_keys(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert set(data) == {
+        "runtime_discovery_overview",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "domain_signals",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "input_sources",
+        "advisory",
+    }
+    overview = data["runtime_discovery_overview"]
+    assert overview["phase"] == "61B"
+    assert overview["domain_count"] == 8
+    assert overview["discovery_allowed"] is False
+    assert overview["registration_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["human_review_required"] is True
+
+
+def test_61b_models_and_exact_fields(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    expected = {
+        "signal_model": (
+            "RuntimeDiscoverySignal",
+            [
+                "signal_id", "discovery_id", "runtime_id", "discovery_domain",
+                "signal_type", "severity", "detected_state",
+                "expected_state", "human_review_required",
+            ],
+        ),
+        "assessment_model": (
+            "RuntimeDiscoveryAssessment",
+            [
+                "assessment_id", "signal_count", "blocker_count",
+                "warning_count", "discovery_status", "discovery_allowed",
+                "registration_allowed", "execution_allowed",
+                "human_review_required",
+            ],
+        ),
+        "summary_model": (
+            "RuntimeDiscoverySummary",
+            [
+                "summary_id", "assessment_id", "domain_count", "signal_count",
+                "blocker_count", "warning_count", "discovery_status",
+                "discovery_allowed", "registration_allowed",
+                "execution_allowed", "human_review_required",
+            ],
+        ),
+    }
+    for key, (model_name, fields) in expected.items():
+        model = data[key]
+        assert model["model_name"] == model_name
+        assert model["field_count"] == model["required_field_count"] == len(fields)
+        assert [field["name"] for field in model["fields"]] == fields
+
+
+def test_61b_all_discovery_domains_defined(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert {s["domain"] for s in data["domain_signals"]} == {
+        "runtime_presence_discovery",
+        "runtime_identity_discovery",
+        "runtime_version_discovery",
+        "runtime_location_discovery",
+        "runtime_capability_discovery",
+        "runtime_trust_discovery",
+        "runtime_status_discovery",
+        "runtime_governance_discovery",
+    }
+    assert set(data["signal_model"]["severity_values"]) == {"info", "warning", "blocker"}
+    assert set(data["assessment_model"]["supported_discovery_statuses"]) == {
+        "ready", "ready_with_warnings", "discovery_required", "blocked",
+    }
+    assert set(data["summary_model"]["supported_discovery_statuses"]) == {
+        "ready", "ready_with_warnings", "discovery_required", "blocked",
+    }
+
+
+def test_61b_signals_are_attributable_and_human_reviewed(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["signals"]) == 8
+    for signal in data["signals"]:
+        assert signal["discovery_id"]
+        assert signal["runtime_id"]
+        assert signal["discovery_domain"]
+        assert signal["signal_type"]
+        assert signal["detected_state"]
+        assert signal["expected_state"]
+        assert signal["human_review_required"] is True
+
+
+def test_61b_assessment_and_summary(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["signal_count"] == len(data["signals"])
+    assert assessment["blocker_count"] > 0
+    assert assessment["warning_count"] > 0
+    assert assessment["discovery_status"] == "discovery_required"
+    assert assessment["discovery_allowed"] is False
+    assert assessment["registration_allowed"] is False
+    assert assessment["execution_allowed"] is False
+    assert assessment["human_review_required"] is True
+    assert summary["assessment_id"] == assessment["assessment_id"]
+    assert summary["domain_count"] == 8
+    assert summary["discovery_allowed"] is False
+    assert summary["registration_allowed"] is False
+    assert summary["execution_allowed"] is False
+    assert summary["human_review_required"] is True
+
+
+def test_61b_input_sources(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["input_sources"] == [
+        "RuntimeRegistryAssessment",
+        "RuntimeIntegrationReadinessAssessment",
+        "GovernanceInvariantAssessment",
+        "RecoveryValidationAssessment",
+    ]
+
+
+def test_61b_governance_boundaries(capsys) -> None:
+    main(["runtime-discovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    boundaries = data["governance_boundaries"]
+    assert boundaries["phase"] == "61B"
+    assert boundaries["read_only"] is True
+    assert boundaries["discovery_allowed"] is False
+    assert boundaries["registration_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    forbidden = " ".join(boundaries["may_not"]).lower()
+    for action in (
+        "invoke runtimes", "execute prompts", "discover runtimes on host",
+        "register runtimes", "modify runtime configuration",
+        "modify repository", "commit", "push", "rollback",
+    ):
+        assert action in forbidden
+
+
+def test_61b_human_output(capsys) -> None:
+    main(["runtime-discovery"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime discovery",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Discovery signals",
+        "Governance boundaries",
+        "Discovery allowed:      no",
+        "Registration allowed:   no",
+        "Execution allowed:      no",
+        "discovery_allowed=False",
+    ):
+        assert text in output

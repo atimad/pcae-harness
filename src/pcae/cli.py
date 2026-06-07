@@ -159,6 +159,7 @@ from pcae.commands.agent import (
     run_controlled_write_dry_run,
     run_single_file_write_pilot,
     run_runtime_registry,
+    run_runtime_discovery_assessment,
     run_planning_dry_run,
     run_planning_execution_design,
     run_planning_prototype_design,
@@ -4332,6 +4333,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rr_parser.set_defaults(handler=run_runtime_registry)
+
+    rd_parser = subparsers.add_parser(
+        "runtime-discovery",
+        help="Define governed runtime discovery readiness model for PCAE (Phase 61B).",
+    )
+    rd_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rd_parser.set_defaults(handler=run_runtime_discovery_assessment)
 
     return parser
 

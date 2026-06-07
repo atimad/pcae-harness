@@ -58227,6 +58227,16 @@ RUNTIME_REGISTRY_ADVISORY = (
     "Human review is always required."
 )
 
+RUNTIME_DISCOVERY_PHASE_ADVISORY = (
+    "Runtime discovery is assessment and reporting only; "
+    "discovery requirements are defined and blockers reported, but no runtimes are discovered on the host, "
+    "no runtimes are invoked, no prompts are executed, no execution authorization occurs, "
+    "no runtime registration occurs, no runtime configuration is modified, "
+    "and no repository modification occurs. "
+    "discovery_allowed=False, registration_allowed=False, execution_allowed=False, "
+    "and human_review_required=True in Phase 61B. Human review is always required."
+)
+
 _RR_REGISTRY_DOMAINS: tuple[str, ...] = (
     "runtime_identity_registry",
     "runtime_metadata_registry",
@@ -58543,4 +58553,290 @@ def build_runtime_registry() -> dict:
         "governance_boundaries": dict(_RR_GOVERNANCE_BOUNDARIES),
         "input_sources": list(_RR_INPUT_SOURCES),
         "advisory": RUNTIME_REGISTRY_ADVISORY,
+    }
+
+
+_RD_DISCOVERY_DOMAINS: tuple[str, ...] = (
+    "runtime_presence_discovery",
+    "runtime_identity_discovery",
+    "runtime_version_discovery",
+    "runtime_location_discovery",
+    "runtime_capability_discovery",
+    "runtime_trust_discovery",
+    "runtime_status_discovery",
+    "runtime_governance_discovery",
+)
+
+_RD_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RD_DISCOVERY_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "discovery_required",
+    "blocked",
+)
+
+_RD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "discovery_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "discovery_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "discovery_status", "type": "str", "required": True},
+    {"name": "discovery_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "discovery_status", "type": "str", "required": True},
+    {"name": "discovery_allowed", "type": "bool", "required": True},
+    {"name": "registration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RD_INPUT_SOURCES: tuple[str, ...] = (
+    "RuntimeRegistryAssessment",
+    "RuntimeIntegrationReadinessAssessment",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_RD_DOMAIN_SIGNALS: tuple[dict, ...] = (
+    {
+        "domain": "runtime_presence_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_presence_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime presence discovery requirements are not yet confirmed with governed evidence sources, allowlist boundaries, and human-review checkpoints",
+        "expected_state": "runtime presence discovery defines governed evidence sources, allowlist boundaries, and human-review checkpoints before any presence discovery is attempted",
+    },
+    {
+        "domain": "runtime_identity_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_identity_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime identity discovery requirements are not yet confirmed with stable runtime_id derivation, identity normalization, and collision handling",
+        "expected_state": "runtime identity discovery derives stable runtime_id values, normalizes runtime identity metadata, and defines collision handling before any runtime identity is accepted",
+    },
+    {
+        "domain": "runtime_version_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_version_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime version discovery requirements are not yet confirmed with governed version capture, parsing rules, and unsupported-version handling",
+        "expected_state": "runtime version discovery captures version metadata with governed parsing rules and defines unsupported-version handling before any version result is trusted",
+    },
+    {
+        "domain": "runtime_location_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_location_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime location discovery requirements are not yet confirmed with approved search boundaries, path provenance, and host-safety constraints",
+        "expected_state": "runtime location discovery defines approved search boundaries, records path provenance, and enforces host-safety constraints before any location result is considered",
+    },
+    {
+        "domain": "runtime_capability_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_capability_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime capability discovery requirements are not yet confirmed with metadata-only capability inference, evidence grading, and no-execution guarantees",
+        "expected_state": "runtime capability discovery infers capabilities from governed metadata-only evidence, grades evidence quality, and guarantees no runtime execution during discovery",
+    },
+    {
+        "domain": "runtime_trust_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_trust_discovery_readiness",
+        "severity": "warning",
+        "detected_state": "runtime trust discovery requirements are partially defined, but trust evidence taxonomy and reviewer guidance remain incomplete",
+        "expected_state": "runtime trust discovery defines trust evidence taxonomy, reviewer guidance, and escalation rules before any trust classification is proposed",
+    },
+    {
+        "domain": "runtime_status_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_status_discovery_readiness",
+        "severity": "warning",
+        "detected_state": "runtime status discovery requirements are partially defined, but freshness windows and stale-status handling remain incomplete",
+        "expected_state": "runtime status discovery defines freshness windows, stale-status handling, and reviewer confirmation before any runtime status is reported",
+    },
+    {
+        "domain": "runtime_governance_discovery",
+        "runtime_id": "candidate_runtime_id",
+        "signal_type": "runtime_governance_discovery_readiness",
+        "severity": "blocker",
+        "detected_state": "runtime governance discovery requirements are not yet confirmed with policy linkage, audit attribution, and enforced human-review gates",
+        "expected_state": "runtime governance discovery links every result to governing policy, preserves audit attribution, and enforces human review before any follow-on action is considered",
+    },
+)
+
+_RD_GOVERNANCE_BOUNDARIES: dict = {
+    "may": [
+        "define runtime discovery requirements",
+        "assess runtime presence requirements",
+        "assess runtime metadata discovery requirements",
+        "assess runtime trust discovery requirements",
+        "report blockers and warnings",
+        "recommend human-reviewed remediation",
+    ],
+    "may_not": [
+        "invoke runtimes",
+        "execute prompts",
+        "discover runtimes on host",
+        "register runtimes",
+        "modify runtime configuration",
+        "modify repository",
+        "commit",
+        "push",
+        "rollback",
+    ],
+    "discovery_allowed": False,
+    "registration_allowed": False,
+    "execution_allowed": False,
+    "human_review_required": True,
+    "read_only": True,
+    "phase": "61B",
+}
+
+
+def build_runtime_discovery_assessment() -> dict:
+    """Build a governed runtime discovery readiness scaffold."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    domain_signals = [dict(s) for s in _RD_DOMAIN_SIGNALS]
+
+    domain_count = len(_RD_DISCOVERY_DOMAINS)
+    signal_count = len(domain_signals)
+    blocker_count = sum(1 for s in domain_signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in domain_signals if s["severity"] == "warning")
+    info_count = sum(1 for s in domain_signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        discovery_status = "discovery_required"
+    elif warning_count > 0:
+        discovery_status = "ready_with_warnings"
+    else:
+        discovery_status = "ready"
+
+    discovery_id = f"rd-{ts}"
+    signals = [
+        {
+            "signal_id": f"rds-{ts}-{index:02d}",
+            "discovery_id": discovery_id,
+            "runtime_id": signal["runtime_id"],
+            "discovery_domain": signal["domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for index, signal in enumerate(domain_signals, start=1)
+    ]
+
+    assessment_id = f"rda-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "discovery_status": discovery_status,
+        "discovery_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rdsum-{ts}",
+        "assessment_id": assessment_id,
+        "domain_count": domain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "discovery_status": discovery_status,
+        "discovery_allowed": False,
+        "registration_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "runtime_discovery_overview": {
+            "overview_id": f"61b-{ts}",
+            "generated_at": generated_at,
+            "phase": "61B",
+            "title": "Runtime Discovery",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "discovery_status": discovery_status,
+            "discovery_allowed": False,
+            "registration_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Defines the governed runtime discovery readiness model for PCAE. "
+                "No runtime discovery occurs, no runtimes are invoked, no runtimes are registered, "
+                "no runtime configuration is modified, and no repository modification occurs. "
+                f"discovery_status={discovery_status}. discovery_allowed=False. "
+                "registration_allowed=False. execution_allowed=False."
+            ),
+        },
+        "signal_model": {
+            "model_name": "RuntimeDiscoverySignal",
+            "field_count": len(_RD_SIGNAL_FIELDS),
+            "required_field_count": len(_RD_SIGNAL_FIELDS),
+            "severity_values": list(_RD_SEVERITY_VALUES),
+            "discovery_allowed_always_false_in_61b": True,
+            "fields": [dict(field) for field in _RD_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeDiscoveryAssessment",
+            "field_count": len(_RD_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RD_ASSESSMENT_FIELDS),
+            "supported_discovery_statuses": list(_RD_DISCOVERY_STATUSES),
+            "discovery_allowed_always_false_in_61b": True,
+            "registration_allowed_always_false_in_61b": True,
+            "execution_allowed_always_false_in_61b": True,
+            "human_review_required_always_true_in_61b": True,
+            "fields": [dict(field) for field in _RD_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeDiscoverySummary",
+            "field_count": len(_RD_SUMMARY_FIELDS),
+            "required_field_count": len(_RD_SUMMARY_FIELDS),
+            "supported_discovery_statuses": list(_RD_DISCOVERY_STATUSES),
+            "discovery_allowed_always_false_in_61b": True,
+            "registration_allowed_always_false_in_61b": True,
+            "execution_allowed_always_false_in_61b": True,
+            "human_review_required_always_true_in_61b": True,
+            "fields": [dict(field) for field in _RD_SUMMARY_FIELDS],
+        },
+        "domain_signals": domain_signals,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": dict(_RD_GOVERNANCE_BOUNDARIES),
+        "input_sources": list(_RD_INPUT_SOURCES),
+        "advisory": RUNTIME_DISCOVERY_PHASE_ADVISORY,
     }

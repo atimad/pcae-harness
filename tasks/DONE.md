@@ -2,6 +2,10 @@
 
 ## Completed
 
+- Implemented Runtime Discovery (Phase 61B): `pcae runtime-discovery` and `--json`; added RuntimeDiscoverySignal, RuntimeDiscoveryAssessment, and RuntimeDiscoverySummary; defined all eight discovery domains; kept discovery_allowed=False, registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
+
+- Implemented Runtime Registry (Phase 61A): `pcae runtime-registry` and `--json`; added RuntimeRegistrySignal, RuntimeRegistryEntry, RuntimeRegistryAssessment, and RuntimeRegistrySummary; defined all eight registry domains; kept registration_allowed=False, execution_allowed=False, and human_review_required=True; added focused tests.
+
 - Implemented Conflict Resolution Engine (Phase 52M): `pcae conflict-resolution-engine` and `--json`; detects and classifies advisory conflict signals across task, session, lock, governance, runtime, evidence, handoff, and recovery domains; defines ConflictResolutionSignal, ConflictResolutionAssessment, and ConflictResolutionSummary; emits human-reviewed resolution paths while keeping automatic resolution disabled, execution blocked, and all governed state unchanged; focused tests added.
 
 - Completed Planning Artifact Dry-Run (Phase 44I): `pcae planning-dry-run` and `--json`; fixed objective, 3 planners selected from capability registry (all validated), 3 simulated plans with phases/assumptions/risks, simulated consensus with agreements/conflicts, human_decision_required=true, next actions; `build_planning_dry_run` in core; `run_planning_dry_run` in commands; `planning-dry-run` wired in CLI; 13 new tests; strictly read-only.

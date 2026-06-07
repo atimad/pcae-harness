@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 61A: Runtime Registry.
+Phase 61B: Runtime Discovery.
 
 ## Post-52Q Architecture Checkpoint
 
@@ -74,6 +74,11 @@ roadmap guidance must remain coherent. When they drift, run
 `pcae status coherence` to surface stale references.
 
 ## Current State
+
+PCAE can assess governed runtime discovery readiness with `pcae runtime-discovery`
+and `pcae runtime-discovery --json`, defining discovery domains, signals,
+assessment status, governance boundaries, and human-review requirements while
+keeping discovery, registration, and execution disabled.
 
 PCAE can recommend the next governed roadmap phase with `pcae roadmap next`
 and `pcae roadmap next --json`, can select a recommended agent for a task
@@ -3978,7 +3983,7 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61A: Runtime Registry.
+Phase 61B: Runtime Discovery.
 
 ## Next
 
