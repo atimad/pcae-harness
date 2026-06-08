@@ -66634,3 +66634,477 @@ def build_multi_runtime_audit_chain(root: HarnessPath | None = None) -> dict:
         },
         "advisory": MULTI_RUNTIME_AUDIT_CHAIN_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63E: Runtime Failure Recovery
+# ---------------------------------------------------------------------------
+
+RUNTIME_FAILURE_RECOVERY_ADVISORY = (
+    "Phase 63E defines governed recovery handling for runtime failures across "
+    "single-runtime and multi-runtime execution workflows. recovery_allowed=False always. "
+    "execution_allowed=False always. quarantine_allowed=False always. Recovery is "
+    "advisory only: governance classifies failures, recommends recovery actions, and "
+    "recommends escalation or quarantine for future review. No runtime invocation "
+    "occurs. No recovery execution occurs. No runtime quarantine occurs. "
+    "Human review is always required."
+)
+
+_RFR_RECOVERY_DOMAINS: tuple[str, ...] = (
+    "runtime_unavailable_recovery",
+    "runtime_timeout_recovery",
+    "runtime_exit_code_failure_recovery",
+    "runtime_output_capture_failure_recovery",
+    "runtime_audit_persistence_failure_recovery",
+    "runtime_review_failure_recovery",
+    "runtime_selection_failure_recovery",
+    "runtime_arbitration_failure_recovery",
+    "runtime_escalation_recovery",
+    "runtime_quarantine_recommendation",
+)
+
+_RFR_RECOVERY_STATUSES: tuple[str, ...] = (
+    "recovered",
+    "recovered_with_warnings",
+    "recovery_required",
+    "escalated",
+    "blocked",
+)
+
+_RFR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RFR_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "recovery_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "failure_type", "type": "str", "required": True},
+    {"name": "failure_domain", "type": "str", "required": True},
+    {"name": "failure_status", "type": "str", "required": True},
+    {"name": "recovery_status", "type": "str", "required": True},
+    {"name": "recovery_action", "type": "str", "required": True},
+    {"name": "escalation_required", "type": "bool", "required": True},
+    {"name": "quarantine_recommended", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RFR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "recovery_id", "type": "str", "required": True},
+    {"name": "recovery_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RFR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "recovery_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "recovery_status", "type": "str", "required": True},
+    {"name": "recovery_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "quarantine_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RFR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "recovery_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "recovery_status", "type": "str", "required": True},
+    {"name": "recovery_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "quarantine_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RFR_GOVERNED_FAILURES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "failure_type": "runtime_unavailable",
+        "failure_domain": "runtime_unavailable_recovery",
+        "failure_status": "detected",
+        "recovery_status": "recovery_required",
+        "recovery_action": "inspect_runtime_and_notify_human",
+        "escalation_required": False,
+        "quarantine_recommended": False,
+    },
+    {
+        "runtime_id": "python-local",
+        "failure_type": "runtime_timeout",
+        "failure_domain": "runtime_timeout_recovery",
+        "failure_status": "detected",
+        "recovery_status": "escalated",
+        "recovery_action": "escalate_to_human_review",
+        "escalation_required": True,
+        "quarantine_recommended": True,
+    },
+)
+
+
+def build_runtime_failure_recovery(root: HarnessPath | None = None) -> dict:
+    """Classify runtime failures and recommend recovery actions without invoking any runtime."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    recovery_records = []
+    for i, f in enumerate(_RFR_GOVERNED_FAILURES, start=1):
+        rid = f"rfr-{ts}-{i:02d}"
+        recovery_records.append(
+            {
+                "recovery_id": rid,
+                "runtime_id": f["runtime_id"],
+                "failure_type": f["failure_type"],
+                "failure_domain": f["failure_domain"],
+                "failure_status": f["failure_status"],
+                "recovery_status": f["recovery_status"],
+                "recovery_action": f["recovery_action"],
+                "escalation_required": f["escalation_required"],
+                "quarantine_recommended": f["quarantine_recommended"],
+                "human_review_required": True,
+            }
+        )
+
+    recovery_count = len(recovery_records)
+    first_rid = recovery_records[0]["recovery_id"] if recovery_records else f"rfr-{ts}-00"
+    escalation_count = sum(1 for r in recovery_records if r["escalation_required"])
+    quarantine_count = sum(1 for r in recovery_records if r["quarantine_recommended"])
+
+    # Overall recovery_status reflects worst case across records
+    if any(r["recovery_status"] == "blocked" for r in recovery_records):
+        overall_recovery_status = "blocked"
+    elif any(r["recovery_status"] == "escalated" for r in recovery_records):
+        overall_recovery_status = "escalated"
+    elif any(r["recovery_status"] == "recovery_required" for r in recovery_records):
+        overall_recovery_status = "recovery_required"
+    elif any(r["recovery_status"] == "recovered_with_warnings" for r in recovery_records):
+        overall_recovery_status = "recovered_with_warnings"
+    elif recovery_count == 0:
+        overall_recovery_status = "blocked"
+    else:
+        overall_recovery_status = "recovered"
+
+    domain_signal_defs = [
+        {
+            "recovery_domain": "runtime_unavailable_recovery",
+            "signal_type": "runtime_unavailable_recovery_check",
+            "severity": "warning",
+            "detected_state": (
+                f"runtime_unavailable_detected=True; "
+                f"affected_runtimes={[r['runtime_id'] for r in recovery_records if r['failure_type'] == 'runtime_unavailable']}; "
+                "recovery_action=inspect_runtime_and_notify_human; "
+                "recovery_allowed=False"
+            ),
+            "expected_state": (
+                "runtime unavailability must be detected and classified; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_timeout_recovery",
+            "signal_type": "runtime_timeout_recovery_check",
+            "severity": "warning",
+            "detected_state": (
+                f"runtime_timeout_detected=True; "
+                f"affected_runtimes={[r['runtime_id'] for r in recovery_records if r['failure_type'] == 'runtime_timeout']}; "
+                "recovery_action=escalate_to_human_review; "
+                "recovery_allowed=False"
+            ),
+            "expected_state": (
+                "runtime timeout must be detected and classified; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_exit_code_failure_recovery",
+            "signal_type": "runtime_exit_code_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "exit_code_failure_classification=available; "
+                "recovery_action=report_exit_code_and_notify_human; "
+                "recovery_allowed=False; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "exit code failures must be classifiable by governance; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_output_capture_failure_recovery",
+            "signal_type": "runtime_output_capture_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "output_capture_failure_classification=available; "
+                "recovery_action=report_capture_gap_and_notify_human; "
+                "recovery_allowed=False; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "output capture failures must be classifiable by governance; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_audit_persistence_failure_recovery",
+            "signal_type": "runtime_audit_persistence_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "audit_persistence_failure_classification=available; "
+                "recovery_action=report_persistence_failure_and_notify_human; "
+                "recovery_allowed=False; "
+                "audit_artifacts_not_modified=True"
+            ),
+            "expected_state": (
+                "audit persistence failures must be classifiable by governance; "
+                "recovery action must be advisory only; audit artifacts must not be modified"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_review_failure_recovery",
+            "signal_type": "runtime_review_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "review_failure_classification=available; "
+                "recovery_action=report_review_failure_and_escalate; "
+                "recovery_allowed=False; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "runtime review failures must be classifiable by governance; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_selection_failure_recovery",
+            "signal_type": "runtime_selection_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "selection_failure_classification=available; "
+                "recovery_action=report_selection_failure_and_notify_human; "
+                "recovery_allowed=False; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "runtime selection failures must be classifiable by governance; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_arbitration_failure_recovery",
+            "signal_type": "runtime_arbitration_failure_recovery_check",
+            "severity": "info",
+            "detected_state": (
+                "arbitration_failure_classification=available; "
+                "recovery_action=report_arbitration_failure_and_escalate; "
+                "recovery_allowed=False; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "runtime arbitration failures must be classifiable by governance; "
+                "recovery action must be advisory only; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_escalation_recovery",
+            "signal_type": "runtime_escalation_recovery_check",
+            "severity": "info" if escalation_count > 0 else "warning",
+            "detected_state": (
+                f"escalation_required_count={escalation_count}; "
+                f"escalation_path=human_review; "
+                "escalation_is_advisory=True; "
+                "recovery_allowed=False"
+            ),
+            "expected_state": (
+                "escalation path must exist for all unresolvable failures; "
+                "escalation must route to human review; recovery_allowed=False in 63E"
+            ),
+        },
+        {
+            "recovery_domain": "runtime_quarantine_recommendation",
+            "signal_type": "runtime_quarantine_recommendation_check",
+            "severity": "info",
+            "detected_state": (
+                f"quarantine_recommended_count={quarantine_count}; "
+                "quarantine_allowed=False; "
+                "quarantine_is_recommendation_only=True; "
+                "no_runtime_quarantine_executed=True"
+            ),
+            "expected_state": (
+                "quarantine recommendations must be advisory only; "
+                "quarantine_allowed=False in 63E; no runtime quarantine is executed"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rfr-sig-{ts}-{i:02d}",
+            "recovery_id": first_rid,
+            "recovery_domain": sig["recovery_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"rfra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "recovery_count": recovery_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recovery_status": overall_recovery_status,
+        "recovery_allowed": False,
+        "execution_allowed": False,
+        "quarantine_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rfrsum-{ts}",
+        "assessment_id": assessment_id,
+        "recovery_count": recovery_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "recovery_status": overall_recovery_status,
+        "recovery_allowed": False,
+        "execution_allowed": False,
+        "quarantine_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RFR_RECOVERY_DOMAINS)
+
+    return {
+        "runtime_failure_recovery_overview": {
+            "overview_id": f"63e-{ts}",
+            "generated_at": generated_at,
+            "phase": "63E",
+            "title": "Runtime Failure Recovery",
+            "domain_count": domain_count,
+            "recovery_count": recovery_count,
+            "escalation_count": escalation_count,
+            "quarantine_count": quarantine_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "recovery_status": overall_recovery_status,
+            "recovery_allowed": False,
+            "execution_allowed": False,
+            "quarantine_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63E defines governed recovery handling for runtime failures "
+                "across single-runtime and multi-runtime execution workflows. "
+                "Recovery is advisory only: governance classifies failures, recommends "
+                "recovery actions, and recommends escalation or quarantine for future review. "
+                f"recovery_count={recovery_count}. "
+                f"escalation_count={escalation_count}. "
+                f"quarantine_count={quarantine_count}. "
+                f"recovery_status={overall_recovery_status}. "
+                "recovery_allowed=False. execution_allowed=False. quarantine_allowed=False. "
+                "No runtime invocation occurs. No recovery execution occurs. "
+                "No runtime quarantine occurs. human_review_required=True."
+            ),
+        },
+        "recovery_records": recovery_records,
+        "record_model": {
+            "model_name": "RuntimeFailureRecoveryRecord",
+            "field_count": len(_RFR_RECORD_FIELDS),
+            "required_field_count": len(_RFR_RECORD_FIELDS),
+            "supported_recovery_statuses": list(_RFR_RECOVERY_STATUSES),
+            "recovery_allowed_false_in_63e": True,
+            "execution_allowed_false_in_63e": True,
+            "quarantine_allowed_false_in_63e": True,
+            "human_review_required_always_true_in_63e": True,
+            "fields": [dict(f) for f in _RFR_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeFailureRecoverySignal",
+            "field_count": len(_RFR_SIGNAL_FIELDS),
+            "required_field_count": len(_RFR_SIGNAL_FIELDS),
+            "severity_values": list(_RFR_SEVERITY_VALUES),
+            "recovery_allowed_false_in_63e": True,
+            "execution_allowed_false_in_63e": True,
+            "quarantine_allowed_false_in_63e": True,
+            "human_review_required_always_true_in_63e": True,
+            "fields": [dict(f) for f in _RFR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeFailureRecoveryAssessment",
+            "field_count": len(_RFR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RFR_ASSESSMENT_FIELDS),
+            "supported_recovery_statuses": list(_RFR_RECOVERY_STATUSES),
+            "recovery_allowed_false_in_63e": True,
+            "execution_allowed_false_in_63e": True,
+            "quarantine_allowed_false_in_63e": True,
+            "human_review_required_always_true_in_63e": True,
+            "fields": [dict(f) for f in _RFR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeFailureRecoverySummary",
+            "field_count": len(_RFR_SUMMARY_FIELDS),
+            "required_field_count": len(_RFR_SUMMARY_FIELDS),
+            "supported_recovery_statuses": list(_RFR_RECOVERY_STATUSES),
+            "recovery_allowed_false_in_63e": True,
+            "execution_allowed_false_in_63e": True,
+            "quarantine_allowed_false_in_63e": True,
+            "human_review_required_always_true_in_63e": True,
+            "fields": [dict(f) for f in _RFR_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime failure signals",
+                "classify runtime failure type",
+                "recommend recovery action",
+                "recommend escalation",
+                "recommend quarantine for future review",
+                "produce failure recovery records in memory/reporting structures",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "execute recovery",
+                "quarantine runtimes",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "recovery_allowed": False,
+            "execution_allowed": False,
+            "quarantine_allowed": False,
+            "human_review_required": True,
+            "phase": "63E",
+        },
+        "advisory": RUNTIME_FAILURE_RECOVERY_ADVISORY,
+    }

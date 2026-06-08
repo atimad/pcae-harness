@@ -178,6 +178,7 @@ from pcae.commands.agent import (
     run_runtime_selection_engine,
     run_runtime_arbitration,
     run_multi_runtime_audit_chain,
+    run_runtime_failure_recovery,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4588,6 +4589,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     mrac_parser.set_defaults(handler=run_multi_runtime_audit_chain)
+
+    rfr_parser = subparsers.add_parser(
+        "runtime-failure-recovery",
+        help="Govern recovery handling for runtime failures without invoking any runtime (Phase 63E).",
+    )
+    rfr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rfr_parser.set_defaults(handler=run_runtime_failure_recovery)
 
     return parser
 

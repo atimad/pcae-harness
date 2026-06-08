@@ -382,6 +382,8 @@ from pcae.core.agent import (
     RUNTIME_ARBITRATION_ADVISORY,
     build_multi_runtime_audit_chain,
     MULTI_RUNTIME_AUDIT_CHAIN_ADVISORY,
+    build_runtime_failure_recovery,
+    RUNTIME_FAILURE_RECOVERY_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12845,4 +12847,69 @@ def run_multi_runtime_audit_chain(args: argparse.Namespace) -> int:
     print(f"  Human review:      {boundaries['human_review_required']}")
     print()
     print(MULTI_RUNTIME_AUDIT_CHAIN_ADVISORY)
+    return 0
+
+
+def run_runtime_failure_recovery(args: argparse.Namespace) -> int:
+    data = build_runtime_failure_recovery(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_failure_recovery_overview"]
+    print("Runtime failure recovery")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Recovery domains:       {overview['domain_count']}")
+    print(f"Recovery records:       {overview['recovery_count']}")
+    print(f"Escalations:            {overview['escalation_count']}")
+    print(f"Quarantine recs:        {overview['quarantine_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Recovery status:        {overview['recovery_status']}")
+    print(f"Recovery allowed:       {'yes' if overview['recovery_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Quarantine allowed:     {'yes' if overview['quarantine_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Recovery records:")
+    for r in data["recovery_records"]:
+        print(f"  [{r['recovery_id']}] {r['runtime_id']}")
+        print(f"    failure_type={r['failure_type']}  failure_domain={r['failure_domain']}")
+        print(f"    recovery_status={r['recovery_status']}  recovery_action={r['recovery_action']}")
+        print(
+            f"    escalation_required={r['escalation_required']}  "
+            f"quarantine_recommended={r['quarantine_recommended']}"
+        )
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Recovery signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['recovery_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print(f"  Recovery allowed:    {boundaries['recovery_allowed']}")
+    print(f"  Execution allowed:   {boundaries['execution_allowed']}")
+    print(f"  Quarantine allowed:  {boundaries['quarantine_allowed']}")
+    print(f"  Human review:        {boundaries['human_review_required']}")
+    print()
+    print(RUNTIME_FAILURE_RECOVERY_ADVISORY)
     return 0

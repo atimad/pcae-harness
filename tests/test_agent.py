@@ -46510,3 +46510,182 @@ def test_63d_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["multi_runtime_audit_chain_overview"]["human_review_required"] is True
     assert data["multi_runtime_audit_chain_overview"]["audit_allowed"] is True
     assert data["multi_runtime_audit_chain_overview"]["chain_count"] >= 2
+
+
+# ---------------------------------------------------------------------------
+# Phase 63E: Runtime Failure Recovery
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_failure_recovery  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63E  # noqa: E402
+
+
+def test_63e_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    for key in (
+        "runtime_failure_recovery_overview",
+        "recovery_records",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63e_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeFailureRecoveryRecord"
+    assert data["record_model"]["field_count"] == 10
+    assert data["signal_model"]["model_name"] == "RuntimeFailureRecoverySignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeFailureRecoveryAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "RuntimeFailureRecoverySummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "recovery_id", "runtime_id", "failure_type", "failure_domain",
+        "failure_status", "recovery_status", "recovery_action",
+        "escalation_required", "quarantine_recommended", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_63e_all_recovery_domains_defined(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    expected = {
+        "runtime_unavailable_recovery",
+        "runtime_timeout_recovery",
+        "runtime_exit_code_failure_recovery",
+        "runtime_output_capture_failure_recovery",
+        "runtime_audit_persistence_failure_recovery",
+        "runtime_review_failure_recovery",
+        "runtime_selection_failure_recovery",
+        "runtime_arbitration_failure_recovery",
+        "runtime_escalation_recovery",
+        "runtime_quarantine_recommendation",
+    }
+    actual = {s["recovery_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63e_recovery_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    assert data["runtime_failure_recovery_overview"]["recovery_allowed"] is False
+    assert data["sample_assessment"]["recovery_allowed"] is False
+    assert data["sample_summary"]["recovery_allowed"] is False
+    assert data["governance_boundaries"]["recovery_allowed"] is False
+
+
+def test_63e_execution_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    assert data["runtime_failure_recovery_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63e_quarantine_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    assert data["runtime_failure_recovery_overview"]["quarantine_allowed"] is False
+    assert data["sample_assessment"]["quarantine_allowed"] is False
+    assert data["sample_summary"]["quarantine_allowed"] is False
+    assert data["governance_boundaries"]["quarantine_allowed"] is False
+
+
+def test_63e_recovery_records_and_advisory_actions(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    records = data["recovery_records"]
+    assert len(records) >= 2
+    shell = next(r for r in records if r["runtime_id"] == "shell-local")
+    assert shell["failure_type"] == "runtime_unavailable"
+    assert shell["recovery_action"] != ""
+    assert shell["human_review_required"] is True
+    assert shell["recovery_id"].startswith("rfr-")
+    # Quarantine recommendation is advisory only
+    python = next(r for r in records if r["runtime_id"] == "python-local")
+    assert python["quarantine_recommended"] is True
+    assert data["governance_boundaries"]["quarantine_allowed"] is False
+
+
+def test_63e_escalation_paths_generated(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    overview = data["runtime_failure_recovery_overview"]
+    assert overview["escalation_count"] >= 1
+    escalated = [r for r in data["recovery_records"] if r["escalation_required"]]
+    assert len(escalated) >= 1
+
+
+def test_63e_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    for signal in data["signals"]:
+        assert "recovery_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "recovery_domain" in signal
+
+
+def test_63e_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_failure_recovery(_HarnessPath63E(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["recovery_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["quarantine_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "execute recovery",
+        "quarantine runtimes",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect runtime failure signals" in boundaries["may"]
+    assert "classify runtime failure type" in boundaries["may"]
+    assert "recommend recovery action" in boundaries["may"]
+    assert "recommend escalation" in boundaries["may"]
+    assert "recommend quarantine for future review" in boundaries["may"]
+
+
+def test_63e_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-failure-recovery"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime failure recovery",
+        "Recovery records",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Recovery signals",
+        "Governance boundaries",
+        "Recovery allowed:",
+        "Execution allowed:",
+        "Quarantine allowed:",
+        "Recovery status:",
+    ):
+        assert text in output
+
+
+def test_63e_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-failure-recovery", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_failure_recovery_overview"]["phase"] == "63E"
+    assert data["runtime_failure_recovery_overview"]["execution_allowed"] is False
+    assert data["runtime_failure_recovery_overview"]["recovery_allowed"] is False
+    assert data["runtime_failure_recovery_overview"]["quarantine_allowed"] is False
+    assert data["runtime_failure_recovery_overview"]["human_review_required"] is True
