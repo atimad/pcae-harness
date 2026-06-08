@@ -169,6 +169,8 @@ from pcae.commands.agent import (
     run_runtime_execution_pilot,
     run_runtime_output_capture,
     run_runtime_audit_persistence,
+    run_runtime_review_workflow,
+    run_task_state_alignment,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4480,6 +4482,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rap_parser.set_defaults(handler=run_runtime_audit_persistence)
+
+    rrw_parser = subparsers.add_parser(
+        "runtime-review-workflow",
+        help="Define and validate the governed review workflow for persisted runtime audit records (Phase 62D).",
+    )
+    rrw_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rrw_parser.set_defaults(handler=run_runtime_review_workflow)
+
+    tsa_parser = subparsers.add_parser(
+        "task-state-alignment",
+        help="Inspect active task state alignment with the roadmap phase declared in PROJECT_STATUS.md (Phase 62E).",
+    )
+    tsa_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    tsa_parser.set_defaults(handler=run_task_state_alignment)
 
     return parser
 

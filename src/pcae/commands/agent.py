@@ -364,6 +364,10 @@ from pcae.core.agent import (
     RUNTIME_OUTPUT_CAPTURE_ADVISORY,
     build_runtime_audit_persistence,
     RUNTIME_AUDIT_PERSISTENCE_ADVISORY,
+    build_runtime_review_workflow,
+    RUNTIME_REVIEW_WORKFLOW_ADVISORY,
+    build_task_state_alignment,
+    TASK_STATE_ALIGNMENT_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12246,4 +12250,135 @@ def run_runtime_audit_persistence(args: argparse.Namespace) -> int:
     print(f"Allowed commands:   {', '.join(data['allowed_commands'])}")
     print()
     print(RUNTIME_AUDIT_PERSISTENCE_ADVISORY)
+    return 0
+
+
+def run_runtime_review_workflow(args: argparse.Namespace) -> int:
+    data = build_runtime_review_workflow(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_review_workflow_overview"]
+    print("Runtime review workflow")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Review domains:         {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Review status:          {overview['review_status']}")
+    print(f"Review allowed:         {'yes' if overview['review_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Artifact found:         {'yes' if overview['artifact_found'] else 'no'}")
+    print(f"Artifact readable:      {'yes' if overview['artifact_readable'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["review_record"]
+    print("Review record:")
+    print(f"  Review ID:          {rec['review_id']}")
+    print(f"  Execution ID:       {rec['execution_id']}")
+    print(f"  Capture ID:         {rec['capture_id']}")
+    print(f"  Persistence ID:     {rec['persistence_id']}")
+    print(f"  Runtime:            {rec['runtime_id']}")
+    print(f"  Command:            {rec['command']}")
+    print(f"  Command hash:       {rec['command_hash']}")
+    print(f"  Audit record ID:    {rec['audit_record_id']}")
+    print(f"  Review status:      {rec['review_status']}")
+    print(f"  Reviewed by:        {rec['reviewed_by']}")
+    print(f"  Human review:       {'yes' if rec['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Review signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['review_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                {', '.join(boundaries['may'])}")
+    print(f"  May not:            {', '.join(boundaries['may_not'])}")
+    print(f"  Review allowed:     {boundaries['review_allowed']}")
+    print(f"  Execution allowed:  {boundaries['execution_allowed']}")
+    print(f"  Human review:       {boundaries['human_review_required']}")
+    print(f"  Audit dir:          {boundaries['audit_dir']}")
+    print()
+    print(RUNTIME_REVIEW_WORKFLOW_ADVISORY)
+    return 0
+
+
+def run_task_state_alignment(args: argparse.Namespace) -> int:
+    data = build_task_state_alignment(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["task_state_alignment_overview"]
+    print("Task state alignment")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Alignment domains:      {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Alignment status:       {overview['alignment_status']}")
+    print(f"Active task phase:      {overview['active_task_phase']}")
+    print(f"Roadmap phase:          {overview['project_status_phase']}")
+    print(f"Repair recommended:     {'yes' if overview['repair_recommended'] else 'no'}")
+    print(f"Repair allowed:         {'yes' if overview['repair_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["alignment_record"]
+    print("Alignment record:")
+    print(f"  Alignment ID:         {rec['alignment_id']}")
+    print(f"  Active task ID:       {rec['active_task_id']}")
+    print(f"  Active task title:    {rec['active_task_title']}")
+    print(f"  Active task phase:    {rec['active_task_phase']}")
+    print(f"  Project status phase: {rec['project_status_phase']}")
+    print(f"  Alignment status:     {rec['alignment_status']}")
+    print(f"  Drift domain count:   {rec['drift_domain_count']}")
+    print(f"  Repair recommended:   {'yes' if rec['repair_recommended'] else 'no'}")
+    print(f"  Human review:         {'yes' if rec['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Alignment signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['alignment_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                {', '.join(boundaries['may'])}")
+    print(f"  May not:            {', '.join(boundaries['may_not'])}")
+    print(f"  Repair allowed:     {boundaries['repair_allowed']}")
+    print(f"  Repair recommended: {boundaries['repair_recommended']}")
+    print(f"  Human review:       {boundaries['human_review_required']}")
+    print()
+    print(TASK_STATE_ALIGNMENT_ADVISORY)
     return 0

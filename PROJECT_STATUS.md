@@ -2,16 +2,16 @@
 
 ## Current Phase
 
-Phase 62C: Runtime Audit Persistence — complete.
+Phase 62E: Task State Alignment — active.
 
-62A completed: first real governed execution. 62A.1 completed: task transition idempotency
-hardened. 62B completed: runtime output structured into RuntimeOutputCaptureRecord (12 fields).
-62C completed: governed runtime audit JSON artifacts persisted to .pcae/audit/runtime/;
-RuntimeAuditPersistenceRecord (11 fields: persistence_id, execution_id, capture_id,
-runtime_id, command, command_hash, audit_record_id, persistence_target, persisted,
-persistence_timestamp, human_review_required); ten persistence domains validated; read-back
-integrity confirmed; persistence limited to .pcae/audit/runtime/; 4380 tests passing.
-62D is next.
+62A–62D completed: governed execution, output capture, audit persistence, and review
+workflow established. 62E: corrective phase diagnosing and repairing three-phase task
+state drift (62B/62C/62D implemented without `pcae task transition`); introduces
+`pcae task-state-alignment` (inspection command); adds `check_active_task_phase_alignment`
+to `pcae check` (detects active task phase ↔ PROJECT_STATUS.md drift); TaskStateAlignmentRecord
+(10 fields), TaskStateAlignmentSignal (8 fields), TaskStateAlignmentAssessment (9 fields),
+TaskStateAlignmentSummary (10 fields); ten alignment domains; repair_allowed=False;
+human_review_required=True always; 4390+ tests passing. 62F is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

@@ -1900,3 +1900,72 @@ patterns = [
 
 def render_string(value: str) -> str:
     return f'"{value}"'
+
+
+# ---------------------------------------------------------------------------
+# Phase 62E — check_active_task_phase_alignment regression tests
+# ---------------------------------------------------------------------------
+
+from pcae.core.check import check_active_task_phase_alignment  # noqa: E402
+from pcae.core.tasks import read_active_task  # noqa: E402
+
+
+def _write_project_status(root: Path, phase_line: str) -> None:
+    content = f"# Project Status\n\n## Current Phase\n\n{phase_line}\n"
+    write_file(root / "PROJECT_STATUS.md", content)
+
+
+def _write_task_with_phase(root: Path, phase_title: str) -> "ActiveTask":
+    task_path = root / "tasks" / "active" / "20260608-0000-test.md"
+    write_file(
+        task_path,
+        f"# Task Contract\n\n## Task ID\n\n20260608-0000-test\n\n## Title\n\n{phase_title}\n\n## Status\n\nactive\n",
+    )
+    return read_active_task(task_path)
+
+
+def test_62e_check_passes_when_phases_aligned(tmp_path: Path) -> None:
+    _write_project_status(tmp_path, "Phase 62E: Task State Alignment — active.")
+    task = _write_task_with_phase(tmp_path, "62E active task state repair")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert violations == ()
+
+
+def test_62e_check_fails_when_phases_differ(tmp_path: Path) -> None:
+    _write_project_status(tmp_path, "Phase 62D: Runtime Review Workflow — complete.")
+    task = _write_task_with_phase(tmp_path, "62B runtime output capture")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert len(violations) == 1
+    assert "62B" in violations[0].text
+    assert "62D" in violations[0].text
+    assert "pcae task transition" in violations[0].text
+
+
+def test_62e_check_skips_when_project_status_missing(tmp_path: Path) -> None:
+    task = _write_task_with_phase(tmp_path, "62E active task state repair")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert violations == ()
+
+
+def test_62e_check_skips_when_phase_code_unextractable(tmp_path: Path) -> None:
+    _write_project_status(tmp_path, "Work in progress.")
+    task = _write_task_with_phase(tmp_path, "no phase code here")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert violations == ()
+
+
+def test_62e_check_case_insensitive_comparison(tmp_path: Path) -> None:
+    _write_project_status(tmp_path, "Phase 62e: Some task — active.")
+    task = _write_task_with_phase(tmp_path, "62E active task state repair")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert violations == ()
+
+
+def test_62e_check_integrated_in_run_checks(tmp_path: Path) -> None:
+    init_harness(HarnessPath(tmp_path))
+    write_task(tmp_path, allowed_files=["src/allowed.py"], title="62B runtime output capture")
+    _write_project_status(tmp_path, "Phase 62D: Runtime Review Workflow — complete.")
+    write_file(tmp_path / "src" / "allowed.py", "x = 1\n")
+    commit_baseline(tmp_path)
+    result = run_checks(HarnessPath(tmp_path))
+    assert has_violation(result, "does not match PROJECT_STATUS.md current phase")

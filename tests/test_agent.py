@@ -44973,3 +44973,298 @@ def test_62c_human_output(tmp_path, monkeypatch, capsys) -> None:
         "Allowed commands:",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62D: Runtime Review Workflow
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_review_workflow  # noqa: E402
+
+
+def test_62d_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    for key in (
+        "runtime_review_workflow_overview",
+        "review_record",
+        "reviewed_artifact",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62d_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeReviewWorkflowRecord"
+    assert data["record_model"]["field_count"] == 12
+    assert data["signal_model"]["model_name"] == "RuntimeReviewWorkflowSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeReviewWorkflowAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeReviewWorkflowSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "review_id", "execution_id", "capture_id", "persistence_id",
+        "runtime_id", "command", "command_hash", "audit_record_id",
+        "review_status", "human_review_required", "reviewed_by", "review_timestamp",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62d_all_review_domains_defined(tmp_path) -> None:
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    expected = {
+        "execution_record_review",
+        "output_capture_review",
+        "audit_artifact_review",
+        "stdout_review",
+        "stderr_review",
+        "exit_code_review",
+        "command_hash_review",
+        "runtime_metadata_review",
+        "human_review_decision",
+        "escalation_review",
+    }
+    actual = {s["review_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62d_no_artifact_produces_no_blockers(tmp_path) -> None:
+    # With no persisted artifacts, review_allowed should be False but no blockers
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    overview = data["runtime_review_workflow_overview"]
+    assert overview["artifact_found"] is False
+    assert overview["review_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["review_status"] == "pending_human_review"
+    # audit_artifact_review should be blocker when artifact not readable
+    blockers = [s for s in data["signals"] if s["severity"] == "blocker"]
+    assert any(s["review_domain"] == "audit_artifact_review" for s in blockers)
+
+
+def test_62d_with_artifact_review_allowed(tmp_path) -> None:
+    # Seed a valid artifact, then run review
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    overview = data["runtime_review_workflow_overview"]
+    assert overview["artifact_found"] is True
+    assert overview["artifact_readable"] is True
+    assert overview["review_allowed"] is True
+    assert overview["execution_allowed"] is False
+    assert overview["review_status"] == "pending_human_review"
+    assert overview["blocker_count"] == 0
+
+
+def test_62d_execution_allowed_always_false(tmp_path) -> None:
+    # execution_allowed must be False even when artifacts exist
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    assert data["runtime_review_workflow_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_62d_review_record_fields(tmp_path) -> None:
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    rec = data["review_record"]
+    assert rec["review_id"].startswith("rrw-")
+    assert rec["review_status"] == "pending_human_review"
+    assert rec["reviewed_by"] == "pcae-governance"
+    assert rec["human_review_required"] is True
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+
+
+def test_62d_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "review_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62d_governance_boundaries(tmp_path) -> None:
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_workflow(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["audit_dir"] == ".pcae/audit/runtime"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "modify audit artifacts",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"]
+    assert "inspect persisted runtime audit artifacts" in boundaries["may"]
+    assert "classify review status" in boundaries["may"]
+
+
+def test_62d_human_output(tmp_path, monkeypatch, capsys) -> None:
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-review-workflow"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime review workflow",
+        "Review record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Review signals",
+        "Governance boundaries",
+        "Review allowed:",
+        "Execution allowed:",
+        "Audit dir:",
+    ):
+        assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62E — Task State Alignment
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_task_state_alignment  # noqa: E402
+
+
+def test_62e_json_top_level_keys(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    for key in (
+        "task_state_alignment_overview",
+        "alignment_record",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data
+
+
+def test_62e_models_and_exact_fields(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "TaskStateAlignmentRecord"
+    assert data["record_model"]["field_count"] == 10
+    assert data["signal_model"]["model_name"] == "TaskStateAlignmentSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "TaskStateAlignmentAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "TaskStateAlignmentSummary"
+    assert data["summary_model"]["field_count"] == 10
+
+
+def test_62e_all_alignment_domains_defined(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    overview = data["task_state_alignment_overview"]
+    assert overview["domain_count"] == 10
+    signal_domains = {s["alignment_domain"] for s in data["signals"]}
+    for domain in (
+        "active_task_file_presence",
+        "session_task_consistency",
+        "project_status_phase_readability",
+        "active_task_phase_alignment",
+        "done_task_contract_coverage",
+        "task_transition_history_integrity",
+        "session_timestamp_freshness",
+        "changelog_phase_alignment",
+        "roadmap_continuity_consistency",
+        "repair_recommendation",
+    ):
+        assert domain in signal_domains
+
+
+def test_62e_no_active_task_produces_indeterminate(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    overview = data["task_state_alignment_overview"]
+    assert overview["alignment_status"] == "indeterminate"
+    assert overview["active_task_phase"] == "none"
+
+
+def test_62e_repair_allowed_always_false(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    assert data["alignment_record"]["repair_allowed"] is False
+    assert data["governance_boundaries"]["repair_allowed"] is False
+
+
+def test_62e_human_review_always_required(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    assert data["alignment_record"]["human_review_required"] is True
+    for signal in data["signals"]:
+        assert signal["human_review_required"] is True
+
+
+def test_62e_alignment_record_fields(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    rec = data["alignment_record"]
+    for field in (
+        "alignment_id",
+        "active_task_id",
+        "active_task_title",
+        "active_task_phase",
+        "project_status_phase",
+        "alignment_status",
+        "drift_domain_count",
+        "repair_recommended",
+        "repair_allowed",
+        "human_review_required",
+    ):
+        assert field in rec
+
+
+def test_62e_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "alignment_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62e_governance_boundaries(tmp_path) -> None:
+    data = build_task_state_alignment(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["repair_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in ("move task contract files", "rewrite session state", "commit", "push", "rollback"):
+        assert action in boundaries["may_not"]
+    assert "inspect active task contract files" in boundaries["may"]
+    assert "read PROJECT_STATUS.md current phase" in boundaries["may"]
+
+
+def test_62e_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["task-state-alignment"])
+    output = capsys.readouterr().out
+    for text in (
+        "Task state alignment",
+        "Alignment record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Alignment signals",
+        "Governance boundaries",
+        "Repair allowed:",
+        "Repair recommended:",
+    ):
+        assert text in output

@@ -1060,6 +1060,16 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-audit-persistence`
 - `pcae runtime-audit-persistence --json`
+
+## runtime-review-workflow
+
+- `pcae runtime-review-workflow`
+- `pcae runtime-review-workflow --json`
+
+## task-state-alignment
+
+- `pcae task-state-alignment`
+- `pcae task-state-alignment --json`
 """
 
 

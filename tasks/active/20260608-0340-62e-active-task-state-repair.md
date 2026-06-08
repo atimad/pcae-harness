@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260607-2105-62b-runtime-output-capture
+20260608-0340-62e-active-task-state-repair
 
 ## Title
 
-62B runtime output capture
+62E active task state repair
 
 ## Status
 
@@ -18,12 +18,11 @@ implementation
 
 ## Goal
 
-62B runtime output capture
+62E active task state repair
 
 ## Allowed Files
 
 - .pcae/session.json
-- .pcae/audit/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -35,10 +34,10 @@ implementation
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
 - src/pcae/core/agent.py
+- src/pcae/core/check.py
 - src/pcae/core/docs.py
-- src/pcae/core/tasks.py
 - tests/test_agent.py
-- tests/test_task.py
+- tests/test_check.py
 
 ## Forbidden Files
 
@@ -88,4 +87,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-07T21:05:50.937852+02:00
+2026-06-08T03:40:31.768561+02:00

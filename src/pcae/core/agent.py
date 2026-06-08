@@ -62658,3 +62658,803 @@ def build_runtime_audit_persistence(root: HarnessPath | None = None) -> dict:
         "forbidden_commands": list(_REP_FORBIDDEN_PREFIXES),
         "advisory": RUNTIME_AUDIT_PERSISTENCE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62D: Runtime Review Workflow
+# ---------------------------------------------------------------------------
+
+RUNTIME_REVIEW_WORKFLOW_ADVISORY = (
+    "Phase 62D defines and validates the governed review workflow for persisted runtime "
+    "execution audit records. No new runtime invocation occurs. Review inspects persisted "
+    "artifacts under .pcae/audit/runtime/. Audit artifacts are not modified. Future "
+    "execution is not approved. Write execution is not approved. Human review is always "
+    "required."
+)
+
+_RRW_REVIEW_DOMAINS: tuple[str, ...] = (
+    "execution_record_review",
+    "output_capture_review",
+    "audit_artifact_review",
+    "stdout_review",
+    "stderr_review",
+    "exit_code_review",
+    "command_hash_review",
+    "runtime_metadata_review",
+    "human_review_decision",
+    "escalation_review",
+)
+
+_RRW_REVIEW_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "accepted",
+    "accepted_with_warnings",
+    "rejected",
+    "escalated",
+    "blocked",
+)
+
+_RRW_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RRW_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "review_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "capture_id", "type": "str", "required": True},
+    {"name": "persistence_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "audit_record_id", "type": "str", "required": True},
+    {"name": "review_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "reviewed_by", "type": "str", "required": True},
+    {"name": "review_timestamp", "type": "str", "required": True},
+)
+
+_RRW_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "review_id", "type": "str", "required": True},
+    {"name": "review_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRW_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "review_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "review_status", "type": "str", "required": True},
+    {"name": "review_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRW_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "review_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "review_status", "type": "str", "required": True},
+    {"name": "review_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def build_runtime_review_workflow(root: HarnessPath | None = None) -> dict:
+    """Define and validate the governed review workflow for persisted runtime audit records."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    review_id = f"rrw-{ts}"
+    audit_dir = root.join(Path(_RAP_AUDIT_DIR))
+
+    artifact_data: dict = {}
+    artifact_found = False
+    artifact_readable = False
+    artifact_path_used = ""
+    artifact_error = ""
+
+    if audit_dir.exists():
+        artifact_files = sorted(audit_dir.glob("rap-*.json"), reverse=True)
+        if artifact_files:
+            latest = artifact_files[0]
+            artifact_path_used = str(latest)
+            try:
+                artifact_data = json.loads(latest.read_text(encoding="utf-8"))
+                artifact_found = True
+                artifact_readable = bool(artifact_data.get("persistence_id"))
+            except Exception as exc:
+                artifact_error = str(exc)
+
+    execution_id = artifact_data.get("execution_id", f"rep-{ts}-unknown")
+    capture_id = artifact_data.get("capture_id", f"roc-{ts}-unknown")
+    persistence_id = artifact_data.get("persistence_id", f"rap-{ts}-unknown")
+    runtime_id = artifact_data.get("runtime_id", _REP_RUNTIME_ID)
+    command = artifact_data.get("command", _REP_DEFAULT_COMMAND)
+    command_hash = artifact_data.get("command_hash", "")
+    audit_record_id = artifact_data.get("audit_record_id", f"rap-audit-{ts}-unknown")
+    stdout_value = artifact_data.get("stdout", "")
+    stderr_value = artifact_data.get("stderr", "")
+    exit_code = artifact_data.get("exit_code", -1)
+
+    review_status = "pending_human_review"
+    review_allowed = artifact_found and artifact_readable
+
+    review_record = {
+        "review_id": review_id,
+        "execution_id": execution_id,
+        "capture_id": capture_id,
+        "persistence_id": persistence_id,
+        "runtime_id": runtime_id,
+        "command": command,
+        "command_hash": command_hash,
+        "audit_record_id": audit_record_id,
+        "review_status": review_status,
+        "human_review_required": True,
+        "reviewed_by": "pcae-governance",
+        "review_timestamp": generated_at,
+    }
+
+    domain_signal_defs = [
+        {
+            "review_domain": "execution_record_review",
+            "signal_type": "execution_record_review_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"execution_id={execution_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}"
+            ),
+            "expected_state": (
+                "execution record must be readable from persisted audit artifact; "
+                "execution_id must be present and linked"
+            ),
+        },
+        {
+            "review_domain": "output_capture_review",
+            "signal_type": "output_capture_review_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"capture_id={capture_id}; "
+                f"stdout_len={len(stdout_value)}; stderr_len={len(stderr_value)}; "
+                f"exit_code={exit_code}"
+            ),
+            "expected_state": (
+                "output capture linkage (capture_id, stdout, stderr, exit_code) must be "
+                "present and reviewable in the persisted artifact"
+            ),
+        },
+        {
+            "review_domain": "audit_artifact_review",
+            "signal_type": "audit_artifact_review_check",
+            "severity": "info" if artifact_readable else "blocker",
+            "detected_state": (
+                f"persistence_id={persistence_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}; "
+                f"artifact_path={artifact_path_used}"
+                + (f"; error={artifact_error}" if artifact_error else "")
+            ),
+            "expected_state": (
+                "persisted audit artifact must be locatable under .pcae/audit/runtime/ "
+                "and must be readable JSON with persistence_id present"
+            ),
+        },
+        {
+            "review_domain": "stdout_review",
+            "signal_type": "stdout_review_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"stdout captured in artifact; length={len(stdout_value)} chars; "
+                f"non_empty={bool(stdout_value.strip())}; review_ready={artifact_readable}"
+            ),
+            "expected_state": "stdout from the persisted execution must be available for review",
+        },
+        {
+            "review_domain": "stderr_review",
+            "signal_type": "stderr_review_check",
+            "severity": "info",
+            "detected_state": (
+                f"stderr captured in artifact; length={len(stderr_value)} chars; "
+                f"empty_stderr_is_valid=True; review_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "stderr from the persisted execution must be available for review "
+                "(empty stderr is valid)"
+            ),
+        },
+        {
+            "review_domain": "exit_code_review",
+            "signal_type": "exit_code_review_check",
+            "severity": "info" if exit_code != -1 else "warning",
+            "detected_state": (
+                f"exit_code={exit_code}; review_ready={artifact_readable}; "
+                f"exit_code_present={exit_code != -1}"
+            ),
+            "expected_state": "exit code from the persisted execution must be available for review",
+        },
+        {
+            "review_domain": "command_hash_review",
+            "signal_type": "command_hash_review_check",
+            "severity": "info" if command_hash else "warning",
+            "detected_state": (
+                f"command_hash={command_hash}; "
+                f"hash_present={bool(command_hash)}; "
+                f"review_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "command hash must be present in the persisted artifact and available for review"
+            ),
+        },
+        {
+            "review_domain": "runtime_metadata_review",
+            "signal_type": "runtime_metadata_review_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_id={runtime_id}; command='{command}'; "
+                f"review_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "runtime metadata (runtime_id, command) must be present "
+                "in the persisted artifact and available for review"
+            ),
+        },
+        {
+            "review_domain": "human_review_decision",
+            "signal_type": "human_review_decision_check",
+            "severity": "info",
+            "detected_state": (
+                f"review_status={review_status}; human_review_required=True; "
+                "reviewed_by=pcae-governance; no_automatic_approval=True"
+            ),
+            "expected_state": (
+                "review_status must be pending_human_review; human approval is required "
+                "before any execution can proceed; no automatic approval"
+            ),
+        },
+        {
+            "review_domain": "escalation_review",
+            "signal_type": "escalation_review_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path=human-only; no_runtime_invocation_during_review=True; "
+                "no_write_approval_during_review=True; execution_allowed=False"
+            ),
+            "expected_state": (
+                "review workflow must not invoke runtimes, approve writes, or approve "
+                "future execution; escalation path is human-only"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rrw-sig-{ts}-{i:02d}",
+            "review_id": review_id,
+            "review_domain": sig["review_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    final_review_allowed = review_allowed and blocker_count == 0
+
+    assessment_id = f"rrwa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "review_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": final_review_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rrwsum-{ts}",
+        "assessment_id": assessment_id,
+        "review_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "review_status": review_status,
+        "review_allowed": final_review_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RRW_REVIEW_DOMAINS)
+
+    return {
+        "runtime_review_workflow_overview": {
+            "overview_id": f"62d-{ts}",
+            "generated_at": generated_at,
+            "phase": "62D",
+            "title": "Runtime Review Workflow",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "review_status": review_status,
+            "review_allowed": final_review_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "artifact_found": artifact_found,
+            "artifact_readable": artifact_readable,
+            "summary": (
+                "Phase 62D defines and validates the governed review workflow for persisted "
+                "runtime execution audit records. Inspects persisted artifacts under "
+                f".pcae/audit/runtime/. artifact_found={artifact_found}. "
+                f"artifact_readable={artifact_readable}. "
+                f"review_status={review_status}. "
+                f"review_allowed={final_review_allowed}. "
+                "execution_allowed=False. "
+                "No new runtime invocation occurs. Audit artifacts are not modified. "
+                "Future execution is not approved. Write execution is not approved. "
+                "human_review_required=True."
+            ),
+        },
+        "review_record": review_record,
+        "reviewed_artifact": artifact_data if artifact_found else {},
+        "record_model": {
+            "model_name": "RuntimeReviewWorkflowRecord",
+            "field_count": len(_RRW_RECORD_FIELDS),
+            "required_field_count": len(_RRW_RECORD_FIELDS),
+            "supported_review_statuses": list(_RRW_REVIEW_STATUSES),
+            "review_allowed_conditional_in_62d": True,
+            "execution_allowed_false_in_62d": True,
+            "human_review_required_always_true_in_62d": True,
+            "fields": [dict(f) for f in _RRW_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeReviewWorkflowSignal",
+            "field_count": len(_RRW_SIGNAL_FIELDS),
+            "required_field_count": len(_RRW_SIGNAL_FIELDS),
+            "severity_values": list(_RRW_SEVERITY_VALUES),
+            "review_allowed_conditional_in_62d": True,
+            "execution_allowed_false_in_62d": True,
+            "human_review_required_always_true_in_62d": True,
+            "fields": [dict(f) for f in _RRW_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeReviewWorkflowAssessment",
+            "field_count": len(_RRW_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RRW_ASSESSMENT_FIELDS),
+            "supported_review_statuses": list(_RRW_REVIEW_STATUSES),
+            "review_allowed_conditional_in_62d": True,
+            "execution_allowed_false_in_62d": True,
+            "human_review_required_always_true_in_62d": True,
+            "fields": [dict(f) for f in _RRW_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeReviewWorkflowSummary",
+            "field_count": len(_RRW_SUMMARY_FIELDS),
+            "required_field_count": len(_RRW_SUMMARY_FIELDS),
+            "supported_review_statuses": list(_RRW_REVIEW_STATUSES),
+            "review_allowed_conditional_in_62d": True,
+            "execution_allowed_false_in_62d": True,
+            "human_review_required_always_true_in_62d": True,
+            "fields": [dict(f) for f in _RRW_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect persisted runtime audit artifacts",
+                "validate execution/output/audit linkage",
+                "classify review status",
+                "produce review records in memory/reporting structures",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "modify audit artifacts",
+                "modify source files through executed commands",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "review_allowed": final_review_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "audit_dir": _RAP_AUDIT_DIR,
+            "phase": "62D",
+        },
+        "advisory": RUNTIME_REVIEW_WORKFLOW_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62E — Task State Alignment (active task ↔ roadmap phase inspection)
+# ---------------------------------------------------------------------------
+
+TASK_STATE_ALIGNMENT_ADVISORY = (
+    "Phase 62E inspects and repairs active task state drift caused by phases being "
+    "implemented without running `pcae task transition`. No task files are moved, "
+    "no session state is rewritten, and no repository modification occurs during "
+    "inspection. repair_allowed=False. repair_recommended=True when drifted. "
+    "Human review is always required."
+)
+
+_TSA_ALIGNMENT_DOMAINS: tuple[str, ...] = (
+    "active_task_file_presence",
+    "session_task_consistency",
+    "project_status_phase_readability",
+    "active_task_phase_alignment",
+    "done_task_contract_coverage",
+    "task_transition_history_integrity",
+    "session_timestamp_freshness",
+    "changelog_phase_alignment",
+    "roadmap_continuity_consistency",
+    "repair_recommendation",
+)
+
+_TSA_ALIGNMENT_STATUSES: tuple[str, ...] = (
+    "aligned",
+    "drifted",
+    "indeterminate",
+)
+
+_TSA_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_TSA_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "alignment_id", "type": "str", "required": True},
+    {"name": "active_task_id", "type": "str", "required": True},
+    {"name": "active_task_title", "type": "str", "required": True},
+    {"name": "active_task_phase", "type": "str", "required": True},
+    {"name": "project_status_phase", "type": "str", "required": True},
+    {"name": "alignment_status", "type": "str", "required": True},
+    {"name": "drift_domain_count", "type": "int", "required": True},
+    {"name": "repair_recommended", "type": "bool", "required": True},
+    {"name": "repair_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TSA_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "alignment_id", "type": "str", "required": True},
+    {"name": "alignment_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TSA_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "alignment_status", "type": "str", "required": True},
+    {"name": "repair_recommended", "type": "bool", "required": True},
+    {"name": "repair_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TSA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "domain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "alignment_status", "type": "str", "required": True},
+    {"name": "repair_recommended", "type": "bool", "required": True},
+    {"name": "repair_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_TSA_PHASE_CODE_RE = re.compile(r"\b(\d+[A-Z][\d.A-Z]*)\b")
+
+
+def _tsa_phase_from_project_status(root: HarnessPath) -> str:
+    path = root.join(Path("PROJECT_STATUS.md"))
+    if not path.is_file():
+        return "unknown"
+    content = path.read_text(encoding="utf-8")
+    in_section = False
+    for line in content.splitlines():
+        if line.strip() == "## Current Phase":
+            in_section = True
+            continue
+        if in_section:
+            if line.strip().startswith("#"):
+                break
+            match = _TSA_PHASE_CODE_RE.search(line)
+            if match:
+                return match.group(1)
+    return "unknown"
+
+
+def _tsa_phase_from_title(title: str) -> str:
+    match = _TSA_PHASE_CODE_RE.match(title.strip())
+    return match.group(1) if match else "unknown"
+
+
+def _tsa_done_contract_count(root: HarnessPath) -> int:
+    done_dir = root.join(Path("tasks") / "done")
+    if not done_dir.is_dir():
+        return 0
+    return len(list(done_dir.glob("*.md")))
+
+
+def _tsa_session_task_id(root: HarnessPath) -> str:
+    session_path = root.join(Path(".pcae") / "session.json")
+    if not session_path.is_file():
+        return "missing"
+    try:
+        data = json.loads(session_path.read_text(encoding="utf-8"))
+        task = data.get("active_task")
+        if isinstance(task, dict):
+            return task.get("id", "missing")
+    except (json.JSONDecodeError, KeyError):
+        pass
+    return "missing"
+
+
+def build_task_state_alignment(root: HarnessPath | None = None) -> dict:
+    """Inspect active task state alignment with roadmap phase declarations."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    alignment_id = f"tsa-{ts}"
+
+    active_task = find_latest_active_task(root)
+    active_task_id = active_task.task_id if active_task is not None else "none"
+    active_task_title = active_task.title if active_task is not None else "none"
+    active_task_phase = _tsa_phase_from_title(active_task_title) if active_task is not None else "none"
+    project_status_phase = _tsa_phase_from_project_status(root)
+    session_task_id = _tsa_session_task_id(root)
+    done_contract_count = _tsa_done_contract_count(root)
+
+    phase_aligned = (
+        active_task is not None
+        and active_task_phase != "unknown"
+        and project_status_phase != "unknown"
+        and active_task_phase.upper() == project_status_phase.upper()
+    )
+    session_aligned = active_task is not None and session_task_id == active_task_id
+    alignment_status = "aligned" if phase_aligned else ("drifted" if active_task is not None else "indeterminate")
+    repair_recommended = not phase_aligned or not session_aligned
+
+    signals: list[dict] = []
+
+    def _signal(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        signals.append({
+            "signal_id": f"{alignment_id}-{domain}",
+            "alignment_id": alignment_id,
+            "alignment_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+
+    # active_task_file_presence
+    if active_task is not None:
+        _signal("active_task_file_presence", "active_task_found", "info",
+                active_task_id, "active task contract present")
+    else:
+        _signal("active_task_file_presence", "active_task_missing", "blocker",
+                "none", "active task contract present in tasks/active/")
+
+    # session_task_consistency
+    if session_aligned:
+        _signal("session_task_consistency", "session_matches_active_task", "info",
+                session_task_id, session_task_id)
+    else:
+        _signal("session_task_consistency", "session_mismatch", "blocker",
+                session_task_id, active_task_id)
+
+    # project_status_phase_readability
+    if project_status_phase != "unknown":
+        _signal("project_status_phase_readability", "phase_readable", "info",
+                project_status_phase, "phase code readable from PROJECT_STATUS.md")
+    else:
+        _signal("project_status_phase_readability", "phase_unreadable", "warning",
+                "unknown", "phase code extractable from PROJECT_STATUS.md Current Phase section")
+
+    # active_task_phase_alignment
+    if phase_aligned:
+        _signal("active_task_phase_alignment", "phases_aligned", "info",
+                active_task_phase, project_status_phase)
+    else:
+        _signal("active_task_phase_alignment", "phase_drift_detected", "blocker",
+                active_task_phase, project_status_phase)
+
+    # done_task_contract_coverage
+    _signal("done_task_contract_coverage", "done_contracts_scanned", "info",
+            str(done_contract_count), "task contracts present for completed phases")
+
+    # task_transition_history_integrity
+    _signal("task_transition_history_integrity", "transition_history_inspected", "info",
+            f"{done_contract_count} done contracts",
+            "pcae task transition called for each phase boundary")
+
+    # session_timestamp_freshness
+    _signal("session_timestamp_freshness", "session_freshness_inspected", "info",
+            "session.json present" if session_task_id != "missing" else "session.json missing",
+            "session.json reflects current active task")
+
+    # changelog_phase_alignment
+    changelog_path = root.join(Path("CHANGELOG.md"))
+    changelog_present = changelog_path.is_file()
+    _signal("changelog_phase_alignment", "changelog_presence_checked", "info",
+            "CHANGELOG.md present" if changelog_present else "CHANGELOG.md missing",
+            "CHANGELOG.md updated for current transition")
+
+    # roadmap_continuity_consistency
+    _signal("roadmap_continuity_consistency", "roadmap_consistency_inspected", "info",
+            alignment_status, "roadmap and active task state consistent")
+
+    # repair_recommendation
+    if repair_recommended:
+        _signal("repair_recommendation", "repair_recommended", "blocker",
+                alignment_status,
+                "run `pcae task transition` to align active task with roadmap phase")
+    else:
+        _signal("repair_recommendation", "no_repair_needed", "info",
+                alignment_status, "aligned")
+
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    domain_count = len(_TSA_ALIGNMENT_DOMAINS)
+
+    alignment_record = {
+        "alignment_id": alignment_id,
+        "active_task_id": active_task_id,
+        "active_task_title": active_task_title,
+        "active_task_phase": active_task_phase,
+        "project_status_phase": project_status_phase,
+        "alignment_status": alignment_status,
+        "drift_domain_count": blocker_count,
+        "repair_recommended": repair_recommended,
+        "repair_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_assessment = {
+        "assessment_id": f"tsa-assessment-{ts}",
+        "domain_count": domain_count,
+        "signal_count": len(signals),
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "alignment_status": alignment_status,
+        "repair_recommended": repair_recommended,
+        "repair_allowed": False,
+        "human_review_required": True,
+    }
+
+    sample_summary = {
+        "summary_id": f"tsa-summary-{ts}",
+        "assessment_id": sample_assessment["assessment_id"],
+        "domain_count": domain_count,
+        "signal_count": len(signals),
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "alignment_status": alignment_status,
+        "repair_recommended": repair_recommended,
+        "repair_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "task_state_alignment_overview": {
+            "overview_id": f"62e-{ts}",
+            "generated_at": generated_at,
+            "phase": "62E",
+            "title": "Task State Alignment",
+            "domain_count": domain_count,
+            "signal_count": len(signals),
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "alignment_status": alignment_status,
+            "repair_recommended": repair_recommended,
+            "repair_allowed": False,
+            "human_review_required": True,
+            "active_task_phase": active_task_phase,
+            "project_status_phase": project_status_phase,
+            "summary": (
+                f"Phase 62E inspects active task state alignment with the roadmap phase declared "
+                f"in PROJECT_STATUS.md. active_task_phase={active_task_phase}. "
+                f"project_status_phase={project_status_phase}. "
+                f"alignment_status={alignment_status}. "
+                f"repair_recommended={repair_recommended}. "
+                "repair_allowed=False. No task files are moved. No session state is rewritten. "
+                "No repository modification occurs. human_review_required=True."
+            ),
+        },
+        "alignment_record": alignment_record,
+        "record_model": {
+            "model_name": "TaskStateAlignmentRecord",
+            "field_count": len(_TSA_RECORD_FIELDS),
+            "required_field_count": len(_TSA_RECORD_FIELDS),
+            "supported_alignment_statuses": list(_TSA_ALIGNMENT_STATUSES),
+            "repair_allowed_false_in_62e": True,
+            "human_review_required_always_true_in_62e": True,
+            "fields": [dict(f) for f in _TSA_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "TaskStateAlignmentSignal",
+            "field_count": len(_TSA_SIGNAL_FIELDS),
+            "required_field_count": len(_TSA_SIGNAL_FIELDS),
+            "severity_values": list(_TSA_SEVERITY_VALUES),
+            "repair_allowed_false_in_62e": True,
+            "human_review_required_always_true_in_62e": True,
+            "fields": [dict(f) for f in _TSA_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "TaskStateAlignmentAssessment",
+            "field_count": len(_TSA_ASSESSMENT_FIELDS),
+            "required_field_count": len(_TSA_ASSESSMENT_FIELDS),
+            "supported_alignment_statuses": list(_TSA_ALIGNMENT_STATUSES),
+            "repair_allowed_false_in_62e": True,
+            "human_review_required_always_true_in_62e": True,
+            "fields": [dict(f) for f in _TSA_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "TaskStateAlignmentSummary",
+            "field_count": len(_TSA_SUMMARY_FIELDS),
+            "required_field_count": len(_TSA_SUMMARY_FIELDS),
+            "supported_alignment_statuses": list(_TSA_ALIGNMENT_STATUSES),
+            "repair_allowed_false_in_62e": True,
+            "human_review_required_always_true_in_62e": True,
+            "fields": [dict(f) for f in _TSA_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect active task contract files",
+                "read PROJECT_STATUS.md current phase",
+                "read session.json active task",
+                "compare phase codes between active task and roadmap",
+                "report alignment signals and blockers",
+            ],
+            "may_not": [
+                "move task contract files",
+                "rewrite session state",
+                "invoke runtimes",
+                "execute prompts",
+                "modify source files",
+                "access network",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "repair_allowed": False,
+            "repair_recommended": repair_recommended,
+            "human_review_required": True,
+            "phase": "62E",
+        },
+        "advisory": TASK_STATE_ALIGNMENT_ADVISORY,
+    }

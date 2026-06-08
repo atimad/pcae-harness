@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from fnmatch import fnmatch
 import json
 from pathlib import Path
+import re
 
 from pcae.core.architecture import analyze_changed_python_dependencies, zones_for_path
 from pcae.core.git_status import GitChange, read_git_changes
@@ -105,6 +106,7 @@ def run_checks(root: HarnessPath) -> CheckResult:
         )
 
     if active_task is not None:
+        violations.extend(check_active_task_phase_alignment(root, active_task))
         violations.extend(check_forbidden_changes(changes, active_task))
         violations.extend(
             check_global_protected_changes(
@@ -603,3 +605,55 @@ def documentation_changed(paths: tuple[Path, ...]) -> bool:
 
 def is_documentation_path(path: Path) -> bool:
     return path in DOCUMENTATION_PATHS or path.as_posix().startswith("tasks/active/")
+
+
+_PHASE_CODE_RE = re.compile(r"\b(\d+[A-Z][\d.A-Z]*)\b")
+
+
+def _extract_phase_code_from_project_status(content: str) -> str | None:
+    in_section = False
+    for line in content.splitlines():
+        if line.strip() == "## Current Phase":
+            in_section = True
+            continue
+        if in_section:
+            if line.strip().startswith("#"):
+                break
+            match = _PHASE_CODE_RE.search(line)
+            if match:
+                return match.group(1)
+    return None
+
+
+def _extract_phase_code_from_title(title: str) -> str | None:
+    match = _PHASE_CODE_RE.match(title.strip())
+    return match.group(1) if match else None
+
+
+def check_active_task_phase_alignment(
+    root: HarnessPath,
+    active_task: ActiveTask,
+) -> tuple[CheckMessage, ...]:
+    status_path = root.join(Path("PROJECT_STATUS.md"))
+    if not status_path.is_file():
+        return ()
+
+    content = status_path.read_text(encoding="utf-8")
+    status_phase = _extract_phase_code_from_project_status(content)
+    task_phase = _extract_phase_code_from_title(active_task.title)
+
+    if status_phase is None or task_phase is None:
+        return ()
+
+    if status_phase.upper() == task_phase.upper():
+        return ()
+
+    return (
+        CheckMessage(
+            reason=(
+                f"Active task phase '{task_phase}' does not match "
+                f"PROJECT_STATUS.md current phase '{status_phase}'. "
+                "Run `pcae task transition` to advance task state."
+            ),
+        ),
+    )

@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260607-2105-62b-runtime-output-capture",
-    "title": "62B runtime output capture"
+    "id": "20260608-0340-62e-active-task-state-repair",
+    "title": "62E active task state repair"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "62B runtime output capture",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -38,15 +38,11 @@
         "status": " M"
       },
       {
+        "path": "src/pcae/core/check.py",
+        "status": " M"
+      },
+      {
         "path": "src/pcae/core/docs.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/tasks.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DECISIONS.md",
         "status": " M"
       },
       {
@@ -54,7 +50,7 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260607-1939-next-governed-task.md",
+        "path": "tasks/active/20260607-2105-62b-runtime-output-capture.md",
         "status": " D"
       },
       {
@@ -62,30 +58,18 @@
         "status": " M"
       },
       {
-        "path": "tests/test_task.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260607-2105-62b-runtime-output-capture.md",
+        "path": "tasks/active/20260608-0340-62e-active-task-state-repair.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260607-1939-next-governed-task.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260607-2023-62a-controlled-runtime-execution-pilot.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260607-2050-62a-1-task-transition-idempotency-hardening.md",
+        "path": "tasks/done/20260607-2105-62b-runtime-output-capture.md",
         "status": "??"
       }
     ],
-    "status_summary": "18 changed files"
+    "status_summary": "14 changed files"
   },
-  "last_completed_step": "Completed task 20260607-2050-62a-1-task-transition-idempotency-hardening: 62A.1 task transition idempotency hardening",
-  "next_recommended_step": "Continue active task 20260607-2105-62b-runtime-output-capture.",
-  "timestamp": "2026-06-07T19:05:50.954340+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-08T01:45:36.607674+00:00",
   "warnings": []
 }
