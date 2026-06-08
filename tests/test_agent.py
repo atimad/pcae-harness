@@ -45448,3 +45448,218 @@ def test_62f_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_review_decision_overview"]["phase"] == "62F"
     assert data["runtime_review_decision_overview"]["execution_allowed"] is False
     assert data["runtime_review_decision_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 62G: Runtime Approval Gates
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_approval_gates  # noqa: E402
+
+
+def test_62g_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    for key in (
+        "runtime_approval_gates_overview",
+        "approval_record",
+        "inspected_artifact",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "mandatory_gates",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62g_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeApprovalGateRecord"
+    assert data["record_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "RuntimeApprovalGateSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeApprovalGateAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeApprovalGateSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "approval_id", "execution_id", "runtime_id", "command", "command_hash",
+        "gate_name", "gate_status", "approval_status", "escalation_required",
+        "human_review_required", "approval_timestamp",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62g_all_approval_domains_defined(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    expected = {
+        "runtime_registration_gate",
+        "runtime_trust_gate",
+        "command_allowlist_gate",
+        "command_denylist_gate",
+        "execution_scope_gate",
+        "human_review_gate",
+        "audit_readiness_gate",
+        "review_decision_gate",
+        "approval_record_gate",
+        "escalation_gate",
+    }
+    actual = {s["approval_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62g_all_mandatory_gates_listed(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    assert len(data["mandatory_gates"]) == 10
+    for gate in (
+        "runtime_registration_gate",
+        "runtime_trust_gate",
+        "command_allowlist_gate",
+        "command_denylist_gate",
+        "execution_scope_gate",
+        "human_review_gate",
+        "audit_readiness_gate",
+        "review_decision_gate",
+        "approval_record_gate",
+        "escalation_gate",
+    ):
+        assert gate in data["mandatory_gates"]
+
+
+def test_62g_no_artifact_blocks_approval(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    overview = data["runtime_approval_gates_overview"]
+    assert overview["artifact_found"] is False
+    assert overview["approval_allowed"] is False
+    assert overview["execution_allowed"] is False
+    blockers = [s for s in data["signals"] if s["severity"] == "blocker"]
+    blocker_domains = {s["approval_domain"] for s in blockers}
+    assert "audit_readiness_gate" in blocker_domains
+    assert "review_decision_gate" in blocker_domains
+    assert "approval_record_gate" in blocker_domains
+
+
+def test_62g_with_artifact_approval_allowed(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    overview = data["runtime_approval_gates_overview"]
+    assert overview["artifact_found"] is True
+    assert overview["approval_allowed"] is True
+    assert overview["execution_allowed"] is False
+    assert overview["blocker_count"] == 0
+
+
+def test_62g_execution_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    assert data["runtime_approval_gates_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_62g_runtime_registration_and_trust_validated(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    overview = data["runtime_approval_gates_overview"]
+    assert overview["runtime_registered"] is True
+    assert overview["runtime_trusted"] is True
+    assert overview["command_allowlisted"] is True
+    assert overview["command_denylisted"] is False
+    reg_signal = next(s for s in data["signals"] if s["approval_domain"] == "runtime_registration_gate")
+    trust_signal = next(s for s in data["signals"] if s["approval_domain"] == "runtime_trust_gate")
+    allow_signal = next(s for s in data["signals"] if s["approval_domain"] == "command_allowlist_gate")
+    deny_signal = next(s for s in data["signals"] if s["approval_domain"] == "command_denylist_gate")
+    assert reg_signal["severity"] == "info"
+    assert trust_signal["severity"] == "info"
+    assert allow_signal["severity"] == "info"
+    assert deny_signal["severity"] == "info"
+
+
+def test_62g_approval_record_fields(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    rec = data["approval_record"]
+    assert rec["approval_id"].startswith("rag-")
+    assert rec["gate_name"] == "runtime-approval-gates"
+    assert rec["gate_status"] == "passed"
+    assert rec["human_review_required"] is True
+    assert rec["escalation_required"] is False
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+
+
+def test_62g_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "approval_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62g_governance_boundaries(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_approval_gates(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["audit_dir"] == ".pcae/audit/runtime"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "modify audit artifacts",
+        "approve write execution",
+        "bypass governance",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"]
+    assert "inspect runtime governance state" in boundaries["may"]
+    assert "generate approval records" in boundaries["may"]
+
+
+def test_62g_human_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-approval-gates"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime approval gates",
+        "Approval record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Approval gate signals",
+        "Governance boundaries",
+        "Approval allowed:",
+        "Execution allowed:",
+        "Audit dir:",
+    ):
+        assert text in output
+
+
+def test_62g_json_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-approval-gates", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_approval_gates_overview"]["phase"] == "62G"
+    assert data["runtime_approval_gates_overview"]["execution_allowed"] is False
+    assert data["runtime_approval_gates_overview"]["human_review_required"] is True

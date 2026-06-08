@@ -2,7 +2,16 @@
 
 ## Current Phase
 
-Phase 62F: Runtime Review Decision Record.
+Phase 62G: Runtime Approval Gates — active.
+
+62A–62F completed: governed execution, output capture, audit persistence, review workflow,
+task state alignment, and review decision record established. 62G: introduces governed
+approval gates that determine whether a runtime execution request may proceed under PCAE
+governance; `pcae runtime-approval-gates`; RuntimeApprovalGateRecord (11 fields),
+RuntimeApprovalGateSignal (8 fields), RuntimeApprovalGateAssessment (9 fields),
+RuntimeApprovalGateSummary (10 fields); ten mandatory approval domains; approval_allowed=True
+only when all mandatory gates pass; execution_allowed=False; human_review_required=True
+always; 4430 tests passing. 62H is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

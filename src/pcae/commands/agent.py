@@ -370,6 +370,8 @@ from pcae.core.agent import (
     TASK_STATE_ALIGNMENT_ADVISORY,
     build_runtime_review_decision,
     RUNTIME_REVIEW_DECISION_ADVISORY,
+    build_runtime_approval_gates,
+    RUNTIME_APPROVAL_GATES_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12449,4 +12451,73 @@ def run_runtime_review_decision(args: argparse.Namespace) -> int:
     print(f"  Audit dir:          {boundaries['audit_dir']}")
     print()
     print(RUNTIME_REVIEW_DECISION_ADVISORY)
+    return 0
+
+
+def run_runtime_approval_gates(args: argparse.Namespace) -> int:
+    data = build_runtime_approval_gates(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_approval_gates_overview"]
+    print("Runtime approval gates")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Approval domains:       {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Approval status:        {overview['approval_status']}")
+    print(f"Approval allowed:       {'yes' if overview['approval_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Runtime registered:     {'yes' if overview['runtime_registered'] else 'no'}")
+    print(f"Runtime trusted:        {'yes' if overview['runtime_trusted'] else 'no'}")
+    print(f"Command allowlisted:    {'yes' if overview['command_allowlisted'] else 'no'}")
+    print(f"Command denylisted:     {'yes' if overview['command_denylisted'] else 'no'}")
+    print(f"Artifact found:         {'yes' if overview['artifact_found'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["approval_record"]
+    print("Approval record:")
+    print(f"  Approval ID:        {rec['approval_id']}")
+    print(f"  Execution ID:       {rec['execution_id']}")
+    print(f"  Runtime:            {rec['runtime_id']}")
+    print(f"  Command:            {rec['command']}")
+    print(f"  Command hash:       {rec['command_hash']}")
+    print(f"  Gate name:          {rec['gate_name']}")
+    print(f"  Gate status:        {rec['gate_status']}")
+    print(f"  Approval status:    {rec['approval_status']}")
+    print(f"  Escalation req'd:   {'yes' if rec['escalation_required'] else 'no'}")
+    print(f"  Human review:       {'yes' if rec['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Approval gate signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['approval_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                {', '.join(boundaries['may'])}")
+    print(f"  May not:            {', '.join(boundaries['may_not'])}")
+    print(f"  Approval allowed:   {boundaries['approval_allowed']}")
+    print(f"  Execution allowed:  {boundaries['execution_allowed']}")
+    print(f"  Human review:       {boundaries['human_review_required']}")
+    print(f"  Audit dir:          {boundaries['audit_dir']}")
+    print()
+    print(RUNTIME_APPROVAL_GATES_ADVISORY)
     return 0

@@ -63892,3 +63892,452 @@ def build_runtime_review_decision(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_REVIEW_DECISION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62G: Runtime Approval Gates
+# ---------------------------------------------------------------------------
+
+RUNTIME_APPROVAL_GATES_ADVISORY = (
+    "Phase 62G establishes governed approval gates that determine whether a runtime "
+    "execution request may proceed under PCAE governance. All 10 mandatory gates must "
+    "pass for approval_allowed to be True. execution_allowed remains False in 62G. "
+    "Approval does not automatically execute commands. Human review is always required. "
+    "Write execution remains blocked. Network operations remain blocked. Runtime trust "
+    "validation is mandatory."
+)
+
+_RAG_APPROVAL_DOMAINS: tuple[str, ...] = (
+    "runtime_registration_gate",
+    "runtime_trust_gate",
+    "command_allowlist_gate",
+    "command_denylist_gate",
+    "execution_scope_gate",
+    "human_review_gate",
+    "audit_readiness_gate",
+    "review_decision_gate",
+    "approval_record_gate",
+    "escalation_gate",
+)
+
+_RAG_APPROVAL_STATUSES: tuple[str, ...] = (
+    "pending_review",
+    "approved",
+    "approved_with_warnings",
+    "rejected",
+    "escalated",
+    "blocked",
+)
+
+_RAG_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RAG_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "approval_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "gate_name", "type": "str", "required": True},
+    {"name": "gate_status", "type": "str", "required": True},
+    {"name": "approval_status", "type": "str", "required": True},
+    {"name": "escalation_required", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "approval_timestamp", "type": "str", "required": True},
+)
+
+_RAG_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "approval_id", "type": "str", "required": True},
+    {"name": "approval_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAG_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "approval_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "approval_status", "type": "str", "required": True},
+    {"name": "approval_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "approval_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "approval_status", "type": "str", "required": True},
+    {"name": "approval_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RAG_TRUSTED_RUNTIMES: frozenset[str] = frozenset({"shell-local"})
+_RAG_REGISTERED_RUNTIMES: frozenset[str] = frozenset({"shell-local"})
+
+
+def build_runtime_approval_gates(root: HarnessPath | None = None) -> dict:
+    """Establish governed approval gates for runtime execution requests."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    approval_id = f"rag-{ts}"
+    audit_dir = root.join(Path(_RAP_AUDIT_DIR))
+
+    artifact_data: dict = {}
+    artifact_found = False
+    artifact_readable = False
+    artifact_path_used = ""
+
+    if audit_dir.exists():
+        artifact_files = sorted(audit_dir.glob("rap-*.json"), reverse=True)
+        if artifact_files:
+            latest = artifact_files[0]
+            artifact_path_used = str(latest)
+            try:
+                artifact_data = json.loads(latest.read_text(encoding="utf-8"))
+                artifact_found = True
+                artifact_readable = bool(artifact_data.get("persistence_id"))
+            except Exception:
+                pass
+
+    execution_id = artifact_data.get("execution_id", f"rep-{ts}-unknown")
+    runtime_id = artifact_data.get("runtime_id", _REP_RUNTIME_ID)
+    command = artifact_data.get("command", _REP_DEFAULT_COMMAND)
+    command_hash = artifact_data.get("command_hash", "")
+
+    runtime_registered = runtime_id in _RAG_REGISTERED_RUNTIMES
+    runtime_trusted = runtime_id in _RAG_TRUSTED_RUNTIMES
+    command_allowlisted = _rep_command_allowed(command)
+    command_denylisted = _rep_command_forbidden(command)
+    execution_scope_valid = command_allowlisted and not command_denylisted and runtime_registered
+
+    approval_status = "pending_review"
+
+    domain_signal_defs = [
+        {
+            "approval_domain": "runtime_registration_gate",
+            "signal_type": "runtime_registration_check",
+            "severity": "info" if runtime_registered else "blocker",
+            "detected_state": (
+                f"runtime_id={runtime_id}; registered={runtime_registered}; "
+                f"known_runtimes={sorted(_RAG_REGISTERED_RUNTIMES)}"
+            ),
+            "expected_state": (
+                "runtime must be registered in PCAE governance before approval may proceed"
+            ),
+        },
+        {
+            "approval_domain": "runtime_trust_gate",
+            "signal_type": "runtime_trust_check",
+            "severity": "info" if runtime_trusted else "blocker",
+            "detected_state": (
+                f"runtime_id={runtime_id}; trusted={runtime_trusted}; "
+                f"trusted_runtimes={sorted(_RAG_TRUSTED_RUNTIMES)}"
+            ),
+            "expected_state": (
+                "runtime must be trusted in PCAE trust model before approval may proceed; "
+                "runtime trust cannot be bypassed"
+            ),
+        },
+        {
+            "approval_domain": "command_allowlist_gate",
+            "signal_type": "command_allowlist_check",
+            "severity": "info" if command_allowlisted else "blocker",
+            "detected_state": (
+                f"command='{command}'; allowlisted={command_allowlisted}; "
+                f"allowlist={sorted(_REP_ALLOWED_COMMANDS)}"
+            ),
+            "expected_state": (
+                "command must be present in PCAE command allowlist before approval may proceed"
+            ),
+        },
+        {
+            "approval_domain": "command_denylist_gate",
+            "signal_type": "command_denylist_check",
+            "severity": "blocker" if command_denylisted else "info",
+            "detected_state": (
+                f"command='{command}'; denylisted={command_denylisted}; "
+                f"denylist_prefixes={list(_REP_FORBIDDEN_PREFIXES[:5])}..."
+            ),
+            "expected_state": (
+                "command must not match any PCAE command denylist entry; "
+                "command governance cannot be bypassed"
+            ),
+        },
+        {
+            "approval_domain": "execution_scope_gate",
+            "signal_type": "execution_scope_check",
+            "severity": "info" if execution_scope_valid else "blocker",
+            "detected_state": (
+                f"scope_valid={execution_scope_valid}; read_only=True; "
+                f"local_runtime=True; write_blocked=True; network_blocked=True; "
+                f"ai_invocation_blocked=True"
+            ),
+            "expected_state": (
+                "execution must be within approved PCAE scope: read-only, local, "
+                "no write execution, no network access, no AI runtime invocation"
+            ),
+        },
+        {
+            "approval_domain": "human_review_gate",
+            "signal_type": "human_review_check",
+            "severity": "info",
+            "detected_state": (
+                "human_review_required=True; review_status=pending_human_review; "
+                "no_automatic_approval=True; human_review_enforced=True"
+            ),
+            "expected_state": (
+                "human review requirement must be acknowledged and enforced before "
+                "approval may proceed; automatic approval is prohibited"
+            ),
+        },
+        {
+            "approval_domain": "audit_readiness_gate",
+            "signal_type": "audit_readiness_check",
+            "severity": "info" if artifact_found else "blocker",
+            "detected_state": (
+                f"audit_dir={_RAP_AUDIT_DIR}; audit_dir_exists={audit_dir.exists()}; "
+                f"artifact_found={artifact_found}; artifact_readable={artifact_readable}; "
+                f"artifact_path={artifact_path_used}"
+            ),
+            "expected_state": (
+                "audit capability must be available and at least one governed audit artifact "
+                "must exist under .pcae/audit/runtime/ before approval may proceed"
+            ),
+        },
+        {
+            "approval_domain": "review_decision_gate",
+            "signal_type": "review_decision_check",
+            "severity": "info" if artifact_readable else "blocker",
+            "detected_state": (
+                f"review_artifact_readable={artifact_readable}; "
+                f"artifact_found={artifact_found}; "
+                f"review_workflow_completion_inferred={artifact_readable}"
+            ),
+            "expected_state": (
+                "review workflow must have been completed and artifact must be readable "
+                "before approval may proceed; review_decision_gate cannot be bypassed"
+            ),
+        },
+        {
+            "approval_domain": "approval_record_gate",
+            "signal_type": "approval_record_check",
+            "severity": "info" if artifact_readable else "blocker",
+            "detected_state": (
+                f"decision_artifact_present={artifact_readable}; "
+                f"approval_id_generated={approval_id}; "
+                f"approval_record_gate_satisfied={artifact_readable}"
+            ),
+            "expected_state": (
+                "a governed review decision record must be present before an approval "
+                "record may be generated; approval record gate cannot be bypassed"
+            ),
+        },
+        {
+            "approval_domain": "escalation_gate",
+            "signal_type": "escalation_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path=human-only; escalation_available=True; "
+                "no_runtime_invocation_during_approval=True; "
+                "no_write_approval=True; execution_allowed=False"
+            ),
+            "expected_state": (
+                "escalation handling must be available; approval workflow must not invoke "
+                "runtimes, approve writes, or approve future execution without human review"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rag-sig-{ts}-{i:02d}",
+            "approval_id": approval_id,
+            "approval_domain": sig["approval_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    approval_allowed = blocker_count == 0
+
+    gate_status = "passed" if approval_allowed else "blocked"
+    if approval_allowed and warning_count > 0:
+        approval_status = "approved_with_warnings"
+    elif approval_allowed:
+        approval_status = "pending_review"
+    else:
+        approval_status = "blocked"
+
+    approval_record = {
+        "approval_id": approval_id,
+        "execution_id": execution_id,
+        "runtime_id": runtime_id,
+        "command": command,
+        "command_hash": command_hash,
+        "gate_name": "runtime-approval-gates",
+        "gate_status": gate_status,
+        "approval_status": approval_status,
+        "escalation_required": False,
+        "human_review_required": True,
+        "approval_timestamp": generated_at,
+    }
+
+    assessment_id = f"raga-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "approval_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "approval_status": approval_status,
+        "approval_allowed": approval_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"ragsum-{ts}",
+        "assessment_id": assessment_id,
+        "approval_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "approval_status": approval_status,
+        "approval_allowed": approval_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RAG_APPROVAL_DOMAINS)
+
+    return {
+        "runtime_approval_gates_overview": {
+            "overview_id": f"62g-{ts}",
+            "generated_at": generated_at,
+            "phase": "62G",
+            "title": "Runtime Approval Gates",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "approval_status": approval_status,
+            "approval_allowed": approval_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "artifact_found": artifact_found,
+            "artifact_readable": artifact_readable,
+            "runtime_registered": runtime_registered,
+            "runtime_trusted": runtime_trusted,
+            "command_allowlisted": command_allowlisted,
+            "command_denylisted": command_denylisted,
+            "summary": (
+                "Phase 62G establishes governed approval gates for runtime execution "
+                f"requests. Evaluates 10 mandatory approval gates. "
+                f"runtime_registered={runtime_registered}. "
+                f"runtime_trusted={runtime_trusted}. "
+                f"command_allowlisted={command_allowlisted}. "
+                f"command_denylisted={command_denylisted}. "
+                f"artifact_found={artifact_found}. "
+                f"approval_status={approval_status}. "
+                f"approval_allowed={approval_allowed}. "
+                "execution_allowed=False. "
+                "Approval does not automatically execute commands. "
+                "human_review_required=True."
+            ),
+        },
+        "approval_record": approval_record,
+        "inspected_artifact": artifact_data if artifact_found else {},
+        "record_model": {
+            "model_name": "RuntimeApprovalGateRecord",
+            "field_count": len(_RAG_RECORD_FIELDS),
+            "required_field_count": len(_RAG_RECORD_FIELDS),
+            "supported_approval_statuses": list(_RAG_APPROVAL_STATUSES),
+            "approval_allowed_conditional_in_62g": True,
+            "execution_allowed_false_in_62g": True,
+            "human_review_required_always_true_in_62g": True,
+            "fields": [dict(f) for f in _RAG_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeApprovalGateSignal",
+            "field_count": len(_RAG_SIGNAL_FIELDS),
+            "required_field_count": len(_RAG_SIGNAL_FIELDS),
+            "severity_values": list(_RAG_SEVERITY_VALUES),
+            "approval_allowed_conditional_in_62g": True,
+            "execution_allowed_false_in_62g": True,
+            "human_review_required_always_true_in_62g": True,
+            "fields": [dict(f) for f in _RAG_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeApprovalGateAssessment",
+            "field_count": len(_RAG_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RAG_ASSESSMENT_FIELDS),
+            "supported_approval_statuses": list(_RAG_APPROVAL_STATUSES),
+            "approval_allowed_conditional_in_62g": True,
+            "execution_allowed_false_in_62g": True,
+            "human_review_required_always_true_in_62g": True,
+            "fields": [dict(f) for f in _RAG_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeApprovalGateSummary",
+            "field_count": len(_RAG_SUMMARY_FIELDS),
+            "required_field_count": len(_RAG_SUMMARY_FIELDS),
+            "supported_approval_statuses": list(_RAG_APPROVAL_STATUSES),
+            "approval_allowed_conditional_in_62g": True,
+            "execution_allowed_false_in_62g": True,
+            "human_review_required_always_true_in_62g": True,
+            "fields": [dict(f) for f in _RAG_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime governance state",
+                "inspect review decisions",
+                "inspect audit readiness",
+                "generate approval records",
+                "generate approval assessments",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "modify audit artifacts",
+                "approve write execution",
+                "bypass governance",
+                "access network",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "approval_allowed": approval_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "audit_dir": _RAP_AUDIT_DIR,
+            "phase": "62G",
+        },
+        "mandatory_gates": list(_RAG_APPROVAL_DOMAINS),
+        "advisory": RUNTIME_APPROVAL_GATES_ADVISORY,
+    }

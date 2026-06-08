@@ -1054,3 +1054,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-review-decision`
 - `pcae runtime-review-decision --json`
+
+## runtime-approval-gates
+
+- `pcae runtime-approval-gates`
+- `pcae runtime-approval-gates --json`

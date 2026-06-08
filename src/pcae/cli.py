@@ -172,6 +172,7 @@ from pcae.commands.agent import (
     run_runtime_review_workflow,
     run_task_state_alignment,
     run_runtime_review_decision,
+    run_runtime_approval_gates,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4516,6 +4517,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rrd_parser.set_defaults(handler=run_runtime_review_decision)
+
+    rag_parser = subparsers.add_parser(
+        "runtime-approval-gates",
+        help="Establish governed approval gates for runtime execution requests (Phase 62G).",
+    )
+    rag_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rag_parser.set_defaults(handler=run_runtime_approval_gates)
 
     return parser
 
