@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 63F: Runtime Quarantine.
+Phase 64A: Multi-Runtime Execution Planning.
 
 ## Post-61J Runtime Registry Checkpoint
 

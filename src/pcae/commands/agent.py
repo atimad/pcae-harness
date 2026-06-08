@@ -386,6 +386,8 @@ from pcae.core.agent import (
     RUNTIME_FAILURE_RECOVERY_ADVISORY,
     build_runtime_quarantine,
     RUNTIME_QUARANTINE_ADVISORY,
+    build_multi_runtime_execution_planning,
+    MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12981,4 +12983,70 @@ def run_runtime_quarantine(args: argparse.Namespace) -> int:
     print(f"  Human review:        {boundaries['human_review_required']}")
     print()
     print(RUNTIME_QUARANTINE_ADVISORY)
+
+
+def run_multi_runtime_execution_planning(args: argparse.Namespace) -> int:
+    data = build_multi_runtime_execution_planning(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["multi_runtime_execution_planning_overview"]
+    print("Multi-runtime execution planning")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Planning domains:       {overview['domain_count']}")
+    print(f"Execution plans:        {overview['plan_count']}")
+    print(f"Ready:                  {overview['ready_count']}")
+    print(f"Pending approval:       {overview['pending_count']}")
+    print(f"Escalations:            {overview['escalation_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Planning status:        {overview['planning_status']}")
+    print(f"Planning allowed:       {'yes' if overview['planning_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Execution plans:")
+    for p in data["execution_plans"]:
+        print(f"  [{p['plan_id']}] {p['runtime_id']} ({p['runtime_name']})")
+        print(f"    step={p['execution_step']}  order={p['assignment_order']}")
+        print(f"    execution_readiness={p['execution_readiness']}")
+        print(
+            f"    approval_required={p['approval_required']}  "
+            f"audit_required={p['audit_required']}  "
+            f"rollback_required={p['rollback_required']}  "
+            f"escalation_required={p['escalation_required']}"
+        )
+    print()
+    for key, label in (
+        ("plan_model", "Plan model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Planning signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['planning_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print(f"  Planning allowed:    {boundaries['planning_allowed']}")
+    print(f"  Execution allowed:   {boundaries['execution_allowed']}")
+    print(f"  Human review:        {boundaries['human_review_required']}")
+    print()
+    print(MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY)
+    return 0
     return 0

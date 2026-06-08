@@ -180,6 +180,7 @@ from pcae.commands.agent import (
     run_multi_runtime_audit_chain,
     run_runtime_failure_recovery,
     run_runtime_quarantine,
+    run_multi_runtime_execution_planning,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4612,6 +4613,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rq_parser.set_defaults(handler=run_runtime_quarantine)
+
+    mrep_parser = subparsers.add_parser(
+        "multi-runtime-execution-planning",
+        help="Generate governed multi-runtime execution plans connecting registry, selection, arbitration, approval, and execution (Phase 64A).",
+    )
+    mrep_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    mrep_parser.set_defaults(handler=run_multi_runtime_execution_planning)
 
     return parser
 

@@ -46867,3 +46867,183 @@ def test_63f_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_quarantine_overview"]["quarantine_allowed"] is False
     assert data["runtime_quarantine_overview"]["release_allowed"] is False
     assert data["runtime_quarantine_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 64A: Multi-Runtime Execution Planning
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_multi_runtime_execution_planning  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64A  # noqa: E402
+
+
+def test_64a_json_top_level_keys(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    for key in (
+        "multi_runtime_execution_planning_overview",
+        "execution_plans",
+        "plan_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_64a_models_and_exact_fields(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    assert data["plan_model"]["model_name"] == "MultiRuntimeExecutionPlan"
+    assert data["plan_model"]["field_count"] == 12
+    assert data["signal_model"]["model_name"] == "MultiRuntimeExecutionPlanSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "MultiRuntimeExecutionPlanAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "MultiRuntimeExecutionPlanSummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "plan_id", "runtime_id", "runtime_name", "assignment_order",
+        "execution_step", "execution_dependencies", "approval_required",
+        "audit_required", "rollback_required", "escalation_required",
+        "execution_readiness", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["plan_model"]["fields"]
+        ), f"Missing plan field: {field_name}"
+
+
+def test_64a_all_planning_domains_defined(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    expected = {
+        "execution_plan_generation",
+        "runtime_assignment",
+        "execution_ordering",
+        "execution_dependencies",
+        "execution_boundaries",
+        "approval_requirements",
+        "audit_requirements",
+        "rollback_requirements",
+        "escalation_requirements",
+        "execution_readiness",
+    }
+    actual = {s["planning_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_64a_planning_allowed_true(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    assert data["multi_runtime_execution_planning_overview"]["planning_allowed"] is True
+    assert data["sample_assessment"]["planning_allowed"] is True
+    assert data["sample_summary"]["planning_allowed"] is True
+    assert data["governance_boundaries"]["planning_allowed"] is True
+
+
+def test_64a_execution_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    assert data["multi_runtime_execution_planning_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_64a_execution_plans_generated(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    plans = data["execution_plans"]
+    assert len(plans) >= 2
+    for p in plans:
+        assert p["plan_id"].startswith("mrep-")
+        assert p["human_review_required"] is True
+        assert "execution_dependencies" in p
+        assert isinstance(p["execution_dependencies"], list)
+        assert len(p["execution_dependencies"]) >= 1
+
+
+def test_64a_runtime_assignments_generated(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    plans = data["execution_plans"]
+    runtime_ids = [p["runtime_id"] for p in plans]
+    assert "shell-local" in runtime_ids
+    assert "python-local" in runtime_ids
+    orders = [p["assignment_order"] for p in plans]
+    assert sorted(orders) == list(range(1, len(plans) + 1))
+
+
+def test_64a_execution_readiness_generated(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    overview = data["multi_runtime_execution_planning_overview"]
+    assert overview["ready_count"] >= 1
+    ready_plans = [p for p in data["execution_plans"] if p["execution_readiness"] == "ready"]
+    assert len(ready_plans) >= 1
+    pending_plans = [
+        p for p in data["execution_plans"] if p["execution_readiness"] == "pending_approval"
+    ]
+    assert len(pending_plans) >= 1
+
+
+def test_64a_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    for signal in data["signals"]:
+        assert "plan_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "planning_domain" in signal
+
+
+def test_64a_governance_boundaries(tmp_path) -> None:
+    data = build_multi_runtime_execution_planning(_HarnessPath64A(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["planning_allowed"] is True
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "write files",
+        "orchestrate runtimes",
+        "approve writes",
+        "modify audit artifacts",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect runtime governance state" in boundaries["may"]
+    assert "generate execution plans" in boundaries["may"]
+    assert "assign runtimes to execution steps" in boundaries["may"]
+    assert "define execution ordering" in boundaries["may"]
+    assert "assess execution readiness" in boundaries["may"]
+
+
+def test_64a_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-execution-planning"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-runtime execution planning",
+        "Execution plans:",
+        "Plan model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Planning signals:",
+        "Governance boundaries:",
+        "Planning allowed:",
+        "Execution allowed:",
+        "Planning status:",
+    ):
+        assert text in output
+
+
+def test_64a_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-execution-planning", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["multi_runtime_execution_planning_overview"]["phase"] == "64A"
+    assert data["multi_runtime_execution_planning_overview"]["planning_allowed"] is True
+    assert data["multi_runtime_execution_planning_overview"]["execution_allowed"] is False
+    assert data["multi_runtime_execution_planning_overview"]["human_review_required"] is True

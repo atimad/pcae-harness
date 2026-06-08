@@ -67589,3 +67589,481 @@ def build_runtime_quarantine(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_QUARANTINE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64A: Multi-Runtime Execution Planning
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY = (
+    "Phase 64A defines governed multi-runtime execution planning that connects "
+    "registry, selection, arbitration, approval, and rollback into structured "
+    "execution plans. planning_allowed=True. execution_allowed=False always. "
+    "No runtime invocation occurs. No prompt execution occurs. No command execution occurs. "
+    "No write execution occurs. No orchestration execution occurs. "
+    "Human review is always required."
+)
+
+_MREP_PLANNING_DOMAINS: tuple[str, ...] = (
+    "execution_plan_generation",
+    "runtime_assignment",
+    "execution_ordering",
+    "execution_dependencies",
+    "execution_boundaries",
+    "approval_requirements",
+    "audit_requirements",
+    "rollback_requirements",
+    "escalation_requirements",
+    "execution_readiness",
+)
+
+_MREP_PLAN_STATUSES: tuple[str, ...] = (
+    "plan_generated",
+    "ready",
+    "pending_approval",
+    "blocked",
+    "escalated",
+)
+
+_MREP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MREP_PLAN_FIELDS: tuple[dict, ...] = (
+    {"name": "plan_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "assignment_order", "type": "int", "required": True},
+    {"name": "execution_step", "type": "str", "required": True},
+    {"name": "execution_dependencies", "type": "list", "required": True},
+    {"name": "approval_required", "type": "bool", "required": True},
+    {"name": "audit_required", "type": "bool", "required": True},
+    {"name": "rollback_required", "type": "bool", "required": True},
+    {"name": "escalation_required", "type": "bool", "required": True},
+    {"name": "execution_readiness", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MREP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "plan_id", "type": "str", "required": True},
+    {"name": "planning_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MREP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "plan_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "planning_status", "type": "str", "required": True},
+    {"name": "planning_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "readiness_count", "type": "int", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MREP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "plan_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "planning_status", "type": "str", "required": True},
+    {"name": "planning_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "readiness_count", "type": "int", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MREP_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "assignment_order": 1,
+        "execution_step": "step-01",
+        "execution_dependencies": ["registry", "selection", "arbitration", "approval"],
+        "approval_required": False,
+        "audit_required": True,
+        "rollback_required": True,
+        "escalation_required": False,
+        "execution_readiness": "ready",
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "assignment_order": 2,
+        "execution_step": "step-02",
+        "execution_dependencies": ["registry", "selection", "arbitration", "approval"],
+        "approval_required": True,
+        "audit_required": True,
+        "rollback_required": True,
+        "escalation_required": True,
+        "execution_readiness": "pending_approval",
+    },
+)
+
+
+def build_multi_runtime_execution_planning(root: HarnessPath | None = None) -> dict:
+    """Generate governed multi-runtime execution plans without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    plans = []
+    for i, c in enumerate(_MREP_GOVERNED_CANDIDATES, start=1):
+        pid = f"mrep-{ts}-{i:02d}"
+        plans.append(
+            {
+                "plan_id": pid,
+                "runtime_id": c["runtime_id"],
+                "runtime_name": c["runtime_name"],
+                "assignment_order": c["assignment_order"],
+                "execution_step": c["execution_step"],
+                "execution_dependencies": c["execution_dependencies"],
+                "approval_required": c["approval_required"],
+                "audit_required": c["audit_required"],
+                "rollback_required": c["rollback_required"],
+                "escalation_required": c["escalation_required"],
+                "execution_readiness": c["execution_readiness"],
+                "human_review_required": True,
+            }
+        )
+
+    plan_count = len(plans)
+    ready_count = sum(1 for p in plans if p["execution_readiness"] == "ready")
+    pending_count = sum(1 for p in plans if p["execution_readiness"] == "pending_approval")
+    escalation_count = sum(1 for p in plans if p["escalation_required"])
+    first_pid = plans[0]["plan_id"] if plans else f"mrep-{ts}-00"
+
+    if any(p["execution_readiness"] == "blocked" for p in plans):
+        overall_status = "blocked"
+    elif any(p["execution_readiness"] == "escalated" for p in plans):
+        overall_status = "escalated"
+    elif any(p["execution_readiness"] == "pending_approval" for p in plans):
+        overall_status = "pending_approval"
+    elif plan_count == 0:
+        overall_status = "blocked"
+    else:
+        overall_status = "plan_generated"
+
+    approval_required_count = sum(1 for p in plans if p["approval_required"])
+    audit_required_count = sum(1 for p in plans if p["audit_required"])
+    rollback_required_count = sum(1 for p in plans if p["rollback_required"])
+
+    domain_signal_defs = [
+        {
+            "planning_domain": "execution_plan_generation",
+            "signal_type": "execution_plan_generation_check",
+            "severity": "info",
+            "detected_state": (
+                f"plan_count={plan_count}; "
+                "plan_generation=complete; "
+                "execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution plans must be generated for all governed candidates; "
+                "execution_allowed=False in 64A; no execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "runtime_assignment",
+            "signal_type": "runtime_assignment_check",
+            "severity": "info",
+            "detected_state": (
+                f"assigned_count={plan_count}; "
+                "assignment_order_defined=True; "
+                "execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "runtime assignments must be generated for all governed candidates; "
+                "execution_allowed=False in 64A; no runtime invocation occurs"
+            ),
+        },
+        {
+            "planning_domain": "execution_ordering",
+            "signal_type": "execution_ordering_check",
+            "severity": "info",
+            "detected_state": (
+                f"ordered_count={plan_count}; "
+                "ordering_defined=True; "
+                "execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution ordering must be defined for all governed candidates; "
+                "execution_allowed=False in 64A; no orchestration execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "execution_dependencies",
+            "signal_type": "execution_dependencies_check",
+            "severity": "info",
+            "detected_state": (
+                "dependencies_defined=True; "
+                "chain=registry→selection→arbitration→approval→execution; "
+                "execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution dependencies must span registry, selection, arbitration, approval; "
+                "execution_allowed=False in 64A; no command execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "execution_boundaries",
+            "signal_type": "execution_boundaries_check",
+            "severity": "info",
+            "detected_state": (
+                "boundaries_defined=True; "
+                "execution_blocked=True; "
+                "write_execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution boundaries must be defined; "
+                "execution_allowed=False in 64A; no write execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "approval_requirements",
+            "signal_type": "approval_requirements_check",
+            "severity": "warning" if pending_count > 0 else "info",
+            "detected_state": (
+                f"approval_required_count={approval_required_count}; "
+                f"pending_approval_count={pending_count}; "
+                "approval_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "approval requirements must be defined for all governed candidates; "
+                "execution_allowed=False in 64A; no prompt execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "audit_requirements",
+            "signal_type": "audit_requirements_check",
+            "severity": "info",
+            "detected_state": (
+                f"audit_required_count={audit_required_count}; "
+                "audit_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit requirements must be defined for all governed candidates; "
+                "execution_allowed=False in 64A; no audit artifacts modified"
+            ),
+        },
+        {
+            "planning_domain": "rollback_requirements",
+            "signal_type": "rollback_requirements_check",
+            "severity": "info",
+            "detected_state": (
+                f"rollback_required_count={rollback_required_count}; "
+                "rollback_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "rollback requirements must be defined for all governed candidates; "
+                "execution_allowed=False in 64A; no rollback execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "escalation_requirements",
+            "signal_type": "escalation_requirements_check",
+            "severity": "info" if escalation_count > 0 else "warning",
+            "detected_state": (
+                f"escalation_required_count={escalation_count}; "
+                "escalation_path=human_review; "
+                "escalation_is_advisory=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "escalation requirements must route unresolvable decisions to human review; "
+                "execution_allowed=False in 64A; no execution occurs"
+            ),
+        },
+        {
+            "planning_domain": "execution_readiness",
+            "signal_type": "execution_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                f"ready_count={ready_count}; "
+                f"pending_count={pending_count}; "
+                f"plan_count={plan_count}; "
+                f"planning_status={overall_status}; "
+                "execution_allowed=False; "
+                "human_review_required=True"
+            ),
+            "expected_state": (
+                "execution readiness must be assessed for all governed candidates; "
+                "planning_allowed=True; execution_allowed=False always in 64A; "
+                "human_review_required=True always"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"mrep-sig-{ts}-{i:02d}",
+            "plan_id": first_pid,
+            "planning_domain": sig["planning_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"mrepa-{ts}"
+    readiness_count = ready_count
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "plan_count": plan_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "planning_status": overall_status,
+        "planning_allowed": True,
+        "execution_allowed": False,
+        "readiness_count": readiness_count,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mrepsum-{ts}",
+        "assessment_id": assessment_id,
+        "plan_count": plan_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "planning_status": overall_status,
+        "planning_allowed": True,
+        "execution_allowed": False,
+        "readiness_count": readiness_count,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_MREP_PLANNING_DOMAINS)
+
+    return {
+        "multi_runtime_execution_planning_overview": {
+            "overview_id": f"64a-{ts}",
+            "generated_at": generated_at,
+            "phase": "64A",
+            "title": "Multi-Runtime Execution Planning",
+            "domain_count": domain_count,
+            "plan_count": plan_count,
+            "ready_count": ready_count,
+            "pending_count": pending_count,
+            "escalation_count": escalation_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "planning_status": overall_status,
+            "planning_allowed": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 64A defines governed multi-runtime execution planning connecting "
+                "registry, selection, arbitration, approval, and rollback into structured "
+                "execution plans. Planning is allowed; execution is blocked. "
+                f"plan_count={plan_count}. "
+                f"ready_count={ready_count}. "
+                f"pending_count={pending_count}. "
+                f"escalation_count={escalation_count}. "
+                f"planning_status={overall_status}. "
+                "planning_allowed=True. execution_allowed=False. "
+                "No runtime invocation occurs. No orchestration execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "execution_plans": plans,
+        "plan_model": {
+            "model_name": "MultiRuntimeExecutionPlan",
+            "field_count": len(_MREP_PLAN_FIELDS),
+            "required_field_count": len(_MREP_PLAN_FIELDS),
+            "supported_plan_statuses": list(_MREP_PLAN_STATUSES),
+            "planning_allowed_true_in_64a": True,
+            "execution_allowed_false_in_64a": True,
+            "human_review_required_always_true_in_64a": True,
+            "fields": [dict(f) for f in _MREP_PLAN_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "MultiRuntimeExecutionPlanSignal",
+            "field_count": len(_MREP_SIGNAL_FIELDS),
+            "required_field_count": len(_MREP_SIGNAL_FIELDS),
+            "severity_values": list(_MREP_SEVERITY_VALUES),
+            "planning_allowed_true_in_64a": True,
+            "execution_allowed_false_in_64a": True,
+            "human_review_required_always_true_in_64a": True,
+            "fields": [dict(f) for f in _MREP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiRuntimeExecutionPlanAssessment",
+            "field_count": len(_MREP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MREP_ASSESSMENT_FIELDS),
+            "supported_plan_statuses": list(_MREP_PLAN_STATUSES),
+            "planning_allowed_true_in_64a": True,
+            "execution_allowed_false_in_64a": True,
+            "human_review_required_always_true_in_64a": True,
+            "fields": [dict(f) for f in _MREP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiRuntimeExecutionPlanSummary",
+            "field_count": len(_MREP_SUMMARY_FIELDS),
+            "required_field_count": len(_MREP_SUMMARY_FIELDS),
+            "supported_plan_statuses": list(_MREP_PLAN_STATUSES),
+            "planning_allowed_true_in_64a": True,
+            "execution_allowed_false_in_64a": True,
+            "human_review_required_always_true_in_64a": True,
+            "fields": [dict(f) for f in _MREP_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime governance state",
+                "generate execution plans",
+                "assign runtimes to execution steps",
+                "define execution ordering",
+                "define execution dependencies",
+                "define execution boundaries",
+                "assess execution readiness",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "write files",
+                "orchestrate runtimes",
+                "approve writes",
+                "modify audit artifacts",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "planning_allowed": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64A",
+        },
+        "advisory": MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY,
+    }

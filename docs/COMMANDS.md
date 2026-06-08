@@ -1094,3 +1094,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-quarantine`
 - `pcae runtime-quarantine --json`
+
+## multi-runtime-execution-planning
+
+- `pcae multi-runtime-execution-planning`
+- `pcae multi-runtime-execution-planning --json`
