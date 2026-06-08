@@ -2,15 +2,7 @@
 
 ## Current Phase
 
-Phase 63B: Runtime Selection Engine — complete.
-
-63A completed: multi-runtime registry established. 63B: defines governed runtime selection
-across multiple registered runtime candidates without invoking or executing any runtime;
-`pcae runtime-selection-engine`; RuntimeSelectionCandidate (12 fields), RuntimeSelectionSignal
-(8 fields), RuntimeSelectionAssessment (10 fields), RuntimeSelectionSummary (11 fields);
-ten selection domains; selection_allowed=True only when all mandatory criteria satisfied;
-execution_allowed=False always; no runtime invocation; no command execution;
-human_review_required=True always; 4464 tests passing. 63C is next.
+Phase 63C: Runtime Arbitration.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -24,7 +16,7 @@ refresh, and phase test selection hardening.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4348 passing tests.
+**Test count:** 4475 passing tests.
 
 **License:** Apache License 2.0.
 

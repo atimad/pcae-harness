@@ -176,6 +176,7 @@ from pcae.commands.agent import (
     run_runtime_rollback_boundaries,
     run_multi_runtime_registry,
     run_runtime_selection_engine,
+    run_runtime_arbitration,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4564,6 +4565,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rse_parser.set_defaults(handler=run_runtime_selection_engine)
+
+    ra_parser = subparsers.add_parser(
+        "runtime-arbitration",
+        help="Arbitrate between multiple governed runtime candidates without invoking any runtime (Phase 63C).",
+    )
+    ra_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    ra_parser.set_defaults(handler=run_runtime_arbitration)
 
     return parser
 

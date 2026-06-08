@@ -46182,3 +46182,172 @@ def test_63b_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_selection_engine_overview"]["execution_allowed"] is False
     assert data["runtime_selection_engine_overview"]["human_review_required"] is True
     assert data["runtime_selection_engine_overview"]["selection_allowed"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 63C: Runtime Arbitration
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_arbitration  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63C  # noqa: E402
+
+
+def test_63c_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    for key in (
+        "runtime_arbitration_overview",
+        "candidates",
+        "candidate_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63c_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    assert data["candidate_model"]["model_name"] == "RuntimeArbitrationCandidate"
+    assert data["candidate_model"]["field_count"] == 13
+    assert data["signal_model"]["model_name"] == "RuntimeArbitrationSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeArbitrationAssessment"
+    assert data["assessment_model"]["field_count"] == 11
+    assert data["summary_model"]["model_name"] == "RuntimeArbitrationSummary"
+    assert data["summary_model"]["field_count"] == 12
+    for field_name in (
+        "candidate_id", "runtime_id", "runtime_name", "runtime_type",
+        "capability_score", "trust_score", "audit_score", "approval_score",
+        "rollback_score", "task_fit_score", "arbitration_score",
+        "arbitration_status", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["candidate_model"]["fields"]
+        ), f"Missing candidate field: {field_name}"
+
+
+def test_63c_all_arbitration_domains_defined(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    expected = {
+        "candidate_conflict_detection",
+        "capability_conflict_arbitration",
+        "trust_conflict_arbitration",
+        "audit_readiness_arbitration",
+        "approval_readiness_arbitration",
+        "rollback_readiness_arbitration",
+        "task_fit_arbitration",
+        "weighted_scoring_arbitration",
+        "escalation_arbitration",
+        "final_arbitration_decision",
+    }
+    actual = {s["arbitration_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63c_execution_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    assert data["runtime_arbitration_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63c_arbitration_allowed_requires_multiple_candidates(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    overview = data["runtime_arbitration_overview"]
+    assert overview["candidate_count"] >= 2
+    assert overview["arbitration_allowed"] is True
+
+
+def test_63c_winning_runtime_reported(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    overview = data["runtime_arbitration_overview"]
+    assert overview["winning_runtime_id"] == "shell-local"
+    assert overview["arbitration_status"] in (
+        "arbitrated", "arbitration_with_warnings"
+    )
+
+
+def test_63c_candidate_scores_and_arbitration_score_populated(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    candidates = data["candidates"]
+    assert len(candidates) >= 2
+    shell = next(c for c in candidates if c["runtime_id"] == "shell-local")
+    assert shell["capability_score"] == 10
+    assert shell["trust_score"] == 10
+    assert shell["audit_score"] == 10
+    assert shell["approval_score"] == 10
+    assert shell["rollback_score"] == 10
+    assert shell["task_fit_score"] == 10
+    assert shell["arbitration_score"] == 60
+    assert shell["arbitration_status"] == "arbitrated"
+    assert shell["human_review_required"] is True
+    assert shell["candidate_id"].startswith("ra-cand-")
+
+
+def test_63c_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    for signal in data["signals"]:
+        assert "candidate_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "arbitration_domain" in signal
+
+
+def test_63c_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_arbitration(_HarnessPath63C(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "register runtimes",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "compare qualified runtime candidates" in boundaries["may"]
+    assert "score arbitration candidates" in boundaries["may"]
+    assert "determine a preferred candidate" in boundaries["may"]
+    assert "recommend escalation if arbitration cannot produce a clear result" in boundaries["may"]
+
+
+def test_63c_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-arbitration"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime arbitration",
+        "Candidates",
+        "Candidate model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Arbitration signals",
+        "Governance boundaries",
+        "Arbitration allowed:",
+        "Execution allowed:",
+        "Winning runtime:",
+    ):
+        assert text in output
+
+
+def test_63c_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-arbitration", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_arbitration_overview"]["phase"] == "63C"
+    assert data["runtime_arbitration_overview"]["execution_allowed"] is False
+    assert data["runtime_arbitration_overview"]["human_review_required"] is True
+    assert data["runtime_arbitration_overview"]["arbitration_allowed"] is True
+    assert data["runtime_arbitration_overview"]["winning_runtime_id"] == "shell-local"

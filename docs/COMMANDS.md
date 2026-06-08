@@ -1074,3 +1074,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-selection-engine`
 - `pcae runtime-selection-engine --json`
+
+## runtime-arbitration
+
+- `pcae runtime-arbitration`
+- `pcae runtime-arbitration --json`

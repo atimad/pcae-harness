@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 63C: Runtime Arbitration (20260608-1449-63c-runtime-arbitration)
+- Implemented Runtime Arbitration (Phase 63C): `pcae runtime-arbitration` and `--json`; governs arbitration between multiple qualified runtime candidates when runtime selection produces competing candidates; four models — RuntimeArbitrationCandidate (13 fields), RuntimeArbitrationSignal (8 fields), RuntimeArbitrationAssessment (11 fields), RuntimeArbitrationSummary (12 fields); ten arbitration domains; arbitration_allowed=True when multiple governed candidates are eligible; winning_runtime_id reported when arbitration succeeds; escalation reported when arbitration cannot resolve conflict; selection_allowed remains governed and conditional; execution_allowed=False always; human_review_required=True always; no runtime invocation; no runtime registration; no command execution; 11 new tests following test_63c_* naming; `python -m pytest -k 63c` selects 11 tests; 4475 total tests passing.
 - 63B: Runtime Selection Engine (20260608-1306-63b-runtime-selection-engine)
 - 63A: Multi-Runtime Registry (20260608-1220-63a-multi-runtime-registry)
 - 62H: Runtime Rollback Boundaries (20260608-0826-62h-runtime-rollback-boundaries)

@@ -65690,3 +65690,504 @@ def build_runtime_selection_engine(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_SELECTION_ENGINE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63C: Runtime Arbitration
+# ---------------------------------------------------------------------------
+
+RUNTIME_ARBITRATION_ADVISORY = (
+    "Phase 63C defines governed arbitration between multiple qualified runtime "
+    "candidates. arbitration_allowed may be True when multiple governed candidates are "
+    "eligible and all mandatory arbitration criteria are satisfied. selection_allowed "
+    "remains governed and conditional. execution_allowed=False always. No runtime "
+    "invocation occurs. No command execution occurs. No runtime registration occurs. "
+    "Escalation is required if arbitration cannot determine a clear winner. "
+    "Human review is always required."
+)
+
+_RA_ARBITRATION_DOMAINS: tuple[str, ...] = (
+    "candidate_conflict_detection",
+    "capability_conflict_arbitration",
+    "trust_conflict_arbitration",
+    "audit_readiness_arbitration",
+    "approval_readiness_arbitration",
+    "rollback_readiness_arbitration",
+    "task_fit_arbitration",
+    "weighted_scoring_arbitration",
+    "escalation_arbitration",
+    "final_arbitration_decision",
+)
+
+_RA_ARBITRATION_STATUSES: tuple[str, ...] = (
+    "arbitrated",
+    "arbitration_required",
+    "arbitration_with_warnings",
+    "escalated",
+    "blocked",
+)
+
+_RA_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RA_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {"name": "candidate_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "runtime_type", "type": "str", "required": True},
+    {"name": "capability_score", "type": "int", "required": True},
+    {"name": "trust_score", "type": "int", "required": True},
+    {"name": "audit_score", "type": "int", "required": True},
+    {"name": "approval_score", "type": "int", "required": True},
+    {"name": "rollback_score", "type": "int", "required": True},
+    {"name": "task_fit_score", "type": "int", "required": True},
+    {"name": "arbitration_score", "type": "int", "required": True},
+    {"name": "arbitration_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RA_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "candidate_id", "type": "str", "required": True},
+    {"name": "arbitration_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RA_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "candidate_count", "type": "int", "required": True},
+    {"name": "winning_runtime_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "arbitration_status", "type": "str", "required": True},
+    {"name": "arbitration_allowed", "type": "bool", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RA_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "candidate_count", "type": "int", "required": True},
+    {"name": "winning_runtime_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "arbitration_status", "type": "str", "required": True},
+    {"name": "arbitration_allowed", "type": "bool", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RA_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "runtime_type": "shell",
+        "in_registry": True,
+        "passed_selection": True,
+        "capability_match": True,
+        "trust_sufficient": True,
+        "audit_ready": True,
+        "approval_ready": True,
+        "rollback_defined": True,
+        "task_fit": True,
+        "is_blocked": False,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "runtime_type": "python",
+        "in_registry": True,
+        "passed_selection": True,
+        "capability_match": True,
+        "trust_sufficient": True,
+        "audit_ready": True,
+        "approval_ready": False,
+        "rollback_defined": True,
+        "task_fit": True,
+        "is_blocked": False,
+    },
+)
+
+
+def build_runtime_arbitration(root: HarnessPath | None = None) -> dict:
+    """Arbitrate between multiple governed runtime candidates without invoking any runtime."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    candidates = []
+    for i, c in enumerate(_RA_GOVERNED_CANDIDATES, start=1):
+        cid = f"ra-cand-{ts}-{i:02d}"
+        cap_score = 10 if c["capability_match"] else 0
+        trust_score = 10 if c["trust_sufficient"] else 0
+        audit_score = 10 if c["audit_ready"] else 0
+        approval_score = 10 if c["approval_ready"] else 0
+        rollback_score = 10 if c["rollback_defined"] else 0
+        task_fit_score = 10 if c["task_fit"] else 0
+        arbitration_score = (
+            cap_score + trust_score + audit_score
+            + approval_score + rollback_score + task_fit_score
+        )
+        eligible = (
+            c["in_registry"]
+            and c["passed_selection"]
+            and not c["is_blocked"]
+        )
+        if not eligible:
+            arb_status = "blocked"
+        elif arbitration_score == 60:
+            arb_status = "arbitrated"
+        elif arbitration_score >= 40:
+            arb_status = "arbitration_with_warnings"
+        else:
+            arb_status = "blocked"
+        candidates.append(
+            {
+                "candidate_id": cid,
+                "runtime_id": c["runtime_id"],
+                "runtime_name": c["runtime_name"],
+                "runtime_type": c["runtime_type"],
+                "capability_score": cap_score,
+                "trust_score": trust_score,
+                "audit_score": audit_score,
+                "approval_score": approval_score,
+                "rollback_score": rollback_score,
+                "task_fit_score": task_fit_score,
+                "arbitration_score": arbitration_score,
+                "arbitration_status": arb_status,
+                "human_review_required": True,
+            }
+        )
+
+    candidate_count = len(candidates)
+    eligible_candidates = [c for c in candidates if c["arbitration_status"] != "blocked"]
+    arbitration_allowed = candidate_count >= 2 and len(eligible_candidates) >= 1
+
+    winner: dict | None = None
+    if eligible_candidates:
+        winner = max(eligible_candidates, key=lambda c: c["arbitration_score"])
+    winning_runtime_id = winner["runtime_id"] if winner else "none"
+    first_cid = candidates[0]["candidate_id"] if candidates else f"ra-cand-{ts}-00"
+
+    has_warnings = any(c["arbitration_status"] == "arbitration_with_warnings" for c in candidates)
+    if candidate_count == 0:
+        arbitration_status = "blocked"
+    elif winner and arbitration_allowed and not has_warnings:
+        arbitration_status = "arbitrated"
+    elif winner and arbitration_allowed:
+        arbitration_status = "arbitration_with_warnings"
+    elif winner:
+        arbitration_status = "arbitration_required"
+    else:
+        arbitration_status = "escalated"
+
+    selection_allowed = winner is not None
+
+    domain_signal_defs = [
+        {
+            "arbitration_domain": "candidate_conflict_detection",
+            "signal_type": "candidate_conflict_detection_check",
+            "severity": "info" if candidate_count >= 2 else "blocker",
+            "detected_state": (
+                f"candidate_count={candidate_count}; "
+                f"candidate_ids={[c['runtime_id'] for c in candidates]}; "
+                f"conflict_detected={candidate_count >= 2}"
+            ),
+            "expected_state": (
+                "at least two governed runtime candidates must exist for arbitration "
+                "to proceed; single-candidate cases do not require arbitration"
+            ),
+        },
+        {
+            "arbitration_domain": "capability_conflict_arbitration",
+            "signal_type": "capability_conflict_arbitration_check",
+            "severity": "info" if winner else "warning",
+            "detected_state": (
+                f"capability_scores={[c['capability_score'] for c in candidates]}; "
+                f"highest_capability_runtime={winning_runtime_id}; "
+                "task_intent=read_only_local"
+            ),
+            "expected_state": (
+                "capability comparison must be available for all candidates; "
+                "highest capability score informs arbitration decision"
+            ),
+        },
+        {
+            "arbitration_domain": "trust_conflict_arbitration",
+            "signal_type": "trust_conflict_arbitration_check",
+            "severity": "info" if winner else "warning",
+            "detected_state": (
+                f"trust_scores={[c['trust_score'] for c in candidates]}; "
+                f"highest_trust_runtime={winning_runtime_id}; "
+                "minimum_trust=trusted"
+            ),
+            "expected_state": (
+                "trust comparison must be available for all candidates; "
+                "untrusted candidates must be excluded from arbitration winner selection"
+            ),
+        },
+        {
+            "arbitration_domain": "audit_readiness_arbitration",
+            "signal_type": "audit_readiness_arbitration_check",
+            "severity": "info" if winner else "blocker",
+            "detected_state": (
+                f"audit_scores={[c['audit_score'] for c in candidates]}; "
+                f"audit_ready_count={sum(1 for c in candidates if c['audit_score'] > 0)}; "
+                "audit_dir=.pcae/audit/runtime"
+            ),
+            "expected_state": (
+                "audit readiness comparison must be available; "
+                "winning candidate must have audit_score > 0"
+            ),
+        },
+        {
+            "arbitration_domain": "approval_readiness_arbitration",
+            "signal_type": "approval_readiness_arbitration_check",
+            "severity": "info" if winner else "blocker",
+            "detected_state": (
+                f"approval_scores={[c['approval_score'] for c in candidates]}; "
+                f"approval_ready_count={sum(1 for c in candidates if c['approval_score'] > 0)}; "
+                "approval_not_granted_in_63c=True"
+            ),
+            "expected_state": (
+                "approval readiness comparison must be available; "
+                "winning candidate must have approval_score > 0; "
+                "arbitration does not grant approval"
+            ),
+        },
+        {
+            "arbitration_domain": "rollback_readiness_arbitration",
+            "signal_type": "rollback_readiness_arbitration_check",
+            "severity": "info" if winner else "blocker",
+            "detected_state": (
+                f"rollback_scores={[c['rollback_score'] for c in candidates]}; "
+                f"rollback_defined_count={sum(1 for c in candidates if c['rollback_score'] > 0)}; "
+                "rollback_not_executed_in_63c=True"
+            ),
+            "expected_state": (
+                "rollback readiness comparison must be available; "
+                "winning candidate must have rollback_score > 0; "
+                "arbitration does not execute rollback"
+            ),
+        },
+        {
+            "arbitration_domain": "task_fit_arbitration",
+            "signal_type": "task_fit_arbitration_check",
+            "severity": "info" if winner else "warning",
+            "detected_state": (
+                f"task_fit_scores={[c['task_fit_score'] for c in candidates]}; "
+                f"best_fit_runtime={winning_runtime_id}; "
+                "task_type=read_only_governed"
+            ),
+            "expected_state": (
+                "task-fit comparison must be available for all candidates; "
+                "winning candidate must have task_fit_score > 0"
+            ),
+        },
+        {
+            "arbitration_domain": "weighted_scoring_arbitration",
+            "signal_type": "weighted_scoring_arbitration_check",
+            "severity": "info" if winner else "warning",
+            "detected_state": (
+                f"arbitration_scores={[c['arbitration_score'] for c in candidates]}; "
+                f"winning_score={winner['arbitration_score'] if winner else 0}; "
+                f"winning_runtime_id={winning_runtime_id}"
+            ),
+            "expected_state": (
+                "arbitration scores must be computed for all candidates; "
+                "candidate with highest arbitration_score is preferred winner"
+            ),
+        },
+        {
+            "arbitration_domain": "escalation_arbitration",
+            "signal_type": "escalation_arbitration_check",
+            "severity": "info" if winner else "blocker",
+            "detected_state": (
+                f"escalation_required={winner is None}; "
+                f"winning_runtime_id={winning_runtime_id}; "
+                "escalation_path=human_review"
+            ),
+            "expected_state": (
+                "escalation path must exist if arbitration cannot determine a winner; "
+                "escalation_path=human_review is always available"
+            ),
+        },
+        {
+            "arbitration_domain": "final_arbitration_decision",
+            "signal_type": "final_arbitration_decision_check",
+            "severity": "info",
+            "detected_state": (
+                f"arbitration_status={arbitration_status}; "
+                f"winning_runtime_id={winning_runtime_id}; "
+                "execution_allowed=False; "
+                "arbitration_does_not_invoke_runtime=True; "
+                "no_runtime_registration=True; "
+                "no_command_execution=True"
+            ),
+            "expected_state": (
+                "final arbitration decision must not invoke any runtime; "
+                "execution_allowed=False in 63C; arbitration never executes commands"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"ra-sig-{ts}-{i:02d}",
+            "candidate_id": first_cid,
+            "arbitration_domain": sig["arbitration_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"raa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "candidate_count": candidate_count,
+        "winning_runtime_id": winning_runtime_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "arbitration_status": arbitration_status,
+        "arbitration_allowed": arbitration_allowed,
+        "selection_allowed": selection_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rasum-{ts}",
+        "assessment_id": assessment_id,
+        "candidate_count": candidate_count,
+        "winning_runtime_id": winning_runtime_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "arbitration_status": arbitration_status,
+        "arbitration_allowed": arbitration_allowed,
+        "selection_allowed": selection_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RA_ARBITRATION_DOMAINS)
+
+    return {
+        "runtime_arbitration_overview": {
+            "overview_id": f"63c-{ts}",
+            "generated_at": generated_at,
+            "phase": "63C",
+            "title": "Runtime Arbitration",
+            "domain_count": domain_count,
+            "candidate_count": candidate_count,
+            "winning_runtime_id": winning_runtime_id,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "arbitration_status": arbitration_status,
+            "arbitration_allowed": arbitration_allowed,
+            "selection_allowed": selection_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63C defines governed arbitration between multiple qualified "
+                "runtime candidates without invoking or executing any runtime. "
+                f"candidate_count={candidate_count}. "
+                f"winning_runtime_id={winning_runtime_id}. "
+                f"arbitration_status={arbitration_status}. "
+                f"arbitration_allowed={arbitration_allowed}. "
+                f"selection_allowed={selection_allowed}. "
+                "execution_allowed=False. No runtime invocation occurs. "
+                "No command execution occurs. human_review_required=True."
+            ),
+        },
+        "candidates": candidates,
+        "candidate_model": {
+            "model_name": "RuntimeArbitrationCandidate",
+            "field_count": len(_RA_CANDIDATE_FIELDS),
+            "required_field_count": len(_RA_CANDIDATE_FIELDS),
+            "supported_arbitration_statuses": list(_RA_ARBITRATION_STATUSES),
+            "execution_allowed_false_in_63c": True,
+            "human_review_required_always_true_in_63c": True,
+            "fields": [dict(f) for f in _RA_CANDIDATE_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeArbitrationSignal",
+            "field_count": len(_RA_SIGNAL_FIELDS),
+            "required_field_count": len(_RA_SIGNAL_FIELDS),
+            "severity_values": list(_RA_SEVERITY_VALUES),
+            "execution_allowed_false_in_63c": True,
+            "human_review_required_always_true_in_63c": True,
+            "fields": [dict(f) for f in _RA_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeArbitrationAssessment",
+            "field_count": len(_RA_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RA_ASSESSMENT_FIELDS),
+            "supported_arbitration_statuses": list(_RA_ARBITRATION_STATUSES),
+            "execution_allowed_false_in_63c": True,
+            "human_review_required_always_true_in_63c": True,
+            "fields": [dict(f) for f in _RA_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeArbitrationSummary",
+            "field_count": len(_RA_SUMMARY_FIELDS),
+            "required_field_count": len(_RA_SUMMARY_FIELDS),
+            "supported_arbitration_statuses": list(_RA_ARBITRATION_STATUSES),
+            "execution_allowed_false_in_63c": True,
+            "human_review_required_always_true_in_63c": True,
+            "fields": [dict(f) for f in _RA_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "compare qualified runtime candidates",
+                "score arbitration candidates",
+                "determine a preferred candidate",
+                "recommend escalation if arbitration cannot produce a clear result",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "register runtimes",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "arbitration_allowed": arbitration_allowed,
+            "selection_allowed": selection_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "63C",
+        },
+        "advisory": RUNTIME_ARBITRATION_ADVISORY,
+    }
