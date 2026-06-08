@@ -45853,3 +45853,164 @@ def test_62h_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_rollback_boundaries_overview"]["rollback_allowed"] is False
     assert data["runtime_rollback_boundaries_overview"]["execution_allowed"] is False
     assert data["runtime_rollback_boundaries_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 63A: Multi-Runtime Registry
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_multi_runtime_registry  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63A  # noqa: E402
+
+
+def test_63a_json_top_level_keys(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    for key in (
+        "multi_runtime_registry_overview",
+        "registry_entries",
+        "entry_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63a_models_and_exact_fields(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    assert data["entry_model"]["model_name"] == "MultiRuntimeRegistryEntry"
+    assert data["entry_model"]["field_count"] == 12
+    assert data["signal_model"]["model_name"] == "MultiRuntimeRegistrySignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "MultiRuntimeRegistryAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "MultiRuntimeRegistrySummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "registry_entry_id", "runtime_id", "runtime_name", "runtime_type",
+        "runtime_status", "trust_status", "capability_status",
+        "execution_boundary_status", "audit_status", "approval_status",
+        "rollback_status", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["entry_model"]["fields"]
+        ), f"Missing entry field: {field_name}"
+
+
+def test_63a_all_registry_domains_defined(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    expected = {
+        "runtime_candidate_registry",
+        "runtime_identity_registry",
+        "runtime_capability_registry",
+        "runtime_trust_registry",
+        "runtime_execution_boundary_registry",
+        "runtime_audit_registry",
+        "runtime_review_registry",
+        "runtime_approval_registry",
+        "runtime_rollback_registry",
+        "runtime_selection_readiness_registry",
+    }
+    actual = {s["registry_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63a_selection_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    assert data["multi_runtime_registry_overview"]["selection_allowed"] is False
+    assert data["sample_assessment"]["selection_allowed"] is False
+    assert data["sample_summary"]["selection_allowed"] is False
+    assert data["governance_boundaries"]["selection_allowed"] is False
+
+
+def test_63a_execution_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    assert data["multi_runtime_registry_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63a_registry_entries_populated(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    entries = data["registry_entries"]
+    assert len(entries) >= 1
+    shell_entry = next((e for e in entries if e["runtime_id"] == "shell-local"), None)
+    assert shell_entry is not None
+    assert shell_entry["runtime_type"] == "shell"
+    assert shell_entry["human_review_required"] is True
+    assert shell_entry["registry_entry_id"].startswith("mrr-entry-")
+
+
+def test_63a_registry_allowed_for_governed_candidates(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    overview = data["multi_runtime_registry_overview"]
+    assert overview["registry_allowed"] is True
+    assert overview["blocker_count"] == 0
+    assert overview["registry_status"] == "ready"
+
+
+def test_63a_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    for signal in data["signals"]:
+        assert "registry_entry_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_63a_governance_boundaries(tmp_path) -> None:
+    data = build_multi_runtime_registry(_HarnessPath63A(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["selection_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "register runtimes on the host",
+        "select a runtime for execution",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect existing runtime registry/trust/capability summaries" in boundaries["may"]
+    assert "define multi-runtime registry entries" in boundaries["may"]
+    assert "compare runtime candidates at metadata level" in boundaries["may"]
+
+
+def test_63a_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-registry"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-runtime registry",
+        "Registry entries",
+        "Entry model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Registry signals",
+        "Governance boundaries",
+        "Registry allowed:",
+        "Selection allowed:",
+        "Execution allowed:",
+    ):
+        assert text in output
+
+
+def test_63a_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-registry", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["multi_runtime_registry_overview"]["phase"] == "63A"
+    assert data["multi_runtime_registry_overview"]["selection_allowed"] is False
+    assert data["multi_runtime_registry_overview"]["execution_allowed"] is False
+    assert data["multi_runtime_registry_overview"]["human_review_required"] is True

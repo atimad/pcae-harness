@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260608-0826-62h-runtime-rollback-boundaries",
-    "title": "62H: Runtime Rollback Boundaries"
+    "id": "20260608-1220-63a-multi-runtime-registry",
+    "title": "63A: Multi-Runtime Registry"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "62H: Runtime Rollback Boundaries",
+  "current_objective": "63A: Multi-Runtime Registry",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -18,46 +18,26 @@
         "status": " M"
       },
       {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
         "path": "tasks/DONE.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260608-0717-62g-runtime-approval-gates.md",
+        "path": "tasks/active/20260608-0826-62h-runtime-rollback-boundaries.md",
         "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260608-0826-62h-runtime-rollback-boundaries.md",
+        "path": "tasks/active/20260608-1220-63a-multi-runtime-registry.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260608-0717-62g-runtime-approval-gates.md",
+        "path": "tasks/done/20260608-0826-62h-runtime-rollback-boundaries.md",
         "status": "??"
       }
     ],
-    "status_summary": "11 changed files"
+    "status_summary": "6 changed files"
   },
-  "last_completed_step": "Completed task 20260608-0717-62g-runtime-approval-gates: 62G: Runtime Approval Gates",
-  "next_recommended_step": "Continue active task 20260608-0826-62h-runtime-rollback-boundaries.",
-  "timestamp": "2026-06-08T06:26:01.406869+00:00",
+  "last_completed_step": "Completed task 20260608-0826-62h-runtime-rollback-boundaries: 62H: Runtime Rollback Boundaries",
+  "next_recommended_step": "Continue active task 20260608-1220-63a-multi-runtime-registry.",
+  "timestamp": "2026-06-08T10:20:57.826211+00:00",
   "warnings": []
 }

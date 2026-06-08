@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 63A: Multi-Runtime Registry (20260608-1220-63a-multi-runtime-registry)
+- 62H: Runtime Rollback Boundaries (20260608-0826-62h-runtime-rollback-boundaries)
 - 62G: Runtime Approval Gates (20260608-0717-62g-runtime-approval-gates)
 - 62F: Runtime Review Decision Record (20260608-0649-62f-runtime-review-decision-record)
 - 62E active task state repair (20260608-0340-62e-active-task-state-repair)

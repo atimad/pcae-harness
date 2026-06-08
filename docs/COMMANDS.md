@@ -1064,3 +1064,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-rollback-boundaries`
 - `pcae runtime-rollback-boundaries --json`
+
+## multi-runtime-registry
+
+- `pcae multi-runtime-registry`
+- `pcae multi-runtime-registry --json`

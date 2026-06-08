@@ -1070,6 +1070,26 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae task-state-alignment`
 - `pcae task-state-alignment --json`
+
+## runtime-review-decision
+
+- `pcae runtime-review-decision`
+- `pcae runtime-review-decision --json`
+
+## runtime-approval-gates
+
+- `pcae runtime-approval-gates`
+- `pcae runtime-approval-gates --json`
+
+## runtime-rollback-boundaries
+
+- `pcae runtime-rollback-boundaries`
+- `pcae runtime-rollback-boundaries --json`
+
+## multi-runtime-registry
+
+- `pcae multi-runtime-registry`
+- `pcae multi-runtime-registry --json`
 """
 
 

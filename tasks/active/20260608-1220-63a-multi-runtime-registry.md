@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-0826-62h-runtime-rollback-boundaries
+20260608-1220-63a-multi-runtime-registry
 
 ## Title
 
-62H: Runtime Rollback Boundaries
+63A: Multi-Runtime Registry
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-62H: Runtime Rollback Boundaries
+63A: Multi-Runtime Registry
 
 ## Allowed Files
 
@@ -30,10 +30,11 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/COMMANDS.md
-- src/pcae/cli.py
-- src/pcae/commands/agent.py
 - src/pcae/core/agent.py
+- src/pcae/core/docs.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
+- docs/COMMANDS.md
 - tests/test_agent.py
 
 ## Forbidden Files
@@ -84,4 +85,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T08:26:01.386937+02:00
+2026-06-08T12:20:57.807337+02:00

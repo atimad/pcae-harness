@@ -374,6 +374,8 @@ from pcae.core.agent import (
     RUNTIME_APPROVAL_GATES_ADVISORY,
     build_runtime_rollback_boundaries,
     RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY,
+    build_multi_runtime_registry,
+    MULTI_RUNTIME_REGISTRY_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12590,4 +12592,64 @@ def run_runtime_rollback_boundaries(args: argparse.Namespace) -> int:
     print(f"  Audit dir:          {boundaries['audit_dir']}")
     print()
     print(RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY)
+    return 0
+
+
+def run_multi_runtime_registry(args: argparse.Namespace) -> int:
+    data = build_multi_runtime_registry(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["multi_runtime_registry_overview"]
+    print("Multi-runtime registry")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Registry domains:       {overview['domain_count']}")
+    print(f"Registry entries:       {overview['registry_entry_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Registry status:        {overview['registry_status']}")
+    print(f"Registry allowed:       {'yes' if overview['registry_allowed'] else 'no'}")
+    print(f"Selection allowed:      {'yes' if overview['selection_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Registry entries:")
+    for entry in data["registry_entries"]:
+        print(f"  [{entry['registry_entry_id']}] {entry['runtime_id']} ({entry['runtime_type']})")
+        print(f"    trust={entry['trust_status']}  capability={entry['capability_status']}")
+        print(f"    boundary={entry['execution_boundary_status']}  audit={entry['audit_status']}")
+        print(f"    approval={entry['approval_status']}  rollback={entry['rollback_status']}")
+    print()
+    for key, label in (
+        ("entry_model", "Entry model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Registry signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['registry_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:               {', '.join(boundaries['may'])}")
+    print(f"  May not:           {', '.join(boundaries['may_not'])}")
+    print(f"  Registry allowed:  {boundaries['registry_allowed']}")
+    print(f"  Selection allowed: {boundaries['selection_allowed']}")
+    print(f"  Execution allowed: {boundaries['execution_allowed']}")
+    print(f"  Human review:      {boundaries['human_review_required']}")
+    print()
+    print(MULTI_RUNTIME_REGISTRY_ADVISORY)
     return 0

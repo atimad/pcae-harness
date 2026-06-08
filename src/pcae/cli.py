@@ -174,6 +174,7 @@ from pcae.commands.agent import (
     run_runtime_review_decision,
     run_runtime_approval_gates,
     run_runtime_rollback_boundaries,
+    run_multi_runtime_registry,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4540,6 +4541,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rrb_parser.set_defaults(handler=run_runtime_rollback_boundaries)
+
+    mrr_parser = subparsers.add_parser(
+        "multi-runtime-registry",
+        help="Define and validate the multi-runtime registry for governed runtime candidates (Phase 63A).",
+    )
+    mrr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    mrr_parser.set_defaults(handler=run_multi_runtime_registry)
 
     return parser
 

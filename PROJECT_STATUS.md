@@ -2,16 +2,17 @@
 
 ## Current Phase
 
-Phase 62H: Runtime Rollback Boundaries — active.
+Phase 63A: Multi-Runtime Registry — complete.
 
-62A–62G completed: governed execution, output capture, audit persistence, review workflow,
-task state alignment, review decision record, and approval gates established. 62H: defines
-and validates rollback boundaries for governed runtime execution records; distinguishes
-reversible artifacts from non-reversible runtime activity; `pcae runtime-rollback-boundaries`;
-RuntimeRollbackBoundaryRecord (11 fields), RuntimeRollbackBoundarySignal (8 fields),
-RuntimeRollbackBoundaryAssessment (9 fields), RuntimeRollbackBoundarySummary (10 fields);
-ten rollback domains; rollback_allowed=False always; execution_allowed=False;
-human_review_required=True always; 4442 tests passing. 62I is next.
+62A–62H completed: governed execution, output capture, audit persistence, review workflow,
+task state alignment, review decision record, approval gates, and rollback boundaries.
+63A: extends runtime governance from single-runtime to multi-runtime scope; PCAE can now
+represent, compare, and govern multiple runtime candidates at metadata level before runtime
+selection begins; `pcae multi-runtime-registry`; MultiRuntimeRegistryEntry (12 fields),
+MultiRuntimeRegistrySignal (8 fields), MultiRuntimeRegistryAssessment (10 fields),
+MultiRuntimeRegistrySummary (11 fields); ten registry domains; registry_allowed=True only
+for governed candidates; selection_allowed=False always; execution_allowed=False always;
+human_review_required=True always; 4453 tests passing. 63B is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

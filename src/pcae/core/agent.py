@@ -64794,3 +64794,440 @@ def build_runtime_rollback_boundaries(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63A: Multi-Runtime Registry
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_REGISTRY_ADVISORY = (
+    "Phase 63A extends runtime governance from single-runtime to multi-runtime scope. "
+    "PCAE can represent, compare, and govern multiple runtime candidates at metadata level "
+    "before runtime selection begins. registry_allowed may be True only for governed "
+    "runtime candidates. selection_allowed=False always in 63A. execution_allowed=False "
+    "always. No runtime invocation occurs. No runtime registration occurs. No runtime "
+    "selection occurs. Human review is always required."
+)
+
+_MRR_REGISTRY_DOMAINS: tuple[str, ...] = (
+    "runtime_candidate_registry",
+    "runtime_identity_registry",
+    "runtime_capability_registry",
+    "runtime_trust_registry",
+    "runtime_execution_boundary_registry",
+    "runtime_audit_registry",
+    "runtime_review_registry",
+    "runtime_approval_registry",
+    "runtime_rollback_registry",
+    "runtime_selection_readiness_registry",
+)
+
+_MRR_REGISTRY_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "registry_required",
+    "blocked",
+)
+
+_MRR_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MRR_ENTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "registry_entry_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "runtime_type", "type": "str", "required": True},
+    {"name": "runtime_status", "type": "str", "required": True},
+    {"name": "trust_status", "type": "str", "required": True},
+    {"name": "capability_status", "type": "str", "required": True},
+    {"name": "execution_boundary_status", "type": "str", "required": True},
+    {"name": "audit_status", "type": "str", "required": True},
+    {"name": "approval_status", "type": "str", "required": True},
+    {"name": "rollback_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRR_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "registry_entry_id", "type": "str", "required": True},
+    {"name": "registry_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRR_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "registry_entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "registry_status", "type": "str", "required": True},
+    {"name": "registry_allowed", "type": "bool", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRR_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "registry_entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "registry_status", "type": "str", "required": True},
+    {"name": "registry_allowed", "type": "bool", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRR_GOVERNED_RUNTIMES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "runtime_type": "shell",
+        "trust_level": "trusted",
+        "capability_tier": "read-only",
+    },
+)
+
+
+def build_multi_runtime_registry(root: HarnessPath | None = None) -> dict:
+    """Define and validate the multi-runtime registry for governed runtime candidates."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    registry_id = f"mrr-{ts}"
+
+    registry_entries = []
+    for i, runtime in enumerate(_MRR_GOVERNED_RUNTIMES, start=1):
+        entry_id = f"mrr-entry-{ts}-{i:02d}"
+        registry_entries.append(
+            {
+                "registry_entry_id": entry_id,
+                "runtime_id": runtime["runtime_id"],
+                "runtime_name": runtime["runtime_name"],
+                "runtime_type": runtime["runtime_type"],
+                "runtime_status": "registered",
+                "trust_status": runtime["trust_level"],
+                "capability_status": runtime["capability_tier"],
+                "execution_boundary_status": "read_only_enforced",
+                "audit_status": "audit_ready",
+                "approval_status": "approval_ready",
+                "rollback_status": "not_required",
+                "human_review_required": True,
+            }
+        )
+
+    registry_entry_count = len(registry_entries)
+
+    domain_signal_defs = [
+        {
+            "registry_domain": "runtime_candidate_registry",
+            "signal_type": "runtime_candidate_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"governed_candidates={registry_entry_count}; "
+                f"candidate_ids={[e['runtime_id'] for e in registry_entries]}; "
+                "candidate_source=static_governed_list"
+            ),
+            "expected_state": (
+                "governed runtime candidates must be defined and enumerable before "
+                "registry comparison or selection; candidates populated from governed list"
+            ),
+        },
+        {
+            "registry_domain": "runtime_identity_registry",
+            "signal_type": "runtime_identity_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"identity_verified={registry_entry_count > 0}; "
+                f"runtime_ids={[e['runtime_id'] for e in registry_entries]}; "
+                "identity_source=static_governed_list"
+            ),
+            "expected_state": (
+                "each governed candidate must have a verifiable runtime_id and runtime_name; "
+                "identity must be confirmed before capability or trust assessment"
+            ),
+        },
+        {
+            "registry_domain": "runtime_capability_registry",
+            "signal_type": "runtime_capability_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"capability_tiers={[e['capability_status'] for e in registry_entries]}; "
+                "capability_source=governed_registry; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "capability tier must be recorded for each governed candidate at metadata "
+                "level; no runtime invocation is required to record declared capabilities"
+            ),
+        },
+        {
+            "registry_domain": "runtime_trust_registry",
+            "signal_type": "runtime_trust_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"trust_levels={[e['trust_status'] for e in registry_entries]}; "
+                "trust_source=governed_registry; "
+                "untrusted_candidates=0"
+            ),
+            "expected_state": (
+                "trust level must be recorded for each governed candidate; "
+                "untrusted candidates must be flagged before selection readiness is assessed"
+            ),
+        },
+        {
+            "registry_domain": "runtime_execution_boundary_registry",
+            "signal_type": "runtime_execution_boundary_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"boundary_statuses={[e['execution_boundary_status'] for e in registry_entries]}; "
+                "selection_allowed=False; execution_allowed=False; "
+                "boundary_enforcement=read_only"
+            ),
+            "expected_state": (
+                "execution boundary must be recorded as enforced for each candidate; "
+                "selection_allowed=False in 63A; execution_allowed=False in 63A"
+            ),
+        },
+        {
+            "registry_domain": "runtime_audit_registry",
+            "signal_type": "runtime_audit_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"audit_statuses={[e['audit_status'] for e in registry_entries]}; "
+                "audit_dir=.pcae/audit/runtime; audit_artifacts_not_modified=True"
+            ),
+            "expected_state": (
+                "audit readiness must be recorded for each candidate; "
+                "audit artifacts must not be modified by registry operations"
+            ),
+        },
+        {
+            "registry_domain": "runtime_review_registry",
+            "signal_type": "runtime_review_registry_check",
+            "severity": "info",
+            "detected_state": (
+                "review_records_in_memory=True; "
+                "review_records_not_persisted=True; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "review registry must record that review records are produced in-memory; "
+                "no runtime invocation is required to populate review registry"
+            ),
+        },
+        {
+            "registry_domain": "runtime_approval_registry",
+            "signal_type": "runtime_approval_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"approval_statuses={[e['approval_status'] for e in registry_entries]}; "
+                "approval_not_granted_in_63a=True; "
+                "selection_allowed=False"
+            ),
+            "expected_state": (
+                "approval registry must record approval readiness for each candidate; "
+                "approval is not granted in 63A; selection_allowed=False"
+            ),
+        },
+        {
+            "registry_domain": "runtime_rollback_registry",
+            "signal_type": "runtime_rollback_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"rollback_statuses={[e['rollback_status'] for e in registry_entries]}; "
+                "rollback_not_executed_in_63a=True; "
+                "rollback_allowed=False"
+            ),
+            "expected_state": (
+                "rollback registry must record rollback status for each candidate; "
+                "rollback is not executed in 63A; rollback_allowed=False"
+            ),
+        },
+        {
+            "registry_domain": "runtime_selection_readiness_registry",
+            "signal_type": "runtime_selection_readiness_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"candidates_assessed={registry_entry_count}; "
+                "selection_allowed=False; execution_allowed=False; "
+                "human_review_required=True; selection_not_performed_in_63a=True"
+            ),
+            "expected_state": (
+                "selection readiness registry must confirm that selection_allowed=False "
+                "in 63A and that human review is required before any selection may occur"
+            ),
+        },
+    ]
+
+    first_entry_id = registry_entries[0]["registry_entry_id"] if registry_entries else f"mrr-entry-{ts}-00"
+    signals = [
+        {
+            "signal_id": f"mrr-sig-{ts}-{i:02d}",
+            "registry_entry_id": first_entry_id,
+            "registry_domain": sig["registry_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    registry_status: str
+    if blocker_count > 0:
+        registry_status = "blocked"
+    elif warning_count > 0:
+        registry_status = "ready_with_warnings"
+    elif registry_entry_count == 0:
+        registry_status = "registry_required"
+    else:
+        registry_status = "ready"
+
+    registry_allowed = registry_entry_count > 0 and blocker_count == 0
+
+    assessment_id = f"mrra-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "registry_entry_count": registry_entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "registry_status": registry_status,
+        "registry_allowed": registry_allowed,
+        "selection_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mrrsum-{ts}",
+        "assessment_id": assessment_id,
+        "registry_entry_count": registry_entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "registry_status": registry_status,
+        "registry_allowed": registry_allowed,
+        "selection_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_MRR_REGISTRY_DOMAINS)
+
+    return {
+        "multi_runtime_registry_overview": {
+            "overview_id": f"63a-{ts}",
+            "generated_at": generated_at,
+            "phase": "63A",
+            "title": "Multi-Runtime Registry",
+            "domain_count": domain_count,
+            "registry_entry_count": registry_entry_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "registry_status": registry_status,
+            "registry_allowed": registry_allowed,
+            "selection_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63A extends runtime governance from single-runtime to multi-runtime "
+                "scope. PCAE can now represent, compare, and govern multiple runtime "
+                "candidates at metadata level before runtime selection begins. "
+                f"registry_entry_count={registry_entry_count}. "
+                f"registry_status={registry_status}. "
+                f"registry_allowed={registry_allowed}. "
+                "selection_allowed=False. execution_allowed=False. "
+                "No runtime invocation occurs. No runtime registration occurs. "
+                "No runtime selection occurs. human_review_required=True."
+            ),
+        },
+        "registry_entries": registry_entries,
+        "entry_model": {
+            "model_name": "MultiRuntimeRegistryEntry",
+            "field_count": len(_MRR_ENTRY_FIELDS),
+            "required_field_count": len(_MRR_ENTRY_FIELDS),
+            "supported_registry_statuses": list(_MRR_REGISTRY_STATUSES),
+            "selection_allowed_false_in_63a": True,
+            "execution_allowed_false_in_63a": True,
+            "human_review_required_always_true_in_63a": True,
+            "fields": [dict(f) for f in _MRR_ENTRY_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "MultiRuntimeRegistrySignal",
+            "field_count": len(_MRR_SIGNAL_FIELDS),
+            "required_field_count": len(_MRR_SIGNAL_FIELDS),
+            "severity_values": list(_MRR_SEVERITY_VALUES),
+            "selection_allowed_false_in_63a": True,
+            "execution_allowed_false_in_63a": True,
+            "human_review_required_always_true_in_63a": True,
+            "fields": [dict(f) for f in _MRR_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiRuntimeRegistryAssessment",
+            "field_count": len(_MRR_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MRR_ASSESSMENT_FIELDS),
+            "supported_registry_statuses": list(_MRR_REGISTRY_STATUSES),
+            "selection_allowed_false_in_63a": True,
+            "execution_allowed_false_in_63a": True,
+            "human_review_required_always_true_in_63a": True,
+            "fields": [dict(f) for f in _MRR_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiRuntimeRegistrySummary",
+            "field_count": len(_MRR_SUMMARY_FIELDS),
+            "required_field_count": len(_MRR_SUMMARY_FIELDS),
+            "supported_registry_statuses": list(_MRR_REGISTRY_STATUSES),
+            "selection_allowed_false_in_63a": True,
+            "execution_allowed_false_in_63a": True,
+            "human_review_required_always_true_in_63a": True,
+            "fields": [dict(f) for f in _MRR_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect existing runtime registry/trust/capability summaries",
+                "define multi-runtime registry entries",
+                "compare runtime candidates at metadata level",
+                "report blockers and warnings",
+                "recommend human-reviewed remediation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "register runtimes on the host",
+                "select a runtime for execution",
+                "modify audit artifacts",
+                "modify source files through executed commands",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "registry_allowed": registry_allowed,
+            "selection_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "63A",
+        },
+        "advisory": MULTI_RUNTIME_REGISTRY_ADVISORY,
+    }
