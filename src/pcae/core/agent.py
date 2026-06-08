@@ -68533,6 +68533,7 @@ _CI_CAPABILITY_DOMAINS: tuple[str, ...] = (
     "roadmap_capabilities",
     "prompt_generation_capabilities",
     "prompt_intelligence_capabilities",
+    "skill_system_capabilities",
     "runtime_governance_capabilities",
     "runtime_execution_capabilities",
     "runtime_audit_capabilities",
@@ -68660,6 +68661,43 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "capability_and_roadmap_intelligence",
             "roadmap_recommendation_hardening",
+        ],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Skill System Foundation",
+        "implemented_phase": "64B.4",
+        "status": "implemented",
+        "commands": [
+            "pcae skill list",
+            "pcae skill show",
+            "pcae skill validate",
+            "pcae skill invoke",
+        ],
+        "dependencies": [
+            "capability_and_roadmap_intelligence",
+            "prompt_recommendation_hardening",
+        ],
+        "successor_capabilities": ["skill_registry_consolidation_hardening"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Skill Registry Consolidation Hardening",
+        "implemented_phase": "64B.4A",
+        "status": "implemented",
+        "commands": [
+            "pcae skill list",
+            "pcae skill show",
+            "pcae skill validate",
+            "pcae skill invoke",
+            "pcae capability-inventory",
+            "pcae roadmap current",
+            "pcae prompt validate",
+        ],
+        "dependencies": [
+            "skill_system_foundation",
+            "capability_and_roadmap_intelligence",
         ],
         "successor_capabilities": [],
     },
@@ -68902,6 +68940,20 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
             "expected_state": (
                 "prompt generation capabilities must be inventoried and classified; "
                 "no prompt execution occurs"
+            ),
+        },
+        {
+            "domain": "skill_system_capabilities",
+            "signal_type": "skill_system_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"skill_system_capabilities_count={domains_seen.get('skill_system_capabilities', 0)}; "
+                "skill_registry=implemented; skill_validation=implemented; "
+                "skill_invocation=read_only_only; inventory_complete=True"
+            ),
+            "expected_state": (
+                "skill system capabilities must be inventoried and classified; "
+                "no runtime or orchestration execution occurs"
             ),
         },
         {
@@ -69276,6 +69328,7 @@ _CRI_INTELLIGENCE_DOMAINS: tuple[str, ...] = (
     "superseded_phase_tracking",
     "next_phase_recommendation",
     "prompt_recommendation",
+    "skill_registry",
     "roadmap_gap_detection",
 )
 
@@ -69551,8 +69604,26 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.3",
         "phase_title": "Prompt Recommendation Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.2",
+        "successor": "64B.4",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.4",
+        "phase_title": "Skill System Foundation",
+        "status": "completed",
+        "predecessor": "64B.3",
+        "successor": "64B.4A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.4A",
+        "phase_title": "Skill Registry Consolidation Hardening",
+        "status": "active",
+        "predecessor": "64B.4",
         "successor": "",
         "superseded_by": "",
     },
@@ -69647,6 +69718,48 @@ _CRI_KNOWN_PROMPTS: tuple[dict, ...] = (
         "prompt_type": "agent",
         "prompt_available": True,
         "prompt_source": "prompt_recommendation_hardening",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "skill_system_foundation",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "agent",
+        "prompt_available": True,
+        "prompt_source": "skill_system_foundation",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "skill_registry_consolidation_hardening",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "agent",
+        "prompt_available": True,
+        "prompt_source": "skill_registry_consolidation_hardening",
         "recommendation_status": "recommended",
     },
     {
@@ -69767,9 +69880,151 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "capability_and_roadmap_intelligence",
             "roadmap_recommendation_hardening",
         ],
+        "successors": ["skill_system_foundation"],
+    },
+    {
+        "capability_name": "Skill System Foundation",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.4",
+        "status": "implemented",
+        "commands": [
+            "pcae skill list",
+            "pcae skill show",
+            "pcae skill validate",
+            "pcae skill invoke",
+        ],
+        "dependencies": [
+            "capability_and_roadmap_intelligence",
+            "prompt_recommendation_hardening",
+        ],
+        "successors": ["skill_registry_consolidation_hardening"],
+    },
+    {
+        "capability_name": "Skill Registry Consolidation Hardening",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.4A",
+        "status": "implemented",
+        "commands": [
+            "pcae skill list",
+            "pcae skill show",
+            "pcae skill validate",
+            "pcae skill invoke",
+            "pcae capability-inventory",
+            "pcae roadmap current",
+            "pcae prompt validate",
+        ],
+        "dependencies": [
+            "skill_system_foundation",
+            "capability_and_roadmap_intelligence",
+        ],
         "successors": [],
     },
 )
+
+_SKILL_REQUIRED_SKILLS: tuple[dict, ...] = (
+    {"skill_id": "phase-implementation", "skill_name": "Phase Implementation", "skill_type": "implementation"},
+    {"skill_id": "phase-validation", "skill_name": "Phase Validation", "skill_type": "validation"},
+    {"skill_id": "roadmap-analysis", "skill_name": "Roadmap Analysis", "skill_type": "analysis"},
+    {"skill_id": "capability-analysis", "skill_name": "Capability Analysis", "skill_type": "analysis"},
+    {"skill_id": "task-transition", "skill_name": "Task Transition", "skill_type": "workflow"},
+)
+
+
+def _extract_skill_metadata(text: str) -> dict[str, str]:
+    headings = (
+        "Skill ID",
+        "Skill Name",
+        "Skill Type",
+        "Skill Version",
+        "Skill Status",
+        "Human Review Required",
+    )
+    metadata: dict[str, str] = {}
+    for heading in headings:
+        pattern = rf"^## {re.escape(heading)}\n\n(.+?)\n(?:## |\Z)"
+        match = re.search(pattern, text, flags=re.MULTILINE | re.DOTALL)
+        if match:
+            metadata[heading] = match.group(1).strip()
+    return metadata
+
+
+def _discover_skill_registry(root: HarnessPath, ts: str) -> dict:
+    skills_root = root.path / ".pcae" / "skills"
+    registry: list[dict] = []
+    invalid_skills: list[dict] = []
+    skill_documents: dict[str, str] = {}
+
+    skill_dirs = sorted(path for path in skills_root.iterdir() if path.is_dir()) if skills_root.exists() else []
+
+    for index, skill_dir in enumerate(skill_dirs, start=1):
+        skill_md = skill_dir / "SKILL.md"
+        text = skill_md.read_text(encoding="utf-8") if skill_md.exists() else ""
+        metadata = _extract_skill_metadata(text) if text else {}
+        missing = [
+            field for field in (
+                "Skill ID",
+                "Skill Name",
+                "Skill Type",
+                "Skill Version",
+                "Skill Status",
+                "Human Review Required",
+            )
+            if field not in metadata
+        ]
+        skill_id = metadata.get("Skill ID", skill_dir.name)
+        skill_status = metadata.get("Skill Status", "invalid")
+        human_review_required = metadata.get("Human Review Required", "true").lower() == "true"
+        record = {
+            "skill_id": skill_id,
+            "skill_name": metadata.get("Skill Name", skill_dir.name.replace("-", " ").title()),
+            "skill_type": metadata.get("Skill Type", "unknown"),
+            "skill_path": str(skill_dir.relative_to(root.path)),
+            "skill_version": metadata.get("Skill Version", "unknown"),
+            "skill_status": skill_status if skill_md.exists() and not missing else "invalid",
+            "human_review_required": human_review_required,
+            "registry_id": f"skill-reg-{ts}-{index:02d}",
+        }
+        registry.append(record)
+        if record["skill_status"] == "invalid":
+            invalid_skills.append({
+                "skill_id": skill_id,
+                "skill_path": record["skill_path"],
+                "missing_fields": missing if missing else (["SKILL.md"] if not skill_md.exists() else []),
+            })
+        else:
+            skill_documents[skill_id] = text
+
+    required_skill_ids = {skill["skill_id"] for skill in _SKILL_REQUIRED_SKILLS}
+    discovered_skill_ids = {record["skill_id"] for record in registry}
+    for missing_skill_id in sorted(required_skill_ids - discovered_skill_ids):
+        invalid_skills.append({
+            "skill_id": missing_skill_id,
+            "skill_path": f".pcae/skills/{missing_skill_id}",
+            "missing_fields": ["SKILL.md", "required skill directory"],
+        })
+
+    active_skill_count = sum(1 for record in registry if record["skill_status"] == "active")
+    dormant_skill_count = sum(1 for record in registry if record["skill_status"] == "dormant")
+    invalid_skill_count = len(invalid_skills) + sum(1 for record in registry if record["skill_status"] == "invalid")
+
+    return {
+        "skills_root": str(skills_root.relative_to(root.path)) if skills_root.exists() else ".pcae/skills",
+        "required_skills": [dict(skill) for skill in _SKILL_REQUIRED_SKILLS],
+        "skill_registry": registry,
+        "invalid_skills": invalid_skills,
+        "skill_documents": skill_documents,
+        "skill_discovery": {
+            "discovery_id": f"skill-discovery-{ts}",
+            "skill_count": len(registry),
+            "active_skill_count": active_skill_count,
+            "dormant_skill_count": dormant_skill_count,
+            "invalid_skill_count": invalid_skill_count,
+            "discovery_status": (
+                "discovered" if invalid_skill_count == 0 and len(registry) >= len(_SKILL_REQUIRED_SKILLS)
+                else "discovered_with_issues"
+            ),
+        },
+    }
 
 
 def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> dict:
@@ -69779,6 +70034,7 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
 
     generated_at = datetime.now(timezone.utc).isoformat()
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    skill_data = _discover_skill_registry(root, ts)
 
     capability_registry = [
         {
@@ -69860,6 +70116,8 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
     )
     recommendation_count = len(prompt_recommendations)
     implemented_count = sum(1 for r in capability_registry if r["status"] == "implemented")
+    skill_count = skill_data["skill_discovery"]["skill_count"]
+    invalid_skill_count = skill_data["skill_discovery"]["invalid_skill_count"]
 
     assessment_status = (
         "intelligence_with_gaps" if roadmap_gap_count > 0 else "intelligence_available"
@@ -69998,6 +70256,21 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
             ),
         },
         {
+            "domain": "skill_registry",
+            "signal_type": "skill_registry_check",
+            "severity": "warning" if invalid_skill_count > 0 else "info",
+            "detected_state": (
+                f"skill_count={skill_count}; "
+                f"invalid_skill_count={invalid_skill_count}; "
+                "skill_registry=aligned_with_capability_roadmap_intelligence; "
+                "discovery=enabled"
+            ),
+            "expected_state": (
+                "skill registry must reuse the shared intelligence layer and remain "
+                "aligned with capability, roadmap, and prompt intelligence"
+            ),
+        },
+        {
             "domain": "roadmap_gap_detection",
             "signal_type": "roadmap_gap_detection_check",
             "severity": "warning" if roadmap_gap_count > 0 else "info",
@@ -70059,6 +70332,8 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
             "roadmap_gap_count": roadmap_gap_count,
             "prompt_capability_count": prompt_capability_count,
             "recommendation_count": recommendation_count,
+            "skill_count": skill_count,
+            "invalid_skill_count": invalid_skill_count,
             "evolution_count": len(evolution_records),
             "signal_count": signal_count,
             "blocker_count": blocker_count,
@@ -70075,6 +70350,7 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
                 f"superseded_phase_count={superseded_phase_count}. "
                 f"roadmap_gap_count={roadmap_gap_count}. "
                 f"prompt_capability_count={prompt_capability_count}. "
+                f"skill_count={skill_count}. "
                 f"assessment_status={assessment_status}. "
                 "No runtime behavior changes occur."
             ),
@@ -70084,6 +70360,9 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
         "roadmap_tracks": roadmap_tracks,
         "roadmap_evolution": evolution_records,
         "prompt_recommendations": prompt_recommendations,
+        "skill_registry": skill_data["skill_registry"],
+        "skill_discovery": skill_data["skill_discovery"],
+        "invalid_skills": skill_data["invalid_skills"],
         "roadmap_gaps": roadmap_gaps,
         "current_phase": current_phase,
         "next_recommended_phase": next_recommended,
@@ -70594,6 +70873,54 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_source": "roadmap_registry+capability_registry",
         "capability_phase": "64B.3",
     },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4",
+    },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4",
+    },
+    {
+        "phase_id": "64B.4",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4A",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4A",
+    },
+    {
+        "phase_id": "64B.4A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4A",
+    },
 )
 
 
@@ -70899,4 +71226,160 @@ def build_prompt_recommendation_hardening(root: "HarnessPath") -> dict:
             "phase": "64B.3",
         },
         "advisory": PROMPT_RECOMMENDATION_HARDENING_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.4 – Skill System Foundation
+# ---------------------------------------------------------------------------
+
+SKILL_SYSTEM_FOUNDATION_ADVISORY = (
+    "Phase 64B.4 introduces a first-class governed skill system. Skills are "
+    "governed artifacts discovered from .pcae/skills, validated structurally, "
+    "enumerated through a registry, and invoked in read-only mode only. Prompt "
+    "rendering is not implemented in 64B.4. No runtime invocation occurs. No "
+    "orchestration execution occurs. No write execution occurs."
+)
+
+_SSF_REQUIRED_SKILLS = _SKILL_REQUIRED_SKILLS
+
+_SSF_REGISTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "skill_id", "type": "str", "required": True},
+    {"name": "skill_name", "type": "str", "required": True},
+    {"name": "skill_type", "type": "str", "required": True},
+    {"name": "skill_path", "type": "str", "required": True},
+    {"name": "skill_version", "type": "str", "required": True},
+    {"name": "skill_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SSF_INVOCATION_FIELDS: tuple[dict, ...] = (
+    {"name": "invocation_id", "type": "str", "required": True},
+    {"name": "skill_id", "type": "str", "required": True},
+    {"name": "invocation_target", "type": "str", "required": True},
+    {"name": "invocation_type", "type": "str", "required": True},
+    {"name": "invocation_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SSF_DISCOVERY_FIELDS: tuple[dict, ...] = (
+    {"name": "discovery_id", "type": "str", "required": True},
+    {"name": "skill_count", "type": "int", "required": True},
+    {"name": "active_skill_count", "type": "int", "required": True},
+    {"name": "dormant_skill_count", "type": "int", "required": True},
+    {"name": "invalid_skill_count", "type": "int", "required": True},
+    {"name": "discovery_status", "type": "str", "required": True},
+)
+
+_SSF_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "skill_count", "type": "int", "required": True},
+    {"name": "invocation_count", "type": "int", "required": True},
+    {"name": "invalid_skill_count", "type": "int", "required": True},
+    {"name": "governance_status", "type": "str", "required": True},
+)
+
+def build_skill_system_foundation(
+    root: HarnessPath | None = None,
+    invoke_skill_id: str | None = None,
+) -> dict:
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    skill_data = _discover_skill_registry(root, ts)
+    registry = skill_data["skill_registry"]
+    invalid_skills = skill_data["invalid_skills"]
+    skill_documents = skill_data["skill_documents"]
+    discovery = {
+        "discovery_id": f"ssf-discovery-{ts}",
+        "skill_count": skill_data["skill_discovery"]["skill_count"],
+        "active_skill_count": skill_data["skill_discovery"]["active_skill_count"],
+        "dormant_skill_count": skill_data["skill_discovery"]["dormant_skill_count"],
+        "invalid_skill_count": skill_data["skill_discovery"]["invalid_skill_count"],
+        "discovery_status": skill_data["skill_discovery"]["discovery_status"],
+    }
+
+    invocations: list[dict] = []
+    invoked_skill = None
+    invoked_content = ""
+    if invoke_skill_id is not None:
+        invoked_skill = next((record for record in registry if record["skill_id"] == invoke_skill_id), None)
+        invocation_status = "invoked_read_only" if invoked_skill and invoked_skill["skill_status"] != "invalid" else "blocked"
+        invocations.append({
+            "invocation_id": f"ssf-invoke-{ts}-01",
+            "skill_id": invoke_skill_id,
+            "invocation_target": "read_only_skill_package",
+            "invocation_type": "read_only",
+            "invocation_status": invocation_status,
+            "human_review_required": True,
+        })
+        if invoked_skill and invocation_status == "invoked_read_only":
+            invoked_content = skill_documents.get(invoke_skill_id, "")
+
+    assessment = {
+        "assessment_id": f"ssf-assess-{ts}",
+        "skill_count": discovery["skill_count"],
+        "invocation_count": len(invocations),
+        "invalid_skill_count": discovery["invalid_skill_count"],
+        "governance_status": "governed" if discovery["invalid_skill_count"] == 0 else "governed_with_issues",
+    }
+
+    return {
+        "generated_at": generated_at,
+        "skills_root": skill_data["skills_root"],
+        "required_skills": [dict(skill) for skill in _SSF_REQUIRED_SKILLS],
+        "skill_registry": registry,
+        "invalid_skills": invalid_skills,
+        "discovery": discovery,
+        "invocations": invocations,
+        "invoked_skill": invoked_skill,
+        "invoked_content": invoked_content,
+        "assessment": assessment,
+        "registry_model": {
+            "model_name": "SkillRegistryRecord",
+            "field_count": len(_SSF_REGISTRY_FIELDS),
+            "required_field_count": len(_SSF_REGISTRY_FIELDS),
+            "fields": [dict(field) for field in _SSF_REGISTRY_FIELDS],
+        },
+        "invocation_model": {
+            "model_name": "SkillInvocationRecord",
+            "field_count": len(_SSF_INVOCATION_FIELDS),
+            "required_field_count": len(_SSF_INVOCATION_FIELDS),
+            "fields": [dict(field) for field in _SSF_INVOCATION_FIELDS],
+        },
+        "discovery_model": {
+            "model_name": "SkillDiscoveryRecord",
+            "field_count": len(_SSF_DISCOVERY_FIELDS),
+            "required_field_count": len(_SSF_DISCOVERY_FIELDS),
+            "fields": [dict(field) for field in _SSF_DISCOVERY_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "SkillGovernanceAssessment",
+            "field_count": len(_SSF_ASSESSMENT_FIELDS),
+            "required_field_count": len(_SSF_ASSESSMENT_FIELDS),
+            "fields": [dict(field) for field in _SSF_ASSESSMENT_FIELDS],
+        },
+        "governance_boundaries": {
+            "may": [
+                "inspect skills",
+                "validate skills",
+                "enumerate skills",
+                "invoke skills in read-only mode",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute commands",
+                "modify runtime configuration",
+                "modify source files through execution",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "phase": "64B.4",
+        },
+        "advisory": SKILL_SYSTEM_FOUNDATION_ADVISORY,
     }

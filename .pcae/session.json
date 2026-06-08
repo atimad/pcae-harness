@@ -1,35 +1,95 @@
 {
   "active_task": {
-    "id": "20260608-1856-64b-3-prompt-recommendation-hardening",
-    "title": "64B.3: Prompt Recommendation Hardening"
+    "id": "20260608-2032-64b-4a-skill-registry-consolidation-hardening",
+    "title": "64B.4A: Skill Registry Consolidation Hardening"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "64B.3: Prompt Recommendation Hardening",
+  "current_objective": "64B.4A: Skill Registry Consolidation Hardening",
   "git": {
     "branch": "main",
     "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260608-1813-64b-2-roadmap-recommendation-hardening.md",
-        "status": " D"
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/COMMANDS.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/ROADMAP_REGISTRY.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/docs.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DECISIONS.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": " M"
       },
       {
         "path": "tasks/active/20260608-1856-64b-3-prompt-recommendation-hardening.md",
+        "status": " D"
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": " M"
+      },
+      {
+        "path": ".pcae/skills",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260608-1813-64b-2-roadmap-recommendation-hardening.md",
+        "path": "docs/SKILL_REGISTRY.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/active/20260608-2032-64b-4a-skill-registry-consolidation-hardening.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260608-1856-64b-3-prompt-recommendation-hardening.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260608-2019-64b-4-skill-system-foundation.md",
         "status": "??"
       }
     ],
-    "status_summary": "4 changed files"
+    "status_summary": "19 changed files"
   },
-  "last_completed_step": "Completed task 20260608-1813-64b-2-roadmap-recommendation-hardening: 64B.2: Roadmap Recommendation Hardening",
-  "next_recommended_step": "Continue active task 20260608-1856-64b-3-prompt-recommendation-hardening.",
-  "timestamp": "2026-06-08T16:56:38.289306+00:00",
+  "last_completed_step": "Completed task 20260608-2019-64b-4-skill-system-foundation: 64B.4: Skill System Foundation",
+  "next_recommended_step": "Continue active task 20260608-2032-64b-4a-skill-registry-consolidation-hardening.",
+  "timestamp": "2026-06-08T18:32:49.606619+00:00",
   "warnings": []
 }

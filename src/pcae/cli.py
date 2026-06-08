@@ -192,6 +192,10 @@ from pcae.commands.agent import (
     run_prompt_next,
     run_prompt_phase,
     run_prompt_validate,
+    run_skill_invoke,
+    run_skill_list,
+    run_skill_show,
+    run_skill_validate,
     run_roadmap_recommendation_hardening,
     run_roadmap_next_hardened,
     run_prompt_next_hardened,
@@ -4733,6 +4737,36 @@ def build_parser() -> argparse.ArgumentParser:
     )
     prompt_validate_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
     prompt_validate_parser.set_defaults(handler=run_prompt_validate)
+
+    skill_parser = subparsers.add_parser(
+        "skill",
+        help="Access governed skill discovery, validation, metadata, and read-only invocation (Phase 64B.4).",
+    )
+    skill_subparsers = skill_parser.add_subparsers(dest="skill_command", required=True)
+
+    skill_list_parser = skill_subparsers.add_parser("list", help="List discovered skills.")
+    skill_list_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    skill_list_parser.set_defaults(handler=run_skill_list)
+
+    skill_show_parser = skill_subparsers.add_parser("show", help="Show metadata for a specific skill.")
+    skill_show_parser.add_argument("skill_id", help="Skill ID to inspect.")
+    skill_show_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    skill_show_parser.set_defaults(handler=run_skill_show)
+
+    skill_validate_parser = skill_subparsers.add_parser(
+        "validate",
+        help="Validate discovered skills and generate the governed skill registry document (Phase 64B.4).",
+    )
+    skill_validate_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    skill_validate_parser.set_defaults(handler=run_skill_validate)
+
+    skill_invoke_parser = skill_subparsers.add_parser(
+        "invoke",
+        help="Invoke a skill in read-only mode without runtime or orchestration execution (Phase 64B.4).",
+    )
+    skill_invoke_parser.add_argument("skill_id", help="Skill ID to invoke.")
+    skill_invoke_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    skill_invoke_parser.set_defaults(handler=run_skill_invoke)
 
     return parser
 

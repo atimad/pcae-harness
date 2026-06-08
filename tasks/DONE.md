@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 64B.4A: Skill Registry Consolidation Hardening (20260608-2032-64b-4a-skill-registry-consolidation-hardening)
+- 64B.4: Skill System Foundation (20260608-2019-64b-4-skill-system-foundation)
 - 64B.3: Prompt Recommendation Hardening (20260608-1856-64b-3-prompt-recommendation-hardening)
 - 64B.2: Roadmap Recommendation Hardening (20260608-1813-64b-2-roadmap-recommendation-hardening)
 - 64B.1: Capability and Roadmap Intelligence (20260608-1751-64b-1-capability-and-roadmap-intelligence)

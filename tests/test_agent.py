@@ -47296,6 +47296,7 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
         "roadmap_capabilities",
         "prompt_generation_capabilities",
         "prompt_intelligence_capabilities",
+        "skill_system_capabilities",
         "runtime_governance_capabilities",
         "runtime_execution_capabilities",
         "runtime_audit_capabilities",
@@ -47380,9 +47381,9 @@ def test_capability_inventory_record_structure(tmp_path) -> None:
 
 def test_capability_inventory_signals_cover_all_domains(tmp_path) -> None:
     data = build_capability_inventory(_HarnessPath64B0(tmp_path))
-    assert len(data["signals"]) == 17
+    assert len(data["signals"]) == 18
     signal_domains = {s["capability_domain"] for s in data["signals"]}
-    assert len(signal_domains) == 17
+    assert len(signal_domains) == 18
     for signal in data["signals"]:
         assert signal["severity"] in ("info", "warning", "blocker")
         assert "capability_id" in signal
@@ -47493,7 +47494,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.3"
+    assert current["phase_id"] == "64B.4A"
     assert current["status"] == "active"
 
 
@@ -47521,6 +47522,18 @@ def test_roadmap_intelligence_prompt_recommendations_present(tmp_path, monkeypat
     for field in ("recommendation_id", "phase_id", "prompt_type", "prompt_source",
                   "prompt_available", "recommendation_status"):
         assert field in rec, f"Missing field: {field}"
+
+
+def test_roadmap_intelligence_includes_skill_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    assert "skill_registry" in data
+    assert len(data["skill_registry"]) >= 5
+    assert data["skill_discovery"]["skill_count"] >= 5
 
 
 def test_roadmap_intelligence_capability_list_command(tmp_path, monkeypatch, capsys) -> None:
@@ -47571,7 +47584,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.3"
+    assert data["current_phase"]["phase_id"] == "64B.4A"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47622,10 +47635,10 @@ def test_roadmap_intelligence_prompt_next_json(tmp_path, monkeypatch, capsys) ->
 
 def test_roadmap_intelligence_prompt_phase_found(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    rc = main(["prompt", "phase", "64B.3"])
+    rc = main(["prompt", "phase", "64B.4A"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "64B.3" in output
+    assert "64B.4A" in output
 
 
 def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, capsys) -> None:
@@ -47638,9 +47651,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.3", "--json"])
+    main(["prompt", "phase", "64B.4A", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.3"
+    assert data["phase_id"] == "64B.4A"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47679,13 +47692,13 @@ def test_roadmap_recommendation_build_returns_dict(tmp_path, monkeypatch) -> Non
     assert isinstance(data, dict)
 
 
-def test_roadmap_recommendation_current_phase_is_64b3(tmp_path, monkeypatch) -> None:
+def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.3"
+    assert data["current_phase"]["phase_id"] == "64B.4A"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47813,7 +47826,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "64B.3" in output or "capability_intelligence" in output
+    assert "64B.4A" in output or "capability_intelligence" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47911,13 +47924,13 @@ def test_prompt_recommendation_build_returns_dict(tmp_path, monkeypatch) -> None
     assert isinstance(data, dict)
 
 
-def test_prompt_recommendation_current_phase_is_64b3(tmp_path, monkeypatch) -> None:
+def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     from pcae.core.agent import build_prompt_recommendation_hardening
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64B.3"
+    assert data["current_phase"]["phase_id"] == "64B.4A"
     assert data["current_track"] == "capability_intelligence"
 
 
@@ -48027,3 +48040,157 @@ def test_prompt_validate_json_shape(tmp_path, monkeypatch, capsys) -> None:
     assert "validations" in data
     assert "signals" in data
     assert data["assessment"]["validation_count"] >= 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.4 – Skill System Foundation
+# ---------------------------------------------------------------------------
+
+
+def _write_skill_fixture(root: Path, skill_id: str, skill_name: str, skill_type: str) -> None:
+    skill_dir = root / ".pcae" / "skills" / skill_id
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(
+        "# Skill\n\n"
+        "## Skill ID\n\n"
+        f"{skill_id}\n\n"
+        "## Skill Name\n\n"
+        f"{skill_name}\n\n"
+        "## Skill Type\n\n"
+        f"{skill_type}\n\n"
+        "## Skill Version\n\n"
+        "1.0.0\n\n"
+        "## Skill Status\n\n"
+        "active\n\n"
+        "## Human Review Required\n\n"
+        "true\n\n"
+        "## Purpose\n\n"
+        "Fixture skill.\n\n",
+        encoding="utf-8",
+    )
+
+
+def _setup_skill_repo(tmp_path: Path) -> None:
+    for skill_id, skill_name, skill_type in (
+        ("phase-implementation", "Phase Implementation", "implementation"),
+        ("phase-validation", "Phase Validation", "validation"),
+        ("roadmap-analysis", "Roadmap Analysis", "analysis"),
+        ("capability-analysis", "Capability Analysis", "analysis"),
+        ("task-transition", "Task Transition", "workflow"),
+    ):
+        _write_skill_fixture(tmp_path, skill_id, skill_name, skill_type)
+
+
+def test_skill_system_build_returns_dict(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    assert isinstance(data, dict)
+
+
+def test_skill_system_registry_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    record = data["skill_registry"][0]
+    for field in ("skill_id", "skill_name", "skill_type", "skill_path", "skill_version", "skill_status", "human_review_required"):
+        assert field in record
+
+
+def test_skill_system_discovery_and_assessment_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    for field in ("discovery_id", "skill_count", "active_skill_count", "dormant_skill_count", "invalid_skill_count", "discovery_status"):
+        assert field in data["discovery"]
+    for field in ("assessment_id", "skill_count", "invocation_count", "invalid_skill_count", "governance_status"):
+        assert field in data["assessment"]
+
+
+def test_skill_system_invoke_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_system_foundation(HarnessPath.cwd(), invoke_skill_id="phase-implementation")
+    record = data["invocations"][0]
+    for field in ("invocation_id", "skill_id", "invocation_target", "invocation_type", "invocation_status", "human_review_required"):
+        assert field in record
+    assert record["invocation_status"] == "invoked_read_only"
+
+
+def test_skill_list_command(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    rc = main(["skill", "list"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Skill registry" in output
+    assert "phase-implementation" in output
+
+
+def test_skill_show_command_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    rc = main(["skill", "show", "phase-validation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert data["skill_id"] == "phase-validation"
+    assert data["skill_type"] == "validation"
+
+
+def test_skill_validate_command_generates_registry(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    rc = main(["skill", "validate"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Skill validation" in output
+    assert "Generated: docs/SKILL_REGISTRY.md" in output
+    assert (tmp_path / "docs" / "SKILL_REGISTRY.md").exists()
+
+
+def test_skill_invoke_command(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    rc = main(["skill", "invoke", "roadmap-analysis"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Skill invocation" in output
+    assert "roadmap-analysis" in output
+
+
+def test_skill_system_detects_invalid_skill(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    invalid_dir = tmp_path / ".pcae" / "skills" / "broken-skill"
+    invalid_dir.mkdir(parents=True, exist_ok=True)
+    (invalid_dir / "SKILL.md").write_text("# Skill\n\n## Skill ID\n\nbroken-skill\n", encoding="utf-8")
+    from pcae.core.agent import build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    assert data["discovery"]["invalid_skill_count"] >= 1
+
+
+def test_skill_system_registry_aligns_with_shared_intelligence(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_skill_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence, build_skill_system_foundation
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    skill_data = build_skill_system_foundation(HarnessPath.cwd())
+    assert {record["skill_id"] for record in cri_data["skill_registry"]} == {
+        record["skill_id"] for record in skill_data["skill_registry"]
+    }

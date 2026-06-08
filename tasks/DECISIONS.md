@@ -2,6 +2,8 @@
 
 ## Accepted
 
+- Treat Phase 64B.4A skill registry hardening as consolidation work, not a new parallel subsystem: skill discovery, metadata parsing, and registry alignment should reuse the shared intelligence infrastructure that already supports capability, roadmap, and prompt governance.
+- Treat Phase 64B.4 skills as first-class governed packages stored under `.pcae/skills`: a skill is metadata plus reusable instructions/workflow references, not merely a rendered prompt, and skill invocation remains read-only with no runtime, orchestration, or write execution.
 - Treat Phase 64B.3 prompt recommendations as registry-backed governance artifacts: `pcae prompt next`, `pcae prompt phase`, and `pcae prompt validate` must source phase alignment from the roadmap registry, capability alignment from the capability registry, block historical/completed/superseded/track-mismatch prompt recommendations, and remain read-only with no runtime or orchestration execution.
 - Phase 62A (Controlled Runtime Execution Pilot) is the first PCAE phase where execution_allowed=True. Execution is conditionally permitted only when: runtime is shell-local, command is on the allowlist (pwd, ls, ls -la, git status, python --version, python3 --version), command is not on the denylist, no write or network operations are involved, the 30s timeout is enforced, the 100 KB output limit is enforced, and human_review_required=True. All other governance restrictions (no write execution, no network, no AI runtime invocation, no commit/push/rollback) remain in force.
 - Use Python and `pathlib` for cross-platform filesystem behavior.

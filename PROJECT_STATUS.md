@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.3: Prompt Recommendation Hardening.
+Phase 64B.4A: Skill Registry Consolidation Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -16,7 +16,7 @@ refresh, and phase test selection hardening.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4602 passing tests.
+**Test count:** 4613 passing tests.
 
 **License:** Apache License 2.0.
 
@@ -82,6 +82,15 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
+PCAE can discover governed skills from `.pcae/skills` with `pcae skill list`,
+inspect skill metadata with `pcae skill show <skill_id>`, validate governed
+skill structure with `pcae skill validate`, and invoke a skill in read-only
+mode with `pcae skill invoke <skill_id>`, using a consolidated skill registry
+aligned with the shared capability, roadmap, and prompt intelligence
+infrastructure rather than a disconnected parallel registry, while keeping
+runtime invocation, runtime execution, prompt rendering, orchestration
+execution, and write execution disabled. Skills are governed artifacts and
+participate in capability inventory and roadmap intelligence.
 PCAE can harden governed prompt recommendations with `pcae prompt next`,
 `pcae prompt phase <phase_id>`, and `pcae prompt validate`, using the roadmap
 registry and capability registry as authoritative sources, enforcing prompt

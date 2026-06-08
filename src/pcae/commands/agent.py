@@ -398,6 +398,8 @@ from pcae.core.agent import (
     ROADMAP_RECOMMENDATION_HARDENING_ADVISORY,
     build_prompt_recommendation_hardening,
     PROMPT_RECOMMENDATION_HARDENING_ADVISORY,
+    build_skill_system_foundation,
+    SKILL_SYSTEM_FOUNDATION_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13153,6 +13155,8 @@ def _write_capability_inventory_md(data: dict) -> None:
         "",
         "- 64B.0 creates a capability inventory.",
         "- 64B.3 adds prompt recommendation hardening as an implemented capability.",
+        "- 64B.4 adds a first-class skill system as an implemented capability.",
+        "- Skill Registry metadata is consolidated with the shared intelligence infrastructure.",
         "- 64B.0 does not modify roadmap behavior.",
         "- 64B.0 does not modify task lifecycle behavior.",
         "- 64B.0 does not modify runtime behavior.",
@@ -13270,6 +13274,8 @@ def _write_roadmap_registry_md(data: dict) -> None:
         "",
         "- 64B.1 introduces Capability and Roadmap Intelligence.",
         "- 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.",
+        "- 64B.4 introduces a first-class skill system in the capability_intelligence track.",
+        "- Skill Registry discovery is consolidated into the shared intelligence layer.",
         "- Roadmap evolution is tracked.",
         "- Superseded phases are tracked.",
         "- No runtime behavior changes occur.",
@@ -13499,6 +13505,7 @@ def _write_prompt_registry_md(data: dict) -> None:
         "- 64B.3 hardens prompt recommendations.",
         "- Prompt recommendations use the roadmap registry.",
         "- Prompt recommendations use the capability registry.",
+        "- Prompt Registry remains aligned with the shared intelligence layer that also exposes the Skill Registry.",
         "- Prompt drift detection is implemented.",
         "- Prompt quality governance is implemented.",
         "- Prompt traceability is implemented.",
@@ -13708,4 +13715,153 @@ def run_prompt_validate(args: argparse.Namespace) -> int:
     print("Generated: docs/PROMPT_REGISTRY.md")
     print()
     print(PROMPT_RECOMMENDATION_HARDENING_ADVISORY)
+    return 0
+
+
+def _write_skill_registry_md(data: dict) -> None:
+    import pathlib
+
+    lines = [
+        "# PCAE Skill Registry",
+        "",
+        f"Generated: {data['generated_at']}",
+        "Phase: 64B.4A — Skill Registry Consolidation Hardening",
+        f"Skills root: {data['skills_root']}",
+        f"Skill count: {data['assessment']['skill_count']}",
+        f"Invalid skill count: {data['assessment']['invalid_skill_count']}",
+        f"Governance status: {data['assessment']['governance_status']}",
+        "",
+        "## Skill Registry",
+        "",
+        "| Skill ID | Name | Type | Path | Version | Status | Human Review Required |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for record in data["skill_registry"]:
+        lines.append(
+            f"| {record['skill_id']} | {record['skill_name']} | {record['skill_type']} "
+            f"| {record['skill_path']} | {record['skill_version']} | {record['skill_status']} "
+            f"| {record['human_review_required']} |"
+        )
+    if data["invalid_skills"]:
+        lines.extend(["", "## Invalid Skills", ""])
+        for invalid in data["invalid_skills"]:
+            lines.append(
+                f"- `{invalid['skill_id']}` at `{invalid['skill_path']}`: missing {', '.join(invalid['missing_fields'])}"
+            )
+    lines.extend([
+        "",
+        "## Governance Notes",
+        "",
+        "- 64B.4 introduces a first-class skill system.",
+        "- Skills are governed artifacts.",
+        "- Skill Registry discovery and metadata are consolidated with the shared intelligence infrastructure.",
+        "- Capability Inventory records the skill system as a capability domain.",
+        "- Roadmap Registry tracks the 64B.4 capability_intelligence phase that introduces the skill system.",
+        "- Prompt Registry remains separate in purpose but aligned in metadata/governance structure.",
+        "- Skills support discovery, validation, and invocation.",
+        "- Prompt rendering is not implemented in 64B.4.",
+        "- Future skills may provide prompt rendering, roadmap analysis, capability analysis, and task lifecycle workflows.",
+    ])
+    docs_dir = pathlib.Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    (docs_dir / "SKILL_REGISTRY.md").write_text("\n".join(lines) + "\n")
+
+
+def run_skill_list(args: argparse.Namespace) -> int:
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({
+            "skill_registry": data["skill_registry"],
+            "discovery": data["discovery"],
+            "assessment": data["assessment"],
+        }, indent=2, sort_keys=True))
+        return 0
+    print("Skill registry")
+    print(f"Skills root: {data['skills_root']}")
+    print(f"Skills:      {data['discovery']['skill_count']}")
+    print(f"Active:      {data['discovery']['active_skill_count']}")
+    print(f"Dormant:     {data['discovery']['dormant_skill_count']}")
+    print(f"Invalid:     {data['discovery']['invalid_skill_count']}")
+    print()
+    for record in data["skill_registry"]:
+        print(f"  [{record['skill_status'].upper()}] {record['skill_id']} — {record['skill_name']}")
+        print(f"    type={record['skill_type']} version={record['skill_version']} path={record['skill_path']}")
+    return 0
+
+
+def run_skill_show(args: argparse.Namespace) -> int:
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    skill = next((record for record in data["skill_registry"] if record["skill_id"] == args.skill_id), None)
+    if skill is None:
+        print(f"Skill not found: {args.skill_id}")
+        print(f"Available skills: {[record['skill_id'] for record in data['skill_registry']]}")
+        return 1
+    if args.json:
+        print(json.dumps(skill, indent=2, sort_keys=True))
+        return 0
+    print(f"Skill:                {skill['skill_name']}")
+    print(f"ID:                   {skill['skill_id']}")
+    print(f"Type:                 {skill['skill_type']}")
+    print(f"Path:                 {skill['skill_path']}")
+    print(f"Version:              {skill['skill_version']}")
+    print(f"Status:               {skill['skill_status']}")
+    print(f"Human review required:{' yes' if skill['human_review_required'] else ' no'}")
+    return 0
+
+
+def run_skill_validate(args: argparse.Namespace) -> int:
+    data = build_skill_system_foundation(HarnessPath.cwd())
+    _write_skill_registry_md(data)
+    if args.json:
+        print(json.dumps({
+            "discovery": data["discovery"],
+            "assessment": data["assessment"],
+            "invalid_skills": data["invalid_skills"],
+            "advisory": data["advisory"],
+        }, indent=2, sort_keys=True))
+        return 0
+    print("Skill validation")
+    print(f"Skill count:         {data['assessment']['skill_count']}")
+    print(f"Invalid skill count: {data['assessment']['invalid_skill_count']}")
+    print(f"Governance status:   {data['assessment']['governance_status']}")
+    if data["invalid_skills"]:
+        print()
+        print("Invalid skills:")
+        for invalid in data["invalid_skills"]:
+            print(f"  {invalid['skill_id']}: missing {', '.join(invalid['missing_fields'])}")
+    print()
+    print("Generated: docs/SKILL_REGISTRY.md")
+    print()
+    print(SKILL_SYSTEM_FOUNDATION_ADVISORY)
+    return 0
+
+
+def run_skill_invoke(args: argparse.Namespace) -> int:
+    data = build_skill_system_foundation(HarnessPath.cwd(), invoke_skill_id=args.skill_id)
+    invocation = data["invocations"][0] if data["invocations"] else None
+    if args.json:
+        print(json.dumps({
+            "invocation": invocation,
+            "invoked_skill": data["invoked_skill"],
+            "advisory": data["advisory"],
+        }, indent=2, sort_keys=True))
+        return 0 if invocation and invocation["invocation_status"] == "invoked_read_only" else 1
+    if invocation is None or invocation["invocation_status"] != "invoked_read_only":
+        print(f"Skill invocation blocked: {args.skill_id}")
+        return 1
+    print("Skill invocation")
+    print(f"Skill ID:             {invocation['skill_id']}")
+    print(f"Invocation type:      {invocation['invocation_type']}")
+    print(f"Invocation status:    {invocation['invocation_status']}")
+    print(f"Invocation target:    {invocation['invocation_target']}")
+    print()
+    if data["invoked_skill"]:
+        print(f"Skill: {data['invoked_skill']['skill_name']}")
+        print(f"Path:  {data['invoked_skill']['skill_path']}")
+        print()
+    preview = data["invoked_content"].strip().splitlines()
+    for line in preview[:20]:
+        print(line)
+    print()
+    print(SKILL_SYSTEM_FOUNDATION_ADVISORY)
     return 0

@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-08T17:09:22.381605+00:00
+Generated: 2026-06-08T18:38:48.943882+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 24
+Total phases: 26
 Tracks: 6
 Superseded: 1
 Roadmap gaps: 1
@@ -49,7 +49,9 @@ Assessment status: intelligence_with_gaps
 | 64B.0 | Capability Inventory | completed | — | 64B.1 |
 | 64B.1 | Capability and Roadmap Intelligence | completed | 64B.0 | 64B.2 |
 | 64B.2 | Roadmap Recommendation Hardening | completed | 64B.1 | 64B.3 |
-| 64B.3 | Prompt Recommendation Hardening | active | 64B.2 | — |
+| 64B.3 | Prompt Recommendation Hardening | completed | 64B.2 | 64B.4 |
+| 64B.4 | Skill System Foundation | completed | 64B.3 | 64B.4A |
+| 64B.4A | Skill Registry Consolidation Hardening | active | 64B.4 | — |
 
 ## Track: roadmap_intelligence
 
@@ -76,6 +78,8 @@ Assessment status: intelligence_with_gaps
 
 - 64B.1 introduces Capability and Roadmap Intelligence.
 - 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.
+- 64B.4 introduces a first-class skill system in the capability_intelligence track.
+- Skill Registry discovery is consolidated into the shared intelligence layer.
 - Roadmap evolution is tracked.
 - Superseded phases are tracked.
 - No runtime behavior changes occur.

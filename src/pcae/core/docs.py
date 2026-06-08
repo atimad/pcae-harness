@@ -1176,6 +1176,26 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae prompt validate`
 - `pcae prompt validate --json`
 
+## skill list
+
+- `pcae skill list`
+- `pcae skill list --json`
+
+## skill show
+
+- `pcae skill show <skill_id>`
+- `pcae skill show <skill_id> --json`
+
+## skill validate
+
+- `pcae skill validate`
+- `pcae skill validate --json`
+
+## skill invoke
+
+- `pcae skill invoke <skill_id>`
+- `pcae skill invoke <skill_id> --json`
+
 ## roadmap-recommendation-hardening
 
 - `pcae roadmap-recommendation-hardening`
