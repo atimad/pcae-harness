@@ -171,6 +171,7 @@ from pcae.commands.agent import (
     run_runtime_audit_persistence,
     run_runtime_review_workflow,
     run_task_state_alignment,
+    run_runtime_review_decision,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4504,6 +4505,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     tsa_parser.set_defaults(handler=run_task_state_alignment)
+
+    rrd_parser = subparsers.add_parser(
+        "runtime-review-decision",
+        help="Define and validate the governed decision artifact for runtime review records (Phase 62F).",
+    )
+    rrd_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rrd_parser.set_defaults(handler=run_runtime_review_decision)
 
     return parser
 

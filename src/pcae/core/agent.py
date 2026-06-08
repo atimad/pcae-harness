@@ -63458,3 +63458,437 @@ def build_task_state_alignment(root: HarnessPath | None = None) -> dict:
         },
         "advisory": TASK_STATE_ALIGNMENT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62F: Runtime Review Decision Record
+# ---------------------------------------------------------------------------
+
+RUNTIME_REVIEW_DECISION_ADVISORY = (
+    "Phase 62F defines and validates the governed decision artifact produced after "
+    "runtime review of persisted runtime audit records. Decision domains map to review "
+    "domains from Phase 62D. No new runtime invocation occurs. Audit artifacts are not "
+    "modified. execution_allowed remains False. decision_allowed may be True only for "
+    "governed runtime review records. Human review is always required."
+)
+
+_RRD_DECISION_DOMAINS: tuple[str, ...] = (
+    "execution_review_decision",
+    "output_review_decision",
+    "audit_artifact_decision",
+    "stdout_decision",
+    "stderr_decision",
+    "exit_code_decision",
+    "command_hash_decision",
+    "runtime_metadata_decision",
+    "human_final_decision",
+    "escalation_decision",
+)
+
+_RRD_DECISION_STATUSES: tuple[str, ...] = (
+    "pending_human_review",
+    "accepted",
+    "accepted_with_warnings",
+    "rejected",
+    "changes_requested",
+    "escalated",
+    "blocked",
+)
+
+_RRD_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RRD_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "decision_id", "type": "str", "required": True},
+    {"name": "review_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "capture_id", "type": "str", "required": True},
+    {"name": "persistence_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "decision_status", "type": "str", "required": True},
+    {"name": "accepted_findings", "type": "list", "required": True},
+    {"name": "rejected_findings", "type": "list", "required": True},
+    {"name": "requested_changes", "type": "list", "required": True},
+    {"name": "escalations", "type": "list", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+    {"name": "decision_timestamp", "type": "str", "required": True},
+)
+
+_RRD_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "decision_id", "type": "str", "required": True},
+    {"name": "decision_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRD_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "decision_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "decision_status", "type": "str", "required": True},
+    {"name": "decision_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRD_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "decision_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "decision_status", "type": "str", "required": True},
+    {"name": "decision_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def build_runtime_review_decision(root: HarnessPath | None = None) -> dict:
+    """Define and validate the governed decision artifact for runtime review records."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    decision_id = f"rrd-{ts}"
+    audit_dir = root.join(Path(_RAP_AUDIT_DIR))
+
+    artifact_data: dict = {}
+    artifact_found = False
+    artifact_readable = False
+    artifact_path_used = ""
+    artifact_error = ""
+
+    if audit_dir.exists():
+        artifact_files = sorted(audit_dir.glob("rap-*.json"), reverse=True)
+        if artifact_files:
+            latest = artifact_files[0]
+            artifact_path_used = str(latest)
+            try:
+                artifact_data = json.loads(latest.read_text(encoding="utf-8"))
+                artifact_found = True
+                artifact_readable = bool(artifact_data.get("persistence_id"))
+            except Exception as exc:
+                artifact_error = str(exc)
+
+    review_id = artifact_data.get("review_id", f"rrw-{ts}-unknown")
+    execution_id = artifact_data.get("execution_id", f"rep-{ts}-unknown")
+    capture_id = artifact_data.get("capture_id", f"roc-{ts}-unknown")
+    persistence_id = artifact_data.get("persistence_id", f"rap-{ts}-unknown")
+    runtime_id = artifact_data.get("runtime_id", _REP_RUNTIME_ID)
+    command = artifact_data.get("command", _REP_DEFAULT_COMMAND)
+    command_hash = artifact_data.get("command_hash", "")
+    stdout_value = artifact_data.get("stdout", "")
+    stderr_value = artifact_data.get("stderr", "")
+    exit_code = artifact_data.get("exit_code", -1)
+
+    decision_status = "pending_human_review"
+    decision_allowed = artifact_found and artifact_readable
+
+    decision_record = {
+        "decision_id": decision_id,
+        "review_id": review_id,
+        "execution_id": execution_id,
+        "capture_id": capture_id,
+        "persistence_id": persistence_id,
+        "runtime_id": runtime_id,
+        "command": command,
+        "command_hash": command_hash,
+        "decision_status": decision_status,
+        "accepted_findings": [],
+        "rejected_findings": [],
+        "requested_changes": [],
+        "escalations": [],
+        "human_review_required": True,
+        "decision_timestamp": generated_at,
+    }
+
+    domain_signal_defs = [
+        {
+            "decision_domain": "execution_review_decision",
+            "signal_type": "execution_review_decision_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"execution_id={execution_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}"
+            ),
+            "expected_state": (
+                "execution review must be readable from persisted audit artifact; "
+                "execution_id must be present and linked for decision"
+            ),
+        },
+        {
+            "decision_domain": "output_review_decision",
+            "signal_type": "output_review_decision_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"capture_id={capture_id}; "
+                f"stdout_len={len(stdout_value)}; stderr_len={len(stderr_value)}; "
+                f"exit_code={exit_code}"
+            ),
+            "expected_state": (
+                "output capture linkage (capture_id, stdout, stderr, exit_code) must be "
+                "present and decidable from the persisted artifact"
+            ),
+        },
+        {
+            "decision_domain": "audit_artifact_decision",
+            "signal_type": "audit_artifact_decision_check",
+            "severity": "info" if artifact_readable else "blocker",
+            "detected_state": (
+                f"persistence_id={persistence_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}; "
+                f"artifact_path={artifact_path_used}"
+                + (f"; error={artifact_error}" if artifact_error else "")
+            ),
+            "expected_state": (
+                "persisted audit artifact must be locatable under .pcae/audit/runtime/ "
+                "and must be readable JSON with persistence_id present for decision"
+            ),
+        },
+        {
+            "decision_domain": "stdout_decision",
+            "signal_type": "stdout_decision_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"stdout available for decision; length={len(stdout_value)} chars; "
+                f"non_empty={bool(stdout_value.strip())}; decision_ready={artifact_readable}"
+            ),
+            "expected_state": "stdout from the persisted execution must be available for decision",
+        },
+        {
+            "decision_domain": "stderr_decision",
+            "signal_type": "stderr_decision_check",
+            "severity": "info",
+            "detected_state": (
+                f"stderr available for decision; length={len(stderr_value)} chars; "
+                f"empty_stderr_is_valid=True; decision_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "stderr from the persisted execution must be available for decision "
+                "(empty stderr is valid)"
+            ),
+        },
+        {
+            "decision_domain": "exit_code_decision",
+            "signal_type": "exit_code_decision_check",
+            "severity": "info" if exit_code != -1 else "warning",
+            "detected_state": (
+                f"exit_code={exit_code}; decision_ready={artifact_readable}; "
+                f"exit_code_present={exit_code != -1}"
+            ),
+            "expected_state": "exit code from the persisted execution must be available for decision",
+        },
+        {
+            "decision_domain": "command_hash_decision",
+            "signal_type": "command_hash_decision_check",
+            "severity": "info" if command_hash else "warning",
+            "detected_state": (
+                f"command_hash={command_hash}; "
+                f"hash_present={bool(command_hash)}; "
+                f"decision_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "command hash must be present in the persisted artifact and available for decision"
+            ),
+        },
+        {
+            "decision_domain": "runtime_metadata_decision",
+            "signal_type": "runtime_metadata_decision_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_id={runtime_id}; command='{command}'; "
+                f"decision_ready={artifact_readable}"
+            ),
+            "expected_state": (
+                "runtime metadata (runtime_id, command) must be present "
+                "in the persisted artifact and available for decision"
+            ),
+        },
+        {
+            "decision_domain": "human_final_decision",
+            "signal_type": "human_final_decision_check",
+            "severity": "info",
+            "detected_state": (
+                f"decision_status={decision_status}; human_review_required=True; "
+                "no_automatic_decision=True; execution_allowed=False"
+            ),
+            "expected_state": (
+                "decision_status must be pending_human_review; human approval is required "
+                "before any execution can proceed; no automatic decision"
+            ),
+        },
+        {
+            "decision_domain": "escalation_decision",
+            "signal_type": "escalation_decision_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path=human-only; no_runtime_invocation_during_decision=True; "
+                "no_write_approval_during_decision=True; execution_allowed=False"
+            ),
+            "expected_state": (
+                "decision workflow must not invoke runtimes, approve writes, or approve "
+                "future execution; escalation path is human-only"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rrd-sig-{ts}-{i:02d}",
+            "decision_id": decision_id,
+            "decision_domain": sig["decision_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    final_decision_allowed = decision_allowed and blocker_count == 0
+
+    assessment_id = f"rrda-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "decision_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "decision_status": decision_status,
+        "decision_allowed": final_decision_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rrdsum-{ts}",
+        "assessment_id": assessment_id,
+        "decision_count": 1,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "decision_status": decision_status,
+        "decision_allowed": final_decision_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RRD_DECISION_DOMAINS)
+
+    return {
+        "runtime_review_decision_overview": {
+            "overview_id": f"62f-{ts}",
+            "generated_at": generated_at,
+            "phase": "62F",
+            "title": "Runtime Review Decision Record",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "decision_status": decision_status,
+            "decision_allowed": final_decision_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "artifact_found": artifact_found,
+            "artifact_readable": artifact_readable,
+            "summary": (
+                "Phase 62F defines and validates the governed decision artifact for persisted "
+                "runtime review records. Evaluates 10 decision domains. "
+                f"artifact_found={artifact_found}. "
+                f"artifact_readable={artifact_readable}. "
+                f"decision_status={decision_status}. "
+                f"decision_allowed={final_decision_allowed}. "
+                "execution_allowed=False. "
+                "No new runtime invocation occurs. Audit artifacts are not modified. "
+                "Write execution is not approved. human_review_required=True."
+            ),
+        },
+        "decision_record": decision_record,
+        "reviewed_artifact": artifact_data if artifact_found else {},
+        "record_model": {
+            "model_name": "RuntimeReviewDecisionRecord",
+            "field_count": len(_RRD_RECORD_FIELDS),
+            "required_field_count": len(_RRD_RECORD_FIELDS),
+            "supported_decision_statuses": list(_RRD_DECISION_STATUSES),
+            "decision_allowed_conditional_in_62f": True,
+            "execution_allowed_false_in_62f": True,
+            "human_review_required_always_true_in_62f": True,
+            "fields": [dict(f) for f in _RRD_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeReviewDecisionSignal",
+            "field_count": len(_RRD_SIGNAL_FIELDS),
+            "required_field_count": len(_RRD_SIGNAL_FIELDS),
+            "severity_values": list(_RRD_SEVERITY_VALUES),
+            "decision_allowed_conditional_in_62f": True,
+            "execution_allowed_false_in_62f": True,
+            "human_review_required_always_true_in_62f": True,
+            "fields": [dict(f) for f in _RRD_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeReviewDecisionAssessment",
+            "field_count": len(_RRD_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RRD_ASSESSMENT_FIELDS),
+            "supported_decision_statuses": list(_RRD_DECISION_STATUSES),
+            "decision_allowed_conditional_in_62f": True,
+            "execution_allowed_false_in_62f": True,
+            "human_review_required_always_true_in_62f": True,
+            "fields": [dict(f) for f in _RRD_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeReviewDecisionSummary",
+            "field_count": len(_RRD_SUMMARY_FIELDS),
+            "required_field_count": len(_RRD_SUMMARY_FIELDS),
+            "supported_decision_statuses": list(_RRD_DECISION_STATUSES),
+            "decision_allowed_conditional_in_62f": True,
+            "execution_allowed_false_in_62f": True,
+            "human_review_required_always_true_in_62f": True,
+            "fields": [dict(f) for f in _RRD_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect persisted runtime audit artifacts",
+                "classify runtime review decision status",
+                "produce decision records in memory/reporting structures",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "modify audit artifacts",
+                "modify source files through executed commands",
+                "access network",
+                "approve writes",
+                "approve future execution",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "decision_allowed": final_decision_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "audit_dir": _RAP_AUDIT_DIR,
+            "phase": "62F",
+        },
+        "advisory": RUNTIME_REVIEW_DECISION_ADVISORY,
+    }

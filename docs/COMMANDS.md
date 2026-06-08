@@ -1049,3 +1049,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae task-state-alignment`
 - `pcae task-state-alignment --json`
+
+## runtime-review-decision
+
+- `pcae runtime-review-decision`
+- `pcae runtime-review-decision --json`

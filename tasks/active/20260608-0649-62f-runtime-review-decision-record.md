@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-0340-62e-active-task-state-repair
+20260608-0649-62f-runtime-review-decision-record
 
 ## Title
 
-62E active task state repair
+62F: Runtime Review Decision Record
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-62E active task state repair
+62F: Runtime Review Decision Record
 
 ## Allowed Files
 
@@ -34,10 +34,7 @@ implementation
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
 - src/pcae/core/agent.py
-- src/pcae/core/check.py
-- src/pcae/core/docs.py
 - tests/test_agent.py
-- tests/test_check.py
 
 ## Forbidden Files
 
@@ -87,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T03:40:31.768561+02:00
+2026-06-08T06:49:43.847616+02:00

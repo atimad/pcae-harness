@@ -45268,3 +45268,183 @@ def test_62e_human_output(tmp_path, monkeypatch, capsys) -> None:
         "Repair recommended:",
     ):
         assert text in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 62F: Runtime Review Decision Record
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_review_decision  # noqa: E402
+
+
+def test_62f_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    for key in (
+        "runtime_review_decision_overview",
+        "decision_record",
+        "reviewed_artifact",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62f_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeReviewDecisionRecord"
+    assert data["record_model"]["field_count"] == 15
+    assert data["signal_model"]["model_name"] == "RuntimeReviewDecisionSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeReviewDecisionAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeReviewDecisionSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "decision_id", "review_id", "execution_id", "capture_id", "persistence_id",
+        "runtime_id", "command", "command_hash", "decision_status",
+        "accepted_findings", "rejected_findings", "requested_changes", "escalations",
+        "human_review_required", "decision_timestamp",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62f_all_decision_domains_defined(tmp_path) -> None:
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    expected = {
+        "execution_review_decision",
+        "output_review_decision",
+        "audit_artifact_decision",
+        "stdout_decision",
+        "stderr_decision",
+        "exit_code_decision",
+        "command_hash_decision",
+        "runtime_metadata_decision",
+        "human_final_decision",
+        "escalation_decision",
+    }
+    actual = {s["decision_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62f_no_artifact_produces_blockers(tmp_path) -> None:
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    overview = data["runtime_review_decision_overview"]
+    assert overview["artifact_found"] is False
+    assert overview["decision_allowed"] is False
+    assert overview["execution_allowed"] is False
+    assert overview["decision_status"] == "pending_human_review"
+    blockers = [s for s in data["signals"] if s["severity"] == "blocker"]
+    assert any(s["decision_domain"] == "audit_artifact_decision" for s in blockers)
+
+
+def test_62f_with_artifact_decision_allowed(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    overview = data["runtime_review_decision_overview"]
+    assert overview["artifact_found"] is True
+    assert overview["artifact_readable"] is True
+    assert overview["decision_allowed"] is True
+    assert overview["execution_allowed"] is False
+    assert overview["decision_status"] == "pending_human_review"
+    assert overview["blocker_count"] == 0
+
+
+def test_62f_execution_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    assert data["runtime_review_decision_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_62f_decision_record_fields(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    rec = data["decision_record"]
+    assert rec["decision_id"].startswith("rrd-")
+    assert rec["decision_status"] == "pending_human_review"
+    assert rec["human_review_required"] is True
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+    assert rec["accepted_findings"] == []
+    assert rec["rejected_findings"] == []
+    assert rec["requested_changes"] == []
+    assert rec["escalations"] == []
+
+
+def test_62f_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "decision_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62f_governance_boundaries(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_review_decision(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["audit_dir"] == ".pcae/audit/runtime"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "modify audit artifacts",
+        "approve writes",
+        "approve future execution",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"]
+    assert "inspect persisted runtime audit artifacts" in boundaries["may"]
+    assert "classify runtime review decision status" in boundaries["may"]
+
+
+def test_62f_human_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-review-decision"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime review decision",
+        "Decision record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Decision signals",
+        "Governance boundaries",
+        "Decision allowed:",
+        "Execution allowed:",
+        "Audit dir:",
+    ):
+        assert text in output
+
+
+def test_62f_json_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-review-decision", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_review_decision_overview"]["phase"] == "62F"
+    assert data["runtime_review_decision_overview"]["execution_allowed"] is False
+    assert data["runtime_review_decision_overview"]["human_review_required"] is True
