@@ -47528,7 +47528,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.4A"
+    assert current["phase_id"] == "64B.5"
     assert current["status"] == "active"
 
 
@@ -47627,7 +47627,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.4A"
+    assert data["current_phase"]["phase_id"] == "64B.5"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47694,9 +47694,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.4A", "--json"])
+    main(["prompt", "phase", "64B.5", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.4A"
+    assert data["phase_id"] == "64B.5"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47741,7 +47741,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.4A"
+    assert data["current_phase"]["phase_id"] == "64B.5"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47869,7 +47869,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "64B.4A" in output or "capability_intelligence" in output
+    assert "64B.5" in output or "capability_intelligence" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47973,7 +47973,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64B.4A"
+    assert data["current_phase"]["phase_id"] == "64B.5"
     assert data["current_track"] == "capability_intelligence"
 
 
@@ -48237,3 +48237,408 @@ def test_skill_system_registry_aligns_with_shared_intelligence(tmp_path, monkeyp
     assert {record["skill_id"] for record in cri_data["skill_registry"]} == {
         record["skill_id"] for record in skill_data["skill_registry"]
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.5 – Skill Invocation Targeting tests
+# ---------------------------------------------------------------------------
+
+
+def _setup_sit_repo(tmp_path: Path) -> None:
+    _setup_skill_repo(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "active" / "20260608-2134-64b-5-skill-invocation-targeting.md").write_text(
+        "# Task\n## Status\nactive\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260608-2032-64b-4a-skill-registry-consolidation-hardening.md").write_text(
+        "# Task\n## Status\ndone\n", encoding="utf-8"
+    )
+
+
+def test_skill_targeting_phase_target_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(HarnessPath.cwd(), invoke_skill_id="phase-implementation", target_id="64B.5")
+    assert data["target_type"] == "phase"
+    assert data["resolution"]["resolved"] is True
+    assert data["assessment"]["blocker_count"] == 0
+
+
+def test_skill_targeting_phase_target_unknown_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(HarnessPath.cwd(), invoke_skill_id="phase-implementation", target_id="99Z.9")
+    assert data["resolution"]["resolved"] is False
+    assert data["assessment"]["blocker_count"] >= 1
+
+
+def test_skill_targeting_capability_target_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="capability-analysis",
+        target_id="skill_system_foundation",
+    )
+    assert data["target_type"] == "capability"
+    assert data["resolution"]["resolved"] is True
+    assert data["assessment"]["blocker_count"] == 0
+
+
+def test_skill_targeting_capability_target_unknown_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="capability-analysis",
+        target_id="nonexistent_capability_xyz",
+    )
+    assert data["resolution"]["resolved"] is False
+    assert data["assessment"]["blocker_count"] >= 1
+
+
+def test_skill_targeting_task_target_active_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="task-transition",
+        target_id="20260608-2134-64b-5-skill-invocation-targeting",
+    )
+    assert data["target_type"] == "task"
+    assert data["resolution"]["resolved"] is True
+    assert data["target"]["target_status"] == "active"
+
+
+def test_skill_targeting_task_target_done_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="task-transition",
+        target_id="20260608-2032-64b-4a-skill-registry-consolidation-hardening",
+    )
+    assert data["target_type"] == "task"
+    assert data["resolution"]["resolved"] is True
+    assert data["target"]["target_status"] == "done"
+
+
+def test_skill_targeting_task_target_missing_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="task-transition",
+        target_id="20991231-9999-nonexistent-task",
+        target_type="task",
+    )
+    assert data["resolution"]["resolved"] is False
+    assert data["assessment"]["blocker_count"] >= 1
+
+
+def test_skill_targeting_track_target_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="roadmap-analysis",
+        target_id="capability_intelligence",
+    )
+    assert data["target_type"] == "track"
+    assert data["resolution"]["resolved"] is True
+    assert data["assessment"]["blocker_count"] == 0
+
+
+def test_skill_targeting_track_series_alias_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="roadmap-analysis",
+        target_id="64-series",
+    )
+    assert data["target_type"] == "track"
+    assert data["resolution"]["resolved"] is True
+
+
+def test_skill_targeting_track_target_unknown_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="roadmap-analysis",
+        target_id="nonexistent_track_xyz",
+        target_type="track",
+    )
+    assert data["resolution"]["resolved"] is False
+    assert data["assessment"]["blocker_count"] >= 1
+
+
+def test_skill_targeting_compat_phase_implementation_valid(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="phase-implementation",
+        target_id="64B.5",
+        target_type="phase",
+    )
+    compat_signals = [s for s in data["signals"] if s["signal_type"] == "incompatible_skill_target_pair"]
+    assert len(compat_signals) == 0
+    assert data["assessment"]["blocker_count"] == 0
+
+
+def test_skill_targeting_compat_incompatible_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="capability-analysis",
+        target_id="capability_intelligence",
+        target_type="track",
+    )
+    compat_signals = [s for s in data["signals"] if s["signal_type"] == "incompatible_skill_target_pair"]
+    assert len(compat_signals) == 1
+    assert data["assessment"]["blocker_count"] >= 1
+
+
+def test_skill_targeting_assessment_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(HarnessPath.cwd(), invoke_skill_id="phase-validation", target_id="64B.5")
+    assessment = data["assessment"]
+    for field in ("assessment_id", "target_count", "resolved_count", "unresolved_count",
+                  "signal_count", "blocker_count", "warning_count", "targeting_status", "human_review_required"):
+        assert field in assessment
+
+
+def test_skill_targeting_resolution_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(HarnessPath.cwd(), invoke_skill_id="phase-validation", target_id="64B.5")
+    res = data["resolution"]
+    for field in ("resolution_id", "skill_id", "target_id", "target_type", "target_source",
+                  "resolved", "resolution_status", "human_review_required"):
+        assert field in res
+
+
+def test_skill_targeting_validation_signal_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="phase-implementation",
+        target_id="99Z.9",
+    )
+    assert len(data["signals"]) >= 1
+    sig = data["signals"][0]
+    for field in ("signal_id", "skill_id", "target_id", "target_type", "validation_domain",
+                  "signal_type", "severity", "detected_state", "expected_state", "human_review_required"):
+        assert field in sig
+
+
+def test_skill_targeting_no_target_reports_optional(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(HarnessPath.cwd(), invoke_skill_id="phase-implementation")
+    assert data["target_id"] is None
+    assert data["resolution"]["resolution_status"] == "target_missing_optional"
+    assert data["assessment"]["targeting_status"] == "no_target"
+
+
+def test_skill_targeting_invoke_positional_target_cli(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "phase-implementation", "64B.5"])
+    output = capsys.readouterr().out
+    assert rc == 0
+    assert "Skill invocation targeting" in output
+    assert "64B.5" in output
+
+
+def test_skill_targeting_invoke_flag_target_cli(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "phase-validation", "--target", "64B.5"])
+    output = capsys.readouterr().out
+    assert rc == 0
+    assert "Skill invocation targeting" in output
+    assert "64B.5" in output
+
+
+def test_skill_targeting_invoke_invalid_target_cli(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "phase-implementation", "99Z.9"])
+    assert rc == 1
+
+
+def test_skill_targeting_invoke_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "capability-analysis", "skill_system_foundation", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert "assessment" in data
+    assert "resolution" in data
+    assert data["assessment"]["blocker_count"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.5A – Capability Target Resolution Hardening tests
+# ---------------------------------------------------------------------------
+
+
+def test_skill_targeting_64b5a_runtime_quarantine_classification_resolves(tmp_path, monkeypatch, capsys) -> None:
+    """Acceptance criterion: runtime_quarantine_classification resolves via alias."""
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "capability-analysis", "runtime_quarantine_classification"])
+    output = capsys.readouterr().out
+    assert rc == 0
+    assert "capability" in output
+    assert "Resolved:             True" in output
+
+
+def test_skill_targeting_64b5a_runtime_quarantine_classification_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    rc = main(["skill", "invoke", "capability-analysis", "runtime_quarantine_classification", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert data["assessment"]["blocker_count"] == 0
+    assert data["resolution"]["resolved"] is True
+    assert data["resolution"]["target_type"] == "capability"
+
+
+def test_skill_targeting_64b5a_runtime_quarantine_resolves_directly(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(), invoke_skill_id="capability-analysis", target_id="runtime_quarantine"
+    )
+    assert data["resolution"]["resolved"] is True
+    assert data["target_type"] == "capability"
+
+
+def test_skill_targeting_64b5a_alias_infers_capability_type(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(),
+        invoke_skill_id="capability-analysis",
+        target_id="runtime_quarantine_classification",
+    )
+    assert data["target_type"] == "capability"
+    assert data["assessment"]["blocker_count"] == 0
+
+
+def test_skill_targeting_64b5a_multi_runtime_registry_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(), invoke_skill_id="capability-analysis", target_id="multi_runtime_registry"
+    )
+    assert data["resolution"]["resolved"] is True
+    assert data["target_type"] == "capability"
+
+
+def test_skill_targeting_64b5a_runtime_selection_engine_resolves(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_skill_invocation_targeting
+    from pcae.core.paths import HarnessPath
+
+    data = build_skill_invocation_targeting(
+        HarnessPath.cwd(), invoke_skill_id="capability-analysis", target_id="runtime_selection_engine"
+    )
+    assert data["resolution"]["resolved"] is True
+    assert data["target_type"] == "capability"
+
+
+def test_skill_targeting_64b5a_capability_aliases_in_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    quarantine_cap = next(
+        (c for c in data["capability_registry"] if c["capability_name"] == "Runtime Quarantine"),
+        None,
+    )
+    assert quarantine_cap is not None
+    assert "runtime_quarantine_classification" in quarantine_cap["aliases"]
+
+
+def test_skill_targeting_64b5a_capability_count_expanded(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_sit_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    cap_names = {c["capability_name"] for c in data["capability_registry"]}
+    assert "Runtime Quarantine" in cap_names
+    assert "Multi-Runtime Registry" in cap_names
+    assert "Runtime Selection Engine" in cap_names
+    assert "Runtime Failure Recovery" in cap_names
+    assert "Multi-Runtime Audit Chain" in cap_names

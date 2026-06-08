@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-2032-64b-4a-skill-registry-consolidation-hardening
+20260608-2236-64b-6-prompt-rendering-skill
 
 ## Title
 
-64B.4A: Skill Registry Consolidation Hardening
+64B.6 Prompt Rendering Skill
 
 ## Status
 
@@ -18,12 +18,11 @@ implementation
 
 ## Goal
 
-64B.4A: Skill Registry Consolidation Hardening
+64B.6 Prompt Rendering Skill
 
 ## Allowed Files
 
 - .pcae/session.json
-- .pcae/skills/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -32,16 +31,11 @@ implementation
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - docs/CAPABILITY_INVENTORY.md
-- docs/COMMANDS.md
-- docs/ROADMAP_REGISTRY.md
-- docs/PROMPT_REGISTRY.md
+- docs/SKILL_REGISTRY.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
 - src/pcae/core/agent.py
-- src/pcae/core/docs.py
 - tests/test_agent.py
-- .pcae/skills
-- docs/SKILL_REGISTRY.md
 
 ## Forbidden Files
 
@@ -91,4 +85,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T20:32:49.588712+02:00
+2026-06-08T22:36:54.116672+02:00

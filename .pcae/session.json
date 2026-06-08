@@ -1,95 +1,83 @@
 {
   "active_task": {
-    "id": "20260608-2032-64b-4a-skill-registry-consolidation-hardening",
-    "title": "64B.4A: Skill Registry Consolidation Hardening"
+    "id": "20260608-2236-64b-6-prompt-rendering-skill",
+    "title": "64B.6 Prompt Rendering Skill"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "64B.4A: Skill Registry Consolidation Hardening",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
       {
         "path": ".pcae/session.json",
-        "status": " M"
+        "status": "MM"
       },
       {
         "path": "CHANGELOG.md",
-        "status": " M"
+        "status": "MM"
       },
       {
         "path": "PROJECT_STATUS.md",
-        "status": " M"
+        "status": "M "
       },
       {
         "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/ROADMAP_REGISTRY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DECISIONS.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DONE.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260608-1856-64b-3-prompt-recommendation-hardening.md",
-        "status": " D"
-      },
-      {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": ".pcae/skills",
-        "status": "??"
+        "status": "M "
       },
       {
         "path": "docs/SKILL_REGISTRY.md",
+        "status": "M "
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": "M "
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": "M "
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": "M "
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": "MM"
+      },
+      {
+        "path": "tasks/active/20260608-2232-64b-6-prompt-rendering-skill.md",
+        "status": "AD"
+      },
+      {
+        "path": "tasks/done/20260608-2032-64b-4a-skill-registry-consolidation-hardening.md",
+        "status": "R "
+      },
+      {
+        "path": "tasks/done/20260608-2134-64b-5-skill-invocation-targeting.md",
+        "status": "A "
+      },
+      {
+        "path": "tasks/done/20260608-2217-64b-5a-capability-target-resolution-hardening.md",
+        "status": "A "
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": "M "
+      },
+      {
+        "path": "tasks/active/20260608-2236-64b-6-prompt-rendering-skill.md",
         "status": "??"
       },
       {
-        "path": "tasks/active/20260608-2032-64b-4a-skill-registry-consolidation-hardening.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260608-1856-64b-3-prompt-recommendation-hardening.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260608-2019-64b-4-skill-system-foundation.md",
+        "path": "tasks/done/20260608-2232-64b-6-prompt-rendering-skill.md",
         "status": "??"
       }
     ],
-    "status_summary": "19 changed files"
+    "status_summary": "16 changed files"
   },
-  "last_completed_step": "Completed task 20260608-2019-64b-4-skill-system-foundation: 64B.4: Skill System Foundation",
-  "next_recommended_step": "Continue active task 20260608-2032-64b-4a-skill-registry-consolidation-hardening.",
-  "timestamp": "2026-06-08T18:32:49.606619+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-08T20:36:56.087884+00:00",
   "warnings": []
 }

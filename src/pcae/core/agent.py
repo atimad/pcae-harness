@@ -69355,6 +69355,7 @@ _CRI_RECORD_FIELDS: tuple[dict, ...] = (
     {"name": "commands", "type": "list", "required": True},
     {"name": "dependencies", "type": "list", "required": True},
     {"name": "successors", "type": "list", "required": True},
+    {"name": "aliases", "type": "list", "required": False},
 )
 
 _CRI_ROADMAP_FIELDS: tuple[dict, ...] = (
@@ -69613,8 +69614,26 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.4A",
         "phase_title": "Skill Registry Consolidation Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.4",
+        "successor": "64B.4B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.4B",
+        "phase_title": "Capability Projection Consolidation",
+        "status": "completed",
+        "predecessor": "64B.4A",
+        "successor": "64B.5",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.5",
+        "phase_title": "Skill Invocation Targeting",
+        "status": "active",
+        "predecessor": "64B.4B",
         "successor": "",
         "superseded_by": "",
     },
@@ -69754,6 +69773,41 @@ _CRI_KNOWN_PROMPTS: tuple[dict, ...] = (
         "recommendation_status": "recommended",
     },
     {
+        "phase_id": "64B.4B",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "capability_projection_consolidation",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.4B",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "skill_invocation_targeting",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "agent",
+        "prompt_available": True,
+        "prompt_source": "skill_invocation_targeting",
+        "recommendation_status": "recommended",
+    },
+    {
         "phase_id": "45A",
         "prompt_type": "roadmap_recommendation",
         "prompt_available": True,
@@ -69807,6 +69861,97 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "commands": ["pcae readonly-invocation", "pcae read-only-runtime-invocation"],
         "dependencies": ["governed_task_contracts"],
         "successors": ["runtime_approval_gates"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Approval Gates",
+        "capability_domain": "runtime_governance_capabilities",
+        "implemented_phase": "62G",
+        "status": "implemented",
+        "commands": ["pcae runtime-approval-gates"],
+        "dependencies": ["read_only_runtime_invocation_governance"],
+        "successors": ["runtime_rollback_boundaries"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Rollback Boundaries",
+        "capability_domain": "runtime_governance_capabilities",
+        "implemented_phase": "62H",
+        "status": "implemented",
+        "commands": ["pcae runtime-rollback-boundaries"],
+        "dependencies": ["runtime_approval_gates"],
+        "successors": ["multi_runtime_registry"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Multi-Runtime Registry",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63A",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-registry"],
+        "dependencies": ["runtime_rollback_boundaries"],
+        "successors": ["runtime_selection_engine"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Selection Engine",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63B",
+        "status": "implemented",
+        "commands": ["pcae runtime-selection-engine"],
+        "dependencies": ["multi_runtime_registry"],
+        "successors": ["runtime_arbitration"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Arbitration",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63C",
+        "status": "implemented",
+        "commands": ["pcae runtime-arbitration"],
+        "dependencies": ["runtime_selection_engine"],
+        "successors": ["multi_runtime_audit_chain"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Multi-Runtime Audit Chain",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63D",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-audit-chain"],
+        "dependencies": ["runtime_arbitration"],
+        "successors": ["runtime_failure_recovery"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Failure Recovery",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63E",
+        "status": "implemented",
+        "commands": ["pcae runtime-failure-recovery"],
+        "dependencies": ["multi_runtime_audit_chain"],
+        "successors": ["runtime_quarantine"],
+        "aliases": [],
+    },
+    {
+        "capability_name": "Runtime Quarantine",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "63F",
+        "status": "implemented",
+        "commands": ["pcae runtime-quarantine"],
+        "dependencies": ["runtime_failure_recovery"],
+        "successors": ["multi_runtime_execution_planning"],
+        "aliases": ["runtime_quarantine_classification"],
+    },
+    {
+        "capability_name": "Multi-Runtime Execution Readiness",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64B",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-execution-readiness"],
+        "dependencies": ["multi_runtime_execution_planning"],
+        "successors": ["capability_inventory"],
+        "aliases": [],
     },
     {
         "capability_name": "Multi-Runtime Execution Planning",
@@ -69816,6 +69961,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "commands": ["pcae multi-runtime-execution-planning"],
         "dependencies": ["multi_runtime_registry", "runtime_selection_engine"],
         "successors": ["multi_runtime_execution_readiness"],
+        "aliases": [],
     },
     {
         "capability_name": "Capability Inventory",
@@ -69891,6 +70037,21 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successors": ["skill_registry_consolidation_hardening"],
     },
     {
+        "capability_name": "Capability Projection Consolidation",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.4B",
+        "status": "implemented",
+        "commands": [
+            "pcae capability list",
+            "pcae capability show",
+            "pcae roadmap current",
+        ],
+        "dependencies": [
+            "skill_registry_consolidation_hardening",
+        ],
+        "successors": ["skill_invocation_targeting"],
+    },
+    {
         "capability_name": "Skill Registry Consolidation Hardening",
         "capability_domain": "skill_system_capabilities",
         "implemented_phase": "64B.4A",
@@ -69907,6 +70068,22 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "skill_system_foundation",
             "capability_and_roadmap_intelligence",
+        ],
+        "successors": ["skill_invocation_targeting"],
+    },
+    {
+        "capability_name": "Skill Invocation Targeting",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.5",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke <skill_id> <target_id>",
+            "pcae skill invoke <skill_id> --target <target_id>",
+            "pcae skill invoke <skill_id> --target-type <type> --target <target_id>",
+            "pcae skill validate",
+        ],
+        "dependencies": [
+            "skill_registry_consolidation_hardening",
         ],
         "successors": [],
     },
@@ -69935,6 +70112,7 @@ def _build_capability_projection(
             "commands": list(capability["commands"]),
             "dependencies": list(capability["dependencies"]),
             successor_field: list(capability[source_successor_field]),
+            "aliases": list(capability.get("aliases", [])),
         })
     return records
 
@@ -70932,6 +71110,46 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_source": "roadmap_registry+capability_registry",
         "capability_phase": "64B.4A",
     },
+    {
+        "phase_id": "64B.4B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4B",
+    },
+    {
+        "phase_id": "64B.4B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.4B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.4B",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.5-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.5",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.5-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.5",
+    },
+    {
+        "phase_id": "64B.5",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.5-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.5",
+    },
 )
 
 
@@ -71393,4 +71611,543 @@ def build_skill_system_foundation(
             "phase": "64B.4",
         },
         "advisory": SKILL_SYSTEM_FOUNDATION_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.5 – Skill Invocation Targeting
+# ---------------------------------------------------------------------------
+
+SKILL_INVOCATION_TARGETING_ADVISORY = (
+    "Phase 64B.5 introduces skill invocation targeting. Skills can now resolve phase, "
+    "capability, task, and track targets. Target resolution is explicit and reported. "
+    "Invalid targets are rejected with useful errors. Skill/target compatibility is validated. "
+    "Invocation records include target metadata. No prompt rendering is implemented. "
+    "No runtime invocation occurs. No command execution occurs. No write execution occurs. "
+    "No orchestration execution occurs. Human review is required for all targeting decisions."
+)
+
+_SIT_SKILL_COMPATIBLE_TARGETS: dict[str, tuple[str, ...]] = {
+    "phase-implementation": ("phase",),
+    "phase-validation": ("phase",),
+    "roadmap-analysis": ("phase", "track"),
+    "capability-analysis": ("capability",),
+    "task-transition": ("task", "phase"),
+}
+
+_SIT_TARGET_TYPES: tuple[str, ...] = ("phase", "capability", "task", "track")
+
+_SIT_TARGET_FIELDS: tuple[dict, ...] = (
+    {"name": "target_id", "type": "str", "required": True},
+    {"name": "target_type", "type": "str", "required": True},
+    {"name": "target_status", "type": "str", "required": True},
+    {"name": "target_source", "type": "str", "required": True},
+    {"name": "resolved", "type": "bool", "required": True},
+    {"name": "validation_status", "type": "str", "required": True},
+)
+
+_SIT_RESOLUTION_FIELDS: tuple[dict, ...] = (
+    {"name": "resolution_id", "type": "str", "required": True},
+    {"name": "skill_id", "type": "str", "required": True},
+    {"name": "target_id", "type": "str", "required": True},
+    {"name": "target_type", "type": "str", "required": True},
+    {"name": "target_source", "type": "str", "required": True},
+    {"name": "resolved", "type": "bool", "required": True},
+    {"name": "resolution_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SIT_VALIDATION_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "skill_id", "type": "str", "required": True},
+    {"name": "target_id", "type": "str", "required": True},
+    {"name": "target_type", "type": "str", "required": True},
+    {"name": "validation_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SIT_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "target_count", "type": "int", "required": True},
+    {"name": "resolved_count", "type": "int", "required": True},
+    {"name": "unresolved_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "targeting_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def _sit_resolve_phase_target(target_id: str, roadmap_registry: list[dict]) -> dict:
+    match = next((r for r in roadmap_registry if r["phase_id"] == target_id), None)
+    if match is None:
+        return {
+            "resolved": False,
+            "target_status": "unknown",
+            "target_source": "roadmap_registry",
+            "reason": f"Phase {target_id!r} not found in roadmap registry.",
+            "phase": None,
+        }
+    return {
+        "resolved": True,
+        "target_status": match["status"],
+        "target_source": "roadmap_registry",
+        "reason": "",
+        "phase": match,
+    }
+
+
+def _sit_capability_slug(s: str) -> str:
+    return s.lower().replace("-", "_").replace(" ", "_")
+
+
+def _sit_find_capability(target_id: str, capability_registry: list[dict]) -> "dict | None":
+    slug = _sit_capability_slug(target_id)
+    for cap in capability_registry:
+        if _sit_capability_slug(cap["capability_name"]) == slug:
+            return cap
+        for alias in cap.get("aliases", []):
+            if _sit_capability_slug(alias) == slug:
+                return cap
+    return None
+
+
+def _sit_resolve_capability_target(target_id: str, capability_registry: list[dict]) -> dict:
+    match = _sit_find_capability(target_id, capability_registry)
+    if match is None:
+        return {
+            "resolved": False,
+            "target_status": "unknown",
+            "target_source": "capability_inventory",
+            "reason": f"Capability {target_id!r} not found in capability inventory.",
+            "capability": None,
+        }
+    return {
+        "resolved": True,
+        "target_status": match["status"],
+        "target_source": "capability_inventory",
+        "reason": "",
+        "capability": match,
+    }
+
+
+def _sit_resolve_task_target(target_id: str, root: "HarnessPath") -> dict:
+    active_path = root.path / "tasks" / "active" / f"{target_id}.md"
+    done_path = root.path / "tasks" / "done" / f"{target_id}.md"
+    if active_path.exists():
+        return {
+            "resolved": True,
+            "target_status": "active",
+            "target_source": "tasks/active",
+            "reason": "",
+        }
+    if done_path.exists():
+        return {
+            "resolved": True,
+            "target_status": "done",
+            "target_source": "tasks/done",
+            "reason": "",
+        }
+    return {
+        "resolved": False,
+        "target_status": "missing",
+        "target_source": "task_lifecycle",
+        "reason": f"Task {target_id!r} not found in tasks/active or tasks/done.",
+    }
+
+
+def _sit_resolve_track_target(target_id: str, roadmap_tracks: dict) -> dict:
+    if target_id in roadmap_tracks:
+        return {
+            "resolved": True,
+            "target_status": "active",
+            "target_source": "roadmap_registry",
+            "track_name": target_id,
+            "reason": "",
+        }
+    # Series alias: e.g. "64-series" → phases with IDs starting with "64"
+    series_prefix = target_id.lower().replace("-series", "").replace("series", "")
+    for track_name in roadmap_tracks:
+        if series_prefix and any(
+            p["phase_id"].startswith(series_prefix)
+            for p in roadmap_tracks[track_name]
+        ):
+            return {
+                "resolved": True,
+                "target_status": "active",
+                "target_source": "roadmap_registry",
+                "track_name": track_name,
+                "reason": f"Resolved {target_id!r} to track {track_name!r} via series prefix.",
+            }
+    return {
+        "resolved": False,
+        "target_status": "unknown",
+        "target_source": "roadmap_registry",
+        "reason": f"Track {target_id!r} not found in roadmap registry.",
+    }
+
+
+def _sit_infer_target_type(
+    target_id: str,
+    roadmap_registry: list[dict],
+    capability_registry: list[dict],
+    root: "HarnessPath",
+    roadmap_tracks: dict,
+) -> str | None:
+    if any(r["phase_id"] == target_id for r in roadmap_registry):
+        return "phase"
+
+    if _sit_find_capability(target_id, capability_registry) is not None:
+        return "capability"
+
+    active_path = root.path / "tasks" / "active" / f"{target_id}.md"
+    done_path = root.path / "tasks" / "done" / f"{target_id}.md"
+    if active_path.exists() or done_path.exists():
+        return "task"
+
+    if target_id in roadmap_tracks:
+        return "track"
+
+    series_prefix = target_id.lower().replace("-series", "").replace("series", "")
+    if series_prefix and any(
+        any(p["phase_id"].startswith(series_prefix) for p in phases)
+        for phases in roadmap_tracks.values()
+    ):
+        return "track"
+
+    return None
+
+
+def build_skill_invocation_targeting(
+    root: "HarnessPath | None" = None,
+    invoke_skill_id: str | None = None,
+    target_id: str | None = None,
+    target_type: str | None = None,
+) -> dict:
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    cri_data = build_capability_roadmap_intelligence(root)
+    roadmap_registry = cri_data["roadmap_registry"]
+    capability_registry = cri_data["capability_registry"]
+    roadmap_tracks = cri_data["roadmap_tracks"]
+
+    skill_data = _discover_skill_registry(root, ts)
+    registry = skill_data["skill_registry"]
+
+    # Skill lookup
+    invoked_skill = (
+        next((r for r in registry if r["skill_id"] == invoke_skill_id), None)
+        if invoke_skill_id
+        else None
+    )
+
+    # --- No target provided ---
+    if target_id is None:
+        valid_types = _SIT_SKILL_COMPATIBLE_TARGETS.get(invoke_skill_id or "", ())
+        resolution_status = "target_missing_optional" if invoke_skill_id else "no_skill_specified"
+        resolution = {
+            "resolution_id": f"sit-res-{ts}-01",
+            "skill_id": invoke_skill_id or "",
+            "target_id": "",
+            "target_type": "",
+            "target_source": "none",
+            "resolved": False,
+            "resolution_status": resolution_status,
+            "human_review_required": True,
+        }
+        assessment = {
+            "assessment_id": f"sit-assess-{ts}",
+            "target_count": 0,
+            "resolved_count": 0,
+            "unresolved_count": 0,
+            "signal_count": 0,
+            "blocker_count": 0,
+            "warning_count": 0,
+            "targeting_status": "no_target",
+            "human_review_required": True,
+        }
+        return {
+            "generated_at": generated_at,
+            "invoke_skill_id": invoke_skill_id,
+            "invoked_skill": invoked_skill,
+            "target_id": None,
+            "target_type": None,
+            "target": None,
+            "resolution": resolution,
+            "resolutions": [resolution],
+            "signals": [],
+            "assessment": assessment,
+            "valid_target_types": list(valid_types),
+            "target_model": {
+                "model_name": "SkillInvocationTarget",
+                "fields": [dict(f) for f in _SIT_TARGET_FIELDS],
+            },
+            "resolution_model": {
+                "model_name": "SkillTargetResolutionRecord",
+                "fields": [dict(f) for f in _SIT_RESOLUTION_FIELDS],
+            },
+            "validation_signal_model": {
+                "model_name": "SkillTargetValidationSignal",
+                "fields": [dict(f) for f in _SIT_VALIDATION_SIGNAL_FIELDS],
+            },
+            "assessment_model": {
+                "model_name": "SkillInvocationTargetingAssessment",
+                "fields": [dict(f) for f in _SIT_ASSESSMENT_FIELDS],
+            },
+            "governance_boundaries": {
+                "may": [
+                    "resolve targets",
+                    "validate target existence",
+                    "validate skill/target compatibility",
+                    "produce target-aware invocation reports",
+                    "report blockers and warnings",
+                ],
+                "may_not": [
+                    "invoke runtimes",
+                    "execute shell commands",
+                    "execute prompts",
+                    "modify runtime configuration",
+                    "modify source files through execution",
+                    "access network",
+                    "approve writes",
+                    "commit",
+                    "push",
+                    "rollback",
+                ],
+                "phase": "64B.5",
+            },
+            "advisory": SKILL_INVOCATION_TARGETING_ADVISORY,
+        }
+
+    # --- Target type inference ---
+    if target_type is None:
+        target_type = _sit_infer_target_type(
+            target_id, roadmap_registry, capability_registry, root, roadmap_tracks
+        )
+
+    signals: list[dict] = []
+    sig_idx = 1
+
+    # --- Target type validation ---
+    if target_type is not None and target_type not in _SIT_TARGET_TYPES:
+        signals.append({
+            "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+            "skill_id": invoke_skill_id or "",
+            "target_id": target_id,
+            "target_type": target_type,
+            "validation_domain": "target_type",
+            "signal_type": "unknown_target_type",
+            "severity": "blocker",
+            "detected_state": f"target_type={target_type!r}",
+            "expected_state": f"target_type must be one of {_SIT_TARGET_TYPES}",
+            "human_review_required": True,
+        })
+        sig_idx += 1
+
+    if target_type is None:
+        signals.append({
+            "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+            "skill_id": invoke_skill_id or "",
+            "target_id": target_id,
+            "target_type": "unknown",
+            "validation_domain": "target_type_inference",
+            "signal_type": "target_type_unresolved",
+            "severity": "blocker",
+            "detected_state": f"target_id={target_id!r} could not be matched to a known type",
+            "expected_state": (
+                "target must resolve to a known phase, capability, task, or track"
+            ),
+            "human_review_required": True,
+        })
+        sig_idx += 1
+
+    # --- Resolve target ---
+    resolved_target: dict | None = None
+    if target_type == "phase":
+        resolved_target = _sit_resolve_phase_target(target_id, roadmap_registry)
+    elif target_type == "capability":
+        resolved_target = _sit_resolve_capability_target(target_id, capability_registry)
+    elif target_type == "task":
+        resolved_target = _sit_resolve_task_target(target_id, root)
+    elif target_type == "track":
+        resolved_target = _sit_resolve_track_target(target_id, roadmap_tracks)
+
+    resolved = resolved_target["resolved"] if resolved_target else False
+
+    if resolved_target and not resolved:
+        signals.append({
+            "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+            "skill_id": invoke_skill_id or "",
+            "target_id": target_id,
+            "target_type": target_type or "unknown",
+            "validation_domain": "target_resolution",
+            "signal_type": "target_unresolved",
+            "severity": "blocker",
+            "detected_state": resolved_target.get("reason", "target not found"),
+            "expected_state": "target must exist and be resolvable",
+            "human_review_required": True,
+        })
+        sig_idx += 1
+
+    # --- Phase-specific warnings ---
+    if target_type == "phase" and resolved_target and resolved:
+        phase_status = resolved_target.get("target_status", "")
+        if phase_status == "superseded":
+            signals.append({
+                "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+                "skill_id": invoke_skill_id or "",
+                "target_id": target_id,
+                "target_type": "phase",
+                "validation_domain": "phase_status",
+                "signal_type": "superseded_phase_target",
+                "severity": "warning",
+                "detected_state": f"phase_status=superseded for {target_id!r}",
+                "expected_state": "phase target should be active or roadmap_gap for implementation prompts",
+                "human_review_required": True,
+            })
+            sig_idx += 1
+        elif phase_status == "completed" and invoke_skill_id == "phase-implementation":
+            signals.append({
+                "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+                "skill_id": invoke_skill_id,
+                "target_id": target_id,
+                "target_type": "phase",
+                "validation_domain": "phase_status",
+                "signal_type": "completed_phase_implementation_target",
+                "severity": "warning",
+                "detected_state": f"phase_status=completed for {target_id!r}",
+                "expected_state": "phase-implementation targets active or roadmap_gap phases by default",
+                "human_review_required": True,
+            })
+            sig_idx += 1
+
+    # --- Skill/target compatibility ---
+    if invoke_skill_id and target_type and target_type in _SIT_TARGET_TYPES:
+        valid_types = _SIT_SKILL_COMPATIBLE_TARGETS.get(invoke_skill_id, ())
+        if valid_types and target_type not in valid_types:
+            signals.append({
+                "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
+                "skill_id": invoke_skill_id,
+                "target_id": target_id,
+                "target_type": target_type,
+                "validation_domain": "skill_target_compatibility",
+                "signal_type": "incompatible_skill_target_pair",
+                "severity": "blocker",
+                "detected_state": (
+                    f"skill={invoke_skill_id!r} does not accept target_type={target_type!r}"
+                ),
+                "expected_state": f"valid target types for {invoke_skill_id!r}: {valid_types}",
+                "human_review_required": True,
+            })
+            sig_idx += 1
+
+    # --- Build target record ---
+    target_status = (
+        resolved_target.get("target_status", "unknown") if resolved_target else "unknown"
+    )
+    target_source = (
+        resolved_target.get("target_source", "unknown") if resolved_target else "unknown"
+    )
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+
+    validation_status = (
+        "blocked" if blocker_count > 0
+        else ("warning" if warning_count > 0 else "valid")
+    )
+
+    target_record: dict = {
+        "target_id": target_id,
+        "target_type": target_type or "unknown",
+        "target_status": target_status,
+        "target_source": target_source,
+        "resolved": resolved,
+        "validation_status": validation_status,
+    }
+
+    resolution = {
+        "resolution_id": f"sit-res-{ts}-01",
+        "skill_id": invoke_skill_id or "",
+        "target_id": target_id,
+        "target_type": target_type or "unknown",
+        "target_source": target_source,
+        "resolved": resolved,
+        "resolution_status": "resolved" if resolved else "unresolved",
+        "human_review_required": True,
+    }
+
+    assessment = {
+        "assessment_id": f"sit-assess-{ts}",
+        "target_count": 1,
+        "resolved_count": 1 if resolved else 0,
+        "unresolved_count": 0 if resolved else 1,
+        "signal_count": len(signals),
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "targeting_status": validation_status,
+        "human_review_required": True,
+    }
+
+    valid_types_for_skill = list(_SIT_SKILL_COMPATIBLE_TARGETS.get(invoke_skill_id or "", ()))
+
+    return {
+        "generated_at": generated_at,
+        "invoke_skill_id": invoke_skill_id,
+        "invoked_skill": invoked_skill,
+        "target_id": target_id,
+        "target_type": target_type,
+        "target": target_record,
+        "resolution": resolution,
+        "resolutions": [resolution],
+        "signals": signals,
+        "assessment": assessment,
+        "valid_target_types": valid_types_for_skill,
+        "target_model": {
+            "model_name": "SkillInvocationTarget",
+            "fields": [dict(f) for f in _SIT_TARGET_FIELDS],
+        },
+        "resolution_model": {
+            "model_name": "SkillTargetResolutionRecord",
+            "fields": [dict(f) for f in _SIT_RESOLUTION_FIELDS],
+        },
+        "validation_signal_model": {
+            "model_name": "SkillTargetValidationSignal",
+            "fields": [dict(f) for f in _SIT_VALIDATION_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "SkillInvocationTargetingAssessment",
+            "fields": [dict(f) for f in _SIT_ASSESSMENT_FIELDS],
+        },
+        "governance_boundaries": {
+            "may": [
+                "resolve targets",
+                "validate target existence",
+                "validate skill/target compatibility",
+                "produce target-aware invocation reports",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute shell commands",
+                "execute prompts",
+                "modify runtime configuration",
+                "modify source files through execution",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "phase": "64B.5",
+        },
+        "advisory": SKILL_INVOCATION_TARGETING_ADVISORY,
     }

@@ -2,6 +2,10 @@
 
 ## Completed
 
+- 64B.6: Prompt Rendering Skill (20260608-2232-64b-6-prompt-rendering-skill)
+- 64B.5A: Capability Target Resolution Hardening (20260608-2217-64b-5a-capability-target-resolution-hardening)
+- 64B.5: Skill Invocation Targeting (20260608-2134-64b-5-skill-invocation-targeting)
+- 64B.4B: Capability Projection Consolidation (internal, no separate task)
 - 64B.4A: Skill Registry Consolidation Hardening (20260608-2032-64b-4a-skill-registry-consolidation-hardening)
 - 64B.4: Skill System Foundation (20260608-2019-64b-4-skill-system-foundation)
 - 64B.3: Prompt Recommendation Hardening (20260608-1856-64b-3-prompt-recommendation-hardening)

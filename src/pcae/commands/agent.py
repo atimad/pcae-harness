@@ -401,6 +401,8 @@ from pcae.core.agent import (
     PROMPT_RECOMMENDATION_HARDENING_ADVISORY,
     build_skill_system_foundation,
     SKILL_SYSTEM_FOUNDATION_ADVISORY,
+    build_skill_invocation_targeting,
+    SKILL_INVOCATION_TARGETING_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13733,7 +13735,7 @@ def _write_skill_registry_md(data: dict) -> None:
         "# PCAE Skill Registry",
         "",
         f"Generated: {data['generated_at']}",
-        "Phase: 64B.4A — Skill Registry Consolidation Hardening",
+        "Phase: 64B.5 — Skill Invocation Targeting",
         f"Skills root: {data['skills_root']}",
         f"Skill count: {data['assessment']['skill_count']}",
         f"Invalid skill count: {data['assessment']['invalid_skill_count']}",
@@ -13761,13 +13763,16 @@ def _write_skill_registry_md(data: dict) -> None:
         "## Governance Notes",
         "",
         "- 64B.4 introduces a first-class skill system.",
+        "- 64B.4A hardens skill registry consolidation.",
+        "- 64B.4B consolidates capability projections.",
+        "- 64B.5 introduces skill invocation targeting.",
+        "- Skills can now resolve phase, capability, task, and track targets.",
         "- Skills are governed artifacts.",
         "- Skill Registry discovery and metadata are consolidated with the shared intelligence infrastructure.",
         "- Capability Inventory records the skill system as a capability domain.",
-        "- Roadmap Registry tracks the 64B.4 capability_intelligence phase that introduces the skill system.",
-        "- Prompt Registry remains separate in purpose but aligned in metadata/governance structure.",
-        "- Skills support discovery, validation, and invocation.",
-        "- Prompt rendering is not implemented in 64B.4.",
+        "- Roadmap Registry tracks the 64B.5 capability_intelligence phase.",
+        "- Skills support discovery, validation, invocation, and target resolution.",
+        "- Prompt rendering is not implemented in 64B.5.",
         "- Future skills may provide prompt rendering, roadmap analysis, capability analysis, and task lifecycle workflows.",
     ])
     docs_dir = pathlib.Path("docs")
@@ -13845,7 +13850,49 @@ def run_skill_validate(args: argparse.Namespace) -> int:
 
 
 def run_skill_invoke(args: argparse.Namespace) -> int:
-    data = build_skill_system_foundation(HarnessPath.cwd(), invoke_skill_id=args.skill_id)
+    target_id = getattr(args, "target_id", None) or getattr(args, "target_flag", None)
+    target_type = getattr(args, "target_type", None)
+    root = HarnessPath.cwd()
+
+    if target_id is not None:
+        targeting = build_skill_invocation_targeting(
+            root,
+            invoke_skill_id=args.skill_id,
+            target_id=target_id,
+            target_type=target_type,
+        )
+        assessment = targeting["assessment"]
+        blocked = assessment["blocker_count"] > 0
+        if args.json:
+            print(json.dumps({
+                "targeting": targeting,
+                "assessment": assessment,
+                "resolution": targeting["resolution"],
+                "signals": targeting["signals"],
+                "advisory": targeting["advisory"],
+            }, indent=2, sort_keys=True))
+            return 1 if blocked else 0
+        print("Skill invocation targeting")
+        print(f"Skill ID:             {args.skill_id}")
+        print(f"Target ID:            {target_id}")
+        print(f"Target type:          {targeting['target_type'] or 'unknown'}")
+        print(f"Targeting status:     {assessment['targeting_status']}")
+        print(f"Resolved:             {targeting['resolution']['resolved']}")
+        print(f"Resolution status:    {targeting['resolution']['resolution_status']}")
+        if targeting["target"]:
+            t = targeting["target"]
+            print(f"Target status:        {t['target_status']}")
+            print(f"Target source:        {t['target_source']}")
+        if targeting["signals"]:
+            print()
+            print("Signals:")
+            for sig in targeting["signals"]:
+                print(f"  [{sig['severity'].upper()}] {sig['signal_type']}: {sig['detected_state']}")
+        print()
+        print(SKILL_INVOCATION_TARGETING_ADVISORY)
+        return 1 if blocked else 0
+
+    data = build_skill_system_foundation(root, invoke_skill_id=args.skill_id)
     invocation = data["invocations"][0] if data["invocations"] else None
     if args.json:
         print(json.dumps({

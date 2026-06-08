@@ -1,7 +1,7 @@
 # PCAE Skill Registry
 
-Generated: 2026-06-08T18:38:48.943085+00:00
-Phase: 64B.4A — Skill Registry Consolidation Hardening
+Generated: 2026-06-08T20:32:06.714481+00:00
+Phase: 64B.5 — Skill Invocation Targeting
 Skills root: .pcae/skills
 Skill count: 5
 Invalid skill count: 0
@@ -20,11 +20,14 @@ Governance status: governed
 ## Governance Notes
 
 - 64B.4 introduces a first-class skill system.
+- 64B.4A hardens skill registry consolidation.
+- 64B.4B consolidates capability projections.
+- 64B.5 introduces skill invocation targeting.
+- Skills can now resolve phase, capability, task, and track targets.
 - Skills are governed artifacts.
 - Skill Registry discovery and metadata are consolidated with the shared intelligence infrastructure.
 - Capability Inventory records the skill system as a capability domain.
-- Roadmap Registry tracks the 64B.4 capability_intelligence phase that introduces the skill system.
-- Prompt Registry remains separate in purpose but aligned in metadata/governance structure.
-- Skills support discovery, validation, and invocation.
-- Prompt rendering is not implemented in 64B.4.
+- Roadmap Registry tracks the 64B.5 capability_intelligence phase.
+- Skills support discovery, validation, invocation, and target resolution.
+- Prompt rendering is not implemented in 64B.5.
 - Future skills may provide prompt rendering, roadmap analysis, capability analysis, and task lifecycle workflows.

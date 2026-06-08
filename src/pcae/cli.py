@@ -4762,9 +4762,28 @@ def build_parser() -> argparse.ArgumentParser:
 
     skill_invoke_parser = skill_subparsers.add_parser(
         "invoke",
-        help="Invoke a skill in read-only mode without runtime or orchestration execution (Phase 64B.4).",
+        help="Invoke a skill with optional target resolution (Phase 64B.5).",
     )
     skill_invoke_parser.add_argument("skill_id", help="Skill ID to invoke.")
+    skill_invoke_parser.add_argument(
+        "target_id",
+        nargs="?",
+        default=None,
+        help="Optional target ID (phase, capability, task, or track).",
+    )
+    skill_invoke_parser.add_argument(
+        "--target",
+        dest="target_flag",
+        default=None,
+        help="Target ID (alternative to positional target_id).",
+    )
+    skill_invoke_parser.add_argument(
+        "--target-type",
+        dest="target_type",
+        choices=["phase", "capability", "task", "track"],
+        default=None,
+        help="Explicit target type (phase, capability, task, or track).",
+    )
     skill_invoke_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
     skill_invoke_parser.set_defaults(handler=run_skill_invoke)
 

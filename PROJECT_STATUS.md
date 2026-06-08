@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.4A: Skill Registry Consolidation Hardening.
+Phase 64B.6: Prompt Rendering Skill.
 
 ## Post-61J Runtime Registry Checkpoint
 
