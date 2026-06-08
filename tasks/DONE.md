@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 63F: Runtime Quarantine (20260608-1600-63f-runtime-quarantine)
+- Implemented Runtime Quarantine (Phase 63F): `pcae runtime-quarantine` and `--json`; governs quarantine handling for runtime candidates that fail governance requirements; four models — RuntimeQuarantineRecord (10 fields), RuntimeQuarantineSignal (8 fields), RuntimeQuarantineAssessment (10 fields), RuntimeQuarantineSummary (11 fields); ten quarantine domains; quarantine_allowed=False always; execution_allowed=False always; release_allowed=False always; quarantine recommendations, release recommendations, and escalation recommendations generated; no quarantine enforcement; no runtime release; human_review_required=True always; 12 new tests following test_63f_* naming; `python -m pytest -k 63f` selects 12 tests; 4509 total tests passing.
 - 63E: Runtime Failure Recovery (20260608-1531-63e-runtime-failure-recovery)
 - Implemented Runtime Failure Recovery (Phase 63E): `pcae runtime-failure-recovery` and `--json`; governs recovery handling for runtime failures across single-runtime and multi-runtime workflows; four models — RuntimeFailureRecoveryRecord (10 fields), RuntimeFailureRecoverySignal (8 fields), RuntimeFailureRecoveryAssessment (10 fields), RuntimeFailureRecoverySummary (11 fields); ten recovery domains; recovery is advisory only; recovery_allowed=False always; execution_allowed=False always; quarantine_allowed=False always; escalation paths generated; quarantine is recommendation-only; human_review_required=True always; 12 new tests following test_63e_* naming; `python -m pytest -k 63e` selects 12 tests; 4497 total tests passing.
 - 63D: Multi-Runtime Audit Chain (20260608-1513-63d-multi-runtime-audit-chain)

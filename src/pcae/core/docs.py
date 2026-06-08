@@ -1110,6 +1110,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-failure-recovery`
 - `pcae runtime-failure-recovery --json`
+
+## runtime-quarantine
+
+- `pcae runtime-quarantine`
+- `pcae runtime-quarantine --json`
 """
 
 

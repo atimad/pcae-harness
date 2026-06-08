@@ -46689,3 +46689,181 @@ def test_63e_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_failure_recovery_overview"]["recovery_allowed"] is False
     assert data["runtime_failure_recovery_overview"]["quarantine_allowed"] is False
     assert data["runtime_failure_recovery_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 63F: Runtime Quarantine
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_quarantine  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63F  # noqa: E402
+
+
+def test_63f_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    for key in (
+        "runtime_quarantine_overview",
+        "quarantine_records",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63f_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeQuarantineRecord"
+    assert data["record_model"]["field_count"] == 10
+    assert data["signal_model"]["model_name"] == "RuntimeQuarantineSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeQuarantineAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "RuntimeQuarantineSummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "quarantine_id", "runtime_id", "runtime_name", "quarantine_reason",
+        "quarantine_domain", "quarantine_status", "quarantine_recommended",
+        "release_recommended", "escalation_required", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_63f_all_quarantine_domains_defined(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    expected = {
+        "trust_violation_quarantine",
+        "approval_failure_quarantine",
+        "audit_failure_quarantine",
+        "recovery_failure_quarantine",
+        "arbitration_failure_quarantine",
+        "governance_violation_quarantine",
+        "escalation_quarantine",
+        "quarantine_eligibility",
+        "quarantine_release_readiness",
+        "quarantine_decision_record",
+    }
+    actual = {s["quarantine_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63f_quarantine_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    assert data["runtime_quarantine_overview"]["quarantine_allowed"] is False
+    assert data["sample_assessment"]["quarantine_allowed"] is False
+    assert data["sample_summary"]["quarantine_allowed"] is False
+    assert data["governance_boundaries"]["quarantine_allowed"] is False
+
+
+def test_63f_execution_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    assert data["runtime_quarantine_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63f_release_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    assert data["runtime_quarantine_overview"]["release_allowed"] is False
+    assert data["sample_assessment"]["release_allowed"] is False
+    assert data["sample_summary"]["release_allowed"] is False
+    assert data["governance_boundaries"]["release_allowed"] is False
+
+
+def test_63f_quarantine_recommendations_generated(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    records = data["quarantine_records"]
+    assert len(records) >= 2
+    recommended = [r for r in records if r["quarantine_recommended"]]
+    assert len(recommended) >= 1
+    assert recommended[0]["quarantine_id"].startswith("rq-")
+    assert recommended[0]["human_review_required"] is True
+    not_required = [r for r in records if not r["quarantine_recommended"]]
+    assert len(not_required) >= 1
+    assert not_required[0]["quarantine_status"] == "quarantine_not_required"
+
+
+def test_63f_escalation_recommendations_generated(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    overview = data["runtime_quarantine_overview"]
+    assert overview["escalation_count"] >= 1
+    escalated = [r for r in data["quarantine_records"] if r["escalation_required"]]
+    assert len(escalated) >= 1
+
+
+def test_63f_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    for signal in data["signals"]:
+        assert "quarantine_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "quarantine_domain" in signal
+
+
+def test_63f_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_quarantine(_HarnessPath63F(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["quarantine_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["release_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "quarantine runtimes",
+        "release runtimes",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect runtime governance state" in boundaries["may"]
+    assert "classify quarantine candidates" in boundaries["may"]
+    assert "recommend quarantine" in boundaries["may"]
+    assert "recommend release review" in boundaries["may"]
+    assert "recommend escalation" in boundaries["may"]
+    assert "generate quarantine records" in boundaries["may"]
+
+
+def test_63f_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-quarantine"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime quarantine",
+        "Quarantine records",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Quarantine signals",
+        "Governance boundaries",
+        "Quarantine allowed:",
+        "Execution allowed:",
+        "Release allowed:",
+        "Quarantine status:",
+    ):
+        assert text in output
+
+
+def test_63f_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-quarantine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_quarantine_overview"]["phase"] == "63F"
+    assert data["runtime_quarantine_overview"]["execution_allowed"] is False
+    assert data["runtime_quarantine_overview"]["quarantine_allowed"] is False
+    assert data["runtime_quarantine_overview"]["release_allowed"] is False
+    assert data["runtime_quarantine_overview"]["human_review_required"] is True

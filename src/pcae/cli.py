@@ -179,6 +179,7 @@ from pcae.commands.agent import (
     run_runtime_arbitration,
     run_multi_runtime_audit_chain,
     run_runtime_failure_recovery,
+    run_runtime_quarantine,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4600,6 +4601,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rfr_parser.set_defaults(handler=run_runtime_failure_recovery)
+
+    rq_parser = subparsers.add_parser(
+        "runtime-quarantine",
+        help="Govern runtime quarantine handling for candidates that fail governance requirements (Phase 63F).",
+    )
+    rq_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rq_parser.set_defaults(handler=run_runtime_quarantine)
 
     return parser
 

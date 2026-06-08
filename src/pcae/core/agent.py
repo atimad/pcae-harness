@@ -67108,3 +67108,484 @@ def build_runtime_failure_recovery(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_FAILURE_RECOVERY_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63F: Runtime Quarantine
+# ---------------------------------------------------------------------------
+
+RUNTIME_QUARANTINE_ADVISORY = (
+    "Phase 63F defines governed runtime quarantine handling for runtime candidates "
+    "that fail trust, governance, audit, recovery, approval, or arbitration requirements. "
+    "quarantine_allowed=False always. execution_allowed=False always. "
+    "release_allowed=False always. Quarantine is advisory only: governance classifies "
+    "candidates, recommends quarantine, recommends release review, and recommends "
+    "escalation. No quarantine enforcement occurs. No runtime release occurs. "
+    "No runtime invocation occurs. Human review is always required."
+)
+
+_RQ_QUARANTINE_DOMAINS: tuple[str, ...] = (
+    "trust_violation_quarantine",
+    "approval_failure_quarantine",
+    "audit_failure_quarantine",
+    "recovery_failure_quarantine",
+    "arbitration_failure_quarantine",
+    "governance_violation_quarantine",
+    "escalation_quarantine",
+    "quarantine_eligibility",
+    "quarantine_release_readiness",
+    "quarantine_decision_record",
+)
+
+_RQ_QUARANTINE_STATUSES: tuple[str, ...] = (
+    "quarantine_recommended",
+    "quarantine_not_required",
+    "release_recommended",
+    "escalated",
+    "blocked",
+)
+
+_RQ_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RQ_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "quarantine_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "quarantine_reason", "type": "str", "required": True},
+    {"name": "quarantine_domain", "type": "str", "required": True},
+    {"name": "quarantine_status", "type": "str", "required": True},
+    {"name": "quarantine_recommended", "type": "bool", "required": True},
+    {"name": "release_recommended", "type": "bool", "required": True},
+    {"name": "escalation_required", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RQ_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "quarantine_id", "type": "str", "required": True},
+    {"name": "quarantine_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RQ_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "quarantine_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "quarantine_status", "type": "str", "required": True},
+    {"name": "quarantine_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "release_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RQ_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "quarantine_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "quarantine_status", "type": "str", "required": True},
+    {"name": "quarantine_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "release_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RQ_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "quarantine_reason": "none",
+        "quarantine_domain": "quarantine_eligibility",
+        "quarantine_status": "quarantine_not_required",
+        "quarantine_recommended": False,
+        "release_recommended": False,
+        "escalation_required": False,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "quarantine_reason": "approval_failure",
+        "quarantine_domain": "approval_failure_quarantine",
+        "quarantine_status": "quarantine_recommended",
+        "quarantine_recommended": True,
+        "release_recommended": False,
+        "escalation_required": True,
+    },
+)
+
+
+def build_runtime_quarantine(root: HarnessPath | None = None) -> dict:
+    """Classify quarantine candidates and generate advisory quarantine records without enforcing quarantine."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    quarantine_records = []
+    for i, c in enumerate(_RQ_GOVERNED_CANDIDATES, start=1):
+        qid = f"rq-{ts}-{i:02d}"
+        quarantine_records.append(
+            {
+                "quarantine_id": qid,
+                "runtime_id": c["runtime_id"],
+                "runtime_name": c["runtime_name"],
+                "quarantine_reason": c["quarantine_reason"],
+                "quarantine_domain": c["quarantine_domain"],
+                "quarantine_status": c["quarantine_status"],
+                "quarantine_recommended": c["quarantine_recommended"],
+                "release_recommended": c["release_recommended"],
+                "escalation_required": c["escalation_required"],
+                "human_review_required": True,
+            }
+        )
+
+    quarantine_count = len(quarantine_records)
+    recommended_count = sum(1 for r in quarantine_records if r["quarantine_recommended"])
+    release_count = sum(1 for r in quarantine_records if r["release_recommended"])
+    escalation_count = sum(1 for r in quarantine_records if r["escalation_required"])
+    first_qid = quarantine_records[0]["quarantine_id"] if quarantine_records else f"rq-{ts}-00"
+
+    if any(r["quarantine_status"] == "blocked" for r in quarantine_records):
+        overall_status = "blocked"
+    elif any(r["quarantine_status"] == "escalated" for r in quarantine_records):
+        overall_status = "escalated"
+    elif any(r["quarantine_status"] == "quarantine_recommended" for r in quarantine_records):
+        overall_status = "quarantine_recommended"
+    elif any(r["quarantine_status"] == "release_recommended" for r in quarantine_records):
+        overall_status = "release_recommended"
+    elif quarantine_count == 0:
+        overall_status = "blocked"
+    else:
+        overall_status = "quarantine_not_required"
+
+    domain_signal_defs = [
+        {
+            "quarantine_domain": "trust_violation_quarantine",
+            "signal_type": "trust_violation_quarantine_check",
+            "severity": "info",
+            "detected_state": (
+                "trust_violation_evaluation=complete; "
+                f"quarantine_recommended_for_trust_violation={recommended_count > 0}; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "trust violations must be evaluated for quarantine candidacy; "
+                "quarantine_allowed=False in 63F; no quarantine enforcement occurs"
+            ),
+        },
+        {
+            "quarantine_domain": "approval_failure_quarantine",
+            "signal_type": "approval_failure_quarantine_check",
+            "severity": "warning" if recommended_count > 0 else "info",
+            "detected_state": (
+                f"approval_failure_detected=True; "
+                f"quarantine_recommended_runtimes={[r['runtime_id'] for r in quarantine_records if r['quarantine_recommended']]}; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "approval failures must be evaluated for quarantine candidacy; "
+                "quarantine recommendation must be advisory only; quarantine_allowed=False in 63F"
+            ),
+        },
+        {
+            "quarantine_domain": "audit_failure_quarantine",
+            "signal_type": "audit_failure_quarantine_check",
+            "severity": "info",
+            "detected_state": (
+                "audit_failure_evaluation=complete; "
+                "audit_quarantine_classification=available; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "audit failures must be evaluated for quarantine candidacy; "
+                "quarantine_allowed=False in 63F; audit artifacts must not be modified"
+            ),
+        },
+        {
+            "quarantine_domain": "recovery_failure_quarantine",
+            "signal_type": "recovery_failure_quarantine_check",
+            "severity": "info",
+            "detected_state": (
+                "recovery_failure_evaluation=complete; "
+                "recovery_quarantine_classification=available; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "recovery failures must be evaluated for quarantine candidacy; "
+                "quarantine_allowed=False in 63F; no recovery execution occurs"
+            ),
+        },
+        {
+            "quarantine_domain": "arbitration_failure_quarantine",
+            "signal_type": "arbitration_failure_quarantine_check",
+            "severity": "info",
+            "detected_state": (
+                "arbitration_failure_evaluation=complete; "
+                "arbitration_quarantine_classification=available; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "arbitration failures must be evaluated for quarantine candidacy; "
+                "quarantine_allowed=False in 63F; no runtime invocation occurs"
+            ),
+        },
+        {
+            "quarantine_domain": "governance_violation_quarantine",
+            "signal_type": "governance_violation_quarantine_check",
+            "severity": "info",
+            "detected_state": (
+                "governance_violation_evaluation=complete; "
+                "governance_quarantine_classification=available; "
+                "quarantine_enforcement_blocked=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "governance violations must be evaluated for quarantine candidacy; "
+                "quarantine_allowed=False in 63F; governance does not enforce quarantine"
+            ),
+        },
+        {
+            "quarantine_domain": "escalation_quarantine",
+            "signal_type": "escalation_quarantine_check",
+            "severity": "info" if escalation_count > 0 else "warning",
+            "detected_state": (
+                f"escalation_required_count={escalation_count}; "
+                f"escalation_path=human_review; "
+                "escalation_is_advisory=True; "
+                "quarantine_allowed=False"
+            ),
+            "expected_state": (
+                "escalation must route unresolvable quarantine decisions to human review; "
+                "quarantine_allowed=False in 63F; no quarantine enforcement occurs"
+            ),
+        },
+        {
+            "quarantine_domain": "quarantine_eligibility",
+            "signal_type": "quarantine_eligibility_check",
+            "severity": "info",
+            "detected_state": (
+                f"quarantine_count={quarantine_count}; "
+                f"recommended_count={recommended_count}; "
+                f"not_required_count={quarantine_count - recommended_count}; "
+                "eligibility_evaluation=complete; "
+                "quarantine_enforcement_blocked=True"
+            ),
+            "expected_state": (
+                "quarantine eligibility must be evaluated for all governed candidates; "
+                "eligibility determination must be advisory only; quarantine_allowed=False in 63F"
+            ),
+        },
+        {
+            "quarantine_domain": "quarantine_release_readiness",
+            "signal_type": "quarantine_release_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                f"release_count={release_count}; "
+                "release_evaluation=complete; "
+                "release_enforcement_blocked=True; "
+                "release_allowed=False"
+            ),
+            "expected_state": (
+                "release readiness must be evaluated; "
+                "release recommendation must be advisory only; release_allowed=False in 63F"
+            ),
+        },
+        {
+            "quarantine_domain": "quarantine_decision_record",
+            "signal_type": "quarantine_decision_record_check",
+            "severity": "info",
+            "detected_state": (
+                f"quarantine_status={overall_status}; "
+                f"quarantine_count={quarantine_count}; "
+                f"recommended_count={recommended_count}; "
+                "quarantine_allowed=False; "
+                "execution_allowed=False; "
+                "release_allowed=False; "
+                "human_review_required=True"
+            ),
+            "expected_state": (
+                "quarantine decision record must be generated for governance audit; "
+                "quarantine_allowed=False always in 63F; release_allowed=False always"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rq-sig-{ts}-{i:02d}",
+            "quarantine_id": first_qid,
+            "quarantine_domain": sig["quarantine_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"rqa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "quarantine_count": quarantine_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "quarantine_status": overall_status,
+        "quarantine_allowed": False,
+        "execution_allowed": False,
+        "release_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rqsum-{ts}",
+        "assessment_id": assessment_id,
+        "quarantine_count": quarantine_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "quarantine_status": overall_status,
+        "quarantine_allowed": False,
+        "execution_allowed": False,
+        "release_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RQ_QUARANTINE_DOMAINS)
+
+    return {
+        "runtime_quarantine_overview": {
+            "overview_id": f"63f-{ts}",
+            "generated_at": generated_at,
+            "phase": "63F",
+            "title": "Runtime Quarantine",
+            "domain_count": domain_count,
+            "quarantine_count": quarantine_count,
+            "recommended_count": recommended_count,
+            "release_count": release_count,
+            "escalation_count": escalation_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "quarantine_status": overall_status,
+            "quarantine_allowed": False,
+            "execution_allowed": False,
+            "release_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63F defines governed runtime quarantine handling for runtime "
+                "candidates that fail trust, governance, audit, recovery, approval, or "
+                "arbitration requirements. Quarantine is advisory only: governance "
+                "classifies candidates, recommends quarantine, recommends release review, "
+                "and recommends escalation. "
+                f"quarantine_count={quarantine_count}. "
+                f"recommended_count={recommended_count}. "
+                f"release_count={release_count}. "
+                f"escalation_count={escalation_count}. "
+                f"quarantine_status={overall_status}. "
+                "quarantine_allowed=False. execution_allowed=False. release_allowed=False. "
+                "No quarantine enforcement occurs. No runtime release occurs. "
+                "No runtime invocation occurs. human_review_required=True."
+            ),
+        },
+        "quarantine_records": quarantine_records,
+        "record_model": {
+            "model_name": "RuntimeQuarantineRecord",
+            "field_count": len(_RQ_RECORD_FIELDS),
+            "required_field_count": len(_RQ_RECORD_FIELDS),
+            "supported_quarantine_statuses": list(_RQ_QUARANTINE_STATUSES),
+            "quarantine_allowed_false_in_63f": True,
+            "execution_allowed_false_in_63f": True,
+            "release_allowed_false_in_63f": True,
+            "human_review_required_always_true_in_63f": True,
+            "fields": [dict(f) for f in _RQ_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeQuarantineSignal",
+            "field_count": len(_RQ_SIGNAL_FIELDS),
+            "required_field_count": len(_RQ_SIGNAL_FIELDS),
+            "severity_values": list(_RQ_SEVERITY_VALUES),
+            "quarantine_allowed_false_in_63f": True,
+            "execution_allowed_false_in_63f": True,
+            "release_allowed_false_in_63f": True,
+            "human_review_required_always_true_in_63f": True,
+            "fields": [dict(f) for f in _RQ_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeQuarantineAssessment",
+            "field_count": len(_RQ_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RQ_ASSESSMENT_FIELDS),
+            "supported_quarantine_statuses": list(_RQ_QUARANTINE_STATUSES),
+            "quarantine_allowed_false_in_63f": True,
+            "execution_allowed_false_in_63f": True,
+            "release_allowed_false_in_63f": True,
+            "human_review_required_always_true_in_63f": True,
+            "fields": [dict(f) for f in _RQ_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeQuarantineSummary",
+            "field_count": len(_RQ_SUMMARY_FIELDS),
+            "required_field_count": len(_RQ_SUMMARY_FIELDS),
+            "supported_quarantine_statuses": list(_RQ_QUARANTINE_STATUSES),
+            "quarantine_allowed_false_in_63f": True,
+            "execution_allowed_false_in_63f": True,
+            "release_allowed_false_in_63f": True,
+            "human_review_required_always_true_in_63f": True,
+            "fields": [dict(f) for f in _RQ_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime governance state",
+                "classify quarantine candidates",
+                "recommend quarantine",
+                "recommend release review",
+                "recommend escalation",
+                "generate quarantine records",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "quarantine runtimes",
+                "release runtimes",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "quarantine_allowed": False,
+            "execution_allowed": False,
+            "release_allowed": False,
+            "human_review_required": True,
+            "phase": "63F",
+        },
+        "advisory": RUNTIME_QUARANTINE_ADVISORY,
+    }
