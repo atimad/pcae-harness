@@ -91,6 +91,11 @@ infrastructure rather than a disconnected parallel registry, while keeping
 runtime invocation, runtime execution, prompt rendering, orchestration
 execution, and write execution disabled. Skills are governed artifacts and
 participate in capability inventory and roadmap intelligence.
+Capability inventory and capability/roadmap intelligence now also share a
+single internal capability projection layer so their public capability records
+are materialized through one authoritative projection implementation while
+keeping capability IDs, command output, roadmap behavior, prompt behavior, and
+skill behavior unchanged.
 PCAE can harden governed prompt recommendations with `pcae prompt next`,
 `pcae prompt phase <phase_id>`, and `pcae prompt validate`, using the roadmap
 registry and capability registry as authoritative sources, enforcing prompt

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 
 from pcae.core.agent import (
     ADAPTER_ADVISORY,
@@ -13305,7 +13306,14 @@ def run_capability_show(args: argparse.Namespace) -> int:
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     capability_id = args.capability_id
     records = data["capability_registry"]
+    normalized_lookup = capability_id.strip().lower().replace("-", "_")
+
+    def _slugify(value: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+
     match = next((r for r in records if r["capability_id"] == capability_id), None)
+    if match is None:
+        match = next((r for r in records if _slugify(r["capability_name"]) == normalized_lookup), None)
     if match is None:
         match = next((r for r in records if capability_id.lower() in r["capability_name"].lower()), None)
     if match is None:

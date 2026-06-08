@@ -2,6 +2,7 @@
 
 ## Accepted
 
+- Treat capability projection as shared infrastructure: capability inventory and capability/roadmap intelligence must materialize their public capability records through one projection helper so IDs, fields, and command/report outputs stay stable while projection logic cannot drift independently.
 - Treat Phase 64B.4A skill registry hardening as consolidation work, not a new parallel subsystem: skill discovery, metadata parsing, and registry alignment should reuse the shared intelligence infrastructure that already supports capability, roadmap, and prompt governance.
 - Treat Phase 64B.4 skills as first-class governed packages stored under `.pcae/skills`: a skill is metadata plus reusable instructions/workflow references, not merely a rendered prompt, and skill invocation remains read-only with no runtime, orchestration, or write execution.
 - Treat Phase 64B.3 prompt recommendations as registry-backed governance artifacts: `pcae prompt next`, `pcae prompt phase`, and `pcae prompt validate` must source phase alignment from the roadmap registry, capability alignment from the capability registry, block historical/completed/superseded/track-mismatch prompt recommendations, and remain read-only with no runtime or orchestration execution.

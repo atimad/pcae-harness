@@ -68850,21 +68850,12 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
     generated_at = datetime.now(timezone.utc).isoformat()
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
-    capability_records = []
-    for i, cap in enumerate(_CI_KNOWN_CAPABILITIES, start=1):
-        cid = f"ci-{ts}-{i:02d}"
-        capability_records.append(
-            {
-                "capability_id": cid,
-                "capability_name": cap["capability_name"],
-                "capability_domain": cap["capability_domain"],
-                "implemented_phase": cap["implemented_phase"],
-                "status": cap["status"],
-                "commands": list(cap["commands"]),
-                "dependencies": list(cap["dependencies"]),
-                "successor_capabilities": list(cap["successor_capabilities"]),
-            }
-        )
+    capability_records = _build_capability_projection(
+        _CI_KNOWN_CAPABILITIES,
+        ts=ts,
+        capability_id_prefix="ci",
+        successor_field="successor_capabilities",
+    )
 
     capability_count = len(capability_records)
     implemented_count = sum(1 for r in capability_records if r["status"] == "implemented")
@@ -69921,6 +69912,33 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
     },
 )
 
+
+def _build_capability_projection(
+    source_capabilities: tuple[dict, ...],
+    *,
+    ts: str,
+    capability_id_prefix: str,
+    successor_field: str,
+) -> list[dict]:
+    """Project capability metadata into a stable public record shape."""
+    records: list[dict] = []
+    source_successor_field = (
+        "successor_capabilities" if successor_field == "successor_capabilities" else "successors"
+    )
+    for index, capability in enumerate(source_capabilities, start=1):
+        records.append({
+            "capability_id": f"{capability_id_prefix}-{ts}-{index:02d}",
+            "capability_name": capability["capability_name"],
+            "capability_domain": capability["capability_domain"],
+            "implemented_phase": capability["implemented_phase"],
+            "status": capability["status"],
+            "commands": list(capability["commands"]),
+            "dependencies": list(capability["dependencies"]),
+            successor_field: list(capability[source_successor_field]),
+        })
+    return records
+
+
 _SKILL_REQUIRED_SKILLS: tuple[dict, ...] = (
     {"skill_id": "phase-implementation", "skill_name": "Phase Implementation", "skill_type": "implementation"},
     {"skill_id": "phase-validation", "skill_name": "Phase Validation", "skill_type": "validation"},
@@ -70036,19 +70054,12 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     skill_data = _discover_skill_registry(root, ts)
 
-    capability_registry = [
-        {
-            "capability_id": f"cri-cap-{ts}-{i:02d}",
-            "capability_name": c["capability_name"],
-            "capability_domain": c["capability_domain"],
-            "implemented_phase": c["implemented_phase"],
-            "status": c["status"],
-            "commands": list(c["commands"]),
-            "dependencies": list(c["dependencies"]),
-            "successors": list(c["successors"]),
-        }
-        for i, c in enumerate(_CRI_KNOWN_CAPABILITIES, start=1)
-    ]
+    capability_registry = _build_capability_projection(
+        _CRI_KNOWN_CAPABILITIES,
+        ts=ts,
+        capability_id_prefix="cri-cap",
+        successor_field="successors",
+    )
 
     roadmap_registry = [
         {

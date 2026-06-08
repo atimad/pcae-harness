@@ -47379,6 +47379,40 @@ def test_capability_inventory_record_structure(tmp_path) -> None:
         assert isinstance(r["successor_capabilities"], list)
 
 
+def test_capability_projection_helper_preserves_inventory_and_registry_shapes(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import (
+        _CI_KNOWN_CAPABILITIES,
+        _CRI_KNOWN_CAPABILITIES,
+        _build_capability_projection,
+        build_capability_inventory,
+        build_capability_roadmap_intelligence,
+    )
+    from pcae.core.paths import HarnessPath
+
+    ts = "20260608T000000"
+    inventory_projection = _build_capability_projection(
+        _CI_KNOWN_CAPABILITIES,
+        ts=ts,
+        capability_id_prefix="ci",
+        successor_field="successor_capabilities",
+    )
+    registry_projection = _build_capability_projection(
+        _CRI_KNOWN_CAPABILITIES,
+        ts=ts,
+        capability_id_prefix="cri-cap",
+        successor_field="successors",
+    )
+
+    inventory_data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    registry_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+
+    assert len(inventory_projection) == len(inventory_data["capability_records"])
+    assert len(registry_projection) == len(registry_data["capability_registry"])
+    assert set(inventory_projection[0]) == set(inventory_data["capability_records"][0])
+    assert set(registry_projection[0]) == set(registry_data["capability_registry"][0])
+
+
 def test_capability_inventory_signals_cover_all_domains(tmp_path) -> None:
     data = build_capability_inventory(_HarnessPath64B0(tmp_path))
     assert len(data["signals"]) == 18
@@ -47559,6 +47593,15 @@ def test_roadmap_intelligence_capability_show_by_name(tmp_path, monkeypatch, cap
     assert rc == 0
     output = capsys.readouterr().out
     assert "Governed Task" in output
+    assert "governance_capabilities" in output
+
+
+def test_roadmap_intelligence_capability_show_by_slug(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["capability", "show", "governed_task_contracts"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Governed Task Contracts" in output
     assert "governance_capabilities" in output
 
 
