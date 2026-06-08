@@ -1059,3 +1059,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-approval-gates`
 - `pcae runtime-approval-gates --json`
+
+## runtime-rollback-boundaries
+
+- `pcae runtime-rollback-boundaries`
+- `pcae runtime-rollback-boundaries --json`

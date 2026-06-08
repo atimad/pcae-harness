@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 62G: Runtime Approval Gates (20260608-0717-62g-runtime-approval-gates)
 - 62F: Runtime Review Decision Record (20260608-0649-62f-runtime-review-decision-record)
 - 62E active task state repair (20260608-0340-62e-active-task-state-repair)
 - Implemented Task State Alignment (Phase 62E): corrective phase diagnosing and repairing three-phase task state drift (62B/62C/62D implemented without `pcae task transition`); adds `pcae task-state-alignment` and `--json`; adds `check_active_task_phase_alignment` to `pcae check` (detects active task phase ↔ PROJECT_STATUS.md phase mismatch — root cause of the 62B/62C/62D drift); four models — TaskStateAlignmentRecord (10 fields), TaskStateAlignmentSignal (8 fields), TaskStateAlignmentAssessment (9 fields), TaskStateAlignmentSummary (10 fields); ten alignment domains; repair_allowed=False always; human_review_required=True always; root cause: `pcae task transition` was not called between 62B→62C→62D, leaving active task frozen at 62B while PROJECT_STATUS.md and DONE.md advanced; 10 new tests following test_62e_* naming; 6 new regression tests in test_check.py for check_active_task_phase_alignment; `python -m pytest -k 62e` selects 10 tests; 4406 total tests passing.

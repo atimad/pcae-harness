@@ -45663,3 +45663,193 @@ def test_62g_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_approval_gates_overview"]["phase"] == "62G"
     assert data["runtime_approval_gates_overview"]["execution_allowed"] is False
     assert data["runtime_approval_gates_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 62H: Runtime Rollback Boundaries
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_rollback_boundaries  # noqa: E402
+
+
+def test_62h_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    for key in (
+        "runtime_rollback_boundaries_overview",
+        "boundary_record",
+        "inspected_artifact",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_62h_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    assert data["record_model"]["model_name"] == "RuntimeRollbackBoundaryRecord"
+    assert data["record_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "RuntimeRollbackBoundarySignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeRollbackBoundaryAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeRollbackBoundarySummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "boundary_id", "execution_id", "runtime_id", "command", "command_hash",
+        "rollback_domain", "rollback_feasible", "rollback_required",
+        "rollback_allowed", "escalation_required", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_62h_all_rollback_domains_defined(tmp_path) -> None:
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    expected = {
+        "execution_artifact_boundary",
+        "output_capture_boundary",
+        "audit_persistence_boundary",
+        "review_record_boundary",
+        "approval_record_boundary",
+        "command_side_effect_boundary",
+        "repository_mutation_boundary",
+        "runtime_state_boundary",
+        "rollback_feasibility_boundary",
+        "escalation_boundary",
+    }
+    actual = {s["rollback_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_62h_rollback_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    assert data["runtime_rollback_boundaries_overview"]["rollback_allowed"] is False
+    assert data["boundary_record"]["rollback_allowed"] is False
+    assert data["sample_assessment"]["rollback_allowed"] is False
+    assert data["sample_summary"]["rollback_allowed"] is False
+    assert data["governance_boundaries"]["rollback_allowed"] is False
+
+
+def test_62h_execution_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    assert data["runtime_rollback_boundaries_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_62h_with_artifact_rollback_feasible(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    overview = data["runtime_rollback_boundaries_overview"]
+    assert overview["artifact_found"] is True
+    assert overview["artifact_readable"] is True
+    assert overview["rollback_feasible"] is True
+    assert overview["rollback_required"] is False
+    assert overview["rollback_status"] == "not_required"
+    assert overview["blocker_count"] == 0
+
+
+def test_62h_no_artifact_sets_blocked_status(tmp_path) -> None:
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    overview = data["runtime_rollback_boundaries_overview"]
+    assert overview["artifact_found"] is False
+    assert overview["rollback_feasible"] is False
+    assert overview["rollback_status"] == "blocked"
+    blockers = [s for s in data["signals"] if s["severity"] == "blocker"]
+    assert any(s["rollback_domain"] == "audit_persistence_boundary" for s in blockers)
+
+
+def test_62h_boundary_record_fields(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    rec = data["boundary_record"]
+    assert rec["boundary_id"].startswith("rrb-")
+    assert rec["rollback_domain"] == "composite"
+    assert rec["rollback_allowed"] is False
+    assert rec["rollback_required"] is False
+    assert rec["human_review_required"] is True
+    assert rec["escalation_required"] is False
+    assert rec["runtime_id"] == "shell-local"
+    assert rec["command"] == "pwd"
+    assert len(rec["command_hash"]) == 16
+
+
+def test_62h_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    for signal in data["signals"]:
+        assert "boundary_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_62h_governance_boundaries(tmp_path) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    data = build_runtime_rollback_boundaries(_HarnessPath(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["rollback_allowed"] is False
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["audit_dir"] == ".pcae/audit/runtime"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute rollback",
+        "modify audit artifacts",
+        "modify source files",
+        "approve writes",
+        "commit",
+        "push",
+    ):
+        assert action in boundaries["may_not"]
+    assert "inspect runtime execution records" in boundaries["may"]
+    assert "classify rollback feasibility" in boundaries["may"]
+
+
+def test_62h_human_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-rollback-boundaries"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime rollback boundaries",
+        "Boundary record",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Rollback boundary signals",
+        "Governance boundaries",
+        "Rollback allowed:",
+        "Execution allowed:",
+        "Audit dir:",
+    ):
+        assert text in output
+
+
+def test_62h_json_output(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.core.agent import build_runtime_audit_persistence  # noqa: E402
+    build_runtime_audit_persistence(_HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-rollback-boundaries", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_rollback_boundaries_overview"]["phase"] == "62H"
+    assert data["runtime_rollback_boundaries_overview"]["rollback_allowed"] is False
+    assert data["runtime_rollback_boundaries_overview"]["execution_allowed"] is False
+    assert data["runtime_rollback_boundaries_overview"]["human_review_required"] is True

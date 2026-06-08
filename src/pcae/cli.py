@@ -173,6 +173,7 @@ from pcae.commands.agent import (
     run_task_state_alignment,
     run_runtime_review_decision,
     run_runtime_approval_gates,
+    run_runtime_rollback_boundaries,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4528,6 +4529,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rag_parser.set_defaults(handler=run_runtime_approval_gates)
+
+    rrb_parser = subparsers.add_parser(
+        "runtime-rollback-boundaries",
+        help="Define and validate rollback boundaries for governed runtime execution records (Phase 62H).",
+    )
+    rrb_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rrb_parser.set_defaults(handler=run_runtime_rollback_boundaries)
 
     return parser
 

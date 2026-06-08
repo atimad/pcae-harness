@@ -2,16 +2,16 @@
 
 ## Current Phase
 
-Phase 62G: Runtime Approval Gates — active.
+Phase 62H: Runtime Rollback Boundaries — active.
 
-62A–62F completed: governed execution, output capture, audit persistence, review workflow,
-task state alignment, and review decision record established. 62G: introduces governed
-approval gates that determine whether a runtime execution request may proceed under PCAE
-governance; `pcae runtime-approval-gates`; RuntimeApprovalGateRecord (11 fields),
-RuntimeApprovalGateSignal (8 fields), RuntimeApprovalGateAssessment (9 fields),
-RuntimeApprovalGateSummary (10 fields); ten mandatory approval domains; approval_allowed=True
-only when all mandatory gates pass; execution_allowed=False; human_review_required=True
-always; 4430 tests passing. 62H is next.
+62A–62G completed: governed execution, output capture, audit persistence, review workflow,
+task state alignment, review decision record, and approval gates established. 62H: defines
+and validates rollback boundaries for governed runtime execution records; distinguishes
+reversible artifacts from non-reversible runtime activity; `pcae runtime-rollback-boundaries`;
+RuntimeRollbackBoundaryRecord (11 fields), RuntimeRollbackBoundarySignal (8 fields),
+RuntimeRollbackBoundaryAssessment (9 fields), RuntimeRollbackBoundarySummary (10 fields);
+ten rollback domains; rollback_allowed=False always; execution_allowed=False;
+human_review_required=True always; 4442 tests passing. 62I is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

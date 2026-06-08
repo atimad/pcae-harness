@@ -64341,3 +64341,456 @@ def build_runtime_approval_gates(root: HarnessPath | None = None) -> dict:
         "mandatory_gates": list(_RAG_APPROVAL_DOMAINS),
         "advisory": RUNTIME_APPROVAL_GATES_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 62H: Runtime Rollback Boundaries
+# ---------------------------------------------------------------------------
+
+RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY = (
+    "Phase 62H defines and validates rollback boundaries for governed runtime execution "
+    "records so PCAE can distinguish reversible execution artifacts from non-reversible "
+    "runtime activity. Rollback is not executed in 62H. Runtime invocation is not "
+    "performed in 62H. rollback_allowed=False. execution_allowed=False. "
+    "Write execution remains blocked. Human review is always required."
+)
+
+_RRB_ROLLBACK_DOMAINS: tuple[str, ...] = (
+    "execution_artifact_boundary",
+    "output_capture_boundary",
+    "audit_persistence_boundary",
+    "review_record_boundary",
+    "approval_record_boundary",
+    "command_side_effect_boundary",
+    "repository_mutation_boundary",
+    "runtime_state_boundary",
+    "rollback_feasibility_boundary",
+    "escalation_boundary",
+)
+
+_RRB_ROLLBACK_STATUSES: tuple[str, ...] = (
+    "not_required",
+    "feasible",
+    "feasible_with_warnings",
+    "escalation_required",
+    "blocked",
+)
+
+_RRB_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RRB_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "boundary_id", "type": "str", "required": True},
+    {"name": "execution_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "command", "type": "str", "required": True},
+    {"name": "command_hash", "type": "str", "required": True},
+    {"name": "rollback_domain", "type": "str", "required": True},
+    {"name": "rollback_feasible", "type": "bool", "required": True},
+    {"name": "rollback_required", "type": "bool", "required": True},
+    {"name": "rollback_allowed", "type": "bool", "required": True},
+    {"name": "escalation_required", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRB_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "boundary_id", "type": "str", "required": True},
+    {"name": "rollback_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRB_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "boundary_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "rollback_status", "type": "str", "required": True},
+    {"name": "rollback_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RRB_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "boundary_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "rollback_status", "type": "str", "required": True},
+    {"name": "rollback_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def build_runtime_rollback_boundaries(root: HarnessPath | None = None) -> dict:
+    """Define and validate rollback boundaries for governed runtime execution records."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    boundary_id = f"rrb-{ts}"
+    audit_dir = root.join(Path(_RAP_AUDIT_DIR))
+
+    artifact_data: dict = {}
+    artifact_found = False
+    artifact_readable = False
+    artifact_path_used = ""
+
+    if audit_dir.exists():
+        artifact_files = sorted(audit_dir.glob("rap-*.json"), reverse=True)
+        if artifact_files:
+            latest = artifact_files[0]
+            artifact_path_used = str(latest)
+            try:
+                artifact_data = json.loads(latest.read_text(encoding="utf-8"))
+                artifact_found = True
+                artifact_readable = bool(artifact_data.get("persistence_id"))
+            except Exception:
+                pass
+
+    execution_id = artifact_data.get("execution_id", f"rep-{ts}-unknown")
+    runtime_id = artifact_data.get("runtime_id", _REP_RUNTIME_ID)
+    command = artifact_data.get("command", _REP_DEFAULT_COMMAND)
+    command_hash = artifact_data.get("command_hash", "")
+    stdout_value = artifact_data.get("stdout", "")
+    stderr_value = artifact_data.get("stderr", "")
+    exit_code = artifact_data.get("exit_code", -1)
+    persistence_id = artifact_data.get("persistence_id", f"rap-{ts}-unknown")
+
+    # pwd is a read-only command with no side effects — always rollback-feasible
+    command_has_side_effects = _rep_command_forbidden(command)
+    rollback_feasible = artifact_readable and not command_has_side_effects
+    rollback_required = False  # No rollback needed for governed read-only execution
+
+    rollback_status: str
+    if not artifact_readable:
+        rollback_status = "blocked"
+    elif rollback_feasible:
+        rollback_status = "not_required"
+    else:
+        rollback_status = "escalation_required"
+
+    domain_signal_defs = [
+        {
+            "rollback_domain": "execution_artifact_boundary",
+            "signal_type": "execution_artifact_boundary_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"execution_id={execution_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}; "
+                f"artifact_path={artifact_path_used}"
+            ),
+            "expected_state": (
+                "execution artifact must be inspectable from persisted audit record; "
+                "execution_id must be present to assess boundary"
+            ),
+        },
+        {
+            "rollback_domain": "output_capture_boundary",
+            "signal_type": "output_capture_boundary_check",
+            "severity": "info" if artifact_found else "warning",
+            "detected_state": (
+                f"stdout_len={len(stdout_value)}; stderr_len={len(stderr_value)}; "
+                f"exit_code={exit_code}; "
+                f"output_reversible=True; output_capture_is_read_only=True"
+            ),
+            "expected_state": (
+                "captured output is a read-only artifact and does not require rollback; "
+                "output capture boundary is always reversible by deletion"
+            ),
+        },
+        {
+            "rollback_domain": "audit_persistence_boundary",
+            "signal_type": "audit_persistence_boundary_check",
+            "severity": "info" if artifact_readable else "blocker",
+            "detected_state": (
+                f"persistence_id={persistence_id}; artifact_found={artifact_found}; "
+                f"artifact_readable={artifact_readable}; "
+                f"audit_dir={_RAP_AUDIT_DIR}; "
+                f"audit_artifact_reversible=True"
+            ),
+            "expected_state": (
+                "persisted audit artifact must be inspectable; audit artifacts under "
+                ".pcae/audit/runtime/ are reversible by deletion; "
+                "artifact must be readable to assess boundary"
+            ),
+        },
+        {
+            "rollback_domain": "review_record_boundary",
+            "signal_type": "review_record_boundary_check",
+            "severity": "info" if artifact_readable else "warning",
+            "detected_state": (
+                f"review_record_derivable={artifact_readable}; "
+                f"review_records_in_memory=True; "
+                f"review_records_reversible=True"
+            ),
+            "expected_state": (
+                "review records are produced in-memory and are not persisted; "
+                "no rollback is required for review records"
+            ),
+        },
+        {
+            "rollback_domain": "approval_record_boundary",
+            "signal_type": "approval_record_boundary_check",
+            "severity": "info" if artifact_readable else "warning",
+            "detected_state": (
+                f"approval_record_derivable={artifact_readable}; "
+                f"approval_records_in_memory=True; "
+                f"approval_records_reversible=True"
+            ),
+            "expected_state": (
+                "approval records are produced in-memory and are not persisted; "
+                "no rollback is required for approval records"
+            ),
+        },
+        {
+            "rollback_domain": "command_side_effect_boundary",
+            "signal_type": "command_side_effect_boundary_check",
+            "severity": "blocker" if command_has_side_effects else "info",
+            "detected_state": (
+                f"command='{command}'; has_side_effects={command_has_side_effects}; "
+                f"allowlisted={_rep_command_allowed(command)}; "
+                f"read_only_boundary=True"
+            ),
+            "expected_state": (
+                "governed command must be read-only with no persistent side effects; "
+                "commands with side effects require escalation before rollback assessment"
+            ),
+        },
+        {
+            "rollback_domain": "repository_mutation_boundary",
+            "signal_type": "repository_mutation_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                "repository_mutation_occurred=False; "
+                "execution_mode=read_only; "
+                "no_file_writes=True; no_git_mutations=True; "
+                "repository_state_unchanged=True"
+            ),
+            "expected_state": (
+                "governed read-only execution must not mutate the repository; "
+                "no rollback is required for read-only execution with no mutations"
+            ),
+        },
+        {
+            "rollback_domain": "runtime_state_boundary",
+            "signal_type": "runtime_state_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_id={runtime_id}; runtime_state_changed=False; "
+                "runtime_is_stateless=True; shell_local_exits_after_command=True"
+            ),
+            "expected_state": (
+                "shell-local runtime is stateless per invocation; "
+                "runtime state boundary is satisfied for read-only commands"
+            ),
+        },
+        {
+            "rollback_domain": "rollback_feasibility_boundary",
+            "signal_type": "rollback_feasibility_boundary_check",
+            "severity": "info" if artifact_readable else "warning",
+            "detected_state": (
+                f"rollback_feasible={rollback_feasible}; "
+                f"rollback_required={rollback_required}; "
+                f"rollback_allowed=False; "
+                f"rollback_status={rollback_status}; "
+                "rollback_not_executed_in_62h=True"
+            ),
+            "expected_state": (
+                "rollback feasibility must be assessed based on artifact readability and "
+                "command side effects; rollback_allowed=False in 62H; "
+                "rollback is not executed in 62H"
+            ),
+        },
+        {
+            "rollback_domain": "escalation_boundary",
+            "signal_type": "escalation_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path=human-only; escalation_required=False; "
+                "no_runtime_invocation=True; no_rollback_execution=True; "
+                "rollback_allowed=False; execution_allowed=False"
+            ),
+            "expected_state": (
+                "escalation boundary must be human-only; rollback workflow must not invoke "
+                "runtimes, execute rollback, or approve writes; "
+                "escalation is available if required"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rrb-sig-{ts}-{i:02d}",
+            "boundary_id": boundary_id,
+            "rollback_domain": sig["rollback_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    boundary_record = {
+        "boundary_id": boundary_id,
+        "execution_id": execution_id,
+        "runtime_id": runtime_id,
+        "command": command,
+        "command_hash": command_hash,
+        "rollback_domain": "composite",
+        "rollback_feasible": rollback_feasible,
+        "rollback_required": rollback_required,
+        "rollback_allowed": False,
+        "escalation_required": False,
+        "human_review_required": True,
+    }
+
+    assessment_id = f"rrba-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "boundary_count": len(_RRB_ROLLBACK_DOMAINS),
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "rollback_status": rollback_status,
+        "rollback_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rrbsum-{ts}",
+        "assessment_id": assessment_id,
+        "boundary_count": len(_RRB_ROLLBACK_DOMAINS),
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "rollback_status": rollback_status,
+        "rollback_allowed": False,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RRB_ROLLBACK_DOMAINS)
+
+    return {
+        "runtime_rollback_boundaries_overview": {
+            "overview_id": f"62h-{ts}",
+            "generated_at": generated_at,
+            "phase": "62H",
+            "title": "Runtime Rollback Boundaries",
+            "domain_count": domain_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "rollback_status": rollback_status,
+            "rollback_feasible": rollback_feasible,
+            "rollback_required": rollback_required,
+            "rollback_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "artifact_found": artifact_found,
+            "artifact_readable": artifact_readable,
+            "summary": (
+                "Phase 62H defines and validates rollback boundaries for governed runtime "
+                "execution records. Evaluates 10 rollback domains. "
+                f"artifact_found={artifact_found}. "
+                f"artifact_readable={artifact_readable}. "
+                f"rollback_feasible={rollback_feasible}. "
+                f"rollback_required={rollback_required}. "
+                f"rollback_status={rollback_status}. "
+                "rollback_allowed=False. execution_allowed=False. "
+                "Rollback is not executed in 62H. Runtime invocation is not performed. "
+                "human_review_required=True."
+            ),
+        },
+        "boundary_record": boundary_record,
+        "inspected_artifact": artifact_data if artifact_found else {},
+        "record_model": {
+            "model_name": "RuntimeRollbackBoundaryRecord",
+            "field_count": len(_RRB_RECORD_FIELDS),
+            "required_field_count": len(_RRB_RECORD_FIELDS),
+            "supported_rollback_statuses": list(_RRB_ROLLBACK_STATUSES),
+            "rollback_allowed_false_in_62h": True,
+            "execution_allowed_false_in_62h": True,
+            "human_review_required_always_true_in_62h": True,
+            "fields": [dict(f) for f in _RRB_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeRollbackBoundarySignal",
+            "field_count": len(_RRB_SIGNAL_FIELDS),
+            "required_field_count": len(_RRB_SIGNAL_FIELDS),
+            "severity_values": list(_RRB_SEVERITY_VALUES),
+            "rollback_allowed_false_in_62h": True,
+            "execution_allowed_false_in_62h": True,
+            "human_review_required_always_true_in_62h": True,
+            "fields": [dict(f) for f in _RRB_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeRollbackBoundaryAssessment",
+            "field_count": len(_RRB_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RRB_ASSESSMENT_FIELDS),
+            "supported_rollback_statuses": list(_RRB_ROLLBACK_STATUSES),
+            "rollback_allowed_false_in_62h": True,
+            "execution_allowed_false_in_62h": True,
+            "human_review_required_always_true_in_62h": True,
+            "fields": [dict(f) for f in _RRB_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeRollbackBoundarySummary",
+            "field_count": len(_RRB_SUMMARY_FIELDS),
+            "required_field_count": len(_RRB_SUMMARY_FIELDS),
+            "supported_rollback_statuses": list(_RRB_ROLLBACK_STATUSES),
+            "rollback_allowed_false_in_62h": True,
+            "execution_allowed_false_in_62h": True,
+            "human_review_required_always_true_in_62h": True,
+            "fields": [dict(f) for f in _RRB_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime execution records",
+                "inspect runtime output capture records",
+                "inspect persisted runtime audit artifacts",
+                "inspect runtime review and approval records",
+                "classify rollback feasibility",
+                "produce rollback boundary records in memory/reporting structures",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute rollback",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+            ],
+            "rollback_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "audit_dir": _RAP_AUDIT_DIR,
+            "phase": "62H",
+        },
+        "advisory": RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY,
+    }

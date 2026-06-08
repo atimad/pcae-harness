@@ -372,6 +372,8 @@ from pcae.core.agent import (
     RUNTIME_REVIEW_DECISION_ADVISORY,
     build_runtime_approval_gates,
     RUNTIME_APPROVAL_GATES_ADVISORY,
+    build_runtime_rollback_boundaries,
+    RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12520,4 +12522,72 @@ def run_runtime_approval_gates(args: argparse.Namespace) -> int:
     print(f"  Audit dir:          {boundaries['audit_dir']}")
     print()
     print(RUNTIME_APPROVAL_GATES_ADVISORY)
+    return 0
+
+
+def run_runtime_rollback_boundaries(args: argparse.Namespace) -> int:
+    data = build_runtime_rollback_boundaries(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_rollback_boundaries_overview"]
+    print("Runtime rollback boundaries")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Rollback domains:       {overview['domain_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Rollback status:        {overview['rollback_status']}")
+    print(f"Rollback feasible:      {'yes' if overview['rollback_feasible'] else 'no'}")
+    print(f"Rollback required:      {'yes' if overview['rollback_required'] else 'no'}")
+    print(f"Rollback allowed:       {'yes' if overview['rollback_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Artifact found:         {'yes' if overview['artifact_found'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    rec = data["boundary_record"]
+    print("Boundary record:")
+    print(f"  Boundary ID:        {rec['boundary_id']}")
+    print(f"  Execution ID:       {rec['execution_id']}")
+    print(f"  Runtime:            {rec['runtime_id']}")
+    print(f"  Command:            {rec['command']}")
+    print(f"  Command hash:       {rec['command_hash']}")
+    print(f"  Rollback domain:    {rec['rollback_domain']}")
+    print(f"  Rollback feasible:  {'yes' if rec['rollback_feasible'] else 'no'}")
+    print(f"  Rollback required:  {'yes' if rec['rollback_required'] else 'no'}")
+    print(f"  Rollback allowed:   {'yes' if rec['rollback_allowed'] else 'no'}")
+    print(f"  Escalation req'd:   {'yes' if rec['escalation_required'] else 'no'}")
+    print(f"  Human review:       {'yes' if rec['human_review_required'] else 'no'}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Rollback boundary signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['rollback_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                {', '.join(boundaries['may'])}")
+    print(f"  May not:            {', '.join(boundaries['may_not'])}")
+    print(f"  Rollback allowed:   {boundaries['rollback_allowed']}")
+    print(f"  Execution allowed:  {boundaries['execution_allowed']}")
+    print(f"  Human review:       {boundaries['human_review_required']}")
+    print(f"  Audit dir:          {boundaries['audit_dir']}")
+    print()
+    print(RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY)
     return 0

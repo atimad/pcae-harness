@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260608-0717-62g-runtime-approval-gates",
-    "title": "62G: Runtime Approval Gates"
+    "id": "20260608-0826-62h-runtime-rollback-boundaries",
+    "title": "62H: Runtime Rollback Boundaries"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "62G: Runtime Approval Gates",
+  "current_objective": "62H: Runtime Rollback Boundaries",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -38,7 +38,7 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260608-0649-62f-runtime-review-decision-record.md",
+        "path": "tasks/active/20260608-0717-62g-runtime-approval-gates.md",
         "status": " D"
       },
       {
@@ -46,18 +46,18 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260608-0717-62g-runtime-approval-gates.md",
+        "path": "tasks/active/20260608-0826-62h-runtime-rollback-boundaries.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260608-0649-62f-runtime-review-decision-record.md",
+        "path": "tasks/done/20260608-0717-62g-runtime-approval-gates.md",
         "status": "??"
       }
     ],
     "status_summary": "11 changed files"
   },
-  "last_completed_step": "Completed task 20260608-0649-62f-runtime-review-decision-record: 62F: Runtime Review Decision Record",
-  "next_recommended_step": "Continue active task 20260608-0717-62g-runtime-approval-gates.",
-  "timestamp": "2026-06-08T05:17:00.069463+00:00",
+  "last_completed_step": "Completed task 20260608-0717-62g-runtime-approval-gates: 62G: Runtime Approval Gates",
+  "next_recommended_step": "Continue active task 20260608-0826-62h-runtime-rollback-boundaries.",
+  "timestamp": "2026-06-08T06:26:01.406869+00:00",
   "warnings": []
 }
