@@ -177,6 +177,7 @@ from pcae.commands.agent import (
     run_multi_runtime_registry,
     run_runtime_selection_engine,
     run_runtime_arbitration,
+    run_multi_runtime_audit_chain,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4576,6 +4577,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     ra_parser.set_defaults(handler=run_runtime_arbitration)
+
+    mrac_parser = subparsers.add_parser(
+        "multi-runtime-audit-chain",
+        help="Create governed audit lineage across multiple runtime candidates (Phase 63D).",
+    )
+    mrac_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    mrac_parser.set_defaults(handler=run_multi_runtime_audit_chain)
 
     return parser
 

@@ -1079,3 +1079,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae runtime-arbitration`
 - `pcae runtime-arbitration --json`
+
+## multi-runtime-audit-chain
+
+- `pcae multi-runtime-audit-chain`
+- `pcae multi-runtime-audit-chain --json`

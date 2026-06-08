@@ -46351,3 +46351,162 @@ def test_63c_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["runtime_arbitration_overview"]["human_review_required"] is True
     assert data["runtime_arbitration_overview"]["arbitration_allowed"] is True
     assert data["runtime_arbitration_overview"]["winning_runtime_id"] == "shell-local"
+
+
+# ---------------------------------------------------------------------------
+# Phase 63D: Multi-Runtime Audit Chain
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_multi_runtime_audit_chain  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63D  # noqa: E402
+
+
+def test_63d_json_top_level_keys(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    for key in (
+        "multi_runtime_audit_chain_overview",
+        "chain_records",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63d_models_and_exact_fields(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    assert data["record_model"]["model_name"] == "MultiRuntimeAuditChainRecord"
+    assert data["record_model"]["field_count"] == 10
+    assert data["signal_model"]["model_name"] == "MultiRuntimeAuditChainSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "MultiRuntimeAuditChainAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "MultiRuntimeAuditChainSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "chain_id", "runtime_id", "candidate_id",
+        "registry_reference", "selection_reference", "arbitration_reference",
+        "approval_reference", "rollback_reference",
+        "lineage_status", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_63d_all_audit_domains_defined(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    expected = {
+        "runtime_registry_audit",
+        "runtime_selection_audit",
+        "runtime_arbitration_audit",
+        "runtime_approval_audit",
+        "runtime_rollback_audit",
+        "candidate_lineage_audit",
+        "decision_lineage_audit",
+        "escalation_lineage_audit",
+        "governance_lineage_audit",
+        "audit_chain_integrity",
+    }
+    actual = {s["audit_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63d_execution_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    assert data["multi_runtime_audit_chain_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63d_chain_records_populated_with_lineage(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    records = data["chain_records"]
+    assert len(records) >= 2
+    shell = next(r for r in records if r["runtime_id"] == "shell-local")
+    assert shell["registry_reference"].startswith("mrr-")
+    assert shell["selection_reference"].startswith("rse-")
+    assert shell["arbitration_reference"].startswith("ra-")
+    assert shell["approval_reference"].startswith("rag-")
+    assert shell["rollback_reference"].startswith("rrb-")
+    assert shell["lineage_status"] == "complete"
+    assert shell["human_review_required"] is True
+    assert shell["chain_id"].startswith("mrac-")
+
+
+def test_63d_audit_allowed_for_governed_lineage(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    overview = data["multi_runtime_audit_chain_overview"]
+    assert overview["audit_allowed"] is True
+    assert overview["chain_count"] >= 2
+    assert overview["complete_count"] >= 1
+
+
+def test_63d_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    for signal in data["signals"]:
+        assert "chain_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "audit_domain" in signal
+
+
+def test_63d_governance_boundaries(tmp_path) -> None:
+    data = build_multi_runtime_audit_chain(_HarnessPath63D(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "register runtimes",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "create audit lineage records for governed runtime candidates" in boundaries["may"]
+    assert "trace registry, selection, arbitration, approval, and rollback references" in boundaries["may"]
+    assert "report candidate and decision lineage" in boundaries["may"]
+    assert "report governance lineage completeness" in boundaries["may"]
+
+
+def test_63d_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-audit-chain"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-runtime audit chain",
+        "Chain records",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Audit signals",
+        "Governance boundaries",
+        "Audit allowed:",
+        "Execution allowed:",
+        "Chain status:",
+    ):
+        assert text in output
+
+
+def test_63d_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-audit-chain", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["multi_runtime_audit_chain_overview"]["phase"] == "63D"
+    assert data["multi_runtime_audit_chain_overview"]["execution_allowed"] is False
+    assert data["multi_runtime_audit_chain_overview"]["human_review_required"] is True
+    assert data["multi_runtime_audit_chain_overview"]["audit_allowed"] is True
+    assert data["multi_runtime_audit_chain_overview"]["chain_count"] >= 2

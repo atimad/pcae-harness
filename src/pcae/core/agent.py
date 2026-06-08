@@ -66191,3 +66191,446 @@ def build_runtime_arbitration(root: HarnessPath | None = None) -> dict:
         },
         "advisory": RUNTIME_ARBITRATION_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63D: Multi-Runtime Audit Chain
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_AUDIT_CHAIN_ADVISORY = (
+    "Phase 63D defines governed audit lineage across multiple runtime candidates and "
+    "runtime governance decisions. audit_allowed may be True for governed runtime "
+    "lineage with all references traceable. execution_allowed=False always. No runtime "
+    "invocation occurs. No command execution occurs. No runtime registration occurs. "
+    "Human review is always required."
+)
+
+_MRAC_AUDIT_DOMAINS: tuple[str, ...] = (
+    "runtime_registry_audit",
+    "runtime_selection_audit",
+    "runtime_arbitration_audit",
+    "runtime_approval_audit",
+    "runtime_rollback_audit",
+    "candidate_lineage_audit",
+    "decision_lineage_audit",
+    "escalation_lineage_audit",
+    "governance_lineage_audit",
+    "audit_chain_integrity",
+)
+
+_MRAC_CHAIN_STATUSES: tuple[str, ...] = (
+    "complete",
+    "complete_with_warnings",
+    "partial",
+    "escalated",
+    "blocked",
+)
+
+_MRAC_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MRAC_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "chain_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "candidate_id", "type": "str", "required": True},
+    {"name": "registry_reference", "type": "str", "required": True},
+    {"name": "selection_reference", "type": "str", "required": True},
+    {"name": "arbitration_reference", "type": "str", "required": True},
+    {"name": "approval_reference", "type": "str", "required": True},
+    {"name": "rollback_reference", "type": "str", "required": True},
+    {"name": "lineage_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRAC_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "chain_id", "type": "str", "required": True},
+    {"name": "audit_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRAC_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "chain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "chain_status", "type": "str", "required": True},
+    {"name": "audit_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRAC_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "chain_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "chain_status", "type": "str", "required": True},
+    {"name": "audit_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRAC_GOVERNED_RUNTIMES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "candidate_id": "mrac-cand-shell-local",
+        "registry_reference": "mrr-shell-local",
+        "selection_reference": "rse-shell-local",
+        "arbitration_reference": "ra-shell-local",
+        "approval_reference": "rag-shell-local",
+        "rollback_reference": "rrb-shell-local",
+        "all_references_present": True,
+    },
+    {
+        "runtime_id": "python-local",
+        "candidate_id": "mrac-cand-python-local",
+        "registry_reference": "mrr-python-local",
+        "selection_reference": "rse-python-local",
+        "arbitration_reference": "ra-python-local",
+        "approval_reference": "rag-python-local",
+        "rollback_reference": "rrb-python-local",
+        "all_references_present": True,
+    },
+)
+
+
+def build_multi_runtime_audit_chain(root: HarnessPath | None = None) -> dict:
+    """Build governed audit lineage across multiple runtime candidates without invoking any runtime."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    chain_records = []
+    for i, r in enumerate(_MRAC_GOVERNED_RUNTIMES, start=1):
+        chain_id = f"mrac-{ts}-{i:02d}"
+        lineage_status = "complete" if r["all_references_present"] else "partial"
+        chain_records.append(
+            {
+                "chain_id": chain_id,
+                "runtime_id": r["runtime_id"],
+                "candidate_id": r["candidate_id"],
+                "registry_reference": r["registry_reference"],
+                "selection_reference": r["selection_reference"],
+                "arbitration_reference": r["arbitration_reference"],
+                "approval_reference": r["approval_reference"],
+                "rollback_reference": r["rollback_reference"],
+                "lineage_status": lineage_status,
+                "human_review_required": True,
+            }
+        )
+
+    chain_count = len(chain_records)
+    complete_count = sum(1 for c in chain_records if c["lineage_status"] == "complete")
+    first_chain_id = chain_records[0]["chain_id"] if chain_records else f"mrac-{ts}-00"
+    audit_allowed = chain_count > 0 and complete_count > 0
+
+    if chain_count == 0:
+        chain_status = "blocked"
+    elif complete_count == chain_count:
+        chain_status = "complete"
+    elif complete_count > 0:
+        chain_status = "complete_with_warnings"
+    else:
+        chain_status = "partial"
+
+    domain_signal_defs = [
+        {
+            "audit_domain": "runtime_registry_audit",
+            "signal_type": "runtime_registry_audit_check",
+            "severity": "info" if audit_allowed else "blocker",
+            "detected_state": (
+                f"chain_count={chain_count}; "
+                f"runtime_ids={[c['runtime_id'] for c in chain_records]}; "
+                f"registry_references={[c['registry_reference'] for c in chain_records]}"
+            ),
+            "expected_state": (
+                "all governed runtime candidates must have a traceable registry reference; "
+                "registry lineage is the entry point for the audit chain"
+            ),
+        },
+        {
+            "audit_domain": "runtime_selection_audit",
+            "signal_type": "runtime_selection_audit_check",
+            "severity": "info" if audit_allowed else "blocker",
+            "detected_state": (
+                f"selection_references={[c['selection_reference'] for c in chain_records]}; "
+                f"complete_count={complete_count}; "
+                "selection_lineage_available=True"
+            ),
+            "expected_state": (
+                "all governed candidates must have a traceable selection reference; "
+                "selection lineage must be derivable from registry lineage"
+            ),
+        },
+        {
+            "audit_domain": "runtime_arbitration_audit",
+            "signal_type": "runtime_arbitration_audit_check",
+            "severity": "info" if audit_allowed else "blocker",
+            "detected_state": (
+                f"arbitration_references={[c['arbitration_reference'] for c in chain_records]}; "
+                f"arbitration_lineage_available=True; "
+                "arbitration_does_not_invoke_runtime=True"
+            ),
+            "expected_state": (
+                "all governed candidates must have a traceable arbitration reference; "
+                "arbitration lineage must not invoke any runtime"
+            ),
+        },
+        {
+            "audit_domain": "runtime_approval_audit",
+            "signal_type": "runtime_approval_audit_check",
+            "severity": "info" if audit_allowed else "blocker",
+            "detected_state": (
+                f"approval_references={[c['approval_reference'] for c in chain_records]}; "
+                f"approval_lineage_available=True; "
+                "approval_not_granted_in_63d=True"
+            ),
+            "expected_state": (
+                "all governed candidates must have a traceable approval reference; "
+                "approval lineage audit does not grant approval"
+            ),
+        },
+        {
+            "audit_domain": "runtime_rollback_audit",
+            "signal_type": "runtime_rollback_audit_check",
+            "severity": "info" if audit_allowed else "blocker",
+            "detected_state": (
+                f"rollback_references={[c['rollback_reference'] for c in chain_records]}; "
+                f"rollback_lineage_available=True; "
+                "rollback_not_executed_in_63d=True"
+            ),
+            "expected_state": (
+                "all governed candidates must have a traceable rollback reference; "
+                "rollback lineage audit does not execute rollback"
+            ),
+        },
+        {
+            "audit_domain": "candidate_lineage_audit",
+            "signal_type": "candidate_lineage_audit_check",
+            "severity": "info" if audit_allowed else "warning",
+            "detected_state": (
+                f"candidate_ids={[c['candidate_id'] for c in chain_records]}; "
+                f"candidate_lineage_complete={complete_count == chain_count}; "
+                f"chain_ids={[c['chain_id'] for c in chain_records]}"
+            ),
+            "expected_state": (
+                "each governed candidate must have a complete lineage chain "
+                "covering registry, selection, arbitration, approval, and rollback"
+            ),
+        },
+        {
+            "audit_domain": "decision_lineage_audit",
+            "signal_type": "decision_lineage_audit_check",
+            "severity": "info" if audit_allowed else "warning",
+            "detected_state": (
+                f"decision_lineage_present=True; "
+                f"arbitration_winner_traceable=True; "
+                "selection_decision_traceable=True"
+            ),
+            "expected_state": (
+                "runtime governance decisions (selection, arbitration, approval) "
+                "must be traceable through the audit chain"
+            ),
+        },
+        {
+            "audit_domain": "escalation_lineage_audit",
+            "signal_type": "escalation_lineage_audit_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path=human_review; "
+                "escalation_lineage_available=True; "
+                "human_escalation_traceable=True"
+            ),
+            "expected_state": (
+                "escalation decisions must be traceable through the audit chain; "
+                "human_review escalation path must always be available"
+            ),
+        },
+        {
+            "audit_domain": "governance_lineage_audit",
+            "signal_type": "governance_lineage_audit_check",
+            "severity": "info" if audit_allowed else "warning",
+            "detected_state": (
+                f"governance_lineage_complete={audit_allowed}; "
+                "execution_allowed=False; "
+                "no_runtime_invocation=True; "
+                "no_command_execution=True"
+            ),
+            "expected_state": (
+                "governance lineage must be complete for all governed candidates; "
+                "execution_allowed=False in 63D; audit does not invoke any runtime"
+            ),
+        },
+        {
+            "audit_domain": "audit_chain_integrity",
+            "signal_type": "audit_chain_integrity_check",
+            "severity": "info",
+            "detected_state": (
+                f"chain_status={chain_status}; "
+                f"chain_count={chain_count}; "
+                f"complete_count={complete_count}; "
+                "audit_allowed=True; "
+                "execution_allowed=False; "
+                "human_review_required=True"
+            ),
+            "expected_state": (
+                "audit chain integrity must be verified; "
+                "all chain records must be traceable; "
+                "execution_allowed=False always in 63D"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"mrac-sig-{ts}-{i:02d}",
+            "chain_id": first_chain_id,
+            "audit_domain": sig["audit_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"mraca-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "chain_count": chain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "chain_status": chain_status,
+        "audit_allowed": audit_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mracsum-{ts}",
+        "assessment_id": assessment_id,
+        "chain_count": chain_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "chain_status": chain_status,
+        "audit_allowed": audit_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_MRAC_AUDIT_DOMAINS)
+
+    return {
+        "multi_runtime_audit_chain_overview": {
+            "overview_id": f"63d-{ts}",
+            "generated_at": generated_at,
+            "phase": "63D",
+            "title": "Multi-Runtime Audit Chain",
+            "domain_count": domain_count,
+            "chain_count": chain_count,
+            "complete_count": complete_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "chain_status": chain_status,
+            "audit_allowed": audit_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63D creates governed audit lineage across multiple runtime "
+                "candidates and runtime governance decisions without invoking or "
+                "executing any runtime. "
+                f"chain_count={chain_count}. "
+                f"complete_count={complete_count}. "
+                f"chain_status={chain_status}. "
+                f"audit_allowed={audit_allowed}. "
+                "execution_allowed=False. No runtime invocation occurs. "
+                "No command execution occurs. human_review_required=True."
+            ),
+        },
+        "chain_records": chain_records,
+        "record_model": {
+            "model_name": "MultiRuntimeAuditChainRecord",
+            "field_count": len(_MRAC_RECORD_FIELDS),
+            "required_field_count": len(_MRAC_RECORD_FIELDS),
+            "supported_lineage_statuses": ["complete", "partial"],
+            "execution_allowed_false_in_63d": True,
+            "human_review_required_always_true_in_63d": True,
+            "fields": [dict(f) for f in _MRAC_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "MultiRuntimeAuditChainSignal",
+            "field_count": len(_MRAC_SIGNAL_FIELDS),
+            "required_field_count": len(_MRAC_SIGNAL_FIELDS),
+            "severity_values": list(_MRAC_SEVERITY_VALUES),
+            "execution_allowed_false_in_63d": True,
+            "human_review_required_always_true_in_63d": True,
+            "fields": [dict(f) for f in _MRAC_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiRuntimeAuditChainAssessment",
+            "field_count": len(_MRAC_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MRAC_ASSESSMENT_FIELDS),
+            "supported_chain_statuses": list(_MRAC_CHAIN_STATUSES),
+            "execution_allowed_false_in_63d": True,
+            "human_review_required_always_true_in_63d": True,
+            "fields": [dict(f) for f in _MRAC_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiRuntimeAuditChainSummary",
+            "field_count": len(_MRAC_SUMMARY_FIELDS),
+            "required_field_count": len(_MRAC_SUMMARY_FIELDS),
+            "supported_chain_statuses": list(_MRAC_CHAIN_STATUSES),
+            "execution_allowed_false_in_63d": True,
+            "human_review_required_always_true_in_63d": True,
+            "fields": [dict(f) for f in _MRAC_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "create audit lineage records for governed runtime candidates",
+                "trace registry, selection, arbitration, approval, and rollback references",
+                "report candidate and decision lineage",
+                "report governance lineage completeness",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "register runtimes",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "audit_allowed": audit_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "63D",
+        },
+        "advisory": MULTI_RUNTIME_AUDIT_CHAIN_ADVISORY,
+    }
