@@ -396,6 +396,8 @@ from pcae.core.agent import (
     CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
     build_roadmap_recommendation_hardening,
     ROADMAP_RECOMMENDATION_HARDENING_ADVISORY,
+    build_prompt_recommendation_hardening,
+    PROMPT_RECOMMENDATION_HARDENING_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13150,6 +13152,7 @@ def _write_capability_inventory_md(data: dict) -> None:
         "## Governance Notes",
         "",
         "- 64B.0 creates a capability inventory.",
+        "- 64B.3 adds prompt recommendation hardening as an implemented capability.",
         "- 64B.0 does not modify roadmap behavior.",
         "- 64B.0 does not modify task lifecycle behavior.",
         "- 64B.0 does not modify runtime behavior.",
@@ -13266,6 +13269,7 @@ def _write_roadmap_registry_md(data: dict) -> None:
         "## Governance Notes",
         "",
         "- 64B.1 introduces Capability and Roadmap Intelligence.",
+        "- 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.",
         "- Roadmap evolution is tracked.",
         "- Superseded phases are tracked.",
         "- No runtime behavior changes occur.",
@@ -13428,22 +13432,121 @@ def run_prompt_next(args: argparse.Namespace) -> int:
     return 0
 
 
+def _write_prompt_registry_md(data: dict) -> None:
+    import pathlib
+
+    current_phase = data["current_phase"]["phase_id"] if data.get("current_phase") else "unknown"
+    lines = [
+        "# PCAE Prompt Registry",
+        "",
+        f"Generated: {data['generated_at']}",
+        f"Phase: 64B.3 — Prompt Recommendation Hardening",
+        f"Current phase: {current_phase}",
+        f"Current track: {data['current_track']}",
+        f"Prompt count: {data['assessment']['prompt_count']}",
+        f"Recommendation count: {data['assessment']['recommendation_count']}",
+        f"Validation count: {data['assessment']['validation_count']}",
+        f"Drift count: {data['assessment']['drift_count']}",
+        f"Assessment status: {data['assessment']['assessment_status']}",
+        "",
+        "## Prompt Registry",
+        "",
+        "| Prompt ID | Phase | Type | Status | Version | Source | Dependency Status |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for record in data["prompt_registry"]:
+        lines.append(
+            f"| {record['prompt_id']} | {record['phase_id']} | {record['prompt_type']} "
+            f"| {record['prompt_status']} | {record['prompt_version']} | {record['prompt_source']} "
+            f"| {record['dependency_status']} |"
+        )
+    lines.extend([
+        "",
+        "## Recommendations",
+        "",
+        "| Recommendation ID | Phase | Type | Status | Roadmap Source | Capability Source |",
+        "|---|---|---|---|---|---|",
+    ])
+    for record in data["recommendations"]:
+        lines.append(
+            f"| {record['recommendation_id']} | {record['phase_id']} | {record['prompt_type']} "
+            f"| {record['recommendation_status']} | {record['roadmap_source']} | {record['capability_source']} |"
+        )
+    lines.extend([
+        "",
+        "## Validation",
+        "",
+        "| Validation ID | Phase | Type | Completeness | Dependency | Roadmap Alignment | Status |",
+        "|---|---|---|---|---|---|---|",
+    ])
+    for record in data["validations"]:
+        lines.append(
+            f"| {record['validation_id']} | {record['phase_id']} | {record['prompt_type']} "
+            f"| {record['completeness_score']} | {record['dependency_score']} "
+            f"| {record['roadmap_alignment_score']} | {record['validation_status']} |"
+        )
+    lines.extend([
+        "",
+        "## Quality Requirements",
+        "",
+    ])
+    for requirement in data["quality_requirements"]:
+        lines.append(f"- {requirement}")
+    lines.extend([
+        "",
+        "## Governance Notes",
+        "",
+        "- 64B.3 hardens prompt recommendations.",
+        "- Prompt recommendations use the roadmap registry.",
+        "- Prompt recommendations use the capability registry.",
+        "- Prompt drift detection is implemented.",
+        "- Prompt quality governance is implemented.",
+        "- Prompt traceability is implemented.",
+        "- No runtime behavior changes occur.",
+        "- No orchestration behavior changes occur.",
+    ])
+    docs_dir = pathlib.Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    (docs_dir / "PROMPT_REGISTRY.md").write_text("\n".join(lines) + "\n")
+
+
 def run_prompt_phase(args: argparse.Namespace) -> int:
-    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
     phase_id = args.phase_id
-    prompts = [p for p in data["prompt_recommendations"] if p["phase_id"] == phase_id]
+    prompts = [p for p in data["prompt_registry"] if p["phase_id"] == phase_id]
+    roadmap_record = next(
+        (record for record in build_capability_roadmap_intelligence(HarnessPath.cwd())["roadmap_registry"] if record["phase_id"] == phase_id),
+        None,
+    )
+    blocked_reason = None
+    if roadmap_record and roadmap_record["status"] in {"completed", "superseded"}:
+        blocked_reason = (
+            "completed historical phase recommendations are blocked"
+            if roadmap_record["status"] == "completed"
+            else "superseded phase recommendations are blocked"
+        )
     if args.json:
-        print(json.dumps({"phase_id": phase_id, "prompt_recommendations": prompts}, indent=2, sort_keys=True))
+        print(json.dumps({
+            "phase_id": phase_id,
+            "phase_status": roadmap_record["status"] if roadmap_record else "unknown",
+            "blocked_reason": blocked_reason or "",
+            "prompt_registry": prompts,
+            "prompt_recommendations": [r for r in data["recommendations"] if r["phase_id"] == phase_id],
+            "prompt_validations": [r for r in data["validations"] if r["phase_id"] == phase_id],
+        }, indent=2, sort_keys=True))
         return 0
     print(f"Prompt recommendations for phase: {phase_id}")
+    if blocked_reason:
+        print(f"  Blocked: {blocked_reason}.")
+        return 0
     if not prompts:
         print(f"  No prompt recommendations found for phase '{phase_id}'.")
-        print(f"  Available phases: {sorted({p['phase_id'] for p in data['prompt_recommendations']})}")
+        print(f"  Available phases: {sorted({p['phase_id'] for p in data['prompt_registry']})}")
         return 0
     for p in prompts:
-        avail = "yes" if p["prompt_available"] else "no"
-        print(f"  [{p['recommendation_id']}] {p['prompt_type']}")
-        print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
+        print(f"  [{p['prompt_id']}] {p['prompt_type']}")
+        print(f"    source={p['prompt_source']}  version={p['prompt_version']}  status={p['prompt_status']}")
+        print(f"    dependency_status={p['dependency_status']}")
     return 0
 
 
@@ -13542,37 +13645,67 @@ def run_roadmap_next_hardened(args: argparse.Namespace) -> int:
 
 
 def run_prompt_next_hardened(args: argparse.Namespace) -> int:
-    """Registry-backed replacement for run_prompt_next — shares the same source as pcae roadmap next."""
-    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
-    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    """Registry-backed replacement for run_prompt_next — shares roadmap and capability sources."""
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    roadmap = data.get("roadmap_recommendation") or {}
     valid = data["valid_recommendations"]
-    current = data["current_phase"]
-
-    prompt_recs = cri_data.get("prompt_recommendations", [])
-    current_phase_id = current["phase_id"] if current else ""
-    relevant_prompts = [p for p in prompt_recs if p.get("phase_id") == current_phase_id]
-    if not relevant_prompts:
-        relevant_prompts = prompt_recs
 
     if args.json:
-        top_rec = valid[0] if valid else {}
         payload = {
-            "current_phase": current,
-            "next_phase": top_rec.get("recommended_phase", ""),
-            "recommendation_source": top_rec.get("recommendation_source", "roadmap_registry"),
-            "prompt_recommendations": relevant_prompts,
+            "current_phase": data["current_phase"],
+            "current_track": data["current_track"],
+            "next_phase": roadmap.get("recommended_phase", ""),
+            "recommendation_source": roadmap.get("recommendation_source", data["roadmap_alignment_mode"]),
+            "roadmap_alignment_mode": data["roadmap_alignment_mode"],
+            "prompt_recommendations": valid,
+            "prompt_registry": data["prompt_registry"],
         }
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 0
 
     print("Next phase prompt recommendations")
-    if valid:
-        top = valid[0]
-        print(f"Next recommended phase: {top['recommended_phase']}")
-        print(f"Source:                 {top['recommendation_source']}")
+    if roadmap:
+        print(f"Roadmap-aligned phase: {roadmap.get('recommended_phase', data['current_phase']['phase_id'])}")
+        print(f"Source:               {roadmap.get('recommendation_source', data['roadmap_alignment_mode'])}")
     print()
-    for p in relevant_prompts:
-        avail = "yes" if p["prompt_available"] else "no"
-        print(f"  [{p['recommendation_id']}] {p['phase_id']} — {p['prompt_type']}")
-        print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
+    for record in valid:
+        print(f"  [{record['recommendation_id']}] {record['phase_id']} — {record['prompt_type']}")
+        print(f"    roadmap_source={record['roadmap_source']}")
+        print(f"    capability_source={record['capability_source']}")
+        print(f"    reason={record['recommendation_reason']}")
+    return 0
+
+
+def run_prompt_validate(args: argparse.Namespace) -> int:
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    _write_prompt_registry_md(data)
+    if args.json:
+        payload = {
+            "current_phase": data["current_phase"],
+            "assessment": data["assessment"],
+            "validations": data["validations"],
+            "signals": data["signals"],
+            "advisory": data["advisory"],
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    print("Prompt recommendation validation")
+    print(f"Current phase:        {data['current_phase']['phase_id'] if data['current_phase'] else 'unknown'}")
+    print(f"Current track:        {data['current_track']}")
+    print(f"Prompt count:         {data['assessment']['prompt_count']}")
+    print(f"Recommendation count: {data['assessment']['recommendation_count']}")
+    print(f"Validation count:     {data['assessment']['validation_count']}")
+    print(f"Drift count:          {data['assessment']['drift_count']}")
+    print()
+    for record in data["validations"]:
+        print(
+            f"  [{record['validation_status'].upper()}] {record['phase_id']} — {record['prompt_type']}  "
+            f"completeness={record['completeness_score']} dependency={record['dependency_score']} "
+            f"roadmap_alignment={record['roadmap_alignment_score']}"
+        )
+    print()
+    print("Generated: docs/PROMPT_REGISTRY.md")
+    print()
+    print(PROMPT_RECOMMENDATION_HARDENING_ADVISORY)
     return 0

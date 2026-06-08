@@ -47295,6 +47295,7 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
         "task_lifecycle_capabilities",
         "roadmap_capabilities",
         "prompt_generation_capabilities",
+        "prompt_intelligence_capabilities",
         "runtime_governance_capabilities",
         "runtime_execution_capabilities",
         "runtime_audit_capabilities",
@@ -47492,7 +47493,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.2"
+    assert current["phase_id"] == "64B.3"
     assert current["status"] == "active"
 
 
@@ -47570,7 +47571,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.2"
+    assert data["current_phase"]["phase_id"] == "64B.3"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47621,10 +47622,10 @@ def test_roadmap_intelligence_prompt_next_json(tmp_path, monkeypatch, capsys) ->
 
 def test_roadmap_intelligence_prompt_phase_found(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    rc = main(["prompt", "phase", "64B.1"])
+    rc = main(["prompt", "phase", "64B.3"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "64B.1" in output
+    assert "64B.3" in output
 
 
 def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, capsys) -> None:
@@ -47637,9 +47638,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.1", "--json"])
+    main(["prompt", "phase", "64B.3", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.1"
+    assert data["phase_id"] == "64B.3"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47678,13 +47679,13 @@ def test_roadmap_recommendation_build_returns_dict(tmp_path, monkeypatch) -> Non
     assert isinstance(data, dict)
 
 
-def test_roadmap_recommendation_current_phase_is_64b2(tmp_path, monkeypatch) -> None:
+def test_roadmap_recommendation_current_phase_is_64b3(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.2"
+    assert data["current_phase"]["phase_id"] == "64B.3"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47812,7 +47813,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "64B.2" in output or "capability_intelligence" in output
+    assert "64B.3" in output or "capability_intelligence" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47894,3 +47895,135 @@ def test_roadmap_recommendation_advisory_text(tmp_path, monkeypatch, capsys) -> 
     output = capsys.readouterr().out
     assert "Roadmap Recommendation Hardening" in output or "hardens roadmap" in output.lower()
     assert "No runtime invocation" in output or "no runtime" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.3 – Prompt Recommendation Hardening
+# ---------------------------------------------------------------------------
+
+
+def test_prompt_recommendation_build_returns_dict(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    assert isinstance(data, dict)
+
+
+def test_prompt_recommendation_current_phase_is_64b3(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    assert data["current_phase"]["phase_id"] == "64B.3"
+    assert data["current_track"] == "capability_intelligence"
+
+
+def test_prompt_recommendation_registry_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    record = data["prompt_registry"][0]
+    for field in ("prompt_id", "phase_id", "prompt_type", "prompt_status", "prompt_version", "prompt_source", "dependency_status"):
+        assert field in record, f"Missing field: {field}"
+
+
+def test_prompt_recommendation_recommendation_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    record = data["recommendations"][0]
+    for field in ("recommendation_id", "phase_id", "prompt_type", "recommendation_reason", "roadmap_source", "capability_source", "recommendation_status"):
+        assert field in record, f"Missing field: {field}"
+
+
+def test_prompt_recommendation_validation_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    record = data["validations"][0]
+    for field in ("validation_id", "phase_id", "prompt_type", "completeness_score", "dependency_score", "roadmap_alignment_score", "validation_status"):
+        assert field in record, f"Missing field: {field}"
+
+
+def test_prompt_recommendation_assessment_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    assessment = data["assessment"]
+    for field in ("assessment_id", "prompt_count", "recommendation_count", "validation_count", "drift_count", "roadmap_mismatch_count", "assessment_status"):
+        assert field in assessment, f"Missing field: {field}"
+
+
+def test_prompt_recommendation_blocks_historical_completed_and_superseded_phases(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    blocked_phases = {record["phase_id"] for record in data["blocked_recommendations"]}
+    assert "64B.1" in blocked_phases
+    assert "64B.2" in blocked_phases
+    assert "46A" in blocked_phases
+
+
+def test_prompt_recommendation_traceability_present(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    for record in data["valid_recommendations"]:
+        assert record["roadmap_source"]
+        assert record["capability_source"]
+        assert record["recommendation_reason"]
+
+
+def test_prompt_recommendation_all_ten_domains_covered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening, _PRH_DOMAINS
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    domains_found = {signal["recommendation_domain"] for signal in data["signals"]}
+    for domain in _PRH_DOMAINS:
+        assert domain in domains_found, f"Domain '{domain}' not covered in signals"
+
+
+def test_prompt_phase_blocks_completed_phase(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "phase", "64B.2"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Blocked" in output
+
+
+def test_prompt_validate_command_generates_registry(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "validate"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Prompt recommendation validation" in output
+    assert "Generated: docs/PROMPT_REGISTRY.md" in output
+    assert (tmp_path / "docs" / "PROMPT_REGISTRY.md").exists()
+
+
+def test_prompt_validate_json_shape(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "validate", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert "assessment" in data
+    assert "validations" in data
+    assert "signals" in data
+    assert data["assessment"]["validation_count"] >= 1

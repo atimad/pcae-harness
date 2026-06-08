@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.2: Roadmap Recommendation Hardening.
+Phase 64B.3: Prompt Recommendation Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -16,7 +16,7 @@ refresh, and phase test selection hardening.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4509 passing tests.
+**Test count:** 4602 passing tests.
 
 **License:** Apache License 2.0.
 
@@ -82,6 +82,13 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
+PCAE can harden governed prompt recommendations with `pcae prompt next`,
+`pcae prompt phase <phase_id>`, and `pcae prompt validate`, using the roadmap
+registry and capability registry as authoritative sources, enforcing prompt
+traceability, prerequisite and capability dependency validation, historical/
+completed/superseded/track-mismatch drift detection, prompt version tracking,
+and prompt quality governance while keeping runtime invocation, runtime
+execution, prompt execution, and orchestration execution disabled.
 PCAE can assess governed runtime discovery readiness with `pcae runtime-discovery`
 and `pcae runtime-discovery --json`, defining discovery domains, signals,
 assessment status, governance boundaries, and human-review requirements while

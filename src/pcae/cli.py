@@ -191,6 +191,7 @@ from pcae.commands.agent import (
     run_roadmap_evolution,
     run_prompt_next,
     run_prompt_phase,
+    run_prompt_validate,
     run_roadmap_recommendation_hardening,
     run_roadmap_next_hardened,
     run_prompt_next_hardened,
@@ -4713,7 +4714,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     prompt_parser = subparsers.add_parser(
         "prompt",
-        help="Access prompt recommendations and phase prompts (Phase 64B.1).",
+        help="Access hardened prompt recommendations, phase prompts, and prompt validation (Phase 64B.3).",
     )
     prompt_subparsers = prompt_parser.add_subparsers(dest="prompt_command", required=True)
 
@@ -4725,6 +4726,13 @@ def build_parser() -> argparse.ArgumentParser:
     prompt_phase_parser.add_argument("phase_id", help="Phase ID to show prompts for (e.g. 64B.1).")
     prompt_phase_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
     prompt_phase_parser.set_defaults(handler=run_prompt_phase)
+
+    prompt_validate_parser = prompt_subparsers.add_parser(
+        "validate",
+        help="Validate prompt recommendations against roadmap, capability, dependency, and quality governance (Phase 64B.3).",
+    )
+    prompt_validate_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    prompt_validate_parser.set_defaults(handler=run_prompt_validate)
 
     return parser
 

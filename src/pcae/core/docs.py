@@ -1171,6 +1171,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae prompt phase <phase_id>`
 - `pcae prompt phase <phase_id> --json`
 
+## prompt validate
+
+- `pcae prompt validate`
+- `pcae prompt validate --json`
+
 ## roadmap-recommendation-hardening
 
 - `pcae roadmap-recommendation-hardening`

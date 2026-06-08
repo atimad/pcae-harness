@@ -1,14 +1,14 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-08T15:38:38.485880+00:00
+Generated: 2026-06-08T17:09:22.381731+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 18
-Implemented: 15
+Total capabilities: 19
+Implemented: 16
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 1
 Duplicates/overlaps: 1
-Prompt capabilities: 1
+Prompt capabilities: 2
 Assessment status: inventory_with_gaps
 
 ## Capability Records
@@ -19,6 +19,7 @@ Assessment status: inventory_with_gaps
 | Task Lifecycle Governance | task_lifecycle_capabilities | 52A | implemented | pcae task-lifecycle-hardening; pcae task transition | governed_task_contracts | (none) |
 | Multi-Agent Roadmap Generation | roadmap_capabilities | 45A-45E | implemented | pcae roadmap; pcae multi-agent-roadmap; pcae roadmap-evidence | governed_task_contracts | capability_inventory |
 | Phase Prompt Generation | prompt_generation_capabilities | 45A-45E | implemented | pcae prompt-render; pcae autonomous-prompt-proposal; pcae prompt-validation-design; pcae prompt-governance-design | multi_agent_roadmap_generation | (none) |
+| Prompt Recommendation Hardening | prompt_intelligence_capabilities | 64B.3 | implemented | pcae prompt next; pcae prompt phase; pcae prompt validate | capability_and_roadmap_intelligence; roadmap_recommendation_hardening | (none) |
 | Read-Only Runtime Invocation Governance | runtime_governance_capabilities | 55A-57A | implemented | pcae readonly-invocation; pcae read-only-runtime-invocation; pcae runtime-review-workflow | governed_task_contracts | runtime_approval_gates |
 | Invocation Pilot (Legacy) | runtime_governance_capabilities | 46A-46J | superseded | pcae invocation-pilot; pcae multi-runtime-pilot | (none) | read_only_runtime_invocation_governance |
 | Controlled Runtime Execution Pilot | runtime_execution_capabilities | 62A | dormant | pcae runtime-execution-pilot | read_only_runtime_invocation_governance | multi_runtime_execution_planning |
@@ -37,9 +38,10 @@ Assessment status: inventory_with_gaps
 ## Governance Notes
 
 - 64B.0 creates a capability inventory.
+- 64B.3 adds prompt recommendation hardening as an implemented capability.
 - 64B.0 does not modify roadmap behavior.
 - 64B.0 does not modify task lifecycle behavior.
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=18. implemented_count=15. dormant_count=1. superseded_count=1. roadmap_gap_count=1. duplicate_count=1. prompt_capability_count=1. assessment_status=inventory_with_gaps. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=19. implemented_count=16. dormant_count=1. superseded_count=1. roadmap_gap_count=1. duplicate_count=1. prompt_capability_count=2. assessment_status=inventory_with_gaps. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*

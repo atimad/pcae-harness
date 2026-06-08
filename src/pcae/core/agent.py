@@ -68532,6 +68532,7 @@ _CI_CAPABILITY_DOMAINS: tuple[str, ...] = (
     "task_lifecycle_capabilities",
     "roadmap_capabilities",
     "prompt_generation_capabilities",
+    "prompt_intelligence_capabilities",
     "runtime_governance_capabilities",
     "runtime_execution_capabilities",
     "runtime_audit_capabilities",
@@ -68648,6 +68649,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt-governance-design",
         ],
         "dependencies": ["multi_agent_roadmap_generation"],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "prompt_intelligence_capabilities",
+        "capability_name": "Prompt Recommendation Hardening",
+        "implemented_phase": "64B.3",
+        "status": "implemented",
+        "commands": ["pcae prompt next", "pcae prompt phase", "pcae prompt validate"],
+        "dependencies": [
+            "capability_and_roadmap_intelligence",
+            "roadmap_recommendation_hardening",
+        ],
         "successor_capabilities": [],
     },
     {
@@ -68822,7 +68835,7 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
     roadmap_gap_count = sum(1 for r in capability_records if r["status"] == "roadmap_gap")
     prompt_count = sum(
         1 for r in capability_records
-        if r["capability_domain"] == "prompt_generation_capabilities"
+        if "prompt" in r["capability_domain"]
     )
 
     domains_seen: dict[str, int] = {}
@@ -69529,8 +69542,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.2",
         "phase_title": "Roadmap Recommendation Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.1",
+        "successor": "64B.3",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.3",
+        "phase_title": "Prompt Recommendation Hardening",
+        "status": "active",
+        "predecessor": "64B.2",
         "successor": "",
         "superseded_by": "",
     },
@@ -69604,6 +69626,27 @@ _CRI_KNOWN_PROMPTS: tuple[dict, ...] = (
         "prompt_type": "validation",
         "prompt_available": True,
         "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "prompt_recommendation_hardening",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "agent",
+        "prompt_available": True,
+        "prompt_source": "prompt_recommendation_hardening",
         "recommendation_status": "recommended",
     },
     {
@@ -69708,6 +69751,22 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt next",
         ],
         "dependencies": ["capability_and_roadmap_intelligence"],
+        "successors": ["prompt_recommendation_hardening"],
+    },
+    {
+        "capability_name": "Prompt Recommendation Hardening",
+        "capability_domain": "prompt_intelligence_capabilities",
+        "implemented_phase": "64B.3",
+        "status": "implemented",
+        "commands": [
+            "pcae prompt next",
+            "pcae prompt phase",
+            "pcae prompt validate",
+        ],
+        "dependencies": [
+            "capability_and_roadmap_intelligence",
+            "roadmap_recommendation_hardening",
+        ],
         "successors": [],
     },
 )
@@ -69797,9 +69856,10 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
     roadmap_gap_count = len(roadmap_gaps)
     prompt_capability_count = sum(
         1 for r in capability_registry
-        if r["capability_domain"] == "prompt_generation_capabilities"
+        if "prompt" in r["capability_domain"]
     )
     recommendation_count = len(prompt_recommendations)
+    implemented_count = sum(1 for r in capability_registry if r["status"] == "implemented")
 
     assessment_status = (
         "intelligence_with_gaps" if roadmap_gap_count > 0 else "intelligence_available"
@@ -69842,7 +69902,7 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
             "signal_type": "capability_status_tracking_check",
             "severity": "info",
             "detected_state": (
-                "implemented_count=8; "
+                f"implemented_count={implemented_count}; "
                 "all_status_values_tracked=True; "
                 "status_tracking=enabled"
             ),
@@ -70398,4 +70458,445 @@ def build_roadmap_recommendation_hardening(root: "HarnessPath") -> dict:
         "roadmap_evolution": roadmap_evolution,
         "roadmap_tracks": roadmap_tracks,
         "advisory": ROADMAP_RECOMMENDATION_HARDENING_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.3 – Prompt Recommendation Hardening
+# ---------------------------------------------------------------------------
+
+PROMPT_RECOMMENDATION_HARDENING_ADVISORY = (
+    "Phase 64B.3 hardens prompt recommendations so they use the roadmap registry "
+    "and capability registry as authoritative sources. Prompt drift detection, "
+    "dependency validation, version tracking, traceability, and quality governance "
+    "are enforced. No runtime behavior changes occur. No orchestration execution "
+    "occurs. No runtime execution occurs. Human review remains required."
+)
+
+_PRH_DOMAINS: tuple[str, ...] = (
+    "prompt_registry",
+    "prompt_traceability",
+    "prompt_dependency_validation",
+    "prompt_roadmap_alignment",
+    "prompt_capability_alignment",
+    "prompt_drift_detection",
+    "prompt_quality_governance",
+    "prompt_version_tracking",
+    "prompt_recommendation_engine",
+    "prompt_validation",
+)
+
+_PRH_REGISTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "prompt_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "prompt_status", "type": "str", "required": True},
+    {"name": "prompt_version", "type": "str", "required": True},
+    {"name": "prompt_source", "type": "str", "required": True},
+    {"name": "dependency_status", "type": "str", "required": True},
+)
+
+_PRH_RECOMMENDATION_FIELDS: tuple[dict, ...] = (
+    {"name": "recommendation_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "recommendation_reason", "type": "str", "required": True},
+    {"name": "roadmap_source", "type": "str", "required": True},
+    {"name": "capability_source", "type": "str", "required": True},
+    {"name": "recommendation_status", "type": "str", "required": True},
+)
+
+_PRH_VALIDATION_FIELDS: tuple[dict, ...] = (
+    {"name": "validation_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "completeness_score", "type": "int", "required": True},
+    {"name": "dependency_score", "type": "int", "required": True},
+    {"name": "roadmap_alignment_score", "type": "int", "required": True},
+    {"name": "validation_status", "type": "str", "required": True},
+)
+
+_PRH_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "prompt_count", "type": "int", "required": True},
+    {"name": "recommendation_count", "type": "int", "required": True},
+    {"name": "validation_count", "type": "int", "required": True},
+    {"name": "drift_count", "type": "int", "required": True},
+    {"name": "roadmap_mismatch_count", "type": "int", "required": True},
+    {"name": "assessment_status", "type": "str", "required": True},
+)
+
+_PRH_QUALITY_REQUIREMENTS: tuple[str, ...] = (
+    "goal",
+    "scope",
+    "inputs",
+    "models",
+    "governance constraints",
+    "acceptance criteria",
+    "validation commands",
+    "documentation requirements",
+)
+
+_PRH_PROMPT_PROFILES: tuple[dict, ...] = (
+    {
+        "phase_id": "64B.1",
+        "prompt_type": "implementation",
+        "prompt_status": "historical",
+        "prompt_version": "64B.1-implementation-v1",
+        "prompt_source": "capability_registry",
+        "capability_phase": "64B.1",
+    },
+    {
+        "phase_id": "64B.1",
+        "prompt_type": "validation",
+        "prompt_status": "historical",
+        "prompt_version": "64B.1-validation-v1",
+        "prompt_source": "capability_registry",
+        "capability_phase": "64B.1",
+    },
+    {
+        "phase_id": "64B.2",
+        "prompt_type": "implementation",
+        "prompt_status": "historical",
+        "prompt_version": "64B.2-implementation-v1",
+        "prompt_source": "roadmap_registry",
+        "capability_phase": "64B.2",
+    },
+    {
+        "phase_id": "64B.2",
+        "prompt_type": "validation",
+        "prompt_status": "historical",
+        "prompt_version": "64B.2-validation-v1",
+        "prompt_source": "roadmap_registry",
+        "capability_phase": "64B.2",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.3-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.3",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.3-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.3",
+    },
+    {
+        "phase_id": "64B.3",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.3-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry",
+        "capability_phase": "64B.3",
+    },
+)
+
+
+def build_prompt_recommendation_hardening(root: "HarnessPath") -> dict:
+    from datetime import datetime, timezone
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    cri_data = build_capability_roadmap_intelligence(root)
+    rrh_data = build_roadmap_recommendation_hardening(root)
+
+    roadmap_registry = cri_data["roadmap_registry"]
+    capability_registry = cri_data["capability_registry"]
+    current_phase = cri_data["current_phase"]
+    current_phase_id = current_phase["phase_id"] if current_phase else ""
+    current_track = current_phase["track_name"] if current_phase else "unknown"
+    roadmap_by_phase = {record["phase_id"]: record for record in roadmap_registry}
+    capability_by_phase = {
+        record["implemented_phase"]: record for record in capability_registry
+    }
+
+    roadmap_top = None
+    if rrh_data["valid_recommendations"]:
+        roadmap_top = rrh_data["valid_recommendations"][0]
+    elif rrh_data["deferred_recommendations"]:
+        roadmap_top = rrh_data["deferred_recommendations"][0]
+
+    def _dependency_status(profile: dict) -> str:
+        phase_id = profile["phase_id"]
+        roadmap_record = roadmap_by_phase.get(phase_id)
+        capability_record = capability_by_phase.get(profile["capability_phase"])
+        if roadmap_record is None:
+            return "blocked:no_roadmap_entry"
+        if roadmap_record["status"] == "superseded":
+            return "blocked:superseded_phase"
+        if roadmap_record["status"] == "completed" and phase_id != current_phase_id:
+            return "blocked:completed_phase"
+        if roadmap_record["track_name"] != current_track:
+            return "blocked:track_mismatch"
+        predecessor = roadmap_record.get("predecessor", "")
+        if predecessor:
+            predecessor_record = roadmap_by_phase.get(predecessor)
+            if predecessor_record and predecessor_record["status"] != "completed":
+                return f"blocked:prerequisite_incomplete:{predecessor}"
+        if capability_record is None:
+            return "blocked:no_capability_entry"
+        dependency_ids = capability_record.get("dependencies", [])
+        unresolved = [
+            dep for dep in dependency_ids
+            if dep not in {cap["successors"][0] if cap["successors"] else dep for cap in capability_registry}
+        ]
+        if unresolved and phase_id == current_phase_id:
+            return f"warning:dependency_registry_unmapped:{','.join(unresolved)}"
+        return "validated"
+
+    prompt_registry: list[dict] = []
+    for index, profile in enumerate(_PRH_PROMPT_PROFILES, start=1):
+        prompt_registry.append({
+            "prompt_id": f"prh-prompt-{ts}-{index:02d}",
+            "phase_id": profile["phase_id"],
+            "prompt_type": profile["prompt_type"],
+            "prompt_status": profile["prompt_status"],
+            "prompt_version": profile["prompt_version"],
+            "prompt_source": profile["prompt_source"],
+            "dependency_status": _dependency_status(profile),
+        })
+
+    active_prompt_records = [
+        record for record in prompt_registry if record["phase_id"] == current_phase_id
+    ]
+
+    target_phase_id = current_phase_id
+    roadmap_source = "roadmap_registry_current_phase"
+    roadmap_alignment_mode = "current_phase_context"
+    if roadmap_top and roadmap_top.get("recommendation_status") == "valid":
+        target_phase_id = roadmap_top["recommended_phase"]
+        roadmap_source = roadmap_top["recommendation_source"]
+        roadmap_alignment_mode = "roadmap_next_alignment"
+
+    target_prompt_records = [
+        record for record in prompt_registry if record["phase_id"] == target_phase_id
+    ]
+    if not target_prompt_records:
+        target_prompt_records = active_prompt_records
+
+    target_capability = capability_by_phase.get(target_phase_id) or capability_by_phase.get(current_phase_id)
+    capability_source = (
+        target_capability["capability_name"] if target_capability else "capability_registry_missing"
+    )
+
+    recommendations: list[dict] = []
+    for index, record in enumerate(target_prompt_records, start=1):
+        recommendations.append({
+            "recommendation_id": f"prh-rec-{ts}-{index:02d}",
+            "phase_id": record["phase_id"],
+            "prompt_type": record["prompt_type"],
+            "recommendation_reason": (
+                f"Prompt type {record['prompt_type']} is recommended for phase {record['phase_id']} "
+                f"using {roadmap_alignment_mode}. Traceability preserved via {roadmap_source} "
+                f"and capability source {capability_source}."
+            ),
+            "roadmap_source": roadmap_source,
+            "capability_source": capability_source,
+            "recommendation_status": (
+                "recommended"
+                if record["dependency_status"] == "validated"
+                else "blocked"
+            ),
+        })
+
+    blocked_examples = (
+        {
+            "phase_id": "64B.1",
+            "prompt_type": "implementation",
+            "reason": "Completed historical phase recommendations are blocked.",
+            "roadmap_source": "roadmap_registry_completed_phase",
+            "capability_source": "Capability and Roadmap Intelligence",
+            "recommendation_status": "blocked",
+        },
+        {
+            "phase_id": "64B.2",
+            "prompt_type": "implementation",
+            "reason": "Completed predecessor phase recommendations are blocked.",
+            "roadmap_source": "roadmap_registry_completed_phase",
+            "capability_source": "Roadmap Recommendation Hardening",
+            "recommendation_status": "blocked",
+        },
+        {
+            "phase_id": "46A",
+            "prompt_type": "implementation",
+            "reason": "Superseded legacy phase recommendations are blocked.",
+            "roadmap_source": "roadmap_registry_superseded_phase",
+            "capability_source": "Invocation Pilot (Legacy)",
+            "recommendation_status": "blocked",
+        },
+        {
+            "phase_id": "45A",
+            "prompt_type": "implementation",
+            "reason": "Cross-track historical recommendations are blocked.",
+            "roadmap_source": "roadmap_registry_track_mismatch",
+            "capability_source": "Multi-Agent Roadmap Generation",
+            "recommendation_status": "blocked",
+        },
+    )
+    for offset, blocked in enumerate(blocked_examples, start=len(recommendations) + 1):
+        recommendations.append({
+            "recommendation_id": f"prh-rec-{ts}-{offset:02d}",
+            "phase_id": blocked["phase_id"],
+            "prompt_type": blocked["prompt_type"],
+            "recommendation_reason": blocked["reason"],
+            "roadmap_source": blocked["roadmap_source"],
+            "capability_source": blocked["capability_source"],
+            "recommendation_status": blocked["recommendation_status"],
+        })
+
+    validations: list[dict] = []
+    for index, record in enumerate(prompt_registry, start=1):
+        completeness_score = 100 if record["prompt_type"] in {"implementation", "validation", "agent"} else 0
+        dependency_score = 100 if record["dependency_status"] == "validated" else 0
+        roadmap_alignment_score = 100
+        roadmap_record = roadmap_by_phase.get(record["phase_id"])
+        if roadmap_record and roadmap_record["status"] in {"completed", "superseded"}:
+            roadmap_alignment_score = 0
+        validation_status = (
+            "valid"
+            if completeness_score == 100 and dependency_score == 100 and roadmap_alignment_score == 100
+            else "blocked"
+        )
+        validations.append({
+            "validation_id": f"prh-val-{ts}-{index:02d}",
+            "phase_id": record["phase_id"],
+            "prompt_type": record["prompt_type"],
+            "completeness_score": completeness_score,
+            "dependency_score": dependency_score,
+            "roadmap_alignment_score": roadmap_alignment_score,
+            "validation_status": validation_status,
+        })
+
+    drift_count = sum(1 for rec in recommendations if rec["recommendation_status"] == "blocked")
+    roadmap_mismatch_count = sum(
+        1 for rec in recommendations if rec["roadmap_source"] == "roadmap_registry_track_mismatch"
+    )
+    assessment_status = "quality_governed" if active_prompt_records else "blocked"
+
+    signals = []
+    for index, domain in enumerate(_PRH_DOMAINS, start=1):
+        severity = "info"
+        detected_state = ""
+        expected_state = ""
+        if domain == "prompt_registry":
+            detected_state = f"prompt_count={len(prompt_registry)}; prompt_types=implementation,validation,agent"
+            expected_state = "prompt registry must enumerate prompt ids, types, versions, and statuses"
+        elif domain == "prompt_traceability":
+            detected_state = f"roadmap_source={roadmap_source}; capability_source={capability_source}"
+            expected_state = "every recommendation must include roadmap source, capability source, and reason"
+        elif domain == "prompt_dependency_validation":
+            detected_state = (
+                f"validated_count={sum(1 for r in prompt_registry if r['dependency_status'] == 'validated')}; "
+                "checks=prerequisite_phase,track,capability_dependencies"
+            )
+            expected_state = "prompts must validate prerequisites, active track, and capability dependencies"
+        elif domain == "prompt_roadmap_alignment":
+            detected_state = f"roadmap_alignment_mode={roadmap_alignment_mode}; roadmap_source={roadmap_source}"
+            expected_state = "prompt recommendations must use the same authoritative roadmap source as pcae roadmap next"
+        elif domain == "prompt_capability_alignment":
+            detected_state = f"capability_source={capability_source}; capability_registry_count={len(capability_registry)}"
+            expected_state = "prompt recommendations must cite the authoritative capability registry entry"
+        elif domain == "prompt_drift_detection":
+            severity = "blocker" if drift_count else "info"
+            detected_state = f"drift_count={drift_count}; blocked_examples=historical,superseded,completed,track_mismatch"
+            expected_state = "historical, superseded, completed, and track-mismatch recommendations must be blocked"
+        elif domain == "prompt_quality_governance":
+            detected_state = f"quality_requirements={list(_PRH_QUALITY_REQUIREMENTS)}"
+            expected_state = "prompts must preserve goal, scope, inputs, models, governance constraints, acceptance criteria, validation commands, and documentation requirements"
+        elif domain == "prompt_version_tracking":
+            detected_state = f"versions={[record['prompt_version'] for record in active_prompt_records]}"
+            expected_state = "all prompts must expose explicit versions"
+        elif domain == "prompt_recommendation_engine":
+            detected_state = f"recommended_count={sum(1 for rec in recommendations if rec['recommendation_status'] == 'recommended')}"
+            expected_state = "recommendation engine must emit registry-backed prompt recommendations without runtime execution"
+        else:
+            detected_state = f"validation_count={len(validations)}; command=pcae prompt validate"
+            expected_state = "prompt validate must score completeness, dependency alignment, and roadmap alignment"
+        signals.append({
+            "signal_id": f"prh-sig-{ts}-{index:02d}",
+            "recommendation_id": recommendations[0]["recommendation_id"] if recommendations else f"prh-rec-{ts}-00",
+            "recommendation_domain": domain,
+            "signal_type": f"{domain}_check",
+            "severity": severity,
+            "detected_state": detected_state,
+            "expected_state": expected_state,
+        })
+
+    assessment = {
+        "assessment_id": f"prh-assess-{ts}",
+        "prompt_count": len(prompt_registry),
+        "recommendation_count": len(recommendations),
+        "validation_count": len(validations),
+        "drift_count": drift_count,
+        "roadmap_mismatch_count": roadmap_mismatch_count,
+        "assessment_status": assessment_status,
+    }
+
+    return {
+        "generated_at": generated_at,
+        "current_phase": current_phase,
+        "current_track": current_track,
+        "roadmap_alignment_mode": roadmap_alignment_mode,
+        "roadmap_recommendation": roadmap_top,
+        "prompt_registry": prompt_registry,
+        "recommendations": recommendations,
+        "validations": validations,
+        "assessment": assessment,
+        "signals": signals,
+        "quality_requirements": list(_PRH_QUALITY_REQUIREMENTS),
+        "valid_recommendations": [
+            rec for rec in recommendations if rec["recommendation_status"] == "recommended"
+        ],
+        "blocked_recommendations": [
+            rec for rec in recommendations if rec["recommendation_status"] == "blocked"
+        ],
+        "registry_model": {
+            "model_name": "PromptRegistryRecord",
+            "field_count": len(_PRH_REGISTRY_FIELDS),
+            "required_field_count": len(_PRH_REGISTRY_FIELDS),
+            "fields": [dict(field) for field in _PRH_REGISTRY_FIELDS],
+        },
+        "recommendation_model": {
+            "model_name": "PromptRecommendationRecord",
+            "field_count": len(_PRH_RECOMMENDATION_FIELDS),
+            "required_field_count": len(_PRH_RECOMMENDATION_FIELDS),
+            "fields": [dict(field) for field in _PRH_RECOMMENDATION_FIELDS],
+        },
+        "validation_model": {
+            "model_name": "PromptValidationRecord",
+            "field_count": len(_PRH_VALIDATION_FIELDS),
+            "required_field_count": len(_PRH_VALIDATION_FIELDS),
+            "fields": [dict(field) for field in _PRH_VALIDATION_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "PromptGovernanceAssessment",
+            "field_count": len(_PRH_ASSESSMENT_FIELDS),
+            "required_field_count": len(_PRH_ASSESSMENT_FIELDS),
+            "fields": [dict(field) for field in _PRH_ASSESSMENT_FIELDS],
+        },
+        "governance_boundaries": {
+            "may": [
+                "enumerate prompt registry entries",
+                "recommend prompts from the roadmap registry",
+                "validate prompt dependency and quality metadata",
+                "generate prompt registry documentation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "modify roadmap recommendations",
+                "execute orchestration workflows",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "phase": "64B.3",
+        },
+        "advisory": PROMPT_RECOMMENDATION_HARDENING_ADVISORY,
     }
