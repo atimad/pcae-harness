@@ -1120,6 +1120,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae multi-runtime-execution-planning`
 - `pcae multi-runtime-execution-planning --json`
+
+## multi-runtime-execution-readiness
+
+- `pcae multi-runtime-execution-readiness`
+- `pcae multi-runtime-execution-readiness --json`
 """
 
 

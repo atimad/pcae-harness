@@ -47047,3 +47047,197 @@ def test_64a_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["multi_runtime_execution_planning_overview"]["planning_allowed"] is True
     assert data["multi_runtime_execution_planning_overview"]["execution_allowed"] is False
     assert data["multi_runtime_execution_planning_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B: Multi-Runtime Execution Readiness
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_multi_runtime_execution_readiness  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64B  # noqa: E402
+
+
+def test_64b_json_top_level_keys(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    for key in (
+        "multi_runtime_execution_readiness_overview",
+        "readiness_checks",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_64b_models_and_exact_fields(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    assert data["signal_model"]["model_name"] == "MultiRuntimeExecutionReadinessSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "MultiRuntimeExecutionReadinessAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "MultiRuntimeExecutionReadinessSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "signal_id", "readiness_id", "readiness_domain", "signal_type",
+        "severity", "detected_state", "expected_state", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["signal_model"]["fields"]
+        ), f"Missing signal field: {field_name}"
+
+
+def test_64b_all_readiness_domains_defined(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    expected = {
+        "execution_plan_readiness",
+        "runtime_assignment_readiness",
+        "execution_order_readiness",
+        "dependency_readiness",
+        "boundary_readiness",
+        "approval_readiness",
+        "audit_readiness",
+        "rollback_readiness",
+        "escalation_readiness",
+        "orchestration_readiness",
+    }
+    actual = {s["readiness_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_64b_readiness_allowed_governed_and_conditional(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    overview = data["multi_runtime_execution_readiness_overview"]
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    boundaries = data["governance_boundaries"]
+    if overview["blocker_count"] > 0:
+        assert overview["readiness_allowed"] is False
+        assert assessment["readiness_allowed"] is False
+        assert summary["readiness_allowed"] is False
+        assert boundaries["readiness_allowed"] is False
+    else:
+        assert isinstance(overview["readiness_allowed"], bool)
+        assert assessment["readiness_allowed"] == overview["readiness_allowed"]
+        assert summary["readiness_allowed"] == overview["readiness_allowed"]
+        assert boundaries["readiness_allowed"] == overview["readiness_allowed"]
+
+
+def test_64b_execution_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    assert data["multi_runtime_execution_readiness_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_64b_readiness_checks_generated(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    checks = data["readiness_checks"]
+    assert len(checks) == 10
+    for c in checks:
+        assert c["readiness_id"].startswith("mrer-")
+        assert "readiness_domain" in c
+        assert "check_name" in c
+        assert "passed" in c
+        assert c["human_review_required"] is True
+
+
+def test_64b_all_mandatory_checks_present(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    check_names = {c["check_name"] for c in data["readiness_checks"]}
+    for required in (
+        "multi_runtime_execution_plan_exists",
+        "runtime_assignments_exist",
+        "execution_ordering_defined",
+        "execution_dependencies_defined",
+        "execution_boundaries_defined",
+        "approval_requirements_defined",
+        "audit_requirements_defined",
+        "rollback_requirements_defined",
+        "escalation_path_exists",
+        "orchestration_readiness_explicitly_blocked",
+    ):
+        assert required in check_names, f"Missing mandatory check: {required}"
+
+
+def test_64b_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    for signal in data["signals"]:
+        assert "readiness_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "readiness_domain" in signal
+
+
+def test_64b_governance_boundaries(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "perform orchestration",
+        "modify runtime configuration",
+        "modify audit artifacts",
+        "modify source files",
+        "access network",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect multi-runtime execution plans" in boundaries["may"]
+    assert "assess runtime assignment readiness" in boundaries["may"]
+    assert "assess execution dependency readiness" in boundaries["may"]
+    assert "report blockers and warnings" in boundaries["may"]
+    assert "recommend escalation" in boundaries["may"]
+
+
+def test_64b_human_review_required(tmp_path) -> None:
+    data = build_multi_runtime_execution_readiness(_HarnessPath64B(tmp_path))
+    assert data["multi_runtime_execution_readiness_overview"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for c in data["readiness_checks"]:
+        assert c["human_review_required"] is True
+    for s in data["signals"]:
+        assert s["human_review_required"] is True
+
+
+def test_64b_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-execution-readiness"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-runtime execution readiness",
+        "Readiness checks:",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Readiness signals:",
+        "Governance boundaries:",
+        "Readiness allowed:",
+        "Execution allowed:",
+        "Readiness status:",
+    ):
+        assert text in output
+
+
+def test_64b_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-execution-readiness", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["multi_runtime_execution_readiness_overview"]["phase"] == "64B"
+    assert data["multi_runtime_execution_readiness_overview"]["execution_allowed"] is False
+    assert data["multi_runtime_execution_readiness_overview"]["human_review_required"] is True
+    assert len(data["readiness_checks"]) == 10
+    assert len(data["signals"]) == 10

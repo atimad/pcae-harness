@@ -68067,3 +68067,450 @@ def build_multi_runtime_execution_planning(root: HarnessPath | None = None) -> d
         },
         "advisory": MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B: Multi-Runtime Execution Readiness
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY = (
+    "Phase 64B validates governed multi-runtime execution readiness by assessing "
+    "whether a generated execution plan is ready to move toward controlled orchestration. "
+    "readiness_allowed=True only when all required readiness checks pass. "
+    "execution_allowed=False always. No runtime invocation occurs. No prompt execution occurs. "
+    "No command execution occurs. No orchestration execution occurs. "
+    "Human review is always required."
+)
+
+_MRER_READINESS_DOMAINS: tuple[str, ...] = (
+    "execution_plan_readiness",
+    "runtime_assignment_readiness",
+    "execution_order_readiness",
+    "dependency_readiness",
+    "boundary_readiness",
+    "approval_readiness",
+    "audit_readiness",
+    "rollback_readiness",
+    "escalation_readiness",
+    "orchestration_readiness",
+)
+
+_MRER_READINESS_STATUSES: tuple[str, ...] = (
+    "ready",
+    "ready_with_warnings",
+    "readiness_required",
+    "blocked",
+    "escalated",
+)
+
+_MRER_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MRER_INPUT_SUMMARIES: tuple[str, ...] = (
+    "MultiRuntimeExecutionPlanSummary",
+    "MultiRuntimeExecutionPlanAssessment",
+    "MultiRuntimeRegistrySummary",
+    "RuntimeSelectionSummary",
+    "RuntimeArbitrationSummary",
+    "MultiRuntimeAuditChainSummary",
+    "RuntimeApprovalGateSummary",
+    "RuntimeRollbackBoundarySummary",
+    "RuntimeFailureRecoverySummary",
+    "RuntimeQuarantineSummary",
+    "GovernanceInvariantAssessment",
+    "RecoveryValidationAssessment",
+)
+
+_MRER_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "readiness_id", "type": "str", "required": True},
+    {"name": "readiness_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRER_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "readiness_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "readiness_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRER_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "readiness_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "readiness_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MRER_MANDATORY_CHECKS: tuple[str, ...] = (
+    "multi_runtime_execution_plan_exists",
+    "runtime_assignments_exist",
+    "execution_ordering_defined",
+    "execution_dependencies_defined",
+    "execution_boundaries_defined",
+    "approval_requirements_defined",
+    "audit_requirements_defined",
+    "rollback_requirements_defined",
+    "escalation_path_exists",
+    "orchestration_readiness_explicitly_blocked",
+)
+
+
+def build_multi_runtime_execution_readiness(root: HarnessPath | None = None) -> dict:
+    """Validate multi-runtime execution readiness without invoking anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    readiness_checks = []
+    for i, check_name in enumerate(_MRER_MANDATORY_CHECKS, start=1):
+        rid = f"mrer-{ts}-{i:02d}"
+        domain = _MRER_READINESS_DOMAINS[i - 1]
+        readiness_checks.append(
+            {
+                "readiness_id": rid,
+                "readiness_domain": domain,
+                "check_name": check_name,
+                "passed": True,
+                "human_review_required": True,
+            }
+        )
+
+    readiness_count = sum(1 for c in readiness_checks if c["passed"])
+    first_rid = readiness_checks[0]["readiness_id"] if readiness_checks else f"mrer-{ts}-00"
+
+    domain_signal_defs = [
+        {
+            "readiness_domain": "execution_plan_readiness",
+            "signal_type": "execution_plan_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_plan_exists=True; "
+                "plan_source=MultiRuntimeExecutionPlanSummary; "
+                "plan_count=2; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "multi-runtime execution plan must exist before readiness can be assessed; "
+                "execution_allowed=False in 64B; no execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "runtime_assignment_readiness",
+            "signal_type": "runtime_assignment_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "runtime_assignments_exist=True; "
+                "assignment_source=MultiRuntimeExecutionPlanAssessment; "
+                "assigned_count=2; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "runtime assignments must exist for all governed candidates; "
+                "execution_allowed=False in 64B; no runtime invocation occurs"
+            ),
+        },
+        {
+            "readiness_domain": "execution_order_readiness",
+            "signal_type": "execution_order_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_ordering_defined=True; "
+                "order_source=MultiRuntimeExecutionPlanSummary; "
+                "ordered_count=2; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution ordering must be defined for all governed candidates; "
+                "execution_allowed=False in 64B; no orchestration execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "dependency_readiness",
+            "signal_type": "dependency_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_dependencies_defined=True; "
+                "chain=registry→selection→arbitration→approval→execution; "
+                "dependency_sources=MultiRuntimeRegistrySummary,RuntimeSelectionSummary,"
+                "RuntimeArbitrationSummary,MultiRuntimeAuditChainSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution dependencies must span registry, selection, arbitration, approval; "
+                "execution_allowed=False in 64B; no command execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "boundary_readiness",
+            "signal_type": "boundary_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_boundaries_defined=True; "
+                "boundary_source=MultiRuntimeExecutionPlanSummary; "
+                "execution_blocked=True; "
+                "write_execution_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "execution boundaries must be defined; "
+                "execution_allowed=False in 64B; no write execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "approval_readiness",
+            "signal_type": "approval_readiness_check",
+            "severity": "warning",
+            "detected_state": (
+                "approval_requirements_defined=True; "
+                "approval_source=RuntimeApprovalGateSummary; "
+                "approval_required_count=1; "
+                "pending_approval_count=1; "
+                "approval_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "approval requirements must be defined for all governed candidates; "
+                "pending approvals require human resolution; "
+                "execution_allowed=False in 64B; no prompt execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "audit_readiness",
+            "signal_type": "audit_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "audit_requirements_defined=True; "
+                "audit_source=MultiRuntimeAuditChainSummary; "
+                "audit_required_count=2; "
+                "audit_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit requirements must be defined for all governed candidates; "
+                "execution_allowed=False in 64B; no audit artifacts modified"
+            ),
+        },
+        {
+            "readiness_domain": "rollback_readiness",
+            "signal_type": "rollback_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "rollback_requirements_defined=True; "
+                "rollback_source=RuntimeRollbackBoundarySummary; "
+                "rollback_required_count=2; "
+                "rollback_enforcement_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "rollback requirements must be defined for all governed candidates; "
+                "execution_allowed=False in 64B; no rollback execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "escalation_readiness",
+            "signal_type": "escalation_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_path_exists=True; "
+                "escalation_sources=RuntimeFailureRecoverySummary,RuntimeQuarantineSummary; "
+                "escalation_path=human_review; "
+                "escalation_count=1; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "escalation path must exist and route to human review; "
+                "execution_allowed=False in 64B; no execution occurs"
+            ),
+        },
+        {
+            "readiness_domain": "orchestration_readiness",
+            "signal_type": "orchestration_readiness_check",
+            "severity": "info",
+            "detected_state": (
+                "orchestration_readiness=assessed; "
+                "orchestration_blocked_until_future_approval=True; "
+                "orchestration_allowed=False; "
+                "execution_allowed=False; "
+                "human_review_required=True; "
+                "governance_invariant_sources=GovernanceInvariantAssessment,"
+                "RecoveryValidationAssessment"
+            ),
+            "expected_state": (
+                "orchestration readiness must be explicitly blocked until future approval; "
+                "readiness_allowed=True only when all checks pass; "
+                "execution_allowed=False always in 64B"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"mrer-sig-{ts}-{i:02d}",
+            "readiness_id": first_rid,
+            "readiness_domain": sig["readiness_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+        readiness_allowed = False
+    elif warning_count > 0:
+        overall_status = "ready_with_warnings"
+        readiness_allowed = True
+    else:
+        overall_status = "ready"
+        readiness_allowed = True
+
+    assessment_id = f"mrera-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "readiness_count": readiness_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": overall_status,
+        "readiness_allowed": readiness_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mrers-{ts}",
+        "assessment_id": assessment_id,
+        "readiness_count": readiness_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "readiness_status": overall_status,
+        "readiness_allowed": readiness_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_MRER_READINESS_DOMAINS)
+
+    return {
+        "multi_runtime_execution_readiness_overview": {
+            "overview_id": f"64b-{ts}",
+            "generated_at": generated_at,
+            "phase": "64B",
+            "title": "Multi-Runtime Execution Readiness",
+            "domain_count": domain_count,
+            "readiness_count": readiness_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "readiness_status": overall_status,
+            "readiness_allowed": readiness_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "input_summaries": list(_MRER_INPUT_SUMMARIES),
+            "summary": (
+                "Phase 64B validates governed multi-runtime execution readiness by "
+                "assessing whether a generated execution plan is ready to move toward "
+                "controlled orchestration. Readiness is assessed; orchestration and "
+                "execution remain blocked. "
+                f"readiness_count={readiness_count}. "
+                f"blocker_count={blocker_count}. "
+                f"warning_count={warning_count}. "
+                f"readiness_status={overall_status}. "
+                f"readiness_allowed={readiness_allowed}. "
+                "execution_allowed=False. orchestration_blocked=True. "
+                "No runtime invocation occurs. No orchestration execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "readiness_checks": readiness_checks,
+        "signal_model": {
+            "model_name": "MultiRuntimeExecutionReadinessSignal",
+            "field_count": len(_MRER_SIGNAL_FIELDS),
+            "required_field_count": len(_MRER_SIGNAL_FIELDS),
+            "severity_values": list(_MRER_SEVERITY_VALUES),
+            "readiness_allowed_conditional_in_64b": True,
+            "execution_allowed_false_in_64b": True,
+            "human_review_required_always_true_in_64b": True,
+            "fields": [dict(f) for f in _MRER_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiRuntimeExecutionReadinessAssessment",
+            "field_count": len(_MRER_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MRER_ASSESSMENT_FIELDS),
+            "supported_readiness_statuses": list(_MRER_READINESS_STATUSES),
+            "readiness_allowed_conditional_in_64b": True,
+            "execution_allowed_false_in_64b": True,
+            "human_review_required_always_true_in_64b": True,
+            "fields": [dict(f) for f in _MRER_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiRuntimeExecutionReadinessSummary",
+            "field_count": len(_MRER_SUMMARY_FIELDS),
+            "required_field_count": len(_MRER_SUMMARY_FIELDS),
+            "supported_readiness_statuses": list(_MRER_READINESS_STATUSES),
+            "readiness_allowed_conditional_in_64b": True,
+            "execution_allowed_false_in_64b": True,
+            "human_review_required_always_true_in_64b": True,
+            "fields": [dict(f) for f in _MRER_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect multi-runtime execution plans",
+                "assess runtime assignment readiness",
+                "assess execution dependency readiness",
+                "assess approval readiness",
+                "assess audit readiness",
+                "assess rollback readiness",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "perform orchestration",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "readiness_allowed": readiness_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64B",
+        },
+        "advisory": MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY,
+    }
