@@ -183,6 +183,14 @@ from pcae.commands.agent import (
     run_multi_runtime_execution_planning,
     run_multi_runtime_execution_readiness,
     run_capability_inventory,
+    run_capability_list,
+    run_capability_show,
+    run_capability_dependencies,
+    run_roadmap_current,
+    run_roadmap_tracks,
+    run_roadmap_evolution,
+    run_prompt_next,
+    run_prompt_phase,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -709,6 +717,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON roadmap recommendation output.",
     )
     roadmap_next_parser.set_defaults(handler=run_roadmap_next)
+
+    roadmap_current_parser = roadmap_subparsers.add_parser(
+        "current",
+        help="Show the current active phase from the roadmap registry (Phase 64B.1).",
+    )
+    roadmap_current_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    roadmap_current_parser.set_defaults(handler=run_roadmap_current)
+
+    roadmap_tracks_parser = roadmap_subparsers.add_parser(
+        "tracks",
+        help="Enumerate roadmap tracks and phases (Phase 64B.1).",
+    )
+    roadmap_tracks_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    roadmap_tracks_parser.set_defaults(handler=run_roadmap_tracks)
+
+    roadmap_evolution_parser = roadmap_subparsers.add_parser(
+        "evolution",
+        help="Show roadmap evolution and superseded phase tracking (Phase 64B.1).",
+    )
+    roadmap_evolution_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    roadmap_evolution_parser.set_defaults(handler=run_roadmap_evolution)
 
     governance_parser = subparsers.add_parser(
         "governance",
@@ -4648,6 +4677,40 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     ci_parser.set_defaults(handler=run_capability_inventory)
+
+    cap_parser = subparsers.add_parser(
+        "capability",
+        help="Enumerate and inspect capabilities from the capability registry (Phase 64B.1).",
+    )
+    cap_subparsers = cap_parser.add_subparsers(dest="capability_command", required=True)
+
+    cap_list_parser = cap_subparsers.add_parser("list", help="List all capabilities.")
+    cap_list_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    cap_list_parser.set_defaults(handler=run_capability_list)
+
+    cap_show_parser = cap_subparsers.add_parser("show", help="Show metadata for a specific capability.")
+    cap_show_parser.add_argument("capability_id", help="Capability ID or name fragment to look up.")
+    cap_show_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    cap_show_parser.set_defaults(handler=run_capability_show)
+
+    cap_deps_parser = cap_subparsers.add_parser("dependencies", help="Show the capability dependency graph.")
+    cap_deps_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    cap_deps_parser.set_defaults(handler=run_capability_dependencies)
+
+    prompt_parser = subparsers.add_parser(
+        "prompt",
+        help="Access prompt recommendations and phase prompts (Phase 64B.1).",
+    )
+    prompt_subparsers = prompt_parser.add_subparsers(dest="prompt_command", required=True)
+
+    prompt_next_parser = prompt_subparsers.add_parser("next", help="Recommend next-phase implementation prompts.")
+    prompt_next_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    prompt_next_parser.set_defaults(handler=run_prompt_next)
+
+    prompt_phase_parser = prompt_subparsers.add_parser("phase", help="Show prompt recommendations for a specific phase.")
+    prompt_phase_parser.add_argument("phase_id", help="Phase ID to show prompts for (e.g. 64B.1).")
+    prompt_phase_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    prompt_phase_parser.set_defaults(handler=run_prompt_phase)
 
     return parser
 

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.0: Capability Inventory.
+Phase 64B.1: Capability and Roadmap Intelligence.
 
 ## Post-61J Runtime Registry Checkpoint
 

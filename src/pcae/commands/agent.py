@@ -392,6 +392,8 @@ from pcae.core.agent import (
     MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
+    build_capability_roadmap_intelligence,
+    CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13215,4 +13217,229 @@ def run_capability_inventory(args: argparse.Namespace) -> int:
     print(CAPABILITY_INVENTORY_ADVISORY)
     print()
     print("Generated: docs/CAPABILITY_INVENTORY.md")
+    return 0
+
+
+def _write_roadmap_registry_md(data: dict) -> None:
+    import pathlib
+    overview = data["capability_roadmap_intelligence_overview"]
+    tracks = data["roadmap_tracks"]
+    evolutions = data["roadmap_evolution"]
+    gaps = data["roadmap_gaps"]
+    lines = [
+        "# PCAE Roadmap Registry",
+        "",
+        f"Generated: {overview['generated_at']}",
+        f"Phase: {overview['phase']} — {overview['title']}",
+        f"Total phases: {overview['roadmap_phase_count']}",
+        f"Tracks: {overview['track_count']}",
+        f"Superseded: {overview['superseded_phase_count']}",
+        f"Roadmap gaps: {overview['roadmap_gap_count']}",
+        f"Evolution events: {overview['evolution_count']}",
+        f"Assessment status: {overview['assessment_status']}",
+        "",
+    ]
+    for track_name, phases in tracks.items():
+        lines.append(f"## Track: {track_name}")
+        lines.append("")
+        lines.append("| Phase | Title | Status | Predecessor | Successor |")
+        lines.append("|---|---|---|---|---|")
+        for p in phases:
+            lines.append(
+                f"| {p['phase_id']} | {p['phase_title']} | {p['status']} "
+                f"| {p['predecessor'] or '—'} | {p['successor'] or '—'} |"
+            )
+        lines.append("")
+    if evolutions:
+        lines.extend(["## Roadmap Evolution", ""])
+        for e in evolutions:
+            lines.append(f"- **{e['original_phase']} → {e['replacement_phase']}**: {e['reason']}")
+        lines.append("")
+    if gaps:
+        lines.extend(["## Roadmap Gaps", ""])
+        for g in gaps:
+            lines.append(f"- **{g['phase_id']}** ({g['phase_title']}): not yet implemented")
+        lines.append("")
+    lines.extend([
+        "## Governance Notes",
+        "",
+        "- 64B.1 introduces Capability and Roadmap Intelligence.",
+        "- Roadmap evolution is tracked.",
+        "- Superseded phases are tracked.",
+        "- No runtime behavior changes occur.",
+    ])
+    docs_dir = pathlib.Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    (docs_dir / "ROADMAP_REGISTRY.md").write_text("\n".join(lines) + "\n")
+
+
+def run_capability_list(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({"capability_registry": data["capability_registry"]}, indent=2, sort_keys=True))
+        return 0
+    print("Capability list")
+    print(f"Total: {len(data['capability_registry'])} capabilities")
+    print()
+    for r in data["capability_registry"]:
+        cmds = ", ".join(r["commands"]) if r["commands"] else "(none)"
+        print(f"  [{r['status'].upper()}] {r['capability_id']}  {r['capability_name']}")
+        print(f"    domain={r['capability_domain']}  phase={r['implemented_phase']}")
+        print(f"    commands={cmds}")
+    return 0
+
+
+def run_capability_show(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    capability_id = args.capability_id
+    records = data["capability_registry"]
+    match = next((r for r in records if r["capability_id"] == capability_id), None)
+    if match is None:
+        match = next((r for r in records if capability_id.lower() in r["capability_name"].lower()), None)
+    if match is None:
+        print(f"Capability not found: {capability_id}")
+        print(f"Available IDs: {[r['capability_id'] for r in records]}")
+        return 1
+    if args.json:
+        print(json.dumps(match, indent=2, sort_keys=True))
+        return 0
+    print(f"Capability: {match['capability_name']}")
+    print(f"ID:           {match['capability_id']}")
+    print(f"Domain:       {match['capability_domain']}")
+    print(f"Phase:        {match['implemented_phase']}")
+    print(f"Status:       {match['status']}")
+    print(f"Commands:     {', '.join(match['commands']) if match['commands'] else '(none)'}")
+    print(f"Dependencies: {', '.join(match['dependencies']) if match['dependencies'] else '(none)'}")
+    print(f"Successors:   {', '.join(match['successors']) if match['successors'] else '(none)'}")
+    return 0
+
+
+def run_capability_dependencies(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    if args.json:
+        dep_graph = {
+            r["capability_name"]: {
+                "dependencies": r["dependencies"],
+                "successors": r["successors"],
+            }
+            for r in data["capability_registry"]
+        }
+        print(json.dumps({"dependency_graph": dep_graph}, indent=2, sort_keys=True))
+        return 0
+    print("Capability dependency graph")
+    print()
+    for r in data["capability_registry"]:
+        print(f"  {r['capability_name']} ({r['capability_domain']})")
+        if r["dependencies"]:
+            print(f"    depends on: {', '.join(r['dependencies'])}")
+        if r["successors"]:
+            print(f"    succeeded by: {', '.join(r['successors'])}")
+    return 0
+
+
+def run_roadmap_current(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    current = data["current_phase"]
+    if args.json:
+        print(json.dumps({"current_phase": current}, indent=2, sort_keys=True))
+        return 0
+    if current:
+        print("Current phase")
+        print(f"  Phase ID:    {current['phase_id']}")
+        print(f"  Title:       {current['phase_title']}")
+        print(f"  Track:       {current['track_name']}")
+        print(f"  Status:      {current['status']}")
+        print(f"  Predecessor: {current['predecessor'] or '—'}")
+        print(f"  Successor:   {current['successor'] or '—'}")
+    else:
+        print("No active phase found in registry.")
+    return 0
+
+
+def run_roadmap_tracks(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    tracks = data["roadmap_tracks"]
+    if args.json:
+        print(json.dumps({"roadmap_tracks": tracks}, indent=2, sort_keys=True))
+        return 0
+    print("Roadmap tracks")
+    print(f"Total tracks: {len(tracks)}")
+    print()
+    for track_name, phases in tracks.items():
+        completed = sum(1 for p in phases if p["status"] == "completed")
+        active = sum(1 for p in phases if p["status"] == "active")
+        gaps = sum(1 for p in phases if p["status"] == "roadmap_gap")
+        print(f"  {track_name}: {len(phases)} phases  (completed={completed}, active={active}, gaps={gaps})")
+        for p in phases:
+            print(f"    [{p['status'].upper()}] {p['phase_id']} — {p['phase_title']}")
+    return 0
+
+
+def run_roadmap_evolution(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    _write_roadmap_registry_md(data)
+    evolutions = data["roadmap_evolution"]
+    if args.json:
+        print(json.dumps({"roadmap_evolution": evolutions}, indent=2, sort_keys=True))
+        return 0
+    print("Roadmap evolution")
+    print(f"Evolution events: {len(evolutions)}")
+    print()
+    for e in evolutions:
+        print(f"  [{e['evolution_id']}]")
+        print(f"    {e['original_phase']} → {e['replacement_phase']}")
+        print(f"    Reason: {e['reason']}")
+        print(f"    Approval: {e['approval_status']}")
+    print()
+    superseded = data.get("roadmap_registry", [])
+    superseded = [r for r in superseded if r["status"] == "superseded"]
+    print(f"Superseded phases: {len(superseded)}")
+    for r in superseded:
+        print(f"  [{r['phase_id']}] {r['phase_title']} → superseded_by={r['superseded_by']}")
+    print()
+    print("Generated: docs/ROADMAP_REGISTRY.md")
+    print()
+    print(CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY)
+    return 0
+
+
+def run_prompt_next(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    next_phase = data["next_recommended_phase"]
+    prompts = [
+        p for p in data["prompt_recommendations"]
+        if next_phase and p["phase_id"] == next_phase.get("phase_id")
+    ]
+    if not prompts:
+        prompts = data["prompt_recommendations"]
+    if args.json:
+        print(json.dumps({"next_phase": next_phase, "prompt_recommendations": prompts}, indent=2, sort_keys=True))
+        return 0
+    print("Next phase prompt recommendations")
+    if next_phase:
+        print(f"Next recommended phase: {next_phase['phase_id']} — {next_phase['phase_title']}")
+    print()
+    for p in prompts:
+        avail = "yes" if p["prompt_available"] else "no"
+        print(f"  [{p['recommendation_id']}] {p['phase_id']} — {p['prompt_type']}")
+        print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
+    return 0
+
+
+def run_prompt_phase(args: argparse.Namespace) -> int:
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phase_id = args.phase_id
+    prompts = [p for p in data["prompt_recommendations"] if p["phase_id"] == phase_id]
+    if args.json:
+        print(json.dumps({"phase_id": phase_id, "prompt_recommendations": prompts}, indent=2, sort_keys=True))
+        return 0
+    print(f"Prompt recommendations for phase: {phase_id}")
+    if not prompts:
+        print(f"  No prompt recommendations found for phase '{phase_id}'.")
+        print(f"  Available phases: {sorted({p['phase_id'] for p in data['prompt_recommendations']})}")
+        return 0
+    for p in prompts:
+        avail = "yes" if p["prompt_available"] else "no"
+        print(f"  [{p['recommendation_id']}] {p['prompt_type']}")
+        print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
     return 0

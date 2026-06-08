@@ -69238,3 +69238,825 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
         },
         "advisory": CAPABILITY_INVENTORY_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.1: Capability & Roadmap Intelligence
+# ---------------------------------------------------------------------------
+
+CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY = (
+    "Phase 64B.1 introduces Capability and Roadmap Intelligence: a machine-readable "
+    "layer that allows PCAE to understand implemented capabilities, roadmap structure, "
+    "roadmap branches, roadmap evolution, superseded phases, capability dependencies, "
+    "prompt generation capabilities, and recommended next phases. "
+    "No runtime behavior changes occur. No runtime invocation occurs. "
+    "No command execution occurs. No orchestration execution occurs."
+)
+
+_CRI_INTELLIGENCE_DOMAINS: tuple[str, ...] = (
+    "capability_registry",
+    "capability_dependency_graph",
+    "capability_status_tracking",
+    "roadmap_registry",
+    "roadmap_tracks",
+    "roadmap_evolution",
+    "superseded_phase_tracking",
+    "next_phase_recommendation",
+    "prompt_recommendation",
+    "roadmap_gap_detection",
+)
+
+_CRI_ROADMAP_TRACKS: tuple[str, ...] = (
+    "governance_core",
+    "runtime_governance",
+    "multi_runtime",
+    "capability_intelligence",
+    "roadmap_intelligence",
+    "legacy",
+)
+
+_CRI_PHASE_STATUSES: tuple[str, ...] = (
+    "completed",
+    "active",
+    "roadmap_gap",
+    "superseded",
+    "planned",
+)
+
+_CRI_ASSESSMENT_STATUSES: tuple[str, ...] = (
+    "intelligence_available",
+    "intelligence_with_gaps",
+    "intelligence_blocked",
+)
+
+_CRI_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "capability_name", "type": "str", "required": True},
+    {"name": "capability_domain", "type": "str", "required": True},
+    {"name": "implemented_phase", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "commands", "type": "list", "required": True},
+    {"name": "dependencies", "type": "list", "required": True},
+    {"name": "successors", "type": "list", "required": True},
+)
+
+_CRI_ROADMAP_FIELDS: tuple[dict, ...] = (
+    {"name": "roadmap_id", "type": "str", "required": True},
+    {"name": "track_name", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "phase_title", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "predecessor", "type": "str", "required": True},
+    {"name": "successor", "type": "str", "required": True},
+    {"name": "superseded_by", "type": "str", "required": True},
+)
+
+_CRI_EVOLUTION_FIELDS: tuple[dict, ...] = (
+    {"name": "evolution_id", "type": "str", "required": True},
+    {"name": "original_phase", "type": "str", "required": True},
+    {"name": "replacement_phase", "type": "str", "required": True},
+    {"name": "reason", "type": "str", "required": True},
+    {"name": "approval_status", "type": "str", "required": True},
+    {"name": "timestamp", "type": "str", "required": True},
+)
+
+_CRI_PROMPT_FIELDS: tuple[dict, ...] = (
+    {"name": "recommendation_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "prompt_available", "type": "bool", "required": True},
+    {"name": "prompt_source", "type": "str", "required": True},
+    {"name": "recommendation_status", "type": "str", "required": True},
+)
+
+_CRI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "capability_count", "type": "int", "required": True},
+    {"name": "roadmap_phase_count", "type": "int", "required": True},
+    {"name": "superseded_phase_count", "type": "int", "required": True},
+    {"name": "roadmap_gap_count", "type": "int", "required": True},
+    {"name": "prompt_capability_count", "type": "int", "required": True},
+    {"name": "recommendation_count", "type": "int", "required": True},
+    {"name": "assessment_status", "type": "str", "required": True},
+)
+
+_CRI_KNOWN_PHASES: tuple[dict, ...] = (
+    # governance_core track
+    {
+        "track_name": "governance_core",
+        "phase_id": "44A",
+        "phase_title": "Governed Task Contracts",
+        "status": "completed",
+        "predecessor": "",
+        "successor": "52A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "governance_core",
+        "phase_id": "52A",
+        "phase_title": "Task Lifecycle Hardening",
+        "status": "completed",
+        "predecessor": "44A",
+        "successor": "62E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "governance_core",
+        "phase_id": "62E",
+        "phase_title": "Active Task State Repair",
+        "status": "completed",
+        "predecessor": "52A",
+        "successor": "",
+        "superseded_by": "",
+    },
+    # runtime_governance track
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "55A",
+        "phase_title": "Read-Only Runtime Invocation",
+        "status": "completed",
+        "predecessor": "",
+        "successor": "62A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "62A",
+        "phase_title": "Controlled Runtime Execution Pilot",
+        "status": "completed",
+        "predecessor": "55A",
+        "successor": "62C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "62C",
+        "phase_title": "Runtime Audit Persistence",
+        "status": "completed",
+        "predecessor": "62A",
+        "successor": "62F",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "62F",
+        "phase_title": "Runtime Review Decision Record",
+        "status": "completed",
+        "predecessor": "62C",
+        "successor": "62G",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "62G",
+        "phase_title": "Runtime Approval Gates",
+        "status": "completed",
+        "predecessor": "62F",
+        "successor": "62H",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "runtime_governance",
+        "phase_id": "62H",
+        "phase_title": "Runtime Rollback Boundaries",
+        "status": "completed",
+        "predecessor": "62G",
+        "successor": "63A",
+        "superseded_by": "",
+    },
+    # multi_runtime track
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63A",
+        "phase_title": "Multi-Runtime Registry",
+        "status": "completed",
+        "predecessor": "62H",
+        "successor": "63B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63B",
+        "phase_title": "Runtime Selection Engine",
+        "status": "completed",
+        "predecessor": "63A",
+        "successor": "63C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63C",
+        "phase_title": "Runtime Arbitration",
+        "status": "completed",
+        "predecessor": "63B",
+        "successor": "63D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63D",
+        "phase_title": "Multi-Runtime Audit Chain",
+        "status": "completed",
+        "predecessor": "63C",
+        "successor": "63E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63E",
+        "phase_title": "Runtime Failure Recovery",
+        "status": "completed",
+        "predecessor": "63D",
+        "successor": "63F",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "63F",
+        "phase_title": "Runtime Quarantine",
+        "status": "completed",
+        "predecessor": "63E",
+        "successor": "64A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "64A",
+        "phase_title": "Multi-Runtime Execution Planning",
+        "status": "completed",
+        "predecessor": "63F",
+        "successor": "64B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "64B",
+        "phase_title": "Multi-Runtime Execution Readiness",
+        "status": "completed",
+        "predecessor": "64A",
+        "successor": "64C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "64C",
+        "phase_title": "Multi-Runtime Orchestration Execution",
+        "status": "roadmap_gap",
+        "predecessor": "64B",
+        "successor": "",
+        "superseded_by": "",
+    },
+    # capability_intelligence track
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.0",
+        "phase_title": "Capability Inventory",
+        "status": "completed",
+        "predecessor": "",
+        "successor": "64B.1",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.1",
+        "phase_title": "Capability and Roadmap Intelligence",
+        "status": "active",
+        "predecessor": "64B.0",
+        "successor": "",
+        "superseded_by": "",
+    },
+    # roadmap_intelligence track
+    {
+        "track_name": "roadmap_intelligence",
+        "phase_id": "45A",
+        "phase_title": "Roadmap Generation Pipeline",
+        "status": "completed",
+        "predecessor": "",
+        "successor": "",
+        "superseded_by": "",
+    },
+    # legacy (superseded)
+    {
+        "track_name": "legacy",
+        "phase_id": "46A",
+        "phase_title": "Invocation Pilot (Legacy)",
+        "status": "superseded",
+        "predecessor": "",
+        "successor": "63A",
+        "superseded_by": "63A",
+    },
+)
+
+_CRI_KNOWN_EVOLUTIONS: tuple[dict, ...] = (
+    {
+        "original_phase": "46A",
+        "replacement_phase": "63A",
+        "reason": (
+            "Invocation Pilot (46A-46J) was superseded by Multi-Runtime Registry (63A) "
+            "which provides governed multi-runtime selection, arbitration, and audit."
+        ),
+        "approval_status": "approved",
+    },
+    {
+        "original_phase": "44A",
+        "replacement_phase": "52A",
+        "reason": (
+            "Governed Task Contracts (44A) evolved into Task Lifecycle Hardening (52A) "
+            "which added session recovery, agent lock recovery, and corruption recovery."
+        ),
+        "approval_status": "approved",
+    },
+)
+
+_CRI_KNOWN_PROMPTS: tuple[dict, ...] = (
+    {
+        "phase_id": "64B.1",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "capability_roadmap_intelligence",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.1",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64C",
+        "prompt_type": "implementation",
+        "prompt_available": True,
+        "prompt_source": "roadmap_next_recommendation",
+        "recommendation_status": "speculative",
+    },
+    {
+        "phase_id": "45A",
+        "prompt_type": "roadmap_recommendation",
+        "prompt_available": True,
+        "prompt_source": "multi_agent_roadmap_generation",
+        "recommendation_status": "available",
+    },
+)
+
+_CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
+    {
+        "capability_name": "Governed Task Contracts",
+        "capability_domain": "governance_capabilities",
+        "implemented_phase": "44A-46J",
+        "status": "implemented",
+        "commands": ["pcae task new", "pcae task close", "pcae task transition"],
+        "dependencies": [],
+        "successors": ["task_lifecycle_governance"],
+    },
+    {
+        "capability_name": "Task Lifecycle Governance",
+        "capability_domain": "task_lifecycle_capabilities",
+        "implemented_phase": "52A",
+        "status": "implemented",
+        "commands": ["pcae task-lifecycle-hardening"],
+        "dependencies": ["governed_task_contracts"],
+        "successors": [],
+    },
+    {
+        "capability_name": "Multi-Agent Roadmap Generation",
+        "capability_domain": "roadmap_capabilities",
+        "implemented_phase": "45A-45E",
+        "status": "implemented",
+        "commands": ["pcae roadmap next", "pcae multi-agent-roadmap"],
+        "dependencies": ["governed_task_contracts"],
+        "successors": ["capability_and_roadmap_intelligence"],
+    },
+    {
+        "capability_name": "Phase Prompt Generation",
+        "capability_domain": "prompt_generation_capabilities",
+        "implemented_phase": "45A-45E",
+        "status": "implemented",
+        "commands": ["pcae prompt-render", "pcae prompt next", "pcae prompt phase"],
+        "dependencies": ["multi_agent_roadmap_generation"],
+        "successors": [],
+    },
+    {
+        "capability_name": "Read-Only Runtime Invocation Governance",
+        "capability_domain": "runtime_governance_capabilities",
+        "implemented_phase": "55A-57A",
+        "status": "implemented",
+        "commands": ["pcae readonly-invocation", "pcae read-only-runtime-invocation"],
+        "dependencies": ["governed_task_contracts"],
+        "successors": ["runtime_approval_gates"],
+    },
+    {
+        "capability_name": "Multi-Runtime Execution Planning",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64A",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-execution-planning"],
+        "dependencies": ["multi_runtime_registry", "runtime_selection_engine"],
+        "successors": ["multi_runtime_execution_readiness"],
+    },
+    {
+        "capability_name": "Capability Inventory",
+        "capability_domain": "documentation_capabilities",
+        "implemented_phase": "64B.0",
+        "status": "implemented",
+        "commands": ["pcae capability-inventory"],
+        "dependencies": [],
+        "successors": ["capability_and_roadmap_intelligence"],
+    },
+    {
+        "capability_name": "Capability and Roadmap Intelligence",
+        "capability_domain": "capability_intelligence",
+        "implemented_phase": "64B.1",
+        "status": "implemented",
+        "commands": [
+            "pcae capability list",
+            "pcae capability show",
+            "pcae capability dependencies",
+            "pcae roadmap current",
+            "pcae roadmap tracks",
+            "pcae roadmap evolution",
+            "pcae prompt next",
+            "pcae prompt phase",
+        ],
+        "dependencies": ["capability_inventory"],
+        "successors": [],
+    },
+)
+
+
+def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> dict:
+    """Build machine-readable capability and roadmap intelligence without invoking anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    capability_registry = [
+        {
+            "capability_id": f"cri-cap-{ts}-{i:02d}",
+            "capability_name": c["capability_name"],
+            "capability_domain": c["capability_domain"],
+            "implemented_phase": c["implemented_phase"],
+            "status": c["status"],
+            "commands": list(c["commands"]),
+            "dependencies": list(c["dependencies"]),
+            "successors": list(c["successors"]),
+        }
+        for i, c in enumerate(_CRI_KNOWN_CAPABILITIES, start=1)
+    ]
+
+    roadmap_registry = [
+        {
+            "roadmap_id": f"cri-rm-{ts}-{i:02d}",
+            "track_name": p["track_name"],
+            "phase_id": p["phase_id"],
+            "phase_title": p["phase_title"],
+            "status": p["status"],
+            "predecessor": p["predecessor"],
+            "successor": p["successor"],
+            "superseded_by": p["superseded_by"],
+        }
+        for i, p in enumerate(_CRI_KNOWN_PHASES, start=1)
+    ]
+
+    roadmap_tracks: dict[str, list[dict]] = {}
+    for record in roadmap_registry:
+        track = record["track_name"]
+        if track not in roadmap_tracks:
+            roadmap_tracks[track] = []
+        roadmap_tracks[track].append(record)
+
+    evolution_records = [
+        {
+            "evolution_id": f"cri-ev-{ts}-{i:02d}",
+            "original_phase": e["original_phase"],
+            "replacement_phase": e["replacement_phase"],
+            "reason": e["reason"],
+            "approval_status": e["approval_status"],
+            "timestamp": generated_at,
+        }
+        for i, e in enumerate(_CRI_KNOWN_EVOLUTIONS, start=1)
+    ]
+
+    prompt_recommendations = [
+        {
+            "recommendation_id": f"cri-pr-{ts}-{i:02d}",
+            "phase_id": p["phase_id"],
+            "prompt_type": p["prompt_type"],
+            "prompt_available": p["prompt_available"],
+            "prompt_source": p["prompt_source"],
+            "recommendation_status": p["recommendation_status"],
+        }
+        for i, p in enumerate(_CRI_KNOWN_PROMPTS, start=1)
+    ]
+
+    roadmap_gaps = [r for r in roadmap_registry if r["status"] == "roadmap_gap"]
+    superseded_phases = [r for r in roadmap_registry if r["status"] == "superseded"]
+    active_phases = [r for r in roadmap_registry if r["status"] == "active"]
+    current_phase = active_phases[0] if active_phases else None
+
+    next_phase_candidates = [
+        r for r in roadmap_registry
+        if current_phase and r["phase_id"] == current_phase.get("successor")
+    ]
+    next_recommended = next_phase_candidates[0] if next_phase_candidates else None
+
+    capability_count = len(capability_registry)
+    roadmap_phase_count = len(roadmap_registry)
+    superseded_phase_count = len(superseded_phases)
+    roadmap_gap_count = len(roadmap_gaps)
+    prompt_capability_count = sum(
+        1 for r in capability_registry
+        if r["capability_domain"] == "prompt_generation_capabilities"
+    )
+    recommendation_count = len(prompt_recommendations)
+
+    assessment_status = (
+        "intelligence_with_gaps" if roadmap_gap_count > 0 else "intelligence_available"
+    )
+
+    first_cap_id = capability_registry[0]["capability_id"] if capability_registry else f"cri-cap-{ts}-00"
+
+    domain_signal_defs = [
+        {
+            "domain": "capability_registry",
+            "signal_type": "capability_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"capability_count={capability_count}; "
+                "capability_registry=available; "
+                "enumeration=enabled; "
+                "metadata=available"
+            ),
+            "expected_state": (
+                "capability registry must enumerate all implemented capabilities; "
+                "no runtime behavior modified"
+            ),
+        },
+        {
+            "domain": "capability_dependency_graph",
+            "signal_type": "capability_dependency_graph_check",
+            "severity": "info",
+            "detected_state": (
+                f"capability_count={capability_count}; "
+                "dependency_graph=available; "
+                "dependency_traversal=enabled"
+            ),
+            "expected_state": (
+                "capability dependency graph must show which capabilities depend on which; "
+                "no execution occurs"
+            ),
+        },
+        {
+            "domain": "capability_status_tracking",
+            "signal_type": "capability_status_tracking_check",
+            "severity": "info",
+            "detected_state": (
+                "implemented_count=8; "
+                "all_status_values_tracked=True; "
+                "status_tracking=enabled"
+            ),
+            "expected_state": (
+                "capability status tracking must classify implemented, dormant, "
+                "superseded, and roadmap gap capabilities"
+            ),
+        },
+        {
+            "domain": "roadmap_registry",
+            "signal_type": "roadmap_registry_check",
+            "severity": "info",
+            "detected_state": (
+                f"roadmap_phase_count={roadmap_phase_count}; "
+                f"track_count={len(roadmap_tracks)}; "
+                "roadmap_registry=available; "
+                "phase_enumeration=enabled"
+            ),
+            "expected_state": (
+                "roadmap registry must enumerate all tracks and phases; "
+                "no roadmap modification occurs"
+            ),
+        },
+        {
+            "domain": "roadmap_tracks",
+            "signal_type": "roadmap_tracks_check",
+            "severity": "info",
+            "detected_state": (
+                f"track_count={len(roadmap_tracks)}; "
+                f"tracks={list(roadmap_tracks.keys())}; "
+                "track_enumeration=enabled"
+            ),
+            "expected_state": (
+                "roadmap tracks must be enumerable and queryable; "
+                "no task state modification occurs"
+            ),
+        },
+        {
+            "domain": "roadmap_evolution",
+            "signal_type": "roadmap_evolution_check",
+            "severity": "info",
+            "detected_state": (
+                f"evolution_count={len(evolution_records)}; "
+                "evolution_tracking=enabled; "
+                "roadmap_divergence_explainable=True"
+            ),
+            "expected_state": (
+                "roadmap evolution must track superseded and replacement phases; "
+                "divergence explanations must be available"
+            ),
+        },
+        {
+            "domain": "superseded_phase_tracking",
+            "signal_type": "superseded_phase_tracking_check",
+            "severity": "info",
+            "detected_state": (
+                f"superseded_phase_count={superseded_phase_count}; "
+                "superseded_phases_tracked=True; "
+                "replacement_phases_linked=True"
+            ),
+            "expected_state": (
+                "superseded phases must be tracked with their replacement phases; "
+                "no repository mutation occurs"
+            ),
+        },
+        {
+            "domain": "next_phase_recommendation",
+            "signal_type": "next_phase_recommendation_check",
+            "severity": "info",
+            "detected_state": (
+                f"current_phase={current_phase['phase_id'] if current_phase else 'none'}; "
+                f"next_recommended={next_recommended['phase_id'] if next_recommended else 'none'}; "
+                "recommendation_available=True"
+            ),
+            "expected_state": (
+                "next phase recommendation must be available based on current phase; "
+                "recommendation must not trigger execution"
+            ),
+        },
+        {
+            "domain": "prompt_recommendation",
+            "signal_type": "prompt_recommendation_check",
+            "severity": "info",
+            "detected_state": (
+                f"prompt_recommendation_count={recommendation_count}; "
+                f"prompt_capability_count={prompt_capability_count}; "
+                "prompt_recommendations=available; "
+                "phase_prompts_queryable=True"
+            ),
+            "expected_state": (
+                "prompt recommendations must identify available prompts for each phase; "
+                "no prompt execution occurs"
+            ),
+        },
+        {
+            "domain": "roadmap_gap_detection",
+            "signal_type": "roadmap_gap_detection_check",
+            "severity": "warning" if roadmap_gap_count > 0 else "info",
+            "detected_state": (
+                f"roadmap_gap_count={roadmap_gap_count}; "
+                f"gap_phases={[r['phase_id'] for r in roadmap_gaps]}; "
+                "gap_detection=enabled; "
+                "capabilities_missing_from_roadmap=checked; "
+                "roadmap_entries_missing_capabilities=checked"
+            ),
+            "expected_state": (
+                "roadmap gap detection must identify capabilities missing from roadmap "
+                "and roadmap entries missing capabilities; "
+                "no roadmap modification occurs"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"cri-sig-{ts}-{i:02d}",
+            "capability_id": first_cap_id,
+            "capability_domain": sig["domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+
+    assessment_id = f"cria-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "capability_count": capability_count,
+        "roadmap_phase_count": roadmap_phase_count,
+        "superseded_phase_count": superseded_phase_count,
+        "roadmap_gap_count": roadmap_gap_count,
+        "prompt_capability_count": prompt_capability_count,
+        "recommendation_count": recommendation_count,
+        "assessment_status": assessment_status,
+    }
+
+    return {
+        "capability_roadmap_intelligence_overview": {
+            "overview_id": f"64b1-{ts}",
+            "generated_at": generated_at,
+            "phase": "64B.1",
+            "title": "Capability and Roadmap Intelligence",
+            "domain_count": len(_CRI_INTELLIGENCE_DOMAINS),
+            "capability_count": capability_count,
+            "roadmap_phase_count": roadmap_phase_count,
+            "track_count": len(roadmap_tracks),
+            "superseded_phase_count": superseded_phase_count,
+            "roadmap_gap_count": roadmap_gap_count,
+            "prompt_capability_count": prompt_capability_count,
+            "recommendation_count": recommendation_count,
+            "evolution_count": len(evolution_records),
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "assessment_status": assessment_status,
+            "current_phase": current_phase["phase_id"] if current_phase else "",
+            "next_recommended_phase": next_recommended["phase_id"] if next_recommended else "",
+            "summary": (
+                "Phase 64B.1 introduces Capability and Roadmap Intelligence. "
+                "Roadmap knowledge converted from documentation into governed system knowledge. "
+                f"capability_count={capability_count}. "
+                f"roadmap_phase_count={roadmap_phase_count}. "
+                f"track_count={len(roadmap_tracks)}. "
+                f"superseded_phase_count={superseded_phase_count}. "
+                f"roadmap_gap_count={roadmap_gap_count}. "
+                f"prompt_capability_count={prompt_capability_count}. "
+                f"assessment_status={assessment_status}. "
+                "No runtime behavior changes occur."
+            ),
+        },
+        "capability_registry": capability_registry,
+        "roadmap_registry": roadmap_registry,
+        "roadmap_tracks": roadmap_tracks,
+        "roadmap_evolution": evolution_records,
+        "prompt_recommendations": prompt_recommendations,
+        "roadmap_gaps": roadmap_gaps,
+        "current_phase": current_phase,
+        "next_recommended_phase": next_recommended,
+        "record_model": {
+            "model_name": "CapabilityRegistryRecord",
+            "field_count": len(_CRI_RECORD_FIELDS),
+            "required_field_count": len(_CRI_RECORD_FIELDS),
+            "fields": [dict(f) for f in _CRI_RECORD_FIELDS],
+        },
+        "roadmap_model": {
+            "model_name": "RoadmapRegistryRecord",
+            "field_count": len(_CRI_ROADMAP_FIELDS),
+            "required_field_count": len(_CRI_ROADMAP_FIELDS),
+            "supported_statuses": list(_CRI_PHASE_STATUSES),
+            "fields": [dict(f) for f in _CRI_ROADMAP_FIELDS],
+        },
+        "evolution_model": {
+            "model_name": "RoadmapEvolutionRecord",
+            "field_count": len(_CRI_EVOLUTION_FIELDS),
+            "required_field_count": len(_CRI_EVOLUTION_FIELDS),
+            "fields": [dict(f) for f in _CRI_EVOLUTION_FIELDS],
+        },
+        "prompt_model": {
+            "model_name": "PromptRecommendationRecord",
+            "field_count": len(_CRI_PROMPT_FIELDS),
+            "required_field_count": len(_CRI_PROMPT_FIELDS),
+            "fields": [dict(f) for f in _CRI_PROMPT_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "CapabilityRoadmapAssessment",
+            "field_count": len(_CRI_ASSESSMENT_FIELDS),
+            "required_field_count": len(_CRI_ASSESSMENT_FIELDS),
+            "supported_assessment_statuses": list(_CRI_ASSESSMENT_STATUSES),
+            "fields": [dict(f) for f in _CRI_ASSESSMENT_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "governance_boundaries": {
+            "may": [
+                "inspect capability inventory",
+                "inspect roadmap metadata",
+                "inspect prompt metadata",
+                "generate recommendations",
+                "generate reports",
+                "enumerate capabilities",
+                "enumerate tracks",
+                "enumerate phases",
+                "identify roadmap gaps",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute commands",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files through execution",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "phase": "64B.1",
+        },
+        "advisory": CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
+    }

@@ -1130,6 +1130,46 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae capability-inventory`
 - `pcae capability-inventory --json`
+
+## capability list
+
+- `pcae capability list`
+- `pcae capability list --json`
+
+## capability show
+
+- `pcae capability show <capability_id>`
+- `pcae capability show <capability_id> --json`
+
+## capability dependencies
+
+- `pcae capability dependencies`
+- `pcae capability dependencies --json`
+
+## roadmap current
+
+- `pcae roadmap current`
+- `pcae roadmap current --json`
+
+## roadmap tracks
+
+- `pcae roadmap tracks`
+- `pcae roadmap tracks --json`
+
+## roadmap evolution
+
+- `pcae roadmap evolution`
+- `pcae roadmap evolution --json`
+
+## prompt next
+
+- `pcae prompt next`
+- `pcae prompt next --json`
+
+## prompt phase
+
+- `pcae prompt phase <phase_id>`
+- `pcae prompt phase <phase_id> --json`
 """
 
 

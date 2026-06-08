@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 64B.1: Capability and Roadmap Intelligence (20260608-1751-64b-1-capability-and-roadmap-intelligence)
+- 64B.0: Capability Inventory (20260608-1731-64b-0-capability-inventory)
 - 64B: Multi-Runtime Execution Readiness (20260608-1639-64b-multi-runtime-execution-readiness)
 - 64A: Multi-Runtime Execution Planning (20260608-1614-64a-multi-runtime-execution-planning)
 - 63F: Runtime Quarantine (20260608-1600-63f-runtime-quarantine)

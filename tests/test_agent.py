@@ -47444,3 +47444,222 @@ def test_capability_inventory_json_output(tmp_path, monkeypatch, capsys) -> None
     assert data["capability_inventory_overview"]["prompt_capability_count"] >= 1
     inventory_file = tmp_path / "docs" / "CAPABILITY_INVENTORY.md"
     assert inventory_file.exists()
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.1 – Capability & Roadmap Intelligence
+# ---------------------------------------------------------------------------
+
+
+def test_roadmap_intelligence_build_returns_dict(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    assert isinstance(data, dict)
+
+
+def test_roadmap_intelligence_capability_registry_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    assert "capability_registry" in data
+    registry = data["capability_registry"]
+    assert len(registry) >= 6
+    rec = registry[0]
+    for field in ("capability_id", "capability_name", "capability_domain", "status",
+                  "implemented_phase", "commands", "dependencies", "successors"):
+        assert field in rec, f"Missing field: {field}"
+
+
+def test_roadmap_intelligence_roadmap_registry_phases(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    assert "roadmap_registry" in data
+    phases = data["roadmap_registry"]
+    assert len(phases) >= 15
+    rec = phases[0]
+    for field in ("phase_id", "phase_title", "track_name", "status", "predecessor", "successor", "superseded_by"):
+        assert field in rec, f"Missing field: {field}"
+
+
+def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    current = data["current_phase"]
+    assert current["phase_id"] == "64B.1"
+    assert current["status"] == "active"
+
+
+def test_roadmap_intelligence_roadmap_tracks_structure(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    tracks = data["roadmap_tracks"]
+    assert isinstance(tracks, dict)
+    assert len(tracks) >= 4
+    for track_name, phases in tracks.items():
+        assert isinstance(phases, list)
+        assert len(phases) >= 1
+
+
+def test_roadmap_intelligence_prompt_recommendations_present(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    prompts = data["prompt_recommendations"]
+    assert len(prompts) >= 2
+    rec = prompts[0]
+    for field in ("recommendation_id", "phase_id", "prompt_type", "prompt_source",
+                  "prompt_available", "recommendation_status"):
+        assert field in rec, f"Missing field: {field}"
+
+
+def test_roadmap_intelligence_capability_list_command(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["capability", "list"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Capability list" in output
+    assert "IMPLEMENTED" in output
+
+
+def test_roadmap_intelligence_capability_list_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["capability", "list", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "capability_registry" in data
+    assert len(data["capability_registry"]) >= 6
+
+
+def test_roadmap_intelligence_capability_show_by_name(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["capability", "show", "Governed Task"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Governed Task" in output
+    assert "governance_capabilities" in output
+
+
+def test_roadmap_intelligence_capability_show_not_found(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["capability", "show", "nonexistent-xyz-capability"])
+    assert rc == 1
+    output = capsys.readouterr().out
+    assert "not found" in output.lower()
+
+
+def test_roadmap_intelligence_capability_dependencies_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["capability", "dependencies", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "dependency_graph" in data
+    graph = data["dependency_graph"]
+    assert len(graph) >= 4
+
+
+def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "current", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "current_phase" in data
+    assert data["current_phase"]["phase_id"] == "64B.1"
+    assert data["current_phase"]["status"] == "active"
+
+
+def test_roadmap_intelligence_roadmap_tracks_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "tracks", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "roadmap_tracks" in data
+    assert len(data["roadmap_tracks"]) >= 4
+
+
+def test_roadmap_intelligence_roadmap_evolution_generates_md(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["roadmap", "evolution"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Generated: docs/ROADMAP_REGISTRY.md" in output
+    registry_file = tmp_path / "docs" / "ROADMAP_REGISTRY.md"
+    assert registry_file.exists()
+
+
+def test_roadmap_intelligence_roadmap_evolution_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "evolution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "roadmap_evolution" in data
+    assert len(data["roadmap_evolution"]) >= 1
+    ev = data["roadmap_evolution"][0]
+    for field in ("evolution_id", "original_phase", "replacement_phase", "reason", "approval_status"):
+        assert field in ev
+
+
+def test_roadmap_intelligence_prompt_next_command(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "next"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "prompt recommendations" in output.lower()
+
+
+def test_roadmap_intelligence_prompt_next_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["prompt", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "prompt_recommendations" in data
+    assert "next_phase" in data
+
+
+def test_roadmap_intelligence_prompt_phase_found(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "phase", "64B.1"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "64B.1" in output
+
+
+def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["prompt", "phase", "99Z.9"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "No prompt recommendations found" in output
+
+
+def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["prompt", "phase", "64B.1", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["phase_id"] == "64B.1"
+    assert "prompt_recommendations" in data
+    assert len(data["prompt_recommendations"]) >= 1
+
+
+def test_roadmap_intelligence_advisory_text(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "evolution"])
+    output = capsys.readouterr().out
+    assert "Capability and Roadmap Intelligence" in output
+    assert "No runtime" in output or "no runtime" in output.lower()
+
+
+def test_roadmap_intelligence_signals_present(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    assert "signals" in data
+    signals = data["signals"]
+    assert len(signals) >= 8
+    for s in signals:
+        assert "capability_domain" in s or "domain" in s
+        assert "signal_id" in s or "signal" in s

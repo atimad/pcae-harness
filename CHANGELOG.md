@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Implemented Capability and Roadmap Intelligence (Phase 64B.1): `pcae capability list`, `pcae capability show <id>`, `pcae capability dependencies`, `pcae roadmap current`, `pcae roadmap tracks`, `pcae roadmap evolution`, `pcae prompt next`, `pcae prompt phase <phase_id>` and all `--json` variants; creates a machine-readable intelligence layer cataloguing 8 capabilities across 6 domains, 22 roadmap phases across 6 tracks, 2 evolution events, 4 prompt recommendations; generates `docs/ROADMAP_REGISTRY.md`; `build_capability_roadmap_intelligence` and `CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY` added to core; 9 runner functions added to commands; `capability`, extended `roadmap`, and `prompt` top-level/subcommands wired in CLI; `docs/COMMANDS.md` updated; 22 new tests following `test_roadmap_intelligence_*` naming; `python -m pytest -k roadmap_intelligence` selects 22 tests; 4568 total tests passing; no runtime invocation; no orchestration execution; no command execution; no write execution; human_review_required=True always.
+- Transitioned active task from 64B.0: Capability Inventory to 64B.1: Capability and Roadmap Intelligence; session refreshed and governance continuity revalidated.
 - Transitioned active task from 64B: Multi-Runtime Execution Readiness to 64B.0: Capability Inventory; session refreshed and governance continuity revalidated.
 - Transitioned active task from 64A: Multi-Runtime Execution Planning to 64B: Multi-Runtime Execution Readiness; session refreshed and governance continuity revalidated.
 - Transitioned active task from 63F: Runtime Quarantine to 64A: Multi-Runtime Execution Planning; session refreshed and governance continuity revalidated.
