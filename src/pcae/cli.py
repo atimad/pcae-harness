@@ -191,6 +191,9 @@ from pcae.commands.agent import (
     run_roadmap_evolution,
     run_prompt_next,
     run_prompt_phase,
+    run_roadmap_recommendation_hardening,
+    run_roadmap_next_hardened,
+    run_prompt_next_hardened,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -716,7 +719,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON roadmap recommendation output.",
     )
-    roadmap_next_parser.set_defaults(handler=run_roadmap_next)
+    roadmap_next_parser.set_defaults(handler=run_roadmap_next_hardened)
 
     roadmap_current_parser = roadmap_subparsers.add_parser(
         "current",
@@ -4678,6 +4681,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ci_parser.set_defaults(handler=run_capability_inventory)
 
+    rrh_parser = subparsers.add_parser(
+        "roadmap-recommendation-hardening",
+        help="Validate and harden roadmap recommendations using the registry as sole source (Phase 64B.2).",
+    )
+    rrh_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rrh_parser.set_defaults(handler=run_roadmap_recommendation_hardening)
+
     cap_parser = subparsers.add_parser(
         "capability",
         help="Enumerate and inspect capabilities from the capability registry (Phase 64B.1).",
@@ -4705,7 +4719,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     prompt_next_parser = prompt_subparsers.add_parser("next", help="Recommend next-phase implementation prompts.")
     prompt_next_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
-    prompt_next_parser.set_defaults(handler=run_prompt_next)
+    prompt_next_parser.set_defaults(handler=run_prompt_next_hardened)
 
     prompt_phase_parser = prompt_subparsers.add_parser("phase", help="Show prompt recommendations for a specific phase.")
     prompt_phase_parser.add_argument("phase_id", help="Phase ID to show prompts for (e.g. 64B.1).")

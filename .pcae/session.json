@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260608-1751-64b-1-capability-and-roadmap-intelligence",
-    "title": "64B.1: Capability and Roadmap Intelligence"
+    "id": "20260608-1813-64b-2-roadmap-recommendation-hardening",
+    "title": "64B.2: Roadmap Recommendation Hardening"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "64B.1: Capability and Roadmap Intelligence",
+  "current_objective": "64B.2: Roadmap Recommendation Hardening",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -14,26 +14,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/DONE.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260608-1731-64b-0-capability-inventory.md",
+        "path": "tasks/active/20260608-1751-64b-1-capability-and-roadmap-intelligence.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260608-1751-64b-1-capability-and-roadmap-intelligence.md",
+        "path": "tasks/active/20260608-1813-64b-2-roadmap-recommendation-hardening.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260608-1731-64b-0-capability-inventory.md",
+        "path": "tasks/done/20260608-1751-64b-1-capability-and-roadmap-intelligence.md",
         "status": "??"
       }
     ],
-    "status_summary": "5 changed files"
+    "status_summary": "4 changed files"
   },
-  "last_completed_step": "Completed task 20260608-1731-64b-0-capability-inventory: 64B.0: Capability Inventory",
-  "next_recommended_step": "Continue active task 20260608-1751-64b-1-capability-and-roadmap-intelligence.",
-  "timestamp": "2026-06-08T15:51:50.172610+00:00",
+  "last_completed_step": "Completed task 20260608-1751-64b-1-capability-and-roadmap-intelligence: 64B.1: Capability and Roadmap Intelligence",
+  "next_recommended_step": "Continue active task 20260608-1813-64b-2-roadmap-recommendation-hardening.",
+  "timestamp": "2026-06-08T16:13:32.450128+00:00",
   "warnings": []
 }

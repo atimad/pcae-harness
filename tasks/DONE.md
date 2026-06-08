@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 64B.2: Roadmap Recommendation Hardening (20260608-1813-64b-2-roadmap-recommendation-hardening)
 - 64B.1: Capability and Roadmap Intelligence (20260608-1751-64b-1-capability-and-roadmap-intelligence)
 - 64B.0: Capability Inventory (20260608-1731-64b-0-capability-inventory)
 - 64B: Multi-Runtime Execution Readiness (20260608-1639-64b-multi-runtime-execution-readiness)

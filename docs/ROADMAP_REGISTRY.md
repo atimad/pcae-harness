@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-08T16:00:15.286112+00:00
+Generated: 2026-06-08T16:40:37.384348+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 22
+Total phases: 23
 Tracks: 6
 Superseded: 1
 Roadmap gaps: 1
@@ -47,7 +47,8 @@ Assessment status: intelligence_with_gaps
 | Phase | Title | Status | Predecessor | Successor |
 |---|---|---|---|---|
 | 64B.0 | Capability Inventory | completed | — | 64B.1 |
-| 64B.1 | Capability and Roadmap Intelligence | active | 64B.0 | — |
+| 64B.1 | Capability and Roadmap Intelligence | completed | 64B.0 | 64B.2 |
+| 64B.2 | Roadmap Recommendation Hardening | active | 64B.1 | — |
 
 ## Track: roadmap_intelligence
 

@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-1751-64b-1-capability-and-roadmap-intelligence
+20260608-1813-64b-2-roadmap-recommendation-hardening
 
 ## Title
 
-64B.1: Capability and Roadmap Intelligence
+64B.2: Roadmap Recommendation Hardening
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-64B.1: Capability and Roadmap Intelligence
+64B.2: Roadmap Recommendation Hardening
 
 ## Allowed Files
 
@@ -31,12 +31,14 @@ implementation
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - src/pcae/core/agent.py
+- src/pcae/core/status.py
 - src/pcae/commands/agent.py
+- src/pcae/commands/status.py
 - src/pcae/cli.py
 - src/pcae/core/docs.py
 - tests/test_agent.py
+- tests/test_status.py
 - docs/COMMANDS.md
-- docs/CAPABILITY_INVENTORY.md
 - docs/ROADMAP_REGISTRY.md
 
 ## Forbidden Files
@@ -87,4 +89,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T17:51:50.158839+02:00
+2026-06-08T18:13:32.438013+02:00

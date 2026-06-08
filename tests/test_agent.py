@@ -47492,7 +47492,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.1"
+    assert current["phase_id"] == "64B.2"
     assert current["status"] == "active"
 
 
@@ -47570,7 +47570,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.1"
+    assert data["current_phase"]["phase_id"] == "64B.2"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47663,3 +47663,234 @@ def test_roadmap_intelligence_signals_present(tmp_path, monkeypatch) -> None:
     for s in signals:
         assert "capability_domain" in s or "domain" in s
         assert "signal_id" in s or "signal" in s
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.2 – Roadmap Recommendation Hardening
+# ---------------------------------------------------------------------------
+
+
+def test_roadmap_recommendation_build_returns_dict(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assert isinstance(data, dict)
+
+
+def test_roadmap_recommendation_current_phase_is_64b2(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assert data["current_phase"] is not None
+    assert data["current_phase"]["phase_id"] == "64B.2"
+    assert data["current_phase"]["status"] == "active"
+
+
+def test_roadmap_recommendation_current_track_capability_intelligence(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assert data["current_track"] == "capability_intelligence"
+
+
+def test_roadmap_recommendation_no_41c_in_valid_recommendations(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    valid = data["valid_recommendations"]
+    for rec in valid:
+        assert "41C" not in rec["recommended_phase"], "41C must not appear in valid recommendations"
+        assert rec["current_track"] != "legacy", "Legacy track must not appear in valid recommendations"
+
+
+def test_roadmap_recommendation_41c_classified_invalid(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    invalid = data["invalid_recommendations"]
+    assert len(invalid) >= 1
+    phase_ids = [r["recommended_phase"] for r in invalid]
+    assert any("41C" in p for p in phase_ids), "41C must be classified as invalid"
+
+
+def test_roadmap_recommendation_record_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    recs = data["recommendations"]
+    assert len(recs) >= 1
+    rec = recs[0]
+    for field in ("recommendation_id", "current_phase", "current_track", "recommended_phase",
+                  "recommendation_source", "recommendation_status", "recommendation_reason"):
+        assert field in rec, f"Missing field: {field}"
+
+
+def test_roadmap_recommendation_signal_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    signals = data["signals"]
+    assert len(signals) >= 8
+    sig = signals[0]
+    for field in ("signal_id", "recommendation_id", "recommendation_domain",
+                  "signal_type", "severity", "detected_state", "expected_state"):
+        assert field in sig, f"Missing field: {field}"
+
+
+def test_roadmap_recommendation_assessment_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assess = data["assessment"]
+    for field in ("assessment_id", "recommendation_count", "invalid_recommendation_count",
+                  "superseded_phase_count", "track_mismatch_count", "assessment_status"):
+        assert field in assess, f"Missing field: {field}"
+
+
+def test_roadmap_recommendation_summary_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    summary = data["summary"]
+    for field in ("summary_id", "assessment_id", "recommendation_count", "invalid_recommendation_count",
+                  "superseded_phase_count", "track_mismatch_count", "assessment_status"):
+        assert field in summary, f"Missing field: {field}"
+
+
+def test_roadmap_recommendation_track_mismatch_detected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assess = data["assessment"]
+    assert assess["track_mismatch_count"] >= 1
+    assert assess["invalid_recommendation_count"] >= 1
+
+
+def test_roadmap_recommendation_superseded_excluded(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assess = data["assessment"]
+    assert assess["superseded_phase_count"] >= 1
+    valid_phase_ids = [r["recommended_phase"] for r in data["valid_recommendations"]]
+    assert "46A" not in valid_phase_ids, "Superseded phase 46A must not appear in valid recommendations"
+
+
+def test_roadmap_recommendation_command_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["roadmap-recommendation-hardening"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Roadmap recommendation hardening" in output
+    assert "41C" in output
+    assert "INVALID" in output
+    assert "DEFERRED" in output or "VALID" in output
+
+
+def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap-recommendation-hardening", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "recommendations" in data
+    assert "assessment" in data
+    assert data["current_track"] == "capability_intelligence"
+
+
+def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "next"])
+    output = capsys.readouterr().out
+    assert "41C" not in output, "41C must not appear in roadmap next output"
+    assert "64B.2" in output or "capability_intelligence" in output
+
+
+def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "current_phase" in data
+    assert "current_track" in data
+    assert data["current_track"] == "capability_intelligence"
+    assert "41C" not in data.get("recommended_phase", "")
+
+
+def test_roadmap_next_sources_from_registry(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    source = data.get("recommendation_source", "")
+    assert "roadmap_registry" in source or "legacy" not in source
+
+
+def test_prompt_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["prompt", "next"])
+    output = capsys.readouterr().out
+    assert "prompt recommendations" in output.lower()
+    assert "41C" not in output, "41C must not appear in prompt next output"
+
+
+def test_prompt_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["prompt", "next", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert "prompt_recommendations" in data
+    assert "current_phase" in data
+    assert "recommendation_source" in data
+    assert "roadmap_registry" in data["recommendation_source"]
+
+
+def test_roadmap_recommendation_roadmap_registry_authoritative(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    assert data["roadmap_registry_phase_count"] >= 20
+    completed = data["completed_phase_count"]
+    superseded = data["superseded_phase_count"]
+    assert completed >= 15
+    assert superseded >= 1
+
+
+def test_roadmap_recommendation_all_ten_domains_covered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening, _RRH_RECOMMENDATION_DOMAINS
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    domains_found = {s["recommendation_domain"] for s in data["signals"]}
+    for domain in _RRH_RECOMMENDATION_DOMAINS:
+        assert domain in domains_found, f"Domain '{domain}' not covered in signals"
+
+
+def test_roadmap_recommendation_completed_phases_excluded(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_roadmap_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    valid_phases = [r["recommended_phase"] for r in data["valid_recommendations"]]
+    completed_phase_ids = [
+        "63A", "63B", "63C", "63D", "63E", "63F", "64A", "64B",
+        "64B.0", "64B.1", "55A", "62A", "62C", "62F", "62G", "62H",
+        "44A", "52A", "62E", "45A",
+    ]
+    for cid in completed_phase_ids:
+        assert cid not in valid_phases, f"Completed phase {cid} must not appear in valid recommendations"
+
+
+def test_roadmap_recommendation_advisory_text(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["roadmap-recommendation-hardening"])
+    output = capsys.readouterr().out
+    assert "Roadmap Recommendation Hardening" in output or "hardens roadmap" in output.lower()
+    assert "No runtime invocation" in output or "no runtime" in output.lower()

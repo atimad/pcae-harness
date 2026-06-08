@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.1: Capability and Roadmap Intelligence.
+Phase 64B.2: Roadmap Recommendation Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 

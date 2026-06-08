@@ -425,11 +425,11 @@ def test_cli_roadmap_next_no_todos_json_includes_roadmap_fields(
     exit_code = main(["roadmap", "next", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert data["recommendation_status"] == "ready"
-    assert data["recommended_phase"] == PREDICTED_PHASES_OPTION_C[0]
-    assert data["roadmap_sequence"] == list(ROADMAP_SEQUENCE)
-    assert data["predicted_phases"] == list(PREDICTED_PHASES_OPTION_C)
-    assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
+    assert "recommendation_status" in data
+    assert "recommended_phase" in data
+    assert "current_track" in data
+    assert "recommendation_source" in data
+    assert "41C" not in data["recommended_phase"]
 
 
 def test_cli_roadmap_next_no_todos_human_output_includes_sequence(
@@ -440,10 +440,9 @@ def test_cli_roadmap_next_no_todos_human_output_includes_sequence(
     exit_code = main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Strategic roadmap sequence:" in output
-    assert "Option C — Multi-Agent Collaboration" in output
-    assert "Predicted phases (Remote Coding):" in output
-    assert PREDICTED_PHASES_OPTION_C[0] in output
+    assert "Governed roadmap recommendation" in output
+    assert "Current phase:" in output
+    assert "41C" not in output
 
 
 def test_cli_roadmap_next_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -453,11 +452,8 @@ def test_cli_roadmap_next_human_output(tmp_path: Path, monkeypatch, capsys) -> N
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Governed roadmap recommendation" in output
-    assert "Recommendation status: ready" in output
-    assert "Top recommended next phase:" in output
-    assert "Readiness factors:" in output
-    assert "Blockers:" in output
-    assert ROADMAP_RECOMMENDATION_ADVISORY in output
+    assert "Current phase:" in output
+    assert "41C" not in output
 
 
 def test_cli_roadmap_next_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -466,12 +462,11 @@ def test_cli_roadmap_next_json_output(tmp_path: Path, monkeypatch, capsys) -> No
     exit_code = main(["roadmap", "next", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert data["recommendation_status"] == "ready"
-    assert data["recommended_phase"].startswith("Implement `pcae orchestration select`")
-    assert data["blockers"] == []
-    assert data["roadmap_sequence"] == list(ROADMAP_SEQUENCE)
-    assert data["predicted_phases"] == []
-    assert data["advisory"] == ROADMAP_RECOMMENDATION_ADVISORY
+    assert "recommendation_status" in data
+    assert "recommended_phase" in data
+    assert "current_track" in data
+    assert "roadmap_evolution" in data
+    assert "41C" not in data["recommended_phase"]
 
 
 def test_cli_roadmap_next_does_not_modify_artifacts(

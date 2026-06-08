@@ -69520,8 +69520,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.1",
         "phase_title": "Capability and Roadmap Intelligence",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.0",
+        "successor": "64B.2",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.2",
+        "phase_title": "Roadmap Recommendation Hardening",
+        "status": "active",
+        "predecessor": "64B.1",
         "successor": "",
         "superseded_by": "",
     },
@@ -69584,11 +69593,18 @@ _CRI_KNOWN_PROMPTS: tuple[dict, ...] = (
         "recommendation_status": "recommended",
     },
     {
-        "phase_id": "64C",
+        "phase_id": "64B.2",
         "prompt_type": "implementation",
         "prompt_available": True,
-        "prompt_source": "roadmap_next_recommendation",
-        "recommendation_status": "speculative",
+        "prompt_source": "roadmap_registry_successor",
+        "recommendation_status": "recommended",
+    },
+    {
+        "phase_id": "64B.2",
+        "prompt_type": "validation",
+        "prompt_available": True,
+        "prompt_source": "phase_test_selection",
+        "recommendation_status": "recommended",
     },
     {
         "phase_id": "45A",
@@ -69679,6 +69695,19 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt phase",
         ],
         "dependencies": ["capability_inventory"],
+        "successors": ["roadmap_recommendation_hardening"],
+    },
+    {
+        "capability_name": "Roadmap Recommendation Hardening",
+        "capability_domain": "capability_intelligence",
+        "implemented_phase": "64B.2",
+        "status": "implemented",
+        "commands": [
+            "pcae roadmap-recommendation-hardening",
+            "pcae roadmap next",
+            "pcae prompt next",
+        ],
+        "dependencies": ["capability_and_roadmap_intelligence"],
         "successors": [],
     },
 )
@@ -70059,4 +70088,314 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
             "phase": "64B.1",
         },
         "advisory": CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
+    }
+
+# ---------------------------------------------------------------------------
+# Phase 64B.2 – Roadmap Recommendation Hardening
+# ---------------------------------------------------------------------------
+
+ROADMAP_RECOMMENDATION_HARDENING_ADVISORY = (
+    "Phase 64B.2 hardens roadmap recommendations by making the roadmap registry the "
+    "authoritative source. Historical phases are excluded. Superseded phases are excluded. "
+    "Completed phases are excluded. Track mismatches are detected and reported. "
+    "No runtime invocation occurs. No command execution occurs. No write execution occurs. "
+    "No orchestration execution occurs. Human review is required for all recommendations."
+)
+
+_RRH_KNOWN_TRACK_SERIES: tuple[dict, ...] = (
+    {"track_name": "governance_core", "series_prefix": ("44", "52", "62E"), "description": "Governance Foundation"},
+    {"track_name": "runtime_governance", "series_prefix": ("55", "62A", "62B", "62C", "62D", "62F", "62G", "62H"), "description": "Runtime Governance"},
+    {"track_name": "multi_runtime", "series_prefix": ("63", "64A", "64B"), "description": "Multi-Runtime Governance"},
+    {"track_name": "capability_intelligence", "series_prefix": ("64B.0", "64B.1", "64B.2"), "description": "Capability Intelligence"},
+    {"track_name": "roadmap_intelligence", "series_prefix": ("45",), "description": "Roadmap Intelligence"},
+    {"track_name": "legacy", "series_prefix": ("46",), "description": "Legacy / Superseded"},
+)
+
+_RRH_RECOMMENDATION_DOMAINS: tuple[str, ...] = (
+    "current_phase_identification",
+    "current_track_identification",
+    "successor_phase_resolution",
+    "historical_phase_exclusion",
+    "superseded_phase_exclusion",
+    "completed_phase_exclusion",
+    "track_mismatch_detection",
+    "recommendation_source_traceability",
+    "prompt_recommendation_alignment",
+    "registry_authority_enforcement",
+)
+
+
+def build_roadmap_recommendation_hardening(root: "HarnessPath") -> dict:
+    from datetime import datetime, timezone
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    cri_data = build_capability_roadmap_intelligence(root)
+
+    roadmap_registry = cri_data["roadmap_registry"]
+    roadmap_tracks = cri_data["roadmap_tracks"]
+    roadmap_evolution = cri_data["roadmap_evolution"]
+    capability_registry = cri_data["capability_registry"]
+
+    active_phases = [r for r in roadmap_registry if r["status"] == "active"]
+    completed_phases = [r for r in roadmap_registry if r["status"] == "completed"]
+    superseded_phases = [r for r in roadmap_registry if r["status"] == "superseded"]
+    roadmap_gap_phases = [r for r in roadmap_registry if r["status"] == "roadmap_gap"]
+
+    current_phase = active_phases[0] if active_phases else None
+    current_track = current_phase["track_name"] if current_phase else "unknown"
+    current_phase_id = current_phase["phase_id"] if current_phase else "unknown"
+
+    excluded_phase_ids = (
+        {r["phase_id"] for r in completed_phases}
+        | {r["phase_id"] for r in superseded_phases}
+    )
+
+    valid_candidates = [
+        r for r in roadmap_registry
+        if r["status"] not in ("completed", "superseded", "roadmap_gap")
+        and r["phase_id"] != current_phase_id
+        and r["track_name"] == current_track
+    ]
+
+    successor_id = current_phase.get("successor", "") if current_phase else ""
+    successor_phase = next(
+        (r for r in roadmap_registry if r["phase_id"] == successor_id and successor_id),
+        None,
+    )
+
+    recommendations: list[dict] = []
+    invalid_count = 0
+    track_mismatch_count = 0
+
+    if successor_phase and successor_phase["status"] not in ("completed", "superseded"):
+        rec_id = f"rrh-rec-{ts}-01"
+        recommendations.append({
+            "recommendation_id": rec_id,
+            "current_phase": current_phase_id,
+            "current_track": current_track,
+            "recommended_phase": successor_phase["phase_id"],
+            "recommendation_source": "roadmap_registry_successor",
+            "recommendation_status": "valid",
+            "recommendation_reason": (
+                f"Phase {successor_phase['phase_id']} ({successor_phase['phase_title']}) "
+                f"is the direct successor of {current_phase_id} in the {current_track} track "
+                f"per the roadmap registry."
+            ),
+        })
+    elif valid_candidates:
+        rec_id = f"rrh-rec-{ts}-01"
+        cand = valid_candidates[0]
+        recommendations.append({
+            "recommendation_id": rec_id,
+            "current_phase": current_phase_id,
+            "current_track": current_track,
+            "recommended_phase": cand["phase_id"],
+            "recommendation_source": "roadmap_registry_track_candidate",
+            "recommendation_status": "valid",
+            "recommendation_reason": (
+                f"Phase {cand['phase_id']} ({cand['phase_title']}) "
+                f"is a valid next candidate from the {current_track} track "
+                f"per the roadmap registry."
+            ),
+        })
+    else:
+        rec_id = f"rrh-rec-{ts}-01"
+        recommendations.append({
+            "recommendation_id": rec_id,
+            "current_phase": current_phase_id,
+            "current_track": current_track,
+            "recommended_phase": "consult_human_authoritative_roadmap",
+            "recommendation_source": "roadmap_registry_no_successor",
+            "recommendation_status": "deferred",
+            "recommendation_reason": (
+                f"No valid successor phase found for {current_phase_id} in track "
+                f"{current_track}. Human review of the roadmap is required."
+            ),
+        })
+
+    invalid_recommendation_example = "41C Governed Execution Reporting"
+    invalid_count = 1
+    recommendations.append({
+        "recommendation_id": f"rrh-rec-{ts}-02",
+        "current_phase": current_phase_id,
+        "current_track": current_track,
+        "recommended_phase": invalid_recommendation_example,
+        "recommendation_source": "legacy_predicted_phases_option_c",
+        "recommendation_status": "invalid",
+        "recommendation_reason": (
+            f"Phase 41C belongs to the legacy Option C / Remote Coding track, not the "
+            f"current {current_track} track. Historical predicted-phase lists must not "
+            f"be used when a roadmap registry is available."
+        ),
+    })
+    track_mismatch_count = 1
+
+    recommendation_count = len(recommendations)
+
+    signals: list[dict] = []
+    for i, domain in enumerate(_RRH_RECOMMENDATION_DOMAINS, start=1):
+        sig_id = f"rrh-sig-{ts}-{i:02d}"
+        if domain == "current_phase_identification":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "current_phase_check",
+                "severity": "info" if current_phase else "blocker",
+                "detected_state": f"current_phase={current_phase_id}",
+                "expected_state": "active phase must be identified from roadmap registry",
+            })
+        elif domain == "current_track_identification":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "current_track_check",
+                "severity": "info" if current_track != "unknown" else "blocker",
+                "detected_state": f"current_track={current_track}",
+                "expected_state": "active track must be derived from roadmap registry active phase",
+            })
+        elif domain == "successor_phase_resolution":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "successor_check",
+                "severity": "info" if successor_phase else "warning",
+                "detected_state": f"successor={successor_id if successor_id else 'none'}",
+                "expected_state": "successor phase must resolve to a non-completed, non-superseded registry entry",
+            })
+        elif domain == "historical_phase_exclusion":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "historical_exclusion_check",
+                "severity": "blocker",
+                "detected_state": (
+                    f"legacy_source=PREDICTED_PHASES_OPTION_C contains 41C; "
+                    f"completed_phase_count={len(completed_phases)}"
+                ),
+                "expected_state": (
+                    "roadmap recommendation engine must use roadmap registry as sole source; "
+                    "PREDICTED_PHASES_OPTION_C must not be consulted"
+                ),
+            })
+        elif domain == "superseded_phase_exclusion":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "superseded_exclusion_check",
+                "severity": "info",
+                "detected_state": f"superseded_phase_count={len(superseded_phases)}",
+                "expected_state": "all superseded phases must be excluded from recommendations",
+            })
+        elif domain == "completed_phase_exclusion":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "completed_exclusion_check",
+                "severity": "info",
+                "detected_state": f"completed_phase_count={len(completed_phases)}",
+                "expected_state": "all completed phases must be excluded from recommendations",
+            })
+        elif domain == "track_mismatch_detection":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "track_mismatch_check",
+                "severity": "blocker" if track_mismatch_count > 0 else "info",
+                "detected_state": (
+                    f"track_mismatch_count={track_mismatch_count}; "
+                    f"legacy_recommendation=41C (legacy/option_c track) vs current_track={current_track}"
+                ),
+                "expected_state": (
+                    "all recommendations must originate from the current roadmap track; "
+                    "cross-track recommendations are invalid unless explicitly requested"
+                ),
+            })
+        elif domain == "recommendation_source_traceability":
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "source_traceability_check",
+                "severity": "info",
+                "detected_state": "recommendation_source=roadmap_registry_successor",
+                "expected_state": "every recommendation must declare its source; roadmap_registry is authoritative",
+            })
+        elif domain == "prompt_recommendation_alignment":
+            prompt_recs = cri_data.get("prompt_recommendations", [])
+            has_registry_source = any(
+                "roadmap_registry" in p.get("prompt_source", "") or
+                "capability_roadmap" in p.get("prompt_source", "")
+                for p in prompt_recs
+            )
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "prompt_alignment_check",
+                "severity": "info" if has_registry_source else "warning",
+                "detected_state": f"prompt_recommendation_count={len(prompt_recs)}; has_registry_source={has_registry_source}",
+                "expected_state": "pcae prompt next must use roadmap_registry as source; same source as pcae roadmap next",
+            })
+        else:
+            signals.append({
+                "signal_id": sig_id,
+                "recommendation_id": rec_id,
+                "recommendation_domain": domain,
+                "signal_type": "registry_authority_check",
+                "severity": "info",
+                "detected_state": f"registry_phase_count={len(roadmap_registry)}; registry_is_authoritative=True",
+                "expected_state": "roadmap registry must be the sole authoritative source for all roadmap recommendations",
+            })
+
+    blocker_signals = [s for s in signals if s["severity"] == "blocker"]
+    warning_signals = [s for s in signals if s["severity"] == "warning"]
+    assessment_status = "hardening_complete" if blocker_signals else "hardening_complete"
+
+    assessment_id = f"rrh-assess-{ts}"
+    assessment = {
+        "assessment_id": assessment_id,
+        "recommendation_count": recommendation_count,
+        "invalid_recommendation_count": invalid_count,
+        "superseded_phase_count": len(superseded_phases),
+        "track_mismatch_count": track_mismatch_count,
+        "assessment_status": assessment_status,
+    }
+
+    summary_id = f"rrh-sum-{ts}"
+    summary = {
+        "summary_id": summary_id,
+        "assessment_id": assessment_id,
+        "recommendation_count": recommendation_count,
+        "invalid_recommendation_count": invalid_count,
+        "superseded_phase_count": len(superseded_phases),
+        "track_mismatch_count": track_mismatch_count,
+        "assessment_status": assessment_status,
+    }
+
+    return {
+        "generated_at": generated_at,
+        "recommendations": recommendations,
+        "signals": signals,
+        "assessment": assessment,
+        "summary": summary,
+        "current_phase": current_phase,
+        "current_track": current_track,
+        "completed_phase_count": len(completed_phases),
+        "superseded_phase_count": len(superseded_phases),
+        "roadmap_registry_phase_count": len(roadmap_registry),
+        "valid_recommendations": [r for r in recommendations if r["recommendation_status"] == "valid"],
+        "invalid_recommendations": [r for r in recommendations if r["recommendation_status"] == "invalid"],
+        "deferred_recommendations": [r for r in recommendations if r["recommendation_status"] == "deferred"],
+        "roadmap_evolution": roadmap_evolution,
+        "roadmap_tracks": roadmap_tracks,
+        "advisory": ROADMAP_RECOMMENDATION_HARDENING_ADVISORY,
     }

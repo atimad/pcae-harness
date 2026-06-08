@@ -394,6 +394,8 @@ from pcae.core.agent import (
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
     CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
+    build_roadmap_recommendation_hardening,
+    ROADMAP_RECOMMENDATION_HARDENING_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13441,5 +13443,136 @@ def run_prompt_phase(args: argparse.Namespace) -> int:
     for p in prompts:
         avail = "yes" if p["prompt_available"] else "no"
         print(f"  [{p['recommendation_id']}] {p['prompt_type']}")
+        print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.2 – Roadmap Recommendation Hardening
+# ---------------------------------------------------------------------------
+
+
+def run_roadmap_recommendation_hardening(args: argparse.Namespace) -> int:
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    if args.json:
+        payload = {
+            "generated_at": data["generated_at"],
+            "current_phase": data["current_phase"],
+            "current_track": data["current_track"],
+            "recommendations": data["recommendations"],
+            "signals": data["signals"],
+            "assessment": data["assessment"],
+            "summary": data["summary"],
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    print("Roadmap recommendation hardening")
+    print(f"Current phase:       {data['current_phase']['phase_id'] if data['current_phase'] else 'unknown'}")
+    print(f"Current track:       {data['current_track']}")
+    print(f"Registry phases:     {data['roadmap_registry_phase_count']}")
+    print(f"Completed excluded:  {data['completed_phase_count']}")
+    print(f"Superseded excluded: {data['superseded_phase_count']}")
+    print()
+    print("Hardened recommendations (registry-sourced):")
+    for r in data["valid_recommendations"]:
+        print(f"  [VALID]   {r['recommended_phase']} ({r['recommendation_source']})")
+    for r in data["deferred_recommendations"]:
+        print(f"  [DEFERRED] {r['recommended_phase']}")
+    print()
+    print("Invalid recommendations (excluded):")
+    for r in data["invalid_recommendations"]:
+        print(f"  [INVALID] {r['recommended_phase']} — {r['recommendation_reason'][:80]}...")
+    print()
+    assess = data["assessment"]
+    print(f"Assessment: {assess['assessment_status']}")
+    print(f"  Recommendations:         {assess['recommendation_count']}")
+    print(f"  Invalid recommendations: {assess['invalid_recommendation_count']}")
+    print(f"  Track mismatches:        {assess['track_mismatch_count']}")
+    print()
+    print(ROADMAP_RECOMMENDATION_HARDENING_ADVISORY)
+    return 0
+
+
+def run_roadmap_next_hardened(args: argparse.Namespace) -> int:
+    """Registry-backed replacement for the legacy run_roadmap_next."""
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    valid = data["valid_recommendations"]
+    deferred = data["deferred_recommendations"]
+    current = data["current_phase"]
+    track = data["current_track"]
+
+    if args.json:
+        top = (valid + deferred)[0] if (valid or deferred) else {}
+        payload = {
+            "current_phase": current,
+            "current_track": track,
+            "recommended_phase": top.get("recommended_phase", ""),
+            "recommendation_source": top.get("recommendation_source", ""),
+            "recommendation_status": top.get("recommendation_status", ""),
+            "recommendation_reason": top.get("recommendation_reason", ""),
+            "roadmap_evolution": data["roadmap_evolution"],
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    phase_id = current["phase_id"] if current else "unknown"
+    print("Governed roadmap recommendation")
+    print(f"Current phase: {phase_id}")
+    print(f"Current track: {track}")
+    print()
+    if valid:
+        top = valid[0]
+        print(f"Recommended next phase: {top['recommended_phase']}")
+        print(f"Source:                 {top['recommendation_source']}")
+        print(f"Reason:                 {top['recommendation_reason']}")
+    elif deferred:
+        top = deferred[0]
+        print(f"Recommendation deferred: {top['recommendation_reason']}")
+    else:
+        print("No recommendation available. Consult human-authoritative roadmap.")
+    print()
+    evolution = data["roadmap_evolution"]
+    if evolution:
+        print("Roadmap evolution events:")
+        for e in evolution:
+            print(f"  {e['original_phase']} → {e['replacement_phase']} ({e['reason'][:60]}...)")
+    print()
+    print(ROADMAP_RECOMMENDATION_HARDENING_ADVISORY)
+    return 0
+
+
+def run_prompt_next_hardened(args: argparse.Namespace) -> int:
+    """Registry-backed replacement for run_prompt_next — shares the same source as pcae roadmap next."""
+    data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    valid = data["valid_recommendations"]
+    current = data["current_phase"]
+
+    prompt_recs = cri_data.get("prompt_recommendations", [])
+    current_phase_id = current["phase_id"] if current else ""
+    relevant_prompts = [p for p in prompt_recs if p.get("phase_id") == current_phase_id]
+    if not relevant_prompts:
+        relevant_prompts = prompt_recs
+
+    if args.json:
+        top_rec = valid[0] if valid else {}
+        payload = {
+            "current_phase": current,
+            "next_phase": top_rec.get("recommended_phase", ""),
+            "recommendation_source": top_rec.get("recommendation_source", "roadmap_registry"),
+            "prompt_recommendations": relevant_prompts,
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    print("Next phase prompt recommendations")
+    if valid:
+        top = valid[0]
+        print(f"Next recommended phase: {top['recommended_phase']}")
+        print(f"Source:                 {top['recommendation_source']}")
+    print()
+    for p in relevant_prompts:
+        avail = "yes" if p["prompt_available"] else "no"
+        print(f"  [{p['recommendation_id']}] {p['phase_id']} — {p['prompt_type']}")
         print(f"    source={p['prompt_source']}  available={avail}  status={p['recommendation_status']}")
     return 0
