@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 64B.6 Prompt Rendering Skill (20260608-2236-64b-6-prompt-rendering-skill)
 - 64B.6: Prompt Rendering Skill (20260608-2232-64b-6-prompt-rendering-skill)
 - 64B.5A: Capability Target Resolution Hardening (20260608-2217-64b-5a-capability-target-resolution-hardening)
 - 64B.5: Skill Invocation Targeting (20260608-2134-64b-5-skill-invocation-targeting)

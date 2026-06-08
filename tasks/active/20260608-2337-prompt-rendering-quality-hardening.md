@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-2236-64b-6-prompt-rendering-skill
+20260608-2337-prompt-rendering-quality-hardening
 
 ## Title
 
-64B.6 Prompt Rendering Skill
+Prompt Rendering Quality Hardening
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-64B.6 Prompt Rendering Skill
+Prompt Rendering Quality Hardening
 
 ## Allowed Files
 
@@ -32,10 +32,12 @@ implementation
 - CHANGELOG.md
 - docs/CAPABILITY_INVENTORY.md
 - docs/SKILL_REGISTRY.md
+- docs/COMMANDS.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
 - src/pcae/core/agent.py
 - tests/test_agent.py
+- .pcae/skills/**
 
 ## Forbidden Files
 
@@ -85,4 +87,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T22:36:54.116672+02:00
+2026-06-08T23:37:41.515540+02:00

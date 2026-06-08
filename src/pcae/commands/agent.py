@@ -403,6 +403,11 @@ from pcae.core.agent import (
     SKILL_SYSTEM_FOUNDATION_ADVISORY,
     build_skill_invocation_targeting,
     SKILL_INVOCATION_TARGETING_ADVISORY,
+    build_prompt_rendering_skill,
+    PROMPT_RENDERING_SKILL_ADVISORY,
+    PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY,
+    _PRS_PROMPT_SKILL_IDS,
+    _PRQ_QUALITY_DOMAINS,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13766,14 +13771,22 @@ def _write_skill_registry_md(data: dict) -> None:
         "- 64B.4A hardens skill registry consolidation.",
         "- 64B.4B consolidates capability projections.",
         "- 64B.5 introduces skill invocation targeting.",
+        "- 64B.6 introduces prompt rendering through PCAE skills.",
+        "- 64B.6A hardens prompt rendering quality: goal accuracy, domain accuracy, completeness scoring, placeholder detection.",
+        "- Skills are the first-class prompt rendering interface.",
+        "- 'pcae skill invoke phase-implementation <phase_id>' renders a full implementation prompt.",
+        "- 'pcae skill invoke phase-validation <phase_id>' renders a full validation prompt.",
+        "- 'pcae skill invoke phase-agent <phase_id>' renders a full agent prompt.",
+        "- Rendered prompts are detailed, goal-oriented, and agent-ready.",
+        "- Prompt quality is checked across 10 domains; quality signals surface inline.",
         "- Skills can now resolve phase, capability, task, and track targets.",
         "- Skills are governed artifacts.",
         "- Skill Registry discovery and metadata are consolidated with the shared intelligence infrastructure.",
         "- Capability Inventory records the skill system as a capability domain.",
-        "- Roadmap Registry tracks the 64B.5 capability_intelligence phase.",
-        "- Skills support discovery, validation, invocation, and target resolution.",
-        "- Prompt rendering is not implemented in 64B.5.",
-        "- Future skills may provide prompt rendering, roadmap analysis, capability analysis, and task lifecycle workflows.",
+        "- Roadmap Registry tracks the 64B.6A capability_intelligence phase.",
+        "- Skills support discovery, validation, invocation, target resolution, and prompt rendering.",
+        "- No runtime behavior changes occur in 64B.6 or 64B.6A.",
+        "- No orchestration behavior changes occur in 64B.6 or 64B.6A.",
     ])
     docs_dir = pathlib.Path("docs")
     docs_dir.mkdir(exist_ok=True)
@@ -13863,15 +13876,25 @@ def run_skill_invoke(args: argparse.Namespace) -> int:
         )
         assessment = targeting["assessment"]
         blocked = assessment["blocker_count"] > 0
+
+        is_prompt_skill = args.skill_id in _PRS_PROMPT_SKILL_IDS
+        render_data: dict | None = None
+        if is_prompt_skill and not blocked and targeting["target_type"] == "phase":
+            render_data = build_prompt_rendering_skill(root, skill_id=args.skill_id, phase_id=target_id)
+
         if args.json:
-            print(json.dumps({
+            payload: dict = {
                 "targeting": targeting,
                 "assessment": assessment,
                 "resolution": targeting["resolution"],
                 "signals": targeting["signals"],
                 "advisory": targeting["advisory"],
-            }, indent=2, sort_keys=True))
+            }
+            if render_data is not None:
+                payload["render"] = render_data
+            print(json.dumps(payload, indent=2, sort_keys=True))
             return 1 if blocked else 0
+
         print("Skill invocation targeting")
         print(f"Skill ID:             {args.skill_id}")
         print(f"Target ID:            {target_id}")
@@ -13888,8 +13911,36 @@ def run_skill_invoke(args: argparse.Namespace) -> int:
             print("Signals:")
             for sig in targeting["signals"]:
                 print(f"  [{sig['severity'].upper()}] {sig['signal_type']}: {sig['detected_state']}")
-        print()
-        print(SKILL_INVOCATION_TARGETING_ADVISORY)
+
+        if render_data is not None:
+            render_rec = render_data["render_record"]
+            print()
+            print("Prompt Rendering")
+            print(f"Render ID:            {render_rec['render_id']}")
+            print(f"Prompt type:          {render_rec['prompt_type']}")
+            print(f"Render status:        {render_rec['render_status']}")
+            print(f"Completeness:         {render_rec['completeness_score']}")
+            if render_data["signals"]:
+                print()
+                print("Render signals:")
+                for sig in render_data["signals"]:
+                    print(f"  [{sig['severity'].upper()}] {sig['signal_type']}: {sig['detected_state']}")
+            quality_signals = render_data.get("quality_signals") or []
+            if quality_signals:
+                print()
+                print("Quality signals:")
+                for sig in quality_signals:
+                    print(f"  [{sig['severity'].upper()}] {sig['quality_domain']}: {sig['detected_state']}")
+            if render_rec["rendered_prompt"]:
+                print()
+                print("=" * 72)
+                print(render_rec["rendered_prompt"].rstrip())
+                print("=" * 72)
+            print()
+            print(PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY)
+        else:
+            print()
+            print(SKILL_INVOCATION_TARGETING_ADVISORY)
         return 1 if blocked else 0
 
     data = build_skill_system_foundation(root, invoke_skill_id=args.skill_id)
@@ -13920,3 +13971,48 @@ def run_skill_invoke(args: argparse.Namespace) -> int:
     print()
     print(SKILL_SYSTEM_FOUNDATION_ADVISORY)
     return 0
+
+
+def run_prompt_render_skill(args: argparse.Namespace) -> int:
+    phase_id = getattr(args, "phase", None)
+    prompt_type = getattr(args, "type", "implementation")
+    skill_map = {
+        "implementation": "phase-implementation",
+        "validation": "phase-validation",
+        "agent": "phase-agent",
+    }
+    skill_id = skill_map.get(prompt_type)
+    if skill_id is None:
+        print(f"Unknown prompt type: {prompt_type!r}. Must be one of: implementation, validation, agent")
+        return 1
+    root = HarnessPath.cwd()
+    data = build_prompt_rendering_skill(root, skill_id=skill_id, phase_id=phase_id)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 1 if data["assessment"]["blocker_count"] > 0 else 0
+    render_rec = data["render_record"]
+    print("Prompt Rendering Skill")
+    print(f"Phase ID:             {phase_id}")
+    print(f"Skill ID:             {skill_id}")
+    print(f"Prompt type:          {render_rec['prompt_type']}")
+    print(f"Render status:        {render_rec['render_status']}")
+    print(f"Completeness:         {render_rec['completeness_score']}")
+    if data["signals"]:
+        print()
+        print("Signals:")
+        for sig in data["signals"]:
+            print(f"  [{sig['severity'].upper()}] {sig['signal_type']}: {sig['detected_state']}")
+    quality_signals = data.get("quality_signals") or []
+    if quality_signals:
+        print()
+        print("Quality signals:")
+        for sig in quality_signals:
+            print(f"  [{sig['severity'].upper()}] {sig['quality_domain']}: {sig['detected_state']}")
+    if render_rec["rendered_prompt"]:
+        print()
+        print("=" * 72)
+        print(render_rec["rendered_prompt"].rstrip())
+        print("=" * 72)
+    print()
+    print(PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY)
+    return 1 if data["assessment"]["blocker_count"] > 0 else 0

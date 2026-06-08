@@ -69632,8 +69632,26 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.5",
         "phase_title": "Skill Invocation Targeting",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.4B",
+        "successor": "64B.6",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6",
+        "phase_title": "Prompt Rendering Skill",
+        "status": "completed",
+        "predecessor": "64B.5",
+        "successor": "64B.6A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6A",
+        "phase_title": "Prompt Rendering Quality Hardening",
+        "status": "active",
+        "predecessor": "64B.6",
         "successor": "",
         "superseded_by": "",
     },
@@ -70085,6 +70103,42 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "skill_registry_consolidation_hardening",
         ],
+        "successors": ["prompt_rendering_skill"],
+    },
+    {
+        "capability_name": "Prompt Rendering Skill",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": [
+            "skill_invocation_targeting",
+        ],
+        "successors": ["prompt_rendering_quality_hardening"],
+    },
+    {
+        "capability_name": "Prompt Rendering Quality Hardening",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6A",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": [
+            "prompt_rendering_skill",
+        ],
         "successors": [],
     },
 )
@@ -70120,6 +70174,7 @@ def _build_capability_projection(
 _SKILL_REQUIRED_SKILLS: tuple[dict, ...] = (
     {"skill_id": "phase-implementation", "skill_name": "Phase Implementation", "skill_type": "implementation"},
     {"skill_id": "phase-validation", "skill_name": "Phase Validation", "skill_type": "validation"},
+    {"skill_id": "phase-agent", "skill_name": "Phase Agent", "skill_type": "agent"},
     {"skill_id": "roadmap-analysis", "skill_name": "Roadmap Analysis", "skill_type": "analysis"},
     {"skill_id": "capability-analysis", "skill_name": "Capability Analysis", "skill_type": "analysis"},
     {"skill_id": "task-transition", "skill_name": "Task Transition", "skill_type": "workflow"},
@@ -71150,6 +71205,54 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_source": "roadmap_registry+capability_registry",
         "capability_phase": "64B.5",
     },
+    {
+        "phase_id": "64B.6",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6",
+    },
+    {
+        "phase_id": "64B.6",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6",
+    },
+    {
+        "phase_id": "64B.6",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6",
+    },
+    {
+        "phase_id": "64B.6A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6A",
+    },
+    {
+        "phase_id": "64B.6A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6A",
+    },
+    {
+        "phase_id": "64B.6A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6A",
+    },
 )
 
 
@@ -71630,6 +71733,7 @@ SKILL_INVOCATION_TARGETING_ADVISORY = (
 _SIT_SKILL_COMPATIBLE_TARGETS: dict[str, tuple[str, ...]] = {
     "phase-implementation": ("phase",),
     "phase-validation": ("phase",),
+    "phase-agent": ("phase",),
     "roadmap-analysis": ("phase", "track"),
     "capability-analysis": ("capability",),
     "task-transition": ("task", "phase"),
@@ -72150,4 +72254,906 @@ def build_skill_invocation_targeting(
             "phase": "64B.5",
         },
         "advisory": SKILL_INVOCATION_TARGETING_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6 – Prompt Rendering Skill
+# Phase 64B.6A – Prompt Rendering Quality Hardening
+# ---------------------------------------------------------------------------
+
+PROMPT_RENDERING_SKILL_ADVISORY = (
+    "Phase 64B.6 introduces prompt rendering through PCAE skills. Skills are the first-class "
+    "prompt rendering interface. Use 'pcae skill invoke phase-implementation <phase_id>', "
+    "'pcae skill invoke phase-validation <phase_id>', or 'pcae skill invoke phase-agent <phase_id>' "
+    "to render detailed, agent-ready prompts from roadmap, capability, prompt, and skill registries. "
+    "Phase 64B.6A hardens prompt rendering quality: phase identity, goal, capability domain, "
+    "dependencies, and placeholder text are now validated. "
+    "No runtime invocation occurs. No shell commands are executed. No write execution occurs. "
+    "Human review is required before use."
+)
+
+PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY = (
+    "Phase 64B.6A hardens prompt rendering quality. Rendered prompts now validate phase identity, "
+    "goal accuracy, capability domain accuracy, dependency accuracy, roadmap context accuracy, "
+    "prompt section completeness, governance constraints, validation commands, agent prompt structure, "
+    "and placeholder text. Rendering is phase-aware, roadmap-aware, and capability-aware. "
+    "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+_PRS_PROMPT_SKILL_IDS: frozenset = frozenset({
+    "phase-implementation",
+    "phase-validation",
+    "phase-agent",
+})
+
+_PRS_SKILL_PROMPT_TYPE_MAP: dict = {
+    "phase-implementation": "implementation",
+    "phase-validation": "validation",
+    "phase-agent": "agent",
+}
+
+_PRS_RENDER_DOMAINS: tuple = (
+    "roadmap_context_rendering",
+    "capability_context_rendering",
+    "skill_context_rendering",
+    "prompt_structure_rendering",
+    "governance_constraint_rendering",
+    "acceptance_criteria_rendering",
+    "validation_command_rendering",
+    "documentation_requirement_rendering",
+    "prompt_completeness_validation",
+    "human_review_boundary_rendering",
+)
+
+_PRQ_QUALITY_DOMAINS: tuple = (
+    "phase_identity_accuracy",
+    "phase_goal_accuracy",
+    "capability_domain_accuracy",
+    "dependency_accuracy",
+    "roadmap_context_accuracy",
+    "prompt_section_completeness",
+    "governance_constraint_accuracy",
+    "validation_command_accuracy",
+    "agent_prompt_structure_quality",
+    "placeholder_detection",
+)
+
+_PRS_RENDER_RECORD_FIELDS: tuple = (
+    {"name": "render_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "skill_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "rendered_prompt", "type": "str", "required": True},
+    {"name": "completeness_score", "type": "float", "required": True},
+    {"name": "render_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRS_RENDER_SIGNAL_FIELDS: tuple = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "render_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "render_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRS_RENDER_ASSESSMENT_FIELDS: tuple = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "render_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "render_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRS_RENDER_SUMMARY_FIELDS: tuple = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "render_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "render_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRQ_SIGNAL_FIELDS: tuple = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "quality_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRQ_ASSESSMENT_FIELDS: tuple = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "completeness_score", "type": "float", "required": True},
+    {"name": "quality_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRQ_SUMMARY_FIELDS: tuple = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "completeness_score", "type": "float", "required": True},
+    {"name": "quality_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_PRS_GOVERNANCE_MAY: tuple = (
+    "inspect roadmap registry",
+    "inspect capability inventory",
+    "inspect prompt registry",
+    "inspect skill registry",
+    "render prompts",
+    "validate prompt quality",
+    "validate prompt completeness",
+    "report blockers and warnings",
+)
+
+_PRS_GOVERNANCE_MAY_NOT: tuple = (
+    "invoke runtimes",
+    "execute shell commands",
+    "execute prompts",
+    "modify runtime configuration",
+    "modify source files through execution",
+    "access network",
+    "approve writes",
+    "commit",
+    "push",
+    "rollback",
+)
+
+_PRS_STANDARD_INPUTS: tuple = (
+    "docs/ROADMAP_REGISTRY.md",
+    "docs/CAPABILITY_INVENTORY.md",
+    "docs/PROMPT_REGISTRY.md",
+    "docs/SKILL_REGISTRY.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md",
+    ".pcae/session.json",
+    ".pcae/skills/**/SKILL.md",
+)
+
+_PRS_STANDARD_ACCEPTANCE_CHECKS: tuple = (
+    "pcae status coherence passes",
+    "pcae health passes",
+    "pcae check passes",
+    "python -m pytest -n auto passes",
+)
+
+_PRS_STANDARD_VALIDATION_COMMANDS: tuple = (
+    "pcae check",
+    "pcae health",
+    "pcae status coherence",
+    "python -m pytest -n auto",
+)
+
+_PRS_STANDARD_DOCUMENTATION_REQUIREMENTS: tuple = (
+    "Update PROJECT_STATUS.md",
+    "Update CHANGELOG.md",
+    "Update tasks/DONE.md",
+    "Update docs/CAPABILITY_INVENTORY.md",
+    "Update docs/SKILL_REGISTRY.md",
+    "Update docs/PROMPT_REGISTRY.md",
+)
+
+_PRQ_PLACEHOLDER_PATTERNS: tuple = (
+    "commands to be defined during implementation",
+    "no required dependencies",
+    "not yet assigned",
+    "planned: next phase",
+    "commands defined during implementation",
+    "(tbd)",
+)
+
+_PRS_TRACK_TO_DOMAIN: dict = {
+    "multi_runtime": "multi_runtime_capabilities",
+    "capability_intelligence": "skill_system_capabilities",
+    "roadmap_intelligence": "roadmap_capabilities",
+    "runtime_governance": "runtime_governance_capabilities",
+    "governance": "governance_capabilities",
+    "legacy": "governance_capabilities",
+}
+
+
+def _prs_find_best_capability(
+    phase_id: str,
+    phase_record: dict | None,
+    capability_registry: list,
+) -> "dict | None":
+    """Return the best-matching capability for phase_id, preferring track alignment."""
+    candidates = [c for c in capability_registry if c.get("implemented_phase") == phase_id]
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+    track = (phase_record or {}).get("track_name", "")
+    if track:
+        expected_domain = _PRS_TRACK_TO_DOMAIN.get(track, "")
+        for c in candidates:
+            if c.get("capability_domain") == expected_domain:
+                return c
+        # Fallback: prefer candidate whose name slug matches track keywords
+        track_keywords = set(track.replace("_", " ").split())
+        for c in candidates:
+            cap_words = set(c.get("capability_name", "").lower().split())
+            if track_keywords & cap_words:
+                return c
+    # Last resort: prefer the one with most commands (most specific)
+    return max(candidates, key=lambda c: len(c.get("commands", [])))
+
+
+def _prs_infer_capability_domain(
+    phase_record: dict | None,
+    capability_record: dict | None,
+) -> str:
+    """Return capability domain, falling back to track-derived domain when missing."""
+    if capability_record and capability_record.get("capability_domain"):
+        return capability_record["capability_domain"]
+    track = (phase_record or {}).get("track_name", "")
+    return _PRS_TRACK_TO_DOMAIN.get(track, f"{track}_capabilities" if track else "unknown")
+
+
+def _prs_compute_completeness(
+    phase_record: dict | None,
+    capability_record: dict | None,
+) -> float:
+    """Roadmap-first completeness: 1.0 when the roadmap record is fully populated."""
+    if not phase_record:
+        return 0.0
+    score = 0.7  # base: phase exists in roadmap registry
+    if phase_record.get("phase_title"):
+        score += 0.1
+    if phase_record.get("track_name"):
+        score += 0.1
+    if phase_record.get("predecessor") or phase_record.get("successor"):
+        score += 0.1
+    # capability data is bonus (already at 1.0 from roadmap, capped below)
+    return round(min(score, 1.0), 2)
+
+
+def _prq_detect_placeholders(text: str) -> list:
+    """Return list of placeholder patterns found in the rendered text."""
+    lower = text.lower()
+    return [p for p in _PRQ_PLACEHOLDER_PATTERNS if p in lower]
+
+
+def _prq_run_quality_checks(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    phase_record: "dict | None",
+    capability_record: "dict | None",
+    rendered_prompt: str,
+) -> list:
+    """Run all quality domain checks and return PromptQualitySignal list."""
+    signals: list[dict] = []
+    idx = 1
+
+    def _qs(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        nonlocal idx
+        signals.append({
+            "signal_id": f"prq-sig-{ts}-{idx:02d}",
+            "phase_id": phase_id,
+            "prompt_type": prompt_type,
+            "quality_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+        idx += 1
+
+    phase_title = (phase_record or {}).get("phase_title", "")
+    track = (phase_record or {}).get("track_name", "")
+    cap_name = (capability_record or {}).get("capability_name", "")
+
+    # 1. Phase identity accuracy
+    if not phase_record:
+        _qs("phase_identity_accuracy", "phase_not_in_registry", "blocker",
+            f"phase_id={phase_id!r} not found in roadmap registry",
+            "phase_id present in roadmap registry")
+    else:
+        if phase_title and rendered_prompt and phase_title not in rendered_prompt:
+            _qs("phase_identity_accuracy", "phase_title_missing_from_prompt", "warning",
+                f"phase_title={phase_title!r} not present in rendered prompt",
+                "phase title appears in rendered prompt")
+
+    # 2. Phase goal accuracy: rendered goal must align with phase title, not capability name
+    if phase_record and cap_name and phase_title and cap_name != phase_title:
+        if rendered_prompt and f"Implement {cap_name}" in rendered_prompt and phase_title not in cap_name:
+            _qs("phase_goal_accuracy", "goal_uses_capability_name_not_phase_title", "warning",
+                f"goal says 'Implement {cap_name}' but phase title is {phase_title!r}",
+                "goal aligns with phase title from roadmap registry")
+
+    # 3. Capability domain accuracy
+    inferred_domain = _prs_infer_capability_domain(phase_record, capability_record)
+    if capability_record:
+        actual_domain = capability_record.get("capability_domain", "")
+        expected_domain = _PRS_TRACK_TO_DOMAIN.get(track, "")
+        if expected_domain and actual_domain and actual_domain != expected_domain:
+            _qs("capability_domain_accuracy", "capability_domain_track_mismatch", "warning",
+                f"capability_domain={actual_domain!r} for track={track!r}",
+                f"expected domain={expected_domain!r} for track")
+    if rendered_prompt and "unknown" in rendered_prompt and "Capability Domain" in rendered_prompt:
+        _qs("capability_domain_accuracy", "unknown_capability_domain_in_prompt", "warning",
+            "rendered prompt contains 'unknown' as capability domain",
+            "capability domain resolved from roadmap registry or track")
+
+    # 4. Dependency accuracy
+    if capability_record:
+        deps = capability_record.get("dependencies", [])
+        if not deps and rendered_prompt:
+            _qs("dependency_accuracy", "no_dependencies_defined", "info",
+                "no dependencies found in capability record",
+                "dependencies present or explicitly none")
+
+    # 5. Roadmap context accuracy
+    if phase_record:
+        status = phase_record.get("status", "")
+        if status in ("roadmap_gap", "planned") and rendered_prompt:
+            _qs("roadmap_context_accuracy", "phase_status_is_roadmap_gap_or_planned", "info",
+                f"phase status={status!r}; rendering from roadmap metadata only",
+                "phase status active or implemented for full context")
+
+    # 6. Prompt section completeness
+    if prompt_type == "implementation" and rendered_prompt:
+        for section in ("Goal", "Scope", "Governance", "Acceptance Criteria"):
+            if section not in rendered_prompt:
+                _qs("prompt_section_completeness", "missing_required_section", "blocker",
+                    f"section {section!r} missing from implementation prompt",
+                    f"section {section!r} present in rendered prompt")
+    elif prompt_type == "validation" and rendered_prompt:
+        for section in ("Commands to Run", "Expected Results", "Governance Checks"):
+            if section not in rendered_prompt:
+                _qs("prompt_section_completeness", "missing_required_section", "blocker",
+                    f"section {section!r} missing from validation prompt",
+                    f"section {section!r} present in rendered prompt")
+    elif prompt_type == "agent" and rendered_prompt:
+        for section in ("Overview", "Implementation Summary", "Validation Summary",
+                        "Governance Constraints", "Review Checklist", "Human Review Requirement"):
+            if section not in rendered_prompt:
+                _qs("prompt_section_completeness", "missing_required_section", "blocker",
+                    f"section {section!r} missing from agent prompt",
+                    f"section {section!r} present in rendered prompt")
+
+    # 7. Governance constraint accuracy
+    if rendered_prompt:
+        if "invoke runtimes" not in rendered_prompt and prompt_type == "implementation":
+            _qs("governance_constraint_accuracy", "governance_may_not_missing", "warning",
+                "governance may-not list missing 'invoke runtimes'",
+                "governance constraints complete in rendered prompt")
+
+    # 8. Validation command accuracy
+    if prompt_type == "validation" and rendered_prompt:
+        for cmd in ("pcae check", "python -m pytest"):
+            if cmd not in rendered_prompt:
+                _qs("validation_command_accuracy", "validation_command_missing", "warning",
+                    f"validation command {cmd!r} not in rendered prompt",
+                    "standard validation commands present")
+
+    # 9. Agent prompt structure quality
+    if prompt_type == "agent" and rendered_prompt:
+        agent_sections = (
+            "Overview", "Implementation Summary", "Validation Summary",
+            "Governance Constraints", "Safety Boundaries", "Review Checklist",
+            "Expected Output Format", "Human Review Requirement",
+        )
+        missing = [s for s in agent_sections if s not in rendered_prompt]
+        if missing:
+            _qs("agent_prompt_structure_quality", "agent_prompt_missing_sections", "warning",
+                f"agent prompt missing sections: {missing}",
+                "agent prompt contains all required structured sections")
+
+    # 10. Placeholder detection
+    if rendered_prompt:
+        found = _prq_detect_placeholders(rendered_prompt)
+        for placeholder in found:
+            _qs("placeholder_detection", "placeholder_text_detected", "warning",
+                f"placeholder text detected: {placeholder!r}",
+                "no placeholder text in rendered prompt")
+
+    return signals
+
+
+def _prs_render_implementation_prompt(
+    phase_id: str,
+    phase_record: dict | None,
+    capability_record: dict | None,
+) -> str:
+    phase_title = (phase_record or {}).get("phase_title") or phase_id
+    track_name = (phase_record or {}).get("track_name", "unknown")
+    status = (phase_record or {}).get("status", "unknown")
+    predecessor = (phase_record or {}).get("predecessor") or "unknown"
+    successor = (phase_record or {}).get("successor") or "(not yet assigned)"
+    cap_domain = _prs_infer_capability_domain(phase_record, capability_record)
+    commands = (capability_record or {}).get("commands", [])
+    dependencies = (capability_record or {}).get("dependencies", [])
+    phase_slug = phase_id.lower().replace(".", "_")
+
+    commands_block = (
+        "\n".join(f"- {cmd}" for cmd in commands)
+        if commands
+        else "- (no commands defined; define during implementation)"
+    )
+    deps_block = (
+        "\n".join(f"- {dep}" for dep in dependencies)
+        if dependencies
+        else "- none"
+    )
+    inputs_block = "\n".join(f"- {inp}" for inp in _PRS_STANDARD_INPUTS)
+    acceptance_block = "\n".join(f"- {chk}" for chk in _PRS_STANDARD_ACCEPTANCE_CHECKS)
+    validation_block = "\n".join(f"  {cmd}" for cmd in _PRS_STANDARD_VALIDATION_COMMANDS)
+    docs_block = "\n".join(f"- {req}" for req in _PRS_STANDARD_DOCUMENTATION_REQUIREMENTS)
+    may_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY)
+    may_not_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY_NOT)
+
+    return f"""# Phase {phase_id}: {phase_title}
+
+## Goal
+Implement {phase_title} for the PCAE governance harness. This phase introduces \
+{phase_title.lower()} as a governed capability in the {track_name} track.
+
+## Phase Context
+- Phase ID: {phase_id}
+- Phase Title: {phase_title}
+- Track: {track_name}
+- Status: {status}
+- Predecessor: {predecessor}
+- Successor: {successor}
+
+## Scope
+- Implement {phase_title} in src/pcae/core/agent.py
+- Add runner and CLI integration in src/pcae/commands/agent.py and src/pcae/cli.py
+- Add tests in tests/test_agent.py using test_{phase_slug}_* naming
+- No runtime invocation
+- No shell command execution
+- No orchestration execution
+- No write execution
+
+## Inputs
+{inputs_block}
+
+## Capability Domain
+{cap_domain}
+
+## Commands
+{commands_block}
+
+## Dependencies
+{deps_block}
+
+## Required Behavior
+- All acceptance checks pass after implementation
+- All existing tests continue to pass
+- New capability is registered in _CRI_KNOWN_CAPABILITIES
+- Phase is registered in _CRI_KNOWN_PHASES with status=active
+- Predecessor phase status updated to completed
+- Prompt profiles registered in _PRH_PROMPT_PROFILES
+- Human review required for all governance decisions
+
+## Governance
+
+### May
+{may_block}
+
+### May Not
+{may_not_block}
+
+## Acceptance Criteria
+{acceptance_block}
+
+## Validation Commands
+```
+{validation_block}
+```
+
+## Documentation Requirements
+{docs_block}
+"""
+
+
+def _prs_render_validation_prompt(
+    phase_id: str,
+    phase_record: dict | None,
+    capability_record: dict | None,
+) -> str:
+    phase_title = (phase_record or {}).get("phase_title") or phase_id
+    phase_slug = phase_id.lower().replace(".", "_")
+    commands = (capability_record or {}).get("commands", [])
+    commands_block = (
+        "\n".join(f"- {cmd}" for cmd in commands[:6])
+        if commands
+        else "- (no commands implemented yet; define during implementation)"
+    )
+
+    return f"""# Phase {phase_id} Validation: {phase_title}
+
+## Purpose
+Validate that {phase_title} is correctly implemented and all acceptance criteria are satisfied.
+
+## Commands to Run
+- pcae check
+- pcae health
+- pcae status coherence
+- python -m pytest -n auto
+
+## Expected Results
+- pcae check: PCAE check passed
+- pcae health: all checks pass
+- pcae status coherence: Status coherent
+- pytest: all tests pass, no regressions
+
+## Governance Checks
+- No runtime invocation occurred during implementation
+- No shell commands executed outside allowed zones
+- No write execution occurred
+- No commit was made automatically
+- Human review was performed
+
+## Implemented Commands
+{commands_block}
+
+## Focused Tests
+```
+python -m pytest -k "{phase_slug}" -v
+python -m pytest -k "prompt_rendering" -v
+```
+
+## Full Regression Tests
+```
+python -m pytest -n auto
+```
+
+## Git Status Review
+```
+git status
+git diff HEAD
+```
+Verify:
+- Only allowed files were modified
+- No unintended changes to runtime or orchestration files
+- No secrets or credentials committed
+
+## Commit Safety Criteria
+- All acceptance checks pass
+- No unintended file modifications
+- No secrets committed
+- Commit message includes phase ID ({phase_id}) and title
+- Co-authored-by attribution included
+"""
+
+
+def _prs_render_agent_prompt(
+    phase_id: str,
+    phase_record: dict | None,
+    capability_record: dict | None,
+) -> str:
+    phase_title = (phase_record or {}).get("phase_title") or phase_id
+    track_name = (phase_record or {}).get("track_name", "unknown")
+    phase_slug = phase_id.lower().replace(".", "_")
+    commands = (capability_record or {}).get("commands", [])
+    key_commands = commands[:3] if commands else ["(to be defined during implementation)"]
+    commands_summary = "\n".join(f"  - {cmd}" for cmd in key_commands)
+    may_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY)
+    may_not_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY_NOT)
+
+    return f"""# Phase {phase_id} Agent Instructions: {phase_title}
+
+## Overview
+You are implementing Phase {phase_id}: {phase_title} for the PCAE governance harness.
+This agent prompt assembles implementation guidance, validation steps, governance constraints,
+and safety requirements into a single artifact. Read all sections before starting.
+Track: {track_name}.
+
+## Implementation Summary
+- Phase: {phase_id} — {phase_title}
+- Track: {track_name}
+- Goal: Implement {phase_title} for the PCAE governance harness
+- Key commands:
+{commands_summary}
+- Acceptance criteria:
+  - pcae status coherence passes
+  - pcae check passes
+  - python -m pytest -n auto passes
+
+## Validation Summary
+- Run: `pcae check && python -m pytest -n auto`
+- Focused: `python -m pytest -k "{phase_slug}" -v`
+- Review: `git status && git diff HEAD`
+- Expected: all checks pass, no regressions, no unintended changes
+
+## Governance Constraints
+
+### May
+{may_block}
+
+### May Not
+{may_not_block}
+
+## Safety Boundaries
+- Do not invoke runtimes or execute prompts automatically
+- Do not modify runtime behavior or orchestration configuration
+- Do not commit, push, or rollback without explicit human instruction
+- Do not access external networks
+- Do not modify files outside the allowed file list in the task contract
+- All governance decisions require human review
+
+## Review Checklist
+- [ ] Phase ID ({phase_id}) and title ({phase_title}) are correct in all outputs
+- [ ] Goal aligns with phase title, not a different phase or capability name
+- [ ] Capability domain is correct for track ({track_name})
+- [ ] All acceptance checks pass
+- [ ] No placeholder text in implementation
+- [ ] No unintended file modifications
+- [ ] Documentation updated per requirements
+- [ ] No secrets committed
+- [ ] Human review performed
+
+## Expected Output Format
+- Source files modified as specified in the implementation
+- Tests added using test_{phase_slug}_* naming convention
+- All acceptance criteria verified
+- Documentation updated (PROJECT_STATUS.md, CHANGELOG.md, docs/)
+
+## Human Review Requirement
+All rendered prompts require human review before use.
+No runtime invocation or execution occurs automatically as a result of rendering this prompt.
+"""
+
+
+def build_prompt_rendering_skill(
+    root: "HarnessPath | None" = None,
+    skill_id: str | None = None,
+    phase_id: str | None = None,
+) -> dict:
+    from datetime import datetime, timezone
+
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    render_id = f"prs-{ts}-01"
+
+    prompt_type = _PRS_SKILL_PROMPT_TYPE_MAP.get(skill_id or "", "unknown")
+
+    cri_data = build_capability_roadmap_intelligence(root)
+    roadmap_registry = cri_data["roadmap_registry"]
+    capability_registry = cri_data["capability_registry"]
+    skill_data = _discover_skill_registry(root, ts)
+    skill_registry = skill_data["skill_registry"]
+
+    phase_record = (
+        next((r for r in roadmap_registry if r["phase_id"] == phase_id), None)
+        if phase_id else None
+    )
+    capability_record = (
+        _prs_find_best_capability(phase_id or "", phase_record, capability_registry)
+        if phase_id else None
+    )
+    skill_record = (
+        next((s for s in skill_registry if s["skill_id"] == skill_id), None)
+        if skill_id else None
+    )
+
+    # Source traceability
+    source_traceability = {
+        "roadmap_registry_source": phase_record.get("roadmap_id") if phase_record else None,
+        "capability_inventory_source": capability_record.get("capability_id") if capability_record else None,
+        "skill_registry_source": skill_record.get("skill_id") if skill_record else None,
+        "prompt_registry_source": f"{phase_id}-{prompt_type}" if phase_id else None,
+    }
+
+    signals: list[dict] = []
+    sig_idx = 1
+
+    def _add_signal(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        nonlocal sig_idx
+        signals.append({
+            "signal_id": f"prs-sig-{ts}-{sig_idx:02d}",
+            "render_id": render_id,
+            "phase_id": phase_id or "",
+            "prompt_type": prompt_type,
+            "render_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+        sig_idx += 1
+
+    if not skill_id or skill_id not in _PRS_PROMPT_SKILL_IDS:
+        _add_signal(
+            "skill_context_rendering",
+            "unsupported_skill_for_rendering",
+            "blocker",
+            f"skill_id={skill_id!r}",
+            f"skill_id in {sorted(_PRS_PROMPT_SKILL_IDS)}",
+        )
+
+    if not phase_id:
+        _add_signal(
+            "roadmap_context_rendering",
+            "missing_phase_id",
+            "blocker",
+            "phase_id=None",
+            "phase_id must be provided",
+        )
+    elif phase_record is None:
+        _add_signal(
+            "roadmap_context_rendering",
+            "phase_not_in_registry",
+            "warning",
+            f"phase_id={phase_id!r} not found in roadmap registry",
+            "phase_id present in roadmap registry",
+        )
+
+    completeness = _prs_compute_completeness(phase_record, capability_record)
+
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+
+    if blocker_count > 0:
+        render_status = "blocked"
+        rendered_prompt = ""
+        quality_signals: list[dict] = []
+    else:
+        render_status = "complete" if completeness >= 0.7 else "partial"
+        if prompt_type == "implementation":
+            rendered_prompt = _prs_render_implementation_prompt(phase_id or "", phase_record, capability_record)
+        elif prompt_type == "validation":
+            rendered_prompt = _prs_render_validation_prompt(phase_id or "", phase_record, capability_record)
+        elif prompt_type == "agent":
+            rendered_prompt = _prs_render_agent_prompt(phase_id or "", phase_record, capability_record)
+        else:
+            rendered_prompt = ""
+            render_status = "blocked"
+        # Run quality checks on the rendered output
+        quality_signals = _prq_run_quality_checks(
+            ts, phase_id or "", prompt_type, phase_record, capability_record, rendered_prompt
+        )
+
+    quality_blockers = sum(1 for s in quality_signals if s["severity"] == "blocker")
+    quality_warnings = sum(1 for s in quality_signals if s["severity"] == "warning")
+    quality_status = (
+        "blocked" if quality_blockers > 0
+        else ("warning" if quality_warnings > 0 else "passed")
+    )
+
+    quality_assessment: dict = {
+        "assessment_id": f"prq-assess-{ts}",
+        "phase_id": phase_id or "",
+        "prompt_type": prompt_type,
+        "signal_count": len(quality_signals),
+        "blocker_count": quality_blockers,
+        "warning_count": quality_warnings,
+        "completeness_score": completeness,
+        "quality_status": quality_status,
+        "human_review_required": True,
+    }
+
+    quality_summary: dict = {
+        "summary_id": f"prq-summary-{ts}",
+        "assessment_id": quality_assessment["assessment_id"],
+        "phase_id": phase_id or "",
+        "prompt_type": prompt_type,
+        "signal_count": len(quality_signals),
+        "blocker_count": quality_blockers,
+        "warning_count": quality_warnings,
+        "completeness_score": completeness,
+        "quality_status": quality_status,
+        "human_review_required": True,
+    }
+
+    render_record: dict = {
+        "render_id": render_id,
+        "phase_id": phase_id or "",
+        "skill_id": skill_id or "",
+        "prompt_type": prompt_type,
+        "rendered_prompt": rendered_prompt,
+        "completeness_score": completeness,
+        "render_status": render_status,
+        "human_review_required": True,
+    }
+
+    assessment: dict = {
+        "assessment_id": f"prs-assess-{ts}",
+        "render_count": 1 if render_status != "blocked" else 0,
+        "signal_count": len(signals),
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "render_status": render_status,
+        "human_review_required": True,
+    }
+
+    summary: dict = {
+        "summary_id": f"prs-summary-{ts}",
+        "assessment_id": assessment["assessment_id"],
+        "render_count": assessment["render_count"],
+        "signal_count": assessment["signal_count"],
+        "blocker_count": assessment["blocker_count"],
+        "warning_count": assessment["warning_count"],
+        "render_status": render_status,
+        "human_review_required": True,
+    }
+
+    return {
+        "generated_at": generated_at,
+        "skill_id": skill_id,
+        "phase_id": phase_id,
+        "prompt_type": prompt_type,
+        "skill": skill_record,
+        "phase": phase_record,
+        "capability": capability_record,
+        "source_traceability": source_traceability,
+        "render_record": render_record,
+        "rendered_prompt": rendered_prompt,
+        "signals": signals,
+        "assessment": assessment,
+        "summary": summary,
+        "quality_signals": quality_signals,
+        "quality_assessment": quality_assessment,
+        "quality_summary": quality_summary,
+        "render_domains": list(_PRS_RENDER_DOMAINS),
+        "quality_domains": list(_PRQ_QUALITY_DOMAINS),
+        "render_record_model": {
+            "model_name": "PromptRenderRecord",
+            "fields": [dict(f) for f in _PRS_RENDER_RECORD_FIELDS],
+        },
+        "render_signal_model": {
+            "model_name": "PromptRenderSignal",
+            "fields": [dict(f) for f in _PRS_RENDER_SIGNAL_FIELDS],
+        },
+        "render_assessment_model": {
+            "model_name": "PromptRenderAssessment",
+            "fields": [dict(f) for f in _PRS_RENDER_ASSESSMENT_FIELDS],
+        },
+        "render_summary_model": {
+            "model_name": "PromptRenderSummary",
+            "fields": [dict(f) for f in _PRS_RENDER_SUMMARY_FIELDS],
+        },
+        "quality_signal_model": {
+            "model_name": "PromptQualitySignal",
+            "fields": [dict(f) for f in _PRQ_SIGNAL_FIELDS],
+        },
+        "quality_assessment_model": {
+            "model_name": "PromptQualityAssessment",
+            "fields": [dict(f) for f in _PRQ_ASSESSMENT_FIELDS],
+        },
+        "quality_summary_model": {
+            "model_name": "PromptQualitySummary",
+            "fields": [dict(f) for f in _PRQ_SUMMARY_FIELDS],
+        },
+        "governance_boundaries": {
+            "may": list(_PRS_GOVERNANCE_MAY),
+            "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
+            "phase": "64B.6A",
+        },
+        "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
     }

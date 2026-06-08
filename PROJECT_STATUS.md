@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.6: Prompt Rendering Skill.
+Phase 64B.6A: Prompt Rendering Quality Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -88,9 +88,33 @@ skill structure with `pcae skill validate`, and invoke a skill in read-only
 mode with `pcae skill invoke <skill_id>`, using a consolidated skill registry
 aligned with the shared capability, roadmap, and prompt intelligence
 infrastructure rather than a disconnected parallel registry, while keeping
-runtime invocation, runtime execution, prompt rendering, orchestration
-execution, and write execution disabled. Skills are governed artifacts and
-participate in capability inventory and roadmap intelligence.
+runtime invocation, runtime execution, orchestration execution, and write
+execution disabled. Skills are governed artifacts and participate in capability
+inventory and roadmap intelligence.
+PCAE can render detailed, agent-ready phase prompts through the skill system
+with `pcae skill invoke phase-implementation <phase_id>`,
+`pcae skill invoke phase-validation <phase_id>`, and
+`pcae skill invoke phase-agent <phase_id>`. Rendered prompts include phase
+context, scope, inputs, capability domain, commands, governance constraints,
+acceptance criteria, validation commands, and documentation requirements drawn
+from the roadmap registry, capability inventory, prompt registry, and skill
+registry. An optional `pcae prompt render --phase <phase_id> --type <type>`
+wrapper delegates to the skill system. Rendered prompts are detailed and
+agent-ready. No runtime invocation occurs. No shell commands are executed.
+No write execution occurs. Human review is required before use. Skills are
+the first-class prompt rendering interface in Phase 64B.6.
+PCAE hardens prompt rendering quality across 10 domains in Phase 64B.6A with
+`pcae skill invoke phase-implementation/phase-validation/phase-agent <phase_id>`.
+Quality checks verify phase goal accuracy (goal derived from phase title, not
+capability name), capability domain accuracy (domain derived from track, not
+cross-track contamination), completeness scoring (1.0 for phases with complete
+roadmap records), placeholder detection (warns on filler text in rendered
+prompts), and agent prompt structure quality (clean section layout with Review
+Checklist). Three quality models are exported: PromptQualitySignal,
+PromptQualityAssessment, PromptQualitySummary. Quality signals surface inline
+when invoking prompt skills. Source traceability fields are included in render
+output. No runtime invocation occurs. No shell commands are executed. No write
+execution occurs. Human review is required before use.
 Capability inventory and capability/roadmap intelligence now also share a
 single internal capability projection layer so their public capability records
 are materialized through one authoritative projection implementation while
@@ -4061,11 +4085,11 @@ MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 
 ## Current Phase
 
-Phase 61G: Roadmap Continuity Validation.
+Phase 64B.6A: Prompt Rendering Quality Hardening.
 
 ## Next
 
-- 62A and beyond: to be planned
+- 64C: Governed Prompt Execution (planned)
 
 ## Future Explorations
 
