@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B: Multi-Runtime Execution Readiness.
+Phase 64B.0: Capability Inventory.
 
 ## Post-61J Runtime Registry Checkpoint
 

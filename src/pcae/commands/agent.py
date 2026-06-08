@@ -390,6 +390,8 @@ from pcae.core.agent import (
     MULTI_RUNTIME_EXECUTION_PLANNING_ADVISORY,
     build_multi_runtime_execution_readiness,
     MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY,
+    build_capability_inventory,
+    CAPABILITY_INVENTORY_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -13106,4 +13108,111 @@ def run_multi_runtime_execution_readiness(args: argparse.Namespace) -> int:
     print()
     print(MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY)
     return 0
+
+
+def _write_capability_inventory_md(data: dict) -> None:
+    import pathlib
+    overview = data["capability_inventory_overview"]
+    records = data["capability_records"]
+    lines = [
+        "# PCAE Capability Inventory",
+        "",
+        f"Generated: {overview['generated_at']}",
+        f"Phase: {overview['phase']} — {overview['title']}",
+        f"Total capabilities: {overview['capability_count']}",
+        f"Implemented: {overview['implemented_count']}",
+        f"Dormant: {overview['dormant_count']}",
+        f"Superseded: {overview['superseded_count']}",
+        f"Roadmap gaps: {overview['roadmap_gap_count']}",
+        f"Duplicates/overlaps: {overview['duplicate_count']}",
+        f"Prompt capabilities: {overview['prompt_capability_count']}",
+        f"Assessment status: {overview['assessment_status']}",
+        "",
+        "## Capability Records",
+        "",
+        "| Capability | Domain | Phase | Status | Commands | Dependencies | Successors |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for r in records:
+        cmds = "; ".join(r["commands"]) if r["commands"] else "(none)"
+        deps = "; ".join(r["dependencies"]) if r["dependencies"] else "(none)"
+        succs = "; ".join(r["successor_capabilities"]) if r["successor_capabilities"] else "(none)"
+        lines.append(
+            f"| {r['capability_name']} | {r['capability_domain']} "
+            f"| {r['implemented_phase']} | {r['status']} | {cmds} | {deps} | {succs} |"
+        )
+    lines.extend([
+        "",
+        "## Governance Notes",
+        "",
+        "- 64B.0 creates a capability inventory.",
+        "- 64B.0 does not modify roadmap behavior.",
+        "- 64B.0 does not modify task lifecycle behavior.",
+        "- 64B.0 does not modify runtime behavior.",
+        "- 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.",
+        "",
+        f"*{overview['summary']}*",
+    ])
+    docs_dir = pathlib.Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    (docs_dir / "CAPABILITY_INVENTORY.md").write_text("\n".join(lines) + "\n")
+
+
+def run_capability_inventory(args: argparse.Namespace) -> int:
+    data = build_capability_inventory(HarnessPath.cwd())
+    _write_capability_inventory_md(data)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["capability_inventory_overview"]
+    print("Capability inventory")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Capability domains:     {overview['domain_count']}")
+    print(f"Total capabilities:     {overview['capability_count']}")
+    print(f"Implemented:            {overview['implemented_count']}")
+    print(f"Dormant:                {overview['dormant_count']}")
+    print(f"Superseded:             {overview['superseded_count']}")
+    print(f"Roadmap gaps:           {overview['roadmap_gap_count']}")
+    print(f"Duplicates/overlaps:    {overview['duplicate_count']}")
+    print(f"Prompt capabilities:    {overview['prompt_capability_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Assessment status:      {overview['assessment_status']}")
+    print()
+    print("Capability records:")
+    for r in data["capability_records"]:
+        cmds = ", ".join(r["commands"]) if r["commands"] else "(none)"
+        print(f"  [{r['status'].upper()}] {r['capability_name']} ({r['capability_domain']})")
+        print(f"    phase={r['implemented_phase']}  commands={cmds}")
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Inventory signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['capability_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print()
+    print(CAPABILITY_INVENTORY_ADVISORY)
+    print()
+    print("Generated: docs/CAPABILITY_INVENTORY.md")
     return 0

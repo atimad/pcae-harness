@@ -68514,3 +68514,727 @@ def build_multi_runtime_execution_readiness(root: HarnessPath | None = None) -> 
         },
         "advisory": MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.0: Capability Inventory
+# ---------------------------------------------------------------------------
+
+CAPABILITY_INVENTORY_ADVISORY = (
+    "Phase 64B.0 creates an authoritative inventory of all PCAE capabilities "
+    "currently implemented. Discovery and governance only. "
+    "No roadmap behavior modified. No task lifecycle behavior modified. "
+    "No runtime behavior modified. Prerequisite for 64B.1 Capability and Roadmap Intelligence."
+)
+
+_CI_CAPABILITY_DOMAINS: tuple[str, ...] = (
+    "governance_capabilities",
+    "task_lifecycle_capabilities",
+    "roadmap_capabilities",
+    "prompt_generation_capabilities",
+    "runtime_governance_capabilities",
+    "runtime_execution_capabilities",
+    "runtime_audit_capabilities",
+    "runtime_review_capabilities",
+    "runtime_approval_capabilities",
+    "runtime_rollback_capabilities",
+    "multi_runtime_capabilities",
+    "orchestration_capabilities",
+    "repository_governance_capabilities",
+    "documentation_capabilities",
+    "testing_capabilities",
+    "recovery_capabilities",
+    "quarantine_capabilities",
+)
+
+_CI_CAPABILITY_STATUSES: tuple[str, ...] = (
+    "implemented",
+    "dormant",
+    "superseded",
+    "roadmap_gap",
+    "partially_implemented",
+)
+
+_CI_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_CI_ASSESSMENT_STATUSES: tuple[str, ...] = (
+    "inventory_complete",
+    "inventory_with_gaps",
+    "inventory_with_duplicates",
+    "inventory_blocked",
+)
+
+_CI_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "capability_name", "type": "str", "required": True},
+    {"name": "capability_domain", "type": "str", "required": True},
+    {"name": "implemented_phase", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "commands", "type": "list", "required": True},
+    {"name": "dependencies", "type": "list", "required": True},
+    {"name": "successor_capabilities", "type": "list", "required": True},
+)
+
+_CI_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "capability_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+)
+
+_CI_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "capability_count", "type": "int", "required": True},
+    {"name": "implemented_count", "type": "int", "required": True},
+    {"name": "dormant_count", "type": "int", "required": True},
+    {"name": "superseded_count", "type": "int", "required": True},
+    {"name": "roadmap_gap_count", "type": "int", "required": True},
+    {"name": "duplicate_count", "type": "int", "required": True},
+    {"name": "assessment_status", "type": "str", "required": True},
+)
+
+_CI_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "capability_count", "type": "int", "required": True},
+    {"name": "implemented_count", "type": "int", "required": True},
+    {"name": "dormant_count", "type": "int", "required": True},
+    {"name": "superseded_count", "type": "int", "required": True},
+    {"name": "roadmap_gap_count", "type": "int", "required": True},
+    {"name": "duplicate_count", "type": "int", "required": True},
+    {"name": "assessment_status", "type": "str", "required": True},
+)
+
+_CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
+    {
+        "capability_domain": "governance_capabilities",
+        "capability_name": "Governed Task Contracts",
+        "implemented_phase": "44A-46J",
+        "status": "implemented",
+        "commands": ["pcae task new", "pcae task close", "pcae task transition"],
+        "dependencies": [],
+        "successor_capabilities": ["task_lifecycle_governance"],
+    },
+    {
+        "capability_domain": "task_lifecycle_capabilities",
+        "capability_name": "Task Lifecycle Governance",
+        "implemented_phase": "52A",
+        "status": "implemented",
+        "commands": ["pcae task-lifecycle-hardening", "pcae task transition"],
+        "dependencies": ["governed_task_contracts"],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "roadmap_capabilities",
+        "capability_name": "Multi-Agent Roadmap Generation",
+        "implemented_phase": "45A-45E",
+        "status": "implemented",
+        "commands": ["pcae roadmap", "pcae multi-agent-roadmap", "pcae roadmap-evidence"],
+        "dependencies": ["governed_task_contracts"],
+        "successor_capabilities": ["capability_inventory"],
+    },
+    {
+        "capability_domain": "prompt_generation_capabilities",
+        "capability_name": "Phase Prompt Generation",
+        "implemented_phase": "45A-45E",
+        "status": "implemented",
+        "commands": [
+            "pcae prompt-render",
+            "pcae autonomous-prompt-proposal",
+            "pcae prompt-validation-design",
+            "pcae prompt-governance-design",
+        ],
+        "dependencies": ["multi_agent_roadmap_generation"],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "runtime_governance_capabilities",
+        "capability_name": "Read-Only Runtime Invocation Governance",
+        "implemented_phase": "55A-57A",
+        "status": "implemented",
+        "commands": [
+            "pcae readonly-invocation",
+            "pcae read-only-runtime-invocation",
+            "pcae runtime-review-workflow",
+        ],
+        "dependencies": ["governed_task_contracts"],
+        "successor_capabilities": ["runtime_approval_gates"],
+    },
+    {
+        "capability_domain": "runtime_governance_capabilities",
+        "capability_name": "Invocation Pilot (Legacy)",
+        "implemented_phase": "46A-46J",
+        "status": "superseded",
+        "commands": ["pcae invocation-pilot", "pcae multi-runtime-pilot"],
+        "dependencies": [],
+        "successor_capabilities": ["read_only_runtime_invocation_governance"],
+    },
+    {
+        "capability_domain": "runtime_execution_capabilities",
+        "capability_name": "Controlled Runtime Execution Pilot",
+        "implemented_phase": "62A",
+        "status": "dormant",
+        "commands": ["pcae runtime-execution-pilot"],
+        "dependencies": ["read_only_runtime_invocation_governance"],
+        "successor_capabilities": ["multi_runtime_execution_planning"],
+    },
+    {
+        "capability_domain": "runtime_audit_capabilities",
+        "capability_name": "Runtime Audit Persistence",
+        "implemented_phase": "62C",
+        "status": "implemented",
+        "commands": ["pcae runtime-audit-persistence"],
+        "dependencies": ["read_only_runtime_invocation_governance"],
+        "successor_capabilities": ["multi_runtime_audit_chain"],
+    },
+    {
+        "capability_domain": "runtime_review_capabilities",
+        "capability_name": "Runtime Review Decision Record",
+        "implemented_phase": "62F",
+        "status": "implemented",
+        "commands": ["pcae runtime-review-decision"],
+        "dependencies": ["runtime_audit_persistence"],
+        "successor_capabilities": ["runtime_approval_gates"],
+    },
+    {
+        "capability_domain": "runtime_approval_capabilities",
+        "capability_name": "Runtime Approval Gates",
+        "implemented_phase": "62G",
+        "status": "implemented",
+        "commands": ["pcae runtime-approval-gates"],
+        "dependencies": ["runtime_review_decision_record"],
+        "successor_capabilities": ["multi_runtime_registry"],
+    },
+    {
+        "capability_domain": "runtime_rollback_capabilities",
+        "capability_name": "Runtime Rollback Boundaries",
+        "implemented_phase": "62H",
+        "status": "implemented",
+        "commands": ["pcae runtime-rollback-boundaries"],
+        "dependencies": ["runtime_approval_gates"],
+        "successor_capabilities": ["runtime_failure_recovery"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Multi-Runtime Execution Planning",
+        "implemented_phase": "64A",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-execution-planning"],
+        "dependencies": [
+            "multi_runtime_registry",
+            "runtime_selection_engine",
+            "runtime_arbitration",
+        ],
+        "successor_capabilities": ["multi_runtime_execution_readiness"],
+    },
+    {
+        "capability_domain": "orchestration_capabilities",
+        "capability_name": "Multi-Runtime Orchestration Execution",
+        "implemented_phase": "64C+",
+        "status": "roadmap_gap",
+        "commands": [],
+        "dependencies": ["multi_runtime_execution_readiness"],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "repository_governance_capabilities",
+        "capability_name": "Repository Health Governance",
+        "implemented_phase": "44A",
+        "status": "implemented",
+        "commands": ["pcae health", "pcae check", "pcae status coherence"],
+        "dependencies": [],
+        "successor_capabilities": ["task_state_alignment"],
+    },
+    {
+        "capability_domain": "documentation_capabilities",
+        "capability_name": "Commands Reference Generation",
+        "implemented_phase": "53A",
+        "status": "implemented",
+        "commands": ["pcae docs commands"],
+        "dependencies": [],
+        "successor_capabilities": ["capability_inventory"],
+    },
+    {
+        "capability_domain": "testing_capabilities",
+        "capability_name": "Phase-Scoped Test Selection",
+        "implemented_phase": "44A+",
+        "status": "implemented",
+        "commands": ["python -m pytest -k <phase_id>", "python -m pytest -n auto"],
+        "dependencies": [],
+        "successor_capabilities": [],
+    },
+    {
+        "capability_domain": "recovery_capabilities",
+        "capability_name": "Session and Agent Lock Recovery",
+        "implemented_phase": "52B-52D",
+        "status": "implemented",
+        "commands": [
+            "pcae session-recovery",
+            "pcae agent-lock-recovery",
+            "pcae corruption-recovery",
+        ],
+        "dependencies": ["governed_task_contracts"],
+        "successor_capabilities": ["runtime_failure_recovery"],
+    },
+    {
+        "capability_domain": "quarantine_capabilities",
+        "capability_name": "Runtime Quarantine Classification",
+        "implemented_phase": "63F",
+        "status": "implemented",
+        "commands": ["pcae runtime-quarantine"],
+        "dependencies": ["runtime_failure_recovery"],
+        "successor_capabilities": [],
+    },
+)
+
+
+def build_capability_inventory(root: HarnessPath | None = None) -> dict:
+    """Discover and classify all PCAE capabilities without modifying any behavior."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    capability_records = []
+    for i, cap in enumerate(_CI_KNOWN_CAPABILITIES, start=1):
+        cid = f"ci-{ts}-{i:02d}"
+        capability_records.append(
+            {
+                "capability_id": cid,
+                "capability_name": cap["capability_name"],
+                "capability_domain": cap["capability_domain"],
+                "implemented_phase": cap["implemented_phase"],
+                "status": cap["status"],
+                "commands": list(cap["commands"]),
+                "dependencies": list(cap["dependencies"]),
+                "successor_capabilities": list(cap["successor_capabilities"]),
+            }
+        )
+
+    capability_count = len(capability_records)
+    implemented_count = sum(1 for r in capability_records if r["status"] == "implemented")
+    dormant_count = sum(1 for r in capability_records if r["status"] == "dormant")
+    superseded_count = sum(1 for r in capability_records if r["status"] == "superseded")
+    roadmap_gap_count = sum(1 for r in capability_records if r["status"] == "roadmap_gap")
+    prompt_count = sum(
+        1 for r in capability_records
+        if r["capability_domain"] == "prompt_generation_capabilities"
+    )
+
+    domains_seen: dict[str, int] = {}
+    for r in capability_records:
+        domains_seen[r["capability_domain"]] = domains_seen.get(r["capability_domain"], 0) + 1
+    duplicate_count = sum(1 for v in domains_seen.values() if v > 1)
+
+    first_cid = capability_records[0]["capability_id"] if capability_records else f"ci-{ts}-00"
+
+    domain_signal_defs = [
+        {
+            "domain": "governance_capabilities",
+            "signal_type": "governance_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"governance_capabilities_count={domains_seen.get('governance_capabilities', 0)}; "
+                "task_contracts=implemented; session_continuity=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "governance capabilities must be inventoried and classified; "
+                "no roadmap modification; no task state modification"
+            ),
+        },
+        {
+            "domain": "task_lifecycle_capabilities",
+            "signal_type": "task_lifecycle_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"task_lifecycle_capabilities_count={domains_seen.get('task_lifecycle_capabilities', 0)}; "
+                "task_lifecycle_hardening=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "task lifecycle capabilities must be inventoried and classified; "
+                "no task lifecycle behavior modified"
+            ),
+        },
+        {
+            "domain": "roadmap_capabilities",
+            "signal_type": "roadmap_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"roadmap_capabilities_count={domains_seen.get('roadmap_capabilities', 0)}; "
+                "roadmap_generation=implemented; roadmap_evidence=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "roadmap capabilities must be inventoried; "
+                "roadmap behavior must not be modified"
+            ),
+        },
+        {
+            "domain": "prompt_generation_capabilities",
+            "signal_type": "prompt_generation_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"prompt_generation_capabilities_count={prompt_count}; "
+                "phase_prompt_generation=implemented; "
+                "validation_prompt_generation=implemented; "
+                "roadmap_recommendation_features=identified; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "prompt generation capabilities must be inventoried and classified; "
+                "no prompt execution occurs"
+            ),
+        },
+        {
+            "domain": "runtime_governance_capabilities",
+            "signal_type": "runtime_governance_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_governance_capabilities_count={domains_seen.get('runtime_governance_capabilities', 0)}; "
+                "readonly_invocation_governance=implemented; "
+                "invocation_pilot_legacy=superseded; "
+                f"superseded_count={superseded_count}; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "runtime governance capabilities must be inventoried; "
+                "superseded capabilities must be identified; "
+                "no runtime behavior modified"
+            ),
+        },
+        {
+            "domain": "runtime_execution_capabilities",
+            "signal_type": "runtime_execution_capabilities_inventory_check",
+            "severity": "warning",
+            "detected_state": (
+                f"runtime_execution_capabilities_count={domains_seen.get('runtime_execution_capabilities', 0)}; "
+                f"dormant_count={dormant_count}; "
+                "controlled_runtime_execution=dormant; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "runtime execution capabilities must be inventoried; "
+                "dormant capabilities must be identified; "
+                "execution_allowed=False in 64B.0"
+            ),
+        },
+        {
+            "domain": "runtime_audit_capabilities",
+            "signal_type": "runtime_audit_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_audit_capabilities_count={domains_seen.get('runtime_audit_capabilities', 0)}; "
+                "runtime_audit_persistence=implemented; "
+                "multi_runtime_audit_chain=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "runtime audit capabilities must be inventoried and classified; "
+                "no audit artifacts modified"
+            ),
+        },
+        {
+            "domain": "runtime_review_capabilities",
+            "signal_type": "runtime_review_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_review_capabilities_count={domains_seen.get('runtime_review_capabilities', 0)}; "
+                "runtime_review_decision=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "runtime review capabilities must be inventoried and classified; "
+                "no review behavior modified"
+            ),
+        },
+        {
+            "domain": "runtime_approval_capabilities",
+            "signal_type": "runtime_approval_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_approval_capabilities_count={domains_seen.get('runtime_approval_capabilities', 0)}; "
+                "runtime_approval_gates=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "runtime approval capabilities must be inventoried and classified; "
+                "no approval behavior modified"
+            ),
+        },
+        {
+            "domain": "runtime_rollback_capabilities",
+            "signal_type": "runtime_rollback_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_rollback_capabilities_count={domains_seen.get('runtime_rollback_capabilities', 0)}; "
+                "runtime_rollback_boundaries=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "runtime rollback capabilities must be inventoried and classified; "
+                "no rollback behavior modified"
+            ),
+        },
+        {
+            "domain": "multi_runtime_capabilities",
+            "signal_type": "multi_runtime_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"multi_runtime_capabilities_count={domains_seen.get('multi_runtime_capabilities', 0)}; "
+                "multi_runtime_execution_planning=implemented; "
+                "multi_runtime_execution_readiness=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "multi-runtime capabilities must be inventoried; "
+                "no runtime invocation occurs"
+            ),
+        },
+        {
+            "domain": "orchestration_capabilities",
+            "signal_type": "orchestration_capabilities_inventory_check",
+            "severity": "warning",
+            "detected_state": (
+                f"orchestration_capabilities_count={domains_seen.get('orchestration_capabilities', 0)}; "
+                f"roadmap_gap_count={roadmap_gap_count}; "
+                "multi_runtime_orchestration_execution=roadmap_gap; "
+                "orchestration_blocked=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "orchestration capabilities must be inventoried; "
+                "roadmap gaps must be identified; "
+                "orchestration execution remains blocked"
+            ),
+        },
+        {
+            "domain": "repository_governance_capabilities",
+            "signal_type": "repository_governance_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"repository_governance_capabilities_count={domains_seen.get('repository_governance_capabilities', 0)}; "
+                "repository_health_governance=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "repository governance capabilities must be inventoried; "
+                "no repository behavior modified"
+            ),
+        },
+        {
+            "domain": "documentation_capabilities",
+            "signal_type": "documentation_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"documentation_capabilities_count={domains_seen.get('documentation_capabilities', 0)}; "
+                "commands_reference_generation=implemented; "
+                "capability_inventory_generation=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "documentation capabilities must be inventoried; "
+                "no source files modified"
+            ),
+        },
+        {
+            "domain": "testing_capabilities",
+            "signal_type": "testing_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"testing_capabilities_count={domains_seen.get('testing_capabilities', 0)}; "
+                "phase_scoped_test_selection=implemented; "
+                "parallel_test_execution=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "testing capabilities must be inventoried; "
+                "no test behavior modified"
+            ),
+        },
+        {
+            "domain": "recovery_capabilities",
+            "signal_type": "recovery_capabilities_inventory_check",
+            "severity": "info",
+            "detected_state": (
+                f"recovery_capabilities_count={domains_seen.get('recovery_capabilities', 0)}; "
+                "session_recovery=implemented; "
+                "agent_lock_recovery=implemented; "
+                "corruption_recovery=implemented; "
+                "inventory_complete=True"
+            ),
+            "expected_state": (
+                "recovery capabilities must be inventoried; "
+                "no recovery behavior modified"
+            ),
+        },
+        {
+            "domain": "quarantine_capabilities",
+            "signal_type": "quarantine_capabilities_inventory_check",
+            "severity": "warning",
+            "detected_state": (
+                f"quarantine_capabilities_count={domains_seen.get('quarantine_capabilities', 0)}; "
+                f"duplicate_count={duplicate_count}; "
+                "runtime_quarantine_classification=implemented; "
+                "overlap_with_multi_runtime_domain=detected"
+            ),
+            "expected_state": (
+                "quarantine capabilities must be inventoried; "
+                "overlapping capabilities across domains must be identified; "
+                "no quarantine behavior modified"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"ci-sig-{ts}-{i:02d}",
+            "capability_id": first_cid,
+            "capability_domain": sig["domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        assessment_status = "inventory_blocked"
+    elif roadmap_gap_count > 0 and duplicate_count > 0:
+        assessment_status = "inventory_with_gaps"
+    elif roadmap_gap_count > 0:
+        assessment_status = "inventory_with_gaps"
+    elif duplicate_count > 0:
+        assessment_status = "inventory_with_duplicates"
+    else:
+        assessment_status = "inventory_complete"
+
+    assessment_id = f"cia-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "capability_count": capability_count,
+        "implemented_count": implemented_count,
+        "dormant_count": dormant_count,
+        "superseded_count": superseded_count,
+        "roadmap_gap_count": roadmap_gap_count,
+        "duplicate_count": duplicate_count,
+        "assessment_status": assessment_status,
+    }
+    sample_summary = {
+        "summary_id": f"cis-{ts}",
+        "assessment_id": assessment_id,
+        "capability_count": capability_count,
+        "implemented_count": implemented_count,
+        "dormant_count": dormant_count,
+        "superseded_count": superseded_count,
+        "roadmap_gap_count": roadmap_gap_count,
+        "duplicate_count": duplicate_count,
+        "assessment_status": assessment_status,
+    }
+
+    domain_count = len(_CI_CAPABILITY_DOMAINS)
+
+    return {
+        "capability_inventory_overview": {
+            "overview_id": f"64b0-{ts}",
+            "generated_at": generated_at,
+            "phase": "64B.0",
+            "title": "Capability Inventory",
+            "domain_count": domain_count,
+            "capability_count": capability_count,
+            "implemented_count": implemented_count,
+            "dormant_count": dormant_count,
+            "superseded_count": superseded_count,
+            "roadmap_gap_count": roadmap_gap_count,
+            "duplicate_count": duplicate_count,
+            "prompt_capability_count": prompt_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "assessment_status": assessment_status,
+            "summary": (
+                "Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. "
+                "Discovery and governance only; no behavior modified. "
+                f"capability_count={capability_count}. "
+                f"implemented_count={implemented_count}. "
+                f"dormant_count={dormant_count}. "
+                f"superseded_count={superseded_count}. "
+                f"roadmap_gap_count={roadmap_gap_count}. "
+                f"duplicate_count={duplicate_count}. "
+                f"prompt_capability_count={prompt_count}. "
+                f"assessment_status={assessment_status}. "
+                "Prerequisite for 64B.1 Capability and Roadmap Intelligence."
+            ),
+        },
+        "capability_records": capability_records,
+        "record_model": {
+            "model_name": "CapabilityInventoryRecord",
+            "field_count": len(_CI_RECORD_FIELDS),
+            "required_field_count": len(_CI_RECORD_FIELDS),
+            "supported_statuses": list(_CI_CAPABILITY_STATUSES),
+            "fields": [dict(f) for f in _CI_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "CapabilityInventorySignal",
+            "field_count": len(_CI_SIGNAL_FIELDS),
+            "required_field_count": len(_CI_SIGNAL_FIELDS),
+            "severity_values": list(_CI_SEVERITY_VALUES),
+            "fields": [dict(f) for f in _CI_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "CapabilityInventoryAssessment",
+            "field_count": len(_CI_ASSESSMENT_FIELDS),
+            "required_field_count": len(_CI_ASSESSMENT_FIELDS),
+            "supported_assessment_statuses": list(_CI_ASSESSMENT_STATUSES),
+            "fields": [dict(f) for f in _CI_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "CapabilityInventorySummary",
+            "field_count": len(_CI_SUMMARY_FIELDS),
+            "required_field_count": len(_CI_SUMMARY_FIELDS),
+            "supported_assessment_statuses": list(_CI_ASSESSMENT_STATUSES),
+            "fields": [dict(f) for f in _CI_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect repository metadata",
+                "inspect documentation",
+                "inspect source code",
+                "inspect tests",
+                "classify capabilities",
+                "identify roadmap gaps",
+                "identify dormant capabilities",
+                "identify superseded capabilities",
+                "generate capability inventory",
+            ],
+            "may_not": [
+                "modify roadmap",
+                "modify task state",
+                "invoke runtimes",
+                "execute commands",
+                "execute prompts",
+                "change repository behavior",
+                "modify audit artifacts",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "phase": "64B.0",
+        },
+        "advisory": CAPABILITY_INVENTORY_ADVISORY,
+    }

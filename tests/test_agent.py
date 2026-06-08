@@ -47241,3 +47241,206 @@ def test_64b_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["multi_runtime_execution_readiness_overview"]["human_review_required"] is True
     assert len(data["readiness_checks"]) == 10
     assert len(data["signals"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.0: Capability Inventory
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_capability_inventory  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64B0  # noqa: E402
+
+
+def test_capability_inventory_json_top_level_keys(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    for key in (
+        "capability_inventory_overview",
+        "capability_records",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_capability_inventory_models_and_exact_fields(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    assert data["record_model"]["model_name"] == "CapabilityInventoryRecord"
+    assert data["record_model"]["field_count"] == 8
+    assert data["signal_model"]["model_name"] == "CapabilityInventorySignal"
+    assert data["signal_model"]["field_count"] == 7
+    assert data["assessment_model"]["model_name"] == "CapabilityInventoryAssessment"
+    assert data["assessment_model"]["field_count"] == 8
+    assert data["summary_model"]["model_name"] == "CapabilityInventorySummary"
+    assert data["summary_model"]["field_count"] == 9
+    for field_name in (
+        "capability_id", "capability_name", "capability_domain", "implemented_phase",
+        "status", "commands", "dependencies", "successor_capabilities",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_capability_inventory_all_domains_covered(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    expected_domains = {
+        "governance_capabilities",
+        "task_lifecycle_capabilities",
+        "roadmap_capabilities",
+        "prompt_generation_capabilities",
+        "runtime_governance_capabilities",
+        "runtime_execution_capabilities",
+        "runtime_audit_capabilities",
+        "runtime_review_capabilities",
+        "runtime_approval_capabilities",
+        "runtime_rollback_capabilities",
+        "multi_runtime_capabilities",
+        "orchestration_capabilities",
+        "repository_governance_capabilities",
+        "documentation_capabilities",
+        "testing_capabilities",
+        "recovery_capabilities",
+        "quarantine_capabilities",
+    }
+    actual_domains = {r["capability_domain"] for r in data["capability_records"]}
+    assert expected_domains == actual_domains
+
+
+def test_capability_inventory_roadmap_gaps_identified(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    overview = data["capability_inventory_overview"]
+    assert overview["roadmap_gap_count"] >= 1
+    gap_records = [r for r in data["capability_records"] if r["status"] == "roadmap_gap"]
+    assert len(gap_records) >= 1
+    orchestration_gap = next(
+        (r for r in gap_records if r["capability_domain"] == "orchestration_capabilities"), None
+    )
+    assert orchestration_gap is not None
+
+
+def test_capability_inventory_dormant_capabilities_identified(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    overview = data["capability_inventory_overview"]
+    assert overview["dormant_count"] >= 1
+    dormant_records = [r for r in data["capability_records"] if r["status"] == "dormant"]
+    assert len(dormant_records) >= 1
+    assert dormant_records[0]["capability_id"].startswith("ci-")
+
+
+def test_capability_inventory_superseded_capabilities_identified(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    overview = data["capability_inventory_overview"]
+    assert overview["superseded_count"] >= 1
+    superseded = [r for r in data["capability_records"] if r["status"] == "superseded"]
+    assert len(superseded) >= 1
+    assert len(superseded[0]["successor_capabilities"]) >= 1
+
+
+def test_capability_inventory_prompt_capabilities_identified(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    overview = data["capability_inventory_overview"]
+    assert overview["prompt_capability_count"] >= 1
+    prompt_caps = [
+        r for r in data["capability_records"]
+        if r["capability_domain"] == "prompt_generation_capabilities"
+    ]
+    assert len(prompt_caps) >= 1
+    assert any(
+        "prompt" in c.lower()
+        for cap in prompt_caps
+        for c in cap["commands"]
+    )
+
+
+def test_capability_inventory_duplicates_identified(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    overview = data["capability_inventory_overview"]
+    assert overview["duplicate_count"] >= 1
+
+
+def test_capability_inventory_record_structure(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    for r in data["capability_records"]:
+        assert r["capability_id"].startswith("ci-")
+        assert r["status"] in (
+            "implemented", "dormant", "superseded", "roadmap_gap", "partially_implemented"
+        )
+        assert isinstance(r["commands"], list)
+        assert isinstance(r["dependencies"], list)
+        assert isinstance(r["successor_capabilities"], list)
+
+
+def test_capability_inventory_signals_cover_all_domains(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    assert len(data["signals"]) == 17
+    signal_domains = {s["capability_domain"] for s in data["signals"]}
+    assert len(signal_domains) == 17
+    for signal in data["signals"]:
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "capability_id" in signal
+
+
+def test_capability_inventory_governance_boundaries(tmp_path) -> None:
+    data = build_capability_inventory(_HarnessPath64B0(tmp_path))
+    boundaries = data["governance_boundaries"]
+    for action in (
+        "modify roadmap",
+        "modify task state",
+        "invoke runtimes",
+        "execute commands",
+        "execute prompts",
+        "change repository behavior",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect repository metadata" in boundaries["may"]
+    assert "classify capabilities" in boundaries["may"]
+    assert "identify roadmap gaps" in boundaries["may"]
+    assert "identify dormant capabilities" in boundaries["may"]
+    assert "generate capability inventory" in boundaries["may"]
+
+
+def test_capability_inventory_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["capability-inventory"])
+    output = capsys.readouterr().out
+    for text in (
+        "Capability inventory",
+        "Capability records:",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Inventory signals:",
+        "Governance boundaries:",
+        "Assessment status:",
+        "Roadmap gaps:",
+        "Dormant:",
+        "Superseded:",
+        "docs/CAPABILITY_INVENTORY.md",
+    ):
+        assert text in output
+    inventory_file = tmp_path / "docs" / "CAPABILITY_INVENTORY.md"
+    assert inventory_file.exists()
+
+
+def test_capability_inventory_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["capability-inventory", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["capability_inventory_overview"]["phase"] == "64B.0"
+    assert data["capability_inventory_overview"]["roadmap_gap_count"] >= 1
+    assert data["capability_inventory_overview"]["dormant_count"] >= 1
+    assert data["capability_inventory_overview"]["superseded_count"] >= 1
+    assert data["capability_inventory_overview"]["prompt_capability_count"] >= 1
+    inventory_file = tmp_path / "docs" / "CAPABILITY_INVENTORY.md"
+    assert inventory_file.exists()

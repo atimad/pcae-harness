@@ -182,6 +182,7 @@ from pcae.commands.agent import (
     run_runtime_quarantine,
     run_multi_runtime_execution_planning,
     run_multi_runtime_execution_readiness,
+    run_capability_inventory,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4636,6 +4637,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     mrer_parser.set_defaults(handler=run_multi_runtime_execution_readiness)
+
+    ci_parser = subparsers.add_parser(
+        "capability-inventory",
+        help="Generate an authoritative inventory of all PCAE capabilities (Phase 64B.0).",
+    )
+    ci_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    ci_parser.set_defaults(handler=run_capability_inventory)
 
     return parser
 
