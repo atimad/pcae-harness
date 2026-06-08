@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 63B: Runtime Selection Engine (20260608-1306-63b-runtime-selection-engine)
 - 63A: Multi-Runtime Registry (20260608-1220-63a-multi-runtime-registry)
 - 62H: Runtime Rollback Boundaries (20260608-0826-62h-runtime-rollback-boundaries)
 - 62G: Runtime Approval Gates (20260608-0717-62g-runtime-approval-gates)

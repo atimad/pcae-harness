@@ -65231,3 +65231,462 @@ def build_multi_runtime_registry(root: HarnessPath | None = None) -> dict:
         },
         "advisory": MULTI_RUNTIME_REGISTRY_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 63B: Runtime Selection Engine
+# ---------------------------------------------------------------------------
+
+RUNTIME_SELECTION_ENGINE_ADVISORY = (
+    "Phase 63B defines governed runtime selection across multiple registered runtime "
+    "candidates. selection_allowed may be True when a governed candidate satisfies all "
+    "mandatory selection criteria. execution_allowed=False always. No runtime invocation "
+    "occurs. No command execution occurs. No runtime registration occurs. Escalation is "
+    "required if no suitable runtime candidate exists. Human review is always required."
+)
+
+_RSE_SELECTION_DOMAINS: tuple[str, ...] = (
+    "runtime_candidate_selection",
+    "runtime_capability_matching",
+    "runtime_trust_matching",
+    "runtime_execution_boundary_matching",
+    "runtime_audit_readiness_matching",
+    "runtime_approval_readiness_matching",
+    "runtime_rollback_readiness_matching",
+    "runtime_task_fit_matching",
+    "runtime_selection_escalation",
+    "runtime_selection_blocking",
+)
+
+_RSE_SELECTION_STATUSES: tuple[str, ...] = (
+    "selected",
+    "selection_required",
+    "selection_with_warnings",
+    "escalated",
+    "blocked",
+)
+
+_RSE_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RSE_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    {"name": "candidate_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "runtime_type", "type": "str", "required": True},
+    {"name": "capability_score", "type": "int", "required": True},
+    {"name": "trust_score", "type": "int", "required": True},
+    {"name": "audit_score", "type": "int", "required": True},
+    {"name": "approval_score", "type": "int", "required": True},
+    {"name": "rollback_score", "type": "int", "required": True},
+    {"name": "task_fit_score", "type": "int", "required": True},
+    {"name": "selection_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RSE_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "candidate_id", "type": "str", "required": True},
+    {"name": "selection_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RSE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "candidate_count", "type": "int", "required": True},
+    {"name": "selected_runtime_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "selection_status", "type": "str", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RSE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "candidate_count", "type": "int", "required": True},
+    {"name": "selected_runtime_id", "type": "str", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "selection_status", "type": "str", "required": True},
+    {"name": "selection_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RSE_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "runtime_type": "shell",
+        "in_registry": True,
+        "identity_valid": True,
+        "capability_match": True,
+        "trust_sufficient": True,
+        "audit_ready": True,
+        "approval_ready": True,
+        "rollback_defined": True,
+        "is_blocked": False,
+    },
+)
+
+
+def build_runtime_selection_engine(root: HarnessPath | None = None) -> dict:
+    """Score and select governed runtime candidates without invoking any runtime."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    candidates = []
+    for i, c in enumerate(_RSE_GOVERNED_CANDIDATES, start=1):
+        cid = f"rse-cand-{ts}-{i:02d}"
+        cap_score = 10 if c["capability_match"] else 0
+        trust_score = 10 if c["trust_sufficient"] else 0
+        audit_score = 10 if c["audit_ready"] else 0
+        approval_score = 10 if c["approval_ready"] else 0
+        rollback_score = 10 if c["rollback_defined"] else 0
+        task_fit_score = 10 if (c["in_registry"] and c["identity_valid"]) else 0
+        all_criteria = (
+            c["in_registry"]
+            and c["identity_valid"]
+            and c["capability_match"]
+            and c["trust_sufficient"]
+            and c["audit_ready"]
+            and c["approval_ready"]
+            and c["rollback_defined"]
+            and not c["is_blocked"]
+        )
+        sel_status = "selected" if all_criteria else "blocked"
+        candidates.append(
+            {
+                "candidate_id": cid,
+                "runtime_id": c["runtime_id"],
+                "runtime_name": c["runtime_name"],
+                "runtime_type": c["runtime_type"],
+                "capability_score": cap_score,
+                "trust_score": trust_score,
+                "audit_score": audit_score,
+                "approval_score": approval_score,
+                "rollback_score": rollback_score,
+                "task_fit_score": task_fit_score,
+                "selection_status": sel_status,
+                "human_review_required": True,
+            }
+        )
+
+    selected = next((c for c in candidates if c["selection_status"] == "selected"), None)
+    selected_runtime_id = selected["runtime_id"] if selected else "none"
+    candidate_count = len(candidates)
+    first_cid = candidates[0]["candidate_id"] if candidates else f"rse-cand-{ts}-00"
+
+    selection_status: str
+    if selected and not any(c["selection_status"] == "blocked" for c in candidates):
+        selection_status = "selected"
+    elif selected:
+        selection_status = "selection_with_warnings"
+    elif candidate_count == 0:
+        selection_status = "escalated"
+    else:
+        selection_status = "blocked"
+
+    selection_allowed = selected is not None
+
+    domain_signal_defs = [
+        {
+            "selection_domain": "runtime_candidate_selection",
+            "signal_type": "runtime_candidate_selection_check",
+            "severity": "info" if candidate_count > 0 else "blocker",
+            "detected_state": (
+                f"candidate_count={candidate_count}; "
+                f"candidate_ids={[c['runtime_id'] for c in candidates]}; "
+                f"selected_runtime_id={selected_runtime_id}"
+            ),
+            "expected_state": (
+                "at least one governed runtime candidate must exist in the registry "
+                "before selection can proceed"
+            ),
+        },
+        {
+            "selection_domain": "runtime_capability_matching",
+            "signal_type": "runtime_capability_matching_check",
+            "severity": "info" if selected else "warning",
+            "detected_state": (
+                f"capability_scores={[c['capability_score'] for c in candidates]}; "
+                f"capability_match_found={selected is not None}; "
+                "task_intent=read_only_local"
+            ),
+            "expected_state": (
+                "at least one candidate must have a capability score > 0 to match "
+                "the intended task; read-only shell capability is sufficient"
+            ),
+        },
+        {
+            "selection_domain": "runtime_trust_matching",
+            "signal_type": "runtime_trust_matching_check",
+            "severity": "info" if selected else "warning",
+            "detected_state": (
+                f"trust_scores={[c['trust_score'] for c in candidates]}; "
+                f"trust_match_found={selected is not None}; "
+                "minimum_trust=trusted"
+            ),
+            "expected_state": (
+                "selected candidate must have trust_score > 0; "
+                "untrusted candidates must not be selected"
+            ),
+        },
+        {
+            "selection_domain": "runtime_execution_boundary_matching",
+            "signal_type": "runtime_execution_boundary_matching_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_boundary=read_only_enforced; "
+                "execution_allowed=False; "
+                "selection_does_not_invoke_runtime=True"
+            ),
+            "expected_state": (
+                "execution boundary must be read_only_enforced for all candidates; "
+                "execution_allowed=False in 63B; selection does not invoke any runtime"
+            ),
+        },
+        {
+            "selection_domain": "runtime_audit_readiness_matching",
+            "signal_type": "runtime_audit_readiness_matching_check",
+            "severity": "info" if selected else "blocker",
+            "detected_state": (
+                f"audit_scores={[c['audit_score'] for c in candidates]}; "
+                f"audit_ready_count={sum(1 for c in candidates if c['audit_score'] > 0)}; "
+                "audit_dir=.pcae/audit/runtime"
+            ),
+            "expected_state": (
+                "selected candidate must have audit_score > 0; "
+                "audit readiness is mandatory before selection is allowed"
+            ),
+        },
+        {
+            "selection_domain": "runtime_approval_readiness_matching",
+            "signal_type": "runtime_approval_readiness_matching_check",
+            "severity": "info" if selected else "blocker",
+            "detected_state": (
+                f"approval_scores={[c['approval_score'] for c in candidates]}; "
+                f"approval_ready_count={sum(1 for c in candidates if c['approval_score'] > 0)}; "
+                "approval_not_granted_in_63b=True"
+            ),
+            "expected_state": (
+                "selected candidate must have approval_score > 0; "
+                "approval readiness is mandatory; approval is not granted by selection"
+            ),
+        },
+        {
+            "selection_domain": "runtime_rollback_readiness_matching",
+            "signal_type": "runtime_rollback_readiness_matching_check",
+            "severity": "info" if selected else "blocker",
+            "detected_state": (
+                f"rollback_scores={[c['rollback_score'] for c in candidates]}; "
+                f"rollback_defined_count={sum(1 for c in candidates if c['rollback_score'] > 0)}; "
+                "rollback_not_executed_in_63b=True"
+            ),
+            "expected_state": (
+                "selected candidate must have rollback_score > 0; "
+                "rollback boundary must be defined before selection is allowed"
+            ),
+        },
+        {
+            "selection_domain": "runtime_task_fit_matching",
+            "signal_type": "runtime_task_fit_matching_check",
+            "severity": "info" if selected else "warning",
+            "detected_state": (
+                f"task_fit_scores={[c['task_fit_score'] for c in candidates]}; "
+                f"best_fit_runtime={selected_runtime_id}; "
+                "task_type=read_only_governed"
+            ),
+            "expected_state": (
+                "selected candidate must have task_fit_score > 0; "
+                "task fit confirms candidate is suitable for the governed task type"
+            ),
+        },
+        {
+            "selection_domain": "runtime_selection_escalation",
+            "signal_type": "runtime_selection_escalation_check",
+            "severity": "info" if selected else "blocker",
+            "detected_state": (
+                f"escalation_required={selected is None}; "
+                f"selected_runtime_id={selected_runtime_id}; "
+                "escalation_path=human_review"
+            ),
+            "expected_state": (
+                "escalation path must exist if no suitable candidate can be selected; "
+                "escalation_path=human_review is always available"
+            ),
+        },
+        {
+            "selection_domain": "runtime_selection_blocking",
+            "signal_type": "runtime_selection_blocking_check",
+            "severity": "info",
+            "detected_state": (
+                f"blocked_candidates={sum(1 for c in candidates if c['selection_status'] == 'blocked')}; "
+                "execution_allowed=False; "
+                "selection_does_not_execute_runtime=True; "
+                "no_runtime_invocation=True"
+            ),
+            "expected_state": (
+                "blocked candidates must be excluded from selection; "
+                "execution_allowed=False in 63B; selection never invokes a runtime"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rse-sig-{ts}-{i:02d}",
+            "candidate_id": first_cid,
+            "selection_domain": sig["selection_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    assessment_id = f"rsea-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "candidate_count": candidate_count,
+        "selected_runtime_id": selected_runtime_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "selection_status": selection_status,
+        "selection_allowed": selection_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rsesum-{ts}",
+        "assessment_id": assessment_id,
+        "candidate_count": candidate_count,
+        "selected_runtime_id": selected_runtime_id,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "selection_status": selection_status,
+        "selection_allowed": selection_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RSE_SELECTION_DOMAINS)
+
+    return {
+        "runtime_selection_engine_overview": {
+            "overview_id": f"63b-{ts}",
+            "generated_at": generated_at,
+            "phase": "63B",
+            "title": "Runtime Selection Engine",
+            "domain_count": domain_count,
+            "candidate_count": candidate_count,
+            "selected_runtime_id": selected_runtime_id,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "selection_status": selection_status,
+            "selection_allowed": selection_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 63B defines governed runtime selection across multiple registered "
+                "runtime candidates without invoking or executing any runtime. "
+                f"candidate_count={candidate_count}. "
+                f"selected_runtime_id={selected_runtime_id}. "
+                f"selection_status={selection_status}. "
+                f"selection_allowed={selection_allowed}. "
+                "execution_allowed=False. No runtime invocation occurs. "
+                "No command execution occurs. human_review_required=True."
+            ),
+        },
+        "candidates": candidates,
+        "candidate_model": {
+            "model_name": "RuntimeSelectionCandidate",
+            "field_count": len(_RSE_CANDIDATE_FIELDS),
+            "required_field_count": len(_RSE_CANDIDATE_FIELDS),
+            "supported_selection_statuses": list(_RSE_SELECTION_STATUSES),
+            "execution_allowed_false_in_63b": True,
+            "human_review_required_always_true_in_63b": True,
+            "fields": [dict(f) for f in _RSE_CANDIDATE_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeSelectionSignal",
+            "field_count": len(_RSE_SIGNAL_FIELDS),
+            "required_field_count": len(_RSE_SIGNAL_FIELDS),
+            "severity_values": list(_RSE_SEVERITY_VALUES),
+            "execution_allowed_false_in_63b": True,
+            "human_review_required_always_true_in_63b": True,
+            "fields": [dict(f) for f in _RSE_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeSelectionAssessment",
+            "field_count": len(_RSE_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RSE_ASSESSMENT_FIELDS),
+            "supported_selection_statuses": list(_RSE_SELECTION_STATUSES),
+            "execution_allowed_false_in_63b": True,
+            "human_review_required_always_true_in_63b": True,
+            "fields": [dict(f) for f in _RSE_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeSelectionSummary",
+            "field_count": len(_RSE_SUMMARY_FIELDS),
+            "required_field_count": len(_RSE_SUMMARY_FIELDS),
+            "supported_selection_statuses": list(_RSE_SELECTION_STATUSES),
+            "execution_allowed_false_in_63b": True,
+            "human_review_required_always_true_in_63b": True,
+            "fields": [dict(f) for f in _RSE_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect runtime registry candidates",
+                "score runtime candidates",
+                "classify selection readiness",
+                "recommend a selected runtime candidate",
+                "recommend escalation if no candidate qualifies",
+                "report blockers and warnings",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "register runtimes on the host",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "selection_allowed": selection_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "63B",
+        },
+        "advisory": RUNTIME_SELECTION_ENGINE_ADVISORY,
+    }

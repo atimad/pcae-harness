@@ -376,6 +376,8 @@ from pcae.core.agent import (
     RUNTIME_ROLLBACK_BOUNDARIES_ADVISORY,
     build_multi_runtime_registry,
     MULTI_RUNTIME_REGISTRY_ADVISORY,
+    build_runtime_selection_engine,
+    RUNTIME_SELECTION_ENGINE_ADVISORY,
     build_roadmap_continuity,
     build_runtime_capability_inventory,
     build_runtime_discovery_assessment,
@@ -12652,4 +12654,66 @@ def run_multi_runtime_registry(args: argparse.Namespace) -> int:
     print(f"  Human review:      {boundaries['human_review_required']}")
     print()
     print(MULTI_RUNTIME_REGISTRY_ADVISORY)
+    return 0
+
+
+def run_runtime_selection_engine(args: argparse.Namespace) -> int:
+    data = build_runtime_selection_engine(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_selection_engine_overview"]
+    print("Runtime selection engine")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Selection domains:      {overview['domain_count']}")
+    print(f"Candidates assessed:    {overview['candidate_count']}")
+    print(f"Selected runtime:       {overview['selected_runtime_id']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Selection status:       {overview['selection_status']}")
+    print(f"Selection allowed:      {'yes' if overview['selection_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Candidates:")
+    for c in data["candidates"]:
+        print(f"  [{c['candidate_id']}] {c['runtime_id']} ({c['runtime_type']})")
+        print(
+            f"    capability={c['capability_score']}  trust={c['trust_score']}  "
+            f"audit={c['audit_score']}  approval={c['approval_score']}  "
+            f"rollback={c['rollback_score']}  task_fit={c['task_fit_score']}"
+        )
+        print(f"    selection_status={c['selection_status']}")
+    print()
+    for key, label in (
+        ("candidate_model", "Candidate model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Selection signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['selection_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:               {', '.join(boundaries['may'])}")
+    print(f"  May not:           {', '.join(boundaries['may_not'])}")
+    print(f"  Selection allowed: {boundaries['selection_allowed']}")
+    print(f"  Execution allowed: {boundaries['execution_allowed']}")
+    print(f"  Human review:      {boundaries['human_review_required']}")
+    print()
+    print(RUNTIME_SELECTION_ENGINE_ADVISORY)
     return 0

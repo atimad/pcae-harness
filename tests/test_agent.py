@@ -46014,3 +46014,171 @@ def test_63a_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["multi_runtime_registry_overview"]["selection_allowed"] is False
     assert data["multi_runtime_registry_overview"]["execution_allowed"] is False
     assert data["multi_runtime_registry_overview"]["human_review_required"] is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 63B: Runtime Selection Engine
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_selection_engine  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath63B  # noqa: E402
+
+
+def test_63b_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    for key in (
+        "runtime_selection_engine_overview",
+        "candidates",
+        "candidate_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_63b_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    assert data["candidate_model"]["model_name"] == "RuntimeSelectionCandidate"
+    assert data["candidate_model"]["field_count"] == 12
+    assert data["signal_model"]["model_name"] == "RuntimeSelectionSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeSelectionAssessment"
+    assert data["assessment_model"]["field_count"] == 10
+    assert data["summary_model"]["model_name"] == "RuntimeSelectionSummary"
+    assert data["summary_model"]["field_count"] == 11
+    for field_name in (
+        "candidate_id", "runtime_id", "runtime_name", "runtime_type",
+        "capability_score", "trust_score", "audit_score", "approval_score",
+        "rollback_score", "task_fit_score", "selection_status", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["candidate_model"]["fields"]
+        ), f"Missing candidate field: {field_name}"
+
+
+def test_63b_all_selection_domains_defined(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    expected = {
+        "runtime_candidate_selection",
+        "runtime_capability_matching",
+        "runtime_trust_matching",
+        "runtime_execution_boundary_matching",
+        "runtime_audit_readiness_matching",
+        "runtime_approval_readiness_matching",
+        "runtime_rollback_readiness_matching",
+        "runtime_task_fit_matching",
+        "runtime_selection_escalation",
+        "runtime_selection_blocking",
+    }
+    actual = {s["selection_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_63b_execution_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    assert data["runtime_selection_engine_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_63b_governed_candidate_selected(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    overview = data["runtime_selection_engine_overview"]
+    assert overview["selected_runtime_id"] == "shell-local"
+    assert overview["selection_allowed"] is True
+    assert overview["selection_status"] == "selected"
+    assert overview["blocker_count"] == 0
+
+
+def test_63b_candidate_scores_populated(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    candidates = data["candidates"]
+    assert len(candidates) >= 1
+    shell = next(c for c in candidates if c["runtime_id"] == "shell-local")
+    assert shell["capability_score"] == 10
+    assert shell["trust_score"] == 10
+    assert shell["audit_score"] == 10
+    assert shell["approval_score"] == 10
+    assert shell["rollback_score"] == 10
+    assert shell["task_fit_score"] == 10
+    assert shell["selection_status"] == "selected"
+    assert shell["human_review_required"] is True
+    assert shell["candidate_id"].startswith("rse-cand-")
+
+
+def test_63b_selection_allowed_conditional(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    assert assessment["selection_allowed"] is True
+    assert summary["selection_allowed"] is True
+    assert assessment["selected_runtime_id"] == "shell-local"
+    assert summary["selected_runtime_id"] == "shell-local"
+
+
+def test_63b_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    for signal in data["signals"]:
+        assert "candidate_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+
+
+def test_63b_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_selection_engine(_HarnessPath63B(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "register runtimes on the host",
+        "modify audit artifacts",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "score runtime candidates" in boundaries["may"]
+    assert "classify selection readiness" in boundaries["may"]
+    assert "recommend a selected runtime candidate" in boundaries["may"]
+    assert "recommend escalation if no candidate qualifies" in boundaries["may"]
+
+
+def test_63b_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-selection-engine"])
+    output = capsys.readouterr().out
+    for text in (
+        "Runtime selection engine",
+        "Candidates",
+        "Candidate model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Selection signals",
+        "Governance boundaries",
+        "Selection allowed:",
+        "Execution allowed:",
+        "Selected runtime:",
+    ):
+        assert text in output
+
+
+def test_63b_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["runtime-selection-engine", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["runtime_selection_engine_overview"]["phase"] == "63B"
+    assert data["runtime_selection_engine_overview"]["execution_allowed"] is False
+    assert data["runtime_selection_engine_overview"]["human_review_required"] is True
+    assert data["runtime_selection_engine_overview"]["selection_allowed"] is True

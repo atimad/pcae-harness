@@ -175,6 +175,7 @@ from pcae.commands.agent import (
     run_runtime_approval_gates,
     run_runtime_rollback_boundaries,
     run_multi_runtime_registry,
+    run_runtime_selection_engine,
     run_roadmap_continuity,
     run_planning_dry_run,
     run_planning_execution_design,
@@ -4552,6 +4553,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     mrr_parser.set_defaults(handler=run_multi_runtime_registry)
+
+    rse_parser = subparsers.add_parser(
+        "runtime-selection-engine",
+        help="Score and select governed runtime candidates without invoking any runtime (Phase 63B).",
+    )
+    rse_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rse_parser.set_defaults(handler=run_runtime_selection_engine)
 
     return parser
 

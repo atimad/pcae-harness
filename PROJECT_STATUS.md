@@ -2,17 +2,15 @@
 
 ## Current Phase
 
-Phase 63A: Multi-Runtime Registry — complete.
+Phase 63B: Runtime Selection Engine — complete.
 
-62A–62H completed: governed execution, output capture, audit persistence, review workflow,
-task state alignment, review decision record, approval gates, and rollback boundaries.
-63A: extends runtime governance from single-runtime to multi-runtime scope; PCAE can now
-represent, compare, and govern multiple runtime candidates at metadata level before runtime
-selection begins; `pcae multi-runtime-registry`; MultiRuntimeRegistryEntry (12 fields),
-MultiRuntimeRegistrySignal (8 fields), MultiRuntimeRegistryAssessment (10 fields),
-MultiRuntimeRegistrySummary (11 fields); ten registry domains; registry_allowed=True only
-for governed candidates; selection_allowed=False always; execution_allowed=False always;
-human_review_required=True always; 4453 tests passing. 63B is next.
+63A completed: multi-runtime registry established. 63B: defines governed runtime selection
+across multiple registered runtime candidates without invoking or executing any runtime;
+`pcae runtime-selection-engine`; RuntimeSelectionCandidate (12 fields), RuntimeSelectionSignal
+(8 fields), RuntimeSelectionAssessment (10 fields), RuntimeSelectionSummary (11 fields);
+ten selection domains; selection_allowed=True only when all mandatory criteria satisfied;
+execution_allowed=False always; no runtime invocation; no command execution;
+human_review_required=True always; 4464 tests passing. 63C is next.
 
 ## Post-61J Runtime Registry Checkpoint
 

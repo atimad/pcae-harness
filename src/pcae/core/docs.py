@@ -1090,6 +1090,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae multi-runtime-registry`
 - `pcae multi-runtime-registry --json`
+
+## runtime-selection-engine
+
+- `pcae runtime-selection-engine`
+- `pcae runtime-selection-engine --json`
 """
 
 
