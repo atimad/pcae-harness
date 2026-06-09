@@ -32,7 +32,8 @@ Assessment status: inventory_complete
 | Runtime Approval Gates | runtime_approval_capabilities | 62G | implemented | pcae runtime-approval-gates | runtime_review_decision_record | multi_runtime_registry |
 | Runtime Rollback Boundaries | runtime_rollback_capabilities | 62H | implemented | pcae runtime-rollback-boundaries | runtime_approval_gates | runtime_failure_recovery |
 | Multi-Runtime Execution Planning | multi_runtime_capabilities | 64A | implemented | pcae multi-runtime-execution-planning | multi_runtime_registry; runtime_selection_engine; runtime_arbitration | multi_runtime_execution_readiness |
-| Multi-Runtime Orchestration Execution | multi_runtime_capabilities | 64C | implemented | pcae multi-runtime-orchestration-execution; pcae multi-runtime-orchestration-execution --json | multi_runtime_execution_readiness | (none) |
+| Multi-Runtime Orchestration Execution | multi_runtime_capabilities | 64C | implemented | pcae multi-runtime-orchestration-execution; pcae multi-runtime-orchestration-execution --json | multi_runtime_execution_readiness | runtime_coordination_policy |
+| Runtime Coordination Policy | multi_runtime_capabilities | 64D | implemented | (CLI deferred) | multi_runtime_orchestration_execution | (none) |
 | Repository Health Governance | repository_governance_capabilities | 44A | implemented | pcae health; pcae check; pcae status coherence | (none) | task_state_alignment |
 | Commands Reference Generation | documentation_capabilities | 53A | implemented | pcae docs commands | (none) | capability_inventory |
 | Phase-Scoped Test Selection | testing_capabilities | 44A+ | implemented | python -m pytest -k <phase_id>; python -m pytest -n auto | (none) | (none) |
@@ -50,4 +51,4 @@ Assessment status: inventory_complete
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Phase 64C promotes Multi-Runtime Orchestration Execution from roadmap_gap to implemented. Phase 64B.6E adds Design Review Intelligence Rendering. capability_count=23. implemented_count=21. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=2. prompt_capability_count=2. assessment_status=inventory_complete.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Phase 64C promotes Multi-Runtime Orchestration Execution from roadmap_gap to implemented. Phase 64B.6E adds Design Review Intelligence Rendering. Phase 64D adds Runtime Coordination Policy. capability_count=24. implemented_count=22. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=2. prompt_capability_count=2. assessment_status=inventory_complete.*

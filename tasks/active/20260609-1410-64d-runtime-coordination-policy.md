@@ -32,6 +32,10 @@ implementation
 - CHANGELOG.md
 - src/pcae/core/agent.py
 - tests/test_agent.py
+- docs/CAPABILITY_INVENTORY.md
+- docs/ROADMAP_REGISTRY.md
+- docs/PROMPT_REGISTRY.md
+- docs/SKILL_REGISTRY.md
 
 ## Forbidden Files
 

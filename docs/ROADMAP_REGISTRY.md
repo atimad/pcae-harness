@@ -40,8 +40,10 @@ Assessment status: intelligence_with_gaps
 | 63F | Runtime Quarantine | completed | 63E | 64A |
 | 64A | Multi-Runtime Execution Planning | completed | 63F | 64B |
 | 64B | Multi-Runtime Execution Readiness | completed | 64A | 64C |
-| 64C | Multi-Runtime Orchestration Execution | active | 64B | 65A |
-| 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64C | — |
+| 64C | Multi-Runtime Orchestration Execution | completed | 64B | 64D |
+| 64D | Runtime Coordination Policy | active | 64C | 64E |
+| 64E | Orchestration Audit Model | roadmap_gap | 64D | 65A |
+| 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64E | — |
 
 ## Track: capability_intelligence
 

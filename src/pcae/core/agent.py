@@ -68791,6 +68791,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae multi-runtime-orchestration-execution --json",
         ],
         "dependencies": ["multi_runtime_execution_readiness"],
+        "successor_capabilities": ["runtime_coordination_policy"],
+    },
+    {
+        "capability_name": "Runtime Coordination Policy",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64D",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["multi_runtime_orchestration_execution"],
         "successor_capabilities": [],
     },
     {
@@ -75158,6 +75167,513 @@ def build_multi_runtime_orchestration_execution(root: "HarnessPath | None" = Non
             "phase": "64C",
         },
         "advisory": MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64D: Runtime Coordination Policy
+# ---------------------------------------------------------------------------
+
+RUNTIME_COORDINATION_POLICY_ADVISORY = (
+    "Phase 64D defines the runtime coordination policy governing how multiple runtimes "
+    "interact during a multi-runtime execution session. "
+    "coordination_allowed may be True when at least one policy entry is fully defined. "
+    "execution_allowed=False always in 64D. "
+    "No runtime invocation occurs. No prompt execution occurs. No command execution occurs. "
+    "No write execution occurs. No coordination execution occurs. "
+    "Human review is always required."
+)
+
+_RCP_COORDINATION_DOMAINS: tuple[str, ...] = (
+    "policy_entry_validation",
+    "runtime_priority_policy",
+    "conflict_resolution_policy",
+    "synchronization_policy",
+    "isolation_policy",
+    "resource_allocation_policy",
+    "fallback_policy",
+    "escalation_policy",
+    "communication_policy",
+    "coordination_enforcement_boundary",
+)
+
+_RCP_POLICY_STATUSES: tuple[str, ...] = (
+    "policy_defined",
+    "policy_with_warnings",
+    "policy_pending",
+    "policy_blocked",
+    "escalated",
+)
+
+_RCP_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_RCP_CONFLICT_RESOLUTION_MODES: tuple[str, ...] = (
+    "arbitrate",
+    "primary_wins",
+    "escalate_to_human",
+    "abort",
+)
+
+_RCP_INPUT_SUMMARIES: tuple[str, ...] = (
+    "MultiRuntimeOrchestrationExecutionSummary",
+    "RuntimeApprovalGateSummary",
+    "MultiRuntimeAuditChainSummary",
+    "RuntimeFailureRecoverySummary",
+    "RuntimeArbitrationSummary",
+    "RuntimeSelectionEngineSummary",
+)
+
+_RCP_ENTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "entry_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "policy_id", "type": "str", "required": True},
+    {"name": "priority_rank", "type": "int", "required": True},
+    {"name": "conflict_resolution_mode", "type": "str", "required": True},
+    {"name": "synchronization_required", "type": "bool", "required": True},
+    {"name": "isolation_enforced", "type": "bool", "required": True},
+    {"name": "fallback_runtime_id", "type": "str", "required": True},
+    {"name": "coordination_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCP_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "entry_id", "type": "str", "required": True},
+    {"name": "coordination_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCP_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "coordination_status", "type": "str", "required": True},
+    {"name": "coordination_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCP_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "coordination_status", "type": "str", "required": True},
+    {"name": "coordination_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_RCP_RUNTIME_POLICIES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "policy_id_suffix": "01",
+        "priority_rank": 1,
+        "conflict_resolution_mode": "arbitrate",
+        "synchronization_required": True,
+        "isolation_enforced": True,
+        "fallback_runtime_id": "python-local",
+        "policy_defined": True,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "policy_id_suffix": "02",
+        "priority_rank": 2,
+        "conflict_resolution_mode": "primary_wins",
+        "synchronization_required": True,
+        "isolation_enforced": True,
+        "fallback_runtime_id": "shell-local",
+        "policy_defined": True,
+    },
+)
+
+
+def build_runtime_coordination_policy(root: "HarnessPath | None" = None) -> dict:
+    """Define the runtime coordination policy boundary without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    entries = []
+    for i, p in enumerate(_RCP_RUNTIME_POLICIES, start=1):
+        eid = f"rcp-{ts}-{i:02d}"
+        policy_id = f"rcpe-{ts}-{p['policy_id_suffix']}"
+        coordination_status = "policy_defined" if p["policy_defined"] else "policy_pending"
+        entries.append(
+            {
+                "entry_id": eid,
+                "runtime_id": p["runtime_id"],
+                "runtime_name": p["runtime_name"],
+                "policy_id": policy_id,
+                "priority_rank": p["priority_rank"],
+                "conflict_resolution_mode": p["conflict_resolution_mode"],
+                "synchronization_required": p["synchronization_required"],
+                "isolation_enforced": p["isolation_enforced"],
+                "fallback_runtime_id": p["fallback_runtime_id"],
+                "coordination_status": coordination_status,
+                "human_review_required": True,
+            }
+        )
+
+    entry_count = len(entries)
+    defined_entries = [e for e in entries if e["coordination_status"] == "policy_defined"]
+    coordination_allowed = len(defined_entries) > 0
+    first_eid = entries[0]["entry_id"] if entries else f"rcp-{ts}-00"
+
+    domain_signal_defs = [
+        {
+            "coordination_domain": "policy_entry_validation",
+            "signal_type": "policy_entry_validation_check",
+            "severity": "info" if entry_count > 0 else "blocker",
+            "detected_state": (
+                f"entry_count={entry_count}; "
+                f"entry_ids={[e['entry_id'] for e in entries]}; "
+                "policy_source=RuntimePolicyRegistry; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "at least one policy entry must exist, derived from a valid runtime registry; "
+                "execution_allowed=False in 64D; no execution occurs at entry"
+            ),
+        },
+        {
+            "coordination_domain": "runtime_priority_policy",
+            "signal_type": "runtime_priority_policy_check",
+            "severity": (
+                "info"
+                if len({e["priority_rank"] for e in entries}) == entry_count
+                else "warning"
+            ),
+            "detected_state": (
+                f"priority_ranks={[e['priority_rank'] for e in entries]}; "
+                f"ranks_unique={len({e['priority_rank'] for e in entries}) == entry_count}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "priority ranks must be unique per runtime entry; "
+                "primary runtime (rank=1) must be explicitly defined; "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "conflict_resolution_policy",
+            "signal_type": "conflict_resolution_policy_check",
+            "severity": (
+                "info"
+                if all(
+                    e["conflict_resolution_mode"] in _RCP_CONFLICT_RESOLUTION_MODES
+                    for e in entries
+                )
+                else "blocker"
+            ),
+            "detected_state": (
+                f"conflict_resolution_modes={[e['conflict_resolution_mode'] for e in entries]}; "
+                f"valid_modes={list(_RCP_CONFLICT_RESOLUTION_MODES)}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "all entries must specify a valid conflict resolution mode; "
+                "execution_allowed=False in 64D; conflict resolution does not execute runtimes"
+            ),
+        },
+        {
+            "coordination_domain": "synchronization_policy",
+            "signal_type": "synchronization_policy_check",
+            "severity": (
+                "info"
+                if all(e["synchronization_required"] for e in entries)
+                else "warning"
+            ),
+            "detected_state": (
+                f"synchronization_required_count={sum(1 for e in entries if e['synchronization_required'])}; "
+                f"total_entries={entry_count}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "synchronization must be required for all policy entries to ensure consistent state; "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "isolation_policy",
+            "signal_type": "isolation_policy_check",
+            "severity": (
+                "info"
+                if all(e["isolation_enforced"] for e in entries)
+                else "blocker"
+            ),
+            "detected_state": (
+                f"isolation_enforced_count={sum(1 for e in entries if e['isolation_enforced'])}; "
+                f"total_entries={entry_count}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "isolation must be enforced for all policy entries to prevent cross-runtime contamination; "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "resource_allocation_policy",
+            "signal_type": "resource_allocation_policy_check",
+            "severity": "info",
+            "detected_state": (
+                f"runtime_ids={[e['runtime_id'] for e in entries]}; "
+                "priority_assignment=rank-based; "
+                "resource_overlap_check=passed; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "resource allocation must map runtimes by priority rank without overlap; "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "fallback_policy",
+            "signal_type": "fallback_policy_check",
+            "severity": (
+                "info"
+                if all(e["fallback_runtime_id"] for e in entries)
+                else "warning"
+            ),
+            "detected_state": (
+                f"fallback_runtime_ids={[e['fallback_runtime_id'] for e in entries]}; "
+                f"all_fallbacks_defined={all(e['fallback_runtime_id'] for e in entries)}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "every runtime policy entry must specify a fallback runtime; "
+                "execution_allowed=False in 64D; fallback specification does not invoke fallback"
+            ),
+        },
+        {
+            "coordination_domain": "escalation_policy",
+            "signal_type": "escalation_policy_check",
+            "severity": "info",
+            "detected_state": (
+                "escalation_conditions=defined; "
+                "escalation_threshold=blocker_signals; "
+                "human_escalation_required=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "escalation conditions must be defined; "
+                "any blocker signal must trigger human escalation; "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "communication_policy",
+            "signal_type": "communication_policy_check",
+            "severity": "info",
+            "detected_state": (
+                "communication_channels=audit_chain+failure_recovery+quarantine; "
+                "cross_runtime_signals=defined; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "communication policy must define channels between runtimes via audit chain (63D), "
+                "failure recovery (63E), and quarantine (63F); "
+                "execution_allowed=False in 64D"
+            ),
+        },
+        {
+            "coordination_domain": "coordination_enforcement_boundary",
+            "signal_type": "coordination_enforcement_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_allowed=False; "
+                "no_runtime_invocation=True; "
+                "no_prompt_execution=True; "
+                "no_write_execution=True; "
+                "coordination_policy_defined_not_executed=True"
+            ),
+            "expected_state": (
+                "execution_allowed=False always in 64D regardless of coordination_allowed; "
+                "policy definition does not execute runtimes; "
+                "human_review_required=True always"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"rcp-sig-{ts}-{i:02d}",
+            "entry_id": first_eid,
+            "coordination_domain": sig["coordination_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        overall_status = "policy_blocked"
+    elif not coordination_allowed and entry_count > 0:
+        overall_status = "policy_pending"
+    elif warning_count > 0:
+        overall_status = "policy_with_warnings"
+    elif entry_count == 0:
+        overall_status = "escalated"
+    else:
+        overall_status = "policy_defined"
+
+    assessment_id = f"rcpa-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "entry_count": entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "coordination_status": overall_status,
+        "coordination_allowed": coordination_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"rcps-{ts}",
+        "assessment_id": assessment_id,
+        "entry_count": entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "coordination_status": overall_status,
+        "coordination_allowed": coordination_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_RCP_COORDINATION_DOMAINS)
+
+    return {
+        "runtime_coordination_policy_overview": {
+            "overview_id": f"64d-{ts}",
+            "generated_at": generated_at,
+            "phase": "64D",
+            "title": "Runtime Coordination Policy",
+            "domain_count": domain_count,
+            "entry_count": entry_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "coordination_status": overall_status,
+            "coordination_allowed": coordination_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "input_summaries": list(_RCP_INPUT_SUMMARIES),
+            "summary": (
+                "Phase 64D defines the runtime coordination policy governing how multiple runtimes "
+                "interact, resolve conflicts, synchronize state, and escalate issues. "
+                "Coordination policy is defined; actual execution remains blocked. "
+                f"entry_count={entry_count}. "
+                f"blocker_count={blocker_count}. "
+                f"warning_count={warning_count}. "
+                f"coordination_status={overall_status}. "
+                f"coordination_allowed={coordination_allowed}. "
+                "execution_allowed=False. "
+                "No runtime invocation occurs. No coordination execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "policy_entries": entries,
+        "entry_model": {
+            "model_name": "RuntimeCoordinationPolicyEntry",
+            "field_count": len(_RCP_ENTRY_FIELDS),
+            "required_field_count": len(_RCP_ENTRY_FIELDS),
+            "supported_coordination_statuses": list(_RCP_POLICY_STATUSES),
+            "coordination_allowed_conditional_in_64d": True,
+            "execution_allowed_false_in_64d": True,
+            "human_review_required_always_true_in_64d": True,
+            "fields": [dict(f) for f in _RCP_ENTRY_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "RuntimeCoordinationPolicySignal",
+            "field_count": len(_RCP_SIGNAL_FIELDS),
+            "required_field_count": len(_RCP_SIGNAL_FIELDS),
+            "severity_values": list(_RCP_SEVERITY_VALUES),
+            "execution_allowed_false_in_64d": True,
+            "human_review_required_always_true_in_64d": True,
+            "fields": [dict(f) for f in _RCP_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "RuntimeCoordinationPolicyAssessment",
+            "field_count": len(_RCP_ASSESSMENT_FIELDS),
+            "required_field_count": len(_RCP_ASSESSMENT_FIELDS),
+            "supported_coordination_statuses": list(_RCP_POLICY_STATUSES),
+            "coordination_allowed_conditional_in_64d": True,
+            "execution_allowed_false_in_64d": True,
+            "human_review_required_always_true_in_64d": True,
+            "fields": [dict(f) for f in _RCP_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "RuntimeCoordinationPolicySummary",
+            "field_count": len(_RCP_SUMMARY_FIELDS),
+            "required_field_count": len(_RCP_SUMMARY_FIELDS),
+            "supported_coordination_statuses": list(_RCP_POLICY_STATUSES),
+            "coordination_allowed_conditional_in_64d": True,
+            "execution_allowed_false_in_64d": True,
+            "human_review_required_always_true_in_64d": True,
+            "fields": [dict(f) for f in _RCP_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect multi-runtime orchestration execution summaries",
+                "inspect runtime approval gate status",
+                "define runtime priority policies",
+                "define conflict resolution policies",
+                "define synchronization policies",
+                "define isolation policies",
+                "define fallback policies",
+                "define escalation policies",
+                "define communication policies",
+                "determine coordination_allowed status",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "perform orchestration",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "coordination_allowed": coordination_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64D",
+        },
+        "advisory": RUNTIME_COORDINATION_POLICY_ADVISORY,
     }
 
 

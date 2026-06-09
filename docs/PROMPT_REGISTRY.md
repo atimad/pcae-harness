@@ -2,9 +2,9 @@
 
 Generated: 2026-06-09T09:00:00.000000+00:00
 Phase: 64B.3 — Prompt Recommendation Hardening
-Current phase: 64C
+Current phase: 64D
 Current track: multi_runtime
-Prompt count: 39
+Prompt count: 42
 Recommendation count: 7
 Validation count: 33
 Drift count: 4
@@ -47,9 +47,12 @@ Assessment status: quality_governed
 | prh-prompt-20260609T050240-31 | 64B.6D | implementation | recommended | 64B.6D-implementation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
 | prh-prompt-20260609T050240-32 | 64B.6D | validation | recommended | 64B.6D-validation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
 | prh-prompt-20260609T050240-33 | 64B.6D | agent | recommended | 64B.6D-agent-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
-| prh-prompt-20260609T050240-34 | 64C | implementation | recommended | 64C-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
-| prh-prompt-20260609T050240-35 | 64C | validation | recommended | 64C-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
-| prh-prompt-20260609T050240-36 | 64C | agent | recommended | 64C-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-34 | 64C | implementation | recommended | 64C-implementation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-35 | 64C | validation | recommended | 64C-validation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-36 | 64C | agent | recommended | 64C-agent-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-40 | 64D | implementation | recommended | 64D-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-41 | 64D | validation | recommended | 64D-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-42 | 64D | agent | recommended | 64D-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 | prh-prompt-20260609T050240-37 | 64B.6E | implementation | recommended | 64B.6E-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 | prh-prompt-20260609T050240-38 | 64B.6E | validation | recommended | 64B.6E-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 | prh-prompt-20260609T050240-39 | 64B.6E | agent | recommended | 64B.6E-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
@@ -58,9 +61,9 @@ Assessment status: quality_governed
 
 | Recommendation ID | Phase | Type | Status | Roadmap Source | Capability Source |
 |---|---|---|---|---|---|
-| prh-rec-20260609T050240-01 | 64C | implementation | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
-| prh-rec-20260609T050240-02 | 64C | validation | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
-| prh-rec-20260609T050240-03 | 64C | agent | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
+| prh-rec-20260609T050240-01 | 64D | implementation | recommended | roadmap_registry_current_phase | Runtime Coordination Policy |
+| prh-rec-20260609T050240-02 | 64D | validation | recommended | roadmap_registry_current_phase | Runtime Coordination Policy |
+| prh-rec-20260609T050240-03 | 64D | agent | recommended | roadmap_registry_current_phase | Runtime Coordination Policy |
 | prh-rec-20260609T050240-04 | 64B.1 | implementation | blocked | roadmap_registry_completed_phase | Capability and Roadmap Intelligence |
 | prh-rec-20260609T050240-05 | 64B.2 | implementation | blocked | roadmap_registry_completed_phase | Roadmap Recommendation Hardening |
 | prh-rec-20260609T050240-06 | 46A | implementation | blocked | roadmap_registry_superseded_phase | Invocation Pilot (Legacy) |

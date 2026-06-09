@@ -50355,3 +50355,205 @@ def test_64b_6e_phase_implementation_65a_works(tmp_path, monkeypatch, capsys) ->
     assert rc == 0
     out = capsys.readouterr().out
     assert "Pre-Implementation Design Review" in out
+
+
+# ---------------------------------------------------------------------------
+# Phase 64D: Runtime Coordination Policy
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_runtime_coordination_policy  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64D  # noqa: E402
+
+
+def test_64d_json_top_level_keys(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    for key in (
+        "runtime_coordination_policy_overview",
+        "policy_entries",
+        "entry_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_64d_models_and_exact_fields(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    assert data["entry_model"]["model_name"] == "RuntimeCoordinationPolicyEntry"
+    assert data["entry_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "RuntimeCoordinationPolicySignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "RuntimeCoordinationPolicyAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "RuntimeCoordinationPolicySummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "signal_id", "entry_id", "coordination_domain", "signal_type",
+        "severity", "detected_state", "expected_state", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["signal_model"]["fields"]
+        ), f"Missing signal field: {field_name}"
+
+
+def test_64d_all_coordination_domains_defined(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    expected = {
+        "policy_entry_validation",
+        "runtime_priority_policy",
+        "conflict_resolution_policy",
+        "synchronization_policy",
+        "isolation_policy",
+        "resource_allocation_policy",
+        "fallback_policy",
+        "escalation_policy",
+        "communication_policy",
+        "coordination_enforcement_boundary",
+    }
+    actual = {s["coordination_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_64d_coordination_allowed_governed_and_conditional(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    overview = data["runtime_coordination_policy_overview"]
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    boundaries = data["governance_boundaries"]
+    if overview["blocker_count"] > 0:
+        assert overview["coordination_allowed"] is False
+    else:
+        assert isinstance(overview["coordination_allowed"], bool)
+    assert assessment["coordination_allowed"] == overview["coordination_allowed"]
+    assert summary["coordination_allowed"] == overview["coordination_allowed"]
+    assert boundaries["coordination_allowed"] == overview["coordination_allowed"]
+
+
+def test_64d_execution_allowed_always_false(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    assert data["runtime_coordination_policy_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_64d_policy_entries_generated(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    entries = data["policy_entries"]
+    assert len(entries) == 2
+    for e in entries:
+        assert e["entry_id"].startswith("rcp-")
+        assert "runtime_id" in e
+        assert "policy_id" in e
+        assert "priority_rank" in e
+        assert "conflict_resolution_mode" in e
+        assert "fallback_runtime_id" in e
+        assert "coordination_status" in e
+        assert e["human_review_required"] is True
+
+
+def test_64d_coordination_statuses_valid(tmp_path) -> None:
+    from pcae.core.agent import _RCP_POLICY_STATUSES
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    for e in data["policy_entries"]:
+        assert e["coordination_status"] in _RCP_POLICY_STATUSES
+    assert data["runtime_coordination_policy_overview"]["coordination_status"] in _RCP_POLICY_STATUSES
+
+
+def test_64d_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    for signal in data["signals"]:
+        assert "entry_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "coordination_domain" in signal
+
+
+def test_64d_governance_boundaries(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["phase"] == "64D"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "perform orchestration",
+        "modify runtime configuration",
+        "modify audit artifacts",
+        "modify source files",
+        "access network",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "define runtime priority policies" in boundaries["may"]
+    assert "define conflict resolution policies" in boundaries["may"]
+    assert "define isolation policies" in boundaries["may"]
+    assert "report blockers and warnings" in boundaries["may"]
+
+
+def test_64d_human_review_required(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    assert data["runtime_coordination_policy_overview"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for e in data["policy_entries"]:
+        assert e["human_review_required"] is True
+    for s in data["signals"]:
+        assert s["human_review_required"] is True
+
+
+def test_64d_input_summaries_declared(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    summaries = data["runtime_coordination_policy_overview"]["input_summaries"]
+    for name in (
+        "MultiRuntimeOrchestrationExecutionSummary",
+        "RuntimeApprovalGateSummary",
+        "MultiRuntimeAuditChainSummary",
+        "RuntimeFailureRecoverySummary",
+        "RuntimeArbitrationSummary",
+        "RuntimeSelectionEngineSummary",
+    ):
+        assert name in summaries, f"Missing input summary: {name}"
+
+
+def test_64d_advisory_exported(tmp_path) -> None:
+    from pcae.core.agent import RUNTIME_COORDINATION_POLICY_ADVISORY
+    assert isinstance(RUNTIME_COORDINATION_POLICY_ADVISORY, str)
+    assert len(RUNTIME_COORDINATION_POLICY_ADVISORY) > 50
+    assert "coordination" in RUNTIME_COORDINATION_POLICY_ADVISORY.lower()
+    assert "execution_allowed" in RUNTIME_COORDINATION_POLICY_ADVISORY
+
+
+def test_64d_priority_ranks_unique(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    ranks = [e["priority_rank"] for e in data["policy_entries"]]
+    assert len(ranks) == len(set(ranks)), "Priority ranks must be unique across policy entries"
+
+
+def test_64d_conflict_resolution_modes_valid(tmp_path) -> None:
+    from pcae.core.agent import _RCP_CONFLICT_RESOLUTION_MODES
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    for e in data["policy_entries"]:
+        assert e["conflict_resolution_mode"] in _RCP_CONFLICT_RESOLUTION_MODES, (
+            f"Invalid conflict_resolution_mode: {e['conflict_resolution_mode']}"
+        )
+
+
+def test_64d_fallback_runtime_specified(tmp_path) -> None:
+    data = build_runtime_coordination_policy(_HarnessPath64D(tmp_path))
+    for e in data["policy_entries"]:
+        assert e["fallback_runtime_id"], (
+            f"Missing fallback_runtime_id for entry {e['entry_id']}"
+        )
