@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-09T17:27:24.405125+00:00
+Generated: 2026-06-09T17:41:18.857361+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 37
+Total phases: 38
 Tracks: 6
 Superseded: 1
 Roadmap gaps: 1
@@ -42,8 +42,9 @@ Assessment status: intelligence_with_gaps
 | 64B | Multi-Runtime Execution Readiness | completed | 64A | 64C |
 | 64C | Multi-Runtime Orchestration Execution | completed | 64B | 64D |
 | 64D | Runtime Coordination Policy | completed | 64C | 64E |
-| 64E | Orchestration Audit Model | active | 64D | 65A |
-| 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64E | — |
+| 64E | Orchestration Audit Model | completed | 64D | 64F |
+| 64F | Orchestration Readiness Gate | active | 64E | 65A |
+| 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64F | — |
 
 ## Track: capability_intelligence
 
