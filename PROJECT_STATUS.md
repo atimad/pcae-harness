@@ -16,7 +16,7 @@ refresh, and phase test selection hardening.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 4613 passing tests.
+**Test count:** 4801 passing tests.
 
 **License:** Apache License 2.0.
 
@@ -82,6 +82,17 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
+PCAE can define governed orchestration audit models with
+`pcae orchestration-audit-model` and `pcae orchestration-audit-model --json`,
+linking multi-runtime orchestration dispatch entries (64C), coordination
+policy entries (64D), approval trace requirements, and downstream
+audit/recovery/quarantine traceability into a read-only audit model while
+keeping runtime invocation, orchestration execution, and write execution
+disabled. Four models are exported: OrchestrationAuditRecord,
+OrchestrationAuditSignal, OrchestrationAuditAssessment, and
+OrchestrationAuditSummary. Audit readiness is governed through 10 audit
+domains. `audit_allowed` is conditional and advisory; `execution_allowed`
+remains False always. Human review is required for all governance decisions.
 PCAE can discover governed skills from `.pcae/skills` with `pcae skill list`,
 inspect skill metadata with `pcae skill show <skill_id>`, validate governed
 skill structure with `pcae skill validate`, and invoke a skill in read-only

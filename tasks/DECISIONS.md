@@ -2,6 +2,7 @@
 
 ## Accepted
 
+- Treat Phase 64E Orchestration Audit Model as a read-only governance layer over 64C orchestration entries and 64D coordination policy entries: it defines audit records, traceability checks, and review readiness, but must not duplicate dispatch logic, policy logic, or authorize execution.
 - Treat capability projection as shared infrastructure: capability inventory and capability/roadmap intelligence must materialize their public capability records through one projection helper so IDs, fields, and command/report outputs stay stable while projection logic cannot drift independently.
 - Treat Phase 64B.4A skill registry hardening as consolidation work, not a new parallel subsystem: skill discovery, metadata parsing, and registry alignment should reuse the shared intelligence infrastructure that already supports capability, roadmap, and prompt governance.
 - Treat Phase 64B.4 skills as first-class governed packages stored under `.pcae/skills`: a skill is metadata plus reusable instructions/workflow references, not merely a rendered prompt, and skill invocation remains read-only with no runtime, orchestration, or write execution.

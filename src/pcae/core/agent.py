@@ -68800,7 +68800,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["multi_runtime_orchestration_execution"],
-        "successor_capabilities": [],
+        "successor_capabilities": ["orchestration_audit_model"],
+    },
+    {
+        "capability_name": "Orchestration Audit Model",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64E",
+        "status": "implemented",
+        "commands": [
+            "pcae orchestration-audit-model",
+            "pcae orchestration-audit-model --json",
+        ],
+        "dependencies": ["runtime_coordination_policy", "multi_runtime_audit_chain"],
+        "successor_capabilities": ["multi_runtime_execution_dispatch"],
     },
     {
         "capability_domain": "repository_governance_capabilities",
@@ -69580,7 +69592,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64D",
         "phase_title": "Runtime Coordination Policy",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64C",
         "successor": "64E",
         "superseded_by": "",
@@ -69589,7 +69601,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64E",
         "phase_title": "Orchestration Audit Model",
-        "status": "roadmap_gap",
+        "status": "active",
         "predecessor": "64D",
         "successor": "65A",
         "superseded_by": "",
@@ -70063,6 +70075,31 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successors": ["multi_runtime_execution_readiness"],
         "aliases": [],
         "contribution": "provides the execution plan structure, constraints, and sequencing",
+    },
+    {
+        "capability_name": "Runtime Coordination Policy",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64D",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["multi_runtime_orchestration_execution"],
+        "successors": ["orchestration_audit_model"],
+        "aliases": [],
+        "contribution": "defines governed priority, conflict resolution, synchronization, isolation, fallback, and escalation policy across runtimes",
+    },
+    {
+        "capability_name": "Orchestration Audit Model",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64E",
+        "status": "implemented",
+        "commands": [
+            "pcae orchestration-audit-model",
+            "pcae orchestration-audit-model --json",
+        ],
+        "dependencies": ["runtime_coordination_policy", "multi_runtime_audit_chain"],
+        "successors": ["multi_runtime_execution_dispatch"],
+        "aliases": [],
+        "contribution": "defines the governed audit record, traceability, and review model for multi-runtime orchestration decisions",
     },
     {
         "capability_name": "Capability Inventory",
@@ -71527,6 +71564,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_version": "64D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64D",
+    },
+    {
+        "phase_id": "64E",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64E-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64E",
+    },
+    {
+        "phase_id": "64E",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64E-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64E",
+    },
+    {
+        "phase_id": "64E",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64E-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64E",
     },
     {
         "phase_id": "64B.6E",
@@ -73141,7 +73202,8 @@ def _pcc_build_predecessor_contributions(
         pr = phase_by_id.get(pid, phase_rec)
         contribution_text, is_inferred = _pcc_get_contribution(cap_rec, pr)
         cap_name = (cap_rec or {}).get("capability_name") or pr.get("phase_title", pid)
-        command = (cap_rec or {}).get("commands", [None])[0] or ""
+        commands = (cap_rec or {}).get("commands") or []
+        command = commands[0] if commands else ""
         contributions.append({
             "phase_id": pid,
             "phase_title": pr.get("phase_title", pid),
@@ -75674,6 +75736,486 @@ def build_runtime_coordination_policy(root: "HarnessPath | None" = None) -> dict
             "phase": "64D",
         },
         "advisory": RUNTIME_COORDINATION_POLICY_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64E: Orchestration Audit Model
+# ---------------------------------------------------------------------------
+
+ORCHESTRATION_AUDIT_MODEL_ADVISORY = (
+    "Phase 64E defines the governed orchestration audit model connecting orchestration "
+    "dispatch entries (64C), coordination policy entries (64D), approval traces, and "
+    "downstream audit, recovery, and quarantine review expectations. audit_allowed may "
+    "be True when at least one orchestration candidate has a complete audit record and "
+    "no blockers are present. execution_allowed=False always in 64E. No runtime "
+    "invocation occurs. No prompt execution occurs. No command execution occurs. "
+    "No write execution occurs. No orchestration execution occurs. Human review is "
+    "always required."
+)
+
+_OAM_AUDIT_DOMAINS: tuple[str, ...] = (
+    "audit_entry_validation",
+    "dispatch_policy_linkage",
+    "approval_trace_validation",
+    "coordination_trace_validation",
+    "audit_chain_trace_validation",
+    "failure_recovery_trace_validation",
+    "quarantine_trace_validation",
+    "human_review_trace_validation",
+    "audit_completeness_determination",
+    "orchestration_audit_blocking",
+)
+
+_OAM_AUDIT_STATUSES: tuple[str, ...] = (
+    "audit_ready",
+    "audit_with_warnings",
+    "audit_incomplete",
+    "escalated",
+    "blocked",
+)
+
+_OAM_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_OAM_INPUT_SUMMARIES: tuple[str, ...] = (
+    "MultiRuntimeOrchestrationExecutionSummary",
+    "RuntimeCoordinationPolicySummary",
+    "RuntimeApprovalGateSummary",
+    "MultiRuntimeAuditChainSummary",
+    "RuntimeFailureRecoverySummary",
+    "RuntimeQuarantineSummary",
+)
+
+_OAM_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "audit_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "dispatch_entry_id", "type": "str", "required": True},
+    {"name": "policy_entry_id", "type": "str", "required": True},
+    {"name": "audit_scope", "type": "str", "required": True},
+    {"name": "audit_status", "type": "str", "required": True},
+    {"name": "approval_trace_required", "type": "bool", "required": True},
+    {"name": "review_trace_required", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_OAM_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "audit_id", "type": "str", "required": True},
+    {"name": "audit_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_OAM_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "audit_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "audit_status", "type": "str", "required": True},
+    {"name": "audit_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_OAM_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "audit_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "audit_status", "type": "str", "required": True},
+    {"name": "audit_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_OAM_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "dispatch_entry_suffix": "01",
+        "policy_entry_suffix": "01",
+        "audit_scope": "dispatch_policy_trace",
+        "audit_status": "audit_ready",
+        "approval_trace_required": True,
+        "review_trace_required": True,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "dispatch_entry_suffix": "02",
+        "policy_entry_suffix": "02",
+        "audit_scope": "approval_escalation_trace",
+        "audit_status": "audit_incomplete",
+        "approval_trace_required": True,
+        "review_trace_required": True,
+    },
+)
+
+
+def build_orchestration_audit_model(root: "HarnessPath | None" = None) -> dict:
+    """Define the governed audit model for orchestration decisions without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    audit_records = []
+    for i, candidate in enumerate(_OAM_GOVERNED_CANDIDATES, start=1):
+        aid = f"oam-{ts}-{i:02d}"
+        audit_records.append(
+            {
+                "audit_id": aid,
+                "runtime_id": candidate["runtime_id"],
+                "runtime_name": candidate["runtime_name"],
+                "dispatch_entry_id": f"mroe-{ts}-{candidate['dispatch_entry_suffix']}",
+                "policy_entry_id": f"rcp-{ts}-{candidate['policy_entry_suffix']}",
+                "audit_scope": candidate["audit_scope"],
+                "audit_status": candidate["audit_status"],
+                "approval_trace_required": candidate["approval_trace_required"],
+                "review_trace_required": candidate["review_trace_required"],
+                "human_review_required": True,
+            }
+        )
+
+    audit_count = len(audit_records)
+    ready_count = sum(1 for r in audit_records if r["audit_status"] == "audit_ready")
+    incomplete_count = sum(1 for r in audit_records if r["audit_status"] == "audit_incomplete")
+    escalated_count = sum(1 for r in audit_records if r["audit_status"] == "escalated")
+    first_aid = audit_records[0]["audit_id"] if audit_records else f"oam-{ts}-00"
+    audit_allowed = ready_count > 0
+
+    domain_signal_defs = [
+        {
+            "audit_domain": "audit_entry_validation",
+            "signal_type": "audit_entry_validation_check",
+            "severity": "info" if audit_count > 0 else "blocker",
+            "detected_state": (
+                f"audit_count={audit_count}; "
+                f"audit_ids={[r['audit_id'] for r in audit_records]}; "
+                "audit_source=MultiRuntimeOrchestrationExecutionSummary+RuntimeCoordinationPolicySummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "at least one orchestration audit record must exist, linked to orchestration and policy "
+                "inputs; execution_allowed=False in 64E; no execution occurs at audit entry"
+            ),
+        },
+        {
+            "audit_domain": "dispatch_policy_linkage",
+            "signal_type": "dispatch_policy_linkage_check",
+            "severity": (
+                "info"
+                if all(r["dispatch_entry_id"] and r["policy_entry_id"] for r in audit_records)
+                else "blocker"
+            ),
+            "detected_state": (
+                f"dispatch_entry_ids={[r['dispatch_entry_id'] for r in audit_records]}; "
+                f"policy_entry_ids={[r['policy_entry_id'] for r in audit_records]}; "
+                "linkage_complete=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "every audit record must link one orchestration entry (64C) to one policy entry (64D); "
+                "execution_allowed=False in 64E"
+            ),
+        },
+        {
+            "audit_domain": "approval_trace_validation",
+            "signal_type": "approval_trace_validation_check",
+            "severity": "warning" if incomplete_count > 0 else "info",
+            "detected_state": (
+                f"approval_trace_required_count={sum(1 for r in audit_records if r['approval_trace_required'])}; "
+                f"incomplete_audit_count={incomplete_count}; "
+                "approval_source=RuntimeApprovalGateSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "approval trace requirements must be captured for every orchestration audit record; "
+                "missing approval readiness must remain advisory only; execution_allowed=False in 64E"
+            ),
+        },
+        {
+            "audit_domain": "coordination_trace_validation",
+            "signal_type": "coordination_trace_validation_check",
+            "severity": "info",
+            "detected_state": (
+                f"coordination_trace_linked_count={audit_count}; "
+                "coordination_source=RuntimeCoordinationPolicySummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "every orchestration audit record must reference the active coordination policy context; "
+                "execution_allowed=False in 64E"
+            ),
+        },
+        {
+            "audit_domain": "audit_chain_trace_validation",
+            "signal_type": "audit_chain_trace_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "audit_chain_trace_ready=True; "
+                "audit_chain_source=MultiRuntimeAuditChainSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit-chain traceability must be declared before future dispatch can occur; "
+                "execution_allowed=False in 64E; no audit chain execution occurs"
+            ),
+        },
+        {
+            "audit_domain": "failure_recovery_trace_validation",
+            "signal_type": "failure_recovery_trace_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "failure_recovery_trace_ready=True; "
+                "failure_recovery_source=RuntimeFailureRecoverySummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "failure recovery traceability must be declared for orchestrated runtimes; "
+                "execution_allowed=False in 64E; no recovery execution occurs"
+            ),
+        },
+        {
+            "audit_domain": "quarantine_trace_validation",
+            "signal_type": "quarantine_trace_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "quarantine_trace_ready=True; "
+                "quarantine_source=RuntimeQuarantineSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "quarantine traceability must be declared for orchestrated runtimes; "
+                "execution_allowed=False in 64E; no quarantine enforcement occurs"
+            ),
+        },
+        {
+            "audit_domain": "human_review_trace_validation",
+            "signal_type": "human_review_trace_validation_check",
+            "severity": (
+                "info" if all(r["human_review_required"] and r["review_trace_required"] for r in audit_records)
+                else "blocker"
+            ),
+            "detected_state": (
+                f"review_trace_required_count={sum(1 for r in audit_records if r['review_trace_required'])}; "
+                f"human_review_required_count={sum(1 for r in audit_records if r['human_review_required'])}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "review traceability and human review must be required for all orchestration audit records; "
+                "execution_allowed=False in 64E"
+            ),
+        },
+        {
+            "audit_domain": "audit_completeness_determination",
+            "signal_type": "audit_completeness_determination_check",
+            "severity": "warning" if incomplete_count > 0 else "info",
+            "detected_state": (
+                f"audit_allowed={audit_allowed}; "
+                f"ready_count={ready_count}; "
+                f"incomplete_count={incomplete_count}; "
+                f"escalated_count={escalated_count}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit_allowed may be True only when at least one audit record is ready and no blockers are "
+                "present; execution_allowed=False always in 64E"
+            ),
+        },
+        {
+            "audit_domain": "orchestration_audit_blocking",
+            "signal_type": "orchestration_audit_blocking_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_allowed=False; "
+                "no_runtime_invocation=True; "
+                "no_prompt_execution=True; "
+                "no_write_execution=True; "
+                "orchestration_audit_model_only=True"
+            ),
+            "expected_state": (
+                "execution_allowed=False always in 64E regardless of audit_allowed; "
+                "the audit model defines reviewability only and does not execute orchestration"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"oam-sig-{ts}-{i:02d}",
+            "audit_id": first_aid,
+            "audit_domain": sig["audit_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+    elif escalated_count > 0:
+        overall_status = "escalated"
+    elif incomplete_count > 0:
+        overall_status = "audit_incomplete"
+    elif warning_count > 0:
+        overall_status = "audit_with_warnings"
+    else:
+        overall_status = "audit_ready"
+
+    assessment_id = f"oama-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "audit_count": audit_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": overall_status,
+        "audit_allowed": audit_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"oams-{ts}",
+        "assessment_id": assessment_id,
+        "audit_count": audit_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "audit_status": overall_status,
+        "audit_allowed": audit_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_OAM_AUDIT_DOMAINS)
+
+    return {
+        "orchestration_audit_model_overview": {
+            "overview_id": f"64e-{ts}",
+            "generated_at": generated_at,
+            "phase": "64E",
+            "title": "Orchestration Audit Model",
+            "domain_count": domain_count,
+            "audit_count": audit_count,
+            "ready_count": ready_count,
+            "incomplete_count": incomplete_count,
+            "escalated_count": escalated_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "audit_status": overall_status,
+            "audit_allowed": audit_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "input_summaries": list(_OAM_INPUT_SUMMARIES),
+            "summary": (
+                "Phase 64E defines the governed audit model for multi-runtime orchestration decisions, "
+                "linking orchestration dispatch entries, coordination policy entries, approval posture, "
+                "and downstream audit/recovery/quarantine traceability. "
+                f"audit_count={audit_count}. "
+                f"ready_count={ready_count}. "
+                f"incomplete_count={incomplete_count}. "
+                f"escalated_count={escalated_count}. "
+                f"audit_status={overall_status}. "
+                f"audit_allowed={audit_allowed}. "
+                "execution_allowed=False. "
+                "No runtime invocation occurs. No orchestration execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "audit_records": audit_records,
+        "record_model": {
+            "model_name": "OrchestrationAuditRecord",
+            "field_count": len(_OAM_RECORD_FIELDS),
+            "required_field_count": len(_OAM_RECORD_FIELDS),
+            "supported_audit_statuses": list(_OAM_AUDIT_STATUSES),
+            "audit_allowed_conditional_in_64e": True,
+            "execution_allowed_false_in_64e": True,
+            "human_review_required_always_true_in_64e": True,
+            "fields": [dict(f) for f in _OAM_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "OrchestrationAuditSignal",
+            "field_count": len(_OAM_SIGNAL_FIELDS),
+            "required_field_count": len(_OAM_SIGNAL_FIELDS),
+            "severity_values": list(_OAM_SEVERITY_VALUES),
+            "execution_allowed_false_in_64e": True,
+            "human_review_required_always_true_in_64e": True,
+            "fields": [dict(f) for f in _OAM_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "OrchestrationAuditAssessment",
+            "field_count": len(_OAM_ASSESSMENT_FIELDS),
+            "required_field_count": len(_OAM_ASSESSMENT_FIELDS),
+            "supported_audit_statuses": list(_OAM_AUDIT_STATUSES),
+            "audit_allowed_conditional_in_64e": True,
+            "execution_allowed_false_in_64e": True,
+            "human_review_required_always_true_in_64e": True,
+            "fields": [dict(f) for f in _OAM_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "OrchestrationAuditSummary",
+            "field_count": len(_OAM_SUMMARY_FIELDS),
+            "required_field_count": len(_OAM_SUMMARY_FIELDS),
+            "supported_audit_statuses": list(_OAM_AUDIT_STATUSES),
+            "audit_allowed_conditional_in_64e": True,
+            "execution_allowed_false_in_64e": True,
+            "human_review_required_always_true_in_64e": True,
+            "fields": [dict(f) for f in _OAM_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect orchestration dispatch entries",
+                "inspect runtime coordination policy entries",
+                "link orchestration and policy traces",
+                "validate approval trace requirements",
+                "validate audit/recovery/quarantine trace coverage",
+                "generate orchestration audit records",
+                "determine audit_allowed status",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "perform orchestration",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "audit_allowed": audit_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64E",
+        },
+        "advisory": ORCHESTRATION_AUDIT_MODEL_ADVISORY,
     }
 
 

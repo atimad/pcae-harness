@@ -393,6 +393,8 @@ from pcae.core.agent import (
     MULTI_RUNTIME_EXECUTION_READINESS_ADVISORY,
     build_multi_runtime_orchestration_execution,
     MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY,
+    build_orchestration_audit_model,
+    ORCHESTRATION_AUDIT_MODEL_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -13183,6 +13185,72 @@ def run_multi_runtime_orchestration_execution(args: argparse.Namespace) -> int:
     print(f"  Human review:           {boundaries['human_review_required']}")
     print()
     print(MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY)
+    return 0
+
+
+def run_orchestration_audit_model(args: argparse.Namespace) -> int:
+    data = build_orchestration_audit_model(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["orchestration_audit_model_overview"]
+    print("Orchestration audit model")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Audit domains:          {overview['domain_count']}")
+    print(f"Audit records:          {overview['audit_count']}")
+    print(f"Ready:                  {overview['ready_count']}")
+    print(f"Incomplete:             {overview['incomplete_count']}")
+    print(f"Escalated:              {overview['escalated_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Audit status:           {overview['audit_status']}")
+    print(f"Audit allowed:          {'yes' if overview['audit_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Audit records:")
+    for record in data["audit_records"]:
+        print(f"  [{record['audit_id']}] {record['runtime_id']} — {record['runtime_name']}")
+        print(
+            f"    dispatch_entry_id={record['dispatch_entry_id']}  "
+            f"policy_entry_id={record['policy_entry_id']}"
+        )
+        print(
+            f"    audit_scope={record['audit_scope']}  "
+            f"audit_status={record['audit_status']}"
+        )
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Audit signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['audit_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print(f"  Audit allowed:       {boundaries['audit_allowed']}")
+    print(f"  Execution allowed:   {boundaries['execution_allowed']}")
+    print(f"  Human review:        {boundaries['human_review_required']}")
+    print()
+    print(ORCHESTRATION_AUDIT_MODEL_ADVISORY)
     return 0
 
 

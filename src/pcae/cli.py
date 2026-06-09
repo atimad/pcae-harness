@@ -183,6 +183,7 @@ from pcae.commands.agent import (
     run_multi_runtime_execution_planning,
     run_multi_runtime_execution_readiness,
     run_multi_runtime_orchestration_execution,
+    run_orchestration_audit_model,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4687,6 +4688,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     mroe_parser.set_defaults(handler=run_multi_runtime_orchestration_execution)
+
+    oam_parser = subparsers.add_parser(
+        "orchestration-audit-model",
+        help="Define the governed orchestration audit model linking dispatch, policy, and review traces (Phase 64E).",
+    )
+    oam_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    oam_parser.set_defaults(handler=run_orchestration_audit_model)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

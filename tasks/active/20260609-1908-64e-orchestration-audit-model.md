@@ -23,6 +23,10 @@ implementation
 ## Allowed Files
 
 - .pcae/session.json
+- src/pcae/core/agent.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
+- tests/test_agent.py
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -30,6 +34,10 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/CAPABILITY_INVENTORY.md
+- docs/PROMPT_REGISTRY.md
+- docs/SKILL_REGISTRY.md
+- docs/ROADMAP_REGISTRY.md
 
 ## Forbidden Files
 
@@ -60,7 +68,7 @@ strict
 
 - No runtime invocation
 - No prompt execution
-- No source behavior changes outside task/session/handoff governance
+- No source behavior changes outside 64E orchestration audit governance
 - No execution authorization
 - No commit
 - No push

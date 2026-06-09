@@ -1,11 +1,11 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-09T09:00:00.000000+00:00
-Phase: 64B.6E — Design Review Intelligence Rendering
-Total phases: 28
+Generated: 2026-06-09T17:27:24.405125+00:00
+Phase: 64B.1 — Capability and Roadmap Intelligence
+Total phases: 37
 Tracks: 6
 Superseded: 1
-Roadmap gaps: 2
+Roadmap gaps: 1
 Evolution events: 2
 Assessment status: intelligence_with_gaps
 
@@ -41,8 +41,8 @@ Assessment status: intelligence_with_gaps
 | 64A | Multi-Runtime Execution Planning | completed | 63F | 64B |
 | 64B | Multi-Runtime Execution Readiness | completed | 64A | 64C |
 | 64C | Multi-Runtime Orchestration Execution | completed | 64B | 64D |
-| 64D | Runtime Coordination Policy | active | 64C | 64E |
-| 64E | Orchestration Audit Model | roadmap_gap | 64D | 65A |
+| 64D | Runtime Coordination Policy | completed | 64C | 64E |
+| 64E | Orchestration Audit Model | active | 64D | 65A |
 | 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64E | — |
 
 ## Track: capability_intelligence
@@ -56,9 +56,8 @@ Assessment status: intelligence_with_gaps
 | 64B.4 | Skill System Foundation | completed | 64B.3 | 64B.4A |
 | 64B.4A | Skill Registry Consolidation Hardening | completed | 64B.4 | 64B.4B |
 | 64B.4B | Capability Projection Consolidation | completed | 64B.4A | 64B.5 |
-| 64B.5 | Skill Invocation Targeting | completed | 64B.4B | 64B.5A |
-| 64B.5A | Capability Target Resolution Hardening | completed | 64B.5 | 64B.6 |
-| 64B.6 | Prompt Rendering Skill | completed | 64B.5A | 64B.6A |
+| 64B.5 | Skill Invocation Targeting | completed | 64B.4B | 64B.6 |
+| 64B.6 | Prompt Rendering Skill | completed | 64B.5 | 64B.6A |
 | 64B.6A | Prompt Rendering Quality Hardening | completed | 64B.6 | 64B.6B |
 | 64B.6B | Dependency & Capability Intelligence Rendering | completed | 64B.6A | 64B.6C |
 | 64B.6C | Predecessor Capability Rendering | completed | 64B.6B | 64B.6D |
@@ -91,7 +90,6 @@ Assessment status: intelligence_with_gaps
 - 64B.1 introduces Capability and Roadmap Intelligence.
 - 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.
 - 64B.4 introduces a first-class skill system in the capability_intelligence track.
-- 64B.6E adds Design Review Intelligence Rendering: implementation prompts now require pre-implementation design review before code is written.
 - Skill Registry discovery is consolidated into the shared intelligence layer.
 - Roadmap evolution is tracked.
 - Superseded phases are tracked.
