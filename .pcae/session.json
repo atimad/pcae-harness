@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260609-2231-64g-capability-inventory-alignment-hardening",
-    "title": "64G Capability Inventory Alignment Hardening"
+    "id": "20260610-0020-strategic-roadmap-governance-design",
+    "title": "Strategic Roadmap Governance Design"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "",
+  "current_objective": "Strategic Roadmap Governance Design",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -14,54 +14,26 @@
         "status": " M"
       },
       {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
-        "status": " M"
-      },
-      {
         "path": "tasks/DONE.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260609-1937-64f-orchestration-readiness-gate.md",
+        "path": "tasks/active/20260609-2231-64g-capability-inventory-alignment-hardening.md",
         "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260609-2231-64g-capability-inventory-alignment-hardening.md",
+        "path": "tasks/active/20260610-0020-strategic-roadmap-governance-design.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260609-1937-64f-orchestration-readiness-gate.md",
+        "path": "tasks/done/20260609-2231-64g-capability-inventory-alignment-hardening.md",
         "status": "??"
       }
     ],
-    "status_summary": "12 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "",
-  "next_recommended_step": "",
-  "timestamp": "2026-06-09T20:31:55.220024+00:00",
+  "last_completed_step": "Completed task 20260609-2231-64g-capability-inventory-alignment-hardening: 64G Capability Inventory Alignment Hardening",
+  "next_recommended_step": "Continue active task 20260610-0020-strategic-roadmap-governance-design.",
+  "timestamp": "2026-06-09T22:20:03.553507+00:00",
   "warnings": []
 }

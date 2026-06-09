@@ -69674,16 +69674,16 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64G",
         "phase_title": "Capability Inventory Alignment Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64F",
         "successor": "65A",
         "superseded_by": "",
     },
     {
-        "track_name": "multi_runtime",
+        "track_name": "strategic_governance",
         "phase_id": "65A",
-        "phase_title": "Multi-Runtime Execution Dispatch",
-        "status": "roadmap_gap",
+        "phase_title": "Strategic Roadmap Governance Design",
+        "status": "active",
         "predecessor": "64G",
         "successor": "",
         "superseded_by": "",
@@ -70223,9 +70223,23 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "runtime_coordination_policy",
             "capability_inventory",
         ],
-        "successors": ["multi_runtime_execution_dispatch"],
+        "successors": ["strategic_roadmap_governance"],
         "aliases": [],
         "contribution": "reconciles capability inventory with roadmap registry, adds missing multi-runtime entries, corrects domain classifications, replaces false-duplicate detection with semantic overlap detection, and exposes runtime coordination policy CLI surface",
+    },
+    {
+        "capability_name": "Strategic Roadmap Governance",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65A",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "capability_inventory_alignment",
+            "capability_and_roadmap_intelligence",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "introduces a strategic governance layer above the roadmap: project goals, vision, objectives, branch registry, capability-objective map, branch health model, evidence-backed recommendations, evolution proposals with evidence requirements, and a human approval model; all advisory-only with execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -71741,7 +71755,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64G",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64G-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64G",
@@ -71749,7 +71763,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64G",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64G-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64G",
@@ -71757,10 +71771,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64G",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64G-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64G",
+    },
+    {
+        "phase_id": "65A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65A",
+    },
+    {
+        "phase_id": "65A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65A",
+    },
+    {
+        "phase_id": "65A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65A",
     },
     {
         "phase_id": "64B.6E",
@@ -77203,4 +77241,1111 @@ def _drr_build_summary(ts: str, assessment: dict) -> dict:
         "warning_count": assessment["warning_count"],
         "readiness_status": assessment["readiness_status"],
         "human_review_required": True,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 65A: Strategic Roadmap Governance
+# ---------------------------------------------------------------------------
+
+STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY = (
+    "Phase 65A introduces strategic roadmap governance: a read-only advisory layer above the "
+    "existing phase and capability registries. PCAE may inspect project goals, vision, objectives, "
+    "branches, and capability-objective mappings; compute branch health; generate recommendations "
+    "with evidence and lineage; and generate roadmap evolution proposals with evidence requirements. "
+    "PCAE may not automatically modify the roadmap, activate branches, retire branches, or change "
+    "objectives. All modifications require explicit human approval. execution_allowed=False always. "
+    "Human review is required."
+)
+
+_SRG_GOVERNANCE_DOMAINS: tuple[str, ...] = (
+    "goal_registry_validation",
+    "vision_registry_validation",
+    "objective_registry_validation",
+    "branch_registry_validation",
+    "capability_objective_mapping_validation",
+    "recommendation_evidence_validation",
+    "evolution_proposal_evidence_validation",
+    "branch_health_validation",
+    "governance_boundary_enforcement",
+    "cross_registry_consistency",
+)
+
+_SRG_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+_SRG_OBJECTIVE_STATUSES: tuple[str, ...] = ("active", "deferred", "retired")
+_SRG_BRANCH_STATUSES: tuple[str, ...] = ("active", "proposed", "deferred", "retired")
+_SRG_RECOMMENDATION_TYPES: tuple[str, ...] = (
+    "next_phase",
+    "branch_evolution",
+    "capability_gap",
+    "objective_alignment",
+)
+_SRG_RECOMMENDATION_STATUSES: tuple[str, ...] = (
+    "proposed",
+    "approved",
+    "rejected",
+    "superseded",
+)
+_SRG_EVOLUTION_PROPOSAL_TYPES: tuple[str, ...] = (
+    "new_branch",
+    "branch_extension",
+    "branch_merge",
+    "phase_insertion",
+    "objective_update",
+    "branch_retirement",
+)
+_SRG_EVOLUTION_PROPOSAL_STATUSES: tuple[str, ...] = (
+    "proposed",
+    "approved",
+    "rejected",
+    "superseded",
+)
+_SRG_APPROVAL_DECISION_VALUES: tuple[str, ...] = ("approved", "rejected", "deferred")
+_SRG_CONTRIBUTION_TYPES: tuple[str, ...] = ("primary", "supporting", "indirect")
+_SRG_BRANCH_HEALTH_STATUSES: tuple[str, ...] = ("healthy", "stalled", "at_risk", "inactive")
+
+_SRG_GOAL_FIELDS: tuple[dict, ...] = (
+    {"name": "goal_id", "type": "str", "required": True},
+    {"name": "goal_name", "type": "str", "required": True},
+    {"name": "goal_title", "type": "str", "required": True},
+    {"name": "description", "type": "str", "required": True},
+    {"name": "priority", "type": "int", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+)
+
+_SRG_VISION_FIELDS: tuple[dict, ...] = (
+    {"name": "vision_statement", "type": "str", "required": True},
+    {"name": "strategic_horizon", "type": "str", "required": True},
+    {"name": "core_values", "type": "list", "required": True},
+    {"name": "governance_model", "type": "str", "required": True},
+    {"name": "vision_version", "type": "str", "required": True},
+    {"name": "supported_goals", "type": "list", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+)
+
+_SRG_OBJECTIVE_FIELDS: tuple[dict, ...] = (
+    {"name": "objective_id", "type": "str", "required": True},
+    {"name": "objective_name", "type": "str", "required": True},
+    {"name": "objective_title", "type": "str", "required": True},
+    {"name": "description", "type": "str", "required": True},
+    {"name": "priority", "type": "int", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "parent_goal", "type": "str", "required": True},
+    {"name": "tags", "type": "list", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+)
+
+_SRG_BRANCH_FIELDS: tuple[dict, ...] = (
+    {"name": "branch_id", "type": "str", "required": True},
+    {"name": "branch_name", "type": "str", "required": True},
+    {"name": "branch_title", "type": "str", "required": True},
+    {"name": "description", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "parent_branch", "type": "str", "required": True},
+    {"name": "child_branches", "type": "list", "required": True},
+    {"name": "serving_objectives", "type": "list", "required": True},
+    {"name": "entry_phase", "type": "str", "required": True},
+    {"name": "current_phase", "type": "str", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+)
+
+_SRG_CAPABILITY_MAP_FIELDS: tuple[dict, ...] = (
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "objective_ids", "type": "list", "required": True},
+    {"name": "contribution_type", "type": "str", "required": True},
+    {"name": "contribution_description", "type": "str", "required": True},
+)
+
+_SRG_RECOMMENDATION_FIELDS: tuple[dict, ...] = (
+    {"name": "recommendation_id", "type": "str", "required": True},
+    {"name": "recommendation_type", "type": "str", "required": True},
+    {"name": "recommendation_title", "type": "str", "required": True},
+    {"name": "justification", "type": "str", "required": True},
+    {"name": "confidence", "type": "float", "required": True},
+    {"name": "supporting_signals", "type": "list", "required": True},
+    {"name": "affected_phases", "type": "list", "required": True},
+    {"name": "affected_objectives", "type": "list", "required": True},
+    {"name": "affected_branches", "type": "list", "required": True},
+    {"name": "evidence_sources", "type": "list", "required": True},
+    {"name": "evidence_count", "type": "int", "required": True},
+    {"name": "lineage_predecessor_ids", "type": "list", "required": True},
+    {"name": "supersedes_ids", "type": "list", "required": True},
+    {"name": "derived_from", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "proposed_at", "type": "str", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+    {"name": "rejection_reason", "type": "str", "required": False},
+)
+
+_SRG_EVOLUTION_PROPOSAL_FIELDS: tuple[dict, ...] = (
+    {"name": "proposal_id", "type": "str", "required": True},
+    {"name": "proposal_type", "type": "str", "required": True},
+    {"name": "proposal_title", "type": "str", "required": True},
+    {"name": "rationale", "type": "str", "required": True},
+    {"name": "proposed_changes", "type": "list", "required": True},
+    {"name": "affected_objectives", "type": "list", "required": True},
+    {"name": "affected_branches", "type": "list", "required": True},
+    {"name": "evidence_sources", "type": "list", "required": True},
+    {"name": "evidence_count", "type": "int", "required": True},
+    {"name": "minimum_evidence_met", "type": "bool", "required": True},
+    {"name": "impact_assessment", "type": "dict", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "proposed_at", "type": "str", "required": True},
+    {"name": "approved_by", "type": "str", "required": False},
+    {"name": "approved_at", "type": "str", "required": False},
+    {"name": "rejection_reason", "type": "str", "required": False},
+)
+
+_SRG_BRANCH_HEALTH_FIELDS: tuple[dict, ...] = (
+    {"name": "branch_id", "type": "str", "required": True},
+    {"name": "branch_name", "type": "str", "required": True},
+    {"name": "active_phase_count", "type": "int", "required": True},
+    {"name": "completed_phase_count", "type": "int", "required": True},
+    {"name": "gap_phase_count", "type": "int", "required": True},
+    {"name": "objective_coverage_ratio", "type": "float", "required": True},
+    {"name": "last_activity_phase", "type": "str", "required": True},
+    {"name": "health_status", "type": "str", "required": True},
+    {"name": "health_signals", "type": "list", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SRG_APPROVAL_FIELDS: tuple[dict, ...] = (
+    {"name": "approval_id", "type": "str", "required": True},
+    {"name": "subject_type", "type": "str", "required": True},
+    {"name": "subject_id", "type": "str", "required": True},
+    {"name": "decision", "type": "str", "required": True},
+    {"name": "decided_by", "type": "str", "required": True},
+    {"name": "decided_at", "type": "str", "required": True},
+    {"name": "notes", "type": "str", "required": False},
+    {"name": "effective_at", "type": "str", "required": False},
+)
+
+_SRG_STRATEGIC_STATE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "generated_at", "type": "str", "required": True},
+    {"name": "active_goal_count", "type": "int", "required": True},
+    {"name": "active_objective_count", "type": "int", "required": True},
+    {"name": "active_branch_count", "type": "int", "required": True},
+    {"name": "total_capability_mappings", "type": "int", "required": True},
+    {"name": "open_recommendation_count", "type": "int", "required": True},
+    {"name": "open_evolution_proposal_count", "type": "int", "required": True},
+    {"name": "branches_at_risk", "type": "list", "required": True},
+    {"name": "objective_coverage_gap_count", "type": "int", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SRG_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "governance_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SRG_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "goal_count", "type": "int", "required": True},
+    {"name": "objective_count", "type": "int", "required": True},
+    {"name": "branch_count", "type": "int", "required": True},
+    {"name": "capability_map_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "governance_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SRG_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "goal_count", "type": "int", "required": True},
+    {"name": "objective_count", "type": "int", "required": True},
+    {"name": "branch_count", "type": "int", "required": True},
+    {"name": "capability_map_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "governance_status", "type": "str", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_SRG_GOAL_REGISTRY: tuple[dict, ...] = (
+    {
+        "goal_id": "GOAL-001",
+        "goal_name": "governed_ai_coding",
+        "goal_title": "Governed AI-Assisted Coding",
+        "description": (
+            "Enable AI coding tools to operate within human-defined governance boundaries, "
+            "ensuring safety, auditability, and resumability across all code changes."
+        ),
+        "priority": 1,
+        "status": "active",
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "goal_id": "GOAL-002",
+        "goal_name": "human_authority_preservation",
+        "goal_title": "Preserve Human Authority",
+        "description": (
+            "Ensure that all consequential decisions — roadmap changes, capability activation, "
+            "write execution — require explicit human approval with no automated override."
+        ),
+        "priority": 2,
+        "status": "active",
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "goal_id": "GOAL-003",
+        "goal_name": "multi_runtime_coordination",
+        "goal_title": "Multi-Runtime Coordination",
+        "description": (
+            "Coordinate execution safely across multiple AI runtimes with governed policies, "
+            "audit chains, failure recovery, and quarantine mechanisms."
+        ),
+        "priority": 3,
+        "status": "active",
+        "approved_by": "",
+        "approved_at": "",
+    },
+)
+
+_SRG_VISION_REGISTRY: dict = {
+    "vision_statement": (
+        "PCAE is a cross-platform Python CLI governance harness that makes AI-assisted coding "
+        "safer, resumable, and documentation-driven by injecting human-approved governance into "
+        "Git repositories without impeding developer velocity."
+    ),
+    "strategic_horizon": "12-24 months",
+    "core_values": [
+        "safety",
+        "human_authority",
+        "documentation_driven",
+        "resumable",
+        "auditability",
+    ],
+    "governance_model": "human_approved",
+    "vision_version": "1.0",
+    "supported_goals": ["GOAL-001", "GOAL-002", "GOAL-003"],
+    "approved_by": "",
+    "approved_at": "",
+}
+
+_SRG_OBJECTIVE_REGISTRY: tuple[dict, ...] = (
+    {
+        "objective_id": "OBJ-001",
+        "objective_name": "safe_ai_coding",
+        "objective_title": "Safe AI-Assisted Coding",
+        "description": (
+            "Provide governance boundaries for AI coding tools operating in production repositories."
+        ),
+        "priority": 1,
+        "status": "active",
+        "parent_goal": "GOAL-001",
+        "tags": ["safety", "governance"],
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "objective_id": "OBJ-002",
+        "objective_name": "human_approval_mandatory",
+        "objective_title": "Mandatory Human Approval",
+        "description": (
+            "All write operations, branch activations, and roadmap modifications require "
+            "explicit human approval before taking effect."
+        ),
+        "priority": 2,
+        "status": "active",
+        "parent_goal": "GOAL-002",
+        "tags": ["human_authority", "approval"],
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "objective_id": "OBJ-003",
+        "objective_name": "multi_runtime_governance",
+        "objective_title": "Multi-Runtime Execution Governance",
+        "description": (
+            "Govern execution across multiple AI runtimes with coordination, audit, and recovery."
+        ),
+        "priority": 3,
+        "status": "active",
+        "parent_goal": "GOAL-003",
+        "tags": ["multi_runtime", "orchestration"],
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "objective_id": "OBJ-004",
+        "objective_name": "capability_intelligence",
+        "objective_title": "Capability Intelligence",
+        "description": (
+            "Maintain accurate, navigable intelligence about implemented capabilities "
+            "and their roadmap position."
+        ),
+        "priority": 4,
+        "status": "active",
+        "parent_goal": "GOAL-001",
+        "tags": ["capability", "intelligence"],
+        "approved_by": "",
+        "approved_at": "",
+    },
+)
+
+_SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
+    {
+        "branch_id": "BR-001",
+        "branch_name": "multi_runtime",
+        "branch_title": "Multi-Runtime Execution Governance",
+        "description": (
+            "Phases governing multi-runtime execution planning, coordination, audit, and readiness."
+        ),
+        "status": "active",
+        "parent_branch": "",
+        "child_branches": [],
+        "serving_objectives": ["OBJ-003", "OBJ-002"],
+        "entry_phase": "51A",
+        "current_phase": "64F",
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "branch_id": "BR-002",
+        "branch_name": "capability_intelligence",
+        "branch_title": "Capability Intelligence",
+        "description": (
+            "Phases governing capability inventory, roadmap intelligence, prompt rendering, "
+            "and skill invocation."
+        ),
+        "status": "active",
+        "parent_branch": "",
+        "child_branches": [],
+        "serving_objectives": ["OBJ-004", "OBJ-001"],
+        "entry_phase": "64B.0",
+        "current_phase": "64G",
+        "approved_by": "",
+        "approved_at": "",
+    },
+    {
+        "branch_id": "BR-003",
+        "branch_name": "strategic_governance",
+        "branch_title": "Strategic Roadmap Governance",
+        "description": (
+            "Phases governing strategic vision, goals, objectives, branch health, "
+            "and roadmap evolution proposals."
+        ),
+        "status": "active",
+        "parent_branch": "",
+        "child_branches": [],
+        "serving_objectives": ["OBJ-001", "OBJ-002"],
+        "entry_phase": "65A",
+        "current_phase": "65A",
+        "approved_by": "",
+        "approved_at": "",
+    },
+)
+
+_SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
+    {
+        "capability_id": "orchestration_readiness_gate",
+        "objective_ids": ["OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "gates orchestration candidates before dispatch eligibility without execution"
+        ),
+    },
+    {
+        "capability_id": "capability_inventory_alignment",
+        "objective_ids": ["OBJ-004"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "reconciles capability registry with roadmap for accurate intelligence"
+        ),
+    },
+    {
+        "capability_id": "capability_and_roadmap_intelligence",
+        "objective_ids": ["OBJ-004"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "provides navigable capability and roadmap intelligence commands"
+        ),
+    },
+    {
+        "capability_id": "strategic_roadmap_governance",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces strategic governance layer with advisory-only recommendations "
+            "and human-approval-gated evolution proposals"
+        ),
+    },
+    {
+        "capability_id": "runtime_coordination_policy",
+        "objective_ids": ["OBJ-003"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "defines conflict resolution, synchronization, and isolation policies for multi-runtime"
+        ),
+    },
+    {
+        "capability_id": "orchestration_audit_model",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides audit record and traceability for orchestration decisions"
+        ),
+    },
+)
+
+
+def _srg_compute_branch_health(branch: dict) -> dict:
+    """Compute health record for a single branch by inspecting _CRI_KNOWN_PHASES."""
+    track = branch["branch_name"]
+    track_phases = [p for p in _CRI_KNOWN_PHASES if p.get("track_name") == track]
+    active_count = sum(1 for p in track_phases if p["status"] == "active")
+    completed_count = sum(1 for p in track_phases if p["status"] == "completed")
+    gap_count = sum(1 for p in track_phases if p["status"] == "roadmap_gap")
+    last_activity = branch["current_phase"] if branch["current_phase"] else branch["entry_phase"]
+    serving = branch["serving_objectives"]
+    mapped_oids: set[str] = set()
+    for entry in _SRG_CAPABILITY_OBJECTIVE_MAP:
+        for oid in entry["objective_ids"]:
+            if oid in serving:
+                mapped_oids.add(oid)
+    coverage = len(mapped_oids) / len(serving) if serving else 0.0
+    if gap_count > 2:
+        health_status = "at_risk"
+    elif active_count == 0 and completed_count == 0:
+        health_status = "inactive"
+    elif gap_count > 0:
+        health_status = "stalled"
+    else:
+        health_status = "healthy"
+    health_signals: list[str] = []
+    if gap_count > 0:
+        health_signals.append(f"gap_phase_count={gap_count}")
+    if coverage < 1.0:
+        health_signals.append(f"objective_coverage_partial={coverage:.2f}")
+    return {
+        "branch_id": branch["branch_id"],
+        "branch_name": track,
+        "active_phase_count": active_count,
+        "completed_phase_count": completed_count,
+        "gap_phase_count": gap_count,
+        "objective_coverage_ratio": round(coverage, 2),
+        "last_activity_phase": last_activity,
+        "health_status": health_status,
+        "health_signals": health_signals,
+        "human_review_required": True,
+    }
+
+
+def build_strategic_roadmap_governance(root: "HarnessPath | None" = None) -> dict:
+    """Define the strategic roadmap governance layer without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    goal_records = list(_SRG_GOAL_REGISTRY)
+    vision_record = dict(_SRG_VISION_REGISTRY)
+    objective_records = list(_SRG_OBJECTIVE_REGISTRY)
+    branch_records = list(_SRG_BRANCH_REGISTRY)
+    capability_map_records = list(_SRG_CAPABILITY_OBJECTIVE_MAP)
+
+    goal_count = len(goal_records)
+    objective_count = len(objective_records)
+    branch_count = len(branch_records)
+    capability_map_count = len(capability_map_records)
+    active_objectives = [o for o in objective_records if o["status"] == "active"]
+
+    branch_health_records = [_srg_compute_branch_health(b) for b in branch_records]
+
+    sample_rec_id = f"rec-{ts}-01"
+    sample_recommendations = [
+        {
+            "recommendation_id": sample_rec_id,
+            "recommendation_type": "next_phase",
+            "recommendation_title": "Define 65B: Strategic State Summary capability",
+            "justification": (
+                "Phase 65A introduces strategic governance registries and models; "
+                "the Strategic State Summary capability is defined but not yet implemented. "
+                "65B would add the build_strategic_state_summary() builder function."
+            ),
+            "confidence": 0.85,
+            "supporting_signals": [
+                {
+                    "signal_type": "roadmap_gap_detected",
+                    "value": "strategic_state_summary_not_implemented",
+                    "weight": 0.4,
+                },
+                {
+                    "signal_type": "successor_phase_undefined",
+                    "value": "65A.successor=''",
+                    "weight": 0.3,
+                },
+                {
+                    "signal_type": "active_objective_unserved",
+                    "value": "OBJ-001 partially served",
+                    "weight": 0.15,
+                },
+            ],
+            "affected_phases": ["65A", "65B"],
+            "affected_objectives": ["OBJ-001"],
+            "affected_branches": ["BR-003"],
+            "evidence_sources": [
+                "roadmap_registry",
+                "capability_registry",
+                "strategic_state_summary_model",
+            ],
+            "evidence_count": 3,
+            "lineage_predecessor_ids": [],
+            "supersedes_ids": [],
+            "derived_from": "65A_roadmap_gap_analysis",
+            "status": "proposed",
+            "proposed_at": generated_at,
+            "approved_by": "",
+            "approved_at": "",
+            "rejection_reason": "",
+        },
+        {
+            "recommendation_id": f"rec-{ts}-02",
+            "recommendation_type": "capability_gap",
+            "recommendation_title": "Expand capability-objective map coverage",
+            "justification": (
+                "Only 6 of the registered capabilities are currently mapped to objectives. "
+                "Expanding the map improves objective coverage reporting accuracy."
+            ),
+            "confidence": 0.70,
+            "supporting_signals": [
+                {
+                    "signal_type": "orphan_capability_detected",
+                    "value": "unmapped_capabilities=partial",
+                    "weight": 0.3,
+                },
+            ],
+            "affected_phases": [],
+            "affected_objectives": ["OBJ-004"],
+            "affected_branches": ["BR-002"],
+            "evidence_sources": ["capability_registry", "capability_objective_map"],
+            "evidence_count": 2,
+            "lineage_predecessor_ids": [],
+            "supersedes_ids": [],
+            "derived_from": "capability_map_coverage_analysis",
+            "status": "proposed",
+            "proposed_at": generated_at,
+            "approved_by": "",
+            "approved_at": "",
+            "rejection_reason": "",
+        },
+    ]
+
+    sample_evolution_proposals = [
+        {
+            "proposal_id": f"prop-{ts}-01",
+            "proposal_type": "new_branch",
+            "proposal_title": "Propose: Write Governance branch (controlled_write track formalisation)",
+            "rationale": (
+                "The controlled_write track has phases in roadmap_gap status. Formalising it as "
+                "a named branch with explicit objectives improves strategic coherence."
+            ),
+            "proposed_changes": [
+                "Add BR-004 to _SRG_BRANCH_REGISTRY with branch_name=controlled_write",
+                "Map BR-004 to OBJ-001 and OBJ-002",
+                "Add relevant capability mappings",
+            ],
+            "affected_objectives": ["OBJ-001", "OBJ-002"],
+            "affected_branches": ["BR-004"],
+            "evidence_sources": [
+                "roadmap_registry",
+                "branch_registry",
+                "objective_registry",
+            ],
+            "evidence_count": 3,
+            "minimum_evidence_met": True,
+            "impact_assessment": {
+                "phases_affected": 0,
+                "capabilities_affected": 0,
+                "objectives_affected": 2,
+                "risk_level": "low",
+                "reversible": True,
+            },
+            "status": "proposed",
+            "proposed_at": generated_at,
+            "approved_by": "",
+            "approved_at": "",
+            "rejection_reason": "",
+        },
+    ]
+
+    valid_goal_ids = {g["goal_id"] for g in goal_records}
+    valid_objective_ids = {o["objective_id"] for o in objective_records}
+    vision_goals_valid = all(
+        gid in valid_goal_ids for gid in vision_record["supported_goals"]
+    )
+    obj_parent_goals_valid = all(
+        o["parent_goal"] in valid_goal_ids for o in objective_records
+    )
+    branch_objectives_valid = all(
+        all(oid in valid_objective_ids for oid in b["serving_objectives"])
+        for b in branch_records
+    )
+    known_cap_names = {
+        c.get("capability_name", "").lower().replace(" ", "_")
+        for c in _CRI_KNOWN_CAPABILITIES
+    }
+    cap_map_valid = all(
+        entry["capability_id"] in known_cap_names for entry in capability_map_records
+    )
+    rec_evidence_valid = all(
+        entry.get("evidence_count", 0) > 0
+        and len(entry.get("evidence_sources", [])) > 0
+        for entry in sample_recommendations
+    )
+    prop_evidence_valid = all(
+        entry.get("minimum_evidence_met", False) and entry.get("evidence_count", 0) > 0
+        for entry in sample_evolution_proposals
+    )
+    branch_health_valid = all(
+        rec["health_status"] in _SRG_BRANCH_HEALTH_STATUSES for rec in branch_health_records
+    )
+    cross_registry_valid = vision_goals_valid and obj_parent_goals_valid and branch_objectives_valid
+
+    domain_signal_defs = [
+        {
+            "governance_domain": "goal_registry_validation",
+            "signal_type": "goal_registry_validation_check",
+            "severity": "info" if goal_count > 0 else "blocker",
+            "detected_state": (
+                f"goal_count={goal_count}; "
+                f"goal_ids={[g['goal_id'] for g in goal_records]}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "at least one project goal must be defined with a unique ID and non-empty "
+                "statement; execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "vision_registry_validation",
+            "signal_type": "vision_registry_validation_check",
+            "severity": "info" if vision_goals_valid else "warning",
+            "detected_state": (
+                f"vision_version={vision_record['vision_version']}; "
+                f"supported_goals={vision_record['supported_goals']}; "
+                f"goals_valid={vision_goals_valid}; "
+                f"governance_model={vision_record['governance_model']}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "vision must reference valid goal IDs and declare governance_model=human_approved; "
+                "execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "objective_registry_validation",
+            "signal_type": "objective_registry_validation_check",
+            "severity": "info" if obj_parent_goals_valid else "blocker",
+            "detected_state": (
+                f"objective_count={objective_count}; "
+                f"active_objective_count={len(active_objectives)}; "
+                f"parent_goals_valid={obj_parent_goals_valid}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "objectives must reference valid goal IDs via parent_goal; all objective IDs must "
+                "be unique; execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "branch_registry_validation",
+            "signal_type": "branch_registry_validation_check",
+            "severity": "info" if branch_objectives_valid else "warning",
+            "detected_state": (
+                f"branch_count={branch_count}; "
+                f"objectives_valid={branch_objectives_valid}; "
+                f"branch_ids={[b['branch_id'] for b in branch_records]}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "branches must reference valid objective IDs in serving_objectives; branch IDs must "
+                "be unique; execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "capability_objective_mapping_validation",
+            "signal_type": "capability_objective_mapping_validation_check",
+            "severity": "info" if cap_map_valid else "warning",
+            "detected_state": (
+                f"map_entry_count={capability_map_count}; "
+                f"capability_ids_valid={cap_map_valid}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "all capability_ids in the capability-objective map must resolve to "
+                "_CRI_KNOWN_CAPABILITIES; contribution_type must be primary|supporting|indirect; "
+                "execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "recommendation_evidence_validation",
+            "signal_type": "recommendation_evidence_validation_check",
+            "severity": "info" if rec_evidence_valid else "blocker",
+            "detected_state": (
+                f"sample_recommendation_count={len(sample_recommendations)}; "
+                f"evidence_valid={rec_evidence_valid}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "each recommendation must declare evidence_sources and evidence_count > 0; "
+                "lineage_predecessor_ids and supersedes_ids must be present; "
+                "execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "evolution_proposal_evidence_validation",
+            "signal_type": "evolution_proposal_evidence_validation_check",
+            "severity": "info" if prop_evidence_valid else "blocker",
+            "detected_state": (
+                f"sample_proposal_count={len(sample_evolution_proposals)}; "
+                f"evidence_valid={prop_evidence_valid}; "
+                f"minimum_evidence_met="
+                f"{all(p['minimum_evidence_met'] for p in sample_evolution_proposals)}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "each evolution proposal must declare evidence_sources, evidence_count > 0, and "
+                "minimum_evidence_met=True before approval; execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "branch_health_validation",
+            "signal_type": "branch_health_validation_check",
+            "severity": "info" if branch_health_valid else "warning",
+            "detected_state": (
+                f"branch_health_record_count={len(branch_health_records)}; "
+                f"health_statuses={[r['health_status'] for r in branch_health_records]}; "
+                f"health_valid={branch_health_valid}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "each branch must have a health record with a valid health_status from "
+                "_SRG_BRANCH_HEALTH_STATUSES; human_review_required=True; "
+                "execution_allowed=False in 65A"
+            ),
+        },
+        {
+            "governance_domain": "governance_boundary_enforcement",
+            "signal_type": "governance_boundary_enforcement_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_allowed=False; auto_modify_roadmap=False; "
+                "auto_activate_branch=False; auto_retire_branch=False; "
+                "auto_change_objectives=False; recommendation_allowed=True; "
+                "evolution_proposal_allowed=True; human_approval_required=True"
+            ),
+            "expected_state": (
+                "all auto_* boundaries must be False; recommendation_allowed and "
+                "evolution_proposal_allowed may be True; execution_allowed=False always in 65A"
+            ),
+        },
+        {
+            "governance_domain": "cross_registry_consistency",
+            "signal_type": "cross_registry_consistency_check",
+            "severity": "info" if cross_registry_valid else "warning",
+            "detected_state": (
+                f"vision_goals_valid={vision_goals_valid}; "
+                f"obj_parent_goals_valid={obj_parent_goals_valid}; "
+                f"branch_objectives_valid={branch_objectives_valid}; "
+                f"cross_registry_valid={cross_registry_valid}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "all cross-registry references must resolve: vision.supported_goals → goal_registry; "
+                "objective.parent_goal → goal_registry; branch.serving_objectives → "
+                "objective_registry; execution_allowed=False in 65A"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"srg-sig-{ts}-{i:02d}",
+            "governance_domain": sig["governance_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        governance_status = "governance_blocked"
+    elif warning_count > 0:
+        governance_status = "governance_with_warnings"
+    else:
+        governance_status = "governance_ready"
+
+    assessment_id = f"srga-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "goal_count": goal_count,
+        "objective_count": objective_count,
+        "branch_count": branch_count,
+        "capability_map_count": capability_map_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "governance_status": governance_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"srgs-{ts}",
+        "assessment_id": assessment_id,
+        "goal_count": goal_count,
+        "objective_count": objective_count,
+        "branch_count": branch_count,
+        "capability_map_count": capability_map_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "governance_status": governance_status,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    strategic_state_summary_capability = {
+        "capability_name": "Strategic State Summary",
+        "capability_domain": "strategic_governance",
+        "status": "proposed",
+        "target_phase": "65B",
+        "description": (
+            "A future capability that produces a single top-level summary of the entire strategic "
+            "state: goals → vision → objectives → branches → capability coverage → open "
+            "recommendations → open evolution proposals. Model defined in 65A; "
+            "implementation deferred to 65B."
+        ),
+        "model_name": "StrategicStateSummary",
+        "field_count": len(_SRG_STRATEGIC_STATE_SUMMARY_FIELDS),
+        "fields": [dict(f) for f in _SRG_STRATEGIC_STATE_SUMMARY_FIELDS],
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "strategic_roadmap_governance_overview": {
+            "overview_id": f"65a-{ts}",
+            "generated_at": generated_at,
+            "phase": "65A",
+            "title": "Strategic Roadmap Governance",
+            "domain_count": len(_SRG_GOVERNANCE_DOMAINS),
+            "goal_count": goal_count,
+            "objective_count": objective_count,
+            "branch_count": branch_count,
+            "capability_map_count": capability_map_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "governance_status": governance_status,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "summary": (
+                "Phase 65A introduces the strategic roadmap governance layer. "
+                "PCAE may inspect project goals, vision, objectives, branches, and "
+                "capability-objective mappings; compute branch health; generate "
+                "evidence-backed recommendations; and generate evolution proposals with "
+                "evidence requirements. All registry modifications require human approval. "
+                f"goal_count={goal_count}. objective_count={objective_count}. "
+                f"branch_count={branch_count}. blocker_count={blocker_count}. "
+                f"warning_count={warning_count}. governance_status={governance_status}. "
+                "execution_allowed=False. human_review_required=True."
+            ),
+        },
+        "goal_registry": goal_records,
+        "vision_registry": vision_record,
+        "objective_registry": objective_records,
+        "branch_registry": branch_records,
+        "capability_objective_map": capability_map_records,
+        "branch_health_records": branch_health_records,
+        "sample_recommendations": sample_recommendations,
+        "sample_evolution_proposals": sample_evolution_proposals,
+        "goal_model": {
+            "model_name": "StrategicGoal",
+            "field_count": len(_SRG_GOAL_FIELDS),
+            "required_field_count": sum(1 for f in _SRG_GOAL_FIELDS if f["required"]),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_GOAL_FIELDS],
+        },
+        "vision_model": {
+            "model_name": "StrategicVision",
+            "field_count": len(_SRG_VISION_FIELDS),
+            "required_field_count": sum(1 for f in _SRG_VISION_FIELDS if f["required"]),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_VISION_FIELDS],
+        },
+        "objective_model": {
+            "model_name": "StrategicObjective",
+            "field_count": len(_SRG_OBJECTIVE_FIELDS),
+            "required_field_count": sum(1 for f in _SRG_OBJECTIVE_FIELDS if f["required"]),
+            "supported_objective_statuses": list(_SRG_OBJECTIVE_STATUSES),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_OBJECTIVE_FIELDS],
+        },
+        "branch_model": {
+            "model_name": "RoadmapBranch",
+            "field_count": len(_SRG_BRANCH_FIELDS),
+            "required_field_count": sum(1 for f in _SRG_BRANCH_FIELDS if f["required"]),
+            "supported_branch_statuses": list(_SRG_BRANCH_STATUSES),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_BRANCH_FIELDS],
+        },
+        "capability_map_model": {
+            "model_name": "CapabilityObjectiveMapping",
+            "field_count": len(_SRG_CAPABILITY_MAP_FIELDS),
+            "required_field_count": len(_SRG_CAPABILITY_MAP_FIELDS),
+            "supported_contribution_types": list(_SRG_CONTRIBUTION_TYPES),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_CAPABILITY_MAP_FIELDS],
+        },
+        "recommendation_model": {
+            "model_name": "RoadmapRecommendation",
+            "field_count": len(_SRG_RECOMMENDATION_FIELDS),
+            "required_field_count": sum(
+                1 for f in _SRG_RECOMMENDATION_FIELDS if f["required"]
+            ),
+            "supported_recommendation_types": list(_SRG_RECOMMENDATION_TYPES),
+            "supported_recommendation_statuses": list(_SRG_RECOMMENDATION_STATUSES),
+            "evidence_lineage_fields_included": True,
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_RECOMMENDATION_FIELDS],
+        },
+        "evolution_proposal_model": {
+            "model_name": "RoadmapEvolutionProposal",
+            "field_count": len(_SRG_EVOLUTION_PROPOSAL_FIELDS),
+            "required_field_count": sum(
+                1 for f in _SRG_EVOLUTION_PROPOSAL_FIELDS if f["required"]
+            ),
+            "supported_proposal_types": list(_SRG_EVOLUTION_PROPOSAL_TYPES),
+            "supported_proposal_statuses": list(_SRG_EVOLUTION_PROPOSAL_STATUSES),
+            "evidence_requirements_enforced": True,
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_EVOLUTION_PROPOSAL_FIELDS],
+        },
+        "branch_health_model": {
+            "model_name": "BranchHealthRecord",
+            "field_count": len(_SRG_BRANCH_HEALTH_FIELDS),
+            "required_field_count": len(_SRG_BRANCH_HEALTH_FIELDS),
+            "supported_health_statuses": list(_SRG_BRANCH_HEALTH_STATUSES),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_BRANCH_HEALTH_FIELDS],
+        },
+        "approval_model": {
+            "model_name": "HumanApprovalRecord",
+            "field_count": len(_SRG_APPROVAL_FIELDS),
+            "required_field_count": sum(1 for f in _SRG_APPROVAL_FIELDS if f["required"]),
+            "supported_decision_values": list(_SRG_APPROVAL_DECISION_VALUES),
+            "approval_record_authored_by": "human",
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_APPROVAL_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "StrategicGovernanceSignal",
+            "field_count": len(_SRG_SIGNAL_FIELDS),
+            "required_field_count": len(_SRG_SIGNAL_FIELDS),
+            "severity_values": list(_SRG_SEVERITY_VALUES),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "StrategicGovernanceAssessment",
+            "field_count": len(_SRG_ASSESSMENT_FIELDS),
+            "required_field_count": len(_SRG_ASSESSMENT_FIELDS),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "StrategicGovernanceSummary",
+            "field_count": len(_SRG_SUMMARY_FIELDS),
+            "required_field_count": len(_SRG_SUMMARY_FIELDS),
+            "execution_allowed_false_in_65a": True,
+            "human_review_required_always_true_in_65a": True,
+            "fields": [dict(f) for f in _SRG_SUMMARY_FIELDS],
+        },
+        "strategic_state_summary_capability": strategic_state_summary_capability,
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect project goals",
+                "inspect vision registry",
+                "inspect objectives",
+                "inspect branch registry",
+                "inspect capability-objective map",
+                "compute branch health",
+                "generate recommendations with evidence and lineage",
+                "generate evolution proposals with evidence requirements",
+                "report objective coverage gaps",
+                "report capability-objective orphans",
+                "recommend roadmap evolution for human approval",
+            ],
+            "may_not": [
+                "modify roadmap automatically",
+                "activate branches automatically",
+                "retire branches automatically",
+                "change project objectives automatically",
+                "update vision automatically",
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "auto_modify_roadmap": False,
+            "auto_activate_branch": False,
+            "auto_retire_branch": False,
+            "auto_change_objectives": False,
+            "recommendation_allowed": True,
+            "justification_allowed": True,
+            "evolution_proposal_allowed": True,
+            "branch_proposal_allowed": True,
+            "human_approval_required": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "65A",
+        },
+        "advisory": STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY,
     }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64G: Capability Inventory Alignment Hardening.
+Phase 65A: Strategic Roadmap Governance Design.
 
 ## Post-61J Runtime Registry Checkpoint
 
