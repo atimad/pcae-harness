@@ -32,6 +32,7 @@ Prompt Rendering Quality Hardening
 - CHANGELOG.md
 - docs/CAPABILITY_INVENTORY.md
 - docs/SKILL_REGISTRY.md
+- docs/PROMPT_REGISTRY.md
 - docs/COMMANDS.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py

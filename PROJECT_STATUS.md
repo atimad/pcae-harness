@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.6A: Prompt Rendering Quality Hardening.
+Phase 64B.6B: Dependency & Capability Intelligence Rendering.
 
 ## Post-61J Runtime Registry Checkpoint
 

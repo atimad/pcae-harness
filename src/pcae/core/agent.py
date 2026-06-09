@@ -69650,8 +69650,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.6A",
         "phase_title": "Prompt Rendering Quality Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.6",
+        "successor": "64B.6B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6B",
+        "phase_title": "Dependency & Capability Intelligence Rendering",
+        "status": "active",
+        "predecessor": "64B.6A",
         "successor": "",
         "superseded_by": "",
     },
@@ -70138,6 +70147,24 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "dependencies": [
             "prompt_rendering_skill",
+        ],
+        "successors": ["dependency_capability_intelligence_rendering"],
+    },
+    {
+        "capability_name": "Dependency & Capability Intelligence Rendering",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6B",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": [
+            "prompt_rendering_quality_hardening",
         ],
         "successors": [],
     },
@@ -71253,6 +71280,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64B.6A",
     },
+    {
+        "phase_id": "64B.6B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6B",
+    },
+    {
+        "phase_id": "64B.6B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6B",
+    },
+    {
+        "phase_id": "64B.6B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6B",
+    },
 )
 
 
@@ -72260,6 +72311,7 @@ def build_skill_invocation_targeting(
 # ---------------------------------------------------------------------------
 # Phase 64B.6 – Prompt Rendering Skill
 # Phase 64B.6A – Prompt Rendering Quality Hardening
+# Phase 64B.6B – Dependency & Capability Intelligence Rendering
 # ---------------------------------------------------------------------------
 
 PROMPT_RENDERING_SKILL_ADVISORY = (
@@ -72279,6 +72331,67 @@ PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY = (
     "prompt section completeness, governance constraints, validation commands, agent prompt structure, "
     "and placeholder text. Rendering is phase-aware, roadmap-aware, and capability-aware. "
     "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+DEPENDENCY_CAPABILITY_INTELLIGENCE_RENDERING_ADVISORY = (
+    "Phase 64B.6B adds dependency and capability intelligence to prompt rendering. "
+    "Rendered prompts now include predecessor phase context, related capability context, "
+    "roadmap-gap explanation, architectural guidance, implementation intent, and specific safety "
+    "boundaries. Dependency context is inferred from roadmap registry and capability inventory. "
+    "Prompts no longer incorrectly say 'Dependencies: none' for phases with known predecessors. "
+    "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+_DRI_INTELLIGENCE_DOMAINS: tuple = (
+    "predecessor_phase_rendering",
+    "capability_dependency_rendering",
+    "roadmap_gap_context_rendering",
+    "track_context_rendering",
+    "implemented_capability_context_rendering",
+    "related_command_context_rendering",
+    "architectural_guidance_rendering",
+    "implementation_intent_rendering",
+    "risk_and_boundary_rendering",
+    "prompt_usefulness_validation",
+)
+
+_DRI_DEPENDENCY_SIGNAL_FIELDS: tuple = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "intelligence_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_DRI_DEPENDENCY_ASSESSMENT_FIELDS: tuple = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "dependency_count", "type": "int", "required": True},
+    {"name": "related_capability_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "intelligence_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_DRI_DEPENDENCY_SUMMARY_FIELDS: tuple = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "dependency_count", "type": "int", "required": True},
+    {"name": "related_capability_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "intelligence_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
 )
 
 _PRS_PROMPT_SKILL_IDS: frozenset = frozenset({
@@ -72406,10 +72519,13 @@ _PRS_GOVERNANCE_MAY: tuple = (
     "inspect capability inventory",
     "inspect prompt registry",
     "inspect skill registry",
+    "infer dependency context from existing governed metadata",
+    "render dependency-aware prompts",
     "render prompts",
     "validate prompt quality",
     "validate prompt completeness",
     "report blockers and warnings",
+    "report missing source metadata as warnings",
 )
 
 _PRS_GOVERNANCE_MAY_NOT: tuple = (
@@ -72420,6 +72536,7 @@ _PRS_GOVERNANCE_MAY_NOT: tuple = (
     "modify source files through execution",
     "access network",
     "approve writes",
+    "bypass approval gates",
     "commit",
     "push",
     "rollback",
@@ -72477,6 +72594,223 @@ _PRS_TRACK_TO_DOMAIN: dict = {
     "governance": "governance_capabilities",
     "legacy": "governance_capabilities",
 }
+
+
+def _dri_collect_predecessor_chain(
+    phase_id: str,
+    roadmap_registry: list,
+    *,
+    same_track_only: bool = True,
+) -> list:
+    """Walk the predecessor chain from phase_id and return ordered list of phase records (oldest first)."""
+    by_id = {r["phase_id"]: r for r in roadmap_registry}
+    target = by_id.get(phase_id)
+    if not target:
+        return []
+    track = target.get("track_name", "") if same_track_only else None
+    chain: list[dict] = []
+    seen: set[str] = {phase_id}
+    current_id = target.get("predecessor", "")
+    while current_id and current_id not in seen:
+        record = by_id.get(current_id)
+        if not record:
+            break
+        seen.add(current_id)
+        if track is None or record.get("track_name") == track:
+            chain.append(record)
+        current_id = record.get("predecessor", "")
+    chain.reverse()
+    return chain
+
+
+def _dri_collect_related_capabilities(
+    phase_ids: list,
+    capability_registry: list,
+) -> list:
+    """Return capability records for the given phase_ids, in phase_id order."""
+    by_phase = {c.get("implemented_phase"): c for c in capability_registry}
+    return [by_phase[pid] for pid in phase_ids if pid in by_phase]
+
+
+def _dri_build_dependency_context(
+    phase_id: str,
+    phase_record: "dict | None",
+    roadmap_registry: list,
+    capability_registry: list,
+) -> dict:
+    """Build dependency and capability intelligence context for a phase."""
+    if not phase_id or not phase_record:
+        return {
+            "predecessor_chain": [],
+            "related_capabilities": [],
+            "track_capabilities": [],
+            "dependency_count": 0,
+            "related_capability_count": 0,
+            "dependency_state": "no_phase_record",
+        }
+    chain = _dri_collect_predecessor_chain(phase_id, roadmap_registry)
+    chain_ids = [r["phase_id"] for r in chain]
+    related_caps = _dri_collect_related_capabilities(chain_ids, capability_registry)
+
+    track = phase_record.get("track_name", "")
+    track_caps = [
+        c for c in capability_registry
+        if c.get("capability_domain") == _PRS_TRACK_TO_DOMAIN.get(track, "")
+    ] if track else []
+
+    dep_state: str
+    if chain:
+        dep_state = "source_complete"
+    else:
+        cap = next((c for c in capability_registry if c.get("implemented_phase") == phase_id), None)
+        explicit_deps = (cap or {}).get("dependencies", [])
+        dep_state = "source_complete" if explicit_deps else "source_incomplete"
+
+    return {
+        "predecessor_chain": chain,
+        "related_capabilities": related_caps,
+        "track_capabilities": track_caps,
+        "dependency_count": len(chain),
+        "related_capability_count": len(related_caps),
+        "dependency_state": dep_state,
+    }
+
+
+def _dri_run_dependency_checks(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    phase_record: "dict | None",
+    dep_ctx: dict,
+) -> list:
+    """Run all 10 DRI intelligence domain checks and return DependencyRenderSignal list."""
+    signals: list[dict] = []
+    idx = 1
+
+    def _ds(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        nonlocal idx
+        signals.append({
+            "signal_id": f"dri-sig-{ts}-{idx:02d}",
+            "phase_id": phase_id,
+            "prompt_type": prompt_type,
+            "intelligence_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+        idx += 1
+
+    chain = dep_ctx.get("predecessor_chain", [])
+    related_caps = dep_ctx.get("related_capabilities", [])
+    dep_state = dep_ctx.get("dependency_state", "")
+
+    # 1. predecessor_phase_rendering
+    if not phase_record:
+        _ds("predecessor_phase_rendering", "phase_not_in_registry", "blocker",
+            f"phase_id={phase_id!r} not found", "phase in roadmap registry")
+    elif not chain:
+        _ds("predecessor_phase_rendering", "no_predecessor_chain_found", "warning",
+            f"no predecessor chain for phase_id={phase_id!r}",
+            "predecessor phases found in roadmap registry")
+
+    # 2. capability_dependency_rendering
+    if dep_state == "source_incomplete":
+        _ds("capability_dependency_rendering", "dependency_source_incomplete", "warning",
+            "dependency source incomplete; no predecessors or explicit deps found",
+            "predecessor chain or explicit capability dependencies present")
+
+    # 3. roadmap_gap_context_rendering
+    status = (phase_record or {}).get("status", "")
+    if status == "roadmap_gap" and not chain:
+        _ds("roadmap_gap_context_rendering", "roadmap_gap_no_predecessor_context", "warning",
+            f"phase status=roadmap_gap but no predecessor context available",
+            "predecessor context available for roadmap gap phases")
+
+    # 4. track_context_rendering
+    track = (phase_record or {}).get("track_name", "")
+    if not track:
+        _ds("track_context_rendering", "missing_track", "info",
+            "no track_name on phase record",
+            "track_name present for context rendering")
+
+    # 5. implemented_capability_context_rendering
+    if chain and not related_caps:
+        _ds("implemented_capability_context_rendering", "no_related_capabilities_found", "info",
+            f"predecessor chain has {len(chain)} phases but no related capabilities found",
+            "related capabilities found for predecessor phases")
+
+    # 6. related_command_context_rendering
+    track_caps = dep_ctx.get("track_capabilities", [])
+    if track and not track_caps:
+        _ds("related_command_context_rendering", "no_track_capabilities_found", "info",
+            f"no capabilities found for track={track!r}",
+            "track capabilities available for command context")
+
+    # 7. architectural_guidance_rendering
+    if chain and len(chain) >= 3:
+        pass  # sufficient foundation for guidance; no signal needed
+    elif chain:
+        pass  # some chain; acceptable
+    # no signal on missing chain; predecessor_phase_rendering already covers it
+
+    # 8. implementation_intent_rendering
+    phase_title = (phase_record or {}).get("phase_title", "")
+    if not phase_title:
+        _ds("implementation_intent_rendering", "missing_phase_title_for_intent", "warning",
+            "phase title missing; cannot render implementation intent",
+            "phase title present for implementation intent")
+
+    # 9. risk_and_boundary_rendering – always present via governance may/may-not; no signal needed
+
+    # 10. prompt_usefulness_validation
+    if dep_state == "source_incomplete" and not chain:
+        _ds("prompt_usefulness_validation", "low_dependency_intelligence", "warning",
+            "prompt will render with minimal dependency context",
+            "dependency and capability context present in rendered prompt")
+
+    return signals
+
+
+def _dri_build_dependency_assessment(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    signals: list,
+    dep_ctx: dict,
+) -> dict:
+    blockers = sum(1 for s in signals if s["severity"] == "blocker")
+    warnings = sum(1 for s in signals if s["severity"] == "warning")
+    status = "blocked" if blockers > 0 else ("warning" if warnings > 0 else "passed")
+    return {
+        "assessment_id": f"dri-assess-{ts}",
+        "phase_id": phase_id,
+        "prompt_type": prompt_type,
+        "dependency_count": dep_ctx.get("dependency_count", 0),
+        "related_capability_count": dep_ctx.get("related_capability_count", 0),
+        "signal_count": len(signals),
+        "blocker_count": blockers,
+        "warning_count": warnings,
+        "intelligence_status": status,
+        "human_review_required": True,
+    }
+
+
+def _dri_build_dependency_summary(ts: str, assessment: dict) -> dict:
+    return {
+        "summary_id": f"dri-summary-{ts}",
+        "assessment_id": assessment["assessment_id"],
+        "phase_id": assessment["phase_id"],
+        "prompt_type": assessment["prompt_type"],
+        "dependency_count": assessment["dependency_count"],
+        "related_capability_count": assessment["related_capability_count"],
+        "signal_count": assessment["signal_count"],
+        "blocker_count": assessment["blocker_count"],
+        "warning_count": assessment["warning_count"],
+        "intelligence_status": assessment["intelligence_status"],
+        "human_review_required": True,
+    }
 
 
 def _prs_find_best_capability(
@@ -72605,12 +72939,20 @@ def _prq_run_quality_checks(
             "capability domain resolved from roadmap registry or track")
 
     # 4. Dependency accuracy
-    if capability_record:
-        deps = capability_record.get("dependencies", [])
-        if not deps and rendered_prompt:
-            _qs("dependency_accuracy", "no_dependencies_defined", "info",
-                "no dependencies found in capability record",
-                "dependencies present or explicitly none")
+    if rendered_prompt:
+        # Check that prompts with predecessor phases don't show bare "- none" for deps
+        if "Predecessor Phases" in rendered_prompt:
+            section_body = rendered_prompt.split("## Predecessor Phases")[-1].split("##")[0]
+            if "- none" in section_body and phase_record and phase_record.get("predecessor"):
+                _qs("dependency_accuracy", "predecessor_exists_but_deps_show_none", "warning",
+                    "prompt shows '- none' for predecessor phases despite predecessor field being set",
+                    "predecessor context rendered from roadmap registry")
+        elif capability_record:
+            deps = capability_record.get("dependencies", [])
+            if not deps:
+                _qs("dependency_accuracy", "no_dependencies_defined", "info",
+                    "no dependencies found in capability record",
+                    "dependencies present or explicitly none")
 
     # 5. Roadmap context accuracy
     if phase_record:
@@ -72684,6 +73026,7 @@ def _prs_render_implementation_prompt(
     phase_id: str,
     phase_record: dict | None,
     capability_record: dict | None,
+    dep_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
@@ -72692,18 +73035,13 @@ def _prs_render_implementation_prompt(
     successor = (phase_record or {}).get("successor") or "(not yet assigned)"
     cap_domain = _prs_infer_capability_domain(phase_record, capability_record)
     commands = (capability_record or {}).get("commands", [])
-    dependencies = (capability_record or {}).get("dependencies", [])
     phase_slug = phase_id.lower().replace(".", "_")
+    dep_ctx = dep_ctx or {}
 
     commands_block = (
         "\n".join(f"- {cmd}" for cmd in commands)
         if commands
         else "- (no commands defined; define during implementation)"
-    )
-    deps_block = (
-        "\n".join(f"- {dep}" for dep in dependencies)
-        if dependencies
-        else "- none"
     )
     inputs_block = "\n".join(f"- {inp}" for inp in _PRS_STANDARD_INPUTS)
     acceptance_block = "\n".join(f"- {chk}" for chk in _PRS_STANDARD_ACCEPTANCE_CHECKS)
@@ -72711,6 +73049,88 @@ def _prs_render_implementation_prompt(
     docs_block = "\n".join(f"- {req}" for req in _PRS_STANDARD_DOCUMENTATION_REQUIREMENTS)
     may_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY)
     may_not_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY_NOT)
+
+    # Dependency intelligence from dep_ctx
+    chain = dep_ctx.get("predecessor_chain", [])
+    related_caps = dep_ctx.get("related_capabilities", [])
+    dep_state = dep_ctx.get("dependency_state", "")
+
+    if chain:
+        predecessor_block = "\n".join(
+            f"- {r['phase_id']}: {r.get('phase_title', '')} ({r.get('status', '')})"
+            for r in chain
+        )
+        deps_block = predecessor_block
+    else:
+        explicit_deps = (capability_record or {}).get("dependencies", [])
+        if explicit_deps:
+            deps_block = "\n".join(f"- {dep}" for dep in explicit_deps)
+        elif dep_state == "source_incomplete":
+            deps_block = "- dependency source incomplete"
+        else:
+            deps_block = "- none"
+
+    if related_caps:
+        related_caps_block = "\n".join(
+            f"- {c.get('capability_name', '')} (phase {c.get('implemented_phase', '')})"
+            for c in related_caps
+        )
+    else:
+        related_caps_block = "- (no related capabilities found in registry)"
+
+    # Roadmap gap context
+    roadmap_gap_section = ""
+    if status == "roadmap_gap":
+        roadmap_gap_section = f"""
+## Roadmap Gap Context
+Phase {phase_id} is marked as a **roadmap gap**: it appears in the roadmap registry but \
+has not yet been implemented. This means:
+- Prior work exists in the {track_name} track that this phase must build on.
+- The missing capability must be introduced in a governed way.
+- All predecessor capabilities must remain functional after implementation.
+- Real execution, runtime invocation, and write execution remain blocked until \
+explicitly authorized through the governance gate chain.
+"""
+
+    # Architectural guidance — derived from predecessor chain in track
+    if chain:
+        arch_items = "\n".join(
+            f"- {r.get('phase_title', r['phase_id'])} ({r['phase_id']})" for r in chain[-6:]
+        )
+        arch_section = f"""
+## Architectural Guidance
+This phase builds on the following completed phases in the {track_name} track:
+{arch_items}
+
+Implement {phase_title} so it connects to and extends this foundation. \
+Ensure the new governed capability integrates with the existing registry, \
+selection, and audit chain structures without modifying their behavior.
+"""
+    else:
+        arch_section = ""
+
+    # Implementation intent
+    intent_section = f"""
+## Implementation Intent
+Introduce {phase_title.lower()} as a governed capability in the PCAE harness. \
+This phase should define the {phase_title.lower()} boundary in a controlled way, \
+connecting any predecessor governance structures (registry, selection, arbitration, \
+audit, recovery) to a new governed entry point. \
+If actual execution remains blocked by governance policy, state that clearly in the implementation.
+"""
+
+    # Safety boundaries (phase-specific)
+    safety_section = f"""
+## Risk and Safety Boundaries
+- No uncontrolled runtime invocation
+- No prompt execution
+- No write execution
+- No network access
+- No bypassing approval gates
+- Human review required for all governance decisions
+- Do not modify files outside the task contract allowed-file list
+- Do not commit, push, or rollback without explicit human instruction
+"""
 
     return f"""# Phase {phase_id}: {phase_title}
 
@@ -72725,6 +73145,7 @@ Implement {phase_title} for the PCAE governance harness. This phase introduces \
 - Status: {status}
 - Predecessor: {predecessor}
 - Successor: {successor}
+- Capability Domain: {cap_domain}
 
 ## Scope
 - Implement {phase_title} in src/pcae/core/agent.py
@@ -72738,15 +73159,15 @@ Implement {phase_title} for the PCAE governance harness. This phase introduces \
 ## Inputs
 {inputs_block}
 
-## Capability Domain
-{cap_domain}
-
 ## Commands
 {commands_block}
 
-## Dependencies
+## Predecessor Phases
 {deps_block}
 
+## Related Capabilities
+{related_caps_block}
+{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
 ## Required Behavior
 - All acceptance checks pass after implementation
 - All existing tests continue to pass
@@ -72852,6 +73273,7 @@ def _prs_render_agent_prompt(
     phase_id: str,
     phase_record: dict | None,
     capability_record: dict | None,
+    dep_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
@@ -72861,6 +73283,25 @@ def _prs_render_agent_prompt(
     commands_summary = "\n".join(f"  - {cmd}" for cmd in key_commands)
     may_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY)
     may_not_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY_NOT)
+    dep_ctx = dep_ctx or {}
+
+    chain = dep_ctx.get("predecessor_chain", [])
+    related_caps = dep_ctx.get("related_capabilities", [])
+
+    if chain:
+        dep_summary = "\n".join(
+            f"  - {r['phase_id']}: {r.get('phase_title', '')}" for r in chain[-5:]
+        )
+    else:
+        dep_summary = "  - (no predecessor chain found)"
+
+    if related_caps:
+        caps_summary = "\n".join(
+            f"  - {c.get('capability_name', '')} ({c.get('implemented_phase', '')})"
+            for c in related_caps[-5:]
+        )
+    else:
+        caps_summary = "  - (no related capabilities found)"
 
     return f"""# Phase {phase_id} Agent Instructions: {phase_title}
 
@@ -72881,6 +73322,12 @@ Track: {track_name}.
   - pcae check passes
   - python -m pytest -n auto passes
 
+## Predecessor Phases
+{dep_summary}
+
+## Related Capabilities
+{caps_summary}
+
 ## Validation Summary
 - Run: `pcae check && python -m pytest -n auto`
 - Focused: `python -m pytest -k "{phase_slug}" -v`
@@ -72896,10 +73343,13 @@ Track: {track_name}.
 {may_not_block}
 
 ## Safety Boundaries
-- Do not invoke runtimes or execute prompts automatically
+- No uncontrolled runtime invocation
+- No prompt execution
+- No write execution
+- No network access
+- No bypassing approval gates
 - Do not modify runtime behavior or orchestration configuration
 - Do not commit, push, or rollback without explicit human instruction
-- Do not access external networks
 - Do not modify files outside the allowed file list in the task contract
 - All governance decisions require human review
 
@@ -72907,6 +73357,7 @@ Track: {track_name}.
 - [ ] Phase ID ({phase_id}) and title ({phase_title}) are correct in all outputs
 - [ ] Goal aligns with phase title, not a different phase or capability name
 - [ ] Capability domain is correct for track ({track_name})
+- [ ] Predecessor phases are accounted for in implementation design
 - [ ] All acceptance checks pass
 - [ ] No placeholder text in implementation
 - [ ] No unintended file modifications
@@ -73016,6 +73467,18 @@ def build_prompt_rendering_skill(
 
     completeness = _prs_compute_completeness(phase_record, capability_record)
 
+    # Dependency & capability intelligence context
+    dep_ctx = _dri_build_dependency_context(
+        phase_id or "", phase_record, roadmap_registry, capability_registry
+    )
+    dependency_signals = _dri_run_dependency_checks(
+        ts, phase_id or "", prompt_type, phase_record, dep_ctx
+    )
+    dependency_assessment = _dri_build_dependency_assessment(
+        ts, phase_id or "", prompt_type, dependency_signals, dep_ctx
+    )
+    dependency_summary = _dri_build_dependency_summary(ts, dependency_assessment)
+
     blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
     warning_count = sum(1 for s in signals if s["severity"] == "warning")
 
@@ -73026,11 +73489,15 @@ def build_prompt_rendering_skill(
     else:
         render_status = "complete" if completeness >= 0.7 else "partial"
         if prompt_type == "implementation":
-            rendered_prompt = _prs_render_implementation_prompt(phase_id or "", phase_record, capability_record)
+            rendered_prompt = _prs_render_implementation_prompt(
+                phase_id or "", phase_record, capability_record, dep_ctx
+            )
         elif prompt_type == "validation":
             rendered_prompt = _prs_render_validation_prompt(phase_id or "", phase_record, capability_record)
         elif prompt_type == "agent":
-            rendered_prompt = _prs_render_agent_prompt(phase_id or "", phase_record, capability_record)
+            rendered_prompt = _prs_render_agent_prompt(
+                phase_id or "", phase_record, capability_record, dep_ctx
+            )
         else:
             rendered_prompt = ""
             render_status = "blocked"
@@ -73120,8 +73587,13 @@ def build_prompt_rendering_skill(
         "quality_signals": quality_signals,
         "quality_assessment": quality_assessment,
         "quality_summary": quality_summary,
+        "dependency_context": dep_ctx,
+        "dependency_signals": dependency_signals,
+        "dependency_assessment": dependency_assessment,
+        "dependency_summary": dependency_summary,
         "render_domains": list(_PRS_RENDER_DOMAINS),
         "quality_domains": list(_PRQ_QUALITY_DOMAINS),
+        "intelligence_domains": list(_DRI_INTELLIGENCE_DOMAINS),
         "render_record_model": {
             "model_name": "PromptRenderRecord",
             "fields": [dict(f) for f in _PRS_RENDER_RECORD_FIELDS],
@@ -73150,10 +73622,22 @@ def build_prompt_rendering_skill(
             "model_name": "PromptQualitySummary",
             "fields": [dict(f) for f in _PRQ_SUMMARY_FIELDS],
         },
+        "dependency_signal_model": {
+            "model_name": "DependencyRenderSignal",
+            "fields": [dict(f) for f in _DRI_DEPENDENCY_SIGNAL_FIELDS],
+        },
+        "dependency_assessment_model": {
+            "model_name": "DependencyRenderAssessment",
+            "fields": [dict(f) for f in _DRI_DEPENDENCY_ASSESSMENT_FIELDS],
+        },
+        "dependency_summary_model": {
+            "model_name": "DependencyRenderSummary",
+            "fields": [dict(f) for f in _DRI_DEPENDENCY_SUMMARY_FIELDS],
+        },
         "governance_boundaries": {
             "may": list(_PRS_GOVERNANCE_MAY),
             "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
-            "phase": "64B.6A",
+            "phase": "64B.6B",
         },
         "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
     }

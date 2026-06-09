@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 64B.6B: Dependency & Capability Intelligence Rendering (20260609-prompt-dep-capability-intelligence-rendering)
+- 64B.6A: Prompt Rendering Quality Hardening (20260608-2337-prompt-rendering-quality-hardening)
 - 64B.6 Prompt Rendering Skill (20260608-2236-64b-6-prompt-rendering-skill)
 - 64B.6: Prompt Rendering Skill (20260608-2232-64b-6-prompt-rendering-skill)
 - 64B.5A: Capability Target Resolution Hardening (20260608-2217-64b-5a-capability-target-resolution-hardening)
