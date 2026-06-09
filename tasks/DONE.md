@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 64B.6E: Design Review Intelligence Rendering (20260609-design-review-intelligence-rendering)
 - 64C: Multi-Runtime Orchestration Execution (20260609-multi-runtime-orchestration-execution)
 - 64B.6D: Command & Architecture Intelligence Rendering (20260609-command-architecture-intelligence-rendering)
 - 64B.6C: Predecessor Capability Rendering (20260609-predecessor-capability-rendering)

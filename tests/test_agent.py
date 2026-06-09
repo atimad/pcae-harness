@@ -48754,7 +48754,7 @@ def test_prompt_rendering_skill_governance_boundaries(tmp_path, monkeypatch) -> 
     assert "render prompts" in gb["may"]
     assert "invoke runtimes" in gb["may_not"]
     assert "execute shell commands" in gb["may_not"]
-    assert gb["phase"] == "64C"
+    assert gb["phase"] == "64B.6E"
 
 
 def test_prompt_rendering_skill_human_review_always_required(tmp_path, monkeypatch) -> None:
@@ -49472,7 +49472,7 @@ def test_64b_6c_governance_phase_updated(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
-    assert data["governance_boundaries"]["phase"] == "64C"
+    assert data["governance_boundaries"]["phase"] == "64B.6E"
 
 
 # ---------------------------------------------------------------------------
@@ -49684,7 +49684,7 @@ def test_64b_6d_governance_phase_updated(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
-    assert data["governance_boundaries"]["phase"] == "64C"
+    assert data["governance_boundaries"]["phase"] == "64B.6E"
 
 
 def test_64b_6d_advisory_exported(tmp_path, monkeypatch) -> None:
@@ -49973,3 +49973,267 @@ def test_64c_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64b is not None
     assert phase_64b["status"] == "completed"
     assert phase_64b["successor"] == "64C"
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6E – Design Review Intelligence Rendering
+# ---------------------------------------------------------------------------
+
+
+def _setup_prs_repo_drr(tmp_path):
+    """Shared setup for DRR prompt rendering tests."""
+    import shutil
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir()
+    (pcae_dir / "session.json").write_text('{"current_phase": "64B.6E"}')
+    skills_dir = pcae_dir / "skills"
+    skills_dir.mkdir()
+    shutil.copytree(".pcae/skills", str(skills_dir), dirs_exist_ok=True)
+
+
+def test_64b_6e_phase_status_active(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = cri_data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64B.6E"), None)
+    assert phase is not None
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "64B.6D"
+    assert phase["track_name"] == "capability_intelligence"
+
+
+def test_64b_6e_predecessor_64b_6d_completed(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = cri_data["roadmap_registry"]
+    phase_64b_6d = next((p for p in phases if p["phase_id"] == "64B.6D"), None)
+    assert phase_64b_6d is not None
+    assert phase_64b_6d["status"] == "completed"
+    assert phase_64b_6d["successor"] == "64B.6E"
+
+
+def test_64b_6e_capability_registered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    caps = cri_data["capability_registry"]
+    cap = next(
+        (c for c in caps if c.get("implemented_phase") == "64B.6E"), None
+    )
+    assert cap is not None
+    assert cap["status"] == "implemented"
+    assert cap["capability_domain"] == "skill_system_capabilities"
+    assert any("phase-implementation" in cmd for cmd in cap["commands"])
+    assert any("phase-agent" in cmd for cmd in cap["commands"])
+
+
+def test_64b_6e_design_review_section_in_implementation_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "## Pre-Implementation Design Review" in rendered
+
+
+def test_64b_6e_human_review_checkpoint_in_implementation_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "Present design for review" in rendered
+    assert "Do not write code until design review is complete" in rendered
+
+
+def test_64b_6e_implementation_readiness_lifecycle_in_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "Design Review" in rendered
+    assert "Human Review" in rendered
+    assert "Implementation" in rendered
+    assert "Validation" in rendered
+
+
+def test_64b_6e_required_inspection_in_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "capability inventory" in rendered
+    assert "roadmap registry" in rendered
+    assert "skill registry" in rendered
+    assert "prompt registry" in rendered
+
+
+def test_64b_6e_required_design_proposal_in_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "What capability is being introduced" in rendered
+    assert "What models are required" in rendered
+    assert "What commands are required" in rendered
+    assert "What lifecycle is required" in rendered
+    assert "What validation strategy is required" in rendered
+
+
+def test_64b_6e_agent_prompt_includes_design_review(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-agent", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "## Pre-Implementation Design Review" in rendered
+    assert "Present design for review" in rendered
+    assert "Do not write code until design review is complete" in rendered
+
+
+def test_64b_6e_validation_prompt_excludes_design_review(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-validation", phase_id="64C")
+    rendered = data["rendered_prompt"]
+    assert "## Pre-Implementation Design Review" not in rendered
+
+
+def test_64b_6e_drr_signals_generated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    drr_signals = data["drr_signals"]
+    assert len(drr_signals) == 10
+    domains = {s["review_domain"] for s in drr_signals}
+    assert "design_review_rendering" in domains
+    assert "human_review_checkpoint_rendering" in domains
+    assert "predecessor_inspection_rendering" in domains
+    assert all(s["human_review_required"] is True for s in drr_signals)
+
+
+def test_64b_6e_drr_assessment_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assessment = data["drr_assessment"]
+    assert "assessment_id" in assessment
+    assert "review_section_count" in assessment
+    assert "readiness_status" in assessment
+    assert assessment["human_review_required"] is True
+    assert assessment["review_section_count"] > 0
+
+
+def test_64b_6e_drr_summary_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    summary = data["drr_summary"]
+    assert "summary_id" in summary
+    assert "assessment_id" in summary
+    assert "review_section_count" in summary
+    assert summary["human_review_required"] is True
+
+
+def test_64b_6e_drr_intelligence_domains_count(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert "design_review_intelligence_domains" in data
+    domains = data["design_review_intelligence_domains"]
+    assert len(domains) == 10
+
+
+def test_64b_6e_drr_models_defined(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert data["drr_signal_model"]["model_name"] == "DesignReviewSignal"
+    assert data["drr_assessment_model"]["model_name"] == "DesignReviewAssessment"
+    assert data["drr_summary_model"]["model_name"] == "DesignReviewSummary"
+    assert len(data["drr_signal_model"]["fields"]) == 9
+    assert len(data["drr_assessment_model"]["fields"]) == 8
+    assert len(data["drr_summary_model"]["fields"]) == 9
+
+
+def test_64b_6e_governance_phase_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert data["governance_boundaries"]["phase"] == "64B.6E"
+
+
+def test_64b_6e_advisory_exported(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY
+
+    assert isinstance(DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY, str)
+    assert len(DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY) > 50
+    assert "design review" in DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY.lower()
+    assert "human review" in DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY.lower()
+
+
+def test_64b_6e_phase_implementation_64c_works(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.cli import main
+
+    rc = main(["skill", "invoke", "phase-implementation", "64C"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Pre-Implementation Design Review" in out
+
+
+def test_64b_6e_phase_implementation_65a_works(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo_drr(tmp_path)
+    from pcae.cli import main
+
+    rc = main(["skill", "invoke", "phase-implementation", "65A"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Pre-Implementation Design Review" in out

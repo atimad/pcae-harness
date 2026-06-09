@@ -4,7 +4,7 @@ Generated: 2026-06-09T09:00:00.000000+00:00
 Phase: 64B.3 — Prompt Recommendation Hardening
 Current phase: 64C
 Current track: multi_runtime
-Prompt count: 36
+Prompt count: 39
 Recommendation count: 7
 Validation count: 33
 Drift count: 4
@@ -50,6 +50,9 @@ Assessment status: quality_governed
 | prh-prompt-20260609T050240-34 | 64C | implementation | recommended | 64C-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 | prh-prompt-20260609T050240-35 | 64C | validation | recommended | 64C-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 | prh-prompt-20260609T050240-36 | 64C | agent | recommended | 64C-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-37 | 64B.6E | implementation | recommended | 64B.6E-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-38 | 64B.6E | validation | recommended | 64B.6E-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-39 | 64B.6E | agent | recommended | 64B.6E-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 
 ## Recommendations
 

@@ -69564,6 +69564,15 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "phase_title": "Multi-Runtime Orchestration Execution",
         "status": "active",
         "predecessor": "64B",
+        "successor": "65A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "multi_runtime",
+        "phase_id": "65A",
+        "phase_title": "Multi-Runtime Execution Dispatch",
+        "status": "roadmap_gap",
+        "predecessor": "64C",
         "successor": "",
         "superseded_by": "",
     },
@@ -69682,6 +69691,15 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "phase_title": "Command & Architecture Intelligence Rendering",
         "status": "completed",
         "predecessor": "64B.6C",
+        "successor": "64B.6E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6E",
+        "phase_title": "Design Review Intelligence Rendering",
+        "status": "active",
+        "predecessor": "64B.6D",
         "successor": "",
         "superseded_by": "",
     },
@@ -70232,8 +70250,23 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "predecessor_capability_rendering",
         ],
-        "successors": [],
+        "successors": ["design_review_intelligence_rendering"],
         "contribution": "renders inferred command surfaces and architecture flows in implementation prompts",
+    },
+    {
+        "capability_name": "Design Review Intelligence Rendering",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6E",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+        ],
+        "dependencies": [
+            "command_architecture_intelligence_rendering",
+        ],
+        "successors": [],
+        "contribution": "renders pre-implementation design review sections in implementation and agent prompts",
     },
 )
 
@@ -71443,6 +71476,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_version": "64C-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64C",
+    },
+    {
+        "phase_id": "64B.6E",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6E-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6E",
+    },
+    {
+        "phase_id": "64B.6E",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6E-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6E",
+    },
+    {
+        "phase_id": "64B.6E",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6E-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6E",
     },
 )
 
@@ -73285,6 +73342,7 @@ def _prs_render_implementation_prompt(
     capability_record: dict | None,
     dep_ctx: "dict | None" = None,
     car_ctx: "dict | None" = None,
+    drr_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
@@ -73419,6 +73477,12 @@ If actual execution remains blocked by governance policy, state that clearly in 
 - Do not commit, push, or rollback without explicit human instruction
 """
 
+    # Design review section (64B.6E)
+    drr_ctx = drr_ctx or {}
+    design_review_section = _drr_render_design_review_section(
+        phase_id, phase_record, dep_ctx, drr_ctx, "implementation"
+    )
+
     return f"""# Phase {phase_id}: {phase_title}
 
 ## Goal
@@ -73454,7 +73518,7 @@ Implement {phase_title} for the PCAE governance harness. This phase introduces \
 
 ## Related Capabilities
 {related_caps_block}
-{contributions_section}{arch_flow_section}{planning_execution_section}{boundary_section}{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
+{contributions_section}{arch_flow_section}{planning_execution_section}{boundary_section}{roadmap_gap_section}{arch_section}{intent_section}{safety_section}{design_review_section}
 ## Required Behavior
 - All acceptance checks pass after implementation
 - All existing tests continue to pass
@@ -73562,6 +73626,7 @@ def _prs_render_agent_prompt(
     capability_record: dict | None,
     dep_ctx: "dict | None" = None,
     car_ctx: "dict | None" = None,
+    drr_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
@@ -73610,6 +73675,12 @@ def _prs_render_agent_prompt(
     else:
         arch_flow_agent_section = ""
 
+    # Design review section (64B.6E)
+    drr_ctx = drr_ctx or {}
+    agent_design_review_section = _drr_render_design_review_section(
+        phase_id, phase_record, dep_ctx, drr_ctx, "agent"
+    )
+
     return f"""# Phase {phase_id} Agent Instructions: {phase_title}
 
 ## Overview
@@ -73628,7 +73699,7 @@ Track: {track_name}.
   - pcae status coherence passes
   - pcae check passes
   - python -m pytest -n auto passes
-
+{agent_design_review_section}
 ## Predecessor Phases
 {dep_summary}
 
@@ -73796,6 +73867,16 @@ def build_prompt_rendering_skill(
     car_assessment = _car_build_assessment(ts, phase_id or "", prompt_type, car_signals, car_ctx)
     car_summary = _car_build_summary(ts, car_assessment)
 
+    # Design review intelligence context (64B.6E)
+    drr_ctx = _drr_build_design_review_context(
+        phase_id or "", phase_record, dep_ctx, capability_record
+    )
+    drr_signals = _drr_run_design_review_checks(
+        ts, phase_id or "", prompt_type, phase_record, dep_ctx, drr_ctx
+    )
+    drr_assessment = _drr_build_assessment(ts, phase_id or "", prompt_type, drr_signals, drr_ctx)
+    drr_summary = _drr_build_summary(ts, drr_assessment)
+
     blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
     warning_count = sum(1 for s in signals if s["severity"] == "warning")
 
@@ -73807,13 +73888,13 @@ def build_prompt_rendering_skill(
         render_status = "complete" if completeness >= 0.7 else "partial"
         if prompt_type == "implementation":
             rendered_prompt = _prs_render_implementation_prompt(
-                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx
+                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx, drr_ctx
             )
         elif prompt_type == "validation":
             rendered_prompt = _prs_render_validation_prompt(phase_id or "", phase_record, capability_record)
         elif prompt_type == "agent":
             rendered_prompt = _prs_render_agent_prompt(
-                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx
+                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx, drr_ctx
             )
         else:
             rendered_prompt = ""
@@ -73912,10 +73993,15 @@ def build_prompt_rendering_skill(
         "car_signals": car_signals,
         "car_assessment": car_assessment,
         "car_summary": car_summary,
+        "drr_context": drr_ctx,
+        "drr_signals": drr_signals,
+        "drr_assessment": drr_assessment,
+        "drr_summary": drr_summary,
         "render_domains": list(_PRS_RENDER_DOMAINS),
         "quality_domains": list(_PRQ_QUALITY_DOMAINS),
         "intelligence_domains": list(_DRI_INTELLIGENCE_DOMAINS),
         "command_architecture_intelligence_domains": list(_CAR_INTELLIGENCE_DOMAINS),
+        "design_review_intelligence_domains": list(_DRR_INTELLIGENCE_DOMAINS),
         "render_record_model": {
             "model_name": "PromptRenderRecord",
             "fields": [dict(f) for f in _PRS_RENDER_RECORD_FIELDS],
@@ -73968,13 +74054,26 @@ def build_prompt_rendering_skill(
             "model_name": "CommandArchitectureRenderSummary",
             "fields": [dict(f) for f in _CAR_SUMMARY_FIELDS],
         },
+        "drr_signal_model": {
+            "model_name": "DesignReviewSignal",
+            "fields": [dict(f) for f in _DRR_SIGNAL_FIELDS],
+        },
+        "drr_assessment_model": {
+            "model_name": "DesignReviewAssessment",
+            "fields": [dict(f) for f in _DRR_ASSESSMENT_FIELDS],
+        },
+        "drr_summary_model": {
+            "model_name": "DesignReviewSummary",
+            "fields": [dict(f) for f in _DRR_SUMMARY_FIELDS],
+        },
         "governance_boundaries": {
             "may": list(_PRS_GOVERNANCE_MAY),
             "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
-            "phase": "64C",
+            "phase": "64B.6E",
         },
         "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
         "car_advisory": COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY,
+        "drr_advisory": DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY,
     }
 
 
@@ -75017,4 +75116,333 @@ def build_multi_runtime_orchestration_execution(root: "HarnessPath | None" = Non
             "phase": "64C",
         },
         "advisory": MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6E – Design Review Intelligence Rendering
+# ---------------------------------------------------------------------------
+
+DESIGN_REVIEW_INTELLIGENCE_RENDERING_ADVISORY = (
+    "Phase 64B.6E adds pre-implementation design review rendering to prompt rendering. "
+    "Rendered implementation and agent prompts now include a 'Pre-Implementation Design Review' "
+    "section that instructs the agent to inspect predecessor implementations, capability inventory, "
+    "roadmap registry, skill registry, and prompt registry before proposing models, commands, "
+    "lifecycle, and validation strategy. A human review checkpoint and implementation readiness "
+    "lifecycle (Design Review → Human Review → Implementation → Validation) are also rendered. "
+    "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+_DRR_INTELLIGENCE_DOMAINS: tuple = (
+    "design_review_rendering",
+    "predecessor_inspection_rendering",
+    "capability_inspection_rendering",
+    "roadmap_inspection_rendering",
+    "model_proposal_rendering",
+    "command_proposal_rendering",
+    "lifecycle_proposal_rendering",
+    "validation_strategy_rendering",
+    "implementation_readiness_rendering",
+    "human_review_checkpoint_rendering",
+)
+
+_DRR_SIGNAL_FIELDS: tuple = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "review_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_DRR_ASSESSMENT_FIELDS: tuple = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "review_section_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_DRR_SUMMARY_FIELDS: tuple = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "review_section_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "readiness_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_DRR_REQUIRED_INSPECTIONS: tuple = (
+    "predecessor phase implementations",
+    "capability inventory (docs/CAPABILITY_INVENTORY.md)",
+    "roadmap registry (docs/ROADMAP_REGISTRY.md)",
+    "skill registry (docs/SKILL_REGISTRY.md)",
+    "prompt registry (docs/PROMPT_REGISTRY.md)",
+)
+
+_DRR_REQUIRED_PROPOSAL_ITEMS: tuple = (
+    "What capability is being introduced",
+    "What models are required (name, fields, purpose)",
+    "What commands are required (command string, purpose)",
+    "What lifecycle is required (entry → signal → assessment → summary)",
+    "What validation strategy is required (focused tests, regression tests, governance checks, commit criteria)",
+)
+
+
+def _drr_build_design_review_context(
+    phase_id: str,
+    phase_record: "dict | None",
+    dep_ctx: "dict | None",
+    capability_record: "dict | None",
+) -> dict:
+    dep_ctx = dep_ctx or {}
+    chain = dep_ctx.get("predecessor_chain", [])
+    has_predecessor_chain = bool(chain)
+    has_capability_record = capability_record is not None
+    has_phase_record = phase_record is not None
+    review_section_count = len(_DRR_REQUIRED_INSPECTIONS) + len(_DRR_REQUIRED_PROPOSAL_ITEMS)
+    return {
+        "phase_id": phase_id,
+        "has_predecessor_chain": has_predecessor_chain,
+        "predecessor_count": len(chain),
+        "predecessor_chain": chain,
+        "has_capability_record": has_capability_record,
+        "has_phase_record": has_phase_record,
+        "review_section_count": review_section_count,
+        "required_inspections": list(_DRR_REQUIRED_INSPECTIONS),
+        "required_proposal_items": list(_DRR_REQUIRED_PROPOSAL_ITEMS),
+    }
+
+
+def _drr_render_design_review_section(
+    phase_id: str,
+    phase_record: "dict | None",
+    dep_ctx: "dict | None",
+    drr_ctx: dict,
+    prompt_type: str,
+) -> str:
+    if prompt_type not in ("implementation", "agent"):
+        return ""
+
+    dep_ctx = dep_ctx or {}
+    chain = drr_ctx.get("predecessor_chain", [])
+    phase_title = (phase_record or {}).get("phase_title") or phase_id
+    track_name = (phase_record or {}).get("track_name", "unknown")
+
+    if chain:
+        predecessor_list = "\n".join(
+            f"- {r['phase_id']}: {r.get('phase_title', '')} ({r.get('status', '')})"
+            for r in chain[-6:]
+        )
+        predecessor_note = (
+            f"Read the {track_name} track predecessor implementations "
+            f"(most recent {min(len(chain), 6)}) in src/pcae/core/agent.py before proposing architecture."
+        )
+    else:
+        predecessor_list = "- (no predecessor chain found in registry)"
+        predecessor_note = "Inspect any related phase implementations in src/pcae/core/agent.py."
+
+    inspections_block = "\n".join(f"- {item}" for item in _DRR_REQUIRED_INSPECTIONS)
+    proposal_block = "\n".join(f"- {item}" for item in _DRR_REQUIRED_PROPOSAL_ITEMS)
+
+    return f"""
+## Pre-Implementation Design Review
+
+Before writing any code, perform the following design review and present it for human approval.
+
+### Predecessor Phases to Inspect
+{predecessor_list}
+
+{predecessor_note}
+
+### Required Inspection
+Before proposing implementation, inspect:
+{inspections_block}
+
+### Required Design Proposal
+Explain the following before writing any code for {phase_title}:
+{proposal_block}
+
+## Human Review Checkpoint
+Present design for review. Do not write code until design review is complete.
+
+## Implementation Readiness Lifecycle
+Design Review → Human Review → Implementation → Validation
+"""
+
+
+def _drr_run_design_review_checks(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    phase_record: "dict | None",
+    dep_ctx: "dict | None",
+    drr_ctx: dict,
+) -> list:
+    signals: list[dict] = []
+    idx = 1
+    dep_ctx = dep_ctx or {}
+    chain = drr_ctx.get("predecessor_chain", [])
+    applies = prompt_type in ("implementation", "agent")
+
+    def _ds(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        nonlocal idx
+        signals.append({
+            "signal_id": f"drr-sig-{ts}-{idx:02d}",
+            "phase_id": phase_id,
+            "prompt_type": prompt_type,
+            "review_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+        idx += 1
+
+    # 1. design_review_rendering
+    if applies:
+        _ds("design_review_rendering", "design_review_section_rendered", "info",
+            f"design review section rendered for prompt_type={prompt_type!r}",
+            "design review section present in implementation and agent prompts")
+    else:
+        _ds("design_review_rendering", "design_review_not_applicable", "info",
+            f"design review not rendered for prompt_type={prompt_type!r}",
+            "design review rendered for implementation and agent prompt types only")
+
+    # 2. predecessor_inspection_rendering
+    if chain:
+        _ds("predecessor_inspection_rendering", "predecessor_chain_available", "info",
+            f"predecessor_chain has {len(chain)} entries; inspection instructions rendered",
+            "predecessor inspection instructions rendered with chain context")
+    else:
+        _ds("predecessor_inspection_rendering", "no_predecessor_chain", "warning",
+            "predecessor_chain empty; generic inspection instructions rendered",
+            "predecessor chain available for specific inspection instructions")
+
+    # 3. capability_inspection_rendering
+    if drr_ctx.get("has_capability_record"):
+        _ds("capability_inspection_rendering", "capability_record_available", "info",
+            "capability record found; capability inspection instructions rendered",
+            "capability inspection instructions reference known capability")
+    else:
+        _ds("capability_inspection_rendering", "no_capability_record", "warning",
+            "capability record not found; generic capability inspection rendered",
+            "capability record available for specific capability inspection")
+
+    # 4. roadmap_inspection_rendering
+    if drr_ctx.get("has_phase_record"):
+        _ds("roadmap_inspection_rendering", "phase_record_available", "info",
+            "phase record found; roadmap inspection instructions rendered with phase context",
+            "roadmap inspection instructions reference known phase")
+    else:
+        _ds("roadmap_inspection_rendering", "no_phase_record", "warning",
+            f"phase_id={phase_id!r} not in roadmap registry; generic roadmap inspection rendered",
+            "phase present in roadmap registry for specific roadmap inspection")
+
+    # 5. model_proposal_rendering
+    if applies:
+        _ds("model_proposal_rendering", "model_proposal_required", "info",
+            "model proposal requirement rendered: name, fields, purpose",
+            "model proposal requirement present in design review section")
+    else:
+        _ds("model_proposal_rendering", "model_proposal_not_applicable", "info",
+            f"model proposal not rendered for prompt_type={prompt_type!r}",
+            "model proposal rendered for implementation and agent prompts")
+
+    # 6. command_proposal_rendering
+    if applies:
+        _ds("command_proposal_rendering", "command_proposal_required", "info",
+            "command proposal requirement rendered: command string, purpose",
+            "command proposal requirement present in design review section")
+    else:
+        _ds("command_proposal_rendering", "command_proposal_not_applicable", "info",
+            f"command proposal not rendered for prompt_type={prompt_type!r}",
+            "command proposal rendered for implementation and agent prompts")
+
+    # 7. lifecycle_proposal_rendering
+    if applies:
+        _ds("lifecycle_proposal_rendering", "lifecycle_proposal_required", "info",
+            "lifecycle proposal requirement rendered: entry → signal → assessment → summary",
+            "lifecycle proposal requirement present in design review section")
+    else:
+        _ds("lifecycle_proposal_rendering", "lifecycle_proposal_not_applicable", "info",
+            f"lifecycle proposal not rendered for prompt_type={prompt_type!r}",
+            "lifecycle proposal rendered for implementation and agent prompts")
+
+    # 8. validation_strategy_rendering
+    if applies:
+        _ds("validation_strategy_rendering", "validation_strategy_required", "info",
+            "validation strategy requirement rendered: focused tests, regression tests, governance checks",
+            "validation strategy requirement present in design review section")
+    else:
+        _ds("validation_strategy_rendering", "validation_strategy_not_applicable", "info",
+            f"validation strategy not rendered for prompt_type={prompt_type!r}",
+            "validation strategy rendered for implementation and agent prompts")
+
+    # 9. implementation_readiness_rendering
+    if applies:
+        _ds("implementation_readiness_rendering", "readiness_lifecycle_rendered", "info",
+            "implementation readiness lifecycle rendered: Design Review → Human Review → Implementation → Validation",
+            "implementation readiness lifecycle present in prompt")
+    else:
+        _ds("implementation_readiness_rendering", "readiness_lifecycle_not_applicable", "info",
+            f"readiness lifecycle not rendered for prompt_type={prompt_type!r}",
+            "readiness lifecycle rendered for implementation and agent prompts")
+
+    # 10. human_review_checkpoint_rendering
+    if applies:
+        _ds("human_review_checkpoint_rendering", "checkpoint_rendered", "info",
+            "human review checkpoint rendered: 'Present design for review. Do not write code until design review is complete.'",
+            "human review checkpoint present in prompt")
+    else:
+        _ds("human_review_checkpoint_rendering", "checkpoint_not_applicable", "info",
+            f"human review checkpoint not rendered for prompt_type={prompt_type!r}",
+            "human review checkpoint rendered for implementation and agent prompts")
+
+    return signals
+
+
+def _drr_build_assessment(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    signals: list,
+    drr_ctx: dict,
+) -> dict:
+    blockers = sum(1 for s in signals if s["severity"] == "blocker")
+    warnings = sum(1 for s in signals if s["severity"] == "warning")
+    status = "blocked" if blockers > 0 else ("warning" if warnings > 0 else "passed")
+    return {
+        "assessment_id": f"drr-assess-{ts}",
+        "phase_id": phase_id,
+        "prompt_type": prompt_type,
+        "review_section_count": drr_ctx.get("review_section_count", 0),
+        "blocker_count": blockers,
+        "warning_count": warnings,
+        "readiness_status": status,
+        "human_review_required": True,
+    }
+
+
+def _drr_build_summary(ts: str, assessment: dict) -> dict:
+    return {
+        "summary_id": f"drr-summary-{ts}",
+        "assessment_id": assessment["assessment_id"],
+        "phase_id": assessment["phase_id"],
+        "prompt_type": assessment["prompt_type"],
+        "review_section_count": assessment["review_section_count"],
+        "blocker_count": assessment["blocker_count"],
+        "warning_count": assessment["warning_count"],
+        "readiness_status": assessment["readiness_status"],
+        "human_review_required": True,
     }
