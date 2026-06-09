@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260609-1410-64d-runtime-coordination-policy
+20260609-1908-64e-orchestration-audit-model
 
 ## Title
 
-64D Runtime Coordination Policy
+64E Orchestration Audit Model
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-64D Runtime Coordination Policy
+64E Orchestration Audit Model
 
 ## Allowed Files
 
@@ -30,27 +30,15 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- src/pcae/core/agent.py
-- tests/test_agent.py
-- docs/CAPABILITY_INVENTORY.md
-- docs/ROADMAP_REGISTRY.md
-- docs/PROMPT_REGISTRY.md
-- docs/SKILL_REGISTRY.md
 
 ## Forbidden Files
 
-- src/pcae/commands/**
-- src/pcae/cli.py
+- TBD
 
 
 ## Allowed Zones
 
-- core
-- tests
-- tasks
-- docs
-- session
-- config
+- TBD
 
 ## Forbidden Zones
 
@@ -58,11 +46,7 @@ implementation
 
 ## Allowed Dependencies
 
-- core -> core
-- core -> tests
-- tests -> core
-- tests -> commands
-- tests -> cli
+- TBD
 
 ## Forbidden Dependencies
 
@@ -95,4 +79,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-09T14:10:02.083301+02:00
+2026-06-09T19:08:57.403071+02:00

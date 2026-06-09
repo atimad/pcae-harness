@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 64D Runtime Coordination Policy (20260609-1410-64d-runtime-coordination-policy)
 - Prompt Rendering Quality Hardening (20260608-2337-prompt-rendering-quality-hardening)
 - 64B.6E: Design Review Intelligence Rendering (20260609-design-review-intelligence-rendering)
 - 64C: Multi-Runtime Orchestration Execution (20260609-multi-runtime-orchestration-execution)
