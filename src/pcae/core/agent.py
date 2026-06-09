@@ -68782,11 +68782,14 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successor_capabilities": ["multi_runtime_execution_readiness"],
     },
     {
-        "capability_domain": "orchestration_capabilities",
+        "capability_domain": "multi_runtime_capabilities",
         "capability_name": "Multi-Runtime Orchestration Execution",
-        "implemented_phase": "64C+",
-        "status": "roadmap_gap",
-        "commands": [],
+        "implemented_phase": "64C",
+        "status": "implemented",
+        "commands": [
+            "pcae multi-runtime-orchestration-execution",
+            "pcae multi-runtime-orchestration-execution --json",
+        ],
         "dependencies": ["multi_runtime_execution_readiness"],
         "successor_capabilities": [],
     },
@@ -69559,7 +69562,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64C",
         "phase_title": "Multi-Runtime Orchestration Execution",
-        "status": "roadmap_gap",
+        "status": "active",
         "predecessor": "64B",
         "successor": "",
         "superseded_by": "",
@@ -69677,7 +69680,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.6D",
         "phase_title": "Command & Architecture Intelligence Rendering",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.6C",
         "successor": "",
         "superseded_by": "",
@@ -71416,6 +71419,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_version": "64B.6D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64B.6D",
+    },
+    {
+        "phase_id": "64C",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64C",
+    },
+    {
+        "phase_id": "64C",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64C",
+    },
+    {
+        "phase_id": "64C",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64C",
     },
 )
 
@@ -73944,7 +73971,7 @@ def build_prompt_rendering_skill(
         "governance_boundaries": {
             "may": list(_PRS_GOVERNANCE_MAY),
             "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
-            "phase": "64B.6D",
+            "phase": "64C",
         },
         "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
         "car_advisory": COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY,
@@ -74488,4 +74515,506 @@ def _car_build_summary(ts: str, assessment: dict) -> dict:
         "warning_count": assessment["warning_count"],
         "render_status": assessment["render_status"],
         "human_review_required": True,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64C: Multi-Runtime Orchestration Execution
+# ---------------------------------------------------------------------------
+
+MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY = (
+    "Phase 64C defines the governed orchestration dispatch boundary connecting "
+    "multi-runtime execution readiness (64B) to the downstream audit chain (63D), "
+    "failure recovery (63E), and quarantine (63F). "
+    "orchestration_allowed may be True when plan exists, readiness is confirmed, and "
+    "approval gates are satisfied. execution_allowed=False always in 64C. "
+    "No runtime invocation occurs. No prompt execution occurs. No command execution occurs. "
+    "No write execution occurs. No orchestration execution occurs. "
+    "Human review is always required."
+)
+
+_MROE_ORCHESTRATION_DOMAINS: tuple[str, ...] = (
+    "orchestration_entry_validation",
+    "readiness_gate_validation",
+    "approval_gate_validation",
+    "audit_chain_hook_validation",
+    "failure_recovery_hook_validation",
+    "quarantine_hook_validation",
+    "orchestration_dispatch_boundary",
+    "execution_scope_validation",
+    "orchestration_allowed_determination",
+    "orchestration_execution_blocking",
+)
+
+_MROE_ORCHESTRATION_STATUSES: tuple[str, ...] = (
+    "orchestration_ready",
+    "orchestration_with_warnings",
+    "pending_approval",
+    "blocked",
+    "escalated",
+)
+
+_MROE_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_MROE_INPUT_SUMMARIES: tuple[str, ...] = (
+    "MultiRuntimeExecutionPlanSummary",
+    "MultiRuntimeExecutionReadinessSummary",
+    "RuntimeApprovalGateSummary",
+    "MultiRuntimeAuditChainSummary",
+    "RuntimeFailureRecoverySummary",
+    "RuntimeQuarantineSummary",
+)
+
+_MROE_ENTRY_FIELDS: tuple[dict, ...] = (
+    {"name": "entry_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "plan_id", "type": "str", "required": True},
+    {"name": "readiness_confirmed", "type": "bool", "required": True},
+    {"name": "approval_gate_satisfied", "type": "bool", "required": True},
+    {"name": "orchestration_dispatch_status", "type": "str", "required": True},
+    {"name": "audit_hook_ready", "type": "bool", "required": True},
+    {"name": "failure_hook_ready", "type": "bool", "required": True},
+    {"name": "quarantine_hook_ready", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MROE_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "entry_id", "type": "str", "required": True},
+    {"name": "orchestration_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MROE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "orchestration_status", "type": "str", "required": True},
+    {"name": "orchestration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MROE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "entry_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "orchestration_status", "type": "str", "required": True},
+    {"name": "orchestration_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_MROE_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "plan_id_suffix": "01",
+        "readiness_confirmed": True,
+        "approval_gate_satisfied": True,
+        "audit_hook_ready": True,
+        "failure_hook_ready": True,
+        "quarantine_hook_ready": True,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "plan_id_suffix": "02",
+        "readiness_confirmed": True,
+        "approval_gate_satisfied": False,
+        "audit_hook_ready": True,
+        "failure_hook_ready": True,
+        "quarantine_hook_ready": True,
+    },
+)
+
+_MROE_DISPATCH_STATUSES: tuple[str, ...] = (
+    "ready_to_dispatch",
+    "blocked_pending_authorization",
+    "escalated",
+)
+
+
+def build_multi_runtime_orchestration_execution(root: "HarnessPath | None" = None) -> dict:
+    """Define the governed orchestration dispatch boundary without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    entries = []
+    for i, c in enumerate(_MROE_GOVERNED_CANDIDATES, start=1):
+        eid = f"mroe-{ts}-{i:02d}"
+        plan_id = f"mrep-{ts}-{c['plan_id_suffix']}"
+        all_gates = (
+            c["readiness_confirmed"]
+            and c["approval_gate_satisfied"]
+            and c["audit_hook_ready"]
+            and c["failure_hook_ready"]
+            and c["quarantine_hook_ready"]
+        )
+        if all_gates:
+            dispatch_status = "ready_to_dispatch"
+        elif not c["approval_gate_satisfied"]:
+            dispatch_status = "blocked_pending_authorization"
+        else:
+            dispatch_status = "escalated"
+        entries.append(
+            {
+                "entry_id": eid,
+                "runtime_id": c["runtime_id"],
+                "runtime_name": c["runtime_name"],
+                "plan_id": plan_id,
+                "readiness_confirmed": c["readiness_confirmed"],
+                "approval_gate_satisfied": c["approval_gate_satisfied"],
+                "orchestration_dispatch_status": dispatch_status,
+                "audit_hook_ready": c["audit_hook_ready"],
+                "failure_hook_ready": c["failure_hook_ready"],
+                "quarantine_hook_ready": c["quarantine_hook_ready"],
+                "human_review_required": True,
+            }
+        )
+
+    entry_count = len(entries)
+    ready_entries = [e for e in entries if e["orchestration_dispatch_status"] == "ready_to_dispatch"]
+    pending_entries = [e for e in entries if e["orchestration_dispatch_status"] == "blocked_pending_authorization"]
+    orchestration_allowed = len(ready_entries) > 0
+    first_eid = entries[0]["entry_id"] if entries else f"mroe-{ts}-00"
+
+    has_pending = len(pending_entries) > 0
+
+    domain_signal_defs = [
+        {
+            "orchestration_domain": "orchestration_entry_validation",
+            "signal_type": "orchestration_entry_validation_check",
+            "severity": "info" if entry_count > 0 else "blocker",
+            "detected_state": (
+                f"entry_count={entry_count}; "
+                f"entry_ids={[e['entry_id'] for e in entries]}; "
+                "plan_source=MultiRuntimeExecutionPlanSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "at least one orchestration entry must exist, derived from a valid execution plan; "
+                "execution_allowed=False in 64C; no execution occurs at entry"
+            ),
+        },
+        {
+            "orchestration_domain": "readiness_gate_validation",
+            "signal_type": "readiness_gate_validation_check",
+            "severity": "info" if all(e["readiness_confirmed"] for e in entries) else "blocker",
+            "detected_state": (
+                f"readiness_confirmed_count={sum(1 for e in entries if e['readiness_confirmed'])}; "
+                f"readiness_source=MultiRuntimeExecutionReadinessSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "readiness must be confirmed for all orchestration entries before dispatch is allowed; "
+                "execution_allowed=False in 64C; readiness gate does not invoke runtime"
+            ),
+        },
+        {
+            "orchestration_domain": "approval_gate_validation",
+            "signal_type": "approval_gate_validation_check",
+            "severity": "warning" if has_pending else "info",
+            "detected_state": (
+                f"approval_satisfied_count={sum(1 for e in entries if e['approval_gate_satisfied'])}; "
+                f"pending_approval_count={len(pending_entries)}; "
+                "approval_source=RuntimeApprovalGateSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "approval gates must be satisfied for all entries before dispatch; "
+                "pending approvals require human resolution; "
+                "execution_allowed=False in 64C; approval gate does not invoke runtime"
+            ),
+        },
+        {
+            "orchestration_domain": "audit_chain_hook_validation",
+            "signal_type": "audit_chain_hook_validation_check",
+            "severity": "info" if all(e["audit_hook_ready"] for e in entries) else "blocker",
+            "detected_state": (
+                f"audit_hook_ready_count={sum(1 for e in entries if e['audit_hook_ready'])}; "
+                "audit_source=MultiRuntimeAuditChainSummary; "
+                "audit_hook=63D; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit chain hook (63D) must be ready before dispatch; "
+                "execution_allowed=False in 64C; hook validation does not invoke audit chain"
+            ),
+        },
+        {
+            "orchestration_domain": "failure_recovery_hook_validation",
+            "signal_type": "failure_recovery_hook_validation_check",
+            "severity": "info" if all(e["failure_hook_ready"] for e in entries) else "blocker",
+            "detected_state": (
+                f"failure_hook_ready_count={sum(1 for e in entries if e['failure_hook_ready'])}; "
+                "recovery_source=RuntimeFailureRecoverySummary; "
+                "failure_hook=63E; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "failure recovery hook (63E) must be ready before dispatch; "
+                "execution_allowed=False in 64C; hook validation does not invoke recovery"
+            ),
+        },
+        {
+            "orchestration_domain": "quarantine_hook_validation",
+            "signal_type": "quarantine_hook_validation_check",
+            "severity": "info" if all(e["quarantine_hook_ready"] for e in entries) else "blocker",
+            "detected_state": (
+                f"quarantine_hook_ready_count={sum(1 for e in entries if e['quarantine_hook_ready'])}; "
+                "quarantine_source=RuntimeQuarantineSummary; "
+                "quarantine_hook=63F; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "quarantine hook (63F) must be ready before dispatch; "
+                "execution_allowed=False in 64C; hook validation does not invoke quarantine"
+            ),
+        },
+        {
+            "orchestration_domain": "orchestration_dispatch_boundary",
+            "signal_type": "orchestration_dispatch_boundary_check",
+            "severity": "info",
+            "detected_state": (
+                f"dispatch_statuses={[e['orchestration_dispatch_status'] for e in entries]}; "
+                f"ready_to_dispatch_count={len(ready_entries)}; "
+                f"blocked_count={len(pending_entries)}; "
+                "dispatch_boundary_defined=True; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "dispatch boundary must be explicitly defined; "
+                "execution_allowed=False in 64C; dispatch boundary definition does not execute"
+            ),
+        },
+        {
+            "orchestration_domain": "execution_scope_validation",
+            "signal_type": "execution_scope_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "scope_within_boundary=True; "
+                "no_planning_redefinition=True; "
+                "no_readiness_duplication=True; "
+                "execution_allowed=False; "
+                "write_execution_blocked=True"
+            ),
+            "expected_state": (
+                "execution scope must not redefine 64A planning or duplicate 64B readiness; "
+                "execution_allowed=False in 64C; no write execution occurs"
+            ),
+        },
+        {
+            "orchestration_domain": "orchestration_allowed_determination",
+            "signal_type": "orchestration_allowed_determination_check",
+            "severity": "info",
+            "detected_state": (
+                f"orchestration_allowed={orchestration_allowed}; "
+                f"ready_entry_count={len(ready_entries)}; "
+                f"pending_entry_count={len(pending_entries)}; "
+                "execution_allowed=False; "
+                "human_review_required=True"
+            ),
+            "expected_state": (
+                "orchestration_allowed must be True only when at least one entry is ready_to_dispatch; "
+                "execution_allowed=False always; human_review_required=True always"
+            ),
+        },
+        {
+            "orchestration_domain": "orchestration_execution_blocking",
+            "signal_type": "orchestration_execution_blocking_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_allowed=False; "
+                "no_runtime_invocation=True; "
+                "no_prompt_execution=True; "
+                "no_write_execution=True; "
+                "no_network_access=True; "
+                "orchestration_execution_blocked_in_64c=True"
+            ),
+            "expected_state": (
+                "execution_allowed=False always in 64C regardless of orchestration_allowed; "
+                "actual runtime execution requires explicit future authorization; "
+                "human_review_required=True always"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"mroe-sig-{ts}-{i:02d}",
+            "entry_id": first_eid,
+            "orchestration_domain": sig["orchestration_domain"],
+            "signal_type": sig["signal_type"],
+            "severity": sig["severity"],
+            "detected_state": sig["detected_state"],
+            "expected_state": sig["expected_state"],
+            "human_review_required": True,
+        }
+        for i, sig in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
+    warning_count = sum(1 for s in signals if s["severity"] == "warning")
+    info_count = sum(1 for s in signals if s["severity"] == "info")
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+    elif not orchestration_allowed and entry_count > 0:
+        overall_status = "pending_approval"
+    elif warning_count > 0:
+        overall_status = "orchestration_with_warnings"
+    elif entry_count == 0:
+        overall_status = "escalated"
+    else:
+        overall_status = "orchestration_ready"
+
+    assessment_id = f"mroea-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "entry_count": entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "orchestration_status": overall_status,
+        "orchestration_allowed": orchestration_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"mroes-{ts}",
+        "assessment_id": assessment_id,
+        "entry_count": entry_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "orchestration_status": overall_status,
+        "orchestration_allowed": orchestration_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    domain_count = len(_MROE_ORCHESTRATION_DOMAINS)
+
+    return {
+        "multi_runtime_orchestration_execution_overview": {
+            "overview_id": f"64c-{ts}",
+            "generated_at": generated_at,
+            "phase": "64C",
+            "title": "Multi-Runtime Orchestration Execution",
+            "domain_count": domain_count,
+            "entry_count": entry_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "orchestration_status": overall_status,
+            "orchestration_allowed": orchestration_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "input_summaries": list(_MROE_INPUT_SUMMARIES),
+            "summary": (
+                "Phase 64C defines the governed orchestration dispatch boundary connecting "
+                "multi-runtime execution readiness to the audit, recovery, and quarantine chain. "
+                "Orchestration boundary is defined; actual execution remains blocked. "
+                f"entry_count={entry_count}. "
+                f"blocker_count={blocker_count}. "
+                f"warning_count={warning_count}. "
+                f"orchestration_status={overall_status}. "
+                f"orchestration_allowed={orchestration_allowed}. "
+                "execution_allowed=False. "
+                "No runtime invocation occurs. No orchestration execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "orchestration_entries": entries,
+        "entry_model": {
+            "model_name": "MultiRuntimeOrchestrationEntry",
+            "field_count": len(_MROE_ENTRY_FIELDS),
+            "required_field_count": len(_MROE_ENTRY_FIELDS),
+            "supported_dispatch_statuses": list(_MROE_DISPATCH_STATUSES),
+            "orchestration_allowed_conditional_in_64c": True,
+            "execution_allowed_false_in_64c": True,
+            "human_review_required_always_true_in_64c": True,
+            "fields": [dict(f) for f in _MROE_ENTRY_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "MultiRuntimeOrchestrationSignal",
+            "field_count": len(_MROE_SIGNAL_FIELDS),
+            "required_field_count": len(_MROE_SIGNAL_FIELDS),
+            "severity_values": list(_MROE_SEVERITY_VALUES),
+            "execution_allowed_false_in_64c": True,
+            "human_review_required_always_true_in_64c": True,
+            "fields": [dict(f) for f in _MROE_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "MultiRuntimeOrchestrationAssessment",
+            "field_count": len(_MROE_ASSESSMENT_FIELDS),
+            "required_field_count": len(_MROE_ASSESSMENT_FIELDS),
+            "supported_orchestration_statuses": list(_MROE_ORCHESTRATION_STATUSES),
+            "orchestration_allowed_conditional_in_64c": True,
+            "execution_allowed_false_in_64c": True,
+            "human_review_required_always_true_in_64c": True,
+            "fields": [dict(f) for f in _MROE_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "MultiRuntimeOrchestrationSummary",
+            "field_count": len(_MROE_SUMMARY_FIELDS),
+            "required_field_count": len(_MROE_SUMMARY_FIELDS),
+            "supported_orchestration_statuses": list(_MROE_ORCHESTRATION_STATUSES),
+            "orchestration_allowed_conditional_in_64c": True,
+            "execution_allowed_false_in_64c": True,
+            "human_review_required_always_true_in_64c": True,
+            "fields": [dict(f) for f in _MROE_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect multi-runtime execution plans",
+                "inspect readiness summaries",
+                "validate approval gate status",
+                "validate audit chain hook readiness",
+                "validate failure recovery hook readiness",
+                "validate quarantine hook readiness",
+                "define orchestration dispatch boundary",
+                "determine orchestration_allowed status",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "perform orchestration",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "orchestration_allowed": orchestration_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64C",
+        },
+        "advisory": MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY,
     }

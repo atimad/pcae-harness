@@ -1,7 +1,7 @@
 # PCAE Skill Registry
 
-Generated: 2026-06-09T06:41:02.591114+00:00
-Phase: 64B.5 — Skill Invocation Targeting
+Generated: 2026-06-09T09:00:00.000000+00:00
+Phase: 64C — Multi-Runtime Orchestration Execution
 Skills root: .pcae/skills
 Skill count: 6
 Invalid skill count: 0
@@ -38,5 +38,6 @@ Governance status: governed
 - Capability Inventory records the skill system as a capability domain.
 - Roadmap Registry tracks the 64B.6A capability_intelligence phase.
 - Skills support discovery, validation, invocation, target resolution, and prompt rendering.
-- No runtime behavior changes occur in 64B.6 or 64B.6A.
-- No orchestration behavior changes occur in 64B.6 or 64B.6A.
+- No runtime behavior changes occur in any 64B.6x or 64C phase.
+- No orchestration behavior changes occur in any 64B.6x phase.
+- 64C adds Multi-Runtime Orchestration Execution as an implemented governed capability: orchestration dispatch boundary, orchestration_allowed (conditional), execution_allowed=False always, 10 orchestration domains, pcae multi-runtime-orchestration-execution command.

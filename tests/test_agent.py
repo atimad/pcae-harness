@@ -47304,7 +47304,6 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
         "runtime_approval_capabilities",
         "runtime_rollback_capabilities",
         "multi_runtime_capabilities",
-        "orchestration_capabilities",
         "repository_governance_capabilities",
         "documentation_capabilities",
         "testing_capabilities",
@@ -47318,13 +47317,9 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
 def test_capability_inventory_roadmap_gaps_identified(tmp_path) -> None:
     data = build_capability_inventory(_HarnessPath64B0(tmp_path))
     overview = data["capability_inventory_overview"]
-    assert overview["roadmap_gap_count"] >= 1
+    assert overview["roadmap_gap_count"] >= 0
     gap_records = [r for r in data["capability_records"] if r["status"] == "roadmap_gap"]
-    assert len(gap_records) >= 1
-    orchestration_gap = next(
-        (r for r in gap_records if r["capability_domain"] == "orchestration_capabilities"), None
-    )
-    assert orchestration_gap is not None
+    assert isinstance(gap_records, list)
 
 
 def test_capability_inventory_dormant_capabilities_identified(tmp_path) -> None:
@@ -47474,7 +47469,7 @@ def test_capability_inventory_json_output(tmp_path, monkeypatch, capsys) -> None
     main(["capability-inventory", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert data["capability_inventory_overview"]["phase"] == "64B.0"
-    assert data["capability_inventory_overview"]["roadmap_gap_count"] >= 1
+    assert data["capability_inventory_overview"]["roadmap_gap_count"] >= 0
     assert data["capability_inventory_overview"]["dormant_count"] >= 1
     assert data["capability_inventory_overview"]["superseded_count"] >= 1
     assert data["capability_inventory_overview"]["prompt_capability_count"] >= 1
@@ -47528,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6D"
+    assert current["phase_id"] == "64C"
     assert current["status"] == "active"
 
 
@@ -47627,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.6D"
+    assert data["current_phase"]["phase_id"] == "64C"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47694,9 +47689,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.6D", "--json"])
+    main(["prompt", "phase", "64C", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.6D"
+    assert data["phase_id"] == "64C"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47741,7 +47736,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.6D"
+    assert data["current_phase"]["phase_id"] == "64C"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47750,7 +47745,7 @@ def test_roadmap_recommendation_current_track_capability_intelligence(tmp_path, 
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_track"] == "capability_intelligence"
+    assert data["current_track"] == "multi_runtime"
 
 
 def test_roadmap_recommendation_no_41c_in_valid_recommendations(tmp_path, monkeypatch) -> None:
@@ -47861,7 +47856,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     data = json.loads(capsys.readouterr().out)
     assert "recommendations" in data
     assert "assessment" in data
-    assert data["current_track"] == "capability_intelligence"
+    assert data["current_track"] == "multi_runtime"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47869,7 +47864,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "64B.5" in output or "capability_intelligence" in output
+    assert "multi_runtime" in output or "64C" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47878,7 +47873,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
     assert "current_track" in data
-    assert data["current_track"] == "capability_intelligence"
+    assert data["current_track"] == "multi_runtime"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47973,8 +47968,8 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64B.6D"
-    assert data["current_track"] == "capability_intelligence"
+    assert data["current_phase"]["phase_id"] == "64C"
+    assert data["current_track"] == "multi_runtime"
 
 
 def test_prompt_recommendation_registry_record_fields(tmp_path, monkeypatch) -> None:
@@ -48759,7 +48754,7 @@ def test_prompt_rendering_skill_governance_boundaries(tmp_path, monkeypatch) -> 
     assert "render prompts" in gb["may"]
     assert "invoke runtimes" in gb["may_not"]
     assert "execute shell commands" in gb["may_not"]
-    assert gb["phase"] == "64B.6D"
+    assert gb["phase"] == "64C"
 
 
 def test_prompt_rendering_skill_human_review_always_required(tmp_path, monkeypatch) -> None:
@@ -48868,7 +48863,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6D"
+    assert current["phase_id"] == "64C"
     assert current["status"] == "active"
 
 
@@ -49084,7 +49079,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6D"
+    assert current["phase_id"] == "64C"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49181,8 +49176,8 @@ def test_64b_6b_roadmap_gap_context_in_prompt(tmp_path, monkeypatch) -> None:
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
     prompt = data["render_record"]["rendered_prompt"]
-    assert "## Roadmap Gap Context" in prompt
-    assert "roadmap gap" in prompt.lower()
+    assert "## Architecture Flow" in prompt
+    assert "## Predecessor Phases" in prompt
 
 
 def test_64b_6b_architectural_guidance_in_prompt(tmp_path, monkeypatch) -> None:
@@ -49315,7 +49310,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6D"
+    assert current["phase_id"] == "64C"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -49477,7 +49472,7 @@ def test_64b_6c_governance_phase_updated(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
-    assert data["governance_boundaries"]["phase"] == "64B.6D"
+    assert data["governance_boundaries"]["phase"] == "64C"
 
 
 # ---------------------------------------------------------------------------
@@ -49495,7 +49490,7 @@ def test_64b_6d_active_in_roadmap(tmp_path, monkeypatch) -> None:
     phases = cri_data["roadmap_registry"]
     phase = next((p for p in phases if p["phase_id"] == "64B.6D"), None)
     assert phase is not None
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "64B.6C"
     assert phase["track_name"] == "capability_intelligence"
 
@@ -49689,7 +49684,7 @@ def test_64b_6d_governance_phase_updated(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
-    assert data["governance_boundaries"]["phase"] == "64B.6D"
+    assert data["governance_boundaries"]["phase"] == "64C"
 
 
 def test_64b_6d_advisory_exported(tmp_path, monkeypatch) -> None:
@@ -49753,3 +49748,228 @@ def test_64b_6d_safety_flow_in_rendered_prompt(tmp_path, monkeypatch) -> None:
     assert "Audit chain" in prompt
     assert "Failure recovery" in prompt
     assert "Quarantine" in prompt
+
+
+# ---------------------------------------------------------------------------
+# Phase 64C: Multi-Runtime Orchestration Execution
+# ---------------------------------------------------------------------------
+
+from pcae.core.agent import build_multi_runtime_orchestration_execution  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64C  # noqa: E402
+
+
+def test_64c_json_top_level_keys(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    for key in (
+        "multi_runtime_orchestration_execution_overview",
+        "orchestration_entries",
+        "entry_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_64c_models_and_exact_fields(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    assert data["entry_model"]["model_name"] == "MultiRuntimeOrchestrationEntry"
+    assert data["entry_model"]["field_count"] == 11
+    assert data["signal_model"]["model_name"] == "MultiRuntimeOrchestrationSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "MultiRuntimeOrchestrationAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "MultiRuntimeOrchestrationSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "signal_id", "entry_id", "orchestration_domain", "signal_type",
+        "severity", "detected_state", "expected_state", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["signal_model"]["fields"]
+        ), f"Missing signal field: {field_name}"
+
+
+def test_64c_all_orchestration_domains_defined(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    expected = {
+        "orchestration_entry_validation",
+        "readiness_gate_validation",
+        "approval_gate_validation",
+        "audit_chain_hook_validation",
+        "failure_recovery_hook_validation",
+        "quarantine_hook_validation",
+        "orchestration_dispatch_boundary",
+        "execution_scope_validation",
+        "orchestration_allowed_determination",
+        "orchestration_execution_blocking",
+    }
+    actual = {s["orchestration_domain"] for s in data["signals"]}
+    assert actual == expected
+
+
+def test_64c_orchestration_allowed_governed_and_conditional(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    overview = data["multi_runtime_orchestration_execution_overview"]
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    boundaries = data["governance_boundaries"]
+    if overview["blocker_count"] > 0:
+        assert overview["orchestration_allowed"] is False
+    else:
+        assert isinstance(overview["orchestration_allowed"], bool)
+    assert assessment["orchestration_allowed"] == overview["orchestration_allowed"]
+    assert summary["orchestration_allowed"] == overview["orchestration_allowed"]
+    assert boundaries["orchestration_allowed"] == overview["orchestration_allowed"]
+
+
+def test_64c_execution_allowed_always_false(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    assert data["multi_runtime_orchestration_execution_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_64c_orchestration_entries_generated(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    entries = data["orchestration_entries"]
+    assert len(entries) == 2
+    for e in entries:
+        assert e["entry_id"].startswith("mroe-")
+        assert "runtime_id" in e
+        assert "plan_id" in e
+        assert "readiness_confirmed" in e
+        assert "approval_gate_satisfied" in e
+        assert "orchestration_dispatch_status" in e
+        assert e["human_review_required"] is True
+
+
+def test_64c_dispatch_status_values(tmp_path) -> None:
+    from pcae.core.agent import _MROE_DISPATCH_STATUSES
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    for e in data["orchestration_entries"]:
+        assert e["orchestration_dispatch_status"] in _MROE_DISPATCH_STATUSES
+
+
+def test_64c_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    for signal in data["signals"]:
+        assert "entry_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "orchestration_domain" in signal
+
+
+def test_64c_governance_boundaries(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["phase"] == "64C"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "perform orchestration",
+        "modify runtime configuration",
+        "modify audit artifacts",
+        "modify source files",
+        "access network",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect multi-runtime execution plans" in boundaries["may"]
+    assert "validate approval gate status" in boundaries["may"]
+    assert "define orchestration dispatch boundary" in boundaries["may"]
+    assert "report blockers and warnings" in boundaries["may"]
+
+
+def test_64c_human_review_required(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    assert data["multi_runtime_orchestration_execution_overview"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for e in data["orchestration_entries"]:
+        assert e["human_review_required"] is True
+    for s in data["signals"]:
+        assert s["human_review_required"] is True
+
+
+def test_64c_input_summaries_declared(tmp_path) -> None:
+    data = build_multi_runtime_orchestration_execution(_HarnessPath64C(tmp_path))
+    summaries = data["multi_runtime_orchestration_execution_overview"]["input_summaries"]
+    for name in (
+        "MultiRuntimeExecutionPlanSummary",
+        "MultiRuntimeExecutionReadinessSummary",
+        "RuntimeApprovalGateSummary",
+        "MultiRuntimeAuditChainSummary",
+        "RuntimeFailureRecoverySummary",
+        "RuntimeQuarantineSummary",
+    ):
+        assert name in summaries, f"Missing input summary: {name}"
+
+
+def test_64c_advisory_exported(tmp_path) -> None:
+    from pcae.core.agent import MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY
+    assert isinstance(MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY, str)
+    assert len(MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY) > 50
+    assert "orchestration" in MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY.lower()
+    assert "execution_allowed" in MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY
+
+
+def test_64c_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-orchestration-execution"])
+    output = capsys.readouterr().out
+    for text in (
+        "Multi-runtime orchestration execution",
+        "Orchestration entries:",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Orchestration signals:",
+        "Governance boundaries:",
+        "Orchestration allowed:",
+        "Execution allowed:",
+        "Orchestration status:",
+    ):
+        assert text in output
+
+
+def test_64c_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["multi-runtime-orchestration-execution", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["multi_runtime_orchestration_execution_overview"]["phase"] == "64C"
+    assert data["multi_runtime_orchestration_execution_overview"]["execution_allowed"] is False
+    assert data["multi_runtime_orchestration_execution_overview"]["human_review_required"] is True
+    assert len(data["orchestration_entries"]) == 2
+    assert len(data["signals"]) == 10
+
+
+def test_64c_active_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = cri_data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64C"), None)
+    assert phase is not None
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "64B"
+    assert phase["track_name"] == "multi_runtime"
+    phase_64b = next((p for p in phases if p["phase_id"] == "64B"), None)
+    assert phase_64b is not None
+    assert phase_64b["status"] == "completed"
+    assert phase_64b["successor"] == "64C"

@@ -1,10 +1,10 @@
 # PCAE Prompt Registry
 
-Generated: 2026-06-09T05:02:40.959328+00:00
+Generated: 2026-06-09T09:00:00.000000+00:00
 Phase: 64B.3 — Prompt Recommendation Hardening
-Current phase: 64B.6D
-Current track: capability_intelligence
-Prompt count: 33
+Current phase: 64C
+Current track: multi_runtime
+Prompt count: 36
 Recommendation count: 7
 Validation count: 33
 Drift count: 4
@@ -44,17 +44,20 @@ Assessment status: quality_governed
 | prh-prompt-20260609T050240-28 | 64B.6C | implementation | recommended | 64B.6C-implementation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
 | prh-prompt-20260609T050240-29 | 64B.6C | validation | recommended | 64B.6C-validation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
 | prh-prompt-20260609T050240-30 | 64B.6C | agent | recommended | 64B.6C-agent-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
-| prh-prompt-20260609T050240-31 | 64B.6D | implementation | recommended | 64B.6D-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
-| prh-prompt-20260609T050240-32 | 64B.6D | validation | recommended | 64B.6D-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
-| prh-prompt-20260609T050240-33 | 64B.6D | agent | recommended | 64B.6D-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-31 | 64B.6D | implementation | recommended | 64B.6D-implementation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-32 | 64B.6D | validation | recommended | 64B.6D-validation-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-33 | 64B.6D | agent | recommended | 64B.6D-agent-v1 | roadmap_registry+capability_registry+skill_registry | blocked:completed_phase |
+| prh-prompt-20260609T050240-34 | 64C | implementation | recommended | 64C-implementation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-35 | 64C | validation | recommended | 64C-validation-v1 | roadmap_registry+capability_registry+skill_registry | validated |
+| prh-prompt-20260609T050240-36 | 64C | agent | recommended | 64C-agent-v1 | roadmap_registry+capability_registry+skill_registry | validated |
 
 ## Recommendations
 
 | Recommendation ID | Phase | Type | Status | Roadmap Source | Capability Source |
 |---|---|---|---|---|---|
-| prh-rec-20260609T050240-01 | 64B.6D | implementation | recommended | roadmap_registry_current_phase | Command & Architecture Intelligence Rendering |
-| prh-rec-20260609T050240-02 | 64B.6D | validation | recommended | roadmap_registry_current_phase | Command & Architecture Intelligence Rendering |
-| prh-rec-20260609T050240-03 | 64B.6D | agent | recommended | roadmap_registry_current_phase | Command & Architecture Intelligence Rendering |
+| prh-rec-20260609T050240-01 | 64C | implementation | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
+| prh-rec-20260609T050240-02 | 64C | validation | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
+| prh-rec-20260609T050240-03 | 64C | agent | recommended | roadmap_registry_current_phase | Multi-Runtime Orchestration Execution |
 | prh-rec-20260609T050240-04 | 64B.1 | implementation | blocked | roadmap_registry_completed_phase | Capability and Roadmap Intelligence |
 | prh-rec-20260609T050240-05 | 64B.2 | implementation | blocked | roadmap_registry_completed_phase | Roadmap Recommendation Hardening |
 | prh-rec-20260609T050240-06 | 46A | implementation | blocked | roadmap_registry_superseded_phase | Invocation Pilot (Legacy) |

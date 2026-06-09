@@ -182,6 +182,7 @@ from pcae.commands.agent import (
     run_runtime_quarantine,
     run_multi_runtime_execution_planning,
     run_multi_runtime_execution_readiness,
+    run_multi_runtime_orchestration_execution,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4675,6 +4676,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     mrer_parser.set_defaults(handler=run_multi_runtime_execution_readiness)
+
+    mroe_parser = subparsers.add_parser(
+        "multi-runtime-orchestration-execution",
+        help="Define the governed orchestration dispatch boundary connecting readiness to audit and recovery (Phase 64C).",
+    )
+    mroe_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    mroe_parser.set_defaults(handler=run_multi_runtime_orchestration_execution)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",
