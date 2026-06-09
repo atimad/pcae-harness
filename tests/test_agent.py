@@ -47528,7 +47528,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6C"
+    assert current["phase_id"] == "64B.6D"
     assert current["status"] == "active"
 
 
@@ -47627,7 +47627,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.6C"
+    assert data["current_phase"]["phase_id"] == "64B.6D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47694,9 +47694,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.6C", "--json"])
+    main(["prompt", "phase", "64B.6D", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.6C"
+    assert data["phase_id"] == "64B.6D"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47741,7 +47741,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.6C"
+    assert data["current_phase"]["phase_id"] == "64B.6D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47973,7 +47973,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64B.6C"
+    assert data["current_phase"]["phase_id"] == "64B.6D"
     assert data["current_track"] == "capability_intelligence"
 
 
@@ -48759,7 +48759,7 @@ def test_prompt_rendering_skill_governance_boundaries(tmp_path, monkeypatch) -> 
     assert "render prompts" in gb["may"]
     assert "invoke runtimes" in gb["may_not"]
     assert "execute shell commands" in gb["may_not"]
-    assert gb["phase"] == "64B.6C"
+    assert gb["phase"] == "64B.6D"
 
 
 def test_prompt_rendering_skill_human_review_always_required(tmp_path, monkeypatch) -> None:
@@ -48868,7 +48868,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6C"
+    assert current["phase_id"] == "64B.6D"
     assert current["status"] == "active"
 
 
@@ -49084,7 +49084,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6C"
+    assert current["phase_id"] == "64B.6D"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49315,7 +49315,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6C"
+    assert current["phase_id"] == "64B.6D"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -49477,4 +49477,279 @@ def test_64b_6c_governance_phase_updated(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
-    assert data["governance_boundaries"]["phase"] == "64B.6C"
+    assert data["governance_boundaries"]["phase"] == "64B.6D"
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6D – Command & Architecture Intelligence Rendering
+# ---------------------------------------------------------------------------
+
+
+def test_64b_6d_active_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = cri_data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64B.6D"), None)
+    assert phase is not None
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "64B.6C"
+    assert phase["track_name"] == "capability_intelligence"
+
+
+def test_64b_6d_capability_in_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    caps = cri_data["capability_registry"]
+    cap = next((c for c in caps if c.get("implemented_phase") == "64B.6D"), None)
+    assert cap is not None
+    assert "command" in cap["capability_name"].lower() or "architecture" in cap["capability_name"].lower()
+
+
+def test_64b_6d_intelligence_domains_complete(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CAR_INTELLIGENCE_DOMAINS
+
+    assert len(_CAR_INTELLIGENCE_DOMAINS) == 10
+    assert "command_surface_inference" in _CAR_INTELLIGENCE_DOMAINS
+    assert "architecture_flow_rendering" in _CAR_INTELLIGENCE_DOMAINS
+    assert "planning_readiness_execution_rendering" in _CAR_INTELLIGENCE_DOMAINS
+    assert "implementation_boundary_rendering" in _CAR_INTELLIGENCE_DOMAINS
+    assert "prompt_actionability_validation" in _CAR_INTELLIGENCE_DOMAINS
+
+
+def test_64b_6d_inferred_commands_for_64c(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    ctx = data["car_context"]
+    assert ctx["has_inferred_commands"] is True
+    cmds = ctx["inferred_commands"]
+    assert len(cmds) >= 1
+    assert all(c["confidence"] == "inferred" for c in cmds)
+    assert any("multi-runtime-orchestration-execution" in c["command"] for c in cmds)
+
+
+def test_64b_6d_inferred_commands_have_reason(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    cmds = data["car_context"]["inferred_commands"]
+    assert all(c.get("reason") for c in cmds)
+    assert all(c.get("source_pattern") for c in cmds)
+
+
+def test_64b_6d_inferred_commands_in_rendered_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Inferred Command Surface" in prompt
+    assert "confidence: inferred" in prompt
+    assert "multi-runtime-orchestration-execution" in prompt
+
+
+def test_64b_6d_no_stale_placeholder_for_64c(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "(no commands defined; define during implementation)" not in prompt
+
+
+def test_64b_6d_architecture_flow_for_64c(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    flow = data["car_context"]["architecture_flow"]
+    assert len(flow) == 11
+    components = [s["component"] for s in flow]
+    assert "Multi-Runtime Registry" in components
+    assert "Governed Orchestration Execution" in components
+    assert "Approval Gate" in components
+
+
+def test_64b_6d_architecture_flow_in_rendered_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Architecture Flow" in prompt
+    assert "Multi-Runtime Registry" in prompt
+    assert "Governed Orchestration Execution" in prompt
+
+
+def test_64b_6d_planning_readiness_execution_in_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Planning" in prompt
+    assert "Readiness" in prompt
+    assert "execution_boundary" in prompt
+    assert "must not duplicate 64A or 64B" in prompt
+
+
+def test_64b_6d_implementation_boundary_in_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Implementation Boundary" in prompt
+    assert "May introduce" in prompt
+    assert "May not introduce" in prompt
+    assert "orchestration execution record models" in prompt
+
+
+def test_64b_6d_signal_model_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CAR_SIGNAL_FIELDS
+
+    field_names = {f["name"] for f in _CAR_SIGNAL_FIELDS}
+    assert "signal_id" in field_names
+    assert "intelligence_domain" in field_names
+    assert "human_review_required" in field_names
+    assert "phase_id" in field_names
+    assert len(_CAR_SIGNAL_FIELDS) == 9
+
+
+def test_64b_6d_assessment_model_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CAR_ASSESSMENT_FIELDS
+
+    field_names = {f["name"] for f in _CAR_ASSESSMENT_FIELDS}
+    assert "inferred_command_count" in field_names
+    assert "architecture_flow_count" in field_names
+    assert "render_status" in field_names
+    assert len(_CAR_ASSESSMENT_FIELDS) == 10
+
+
+def test_64b_6d_summary_model_fields(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CAR_SUMMARY_FIELDS
+
+    field_names = {f["name"] for f in _CAR_SUMMARY_FIELDS}
+    assert "inferred_command_count" in field_names
+    assert "architecture_flow_count" in field_names
+    assert "summary_id" in field_names
+    assert len(_CAR_SUMMARY_FIELDS) == 11
+
+
+def test_64b_6d_car_data_in_return(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert "car_context" in data
+    assert "car_signals" in data
+    assert "car_assessment" in data
+    assert "car_summary" in data
+    assert isinstance(data["car_signals"], list)
+    assert data["car_assessment"]["inferred_command_count"] >= 2
+    assert data["car_assessment"]["architecture_flow_count"] == 11
+
+
+def test_64b_6d_governance_phase_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert data["governance_boundaries"]["phase"] == "64B.6D"
+
+
+def test_64b_6d_advisory_exported(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY
+
+    assert isinstance(COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY, str)
+    assert len(COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY) > 50
+    assert "command" in COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY.lower()
+    assert "architecture" in COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY.lower()
+    assert "inferred" in COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY.lower()
+
+
+def test_64b_6d_agent_prompt_includes_inferred_commands(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-agent", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "inferred" in prompt.lower()
+    assert "multi-runtime-orchestration-execution" in prompt
+
+
+def test_64b_6d_agent_prompt_includes_arch_flow(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-agent", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Architecture Flow" in prompt
+    assert "Multi-Runtime Registry" in prompt
+
+
+def test_64b_6d_64b6c_predecessor_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    cri_data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = cri_data["roadmap_registry"]
+    phase_64b6c = next((p for p in phases if p["phase_id"] == "64B.6C"), None)
+    assert phase_64b6c is not None
+    assert phase_64b6c["status"] == "completed"
+    assert phase_64b6c["successor"] == "64B.6D"
+
+
+def test_64b_6d_safety_flow_in_rendered_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["rendered_prompt"]
+    assert "Approval gates required before execution entry" in prompt
+    assert "Audit chain" in prompt
+    assert "Failure recovery" in prompt
+    assert "Quarantine" in prompt

@@ -69668,8 +69668,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.6C",
         "phase_title": "Predecessor Capability Rendering",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.6B",
+        "successor": "64B.6D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6D",
+        "phase_title": "Command & Architecture Intelligence Rendering",
+        "status": "active",
+        "predecessor": "64B.6C",
         "successor": "",
         "superseded_by": "",
     },
@@ -70201,7 +70210,27 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "dependency_capability_intelligence_rendering",
         ],
+        "successors": ["command_architecture_intelligence_rendering"],
+        "contribution": "provides per-predecessor capability contribution descriptions for rendered prompts",
+    },
+    {
+        "capability_name": "Command & Architecture Intelligence Rendering",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6D",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": [
+            "predecessor_capability_rendering",
+        ],
         "successors": [],
+        "contribution": "renders inferred command surfaces and architecture flows in implementation prompts",
     },
 )
 
@@ -71363,6 +71392,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_version": "64B.6C-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64B.6C",
+    },
+    {
+        "phase_id": "64B.6D",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6D-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6D",
+    },
+    {
+        "phase_id": "64B.6D",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6D-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6D",
+    },
+    {
+        "phase_id": "64B.6D",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6D-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6D",
     },
 )
 
@@ -72644,6 +72697,7 @@ _PRQ_PLACEHOLDER_PATTERNS: tuple = (
     "planned: next phase",
     "commands defined during implementation",
     "(tbd)",
+    "no commands defined; define during implementation",
 )
 
 _PRS_TRACK_TO_DOMAIN: dict = {
@@ -73203,6 +73257,7 @@ def _prs_render_implementation_prompt(
     phase_record: dict | None,
     capability_record: dict | None,
     dep_ctx: "dict | None" = None,
+    car_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
@@ -73213,12 +73268,10 @@ def _prs_render_implementation_prompt(
     commands = (capability_record or {}).get("commands", [])
     phase_slug = phase_id.lower().replace(".", "_")
     dep_ctx = dep_ctx or {}
+    car_ctx = car_ctx or {}
 
-    commands_block = (
-        "\n".join(f"- {cmd}" for cmd in commands)
-        if commands
-        else "- (no commands defined; define during implementation)"
-    )
+    inferred_commands = car_ctx.get("inferred_commands", [])
+    commands_block = _car_render_command_surface_block(commands, inferred_commands)
     inputs_block = "\n".join(f"- {inp}" for inp in _PRS_STANDARD_INPUTS)
     acceptance_block = "\n".join(f"- {chk}" for chk in _PRS_STANDARD_ACCEPTANCE_CHECKS)
     validation_block = "\n".join(f"  {cmd}" for cmd in _PRS_STANDARD_VALIDATION_COMMANDS)
@@ -73261,6 +73314,29 @@ def _prs_render_implementation_prompt(
         contributions_section = f"\n## Predecessor Capability Contributions\n{contributions_text}\n"
     else:
         contributions_section = ""
+
+    # Architecture flow (64B.6D)
+    flow_steps = car_ctx.get("architecture_flow", [])
+    if flow_steps:
+        flow_text = _car_render_architecture_flow_block(flow_steps, phase_id)
+        arch_flow_section = f"\n## Architecture Flow\n{flow_text}\n"
+    else:
+        arch_flow_section = ""
+
+    # Planning → Readiness → Execution relationship (64B.6D)
+    pre_text = _car_render_planning_readiness_execution_section(
+        phase_id, phase_record, chain, related_caps
+    )
+    if pre_text:
+        planning_execution_section = (
+            f"\n## Planning → Readiness → Execution\n{pre_text}\n"
+        )
+    else:
+        planning_execution_section = ""
+
+    # Implementation boundary (64B.6D)
+    boundary_text = _car_render_implementation_boundary_section(phase_id, phase_record)
+    boundary_section = f"\n## Implementation Boundary\n{boundary_text}\n"
 
     # Roadmap gap context
     roadmap_gap_section = ""
@@ -73351,7 +73427,7 @@ Implement {phase_title} for the PCAE governance harness. This phase introduces \
 
 ## Related Capabilities
 {related_caps_block}
-{contributions_section}{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
+{contributions_section}{arch_flow_section}{planning_execution_section}{boundary_section}{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
 ## Required Behavior
 - All acceptance checks pass after implementation
 - All existing tests continue to pass
@@ -73458,19 +73534,33 @@ def _prs_render_agent_prompt(
     phase_record: dict | None,
     capability_record: dict | None,
     dep_ctx: "dict | None" = None,
+    car_ctx: "dict | None" = None,
 ) -> str:
     phase_title = (phase_record or {}).get("phase_title") or phase_id
     track_name = (phase_record or {}).get("track_name", "unknown")
     phase_slug = phase_id.lower().replace(".", "_")
     commands = (capability_record or {}).get("commands", [])
-    key_commands = commands[:3] if commands else ["(to be defined during implementation)"]
-    commands_summary = "\n".join(f"  - {cmd}" for cmd in key_commands)
     may_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY)
     may_not_block = "\n".join(f"- {item}" for item in _PRS_GOVERNANCE_MAY_NOT)
     dep_ctx = dep_ctx or {}
+    car_ctx = car_ctx or {}
 
     chain = dep_ctx.get("predecessor_chain", [])
     related_caps = dep_ctx.get("related_capabilities", [])
+    inferred_commands = car_ctx.get("inferred_commands", [])
+    flow_steps = car_ctx.get("architecture_flow", [])
+
+    if commands:
+        key_cmds = commands[:3]
+        commands_summary = "\n".join(f"  - {cmd}" for cmd in key_cmds)
+    elif inferred_commands:
+        key_cmds_inf = inferred_commands[:2]
+        commands_summary = "\n".join(
+            f"  - {ic['command']} (inferred; confidence: {ic['confidence']})"
+            for ic in key_cmds_inf
+        )
+    else:
+        commands_summary = "  - (to be defined during implementation)"
 
     if chain:
         dep_summary = "\n".join(
@@ -73486,6 +73576,12 @@ def _prs_render_agent_prompt(
         )
     else:
         caps_summary = "  - (no related capabilities found)"
+
+    if flow_steps:
+        flow_text = _car_render_architecture_flow_block(flow_steps, phase_id)
+        arch_flow_agent_section = f"\n## Architecture Flow\n{flow_text}\n"
+    else:
+        arch_flow_agent_section = ""
 
     return f"""# Phase {phase_id} Agent Instructions: {phase_title}
 
@@ -73511,7 +73607,7 @@ Track: {track_name}.
 
 ## Related Capabilities
 {caps_summary}
-
+{arch_flow_agent_section}
 ## Validation Summary
 - Run: `pcae check && python -m pytest -n auto`
 - Focused: `python -m pytest -k "{phase_slug}" -v`
@@ -73663,6 +73759,16 @@ def build_prompt_rendering_skill(
     )
     dependency_summary = _dri_build_dependency_summary(ts, dependency_assessment)
 
+    # Command & architecture intelligence context (64B.6D)
+    car_ctx = _car_build_command_architecture_context(
+        phase_id or "", phase_record, dep_ctx, capability_record
+    )
+    car_signals = _car_run_command_architecture_checks(
+        ts, phase_id or "", prompt_type, phase_record, dep_ctx, car_ctx
+    )
+    car_assessment = _car_build_assessment(ts, phase_id or "", prompt_type, car_signals, car_ctx)
+    car_summary = _car_build_summary(ts, car_assessment)
+
     blocker_count = sum(1 for s in signals if s["severity"] == "blocker")
     warning_count = sum(1 for s in signals if s["severity"] == "warning")
 
@@ -73674,13 +73780,13 @@ def build_prompt_rendering_skill(
         render_status = "complete" if completeness >= 0.7 else "partial"
         if prompt_type == "implementation":
             rendered_prompt = _prs_render_implementation_prompt(
-                phase_id or "", phase_record, capability_record, dep_ctx
+                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx
             )
         elif prompt_type == "validation":
             rendered_prompt = _prs_render_validation_prompt(phase_id or "", phase_record, capability_record)
         elif prompt_type == "agent":
             rendered_prompt = _prs_render_agent_prompt(
-                phase_id or "", phase_record, capability_record, dep_ctx
+                phase_id or "", phase_record, capability_record, dep_ctx, car_ctx
             )
         else:
             rendered_prompt = ""
@@ -73775,9 +73881,14 @@ def build_prompt_rendering_skill(
         "dependency_signals": dependency_signals,
         "dependency_assessment": dependency_assessment,
         "dependency_summary": dependency_summary,
+        "car_context": car_ctx,
+        "car_signals": car_signals,
+        "car_assessment": car_assessment,
+        "car_summary": car_summary,
         "render_domains": list(_PRS_RENDER_DOMAINS),
         "quality_domains": list(_PRQ_QUALITY_DOMAINS),
         "intelligence_domains": list(_DRI_INTELLIGENCE_DOMAINS),
+        "command_architecture_intelligence_domains": list(_CAR_INTELLIGENCE_DOMAINS),
         "render_record_model": {
             "model_name": "PromptRenderRecord",
             "fields": [dict(f) for f in _PRS_RENDER_RECORD_FIELDS],
@@ -73818,10 +73929,563 @@ def build_prompt_rendering_skill(
             "model_name": "DependencyRenderSummary",
             "fields": [dict(f) for f in _DRI_DEPENDENCY_SUMMARY_FIELDS],
         },
+        "car_signal_model": {
+            "model_name": "CommandArchitectureRenderSignal",
+            "fields": [dict(f) for f in _CAR_SIGNAL_FIELDS],
+        },
+        "car_assessment_model": {
+            "model_name": "CommandArchitectureRenderAssessment",
+            "fields": [dict(f) for f in _CAR_ASSESSMENT_FIELDS],
+        },
+        "car_summary_model": {
+            "model_name": "CommandArchitectureRenderSummary",
+            "fields": [dict(f) for f in _CAR_SUMMARY_FIELDS],
+        },
         "governance_boundaries": {
             "may": list(_PRS_GOVERNANCE_MAY),
             "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
-            "phase": "64B.6C",
+            "phase": "64B.6D",
         },
         "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
+        "car_advisory": COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6D – Command & Architecture Intelligence Rendering
+# ---------------------------------------------------------------------------
+
+COMMAND_ARCHITECTURE_INTELLIGENCE_RENDERING_ADVISORY = (
+    "Phase 64B.6D adds command surface inference and architecture flow rendering to prompt rendering. "
+    "Rendered implementation prompts now include an 'Inferred Command Surface' section when explicit "
+    "commands are absent, an 'Architecture Flow' section showing the orchestration chain, and a "
+    "'Planning → Readiness → Execution' section explaining predecessor phase relationships. "
+    "Inferred commands are clearly labeled as inferred and not authoritative. "
+    "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+_CAR_INTELLIGENCE_DOMAINS: tuple = (
+    "command_surface_inference",
+    "command_confidence_rendering",
+    "command_pattern_rendering",
+    "architecture_flow_rendering",
+    "orchestration_chain_rendering",
+    "planning_readiness_execution_rendering",
+    "phase_role_rendering",
+    "implementation_boundary_rendering",
+    "safety_flow_rendering",
+    "prompt_actionability_validation",
+)
+
+_CAR_SIGNAL_FIELDS: tuple = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "intelligence_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CAR_ASSESSMENT_FIELDS: tuple = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "inferred_command_count", "type": "int", "required": True},
+    {"name": "architecture_flow_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "render_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_CAR_SUMMARY_FIELDS: tuple = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "phase_id", "type": "str", "required": True},
+    {"name": "prompt_type", "type": "str", "required": True},
+    {"name": "inferred_command_count", "type": "int", "required": True},
+    {"name": "architecture_flow_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "render_status", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+# Static 11-step multi-runtime architecture flow per 64B.6D spec
+_CAR_MULTI_RUNTIME_ARCH_FLOW: tuple = (
+    {"step": 1, "component": "Request", "role": "entry_point", "phase": None},
+    {"step": 2, "component": "Multi-Runtime Registry", "role": "registry", "phase": "63A"},
+    {"step": 3, "component": "Runtime Selection Engine", "role": "selection", "phase": "63B"},
+    {"step": 4, "component": "Runtime Arbitration", "role": "arbitration", "phase": "63C"},
+    {"step": 5, "component": "Approval Gate", "role": "approval", "phase": None},
+    {"step": 6, "component": "Multi-Runtime Execution Plan", "role": "planning", "phase": "64A"},
+    {"step": 7, "component": "Multi-Runtime Execution Readiness", "role": "readiness", "phase": "64B"},
+    {"step": 8, "component": "Governed Orchestration Execution", "role": "execution_boundary", "phase": "64C"},
+    {"step": 9, "component": "Multi-Runtime Audit Chain", "role": "audit", "phase": "63D"},
+    {"step": 10, "component": "Runtime Failure Recovery", "role": "recovery", "phase": "63E"},
+    {"step": 11, "component": "Runtime Quarantine", "role": "quarantine", "phase": "63F"},
+)
+
+# Phase role descriptions for multi_runtime planning→readiness→execution relationship
+_CAR_MULTI_RUNTIME_PHASE_ROLES: dict = {
+    "64A": ("planning", "defines the execution plan structure, constraints, and sequencing"),
+    "64B": ("readiness", "validates whether the execution plan is ready to proceed"),
+    "64C": ("execution_boundary", "orchestration execution boundary — must not duplicate 64A or 64B"),
+}
+
+# Implementation boundary rules for multi_runtime execution phases
+_CAR_MULTI_RUNTIME_MAY_INTRODUCE: tuple = (
+    "orchestration execution record models",
+    "orchestration execution assessment models",
+    "orchestration execution summaries",
+    "guarded orchestration execution command surface",
+    "audit and failure hooks",
+)
+
+_CAR_MULTI_RUNTIME_MAY_NOT_INTRODUCE: tuple = (
+    "uncontrolled runtime execution",
+    "prompt execution",
+    "write execution",
+    "network access",
+    "bypass of approval gates",
+)
+
+
+def _car_slugify_title(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+
+def _car_infer_predecessor_command_pattern(
+    predecessor_chain: list,
+    related_capabilities: list,
+) -> str:
+    """Return primary command (no flags) of nearest predecessor with explicit commands."""
+    cap_by_phase = {c.get("implemented_phase"): c for c in related_capabilities}
+    for phase_rec in reversed(predecessor_chain):
+        pid = phase_rec["phase_id"]
+        cap = cap_by_phase.get(pid)
+        if cap:
+            cmds = [c for c in cap.get("commands", []) if "--" not in c]
+            if cmds:
+                return cmds[0]
+    return ""
+
+
+def _car_infer_commands(
+    phase_id: str,
+    phase_record: "dict | None",
+    predecessor_chain: list,
+    related_capabilities: list,
+) -> list:
+    """Infer likely command names for phases without explicit commands.
+
+    Returns list of {command, confidence, reason, source_pattern}.
+    All commands carry confidence='inferred'.
+    """
+    if not phase_record:
+        return []
+    phase_title = phase_record.get("phase_title", phase_id)
+    track = phase_record.get("track_name", "")
+    slug = _car_slugify_title(phase_title)
+    primary_cmd = f"pcae {slug}"
+    pattern_cmd = _car_infer_predecessor_command_pattern(predecessor_chain, related_capabilities)
+
+    if pattern_cmd and track:
+        pred_ids = [r["phase_id"] for r in predecessor_chain[-2:]]
+        pred_ref = "/".join(pred_ids) if pred_ids else track
+        reason = (
+            f"derived from {phase_id} phase title and "
+            f"{pred_ref} {track} command pattern"
+        )
+        source_pattern = f"pcae <{track.replace('_', '-')}-slug>"
+    else:
+        reason = (
+            f"derived from phase title {phase_title!r} "
+            "following pcae <slug> naming convention"
+        )
+        source_pattern = "pcae <slug>"
+
+    return [
+        {
+            "command": primary_cmd,
+            "confidence": "inferred",
+            "reason": reason,
+            "source_pattern": source_pattern,
+        },
+        {
+            "command": f"{primary_cmd} --json",
+            "confidence": "inferred",
+            "reason": "JSON output variant follows standard PCAE command convention (pcae <cmd> --json)",
+            "source_pattern": "standard --json variant",
+        },
+    ]
+
+
+def _car_infer_phase_role(phase_title: str) -> str:
+    lower = phase_title.lower()
+    for kw, role in (
+        ("registry", "registry"),
+        ("selection", "selection"),
+        ("arbitration", "arbitration"),
+        ("audit", "audit"),
+        ("recovery", "recovery"),
+        ("quarantine", "quarantine"),
+        ("planning", "planning"),
+        ("readiness", "readiness"),
+        ("orchestration", "orchestration"),
+        ("execution", "execution_boundary"),
+    ):
+        if kw in lower:
+            return role
+    return "predecessor"
+
+
+def _car_build_architecture_flow(
+    phase_id: str,
+    phase_record: "dict | None",
+    predecessor_chain: list,
+    related_capabilities: list,
+) -> list:
+    """Build ordered architecture flow for the target phase."""
+    track = (phase_record or {}).get("track_name", "")
+    if track == "multi_runtime":
+        return list(_CAR_MULTI_RUNTIME_ARCH_FLOW)
+    if not predecessor_chain:
+        return []
+    flow: list[dict] = [{"step": 1, "component": "Request", "role": "entry_point", "phase": None}]
+    for i, phase_rec in enumerate(predecessor_chain, start=2):
+        pid = phase_rec["phase_id"]
+        title = phase_rec.get("phase_title", pid)
+        flow.append({
+            "step": i,
+            "component": title,
+            "role": _car_infer_phase_role(title),
+            "phase": pid,
+        })
+    target_title = (phase_record or {}).get("phase_title", phase_id)
+    flow.append({
+        "step": len(flow) + 1,
+        "component": target_title,
+        "role": _car_infer_phase_role(target_title),
+        "phase": phase_id,
+    })
+    return flow
+
+
+def _car_render_command_surface_block(
+    explicit_commands: list,
+    inferred_commands: list,
+) -> str:
+    """Render commands block; uses inferred surface when explicit commands absent."""
+    if explicit_commands:
+        return "\n".join(f"- {cmd}" for cmd in explicit_commands)
+    if not inferred_commands:
+        return "- (no commands defined; define during implementation)"
+    lines: list[str] = [
+        "### Inferred Command Surface",
+        "(no explicit commands defined; inferred from phase metadata — not authoritative)\n",
+    ]
+    for ic in inferred_commands:
+        lines.append(f"- {ic['command']}")
+        lines.append(f"  confidence: {ic['confidence']}")
+        lines.append(f"  reason: {ic['reason']}")
+        lines.append(f"  source_pattern: {ic['source_pattern']}")
+    lines.append(
+        "\nNote: Inferred commands are not authoritative. "
+        "Define actual commands during implementation."
+    )
+    return "\n".join(lines)
+
+
+def _car_render_architecture_flow_block(flow_steps: list, target_phase_id: str = "") -> str:
+    """Render architecture flow as ASCII arrow diagram with governance controls."""
+    if not flow_steps:
+        return ""
+    lines: list[str] = []
+    for i, step in enumerate(flow_steps):
+        component = step["component"]
+        phase = step.get("phase")
+        is_target = bool(phase and phase == target_phase_id)
+        if is_target:
+            suffix = " ← this phase"
+        elif phase:
+            suffix = f" ({phase})"
+        else:
+            suffix = ""
+        lines.append(f"{component}{suffix}")
+        if i < len(flow_steps) - 1:
+            lines.append("  ↓")
+    ctrl_lines: list[str] = []
+    for step in flow_steps:
+        role = step.get("role", "")
+        comp = step["component"]
+        ph = step.get("phase") or ""
+        ph_suffix = f" ({ph})" if ph else ""
+        if role == "approval":
+            ctrl_lines.append("- Approval gates required before execution entry")
+        elif role == "audit":
+            ctrl_lines.append(f"- Audit chain at {comp}{ph_suffix}")
+        elif role == "recovery":
+            ctrl_lines.append(f"- Failure recovery available at {comp}{ph_suffix}")
+        elif role == "quarantine":
+            ctrl_lines.append(f"- Quarantine available at {comp}{ph_suffix}")
+    result = "\n".join(lines)
+    if ctrl_lines:
+        result += "\n\nGovernance controls in flow:\n" + "\n".join(ctrl_lines)
+    return result
+
+
+def _car_render_planning_readiness_execution_section(
+    phase_id: str,
+    phase_record: "dict | None",
+    predecessor_chain: list,
+    related_capabilities: list,
+) -> str:
+    """Render the Planning → Readiness → Execution relationship section."""
+    track = (phase_record or {}).get("track_name", "")
+    if track != "multi_runtime":
+        if not predecessor_chain:
+            return ""
+        cap_by_phase = {c.get("implemented_phase"): c for c in related_capabilities}
+        lines: list[str] = []
+        for phase_rec in predecessor_chain[-3:]:
+            pid = phase_rec["phase_id"]
+            title = phase_rec.get("phase_title", pid)
+            cap = cap_by_phase.get(pid)
+            contrib = (cap or {}).get("contribution", "predecessor capability")
+            lines.append(f"- {pid} ({title}): {contrib}")
+        target_title = (phase_record or {}).get("phase_title", phase_id)
+        lines.append(f"- {phase_id} ({target_title}): builds on the above predecessor capabilities")
+        return "\n".join(lines)
+
+    chain_by_id = {r["phase_id"]: r for r in predecessor_chain}
+    result_lines: list[str] = []
+    for pid, (role, desc) in _CAR_MULTI_RUNTIME_PHASE_ROLES.items():
+        if pid == phase_id:
+            title = (phase_record or {}).get("phase_title", pid)
+        else:
+            phase_rec = chain_by_id.get(pid)
+            title = (phase_rec or {}).get("phase_title", pid)
+        marker = " ← this phase" if pid == phase_id else ""
+        result_lines.append(f"- {pid} ({title}) = {role}: {desc}{marker}")
+
+    if phase_id in _CAR_MULTI_RUNTIME_PHASE_ROLES:
+        result_lines.append(f"\n{phase_id} must not:")
+        result_lines.append("- Redefine execution planning (belongs to 64A)")
+        result_lines.append("- Duplicate readiness validation (belongs to 64B)")
+        result_lines.append("- Bypass the approval gate chain")
+        result_lines.append(f"\n{phase_id} must:")
+        result_lines.append("- Connect to the existing plan and readiness structures")
+        result_lines.append("- Define the orchestration execution entry point")
+        result_lines.append("- Maintain all governance boundaries")
+    return "\n".join(result_lines)
+
+
+def _car_render_implementation_boundary_section(
+    phase_id: str,
+    phase_record: "dict | None",
+) -> str:
+    """Render implementation boundary (may/may-not introduce) for the target phase."""
+    track = (phase_record or {}).get("track_name", "")
+    if track == "multi_runtime":
+        may_lines = "\n".join(f"- {item}" for item in _CAR_MULTI_RUNTIME_MAY_INTRODUCE)
+        may_not_lines = "\n".join(f"- {item}" for item in _CAR_MULTI_RUNTIME_MAY_NOT_INTRODUCE)
+    else:
+        phase_title = (phase_record or {}).get("phase_title", phase_id)
+        slug = _car_slugify_title(phase_title)
+        may_lines = (
+            f"- {phase_title.lower()} record models\n"
+            f"- {phase_title.lower()} assessment models\n"
+            f"- {phase_title.lower()} summaries\n"
+            f"- guarded {slug} command surface"
+        )
+        may_not_lines = (
+            "- uncontrolled runtime execution\n"
+            "- prompt execution\n"
+            "- write execution\n"
+            "- network access\n"
+            "- bypass of approval gates"
+        )
+    return f"May introduce:\n{may_lines}\n\nMay not introduce:\n{may_not_lines}"
+
+
+def _car_build_command_architecture_context(
+    phase_id: str,
+    phase_record: "dict | None",
+    dep_ctx: dict,
+    capability_record: "dict | None" = None,
+) -> dict:
+    """Build command and architecture intelligence context for a phase."""
+    predecessor_chain = dep_ctx.get("predecessor_chain", [])
+    related_caps = dep_ctx.get("related_capabilities", [])
+    explicit_commands = (capability_record or {}).get("commands", [])
+    inferred_commands: list = []
+    if not explicit_commands:
+        inferred_commands = _car_infer_commands(
+            phase_id, phase_record, predecessor_chain, related_caps
+        )
+    flow_steps = _car_build_architecture_flow(
+        phase_id, phase_record, predecessor_chain, related_caps
+    )
+    return {
+        "explicit_commands": explicit_commands,
+        "inferred_commands": inferred_commands,
+        "inferred_command_count": len(inferred_commands),
+        "architecture_flow": flow_steps,
+        "architecture_flow_count": len(flow_steps),
+        "has_inferred_commands": len(inferred_commands) > 0,
+        "has_architecture_flow": len(flow_steps) > 0,
+    }
+
+
+def _car_run_command_architecture_checks(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    phase_record: "dict | None",
+    dep_ctx: dict,
+    car_ctx: dict,
+) -> list:
+    """Run all 10 CAR intelligence domain checks and return CommandArchitectureRenderSignal list."""
+    signals: list[dict] = []
+    idx = 1
+
+    def _cs(domain: str, sig_type: str, severity: str, detected: str, expected: str) -> None:
+        nonlocal idx
+        signals.append({
+            "signal_id": f"car-sig-{ts}-{idx:02d}",
+            "phase_id": phase_id,
+            "prompt_type": prompt_type,
+            "intelligence_domain": domain,
+            "signal_type": sig_type,
+            "severity": severity,
+            "detected_state": detected,
+            "expected_state": expected,
+            "human_review_required": True,
+        })
+        idx += 1
+
+    explicit_commands = car_ctx.get("explicit_commands", [])
+    inferred_commands = car_ctx.get("inferred_commands", [])
+    flow_steps = car_ctx.get("architecture_flow", [])
+    chain = dep_ctx.get("predecessor_chain", [])
+    track = (phase_record or {}).get("track_name", "")
+
+    # 1. command_surface_inference
+    if not explicit_commands and not inferred_commands:
+        _cs("command_surface_inference", "no_commands_and_no_inference", "warning",
+            "no explicit or inferred commands available",
+            "inferred commands rendered when explicit commands absent")
+
+    # 2. command_confidence_rendering
+    if inferred_commands:
+        missing_reason = [ic for ic in inferred_commands if not ic.get("reason")]
+        if missing_reason:
+            _cs("command_confidence_rendering", "inferred_command_missing_reason", "warning",
+                f"{len(missing_reason)} inferred commands lack reason",
+                "all inferred commands include reason and source_pattern")
+
+    # 3. command_pattern_rendering
+    if not explicit_commands and not inferred_commands and phase_record:
+        _cs("command_pattern_rendering", "no_command_pattern_derived", "info",
+            "no command pattern could be derived for this phase",
+            "command pattern derived from predecessor or phase title")
+
+    # 4. architecture_flow_rendering
+    if not phase_record:
+        _cs("architecture_flow_rendering", "phase_not_in_registry", "blocker",
+            f"phase_id={phase_id!r} not found in roadmap registry",
+            "phase present in roadmap registry for flow rendering")
+    elif not flow_steps:
+        _cs("architecture_flow_rendering", "no_architecture_flow_derived", "warning",
+            "no architecture flow derived for this phase",
+            "architecture flow rendered in implementation prompt")
+
+    # 5. orchestration_chain_rendering
+    if track == "multi_runtime" and flow_steps and len(flow_steps) < 8:
+        _cs("orchestration_chain_rendering", "incomplete_multi_runtime_chain", "warning",
+            f"multi_runtime flow has {len(flow_steps)} steps (expected 11)",
+            "full 11-step multi-runtime orchestration chain rendered")
+
+    # 6. planning_readiness_execution_rendering
+    if track == "multi_runtime" and chain:
+        chain_ids = {r["phase_id"] for r in chain}
+        has_planning = "64A" in chain_ids
+        has_readiness = "64B" in chain_ids
+        if not (has_planning or has_readiness):
+            _cs("planning_readiness_execution_rendering",
+                "missing_planning_readiness_predecessors", "info",
+                f"64A in chain={has_planning}, 64B in chain={has_readiness}",
+                "64A (planning) and 64B (readiness) in chain for multi_runtime execution phase")
+
+    # 7. phase_role_rendering — passes silently when phase record and title present
+    if phase_record and not phase_record.get("phase_title"):
+        _cs("phase_role_rendering", "missing_phase_title_for_role", "warning",
+            "phase title missing; cannot derive phase role",
+            "phase title present for role rendering")
+
+    # 8. implementation_boundary_rendering
+    status = (phase_record or {}).get("status", "")
+    if status in ("roadmap_gap", "planned") and not track:
+        _cs("implementation_boundary_rendering", "roadmap_gap_no_track_for_boundary", "info",
+            "roadmap gap phase has no track; boundary defaults to generic",
+            "track present for specific implementation boundary rendering")
+
+    # 9. safety_flow_rendering — signal only when flow absent despite phase existing
+    if phase_record and not flow_steps:
+        _cs("safety_flow_rendering", "no_flow_for_safety_rendering", "info",
+            "no architecture flow; safety governance controls cannot be anchored to flow steps",
+            "architecture flow present for safety flow rendering")
+
+    # 10. prompt_actionability_validation
+    if prompt_type == "implementation" and not explicit_commands and not inferred_commands:
+        _cs("prompt_actionability_validation", "prompt_lacks_command_surface", "warning",
+            "implementation prompt has no command surface (explicit or inferred)",
+            "implementation prompt includes inferred command surface with confidence labels")
+
+    return signals
+
+
+def _car_build_assessment(
+    ts: str,
+    phase_id: str,
+    prompt_type: str,
+    signals: list,
+    car_ctx: dict,
+) -> dict:
+    blockers = sum(1 for s in signals if s["severity"] == "blocker")
+    warnings = sum(1 for s in signals if s["severity"] == "warning")
+    status = "blocked" if blockers > 0 else ("warning" if warnings > 0 else "passed")
+    return {
+        "assessment_id": f"car-assess-{ts}",
+        "phase_id": phase_id,
+        "prompt_type": prompt_type,
+        "inferred_command_count": car_ctx.get("inferred_command_count", 0),
+        "architecture_flow_count": car_ctx.get("architecture_flow_count", 0),
+        "signal_count": len(signals),
+        "blocker_count": blockers,
+        "warning_count": warnings,
+        "render_status": status,
+        "human_review_required": True,
+    }
+
+
+def _car_build_summary(ts: str, assessment: dict) -> dict:
+    return {
+        "summary_id": f"car-summary-{ts}",
+        "assessment_id": assessment["assessment_id"],
+        "phase_id": assessment["phase_id"],
+        "prompt_type": assessment["prompt_type"],
+        "inferred_command_count": assessment["inferred_command_count"],
+        "architecture_flow_count": assessment["architecture_flow_count"],
+        "signal_count": assessment["signal_count"],
+        "blocker_count": assessment["blocker_count"],
+        "warning_count": assessment["warning_count"],
+        "render_status": assessment["render_status"],
+        "human_review_required": True,
     }

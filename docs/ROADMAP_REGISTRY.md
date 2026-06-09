@@ -51,7 +51,15 @@ Assessment status: intelligence_with_gaps
 | 64B.2 | Roadmap Recommendation Hardening | completed | 64B.1 | 64B.3 |
 | 64B.3 | Prompt Recommendation Hardening | completed | 64B.2 | 64B.4 |
 | 64B.4 | Skill System Foundation | completed | 64B.3 | 64B.4A |
-| 64B.4A | Skill Registry Consolidation Hardening | active | 64B.4 | — |
+| 64B.4A | Skill Registry Consolidation Hardening | completed | 64B.4 | 64B.4B |
+| 64B.4B | Capability Projection Consolidation | completed | 64B.4A | 64B.5 |
+| 64B.5 | Skill Invocation Targeting | completed | 64B.4B | 64B.5A |
+| 64B.5A | Capability Target Resolution Hardening | completed | 64B.5 | 64B.6 |
+| 64B.6 | Prompt Rendering Skill | completed | 64B.5A | 64B.6A |
+| 64B.6A | Prompt Rendering Quality Hardening | completed | 64B.6 | 64B.6B |
+| 64B.6B | Dependency & Capability Intelligence Rendering | completed | 64B.6A | 64B.6C |
+| 64B.6C | Predecessor Capability Rendering | completed | 64B.6B | 64B.6D |
+| 64B.6D | Command & Architecture Intelligence Rendering | active | 64B.6C | — |
 
 ## Track: roadmap_intelligence
 

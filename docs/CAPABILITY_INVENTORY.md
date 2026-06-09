@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-08T21:37:21.210224+00:00
-Phase: 64B.0 — Capability Inventory
-Total capabilities: 21
-Implemented: 18
+Generated: 2026-06-09T06:00:00.000000+00:00
+Phase: 64B.6D — Command & Architecture Intelligence Rendering
+Total capabilities: 22
+Implemented: 19
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 1
@@ -22,6 +22,7 @@ Assessment status: inventory_with_gaps
 | Prompt Recommendation Hardening | prompt_intelligence_capabilities | 64B.3 | implemented | pcae prompt next; pcae prompt phase; pcae prompt validate | capability_and_roadmap_intelligence; roadmap_recommendation_hardening | (none) |
 | Skill System Foundation | skill_system_capabilities | 64B.4 | implemented | pcae skill list; pcae skill show; pcae skill validate; pcae skill invoke | capability_and_roadmap_intelligence; prompt_recommendation_hardening | skill_registry_consolidation_hardening |
 | Skill Registry Consolidation Hardening | skill_system_capabilities | 64B.4A | implemented | pcae skill list; pcae skill show; pcae skill validate; pcae skill invoke; pcae capability-inventory; pcae roadmap current; pcae prompt validate | skill_system_foundation; capability_and_roadmap_intelligence | (none) |
+| Command & Architecture Intelligence Rendering | skill_system_capabilities | 64B.6D | implemented | pcae skill invoke phase-implementation <phase_id>; pcae skill invoke phase-validation <phase_id>; pcae skill invoke phase-agent <phase_id>; pcae prompt render --phase <phase_id> --type implementation | predecessor_capability_rendering | (none) |
 | Read-Only Runtime Invocation Governance | runtime_governance_capabilities | 55A-57A | implemented | pcae readonly-invocation; pcae read-only-runtime-invocation; pcae runtime-review-workflow | governed_task_contracts | runtime_approval_gates |
 | Invocation Pilot (Legacy) | runtime_governance_capabilities | 46A-46J | superseded | pcae invocation-pilot; pcae multi-runtime-pilot | (none) | read_only_runtime_invocation_governance |
 | Controlled Runtime Execution Pilot | runtime_execution_capabilities | 62A | dormant | pcae runtime-execution-pilot | read_only_runtime_invocation_governance | multi_runtime_execution_planning |

@@ -33,6 +33,7 @@ Prompt Rendering Quality Hardening
 - docs/CAPABILITY_INVENTORY.md
 - docs/SKILL_REGISTRY.md
 - docs/PROMPT_REGISTRY.md
+- docs/ROADMAP_REGISTRY.md
 - docs/COMMANDS.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
