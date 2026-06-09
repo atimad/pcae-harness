@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260608-2337-prompt-rendering-quality-hardening
+20260609-1410-64d-runtime-coordination-policy
 
 ## Title
 
-Prompt Rendering Quality Hardening
+64D Runtime Coordination Policy
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Prompt Rendering Quality Hardening
+64D Runtime Coordination Policy
 
 ## Allowed Files
 
@@ -30,25 +30,23 @@ Prompt Rendering Quality Hardening
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/CAPABILITY_INVENTORY.md
-- docs/SKILL_REGISTRY.md
-- docs/PROMPT_REGISTRY.md
-- docs/ROADMAP_REGISTRY.md
-- docs/COMMANDS.md
-- src/pcae/cli.py
-- src/pcae/commands/agent.py
 - src/pcae/core/agent.py
 - tests/test_agent.py
-- .pcae/skills/**
 
 ## Forbidden Files
 
-- TBD
+- src/pcae/commands/**
+- src/pcae/cli.py
 
 
 ## Allowed Zones
 
-- TBD
+- core
+- tests
+- tasks
+- docs
+- session
+- config
 
 ## Forbidden Zones
 
@@ -56,7 +54,11 @@ Prompt Rendering Quality Hardening
 
 ## Allowed Dependencies
 
-- TBD
+- core -> core
+- core -> tests
+- tests -> core
+- tests -> commands
+- tests -> cli
 
 ## Forbidden Dependencies
 
@@ -89,4 +91,4 @@ strict
 
 ## Created Timestamp
 
-2026-06-08T23:37:41.515540+02:00
+2026-06-09T14:10:02.083301+02:00

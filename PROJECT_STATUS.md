@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.6E: Design Review Intelligence Rendering.
+Phase 64D: Runtime Coordination Policy.
 
 ## Post-61J Runtime Registry Checkpoint
 

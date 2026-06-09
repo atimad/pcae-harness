@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64C"
+    assert current["phase_id"] == "64D"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64C"
+    assert data["current_phase"]["phase_id"] == "64D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47689,9 +47689,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64C", "--json"])
+    main(["prompt", "phase", "64D", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64C"
+    assert data["phase_id"] == "64D"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47736,7 +47736,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64C"
+    assert data["current_phase"]["phase_id"] == "64D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47968,7 +47968,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64C"
+    assert data["current_phase"]["phase_id"] == "64D"
     assert data["current_track"] == "multi_runtime"
 
 
@@ -48863,7 +48863,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64C"
+    assert current["phase_id"] == "64D"
     assert current["status"] == "active"
 
 
@@ -49079,7 +49079,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64C"
+    assert current["phase_id"] == "64D"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49310,7 +49310,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64C"
+    assert current["phase_id"] == "64D"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -49966,13 +49966,131 @@ def test_64c_active_in_roadmap(tmp_path, monkeypatch) -> None:
     phases = cri_data["roadmap_registry"]
     phase = next((p for p in phases if p["phase_id"] == "64C"), None)
     assert phase is not None
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "64B"
+    assert phase["successor"] == "64D"
     assert phase["track_name"] == "multi_runtime"
     phase_64b = next((p for p in phases if p["phase_id"] == "64B"), None)
     assert phase_64b is not None
     assert phase_64b["status"] == "completed"
     assert phase_64b["successor"] == "64C"
+
+
+# ---------------------------------------------------------------------------
+# Phase 64C.1 – Roadmap Registry Transition to 64D
+# ---------------------------------------------------------------------------
+
+
+def test_64c_1_64c_completed_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64C"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "64D"
+
+
+def test_64c_1_64d_active_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64D"), None)
+    assert phase is not None
+    assert phase["status"] == "active"
+    assert phase["phase_title"] == "Runtime Coordination Policy"
+    assert phase["predecessor"] == "64C"
+    assert phase["successor"] == "64E"
+    assert phase["track_name"] == "multi_runtime"
+
+    current = data["current_phase"]
+    assert current["phase_id"] == "64D"
+    assert current["status"] == "active"
+
+
+def test_64c_1_64e_roadmap_gap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "64E"), None)
+    assert phase is not None
+    assert phase["status"] == "roadmap_gap"
+    assert phase["phase_title"] == "Orchestration Audit Model"
+    assert phase["predecessor"] == "64D"
+    assert phase["successor"] == "65A"
+    assert phase["track_name"] == "multi_runtime"
+
+
+def test_64c_1_65a_predecessor_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+    phase = next((p for p in phases if p["phase_id"] == "65A"), None)
+    assert phase is not None
+    assert phase["predecessor"] == "64E"
+
+
+def test_64c_1_skill_invoke_phase_implementation_64d(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["skill", "invoke", "phase-implementation", "64D"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "64D" in output
+    assert "Runtime Coordination Policy" in output
+
+
+def test_64c_1_skill_invoke_phase_validation_64d(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["skill", "invoke", "phase-validation", "64D"])
+    assert rc == 0
+
+
+def test_64c_1_skill_invoke_phase_agent_64d(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["skill", "invoke", "phase-agent", "64D"])
+    assert rc == 0
+
+
+def test_64c_1_prompt_profiles_for_64d(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    registry = data["prompt_registry"]
+    phase_64d = [r for r in registry if r["phase_id"] == "64D"]
+    types = {r["prompt_type"] for r in phase_64d}
+    assert "implementation" in types
+    assert "validation" in types
+    assert "agent" in types
+
+
+def test_64c_1_roadmap_current_shows_64d(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["roadmap", "current"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "64D" in output
+
+
+def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["roadmap", "next"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "multi_runtime" in output or "64D" in output or "64E" in output
 
 
 # ---------------------------------------------------------------------------
