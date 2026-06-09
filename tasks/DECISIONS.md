@@ -2,6 +2,7 @@
 
 ## Accepted
 
+- Treat Phase 64F Orchestration Readiness Gate as a read-only future-dispatch eligibility layer over 64C orchestration entries, 64D coordination policy entries, and 64E audit records: it evaluates approval/audit/recovery/quarantine readiness and emits governed gate records and signals, but must not authorize execution, duplicate 64B generic readiness, or replace 64E audit structure.
 - Treat the 64F phase transition as roadmap and prompt-governance advancement only: mark 64E completed, make 64F the active multi_runtime phase, move 65A behind 64F, and register 64F prompt profiles without introducing new runtime behavior before 64F implementation begins.
 - Treat Phase 64E Orchestration Audit Model as a read-only governance layer over 64C orchestration entries and 64D coordination policy entries: it defines audit records, traceability checks, and review readiness, but must not duplicate dispatch logic, policy logic, or authorize execution.
 - Treat capability projection as shared infrastructure: capability inventory and capability/roadmap intelligence must materialize their public capability records through one projection helper so IDs, fields, and command/report outputs stay stable while projection logic cannot drift independently.

@@ -50417,8 +50417,10 @@ def test_64b_6e_phase_implementation_65a_works(tmp_path, monkeypatch, capsys) ->
 
 from pcae.core.agent import build_runtime_coordination_policy  # noqa: E402
 from pcae.core.agent import build_orchestration_audit_model  # noqa: E402
+from pcae.core.agent import build_orchestration_readiness_gate  # noqa: E402
 from pcae.core.paths import HarnessPath as _HarnessPath64D  # noqa: E402
 from pcae.core.paths import HarnessPath as _HarnessPath64E  # noqa: E402
+from pcae.core.paths import HarnessPath as _HarnessPath64F  # noqa: E402
 
 
 def test_64d_json_top_level_keys(tmp_path) -> None:
@@ -50819,4 +50821,210 @@ def test_64e_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["orchestration_audit_model_overview"]["execution_allowed"] is False
     assert data["orchestration_audit_model_overview"]["human_review_required"] is True
     assert len(data["audit_records"]) == 2
+    assert len(data["signals"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# Phase 64F: Orchestration Readiness Gate
+# ---------------------------------------------------------------------------
+
+
+def test_64f_json_top_level_keys(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    for key in (
+        "orchestration_readiness_gate_overview",
+        "gate_records",
+        "record_model",
+        "signal_model",
+        "assessment_model",
+        "summary_model",
+        "signals",
+        "sample_assessment",
+        "sample_summary",
+        "governance_boundaries",
+        "advisory",
+    ):
+        assert key in data, f"Missing top-level key: {key}"
+
+
+def test_64f_models_and_exact_fields(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    assert data["record_model"]["model_name"] == "OrchestrationReadinessGateRecord"
+    assert data["record_model"]["field_count"] == 10
+    assert data["signal_model"]["model_name"] == "OrchestrationReadinessGateSignal"
+    assert data["signal_model"]["field_count"] == 8
+    assert data["assessment_model"]["model_name"] == "OrchestrationReadinessGateAssessment"
+    assert data["assessment_model"]["field_count"] == 9
+    assert data["summary_model"]["model_name"] == "OrchestrationReadinessGateSummary"
+    assert data["summary_model"]["field_count"] == 10
+    for field_name in (
+        "gate_id", "runtime_id", "runtime_name", "orchestration_entry_id",
+        "policy_entry_id", "audit_record_id", "gate_status",
+        "approval_ready", "audit_ready", "human_review_required",
+    ):
+        assert any(
+            f["name"] == field_name for f in data["record_model"]["fields"]
+        ), f"Missing record field: {field_name}"
+
+
+def test_64f_all_gate_domains_defined(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    expected = {
+        "gate_entry_validation",
+        "orchestration_linkage_validation",
+        "coordination_policy_validation",
+        "audit_model_validation",
+        "approval_gate_validation",
+        "failure_recovery_validation",
+        "quarantine_readiness_validation",
+        "human_review_validation",
+        "gate_allowed_determination",
+        "orchestration_readiness_blocking",
+    }
+    actual = {signal["gate_domain"] for signal in data["signals"]}
+    assert actual == expected
+
+
+def test_64f_gate_allowed_governed_and_conditional(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    overview = data["orchestration_readiness_gate_overview"]
+    assessment = data["sample_assessment"]
+    summary = data["sample_summary"]
+    boundaries = data["governance_boundaries"]
+    if overview["blocker_count"] > 0:
+        assert overview["gate_allowed"] is False
+    else:
+        assert isinstance(overview["gate_allowed"], bool)
+    assert assessment["gate_allowed"] == overview["gate_allowed"]
+    assert summary["gate_allowed"] == overview["gate_allowed"]
+    assert boundaries["gate_allowed"] == overview["gate_allowed"]
+
+
+def test_64f_execution_allowed_always_false(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    assert data["orchestration_readiness_gate_overview"]["execution_allowed"] is False
+    assert data["sample_assessment"]["execution_allowed"] is False
+    assert data["sample_summary"]["execution_allowed"] is False
+    assert data["governance_boundaries"]["execution_allowed"] is False
+
+
+def test_64f_gate_records_generated(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    records = data["gate_records"]
+    assert len(records) == 2
+    for record in records:
+        assert record["gate_id"].startswith("org-")
+        assert "orchestration_entry_id" in record
+        assert "policy_entry_id" in record
+        assert "audit_record_id" in record
+        assert "gate_status" in record
+        assert record["human_review_required"] is True
+
+
+def test_64f_gate_statuses_valid(tmp_path) -> None:
+    from pcae.core.agent import _ORG_GATE_STATUSES
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    for record in data["gate_records"]:
+        assert record["gate_status"] in _ORG_GATE_STATUSES
+    assert data["orchestration_readiness_gate_overview"]["gate_status"] in _ORG_GATE_STATUSES
+
+
+def test_64f_signals_attributable_and_human_reviewed(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    for signal in data["signals"]:
+        assert "gate_id" in signal
+        assert signal["human_review_required"] is True
+        assert signal["severity"] in ("info", "warning", "blocker")
+        assert "gate_domain" in signal
+
+
+def test_64f_governance_boundaries(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    boundaries = data["governance_boundaries"]
+    assert boundaries["execution_allowed"] is False
+    assert boundaries["human_review_required"] is True
+    assert boundaries["phase"] == "64F"
+    for action in (
+        "invoke runtimes",
+        "execute prompts",
+        "execute commands",
+        "perform orchestration",
+        "modify runtime configuration",
+        "modify audit artifacts",
+        "modify source files",
+        "access network",
+        "approve writes",
+        "commit",
+        "push",
+        "rollback",
+    ):
+        assert action in boundaries["may_not"], f"Missing may_not: {action}"
+    assert "inspect orchestration entries" in boundaries["may"]
+    assert "inspect coordination policy entries" in boundaries["may"]
+    assert "inspect audit records" in boundaries["may"]
+    assert "determine gate_allowed status" in boundaries["may"]
+
+
+def test_64f_human_review_required(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    assert data["orchestration_readiness_gate_overview"]["human_review_required"] is True
+    assert data["sample_assessment"]["human_review_required"] is True
+    assert data["sample_summary"]["human_review_required"] is True
+    assert data["governance_boundaries"]["human_review_required"] is True
+    for record in data["gate_records"]:
+        assert record["human_review_required"] is True
+    for signal in data["signals"]:
+        assert signal["human_review_required"] is True
+
+
+def test_64f_input_summaries_declared(tmp_path) -> None:
+    data = build_orchestration_readiness_gate(_HarnessPath64F(tmp_path))
+    summaries = data["orchestration_readiness_gate_overview"]["input_summaries"]
+    for name in (
+        "MultiRuntimeOrchestrationExecutionSummary",
+        "RuntimeCoordinationPolicySummary",
+        "OrchestrationAuditSummary",
+        "RuntimeApprovalGateSummary",
+        "RuntimeFailureRecoverySummary",
+        "RuntimeQuarantineSummary",
+    ):
+        assert name in summaries, f"Missing input summary: {name}"
+
+
+def test_64f_advisory_exported(tmp_path) -> None:
+    from pcae.core.agent import ORCHESTRATION_READINESS_GATE_ADVISORY
+    assert isinstance(ORCHESTRATION_READINESS_GATE_ADVISORY, str)
+    assert len(ORCHESTRATION_READINESS_GATE_ADVISORY) > 50
+    assert "readiness gate" in ORCHESTRATION_READINESS_GATE_ADVISORY.lower()
+    assert "execution_allowed" in ORCHESTRATION_READINESS_GATE_ADVISORY
+
+
+def test_64f_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["orchestration-readiness-gate"])
+    output = capsys.readouterr().out
+    for text in (
+        "Orchestration readiness gate",
+        "Gate records:",
+        "Record model",
+        "Signal model",
+        "Assessment model",
+        "Summary model",
+        "Gate signals:",
+        "Governance boundaries:",
+        "Gate allowed:",
+        "Execution allowed:",
+        "Gate status:",
+    ):
+        assert text in output
+
+
+def test_64f_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(["orchestration-readiness-gate", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert data["orchestration_readiness_gate_overview"]["phase"] == "64F"
+    assert data["orchestration_readiness_gate_overview"]["execution_allowed"] is False
+    assert data["orchestration_readiness_gate_overview"]["human_review_required"] is True
+    assert len(data["gate_records"]) == 2
     assert len(data["signals"]) == 10

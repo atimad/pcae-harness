@@ -82,6 +82,18 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
+PCAE can define governed orchestration readiness gates with
+`pcae orchestration-readiness-gate` and
+`pcae orchestration-readiness-gate --json`, linking multi-runtime
+orchestration entries (64C), coordination policy entries (64D), and
+orchestration audit records (64E) into a read-only future-dispatch
+eligibility assessment while keeping runtime invocation, orchestration
+execution, prompt execution, and write execution disabled. Four models are
+exported: OrchestrationReadinessGateRecord,
+OrchestrationReadinessGateSignal, OrchestrationReadinessGateAssessment, and
+OrchestrationReadinessGateSummary. Gate readiness is governed through 10 gate
+domains. `gate_allowed` is conditional and advisory; `execution_allowed`
+remains False always. Human review is required for all governance decisions.
 PCAE can define governed orchestration audit models with
 `pcae orchestration-audit-model` and `pcae orchestration-audit-model --json`,
 linking multi-runtime orchestration dispatch entries (64C), coordination

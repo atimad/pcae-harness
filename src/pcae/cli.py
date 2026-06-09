@@ -184,6 +184,7 @@ from pcae.commands.agent import (
     run_multi_runtime_execution_readiness,
     run_multi_runtime_orchestration_execution,
     run_orchestration_audit_model,
+    run_orchestration_readiness_gate,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4699,6 +4700,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     oam_parser.set_defaults(handler=run_orchestration_audit_model)
+
+    org_parser = subparsers.add_parser(
+        "orchestration-readiness-gate",
+        help="Define the governed orchestration readiness gate linking orchestration, policy, and audit readiness (Phase 64F).",
+    )
+    org_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    org_parser.set_defaults(handler=run_orchestration_readiness_gate)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

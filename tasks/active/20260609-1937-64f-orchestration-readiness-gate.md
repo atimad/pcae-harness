@@ -24,6 +24,8 @@ implementation
 
 - .pcae/session.json
 - src/pcae/core/agent.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
 - tests/test_agent.py
 - tasks/active/**
 - tasks/done/**
@@ -66,7 +68,7 @@ strict
 
 - No runtime invocation
 - No prompt execution
-- No source behavior changes outside 64F phase-state and prompt-governance transition work
+- No source behavior changes outside 64F orchestration readiness gate governance
 - No execution authorization
 - No commit
 - No push

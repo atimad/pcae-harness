@@ -395,6 +395,8 @@ from pcae.core.agent import (
     MULTI_RUNTIME_ORCHESTRATION_EXECUTION_ADVISORY,
     build_orchestration_audit_model,
     ORCHESTRATION_AUDIT_MODEL_ADVISORY,
+    build_orchestration_readiness_gate,
+    ORCHESTRATION_READINESS_GATE_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -13251,6 +13253,72 @@ def run_orchestration_audit_model(args: argparse.Namespace) -> int:
     print(f"  Human review:        {boundaries['human_review_required']}")
     print()
     print(ORCHESTRATION_AUDIT_MODEL_ADVISORY)
+    return 0
+
+
+def run_orchestration_readiness_gate(args: argparse.Namespace) -> int:
+    data = build_orchestration_readiness_gate(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["orchestration_readiness_gate_overview"]
+    print("Orchestration readiness gate")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Gate domains:           {overview['domain_count']}")
+    print(f"Gate records:           {overview['gate_count']}")
+    print(f"Ready:                  {overview['ready_count']}")
+    print(f"Pending:                {overview['pending_count']}")
+    print(f"Escalated:              {overview['escalated_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Gate status:            {overview['gate_status']}")
+    print(f"Gate allowed:           {'yes' if overview['gate_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Gate records:")
+    for record in data["gate_records"]:
+        print(f"  [{record['gate_id']}] {record['runtime_id']} — {record['runtime_name']}")
+        print(
+            f"    orchestration_entry_id={record['orchestration_entry_id']}  "
+            f"policy_entry_id={record['policy_entry_id']}"
+        )
+        print(
+            f"    audit_record_id={record['audit_record_id']}  "
+            f"gate_status={record['gate_status']}"
+        )
+    print()
+    for key, label in (
+        ("record_model", "Record model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Gate signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['gate_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print(f"  Gate allowed:        {boundaries['gate_allowed']}")
+    print(f"  Execution allowed:   {boundaries['execution_allowed']}")
+    print(f"  Human review:        {boundaries['human_review_required']}")
+    print()
+    print(ORCHESTRATION_READINESS_GATE_ADVISORY)
     return 0
 
 

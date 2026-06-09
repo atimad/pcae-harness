@@ -68812,6 +68812,22 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae orchestration-audit-model --json",
         ],
         "dependencies": ["runtime_coordination_policy", "multi_runtime_audit_chain"],
+        "successor_capabilities": ["orchestration_readiness_gate"],
+    },
+    {
+        "capability_name": "Orchestration Readiness Gate",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64F",
+        "status": "implemented",
+        "commands": [
+            "pcae orchestration-readiness-gate",
+            "pcae orchestration-readiness-gate --json",
+        ],
+        "dependencies": [
+            "multi_runtime_orchestration_execution",
+            "runtime_coordination_policy",
+            "orchestration_audit_model",
+        ],
         "successor_capabilities": ["multi_runtime_execution_dispatch"],
     },
     {
@@ -70106,9 +70122,27 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae orchestration-audit-model --json",
         ],
         "dependencies": ["runtime_coordination_policy", "multi_runtime_audit_chain"],
-        "successors": ["multi_runtime_execution_dispatch"],
+        "successors": ["orchestration_readiness_gate"],
         "aliases": [],
         "contribution": "defines the governed audit record, traceability, and review model for multi-runtime orchestration decisions",
+    },
+    {
+        "capability_name": "Orchestration Readiness Gate",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64F",
+        "status": "implemented",
+        "commands": [
+            "pcae orchestration-readiness-gate",
+            "pcae orchestration-readiness-gate --json",
+        ],
+        "dependencies": [
+            "multi_runtime_orchestration_execution",
+            "runtime_coordination_policy",
+            "orchestration_audit_model",
+        ],
+        "successors": ["multi_runtime_execution_dispatch"],
+        "aliases": [],
+        "contribution": "determines whether a governed orchestration candidate is ready to cross from reviewed state into future dispatch eligibility without authorizing execution",
     },
     {
         "capability_name": "Capability Inventory",
@@ -76249,6 +76283,491 @@ def build_orchestration_audit_model(root: "HarnessPath | None" = None) -> dict:
             "phase": "64E",
         },
         "advisory": ORCHESTRATION_AUDIT_MODEL_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64F: Orchestration Readiness Gate
+# ---------------------------------------------------------------------------
+
+ORCHESTRATION_READINESS_GATE_ADVISORY = (
+    "Phase 64F defines the governed orchestration readiness gate connecting orchestration "
+    "entries (64C), coordination policy entries (64D), and orchestration audit records (64E) "
+    "into a single readiness assessment for future dispatch eligibility. gate_allowed may be "
+    "True when at least one governed orchestration candidate is fully linked, approval-ready, "
+    "and audit-ready without blockers. execution_allowed=False always in 64F. No runtime "
+    "invocation occurs. No prompt execution occurs. No command execution occurs. No write "
+    "execution occurs. No orchestration execution occurs. Human review is always required."
+)
+
+_ORG_GATE_DOMAINS: tuple[str, ...] = (
+    "gate_entry_validation",
+    "orchestration_linkage_validation",
+    "coordination_policy_validation",
+    "audit_model_validation",
+    "approval_gate_validation",
+    "failure_recovery_validation",
+    "quarantine_readiness_validation",
+    "human_review_validation",
+    "gate_allowed_determination",
+    "orchestration_readiness_blocking",
+)
+
+_ORG_GATE_STATUSES: tuple[str, ...] = (
+    "gate_ready",
+    "gate_with_warnings",
+    "gate_pending",
+    "escalated",
+    "blocked",
+)
+
+_ORG_GATE_SEVERITY_VALUES: tuple[str, ...] = ("info", "warning", "blocker")
+
+_ORG_GATE_INPUT_SUMMARIES: tuple[str, ...] = (
+    "MultiRuntimeOrchestrationExecutionSummary",
+    "RuntimeCoordinationPolicySummary",
+    "OrchestrationAuditSummary",
+    "RuntimeApprovalGateSummary",
+    "RuntimeFailureRecoverySummary",
+    "RuntimeQuarantineSummary",
+)
+
+_ORG_GATE_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "gate_id", "type": "str", "required": True},
+    {"name": "runtime_id", "type": "str", "required": True},
+    {"name": "runtime_name", "type": "str", "required": True},
+    {"name": "orchestration_entry_id", "type": "str", "required": True},
+    {"name": "policy_entry_id", "type": "str", "required": True},
+    {"name": "audit_record_id", "type": "str", "required": True},
+    {"name": "gate_status", "type": "str", "required": True},
+    {"name": "approval_ready", "type": "bool", "required": True},
+    {"name": "audit_ready", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ORG_GATE_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"name": "signal_id", "type": "str", "required": True},
+    {"name": "gate_id", "type": "str", "required": True},
+    {"name": "gate_domain", "type": "str", "required": True},
+    {"name": "signal_type", "type": "str", "required": True},
+    {"name": "severity", "type": "str", "required": True},
+    {"name": "detected_state", "type": "str", "required": True},
+    {"name": "expected_state", "type": "str", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ORG_GATE_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "gate_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "gate_status", "type": "str", "required": True},
+    {"name": "gate_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ORG_GATE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"name": "summary_id", "type": "str", "required": True},
+    {"name": "assessment_id", "type": "str", "required": True},
+    {"name": "gate_count", "type": "int", "required": True},
+    {"name": "signal_count", "type": "int", "required": True},
+    {"name": "blocker_count", "type": "int", "required": True},
+    {"name": "warning_count", "type": "int", "required": True},
+    {"name": "gate_status", "type": "str", "required": True},
+    {"name": "gate_allowed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+    {"name": "human_review_required", "type": "bool", "required": True},
+)
+
+_ORG_GATE_GOVERNED_CANDIDATES: tuple[dict, ...] = (
+    {
+        "runtime_id": "shell-local",
+        "runtime_name": "Local Shell",
+        "orchestration_entry_suffix": "01",
+        "policy_entry_suffix": "01",
+        "audit_record_suffix": "01",
+        "gate_status": "gate_ready",
+        "approval_ready": True,
+        "audit_ready": True,
+    },
+    {
+        "runtime_id": "python-local",
+        "runtime_name": "Local Python",
+        "orchestration_entry_suffix": "02",
+        "policy_entry_suffix": "02",
+        "audit_record_suffix": "02",
+        "gate_status": "gate_pending",
+        "approval_ready": False,
+        "audit_ready": False,
+    },
+)
+
+
+def build_orchestration_readiness_gate(root: "HarnessPath | None" = None) -> dict:
+    """Define the governed orchestration readiness gate without executing anything."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    gate_records = []
+    for i, candidate in enumerate(_ORG_GATE_GOVERNED_CANDIDATES, start=1):
+        gate_records.append(
+            {
+                "gate_id": f"org-{ts}-{i:02d}",
+                "runtime_id": candidate["runtime_id"],
+                "runtime_name": candidate["runtime_name"],
+                "orchestration_entry_id": (
+                    f"mroe-{ts}-{candidate['orchestration_entry_suffix']}"
+                ),
+                "policy_entry_id": f"rcp-{ts}-{candidate['policy_entry_suffix']}",
+                "audit_record_id": f"oam-{ts}-{candidate['audit_record_suffix']}",
+                "gate_status": candidate["gate_status"],
+                "approval_ready": candidate["approval_ready"],
+                "audit_ready": candidate["audit_ready"],
+                "human_review_required": True,
+            }
+        )
+
+    gate_count = len(gate_records)
+    ready_count = sum(1 for record in gate_records if record["gate_status"] == "gate_ready")
+    pending_count = sum(
+        1 for record in gate_records if record["gate_status"] == "gate_pending"
+    )
+    escalated_count = sum(
+        1 for record in gate_records if record["gate_status"] == "escalated"
+    )
+    first_gate_id = gate_records[0]["gate_id"] if gate_records else f"org-{ts}-00"
+    gate_allowed = any(
+        record["approval_ready"] and record["audit_ready"] for record in gate_records
+    )
+
+    domain_signal_defs = [
+        {
+            "gate_domain": "gate_entry_validation",
+            "signal_type": "gate_entry_validation_check",
+            "severity": "info" if gate_count > 0 else "blocker",
+            "detected_state": (
+                f"gate_count={gate_count}; "
+                f"gate_ids={[record['gate_id'] for record in gate_records]}; "
+                "gate_source=MultiRuntimeOrchestrationExecutionSummary+"
+                "RuntimeCoordinationPolicySummary+OrchestrationAuditSummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "at least one orchestration readiness gate record must exist and link orchestration, "
+                "policy, and audit inputs; execution_allowed=False in 64F"
+            ),
+        },
+        {
+            "gate_domain": "orchestration_linkage_validation",
+            "signal_type": "orchestration_linkage_validation_check",
+            "severity": (
+                "info"
+                if all(
+                    record["orchestration_entry_id"]
+                    and record["policy_entry_id"]
+                    and record["audit_record_id"]
+                    for record in gate_records
+                )
+                else "blocker"
+            ),
+            "detected_state": (
+                f"orchestration_entry_ids={[record['orchestration_entry_id'] for record in gate_records]}; "
+                f"policy_entry_ids={[record['policy_entry_id'] for record in gate_records]}; "
+                f"audit_record_ids={[record['audit_record_id'] for record in gate_records]}; "
+                "linkage_complete=True; execution_allowed=False"
+            ),
+            "expected_state": (
+                "every gate record must link one orchestration entry (64C), one policy entry (64D), "
+                "and one audit record (64E); execution_allowed=False in 64F"
+            ),
+        },
+        {
+            "gate_domain": "coordination_policy_validation",
+            "signal_type": "coordination_policy_validation_check",
+            "severity": "info",
+            "detected_state": (
+                f"coordination_policy_linked_count={gate_count}; "
+                "coordination_source=RuntimeCoordinationPolicySummary; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "each gate record must reference active coordination policy context before future "
+                "dispatch eligibility is considered; execution_allowed=False in 64F"
+            ),
+        },
+        {
+            "gate_domain": "audit_model_validation",
+            "signal_type": "audit_model_validation_check",
+            "severity": "warning" if pending_count > 0 else "info",
+            "detected_state": (
+                f"audit_ready_count={sum(1 for record in gate_records if record['audit_ready'])}; "
+                f"gate_pending_count={pending_count}; "
+                "audit_source=OrchestrationAuditSummary; execution_allowed=False"
+            ),
+            "expected_state": (
+                "audit readiness must be declared for every gate record; pending audit posture remains "
+                "advisory only and must not authorize execution"
+            ),
+        },
+        {
+            "gate_domain": "approval_gate_validation",
+            "signal_type": "approval_gate_validation_check",
+            "severity": "warning" if pending_count > 0 else "info",
+            "detected_state": (
+                f"approval_ready_count={sum(1 for record in gate_records if record['approval_ready'])}; "
+                f"gate_pending_count={pending_count}; "
+                "approval_source=RuntimeApprovalGateSummary; execution_allowed=False"
+            ),
+            "expected_state": (
+                "approval readiness must be represented for every gate record; approval posture may "
+                "inform gate_allowed but never enable execution in 64F"
+            ),
+        },
+        {
+            "gate_domain": "failure_recovery_validation",
+            "signal_type": "failure_recovery_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "failure_recovery_trace_ready=True; "
+                "failure_recovery_source=RuntimeFailureRecoverySummary; execution_allowed=False"
+            ),
+            "expected_state": (
+                "failure recovery linkage must be declared before future dispatch eligibility is "
+                "reported; no recovery execution occurs in 64F"
+            ),
+        },
+        {
+            "gate_domain": "quarantine_readiness_validation",
+            "signal_type": "quarantine_readiness_validation_check",
+            "severity": "info",
+            "detected_state": (
+                "quarantine_readiness_trace=True; "
+                "quarantine_source=RuntimeQuarantineSummary; execution_allowed=False"
+            ),
+            "expected_state": (
+                "quarantine readiness linkage must be declared before future dispatch eligibility is "
+                "reported; no quarantine enforcement occurs in 64F"
+            ),
+        },
+        {
+            "gate_domain": "human_review_validation",
+            "signal_type": "human_review_validation_check",
+            "severity": (
+                "info"
+                if all(record["human_review_required"] for record in gate_records)
+                else "blocker"
+            ),
+            "detected_state": (
+                f"human_review_required_count={sum(1 for record in gate_records if record['human_review_required'])}; "
+                "execution_allowed=False"
+            ),
+            "expected_state": (
+                "human review must be required for every readiness gate record and signal in 64F"
+            ),
+        },
+        {
+            "gate_domain": "gate_allowed_determination",
+            "signal_type": "gate_allowed_determination_check",
+            "severity": "warning" if pending_count > 0 else "info",
+            "detected_state": (
+                f"gate_allowed={gate_allowed}; "
+                f"ready_count={ready_count}; "
+                f"pending_count={pending_count}; "
+                f"escalated_count={escalated_count}; execution_allowed=False"
+            ),
+            "expected_state": (
+                "gate_allowed may be True only when a governed candidate is both approval-ready and "
+                "audit-ready without blockers; execution_allowed=False always in 64F"
+            ),
+        },
+        {
+            "gate_domain": "orchestration_readiness_blocking",
+            "signal_type": "orchestration_readiness_blocking_check",
+            "severity": "info",
+            "detected_state": (
+                "execution_allowed=False; no_runtime_invocation=True; no_prompt_execution=True; "
+                "no_write_execution=True; no_orchestration_execution=True; "
+                "orchestration_readiness_gate_only=True"
+            ),
+            "expected_state": (
+                "execution_allowed=False always in 64F regardless of gate_allowed; the readiness gate "
+                "defines future dispatch eligibility only and does not execute orchestration"
+            ),
+        },
+    ]
+
+    signals = [
+        {
+            "signal_id": f"org-sig-{ts}-{i:02d}",
+            "gate_id": first_gate_id,
+            "gate_domain": signal["gate_domain"],
+            "signal_type": signal["signal_type"],
+            "severity": signal["severity"],
+            "detected_state": signal["detected_state"],
+            "expected_state": signal["expected_state"],
+            "human_review_required": True,
+        }
+        for i, signal in enumerate(domain_signal_defs, start=1)
+    ]
+
+    signal_count = len(signals)
+    blocker_count = sum(1 for signal in signals if signal["severity"] == "blocker")
+    warning_count = sum(1 for signal in signals if signal["severity"] == "warning")
+    info_count = sum(1 for signal in signals if signal["severity"] == "info")
+
+    if blocker_count > 0:
+        overall_status = "blocked"
+    elif escalated_count > 0:
+        overall_status = "escalated"
+    elif pending_count > 0:
+        overall_status = "gate_pending"
+    elif warning_count > 0:
+        overall_status = "gate_with_warnings"
+    else:
+        overall_status = "gate_ready"
+
+    assessment_id = f"orga-{ts}"
+    sample_assessment = {
+        "assessment_id": assessment_id,
+        "gate_count": gate_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "gate_status": overall_status,
+        "gate_allowed": gate_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+    sample_summary = {
+        "summary_id": f"orgs-{ts}",
+        "assessment_id": assessment_id,
+        "gate_count": gate_count,
+        "signal_count": signal_count,
+        "blocker_count": blocker_count,
+        "warning_count": warning_count,
+        "gate_status": overall_status,
+        "gate_allowed": gate_allowed,
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "orchestration_readiness_gate_overview": {
+            "overview_id": f"64f-{ts}",
+            "generated_at": generated_at,
+            "phase": "64F",
+            "title": "Orchestration Readiness Gate",
+            "domain_count": len(_ORG_GATE_DOMAINS),
+            "gate_count": gate_count,
+            "ready_count": ready_count,
+            "pending_count": pending_count,
+            "escalated_count": escalated_count,
+            "signal_count": signal_count,
+            "blocker_count": blocker_count,
+            "warning_count": warning_count,
+            "info_count": info_count,
+            "gate_status": overall_status,
+            "gate_allowed": gate_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "input_summaries": list(_ORG_GATE_INPUT_SUMMARIES),
+            "summary": (
+                "Phase 64F defines the governed orchestration readiness gate linking orchestration "
+                "entries, coordination policy, audit posture, approval posture, and downstream "
+                "recovery/quarantine traceability into a single future-dispatch readiness view. "
+                f"gate_count={gate_count}. "
+                f"ready_count={ready_count}. "
+                f"pending_count={pending_count}. "
+                f"escalated_count={escalated_count}. "
+                f"gate_status={overall_status}. "
+                f"gate_allowed={gate_allowed}. "
+                "execution_allowed=False. "
+                "No runtime invocation occurs. No orchestration execution occurs. "
+                "human_review_required=True."
+            ),
+        },
+        "gate_records": gate_records,
+        "record_model": {
+            "model_name": "OrchestrationReadinessGateRecord",
+            "field_count": len(_ORG_GATE_RECORD_FIELDS),
+            "required_field_count": len(_ORG_GATE_RECORD_FIELDS),
+            "supported_gate_statuses": list(_ORG_GATE_STATUSES),
+            "gate_allowed_conditional_in_64f": True,
+            "execution_allowed_false_in_64f": True,
+            "human_review_required_always_true_in_64f": True,
+            "fields": [dict(field) for field in _ORG_GATE_RECORD_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "OrchestrationReadinessGateSignal",
+            "field_count": len(_ORG_GATE_SIGNAL_FIELDS),
+            "required_field_count": len(_ORG_GATE_SIGNAL_FIELDS),
+            "severity_values": list(_ORG_GATE_SEVERITY_VALUES),
+            "execution_allowed_false_in_64f": True,
+            "human_review_required_always_true_in_64f": True,
+            "fields": [dict(field) for field in _ORG_GATE_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "OrchestrationReadinessGateAssessment",
+            "field_count": len(_ORG_GATE_ASSESSMENT_FIELDS),
+            "required_field_count": len(_ORG_GATE_ASSESSMENT_FIELDS),
+            "supported_gate_statuses": list(_ORG_GATE_STATUSES),
+            "gate_allowed_conditional_in_64f": True,
+            "execution_allowed_false_in_64f": True,
+            "human_review_required_always_true_in_64f": True,
+            "fields": [dict(field) for field in _ORG_GATE_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "OrchestrationReadinessGateSummary",
+            "field_count": len(_ORG_GATE_SUMMARY_FIELDS),
+            "required_field_count": len(_ORG_GATE_SUMMARY_FIELDS),
+            "supported_gate_statuses": list(_ORG_GATE_STATUSES),
+            "gate_allowed_conditional_in_64f": True,
+            "execution_allowed_false_in_64f": True,
+            "human_review_required_always_true_in_64f": True,
+            "fields": [dict(field) for field in _ORG_GATE_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "inspect orchestration entries",
+                "inspect coordination policy entries",
+                "inspect audit records",
+                "evaluate approval readiness",
+                "evaluate audit readiness",
+                "evaluate failure recovery readiness",
+                "evaluate quarantine readiness",
+                "generate orchestration readiness gate records",
+                "determine gate_allowed status",
+                "report blockers and warnings",
+                "recommend escalation",
+            ],
+            "may_not": [
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "perform orchestration",
+                "modify runtime configuration",
+                "modify audit artifacts",
+                "modify source files",
+                "access network",
+                "approve writes",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "gate_allowed": gate_allowed,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "64F",
+        },
+        "advisory": ORCHESTRATION_READINESS_GATE_ADVISORY,
     }
 
 

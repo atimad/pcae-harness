@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-09T17:31:36.607291+00:00
+Generated: 2026-06-09T17:59:16.786899+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 23
-Implemented: 21
+Total capabilities: 24
+Implemented: 22
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 0
@@ -32,7 +32,8 @@ Assessment status: inventory_with_duplicates
 | Multi-Runtime Execution Planning | multi_runtime_capabilities | 64A | implemented | pcae multi-runtime-execution-planning | multi_runtime_registry; runtime_selection_engine; runtime_arbitration | multi_runtime_execution_readiness |
 | Multi-Runtime Orchestration Execution | multi_runtime_capabilities | 64C | implemented | pcae multi-runtime-orchestration-execution; pcae multi-runtime-orchestration-execution --json | multi_runtime_execution_readiness | runtime_coordination_policy |
 | Runtime Coordination Policy | multi_runtime_capabilities | 64D | implemented | (none) | multi_runtime_orchestration_execution | orchestration_audit_model |
-| Orchestration Audit Model | multi_runtime_capabilities | 64E | implemented | pcae orchestration-audit-model; pcae orchestration-audit-model --json | runtime_coordination_policy; multi_runtime_audit_chain | multi_runtime_execution_dispatch |
+| Orchestration Audit Model | multi_runtime_capabilities | 64E | implemented | pcae orchestration-audit-model; pcae orchestration-audit-model --json | runtime_coordination_policy; multi_runtime_audit_chain | orchestration_readiness_gate |
+| Orchestration Readiness Gate | multi_runtime_capabilities | 64F | implemented | pcae orchestration-readiness-gate; pcae orchestration-readiness-gate --json | multi_runtime_orchestration_execution; runtime_coordination_policy; orchestration_audit_model | multi_runtime_execution_dispatch |
 | Repository Health Governance | repository_governance_capabilities | 44A | implemented | pcae health; pcae check; pcae status coherence | (none) | task_state_alignment |
 | Commands Reference Generation | documentation_capabilities | 53A | implemented | pcae docs commands | (none) | capability_inventory |
 | Phase-Scoped Test Selection | testing_capabilities | 44A+ | implemented | python -m pytest -k <phase_id>; python -m pytest -n auto | (none) | (none) |
@@ -50,4 +51,4 @@ Assessment status: inventory_with_duplicates
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=23. implemented_count=21. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=3. prompt_capability_count=2. assessment_status=inventory_with_duplicates. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=24. implemented_count=22. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=3. prompt_capability_count=2. assessment_status=inventory_with_duplicates. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
