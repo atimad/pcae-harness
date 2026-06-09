@@ -69659,8 +69659,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.6B",
         "phase_title": "Dependency & Capability Intelligence Rendering",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.6A",
+        "successor": "64B.6C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64B.6C",
+        "phase_title": "Predecessor Capability Rendering",
+        "status": "active",
+        "predecessor": "64B.6B",
         "successor": "",
         "superseded_by": "",
     },
@@ -69919,6 +69928,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["runtime_rollback_boundaries"],
         "successors": ["runtime_selection_engine"],
         "aliases": [],
+        "contribution": "provides the governed list of runtime candidates available for selection",
     },
     {
         "capability_name": "Runtime Selection Engine",
@@ -69929,6 +69939,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["multi_runtime_registry"],
         "successors": ["runtime_arbitration"],
         "aliases": [],
+        "contribution": "provides runtime candidate scoring and selection decisions",
     },
     {
         "capability_name": "Runtime Arbitration",
@@ -69939,6 +69950,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["runtime_selection_engine"],
         "successors": ["multi_runtime_audit_chain"],
         "aliases": [],
+        "contribution": "resolves conflicts between qualified runtime candidates",
     },
     {
         "capability_name": "Multi-Runtime Audit Chain",
@@ -69949,6 +69961,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["runtime_arbitration"],
         "successors": ["runtime_failure_recovery"],
         "aliases": [],
+        "contribution": "provides cross-runtime lineage and audit traceability",
     },
     {
         "capability_name": "Runtime Failure Recovery",
@@ -69959,6 +69972,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["multi_runtime_audit_chain"],
         "successors": ["runtime_quarantine"],
         "aliases": [],
+        "contribution": "provides recovery classification and escalation guidance for runtime failures",
     },
     {
         "capability_name": "Runtime Quarantine",
@@ -69969,6 +69983,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["runtime_failure_recovery"],
         "successors": ["multi_runtime_execution_planning"],
         "aliases": ["runtime_quarantine_classification"],
+        "contribution": "provides quarantine recommendation and release-governance context",
     },
     {
         "capability_name": "Multi-Runtime Execution Readiness",
@@ -69979,6 +69994,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["multi_runtime_execution_planning"],
         "successors": ["capability_inventory"],
         "aliases": [],
+        "contribution": "validates whether the execution plan is ready to proceed",
     },
     {
         "capability_name": "Multi-Runtime Execution Planning",
@@ -69989,6 +70005,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["multi_runtime_registry", "runtime_selection_engine"],
         "successors": ["multi_runtime_execution_readiness"],
         "aliases": [],
+        "contribution": "provides the execution plan structure, constraints, and sequencing",
     },
     {
         "capability_name": "Capability Inventory",
@@ -70166,6 +70183,24 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "prompt_rendering_quality_hardening",
         ],
+        "successors": ["predecessor_capability_rendering"],
+    },
+    {
+        "capability_name": "Predecessor Capability Rendering",
+        "capability_domain": "skill_system_capabilities",
+        "implemented_phase": "64B.6C",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": [
+            "dependency_capability_intelligence_rendering",
+        ],
         "successors": [],
     },
 )
@@ -70194,6 +70229,7 @@ def _build_capability_projection(
             "dependencies": list(capability["dependencies"]),
             successor_field: list(capability[source_successor_field]),
             "aliases": list(capability.get("aliases", [])),
+            "contribution": capability.get("contribution", ""),
         })
     return records
 
@@ -71303,6 +71339,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "prompt_version": "64B.6B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64B.6B",
+    },
+    {
+        "phase_id": "64B.6C",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6C",
+    },
+    {
+        "phase_id": "64B.6C",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6C",
+    },
+    {
+        "phase_id": "64B.6C",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64B.6C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64B.6C",
     },
 )
 
@@ -72666,10 +72726,15 @@ def _dri_build_dependency_context(
         explicit_deps = (cap or {}).get("dependencies", [])
         dep_state = "source_complete" if explicit_deps else "source_incomplete"
 
+    predecessor_contributions = _pcc_build_predecessor_contributions(
+        chain, related_caps, phase_record, roadmap_registry
+    )
+
     return {
         "predecessor_chain": chain,
         "related_capabilities": related_caps,
         "track_capabilities": track_caps,
+        "predecessor_contributions": predecessor_contributions,
         "dependency_count": len(chain),
         "related_capability_count": len(related_caps),
         "dependency_state": dep_state,
@@ -72811,6 +72876,117 @@ def _dri_build_dependency_summary(ts: str, assessment: dict) -> dict:
         "intelligence_status": assessment["intelligence_status"],
         "human_review_required": True,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6C – Predecessor Capability Rendering
+# ---------------------------------------------------------------------------
+
+PREDECESSOR_CAPABILITY_RENDERING_ADVISORY = (
+    "Phase 64B.6C adds per-predecessor capability contribution descriptions to prompt rendering. "
+    "Rendered implementation prompts now include a 'Predecessor Capability Contributions' section "
+    "that explains what each predecessor phase provides and how the target phase should build on it. "
+    "Contribution descriptions are sourced from the capability registry 'contribution' field where "
+    "available; otherwise inferred from capability name with an inferred marker. "
+    "No runtime invocation occurs. No shell commands are executed. Human review is required."
+)
+
+_PCC_INFERRED_MARKER: str = "(inferred from capability name)"
+
+_PCC_TITLE_KEYWORD_CONTRIBUTIONS: dict = {
+    "registry": "provides the governed registry of managed candidates",
+    "selection": "provides candidate scoring and selection decisions",
+    "arbitration": "resolves conflicts between qualified candidates",
+    "audit": "provides lineage and audit traceability",
+    "recovery": "provides recovery classification and escalation guidance",
+    "quarantine": "provides quarantine recommendation and release-governance context",
+    "planning": "provides the execution plan structure, constraints, and sequencing",
+    "readiness": "validates whether the plan is ready to proceed",
+    "orchestration": "connects predecessor capabilities into a governed execution entry point",
+    "inventory": "provides the governed capability inventory",
+    "intelligence": "provides roadmap and capability intelligence",
+    "hardening": "hardens quality and correctness of governance outputs",
+    "rendering": "renders structured prompts from governed metadata",
+    "targeting": "resolves skill invocation targets from governed registries",
+    "foundation": "establishes the foundational skill system structure",
+    "rollback": "provides governed rollback boundaries",
+    "approval": "provides approval gate enforcement",
+}
+
+
+def _pcc_infer_contribution(capability_name: str, phase_title: str) -> str:
+    """Derive a contribution description from capability_name when no explicit one exists."""
+    lower = (capability_name or phase_title or "").lower()
+    for keyword, description in _PCC_TITLE_KEYWORD_CONTRIBUTIONS.items():
+        if keyword in lower:
+            return description
+    slug = (capability_name or phase_title or "unknown capability").lower().replace(" ", "-")
+    return f"provides governed {slug} capability"
+
+
+def _pcc_get_contribution(
+    cap_record: "dict | None",
+    phase_record: "dict | None",
+) -> "tuple[str, bool]":
+    """Return (contribution_text, is_inferred) for a capability record."""
+    if cap_record and cap_record.get("contribution"):
+        return cap_record["contribution"], False
+    cap_name = (cap_record or {}).get("capability_name", "")
+    phase_title = (phase_record or {}).get("phase_title", "")
+    return _pcc_infer_contribution(cap_name, phase_title), True
+
+
+def _pcc_build_predecessor_contributions(
+    predecessor_chain: list,
+    related_capabilities: list,
+    target_phase_record: "dict | None",
+    roadmap_registry: list,
+) -> list:
+    """Build per-predecessor contribution records for the predecessor chain."""
+    cap_by_phase = {c.get("implemented_phase"): c for c in related_capabilities}
+    phase_by_id = {r["phase_id"]: r for r in roadmap_registry}
+    contributions = []
+    for phase_rec in predecessor_chain:
+        pid = phase_rec["phase_id"]
+        cap_rec = cap_by_phase.get(pid)
+        pr = phase_by_id.get(pid, phase_rec)
+        contribution_text, is_inferred = _pcc_get_contribution(cap_rec, pr)
+        cap_name = (cap_rec or {}).get("capability_name") or pr.get("phase_title", pid)
+        command = (cap_rec or {}).get("commands", [None])[0] or ""
+        contributions.append({
+            "phase_id": pid,
+            "phase_title": pr.get("phase_title", pid),
+            "phase_status": pr.get("status", "unknown"),
+            "capability_name": cap_name,
+            "contribution": contribution_text,
+            "command": command,
+            "is_inferred": is_inferred,
+            "source": "capability_record" if not is_inferred else "inferred",
+        })
+    return contributions
+
+
+def _pcc_render_contributions_block(
+    contributions: list,
+    target_phase_record: "dict | None",
+) -> str:
+    """Render the Predecessor Capability Contributions section text."""
+    if not contributions:
+        return ""
+    lines = []
+    for c in contributions:
+        inferred_note = f" {_PCC_INFERRED_MARKER}" if c["is_inferred"] else ""
+        cmd_note = f" (`{c['command']}`)" if c["command"] else ""
+        lines.append(
+            f"- {c['phase_id']} {c['capability_name']}{cmd_note}: "
+            f"{c['contribution']}{inferred_note}"
+        )
+    target_title = (target_phase_record or {}).get("phase_title", "this phase")
+    synthesis = (
+        f"\n{target_title} should connect these predecessor capabilities into a governed "
+        f"entry point while preserving execution boundaries and human review requirements."
+    )
+    return "\n".join(lines) + synthesis
 
 
 def _prs_find_best_capability(
@@ -73054,6 +73230,7 @@ def _prs_render_implementation_prompt(
     chain = dep_ctx.get("predecessor_chain", [])
     related_caps = dep_ctx.get("related_capabilities", [])
     dep_state = dep_ctx.get("dependency_state", "")
+    predecessor_contributions = dep_ctx.get("predecessor_contributions", [])
 
     if chain:
         predecessor_block = "\n".join(
@@ -73077,6 +73254,13 @@ def _prs_render_implementation_prompt(
         )
     else:
         related_caps_block = "- (no related capabilities found in registry)"
+
+    # Predecessor capability contributions
+    if predecessor_contributions:
+        contributions_text = _pcc_render_contributions_block(predecessor_contributions, phase_record)
+        contributions_section = f"\n## Predecessor Capability Contributions\n{contributions_text}\n"
+    else:
+        contributions_section = ""
 
     # Roadmap gap context
     roadmap_gap_section = ""
@@ -73167,7 +73351,7 @@ Implement {phase_title} for the PCAE governance harness. This phase introduces \
 
 ## Related Capabilities
 {related_caps_block}
-{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
+{contributions_section}{roadmap_gap_section}{arch_section}{intent_section}{safety_section}
 ## Required Behavior
 - All acceptance checks pass after implementation
 - All existing tests continue to pass
@@ -73637,7 +73821,7 @@ def build_prompt_rendering_skill(
         "governance_boundaries": {
             "may": list(_PRS_GOVERNANCE_MAY),
             "may_not": list(_PRS_GOVERNANCE_MAY_NOT),
-            "phase": "64B.6B",
+            "phase": "64B.6C",
         },
         "advisory": PROMPT_RENDERING_SKILL_ADVISORY,
     }

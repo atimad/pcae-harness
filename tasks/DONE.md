@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 64B.6C: Predecessor Capability Rendering (20260609-predecessor-capability-rendering)
 - 64B.6B: Dependency & Capability Intelligence Rendering (20260609-prompt-dep-capability-intelligence-rendering)
 - 64B.6A: Prompt Rendering Quality Hardening (20260608-2337-prompt-rendering-quality-hardening)
 - 64B.6 Prompt Rendering Skill (20260608-2236-64b-6-prompt-rendering-skill)

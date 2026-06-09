@@ -47528,7 +47528,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6B"
+    assert current["phase_id"] == "64B.6C"
     assert current["status"] == "active"
 
 
@@ -47627,7 +47627,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64B.6B"
+    assert data["current_phase"]["phase_id"] == "64B.6C"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47694,9 +47694,9 @@ def test_roadmap_intelligence_prompt_phase_not_found(tmp_path, monkeypatch, caps
 
 def test_roadmap_intelligence_prompt_phase_json(tmp_path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
-    main(["prompt", "phase", "64B.6B", "--json"])
+    main(["prompt", "phase", "64B.6C", "--json"])
     data = json.loads(capsys.readouterr().out)
-    assert data["phase_id"] == "64B.6B"
+    assert data["phase_id"] == "64B.6C"
     assert "prompt_recommendations" in data
     assert len(data["prompt_recommendations"]) >= 1
 
@@ -47741,7 +47741,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64B.6B"
+    assert data["current_phase"]["phase_id"] == "64B.6C"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47973,7 +47973,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64B.6B"
+    assert data["current_phase"]["phase_id"] == "64B.6C"
     assert data["current_track"] == "capability_intelligence"
 
 
@@ -48759,7 +48759,7 @@ def test_prompt_rendering_skill_governance_boundaries(tmp_path, monkeypatch) -> 
     assert "render prompts" in gb["may"]
     assert "invoke runtimes" in gb["may_not"]
     assert "execute shell commands" in gb["may_not"]
-    assert gb["phase"] == "64B.6B"
+    assert gb["phase"] == "64B.6C"
 
 
 def test_prompt_rendering_skill_human_review_always_required(tmp_path, monkeypatch) -> None:
@@ -48868,7 +48868,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6B"
+    assert current["phase_id"] == "64B.6C"
     assert current["status"] == "active"
 
 
@@ -49084,7 +49084,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64B.6B"
+    assert current["phase_id"] == "64B.6C"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49301,3 +49301,180 @@ def test_64b_6b_intelligence_domains_in_return(tmp_path, monkeypatch) -> None:
     assert "intelligence_domains" in data
     assert len(data["intelligence_domains"]) == 10
     assert "predecessor_phase_rendering" in data["intelligence_domains"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 64B.6C – Predecessor Capability Rendering
+# ---------------------------------------------------------------------------
+
+
+def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    current = data["current_phase"]
+    assert current["phase_id"] == "64B.6C"
+    assert current["status"] == "active"
+    phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
+    assert phase_64b6b is not None
+    assert phase_64b6b["status"] == "completed"
+    assert phase_64b6b["successor"] == "64B.6C"
+
+
+def test_64b_6c_capability_in_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    cap_names = {c["capability_name"] for c in data["capability_registry"]}
+    assert "Predecessor Capability Rendering" in cap_names
+
+
+def test_64b_6c_contribution_field_in_capability_records(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    multi_runtime_caps = [
+        c for c in data["capability_registry"]
+        if c.get("implemented_phase") in ("63A", "63B", "63C", "63D", "63E", "63F", "64A", "64B")
+    ]
+    for cap in multi_runtime_caps:
+        assert "contribution" in cap, f"missing contribution on {cap['implemented_phase']}"
+        assert cap["contribution"], f"empty contribution on {cap['implemented_phase']}"
+
+
+def test_64b_6c_predecessor_contributions_in_dep_ctx(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    dc = data["dependency_context"]
+    contributions = dc.get("predecessor_contributions", [])
+    assert len(contributions) == 8
+    phase_ids = [c["phase_id"] for c in contributions]
+    for pid in ("63A", "63B", "63C", "63D", "63E", "63F", "64A", "64B"):
+        assert pid in phase_ids, f"missing contribution for {pid}"
+
+
+def test_64b_6c_contributions_not_inferred_for_known_caps(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    contributions = data["dependency_context"].get("predecessor_contributions", [])
+    for c in contributions:
+        assert not c["is_inferred"], (
+            f"contribution for {c['phase_id']} is inferred but should use capability record: "
+            f"{c['contribution']}"
+        )
+        assert c["source"] == "capability_record"
+
+
+def test_64b_6c_implementation_prompt_contributions_section(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["render_record"]["rendered_prompt"]
+    assert "## Predecessor Capability Contributions" in prompt
+    section = prompt.split("## Predecessor Capability Contributions")[1].split("##")[0]
+    for pid in ("63A", "63B", "63C", "63D", "63E", "63F", "64A", "64B"):
+        assert pid in section, f"missing {pid} in contributions section"
+
+
+def test_64b_6c_contributions_describe_what_each_provides(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["render_record"]["rendered_prompt"]
+    section = prompt.split("## Predecessor Capability Contributions")[1].split("##")[0]
+    assert "governed list of runtime candidates" in section
+    assert "scoring and selection" in section
+    assert "resolves conflicts" in section
+    assert "audit traceability" in section
+    assert "recovery classification" in section
+    assert "quarantine recommendation" in section
+    assert "execution plan structure" in section
+    assert "ready to proceed" in section
+
+
+def test_64b_6c_contributions_include_synthesis(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["render_record"]["rendered_prompt"]
+    section = prompt.split("## Predecessor Capability Contributions")[1].split("##")[0]
+    assert "connect these predecessor capabilities" in section
+    assert "governed entry point" in section
+
+
+def test_64b_6c_contributions_include_commands(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    prompt = data["render_record"]["rendered_prompt"]
+    section = prompt.split("## Predecessor Capability Contributions")[1].split("##")[0]
+    assert "pcae multi-runtime-registry" in section
+    assert "pcae runtime-quarantine" in section
+    assert "pcae multi-runtime-execution-readiness" in section
+
+
+def test_64b_6c_inferred_fallback_for_unknown_cap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _pcc_get_contribution
+
+    # Capability with no contribution field
+    cap_no_contribution = {"capability_name": "Custom Audit Engine", "commands": []}
+    text, is_inferred = _pcc_get_contribution(cap_no_contribution, None)
+    assert is_inferred is True
+    assert len(text) > 0
+
+    # Capability with contribution field
+    cap_with_contribution = {
+        "capability_name": "Some Capability",
+        "contribution": "provides specific governance",
+        "commands": [],
+    }
+    text2, is_inferred2 = _pcc_get_contribution(cap_with_contribution, None)
+    assert is_inferred2 is False
+    assert text2 == "provides specific governance"
+
+
+def test_64b_6c_advisory_exported(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import PREDECESSOR_CAPABILITY_RENDERING_ADVISORY
+
+    assert isinstance(PREDECESSOR_CAPABILITY_RENDERING_ADVISORY, str)
+    assert len(PREDECESSOR_CAPABILITY_RENDERING_ADVISORY) > 50
+    assert "predecessor" in PREDECESSOR_CAPABILITY_RENDERING_ADVISORY.lower()
+    assert "contribution" in PREDECESSOR_CAPABILITY_RENDERING_ADVISORY.lower()
+
+
+def test_64b_6c_governance_phase_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    _setup_prs_repo(tmp_path)
+    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
+    assert data["governance_boundaries"]["phase"] == "64B.6C"

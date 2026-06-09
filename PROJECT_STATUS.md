@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64B.6B: Dependency & Capability Intelligence Rendering.
+Phase 64B.6C: Predecessor Capability Rendering.
 
 ## Post-61J Runtime Registry Checkpoint
 

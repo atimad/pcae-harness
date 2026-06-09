@@ -1,6 +1,6 @@
 # PCAE Skill Registry
 
-Generated: 2026-06-09T04:28:24.740944+00:00
+Generated: 2026-06-09T05:53:15.417639+00:00
 Phase: 64B.5 — Skill Invocation Targeting
 Skills root: .pcae/skills
 Skill count: 6
