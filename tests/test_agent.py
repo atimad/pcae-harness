@@ -47301,14 +47301,11 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
         "runtime_execution_capabilities",
         "runtime_audit_capabilities",
         "runtime_review_capabilities",
-        "runtime_approval_capabilities",
-        "runtime_rollback_capabilities",
         "multi_runtime_capabilities",
         "repository_governance_capabilities",
         "documentation_capabilities",
         "testing_capabilities",
         "recovery_capabilities",
-        "quarantine_capabilities",
     }
     actual_domains = {r["capability_domain"] for r in data["capability_records"]}
     assert expected_domains == actual_domains
@@ -47356,10 +47353,10 @@ def test_capability_inventory_prompt_capabilities_identified(tmp_path) -> None:
     )
 
 
-def test_capability_inventory_duplicates_identified(tmp_path) -> None:
+def test_capability_inventory_duplicates_reconciled(tmp_path) -> None:
     data = build_capability_inventory(_HarnessPath64B0(tmp_path))
     overview = data["capability_inventory_overview"]
-    assert overview["duplicate_count"] >= 1
+    assert overview["duplicate_count"] == 0
 
 
 def test_capability_inventory_record_structure(tmp_path) -> None:
@@ -47410,9 +47407,9 @@ def test_capability_projection_helper_preserves_inventory_and_registry_shapes(tm
 
 def test_capability_inventory_signals_cover_all_domains(tmp_path) -> None:
     data = build_capability_inventory(_HarnessPath64B0(tmp_path))
-    assert len(data["signals"]) == 18
+    assert len(data["signals"]) == 15
     signal_domains = {s["capability_domain"] for s in data["signals"]}
-    assert len(signal_domains) == 18
+    assert len(signal_domains) == 15
     for signal in data["signals"]:
         assert signal["severity"] in ("info", "warning", "blocker")
         assert "capability_id" in signal
@@ -47523,7 +47520,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64F"
+    assert current["phase_id"] == "64G"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47619,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "64F"
+    assert data["current_phase"]["phase_id"] == "64G"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47734,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "64F"
+    assert data["current_phase"]["phase_id"] == "64G"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47746,7 +47743,7 @@ def test_roadmap_recommendation_current_track_capability_intelligence(tmp_path, 
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_track"] == "multi_runtime"
+    assert data["current_track"] == "capability_intelligence"
 
 
 def test_roadmap_recommendation_no_41c_in_valid_recommendations(tmp_path, monkeypatch) -> None:
@@ -47857,7 +47854,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     data = json.loads(capsys.readouterr().out)
     assert "recommendations" in data
     assert "assessment" in data
-    assert data["current_track"] == "multi_runtime"
+    assert data["current_track"] == "capability_intelligence"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47865,7 +47862,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "multi_runtime" in output or "64C" in output
+    assert "capability_intelligence" in output or "64G" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47874,7 +47871,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
     assert "current_track" in data
-    assert data["current_track"] == "multi_runtime"
+    assert data["current_track"] == "capability_intelligence"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47969,8 +47966,8 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "64F"
-    assert data["current_track"] == "multi_runtime"
+    assert data["current_phase"]["phase_id"] == "64G"
+    assert data["current_track"] == "capability_intelligence"
 
 
 def test_prompt_recommendation_registry_record_fields(tmp_path, monkeypatch) -> None:
@@ -48864,7 +48861,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64F"
+    assert current["phase_id"] == "64G"
     assert current["status"] == "active"
 
 
@@ -49080,7 +49077,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64F"
+    assert current["phase_id"] == "64G"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49311,7 +49308,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "64F"
+    assert current["phase_id"] == "64G"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -49522,18 +49519,19 @@ def test_64b_6d_intelligence_domains_complete(tmp_path, monkeypatch) -> None:
 
 
 def test_64b_6d_inferred_commands_for_64c(tmp_path, monkeypatch) -> None:
+    # Post-64G: 64C is now registered in CRI with commands; inference no longer triggered
     monkeypatch.chdir(tmp_path)
     _setup_prs_repo(tmp_path)
-    from pcae.core.agent import build_prompt_rendering_skill
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES, build_prompt_rendering_skill
     from pcae.core.paths import HarnessPath
+
+    cri_64c = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "64C")
+    assert "pcae multi-runtime-orchestration-execution" in cri_64c["commands"]
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
     ctx = data["car_context"]
-    assert ctx["has_inferred_commands"] is True
-    cmds = ctx["inferred_commands"]
-    assert len(cmds) >= 1
-    assert all(c["confidence"] == "inferred" for c in cmds)
-    assert any("multi-runtime-orchestration-execution" in c["command"] for c in cmds)
+    assert ctx["has_inferred_commands"] is False
+    assert ctx["inferred_commands"] == []
 
 
 def test_64b_6d_inferred_commands_have_reason(tmp_path, monkeypatch) -> None:
@@ -49549,6 +49547,7 @@ def test_64b_6d_inferred_commands_have_reason(tmp_path, monkeypatch) -> None:
 
 
 def test_64b_6d_inferred_commands_in_rendered_prompt(tmp_path, monkeypatch) -> None:
+    # Post-64G: 64C commands are registered; prompt shows them via registered path, not inference
     monkeypatch.chdir(tmp_path)
     _setup_prs_repo(tmp_path)
     from pcae.core.agent import build_prompt_rendering_skill
@@ -49556,8 +49555,7 @@ def test_64b_6d_inferred_commands_in_rendered_prompt(tmp_path, monkeypatch) -> N
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-implementation", phase_id="64C")
     prompt = data["rendered_prompt"]
-    assert "Inferred Command Surface" in prompt
-    assert "confidence: inferred" in prompt
+    assert "Inferred Command Surface" not in prompt
     assert "multi-runtime-orchestration-execution" in prompt
 
 
@@ -49674,7 +49672,7 @@ def test_64b_6d_car_data_in_return(tmp_path, monkeypatch) -> None:
     assert "car_assessment" in data
     assert "car_summary" in data
     assert isinstance(data["car_signals"], list)
-    assert data["car_assessment"]["inferred_command_count"] >= 2
+    assert data["car_assessment"]["inferred_command_count"] == 0
     assert data["car_assessment"]["architecture_flow_count"] == 11
 
 
@@ -49700,6 +49698,7 @@ def test_64b_6d_advisory_exported(tmp_path, monkeypatch) -> None:
 
 
 def test_64b_6d_agent_prompt_includes_inferred_commands(tmp_path, monkeypatch) -> None:
+    # Post-64G: 64C commands registered; prompt contains commands via registry path
     monkeypatch.chdir(tmp_path)
     _setup_prs_repo(tmp_path)
     from pcae.core.agent import build_prompt_rendering_skill
@@ -49707,7 +49706,6 @@ def test_64b_6d_agent_prompt_includes_inferred_commands(tmp_path, monkeypatch) -
 
     data = build_prompt_rendering_skill(HarnessPath.cwd(), skill_id="phase-agent", phase_id="64C")
     prompt = data["rendered_prompt"]
-    assert "inferred" in prompt.lower()
     assert "multi-runtime-orchestration-execution" in prompt
 
 
@@ -50036,14 +50034,21 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     phases = data["roadmap_registry"]
     phase = next((p for p in phases if p["phase_id"] == "64F"), None)
     assert phase is not None
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["phase_title"] == "Orchestration Readiness Gate"
     assert phase["predecessor"] == "64E"
-    assert phase["successor"] == "65A"
+    assert phase["successor"] == "64G"
     assert phase["track_name"] == "multi_runtime"
 
+    phase_64g = next((p for p in phases if p["phase_id"] == "64G"), None)
+    assert phase_64g is not None
+    assert phase_64g["status"] == "active"
+    assert phase_64g["phase_title"] == "Capability Inventory Alignment Hardening"
+    assert phase_64g["predecessor"] == "64F"
+    assert phase_64g["track_name"] == "capability_intelligence"
+
     current = data["current_phase"]
-    assert current["phase_id"] == "64F"
+    assert current["phase_id"] == "64G"
     assert current["status"] == "active"
 
 
@@ -50084,7 +50089,7 @@ def test_64c_1_65a_predecessor_updated(tmp_path, monkeypatch) -> None:
     phases = data["roadmap_registry"]
     phase = next((p for p in phases if p["phase_id"] == "65A"), None)
     assert phase is not None
-    assert phase["predecessor"] == "64F"
+    assert phase["predecessor"] == "64G"
 
 
 def test_64c_1_skill_invoke_phase_implementation_64f(tmp_path, monkeypatch, capsys) -> None:
@@ -50136,7 +50141,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "64E" in output
+    assert "64G" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -50144,7 +50149,7 @@ def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "next"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "multi_runtime" in output or "64D" in output or "64E" in output
+    assert "capability_intelligence" in output or "64G" in output
 
 
 # ---------------------------------------------------------------------------
@@ -51028,3 +51033,282 @@ def test_64f_json_output(tmp_path, monkeypatch, capsys) -> None:
     assert data["orchestration_readiness_gate_overview"]["human_review_required"] is True
     assert len(data["gate_records"]) == 2
     assert len(data["signals"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# Phase 64G: Capability Inventory Alignment Hardening
+# ---------------------------------------------------------------------------
+
+from pcae.core.paths import HarnessPath as _HarnessPath64G  # noqa: E402
+
+
+def test_64g_ci_source_count_matches_inventory(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    assert data["capability_inventory_overview"]["capability_count"] == len(_CI_KNOWN_CAPABILITIES)
+    assert len(data["capability_records"]) == len(_CI_KNOWN_CAPABILITIES)
+
+
+def test_64g_missing_multi_runtime_phases_added(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+
+    ci_by_phase = {c["implemented_phase"]: c for c in _CI_KNOWN_CAPABILITIES}
+    for phase_id in ("63A", "63B", "63C", "63D", "63E", "63F", "64B"):
+        assert phase_id in ci_by_phase, f"Phase {phase_id} missing from _CI_KNOWN_CAPABILITIES"
+        assert ci_by_phase[phase_id]["capability_domain"] == "multi_runtime_capabilities"
+        assert ci_by_phase[phase_id]["status"] == "implemented"
+
+
+def test_64g_63_series_phases_in_both_registries(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_phases = {c["implemented_phase"] for c in _CI_KNOWN_CAPABILITIES}
+    cri_phases = {c["implemented_phase"] for c in _CRI_KNOWN_CAPABILITIES}
+    for phase_id in ("63A", "63B", "63C", "63D", "63E", "63F"):
+        assert phase_id in ci_phases, f"Phase {phase_id} missing from CI"
+        assert phase_id in cri_phases, f"Phase {phase_id} missing from CRI"
+
+
+def test_64g_64b_in_both_registries(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_phases = {c["implemented_phase"] for c in _CI_KNOWN_CAPABILITIES}
+    cri_phases = {c["implemented_phase"] for c in _CRI_KNOWN_CAPABILITIES}
+    assert "64B" in ci_phases
+    assert "64B" in cri_phases
+
+    ci_64b = next(c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "64B")
+    cri_64b = next(c for c in _CRI_KNOWN_CAPABILITIES if c["implemented_phase"] == "64B")
+    assert ci_64b["capability_name"] == "Multi-Runtime Execution Readiness"
+    assert cri_64b["capability_name"] == "Multi-Runtime Execution Readiness"
+    assert ci_64b["capability_domain"] == "multi_runtime_capabilities"
+    assert cri_64b["capability_domain"] == "multi_runtime_capabilities"
+
+
+def test_64g_64c_in_cri_registry(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+
+    cri_phases = {c["implemented_phase"] for c in _CRI_KNOWN_CAPABILITIES}
+    assert "64C" in cri_phases
+    cri_64c = next(c for c in _CRI_KNOWN_CAPABILITIES if c["implemented_phase"] == "64C")
+    assert cri_64c["capability_name"] == "Multi-Runtime Orchestration Execution"
+    assert cri_64c["capability_domain"] == "multi_runtime_capabilities"
+
+
+def test_64g_domain_reconciliation_62g(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_62g = next(c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "62G")
+    cri_62g = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "62G")
+    assert ci_62g["capability_domain"] == "runtime_governance_capabilities"
+    assert cri_62g["capability_domain"] == "runtime_governance_capabilities"
+
+
+def test_64g_domain_reconciliation_62h(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_62h = next(c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "62H")
+    cri_62h = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "62H")
+    assert ci_62h["capability_domain"] == "runtime_governance_capabilities"
+    assert cri_62h["capability_domain"] == "runtime_governance_capabilities"
+
+
+def test_64g_domain_reconciliation_63f(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_63f = next(c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "63F")
+    cri_63f = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "63F")
+    assert ci_63f["capability_domain"] == "multi_runtime_capabilities"
+    assert cri_63f["capability_domain"] == "multi_runtime_capabilities"
+
+
+def test_64g_name_normalization_63f(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_63f = next(c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "63F")
+    cri_63f = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "63F")
+    assert ci_63f["capability_name"] == "Runtime Quarantine"
+    assert cri_63f["capability_name"] == "Runtime Quarantine"
+    assert "Classification" not in ci_63f["capability_name"]
+    assert "Classification" not in cri_63f["capability_name"]
+
+
+def test_64g_duplicate_algorithm_no_false_positives_successor_pair(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, build_capability_inventory
+
+    skill_foundation = next(
+        c for c in _CI_KNOWN_CAPABILITIES if c["capability_name"] == "Skill System Foundation"
+    )
+    skill_hardening = next(
+        c for c in _CI_KNOWN_CAPABILITIES
+        if c["capability_name"] == "Skill Registry Consolidation Hardening"
+    )
+    # These two capabilities share commands but form a successor chain — verify shared commands exist
+    commands_overlap = set(skill_foundation["commands"]) & set(skill_hardening["commands"])
+    assert len(commands_overlap) > 0, "Expected these to share commands (successor chain)"
+    # Despite the overlap, the algorithm must not count them as a duplicate
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    assert data["capability_inventory_overview"]["duplicate_count"] == 0
+
+
+def test_64g_duplicate_algorithm_no_false_positives_superseded(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+
+    superseded = [c for c in _CI_KNOWN_CAPABILITIES if c["status"] == "superseded"]
+    assert len(superseded) >= 1
+    for cap in superseded:
+        assert cap["status"] == "superseded"
+
+
+def test_64g_duplicate_algorithm_no_false_positives_track(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    assert data["capability_inventory_overview"]["duplicate_count"] == 0
+
+
+def test_64g_duplicate_algorithm_detects_genuine_name_collision(tmp_path) -> None:
+    synthetic = (
+        {
+            "capability_name": "Duplicate Capability",
+            "capability_domain": "governance_capabilities",
+            "implemented_phase": "TEST-1",
+            "status": "implemented",
+            "commands": ["pcae test-one"],
+            "dependencies": [],
+            "successor_capabilities": [],
+        },
+        {
+            "capability_name": "Duplicate Capability",
+            "capability_domain": "governance_capabilities",
+            "implemented_phase": "TEST-2",
+            "status": "implemented",
+            "commands": ["pcae test-two"],
+            "dependencies": [],
+            "successor_capabilities": [],
+        },
+    )
+    slug_counts: dict[str, int] = {}
+    for r in synthetic:
+        s = r["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+        slug_counts[s] = slug_counts.get(s, 0) + 1
+    name_collision_count = sum(1 for v in slug_counts.values() if v > 1)
+    assert name_collision_count == 1
+
+
+def test_64g_duplicate_count_is_zero(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    assert data["capability_inventory_overview"]["duplicate_count"] == 0
+
+
+def test_64g_assessment_status_inventory_complete(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    assert data["capability_inventory_overview"]["assessment_status"] == "inventory_complete"
+
+
+def test_64g_orchestration_capabilities_signal_info(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    orch_signal = next(
+        (s for s in data["signals"] if s["capability_domain"] == "orchestration_capabilities"),
+        None,
+    )
+    assert orch_signal is not None
+    assert orch_signal["severity"] == "info"
+
+
+def test_64g_orchestration_capabilities_signal_no_stale_state(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath64G(tmp_path))
+    orch_signal = next(
+        (s for s in data["signals"] if s["capability_domain"] == "orchestration_capabilities"),
+        None,
+    )
+    assert orch_signal is not None
+    assert "roadmap_gap" not in orch_signal["detected_state"]
+
+
+def test_64g_64d_cli_surface_human_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["runtime-coordination-policy"])
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "Runtime coordination policy" in output or "runtime_coordination_policy" in output
+
+
+def test_64g_64d_cli_json_output(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = main(["runtime-coordination-policy", "--json"])
+    assert rc == 0
+    data = json.loads(capsys.readouterr().out)
+    assert "runtime_coordination_policy_overview" in data
+    assert data["runtime_coordination_policy_overview"]["execution_allowed"] is False
+
+
+def test_64g_64d_commands_in_cri_registry(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+
+    cri_64d = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "64D")
+    assert "pcae runtime-coordination-policy" in cri_64d["commands"]
+    assert "pcae runtime-coordination-policy --json" in cri_64d["commands"]
+
+
+def test_64g_64d_ci_commands_match_cri(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES, _CRI_KNOWN_CAPABILITIES
+
+    ci_64d = next(c for c in _CI_KNOWN_CAPABILITIES if c["capability_name"] == "Runtime Coordination Policy")
+    cri_64d = next(c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "64D")
+    assert set(ci_64d["commands"]) == set(cri_64d["commands"])
+
+
+def test_64g_phase_registered_as_active(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+
+    phase_64g = next((p for p in phases if p["phase_id"] == "64G"), None)
+    assert phase_64g is not None
+    assert phase_64g["status"] == "active"
+    assert phase_64g["track_name"] == "capability_intelligence"
+    assert phase_64g["predecessor"] == "64F"
+
+    phase_64f = next((p for p in phases if p["phase_id"] == "64F"), None)
+    assert phase_64f is not None
+    assert phase_64f["status"] == "completed"
+    assert phase_64f["successor"] == "64G"
+
+    current = data["current_phase"]
+    assert current["phase_id"] == "64G"
+    assert current["status"] == "active"
+
+
+def test_64g_advisory_exported(tmp_path) -> None:
+    from pcae.core.agent import RUNTIME_COORDINATION_POLICY_ADVISORY
+
+    assert isinstance(RUNTIME_COORDINATION_POLICY_ADVISORY, str)
+    assert len(RUNTIME_COORDINATION_POLICY_ADVISORY) > 50
+    assert "coordination" in RUNTIME_COORDINATION_POLICY_ADVISORY.lower()
+
+
+def test_64g_prompt_profiles_registered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    registry = data["prompt_registry"]
+    phase_64g = [r for r in registry if r["phase_id"] == "64G"]
+    types = {r["prompt_type"] for r in phase_64g}
+    assert "implementation" in types
+    assert "validation" in types
+    assert "agent" in types

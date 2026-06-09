@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260609-1937-64f-orchestration-readiness-gate",
-    "title": "64F Orchestration Readiness Gate"
+    "id": "20260609-2231-64g-capability-inventory-alignment-hardening",
+    "title": "64G Capability Inventory Alignment Hardening"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "64F Orchestration Readiness Gate",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -14,22 +14,54 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260609-1908-64e-orchestration-audit-model.md",
-        "status": " D"
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/docs.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": " M"
       },
       {
         "path": "tasks/active/20260609-1937-64f-orchestration-readiness-gate.md",
+        "status": " D"
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260609-2231-64g-capability-inventory-alignment-hardening.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260609-1908-64e-orchestration-audit-model.md",
+        "path": "tasks/done/20260609-1937-64f-orchestration-readiness-gate.md",
         "status": "??"
       }
     ],
-    "status_summary": "4 changed files"
+    "status_summary": "12 changed files"
   },
-  "last_completed_step": "Completed task 20260609-1908-64e-orchestration-audit-model: 64E Orchestration Audit Model",
-  "next_recommended_step": "Continue active task 20260609-1937-64f-orchestration-readiness-gate.",
-  "timestamp": "2026-06-09T17:37:05.133055+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-09T20:31:55.220024+00:00",
   "warnings": []
 }

@@ -397,6 +397,8 @@ from pcae.core.agent import (
     ORCHESTRATION_AUDIT_MODEL_ADVISORY,
     build_orchestration_readiness_gate,
     ORCHESTRATION_READINESS_GATE_ADVISORY,
+    build_runtime_coordination_policy,
+    RUNTIME_COORDINATION_POLICY_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -13319,6 +13321,66 @@ def run_orchestration_readiness_gate(args: argparse.Namespace) -> int:
     print(f"  Human review:        {boundaries['human_review_required']}")
     print()
     print(ORCHESTRATION_READINESS_GATE_ADVISORY)
+    return 0
+
+
+def run_runtime_coordination_policy(args: argparse.Namespace) -> int:
+    data = build_runtime_coordination_policy(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["runtime_coordination_policy_overview"]
+    print("Runtime coordination policy")
+    print(f"Assessment: {overview['overview_id']}  Generated: {overview['generated_at']}")
+    print(f"Phase: {overview['phase']} — {overview['title']}")
+    print()
+    print(overview["summary"])
+    print()
+    print(f"Policy domains:         {overview['domain_count']}")
+    print(f"Policy entries:         {overview['entry_count']}")
+    print(f"Signals produced:       {overview['signal_count']}")
+    print(f"Blockers:               {overview['blocker_count']}")
+    print(f"Warnings:               {overview['warning_count']}")
+    print(f"Coordination status:    {overview['coordination_status']}")
+    print(f"Coordination allowed:   {'yes' if overview['coordination_allowed'] else 'no'}")
+    print(f"Execution allowed:      {'yes' if overview['execution_allowed'] else 'no'}")
+    print(f"Human review req'd:     {'yes' if overview['human_review_required'] else 'no'}")
+    print()
+    print("Policy entries:")
+    for entry in data["policy_entries"]:
+        print(f"  [{entry['entry_id']}] {entry['runtime_id']} — {entry['runtime_name']}")
+        print(
+            f"    priority={entry['priority_rank']}  "
+            f"conflict_mode={entry['conflict_resolution_mode']}"
+        )
+        print(f"    coordination_status={entry['coordination_status']}")
+    print()
+    for key, label in (
+        ("entry_model", "Entry model"),
+        ("signal_model", "Signal model"),
+        ("assessment_model", "Assessment model"),
+        ("summary_model", "Summary model"),
+    ):
+        model = data[key]
+        print(f"{label}: {model['model_name']} ({model['field_count']} fields)")
+    print()
+    print("Coordination signals:")
+    for signal in data["signals"]:
+        print(
+            f"  [{signal['severity'].upper()}] "
+            f"{signal['coordination_domain']} — {signal['signal_type']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  May:                 {', '.join(boundaries['may'])}")
+    print(f"  May not:             {', '.join(boundaries['may_not'])}")
+    print(f"  Coordination allowed: {boundaries['coordination_allowed']}")
+    print(f"  Execution allowed:   {boundaries['execution_allowed']}")
+    print(f"  Human review:        {boundaries['human_review_required']}")
+    print()
+    print(RUNTIME_COORDINATION_POLICY_ADVISORY)
     return 0
 
 

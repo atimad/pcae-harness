@@ -68538,15 +68538,12 @@ _CI_CAPABILITY_DOMAINS: tuple[str, ...] = (
     "runtime_execution_capabilities",
     "runtime_audit_capabilities",
     "runtime_review_capabilities",
-    "runtime_approval_capabilities",
-    "runtime_rollback_capabilities",
     "multi_runtime_capabilities",
     "orchestration_capabilities",
     "repository_governance_capabilities",
     "documentation_capabilities",
     "testing_capabilities",
     "recovery_capabilities",
-    "quarantine_capabilities",
 )
 
 _CI_CAPABILITY_STATUSES: tuple[str, ...] = (
@@ -68693,7 +68690,6 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae skill invoke",
             "pcae capability-inventory",
             "pcae roadmap current",
-            "pcae prompt validate",
         ],
         "dependencies": [
             "skill_system_foundation",
@@ -68751,7 +68747,7 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successor_capabilities": ["runtime_approval_gates"],
     },
     {
-        "capability_domain": "runtime_approval_capabilities",
+        "capability_domain": "runtime_governance_capabilities",
         "capability_name": "Runtime Approval Gates",
         "implemented_phase": "62G",
         "status": "implemented",
@@ -68760,13 +68756,58 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successor_capabilities": ["multi_runtime_registry"],
     },
     {
-        "capability_domain": "runtime_rollback_capabilities",
+        "capability_domain": "runtime_governance_capabilities",
         "capability_name": "Runtime Rollback Boundaries",
         "implemented_phase": "62H",
         "status": "implemented",
         "commands": ["pcae runtime-rollback-boundaries"],
         "dependencies": ["runtime_approval_gates"],
         "successor_capabilities": ["runtime_failure_recovery"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Multi-Runtime Registry",
+        "implemented_phase": "63A",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-registry"],
+        "dependencies": ["runtime_rollback_boundaries"],
+        "successor_capabilities": ["runtime_selection_engine"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Runtime Selection Engine",
+        "implemented_phase": "63B",
+        "status": "implemented",
+        "commands": ["pcae runtime-selection-engine"],
+        "dependencies": ["multi_runtime_registry"],
+        "successor_capabilities": ["runtime_arbitration"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Runtime Arbitration",
+        "implemented_phase": "63C",
+        "status": "implemented",
+        "commands": ["pcae runtime-arbitration"],
+        "dependencies": ["runtime_selection_engine"],
+        "successor_capabilities": ["multi_runtime_audit_chain"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Multi-Runtime Audit Chain",
+        "implemented_phase": "63D",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-audit-chain"],
+        "dependencies": ["runtime_arbitration"],
+        "successor_capabilities": ["runtime_failure_recovery"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Runtime Failure Recovery",
+        "implemented_phase": "63E",
+        "status": "implemented",
+        "commands": ["pcae runtime-failure-recovery"],
+        "dependencies": ["multi_runtime_audit_chain"],
+        "successor_capabilities": ["runtime_quarantine"],
     },
     {
         "capability_domain": "multi_runtime_capabilities",
@@ -68780,6 +68821,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "runtime_arbitration",
         ],
         "successor_capabilities": ["multi_runtime_execution_readiness"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Multi-Runtime Execution Readiness",
+        "implemented_phase": "64B",
+        "status": "implemented",
+        "commands": ["pcae multi-runtime-execution-readiness"],
+        "dependencies": ["multi_runtime_execution_planning"],
+        "successor_capabilities": ["multi_runtime_orchestration_execution"],
     },
     {
         "capability_domain": "multi_runtime_capabilities",
@@ -68798,7 +68848,10 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_domain": "multi_runtime_capabilities",
         "implemented_phase": "64D",
         "status": "implemented",
-        "commands": [],
+        "commands": [
+            "pcae runtime-coordination-policy",
+            "pcae runtime-coordination-policy --json",
+        ],
         "dependencies": ["multi_runtime_orchestration_execution"],
         "successor_capabilities": ["orchestration_audit_model"],
     },
@@ -68871,8 +68924,8 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successor_capabilities": ["runtime_failure_recovery"],
     },
     {
-        "capability_domain": "quarantine_capabilities",
-        "capability_name": "Runtime Quarantine Classification",
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Runtime Quarantine",
         "implemented_phase": "63F",
         "status": "implemented",
         "commands": ["pcae runtime-quarantine"],
@@ -68910,7 +68963,34 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
     domains_seen: dict[str, int] = {}
     for r in capability_records:
         domains_seen[r["capability_domain"]] = domains_seen.get(r["capability_domain"], 0) + 1
-    duplicate_count = sum(1 for v in domains_seen.values() if v > 1)
+
+    # Semantic duplicate detection: name collisions + command-surface collisions.
+    # Domain multiplicity (multiple phases in the same domain) is NOT a duplicate.
+    # Superseded entries co-resident with their successors are NOT duplicates.
+    _slug_counts: dict[str, int] = {}
+    for r in capability_records:
+        _s = r["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+        _slug_counts[_s] = _slug_counts.get(_s, 0) + 1
+    name_collision_count = sum(1 for v in _slug_counts.values() if v > 1)
+
+    _chain_pairs: set[tuple[str, str]] = set()
+    for r in capability_records:
+        _rs = r["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+        for _dep in r.get("dependencies", []):
+            _chain_pairs.add((_dep.lower(), _rs))
+        for _succ in r.get("successor_capabilities", []):
+            _chain_pairs.add((_rs, _succ.lower()))
+    _active_caps = [r for r in capability_records if r["status"] not in ("superseded", "dormant")]
+    command_collision_count = 0
+    for _i, _r1 in enumerate(_active_caps):
+        _s1 = _r1["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+        for _r2 in _active_caps[_i + 1:]:
+            _s2 = _r2["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+            if set(_r1["commands"]) & set(_r2["commands"]):
+                if (_s1, _s2) not in _chain_pairs and (_s2, _s1) not in _chain_pairs:
+                    command_collision_count += 1
+
+    duplicate_count = name_collision_count + command_collision_count
 
     first_cid = capability_records[0]["capability_id"] if capability_records else f"ci-{ts}-00"
 
@@ -68995,12 +69075,15 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
                 f"runtime_governance_capabilities_count={domains_seen.get('runtime_governance_capabilities', 0)}; "
                 "readonly_invocation_governance=implemented; "
                 "invocation_pilot_legacy=superseded; "
+                "runtime_approval_gates=implemented; "
+                "runtime_rollback_boundaries=implemented; "
                 f"superseded_count={superseded_count}; "
                 "inventory_complete=True"
             ),
             "expected_state": (
                 "runtime governance capabilities must be inventoried; "
                 "superseded capabilities must be identified; "
+                "approval and rollback boundaries consolidated under runtime_governance_capabilities; "
                 "no runtime behavior modified"
             ),
         },
@@ -69050,34 +69133,6 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
             ),
         },
         {
-            "domain": "runtime_approval_capabilities",
-            "signal_type": "runtime_approval_capabilities_inventory_check",
-            "severity": "info",
-            "detected_state": (
-                f"runtime_approval_capabilities_count={domains_seen.get('runtime_approval_capabilities', 0)}; "
-                "runtime_approval_gates=implemented; "
-                "inventory_complete=True"
-            ),
-            "expected_state": (
-                "runtime approval capabilities must be inventoried and classified; "
-                "no approval behavior modified"
-            ),
-        },
-        {
-            "domain": "runtime_rollback_capabilities",
-            "signal_type": "runtime_rollback_capabilities_inventory_check",
-            "severity": "info",
-            "detected_state": (
-                f"runtime_rollback_capabilities_count={domains_seen.get('runtime_rollback_capabilities', 0)}; "
-                "runtime_rollback_boundaries=implemented; "
-                "inventory_complete=True"
-            ),
-            "expected_state": (
-                "runtime rollback capabilities must be inventoried and classified; "
-                "no rollback behavior modified"
-            ),
-        },
-        {
             "domain": "multi_runtime_capabilities",
             "signal_type": "multi_runtime_capabilities_inventory_check",
             "severity": "info",
@@ -69095,18 +69150,18 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
         {
             "domain": "orchestration_capabilities",
             "signal_type": "orchestration_capabilities_inventory_check",
-            "severity": "warning",
+            "severity": "info",
             "detected_state": (
                 f"orchestration_capabilities_count={domains_seen.get('orchestration_capabilities', 0)}; "
-                f"roadmap_gap_count={roadmap_gap_count}; "
-                "multi_runtime_orchestration_execution=roadmap_gap; "
-                "orchestration_blocked=True; "
+                "multi_runtime_orchestration_execution=implemented_under_multi_runtime_capabilities; "
+                "orchestration_audit_model=implemented_under_multi_runtime_capabilities; "
+                "orchestration_readiness_gate=implemented_under_multi_runtime_capabilities; "
                 "execution_allowed=False"
             ),
             "expected_state": (
-                "orchestration capabilities must be inventoried; "
-                "roadmap gaps must be identified; "
-                "orchestration execution remains blocked"
+                "orchestration capabilities are classified under multi_runtime_capabilities; "
+                "orchestration_capabilities domain is intentionally empty; "
+                "execution_allowed=False always"
             ),
         },
         {
@@ -69167,22 +69222,6 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
             "expected_state": (
                 "recovery capabilities must be inventoried; "
                 "no recovery behavior modified"
-            ),
-        },
-        {
-            "domain": "quarantine_capabilities",
-            "signal_type": "quarantine_capabilities_inventory_check",
-            "severity": "warning",
-            "detected_state": (
-                f"quarantine_capabilities_count={domains_seen.get('quarantine_capabilities', 0)}; "
-                f"duplicate_count={duplicate_count}; "
-                "runtime_quarantine_classification=implemented; "
-                "overlap_with_multi_runtime_domain=detected"
-            ),
-            "expected_state": (
-                "quarantine capabilities must be inventoried; "
-                "overlapping capabilities across domains must be identified; "
-                "no quarantine behavior modified"
             ),
         },
     ]
@@ -69626,8 +69665,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64F",
         "phase_title": "Orchestration Readiness Gate",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64E",
+        "successor": "64G",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "capability_intelligence",
+        "phase_id": "64G",
+        "phase_title": "Capability Inventory Alignment Hardening",
+        "status": "active",
+        "predecessor": "64F",
         "successor": "65A",
         "superseded_by": "",
     },
@@ -69636,7 +69684,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "phase_id": "65A",
         "phase_title": "Multi-Runtime Execution Dispatch",
         "status": "roadmap_gap",
-        "predecessor": "64F",
+        "predecessor": "64G",
         "successor": "",
         "superseded_by": "",
     },
@@ -70086,9 +70134,23 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": ["pcae multi-runtime-execution-readiness"],
         "dependencies": ["multi_runtime_execution_planning"],
-        "successors": ["capability_inventory"],
+        "successors": ["multi_runtime_orchestration_execution"],
         "aliases": [],
         "contribution": "validates whether the execution plan is ready to proceed",
+    },
+    {
+        "capability_name": "Multi-Runtime Orchestration Execution",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64C",
+        "status": "implemented",
+        "commands": [
+            "pcae multi-runtime-orchestration-execution",
+            "pcae multi-runtime-orchestration-execution --json",
+        ],
+        "dependencies": ["multi_runtime_execution_readiness"],
+        "successors": ["runtime_coordination_policy"],
+        "aliases": [],
+        "contribution": "provides the governed multi-runtime orchestration execution structure, candidate dispatch, and policy linkage",
     },
     {
         "capability_name": "Multi-Runtime Execution Planning",
@@ -70106,7 +70168,10 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_domain": "multi_runtime_capabilities",
         "implemented_phase": "64D",
         "status": "implemented",
-        "commands": [],
+        "commands": [
+            "pcae runtime-coordination-policy",
+            "pcae runtime-coordination-policy --json",
+        ],
         "dependencies": ["multi_runtime_orchestration_execution"],
         "successors": ["orchestration_audit_model"],
         "aliases": [],
@@ -70140,9 +70205,27 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "runtime_coordination_policy",
             "orchestration_audit_model",
         ],
-        "successors": ["multi_runtime_execution_dispatch"],
+        "successors": ["capability_inventory_alignment"],
         "aliases": [],
         "contribution": "determines whether a governed orchestration candidate is ready to cross from reviewed state into future dispatch eligibility without authorizing execution",
+    },
+    {
+        "capability_name": "Capability Inventory Alignment",
+        "capability_domain": "capability_intelligence",
+        "implemented_phase": "64G",
+        "status": "implemented",
+        "commands": [
+            "pcae runtime-coordination-policy",
+            "pcae runtime-coordination-policy --json",
+            "pcae capability-inventory",
+        ],
+        "dependencies": [
+            "runtime_coordination_policy",
+            "capability_inventory",
+        ],
+        "successors": ["multi_runtime_execution_dispatch"],
+        "aliases": [],
+        "contribution": "reconciles capability inventory with roadmap registry, adds missing multi-runtime entries, corrects domain classifications, replaces false-duplicate detection with semantic overlap detection, and exposes runtime coordination policy CLI surface",
     },
     {
         "capability_name": "Capability Inventory",
@@ -70244,7 +70327,6 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae skill invoke",
             "pcae capability-inventory",
             "pcae roadmap current",
-            "pcae prompt validate",
         ],
         "dependencies": [
             "skill_system_foundation",
@@ -71635,7 +71717,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64F",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64F-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64F",
@@ -71643,7 +71725,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64F",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64F-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64F",
@@ -71651,10 +71733,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64F",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64F-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64F",
+    },
+    {
+        "phase_id": "64G",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64G-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64G",
+    },
+    {
+        "phase_id": "64G",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64G-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64G",
+    },
+    {
+        "phase_id": "64G",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64G-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64G",
     },
     {
         "phase_id": "64B.6E",

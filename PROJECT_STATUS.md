@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64F: Orchestration Readiness Gate.
+Phase 64G: Capability Inventory Alignment Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 

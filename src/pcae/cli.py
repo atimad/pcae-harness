@@ -185,6 +185,7 @@ from pcae.commands.agent import (
     run_multi_runtime_orchestration_execution,
     run_orchestration_audit_model,
     run_orchestration_readiness_gate,
+    run_runtime_coordination_policy,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4711,6 +4712,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     org_parser.set_defaults(handler=run_orchestration_readiness_gate)
+
+    rcp_parser = subparsers.add_parser(
+        "runtime-coordination-policy",
+        help="Inspect the governed runtime coordination policy defining priority, conflict resolution, and synchronization (Phase 64D).",
+    )
+    rcp_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    rcp_parser.set_defaults(handler=run_runtime_coordination_policy)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",
