@@ -69683,8 +69683,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65A",
         "phase_title": "Strategic Roadmap Governance Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64G",
+        "successor": "65B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65B",
+        "phase_title": "Strategic State Summary",
+        "status": "active",
+        "predecessor": "65A",
         "successor": "",
         "superseded_by": "",
     },
@@ -70237,9 +70246,22 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "capability_inventory_alignment",
             "capability_and_roadmap_intelligence",
         ],
-        "successors": [],
+        "successors": ["strategic_state_summary"],
         "aliases": [],
         "contribution": "introduces a strategic governance layer above the roadmap: project goals, vision, objectives, branch registry, capability-objective map, branch health model, evidence-backed recommendations, evolution proposals with evidence requirements, and a human approval model; all advisory-only with execution_allowed=False",
+    },
+    {
+        "capability_name": "Strategic State Summary",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65B",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "strategic_roadmap_governance",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "computes objective coverage governance, detects unmapped capabilities with warning-level severity, generates mapping recommendations with evidence and lineage, produces evidence-based reports, and emits a consolidated strategic state summary; all advisory-only with execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -71779,7 +71801,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65A",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65A-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65A",
@@ -71787,7 +71809,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65A",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65A-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65A",
@@ -71795,10 +71817,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65A",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65A-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65A",
+    },
+    {
+        "phase_id": "65B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65B",
+    },
+    {
+        "phase_id": "65B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65B",
+    },
+    {
+        "phase_id": "65B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65B",
     },
     {
         "phase_id": "64B.6E",
@@ -78348,4 +78394,795 @@ def build_strategic_roadmap_governance(root: "HarnessPath | None" = None) -> dic
             "phase": "65A",
         },
         "advisory": STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 65B: Strategic State Summary
+# ---------------------------------------------------------------------------
+
+STRATEGIC_STATE_SUMMARY_ADVISORY = (
+    "Phase 65B introduces the Strategic State Summary: a read-only advisory layer that "
+    "computes objective coverage governance, detects unmapped capabilities with warning-level "
+    "severity by default, generates capability-to-objective mapping recommendations with "
+    "evidence and lineage, and produces evidence-based reports. "
+    "Governance invariants: execution_allowed=False, auto_apply_capability_mappings=False, "
+    "auto_resolve_coverage_gaps=False, human_approval_required=True."
+)
+
+_SSS_GOVERNANCE_DOMAINS: tuple[str, ...] = (
+    "strategic_summary_generation",
+    "objective_coverage_computation",
+    "coverage_threshold_validation",
+    "unmapped_capability_detection",
+    "unmapped_severity_classification",
+    "mapping_recommendation_generation",
+    "mapping_recommendation_evidence",
+    "evidence_report_generation",
+    "governance_boundary_enforcement",
+    "cross_registry_consistency_65b",
+)
+
+# Coverage thresholds for mapping_completeness_status
+_CCG_COMPLETENESS_THIN_THRESHOLD: float = 0.30   # < 30% → thin
+_CCG_COMPLETENESS_PARTIAL_THRESHOLD: float = 0.80  # 30–80% → partial; > 80% → complete
+
+# Objective coverage statuses (separate from mapping completeness)
+_CCG_OBJECTIVE_COVERAGE_STATUSES: tuple[str, ...] = (
+    "covered",           # ≥1 primary mapping
+    "partially_covered", # supporting or indirect mappings only
+    "uncovered",         # no mappings at all
+)
+
+# Mapping completeness statuses (overall map completeness per domain/objective)
+_CCG_MAPPING_COMPLETENESS_STATUSES: tuple[str, ...] = (
+    "complete",  # > 80% of implementable capabilities are mapped
+    "partial",   # 30–80%
+    "thin",      # < 30%
+)
+
+_UCD_SEVERITY_VALUES: tuple[str, ...] = ("warning", "info", "blocker")
+
+# Justification categories for downgrading unmapped severity from warning → info
+_UCD_LOW_RISK_JUSTIFICATIONS: tuple[str, ...] = (
+    "domain_already_heavily_covered",     # domain has ≥3 primary mappings
+    "capability_is_transitional",         # capability bridges two phases, not a terminal deliverable
+    "capability_superseded",              # capability has a successor that IS mapped
+    "roadmap_gap_only",                   # phase is roadmap_gap, not yet implemented
+)
+
+_MRR_INFERENCE_METHODS: tuple[str, ...] = (
+    "domain_alignment",    # inferred from capability_domain matching objective domain
+    "phase_track",         # inferred from phase track matching branch serving objectives
+    "predecessor_chain",   # inferred from predecessor capability's existing mappings
+    "name_similarity",     # inferred from semantic similarity of capability name to objective title
+)
+
+_MRR_RECOMMENDATION_STATUSES: tuple[str, ...] = (
+    "proposed",
+    "pending_review",
+    "approved",
+    "rejected",
+)
+
+_EBR_EVIDENCE_QUALITY_LEVELS: tuple[str, ...] = (
+    "strong",   # ≥3 independent evidence sources
+    "moderate", # 2 sources
+    "weak",     # 1 source
+    "none",     # 0 sources
+)
+
+# Model field schemas
+
+_CCG_OBJECTIVE_COVERAGE_FIELDS: tuple[dict, ...] = (
+    {"field": "objective_id", "type": "str", "required": True},
+    {"field": "objective_title", "type": "str", "required": True},
+    {"field": "primary_capability_count", "type": "int", "required": True},
+    {"field": "supporting_capability_count", "type": "int", "required": True},
+    {"field": "indirect_capability_count", "type": "int", "required": True},
+    {"field": "total_mapped_capabilities", "type": "int", "required": True},
+    {"field": "objective_coverage_status", "type": "str", "required": True},
+    {"field": "mapping_completeness_status", "type": "str", "required": True},
+    {"field": "coverage_signals", "type": "list[dict]", "required": True},
+)
+
+_UCD_UNMAPPED_CAPABILITY_FIELDS: tuple[dict, ...] = (
+    {"field": "capability_name", "type": "str", "required": True},
+    {"field": "capability_id", "type": "str", "required": True},
+    {"field": "capability_domain", "type": "str", "required": True},
+    {"field": "implemented_phase", "type": "str", "required": True},
+    {"field": "inferred_objectives", "type": "list[str]", "required": True},
+    {"field": "inference_confidence", "type": "str", "required": True},
+    {"field": "severity", "type": "str", "required": True},
+    {"field": "severity_reason", "type": "str", "required": True},
+)
+
+_MRR_RECOMMENDATION_FIELDS: tuple[dict, ...] = (
+    {"field": "recommendation_id", "type": "str", "required": True},
+    {"field": "capability_id", "type": "str", "required": True},
+    {"field": "capability_name", "type": "str", "required": True},
+    {"field": "recommended_objective_ids", "type": "list[str]", "required": True},
+    {"field": "contribution_type", "type": "str", "required": True},
+    {"field": "inference_method", "type": "str", "required": True},
+    {"field": "inference_confidence", "type": "str", "required": True},
+    {"field": "evidence_sources", "type": "list[str]", "required": True},
+    {"field": "evidence_count", "type": "int", "required": True},
+    {"field": "evidence_quality", "type": "str", "required": True},
+    {"field": "rationale", "type": "str", "required": True},
+    {"field": "status", "type": "str", "required": True},
+    {"field": "human_approval_required", "type": "bool", "required": True},
+    {"field": "auto_apply_allowed", "type": "bool", "required": True},
+    {"field": "lineage_predecessor_ids", "type": "list[str]", "required": True},
+    {"field": "derived_from", "type": "str", "required": True},
+    {"field": "supersedes_ids", "type": "list[str]", "required": True},
+    {"field": "phase", "type": "str", "required": True},
+    {"field": "execution_allowed", "type": "bool", "required": True},
+)
+
+_EBR_EVIDENCE_REPORT_FIELDS: tuple[dict, ...] = (
+    {"field": "report_id", "type": "str", "required": True},
+    {"field": "subject_id", "type": "str", "required": True},
+    {"field": "subject_type", "type": "str", "required": True},
+    {"field": "evidence_sources", "type": "list[str]", "required": True},
+    {"field": "evidence_count", "type": "int", "required": True},
+    {"field": "evidence_quality_score", "type": "float", "required": True},
+    {"field": "recommendation_health", "type": "str", "required": True},
+    {"field": "lineage_depth", "type": "int", "required": True},
+)
+
+_EBR_EVIDENCE_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"field": "total_recommendations", "type": "int", "required": True},
+    {"field": "strong_evidence_count", "type": "int", "required": True},
+    {"field": "moderate_evidence_count", "type": "int", "required": True},
+    {"field": "weak_evidence_count", "type": "int", "required": True},
+    {"field": "none_evidence_count", "type": "int", "required": True},
+    {"field": "overall_evidence_health", "type": "str", "required": True},
+)
+
+_SSS_SIGNAL_FIELDS: tuple[dict, ...] = (
+    {"field": "domain", "type": "str", "required": True},
+    {"field": "severity", "type": "str", "required": True},
+    {"field": "message", "type": "str", "required": True},
+    {"field": "execution_allowed", "type": "bool", "required": True},
+)
+
+_SSS_ASSESSMENT_FIELDS: tuple[dict, ...] = (
+    {"field": "phase", "type": "str", "required": True},
+    {"field": "domain_count", "type": "int", "required": True},
+    {"field": "signal_count", "type": "int", "required": True},
+    {"field": "blocker_count", "type": "int", "required": True},
+    {"field": "warning_count", "type": "int", "required": True},
+    {"field": "info_count", "type": "int", "required": True},
+    {"field": "execution_allowed", "type": "bool", "required": True},
+    {"field": "human_review_required", "type": "bool", "required": True},
+)
+
+_SSS_SUMMARY_FIELDS: tuple[dict, ...] = (
+    {"field": "phase", "type": "str", "required": True},
+    {"field": "objective_coverage_summary", "type": "dict", "required": True},
+    {"field": "unmapped_capability_count", "type": "int", "required": True},
+    {"field": "warning_unmapped_count", "type": "int", "required": True},
+    {"field": "mapping_recommendation_count", "type": "int", "required": True},
+    {"field": "evidence_report_count", "type": "int", "required": True},
+    {"field": "overall_state_health", "type": "str", "required": True},
+    {"field": "execution_allowed", "type": "bool", "required": True},
+    {"field": "human_review_required", "type": "bool", "required": True},
+)
+
+
+def _ccg_compute_objective_coverage_record(
+    obj: dict,
+    capability_map: tuple[dict, ...],
+) -> dict:
+    """Compute coverage and completeness statuses for one objective, independently."""
+    obj_id = obj["objective_id"]
+    mappings = [e for e in capability_map if obj_id in e.get("objective_ids", [])]
+    primary_count = sum(1 for m in mappings if m.get("contribution_type") == "primary")
+    supporting_count = sum(1 for m in mappings if m.get("contribution_type") == "supporting")
+    indirect_count = sum(1 for m in mappings if m.get("contribution_type") == "indirect")
+    total = primary_count + supporting_count + indirect_count
+
+    # objective_coverage_status — based purely on whether a primary mapping exists
+    if primary_count >= 1:
+        objective_coverage_status = "covered"
+    elif supporting_count + indirect_count >= 1:
+        objective_coverage_status = "partially_covered"
+    else:
+        objective_coverage_status = "uncovered"
+
+    # mapping_completeness_status — based on ratio of mapped vs total implemented capabilities
+    # Use count of all implemented capabilities as denominator proxy
+    total_implemented = len([c for c in _CRI_KNOWN_CAPABILITIES if c.get("status") == "implemented"])
+    ratio = total / total_implemented if total_implemented > 0 else 0.0
+    if ratio > _CCG_COMPLETENESS_PARTIAL_THRESHOLD:
+        mapping_completeness_status = "complete"
+    elif ratio >= _CCG_COMPLETENESS_THIN_THRESHOLD:
+        mapping_completeness_status = "partial"
+    else:
+        mapping_completeness_status = "thin"
+
+    coverage_signals = []
+    if objective_coverage_status == "uncovered":
+        coverage_signals.append({
+            "domain": "objective_coverage_computation",
+            "severity": "blocker",
+            "message": f"{obj_id} has no capability mappings — critical coverage gap",
+            "execution_allowed": False,
+        })
+    elif objective_coverage_status == "partially_covered":
+        coverage_signals.append({
+            "domain": "objective_coverage_computation",
+            "severity": "warning",
+            "message": f"{obj_id} has only indirect/supporting mappings — no primary capability",
+            "execution_allowed": False,
+        })
+    if mapping_completeness_status == "thin":
+        coverage_signals.append({
+            "domain": "coverage_threshold_validation",
+            "severity": "warning",
+            "message": (
+                f"{obj_id} mapping completeness is thin ({total}/{total_implemented} capabilities mapped)"
+            ),
+            "execution_allowed": False,
+        })
+
+    return {
+        "objective_id": obj_id,
+        "objective_title": obj.get("objective_title", ""),
+        "primary_capability_count": primary_count,
+        "supporting_capability_count": supporting_count,
+        "indirect_capability_count": indirect_count,
+        "total_mapped_capabilities": total,
+        "objective_coverage_status": objective_coverage_status,
+        "mapping_completeness_status": mapping_completeness_status,
+        "coverage_signals": coverage_signals,
+    }
+
+
+def _ucd_classify_unmapped_capability(cap: dict, capability_map: tuple[dict, ...]) -> dict:
+    """
+    Produce an UnmappedCapabilityRecord for a capability not in the capability map.
+    Severity defaults to warning; downgrades to info only when a low-risk justification applies.
+    """
+    cap_id = cap["capability_name"].lower().replace(" ", "_")
+    domain = cap.get("capability_domain", "")
+    phase = cap.get("implemented_phase", "")
+
+    # Count how many primaries exist in this same domain across all mapped capabilities
+    domain_primaries = sum(
+        1 for e in capability_map
+        if e.get("contribution_type") == "primary"
+        and any(
+            c.get("capability_domain") == domain
+            for c in _CRI_KNOWN_CAPABILITIES
+            if c["capability_name"].lower().replace(" ", "_") == e.get("capability_id", "")
+        )
+    )
+
+    # Check if this capability has been superseded (has a successor that IS mapped)
+    successors = cap.get("successors", [])
+    mapped_ids = {e["capability_id"] for e in capability_map}
+    successor_is_mapped = any(s in mapped_ids for s in successors)
+
+    # Roadmap gap check
+    phase_record = next(
+        (p for p in _CRI_KNOWN_PHASES if p["phase_id"] == phase), None
+    )
+    is_roadmap_gap = phase_record is not None and phase_record.get("status") == "roadmap_gap"
+
+    # Infer likely objectives from domain
+    inferred = []
+    for obj in _SRG_OBJECTIVE_REGISTRY:
+        obj_id = obj["objective_id"]
+        # Simple domain-to-objective heuristic
+        if domain in ("multi_runtime_orchestration", "runtime_governance", "runtime_execution_governance"):
+            if obj_id in ("OBJ-003", "OBJ-002"):
+                inferred.append(obj_id)
+        elif domain in ("strategic_governance",):
+            if obj_id in ("OBJ-001", "OBJ-002"):
+                inferred.append(obj_id)
+        elif domain in ("capability_intelligence", "documentation_capabilities"):
+            if obj_id in ("OBJ-004", "OBJ-001"):
+                inferred.append(obj_id)
+
+    if not inferred:
+        inferred = ["OBJ-001"]  # fallback
+
+    # Determine severity
+    justification = ""
+    severity = "warning"
+
+    if is_roadmap_gap:
+        severity = "info"
+        justification = "roadmap_gap_only"
+    elif successor_is_mapped:
+        severity = "info"
+        justification = "capability_superseded"
+    elif domain_primaries >= 3:
+        severity = "info"
+        justification = "domain_already_heavily_covered"
+
+    inference_confidence = "moderate" if len(inferred) > 0 else "low"
+
+    return {
+        "capability_name": cap["capability_name"],
+        "capability_id": cap_id,
+        "capability_domain": domain,
+        "implemented_phase": phase,
+        "inferred_objectives": inferred,
+        "inference_confidence": inference_confidence,
+        "severity": severity,
+        "severity_reason": justification if justification else "unmapped_implemented_capability",
+    }
+
+
+def _mrr_build_recommendation(
+    cap: dict,
+    unmapped_record: dict,
+    recommendation_index: int,
+) -> dict:
+    """Build a MappingRecommendationRecord for an unmapped capability."""
+    cap_id = unmapped_record["capability_id"]
+    inferred = unmapped_record["inferred_objectives"]
+    confidence = unmapped_record["inference_confidence"]
+
+    evidence_sources: list[str] = []
+    if cap.get("capability_domain"):
+        evidence_sources.append(f"domain:{cap['capability_domain']}")
+    phase_rec = next(
+        (p for p in _CRI_KNOWN_PHASES if p["phase_id"] == cap.get("implemented_phase", "")),
+        None,
+    )
+    if phase_rec:
+        evidence_sources.append(f"track:{phase_rec.get('track_name', '')}")
+    if cap.get("dependencies"):
+        evidence_sources.append(f"predecessors:{','.join(cap['dependencies'])}")
+
+    evidence_count = len(evidence_sources)
+    if evidence_count >= 3:
+        evidence_quality = "strong"
+    elif evidence_count == 2:
+        evidence_quality = "moderate"
+    elif evidence_count == 1:
+        evidence_quality = "weak"
+    else:
+        evidence_quality = "none"
+
+    inference_method = "domain_alignment"
+    if phase_rec:
+        inference_method = "phase_track"
+    if cap.get("dependencies"):
+        inference_method = "predecessor_chain"
+
+    return {
+        "recommendation_id": f"REC-{recommendation_index:03d}",
+        "capability_id": cap_id,
+        "capability_name": cap["capability_name"],
+        "recommended_objective_ids": inferred,
+        "contribution_type": "supporting",
+        "inference_method": inference_method,
+        "inference_confidence": confidence,
+        "evidence_sources": evidence_sources,
+        "evidence_count": evidence_count,
+        "evidence_quality": evidence_quality,
+        "rationale": (
+            f"Capability '{cap['capability_name']}' (domain: {cap.get('capability_domain', 'unknown')}) "
+            f"implements phase {cap.get('implemented_phase', '?')} but has no objective mapping. "
+            f"Inferred alignment to {inferred} via {inference_method}."
+        ),
+        "status": "proposed",
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+        "lineage_predecessor_ids": list(cap.get("dependencies", [])),
+        "derived_from": f"65B_unmapped_capability_analysis:{cap_id}",
+        "supersedes_ids": [],
+        "phase": "65B",
+        "execution_allowed": False,
+    }
+
+
+def _ebr_build_evidence_report(rec: dict, report_index: int) -> dict:
+    """Build an EvidenceReportRecord for a mapping recommendation."""
+    ec = rec["evidence_count"]
+    if ec >= 3:
+        quality_score = 1.0
+    elif ec == 2:
+        quality_score = 0.67
+    elif ec == 1:
+        quality_score = 0.33
+    else:
+        quality_score = 0.0
+
+    if quality_score >= 0.67:
+        rec_health = "strong"
+    elif quality_score >= 0.33:
+        rec_health = "moderate"
+    else:
+        rec_health = "weak"
+
+    lineage_depth = len(rec.get("lineage_predecessor_ids", []))
+
+    return {
+        "report_id": f"RPT-{report_index:03d}",
+        "subject_id": rec["recommendation_id"],
+        "subject_type": "mapping_recommendation",
+        "evidence_sources": rec["evidence_sources"],
+        "evidence_count": ec,
+        "evidence_quality_score": quality_score,
+        "recommendation_health": rec_health,
+        "lineage_depth": lineage_depth,
+    }
+
+
+def build_strategic_state_summary(root: "HarnessPath | None" = None) -> dict:
+    ts = "65B"
+
+    # --- Objective coverage records (independently computed) ---
+    objective_coverage_records = [
+        _ccg_compute_objective_coverage_record(obj, _SRG_CAPABILITY_OBJECTIVE_MAP)
+        for obj in _SRG_OBJECTIVE_REGISTRY
+    ]
+
+    # --- Unmapped capability detection ---
+    mapped_cap_ids = {e["capability_id"] for e in _SRG_CAPABILITY_OBJECTIVE_MAP}
+    implemented_caps = [
+        c for c in _CRI_KNOWN_CAPABILITIES if c.get("status") == "implemented"
+    ]
+    unmapped_caps = [
+        c for c in implemented_caps
+        if c["capability_name"].lower().replace(" ", "_") not in mapped_cap_ids
+    ]
+    unmapped_records = [_ucd_classify_unmapped_capability(c, _SRG_CAPABILITY_OBJECTIVE_MAP) for c in unmapped_caps]
+
+    # --- Mapping recommendations ---
+    recommendations = [
+        _mrr_build_recommendation(cap, urec, i + 1)
+        for i, (cap, urec) in enumerate(zip(unmapped_caps, unmapped_records))
+    ]
+
+    # --- Evidence reports ---
+    evidence_reports = [
+        _ebr_build_evidence_report(rec, i + 1)
+        for i, rec in enumerate(recommendations)
+    ]
+
+    # --- Evidence summary ---
+    strong_count = sum(1 for r in evidence_reports if r["recommendation_health"] == "strong")
+    moderate_count = sum(1 for r in evidence_reports if r["recommendation_health"] == "moderate")
+    weak_count = sum(1 for r in evidence_reports if r["recommendation_health"] == "weak")
+    none_count = sum(1 for r in evidence_reports if r["recommendation_health"] not in ("strong", "moderate", "weak"))
+    overall_health = "strong" if strong_count > len(evidence_reports) * 0.5 else (
+        "moderate" if moderate_count + strong_count > len(evidence_reports) * 0.5 else "weak"
+    )
+
+    evidence_summary = {
+        "total_recommendations": len(recommendations),
+        "strong_evidence_count": strong_count,
+        "moderate_evidence_count": moderate_count,
+        "weak_evidence_count": weak_count,
+        "none_evidence_count": none_count,
+        "overall_evidence_health": overall_health,
+    }
+
+    # --- Governance signals (10 domains) ---
+    signals: list[dict] = []
+
+    # 1. strategic_summary_generation
+    signals.append({
+        "domain": "strategic_summary_generation",
+        "severity": "info",
+        "message": (
+            f"Strategic state summary generated for {ts}: "
+            f"{len(objective_coverage_records)} objectives, {len(unmapped_records)} unmapped capabilities"
+        ),
+        "execution_allowed": False,
+    })
+
+    # 2. objective_coverage_computation
+    uncovered_objs = [r for r in objective_coverage_records if r["objective_coverage_status"] == "uncovered"]
+    partial_objs = [r for r in objective_coverage_records if r["objective_coverage_status"] == "partially_covered"]
+    if uncovered_objs:
+        signals.append({
+            "domain": "objective_coverage_computation",
+            "severity": "blocker",
+            "message": f"{len(uncovered_objs)} objectives are uncovered: {[o['objective_id'] for o in uncovered_objs]}",
+            "execution_allowed": False,
+        })
+    elif partial_objs:
+        signals.append({
+            "domain": "objective_coverage_computation",
+            "severity": "warning",
+            "message": f"{len(partial_objs)} objectives are only partially covered (no primary mapping)",
+            "execution_allowed": False,
+        })
+    else:
+        signals.append({
+            "domain": "objective_coverage_computation",
+            "severity": "info",
+            "message": "All objectives have at least one primary capability mapping",
+            "execution_allowed": False,
+        })
+
+    # 3. coverage_threshold_validation
+    thin_objs = [r for r in objective_coverage_records if r["mapping_completeness_status"] == "thin"]
+    if thin_objs:
+        signals.append({
+            "domain": "coverage_threshold_validation",
+            "severity": "warning",
+            "message": (
+                f"{len(thin_objs)} objectives have thin mapping completeness: "
+                f"{[o['objective_id'] for o in thin_objs]}"
+            ),
+            "execution_allowed": False,
+        })
+    else:
+        signals.append({
+            "domain": "coverage_threshold_validation",
+            "severity": "info",
+            "message": "No objectives below thin-completeness threshold",
+            "execution_allowed": False,
+        })
+
+    # 4. unmapped_capability_detection
+    warning_unmapped = [r for r in unmapped_records if r["severity"] == "warning"]
+    if warning_unmapped:
+        signals.append({
+            "domain": "unmapped_capability_detection",
+            "severity": "warning",
+            "message": (
+                f"{len(warning_unmapped)} implemented capabilities have no objective mapping "
+                f"and require strategic visibility review"
+            ),
+            "execution_allowed": False,
+        })
+    else:
+        signals.append({
+            "domain": "unmapped_capability_detection",
+            "severity": "info",
+            "message": "No unmapped capabilities requiring immediate review",
+            "execution_allowed": False,
+        })
+
+    # 5. unmapped_severity_classification
+    downgraded = [r for r in unmapped_records if r["severity"] == "info" and r["severity_reason"] != "unmapped_implemented_capability"]
+    signals.append({
+        "domain": "unmapped_severity_classification",
+        "severity": "info",
+        "message": (
+            f"{len(warning_unmapped)} unmapped capabilities at warning; "
+            f"{len(downgraded)} downgraded to info with explicit justification"
+        ),
+        "execution_allowed": False,
+    })
+
+    # 6. mapping_recommendation_generation
+    signals.append({
+        "domain": "mapping_recommendation_generation",
+        "severity": "info",
+        "message": (
+            f"{len(recommendations)} mapping recommendations generated for unmapped capabilities; "
+            "all require human approval before application"
+        ),
+        "execution_allowed": False,
+    })
+
+    # 7. mapping_recommendation_evidence
+    if evidence_summary["overall_evidence_health"] == "weak":
+        signals.append({
+            "domain": "mapping_recommendation_evidence",
+            "severity": "warning",
+            "message": "Overall recommendation evidence health is weak; human review especially important",
+            "execution_allowed": False,
+        })
+    else:
+        signals.append({
+            "domain": "mapping_recommendation_evidence",
+            "severity": "info",
+            "message": (
+                f"Recommendation evidence health: {evidence_summary['overall_evidence_health']} "
+                f"({strong_count} strong, {moderate_count} moderate, {weak_count} weak)"
+            ),
+            "execution_allowed": False,
+        })
+
+    # 8. evidence_report_generation
+    signals.append({
+        "domain": "evidence_report_generation",
+        "severity": "info",
+        "message": (
+            f"{len(evidence_reports)} evidence reports generated; "
+            "no auto-application of any recommendation"
+        ),
+        "execution_allowed": False,
+    })
+
+    # 9. governance_boundary_enforcement
+    signals.append({
+        "domain": "governance_boundary_enforcement",
+        "severity": "info",
+        "message": (
+            "governance invariants: execution_allowed=False, auto_apply_capability_mappings=False, "
+            "auto_resolve_coverage_gaps=False, human_approval_required=True"
+        ),
+        "execution_allowed": False,
+    })
+
+    # 10. cross_registry_consistency_65b
+    known_cap_ids = {
+        c["capability_name"].lower().replace(" ", "_") for c in _CRI_KNOWN_CAPABILITIES
+    }
+    orphan_map_ids = [
+        e["capability_id"] for e in _SRG_CAPABILITY_OBJECTIVE_MAP
+        if e["capability_id"] not in known_cap_ids
+    ]
+    if orphan_map_ids:
+        signals.append({
+            "domain": "cross_registry_consistency_65b",
+            "severity": "warning",
+            "message": f"Capability map references unknown capability IDs: {orphan_map_ids}",
+            "execution_allowed": False,
+        })
+    else:
+        signals.append({
+            "domain": "cross_registry_consistency_65b",
+            "severity": "info",
+            "message": "All capability_objective_map entries reference known capabilities",
+            "execution_allowed": False,
+        })
+
+    sample_assessment = {
+        "phase": ts,
+        "domain_count": len(_SSS_GOVERNANCE_DOMAINS),
+        "signal_count": len(signals),
+        "blocker_count": sum(1 for s in signals if s["severity"] == "blocker"),
+        "warning_count": sum(1 for s in signals if s["severity"] == "warning"),
+        "info_count": sum(1 for s in signals if s["severity"] == "info"),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    covered_count = sum(1 for r in objective_coverage_records if r["objective_coverage_status"] == "covered")
+    sample_summary = {
+        "phase": ts,
+        "objective_coverage_summary": {
+            "total": len(objective_coverage_records),
+            "covered": covered_count,
+            "partially_covered": sum(1 for r in objective_coverage_records if r["objective_coverage_status"] == "partially_covered"),
+            "uncovered": len(uncovered_objs),
+            "thin_completeness": len(thin_objs),
+        },
+        "unmapped_capability_count": len(unmapped_records),
+        "warning_unmapped_count": len(warning_unmapped),
+        "mapping_recommendation_count": len(recommendations),
+        "evidence_report_count": len(evidence_reports),
+        "overall_state_health": "at_risk" if uncovered_objs else (
+            "needs_attention" if warning_unmapped else "healthy"
+        ),
+        "execution_allowed": False,
+        "human_review_required": True,
+    }
+
+    return {
+        "strategic_state_summary_overview": {
+            "phase": ts,
+            "phase_title": "Strategic State Summary",
+            "advisory": STRATEGIC_STATE_SUMMARY_ADVISORY,
+            "governance_domains": list(_SSS_GOVERNANCE_DOMAINS),
+            "objective_count": len(objective_coverage_records),
+            "implemented_capability_count": len(implemented_caps),
+            "mapped_capability_count": len(mapped_cap_ids),
+            "unmapped_capability_count": len(unmapped_records),
+            "warning_unmapped_count": len(warning_unmapped),
+            "mapping_recommendation_count": len(recommendations),
+            "evidence_report_count": len(evidence_reports),
+        },
+        "objective_coverage_records": objective_coverage_records,
+        "unmapped_capability_records": unmapped_records,
+        "mapping_recommendations": recommendations,
+        "evidence_reports": evidence_reports,
+        "evidence_summary": evidence_summary,
+        "objective_coverage_model": {
+            "model_name": "ObjectiveCoverageRecord",
+            "field_count": len(_CCG_OBJECTIVE_COVERAGE_FIELDS),
+            "required_field_count": len(_CCG_OBJECTIVE_COVERAGE_FIELDS),
+            "objective_coverage_statuses": list(_CCG_OBJECTIVE_COVERAGE_STATUSES),
+            "mapping_completeness_statuses": list(_CCG_MAPPING_COMPLETENESS_STATUSES),
+            "statuses_are_independent": True,
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _CCG_OBJECTIVE_COVERAGE_FIELDS],
+        },
+        "unmapped_capability_model": {
+            "model_name": "UnmappedCapabilityRecord",
+            "field_count": len(_UCD_UNMAPPED_CAPABILITY_FIELDS),
+            "required_field_count": len(_UCD_UNMAPPED_CAPABILITY_FIELDS),
+            "default_severity": "warning",
+            "severity_values": list(_UCD_SEVERITY_VALUES),
+            "low_risk_justifications": list(_UCD_LOW_RISK_JUSTIFICATIONS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _UCD_UNMAPPED_CAPABILITY_FIELDS],
+        },
+        "mapping_recommendation_model": {
+            "model_name": "MappingRecommendationRecord",
+            "field_count": len(_MRR_RECOMMENDATION_FIELDS),
+            "required_field_count": len(_MRR_RECOMMENDATION_FIELDS),
+            "inference_methods": list(_MRR_INFERENCE_METHODS),
+            "recommendation_statuses": list(_MRR_RECOMMENDATION_STATUSES),
+            "auto_apply_allowed": False,
+            "human_approval_required": True,
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _MRR_RECOMMENDATION_FIELDS],
+        },
+        "evidence_report_model": {
+            "model_name": "EvidenceReportRecord",
+            "field_count": len(_EBR_EVIDENCE_REPORT_FIELDS),
+            "required_field_count": len(_EBR_EVIDENCE_REPORT_FIELDS),
+            "evidence_quality_levels": list(_EBR_EVIDENCE_QUALITY_LEVELS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _EBR_EVIDENCE_REPORT_FIELDS],
+        },
+        "evidence_summary_model": {
+            "model_name": "EvidenceSummary",
+            "field_count": len(_EBR_EVIDENCE_SUMMARY_FIELDS),
+            "required_field_count": len(_EBR_EVIDENCE_SUMMARY_FIELDS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _EBR_EVIDENCE_SUMMARY_FIELDS],
+        },
+        "signal_model": {
+            "model_name": "StrategicStateSummarySignal",
+            "field_count": len(_SSS_SIGNAL_FIELDS),
+            "required_field_count": len(_SSS_SIGNAL_FIELDS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _SSS_SIGNAL_FIELDS],
+        },
+        "assessment_model": {
+            "model_name": "StrategicStateSummaryAssessment",
+            "field_count": len(_SSS_ASSESSMENT_FIELDS),
+            "required_field_count": len(_SSS_ASSESSMENT_FIELDS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _SSS_ASSESSMENT_FIELDS],
+        },
+        "summary_model": {
+            "model_name": "StrategicStateSummarySummary",
+            "field_count": len(_SSS_SUMMARY_FIELDS),
+            "required_field_count": len(_SSS_SUMMARY_FIELDS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _SSS_SUMMARY_FIELDS],
+        },
+        "signals": signals,
+        "sample_assessment": sample_assessment,
+        "sample_summary": sample_summary,
+        "governance_boundaries": {
+            "may": [
+                "compute objective coverage governance",
+                "detect unmapped capabilities",
+                "classify unmapped capability severity",
+                "generate mapping recommendations with evidence",
+                "produce evidence reports",
+                "emit strategic state summary",
+                "report coverage gaps",
+            ],
+            "may_not": [
+                "auto-apply capability mappings",
+                "auto-resolve coverage gaps",
+                "auto-approve mapping recommendations",
+                "modify roadmap automatically",
+                "invoke runtimes",
+                "execute prompts",
+                "execute commands",
+                "commit",
+                "push",
+                "rollback",
+            ],
+            "auto_apply_capability_mappings": False,
+            "auto_resolve_coverage_gaps": False,
+            "auto_approve_mapping_recommendations": False,
+            "auto_modify_roadmap": False,
+            "recommendation_allowed": True,
+            "evidence_report_allowed": True,
+            "human_approval_required": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "65B",
+        },
+        "advisory": STRATEGIC_STATE_SUMMARY_ADVISORY,
     }

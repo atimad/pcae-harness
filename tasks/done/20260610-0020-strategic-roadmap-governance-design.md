@@ -10,7 +10,7 @@ Strategic Roadmap Governance Design
 
 ## Status
 
-active
+done
 
 ## Mode
 

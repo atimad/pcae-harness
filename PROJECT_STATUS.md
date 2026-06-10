@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65A: Strategic Roadmap Governance Design.
+Phase 65B: Strategic State Summary.
 
 ## Post-61J Runtime Registry Checkpoint
 
