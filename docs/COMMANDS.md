@@ -1105,6 +1105,26 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae multi-runtime-execution-readiness`
 - `pcae multi-runtime-execution-readiness --json`
 
+## multi-runtime-orchestration-execution
+
+- `pcae multi-runtime-orchestration-execution`
+- `pcae multi-runtime-orchestration-execution --json`
+
+## runtime-coordination-policy
+
+- `pcae runtime-coordination-policy`
+- `pcae runtime-coordination-policy --json`
+
+## orchestration-audit-model
+
+- `pcae orchestration-audit-model`
+- `pcae orchestration-audit-model --json`
+
+## orchestration-readiness-gate
+
+- `pcae orchestration-readiness-gate`
+- `pcae orchestration-readiness-gate --json`
+
 ## capability-inventory
 
 - `pcae capability-inventory`
@@ -1179,3 +1199,13 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae roadmap-recommendation-hardening`
 - `pcae roadmap-recommendation-hardening --json`
+
+## strategic-roadmap-governance
+
+- `pcae strategic-roadmap-governance`
+- `pcae strategic-roadmap-governance --json`
+
+## strategic-state-summary
+
+- `pcae strategic-state-summary`
+- `pcae strategic-state-summary --json`

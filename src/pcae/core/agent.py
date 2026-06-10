@@ -68570,6 +68570,7 @@ _CI_RECORD_FIELDS: tuple[dict, ...] = (
     {"name": "implemented_phase", "type": "str", "required": True},
     {"name": "status", "type": "str", "required": True},
     {"name": "commands", "type": "list", "required": True},
+    {"name": "introduced_commands", "type": "list", "required": False},
     {"name": "dependencies", "type": "list", "required": True},
     {"name": "successor_capabilities", "type": "list", "required": True},
 )
@@ -68691,11 +68692,12 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae capability-inventory",
             "pcae roadmap current",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "skill_system_foundation",
             "capability_and_roadmap_intelligence",
         ],
-        "successor_capabilities": [],
+        "successor_capabilities": ["skill_invocation_targeting"],
     },
     {
         "capability_domain": "runtime_governance_capabilities",
@@ -68932,6 +68934,222 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": ["runtime_failure_recovery"],
         "successor_capabilities": [],
     },
+    {
+        "capability_domain": "documentation_capabilities",
+        "capability_name": "Capability Inventory",
+        "implemented_phase": "64B.0",
+        "status": "implemented",
+        "commands": ["pcae capability-inventory"],
+        "dependencies": [],
+        "successor_capabilities": ["capability_and_roadmap_intelligence"],
+    },
+    {
+        "capability_domain": "capability_intelligence",
+        "capability_name": "Capability and Roadmap Intelligence",
+        "implemented_phase": "64B.1",
+        "status": "implemented",
+        "commands": [
+            "pcae capability list",
+            "pcae capability show",
+            "pcae capability dependencies",
+            "pcae roadmap current",
+            "pcae roadmap tracks",
+            "pcae roadmap evolution",
+            "pcae prompt next",
+            "pcae prompt phase",
+        ],
+        "dependencies": ["capability_inventory"],
+        "successor_capabilities": ["roadmap_recommendation_hardening"],
+    },
+    {
+        "capability_domain": "capability_intelligence",
+        "capability_name": "Roadmap Recommendation Hardening",
+        "implemented_phase": "64B.2",
+        "status": "implemented",
+        "commands": [
+            "pcae roadmap-recommendation-hardening",
+            "pcae roadmap next",
+            "pcae prompt next",
+        ],
+        "dependencies": ["capability_and_roadmap_intelligence"],
+        "successor_capabilities": ["prompt_recommendation_hardening"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Capability Projection Consolidation",
+        "implemented_phase": "64B.4B",
+        "status": "implemented",
+        "commands": [
+            "pcae capability list",
+            "pcae capability show",
+            "pcae roadmap current",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["skill_registry_consolidation_hardening"],
+        "successor_capabilities": ["skill_invocation_targeting"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Skill Invocation Targeting",
+        "implemented_phase": "64B.5",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke <skill_id> <target_id>",
+            "pcae skill invoke <skill_id> --target <target_id>",
+            "pcae skill invoke <skill_id> --target-type <type> --target <target_id>",
+            "pcae skill validate",
+        ],
+        "introduced_commands": [
+            "pcae skill invoke <skill_id> <target_id>",
+            "pcae skill invoke <skill_id> --target <target_id>",
+            "pcae skill invoke <skill_id> --target-type <type> --target <target_id>",
+        ],
+        "dependencies": ["skill_registry_consolidation_hardening"],
+        "successor_capabilities": ["prompt_rendering_skill"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Prompt Rendering Skill",
+        "implemented_phase": "64B.6",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "dependencies": ["skill_invocation_targeting"],
+        "successor_capabilities": ["prompt_rendering_quality_hardening"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Prompt Rendering Quality Hardening",
+        "implemented_phase": "64B.6A",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["prompt_rendering_skill"],
+        "successor_capabilities": ["dependency_capability_intelligence_rendering"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Dependency & Capability Intelligence Rendering",
+        "implemented_phase": "64B.6B",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["prompt_rendering_quality_hardening"],
+        "successor_capabilities": ["predecessor_capability_rendering"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Predecessor Capability Rendering",
+        "implemented_phase": "64B.6C",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["dependency_capability_intelligence_rendering"],
+        "successor_capabilities": ["command_architecture_intelligence_rendering"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Command & Architecture Intelligence Rendering",
+        "implemented_phase": "64B.6D",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-validation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+            "pcae prompt render --phase <phase_id> --type implementation",
+            "pcae prompt render --phase <phase_id> --type validation",
+            "pcae prompt render --phase <phase_id> --type agent",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["predecessor_capability_rendering"],
+        "successor_capabilities": ["design_review_intelligence_rendering"],
+    },
+    {
+        "capability_domain": "skill_system_capabilities",
+        "capability_name": "Design Review Intelligence Rendering",
+        "implemented_phase": "64B.6E",
+        "status": "implemented",
+        "commands": [
+            "pcae skill invoke phase-implementation <phase_id>",
+            "pcae skill invoke phase-agent <phase_id>",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["command_architecture_intelligence_rendering"],
+        "successor_capabilities": ["capability_inventory_alignment"],
+    },
+    {
+        "capability_domain": "capability_intelligence",
+        "capability_name": "Capability Inventory Alignment",
+        "implemented_phase": "64G",
+        "status": "implemented",
+        "commands": [
+            "pcae runtime-coordination-policy",
+            "pcae runtime-coordination-policy --json",
+            "pcae capability-inventory",
+        ],
+        "dependencies": ["runtime_coordination_policy", "capability_inventory"],
+        "successor_capabilities": ["strategic_roadmap_governance"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Roadmap Governance",
+        "implemented_phase": "65A",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-roadmap-governance",
+            "pcae strategic-roadmap-governance --json",
+        ],
+        "dependencies": ["capability_inventory_alignment", "capability_and_roadmap_intelligence"],
+        "successor_capabilities": ["strategic_state_summary"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic State Summary",
+        "implemented_phase": "65B",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-state-summary",
+            "pcae strategic-state-summary --json",
+        ],
+        "dependencies": ["strategic_roadmap_governance"],
+        "successor_capabilities": ["strategic_governance_registry_alignment"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Governance Registry Alignment",
+        "implemented_phase": "65C",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["strategic_state_summary"],
+        "successor_capabilities": [],
+    },
 )
 
 
@@ -68984,9 +69202,11 @@ def build_capability_inventory(root: HarnessPath | None = None) -> dict:
     command_collision_count = 0
     for _i, _r1 in enumerate(_active_caps):
         _s1 = _r1["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
+        _intro1 = set(_r1["introduced_commands"])
         for _r2 in _active_caps[_i + 1:]:
             _s2 = _r2["capability_name"].lower().replace(" ", "_").replace("-", "_").replace("&", "_")
-            if set(_r1["commands"]) & set(_r2["commands"]):
+            _intro2 = set(_r2["introduced_commands"])
+            if _intro1 & _intro2:
                 if (_s1, _s2) not in _chain_pairs and (_s2, _s1) not in _chain_pairs:
                     command_collision_count += 1
 
@@ -69432,6 +69652,7 @@ _CRI_RECORD_FIELDS: tuple[dict, ...] = (
     {"name": "implemented_phase", "type": "str", "required": True},
     {"name": "status", "type": "str", "required": True},
     {"name": "commands", "type": "list", "required": True},
+    {"name": "introduced_commands", "type": "list", "required": False},
     {"name": "dependencies", "type": "list", "required": True},
     {"name": "successors", "type": "list", "required": True},
     {"name": "aliases", "type": "list", "required": False},
@@ -69692,8 +69913,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65B",
         "phase_title": "Strategic State Summary",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65A",
+        "successor": "65C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65C",
+        "phase_title": "Strategic Governance Registry Alignment",
+        "status": "active",
+        "predecessor": "65B",
         "successor": "",
         "superseded_by": "",
     },
@@ -70241,7 +70471,10 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_domain": "strategic_governance",
         "implemented_phase": "65A",
         "status": "implemented",
-        "commands": [],
+        "commands": [
+            "pcae strategic-roadmap-governance",
+            "pcae strategic-roadmap-governance --json",
+        ],
         "dependencies": [
             "capability_inventory_alignment",
             "capability_and_roadmap_intelligence",
@@ -70255,13 +70488,29 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_domain": "strategic_governance",
         "implemented_phase": "65B",
         "status": "implemented",
-        "commands": [],
+        "commands": [
+            "pcae strategic-state-summary",
+            "pcae strategic-state-summary --json",
+        ],
         "dependencies": [
             "strategic_roadmap_governance",
         ],
-        "successors": [],
+        "successors": ["strategic_governance_registry_alignment"],
         "aliases": [],
         "contribution": "computes objective coverage governance, detects unmapped capabilities with warning-level severity, generates mapping recommendations with evidence and lineage, produces evidence-based reports, and emits a consolidated strategic state summary; all advisory-only with execution_allowed=False",
+    },
+    {
+        "capability_name": "Strategic Governance Registry Alignment",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65C",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "strategic_state_summary",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "reconciles _CI_KNOWN_CAPABILITIES with _CRI_KNOWN_CAPABILITIES, populates command surfaces for 65A and 65B, corrects domain→objective inference in unmapped capability detection, and regenerates docs/COMMANDS.md and docs/CAPABILITY_INVENTORY.md",
     },
     {
         "capability_name": "Capability Inventory",
@@ -70346,6 +70595,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae capability show",
             "pcae roadmap current",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "skill_registry_consolidation_hardening",
         ],
@@ -70364,6 +70614,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae capability-inventory",
             "pcae roadmap current",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "skill_system_foundation",
             "capability_and_roadmap_intelligence",
@@ -70380,6 +70631,11 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae skill invoke <skill_id> --target <target_id>",
             "pcae skill invoke <skill_id> --target-type <type> --target <target_id>",
             "pcae skill validate",
+        ],
+        "introduced_commands": [
+            "pcae skill invoke <skill_id> <target_id>",
+            "pcae skill invoke <skill_id> --target <target_id>",
+            "pcae skill invoke <skill_id> --target-type <type> --target <target_id>",
         ],
         "dependencies": [
             "skill_registry_consolidation_hardening",
@@ -70417,6 +70673,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt render --phase <phase_id> --type validation",
             "pcae prompt render --phase <phase_id> --type agent",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "prompt_rendering_skill",
         ],
@@ -70435,6 +70692,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt render --phase <phase_id> --type validation",
             "pcae prompt render --phase <phase_id> --type agent",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "prompt_rendering_quality_hardening",
         ],
@@ -70453,6 +70711,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt render --phase <phase_id> --type validation",
             "pcae prompt render --phase <phase_id> --type agent",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "dependency_capability_intelligence_rendering",
         ],
@@ -70472,6 +70731,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae prompt render --phase <phase_id> --type validation",
             "pcae prompt render --phase <phase_id> --type agent",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "predecessor_capability_rendering",
         ],
@@ -70487,6 +70747,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae skill invoke phase-implementation <phase_id>",
             "pcae skill invoke phase-agent <phase_id>",
         ],
+        "introduced_commands": [],
         "dependencies": [
             "command_architecture_intelligence_rendering",
         ],
@@ -70509,13 +70770,15 @@ def _build_capability_projection(
         "successor_capabilities" if successor_field == "successor_capabilities" else "successors"
     )
     for index, capability in enumerate(source_capabilities, start=1):
+        cmds = list(capability["commands"])
         records.append({
             "capability_id": f"{capability_id_prefix}-{ts}-{index:02d}",
             "capability_name": capability["capability_name"],
             "capability_domain": capability["capability_domain"],
             "implemented_phase": capability["implemented_phase"],
             "status": capability["status"],
-            "commands": list(capability["commands"]),
+            "commands": cmds,
+            "introduced_commands": list(capability.get("introduced_commands", cmds)),
             "dependencies": list(capability["dependencies"]),
             successor_field: list(capability[source_successor_field]),
             "aliases": list(capability.get("aliases", [])),
@@ -71825,7 +72088,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65B",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65B-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65B",
@@ -71833,7 +72096,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65B",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65B-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65B",
@@ -71841,10 +72104,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65B",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65B",
+    },
+    {
+        "phase_id": "65C",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65C",
+    },
+    {
+        "phase_id": "65C",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65C",
+    },
+    {
+        "phase_id": "65C",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65C",
     },
     {
         "phase_id": "64B.6E",
@@ -78670,19 +78957,29 @@ def _ucd_classify_unmapped_capability(cap: dict, capability_map: tuple[dict, ...
     )
     is_roadmap_gap = phase_record is not None and phase_record.get("status") == "roadmap_gap"
 
-    # Infer likely objectives from domain
+    # Infer likely objectives from domain — domain names match _CRI_KNOWN_CAPABILITIES
     inferred = []
     for obj in _SRG_OBJECTIVE_REGISTRY:
         obj_id = obj["objective_id"]
-        # Simple domain-to-objective heuristic
-        if domain in ("multi_runtime_orchestration", "runtime_governance", "runtime_execution_governance"):
+        if domain in ("multi_runtime_capabilities", "runtime_governance_capabilities",
+                      "runtime_execution_capabilities", "runtime_audit_capabilities",
+                      "runtime_review_capabilities"):
             if obj_id in ("OBJ-003", "OBJ-002"):
                 inferred.append(obj_id)
         elif domain in ("strategic_governance",):
             if obj_id in ("OBJ-001", "OBJ-002"):
                 inferred.append(obj_id)
-        elif domain in ("capability_intelligence", "documentation_capabilities"):
+        elif domain in ("capability_intelligence", "documentation_capabilities",
+                        "skill_system_capabilities", "prompt_intelligence_capabilities"):
             if obj_id in ("OBJ-004", "OBJ-001"):
+                inferred.append(obj_id)
+        elif domain in ("governance_capabilities", "task_lifecycle_capabilities"):
+            if obj_id in ("OBJ-001", "OBJ-002"):
+                inferred.append(obj_id)
+        elif domain in ("prompt_generation_capabilities", "roadmap_capabilities",
+                        "repository_governance_capabilities", "testing_capabilities",
+                        "recovery_capabilities"):
+            if obj_id == "OBJ-001":
                 inferred.append(obj_id)
 
     if not inferred:

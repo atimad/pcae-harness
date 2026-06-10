@@ -399,6 +399,10 @@ from pcae.core.agent import (
     ORCHESTRATION_READINESS_GATE_ADVISORY,
     build_runtime_coordination_policy,
     RUNTIME_COORDINATION_POLICY_ADVISORY,
+    build_strategic_roadmap_governance,
+    STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY,
+    build_strategic_state_summary,
+    STRATEGIC_STATE_SUMMARY_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14274,3 +14278,118 @@ def run_prompt_render_skill(args: argparse.Namespace) -> int:
     print()
     print(PROMPT_RENDERING_QUALITY_HARDENING_ADVISORY)
     return 1 if data["assessment"]["blocker_count"] > 0 else 0
+
+
+def run_strategic_roadmap_governance(args: argparse.Namespace) -> int:
+    data = build_strategic_roadmap_governance(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["strategic_roadmap_governance_overview"]
+    print("Strategic Roadmap Governance")
+    print(f"  Phase:   {overview['phase']} — {overview['title']}")
+    print(f"  Goals:   {overview['goal_count']}")
+    print(f"  Objectives: {overview['objective_count']}")
+    print(f"  Branches:   {overview['branch_count']}")
+    print(f"  Capability mappings: {overview['capability_map_count']}")
+    print()
+    print("Goals:")
+    for g in data["goal_registry"]:
+        print(f"  [{g['goal_id']}] {g['goal_title']}  (priority={g['priority']})")
+    print()
+    print("Objectives:")
+    for o in data["objective_registry"]:
+        print(f"  [{o['objective_id']}] {o['objective_title']}  (goal={o['parent_goal']})")
+    print()
+    print("Branch health:")
+    for rec in data["branch_health_records"]:
+        print(
+            f"  [{rec['branch_id']}] {rec['branch_name']}  "
+            f"health={rec['health_status']}  "
+            f"completed={rec['completed_phase_count']}  "
+            f"active={rec['active_phase_count']}  "
+            f"gaps={rec['gap_phase_count']}"
+        )
+    print()
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  Execution allowed:    {boundaries['execution_allowed']}")
+    print(f"  Human approval req'd: {boundaries['human_approval_required']}")
+    print(f"  Auto-modify roadmap:  {boundaries['auto_modify_roadmap']}")
+    print()
+    print(STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY)
+    return 0
+
+
+def run_strategic_state_summary(args: argparse.Namespace) -> int:
+    data = build_strategic_state_summary(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["strategic_state_summary_overview"]
+    print("Strategic State Summary")
+    print(f"  Phase:                     {overview['phase']} — Strategic State Summary")
+    print(f"  Objectives:                {overview['objective_count']}")
+    print(f"  Implemented capabilities:  {overview['implemented_capability_count']}")
+    print(f"  Mapped capabilities:       {overview['mapped_capability_count']}")
+    print(f"  Unmapped capabilities:     {overview['unmapped_capability_count']}")
+    print(f"  Warning-severity unmapped: {overview['warning_unmapped_count']}")
+    print(f"  Mapping recommendations:   {overview['mapping_recommendation_count']}")
+    print(f"  Evidence reports:          {overview['evidence_report_count']}")
+    print()
+
+    print("Objective coverage:")
+    for rec in data["objective_coverage_records"]:
+        print(
+            f"  [{rec['objective_id']}] {rec['objective_title']}"
+        )
+        print(
+            f"    coverage={rec['objective_coverage_status']}  "
+            f"completeness={rec['mapping_completeness_status']}  "
+            f"primary={rec['primary_capability_count']}  "
+            f"supporting={rec['supporting_capability_count']}  "
+            f"indirect={rec['indirect_capability_count']}"
+        )
+    print()
+
+    warning_unmapped = [r for r in data["unmapped_capability_records"] if r["severity"] == "warning"]
+    info_unmapped = [r for r in data["unmapped_capability_records"] if r["severity"] == "info"]
+    print(f"Unmapped capabilities  ({len(data['unmapped_capability_records'])} total):")
+    if warning_unmapped:
+        print(f"  [WARNING] {len(warning_unmapped)} capabilities require strategic visibility review:")
+        for rec in warning_unmapped[:10]:
+            print(f"    {rec['capability_name']}  (phase={rec['implemented_phase']}  domain={rec['capability_domain']})")
+        if len(warning_unmapped) > 10:
+            print(f"    ... and {len(warning_unmapped) - 10} more")
+    if info_unmapped:
+        print(f"  [INFO]    {len(info_unmapped)} capabilities downgraded (explicit justification):")
+        for rec in info_unmapped[:5]:
+            print(f"    {rec['capability_name']}  reason={rec['severity_reason']}")
+        if len(info_unmapped) > 5:
+            print(f"    ... and {len(info_unmapped) - 5} more")
+    print()
+
+    ev = data["evidence_summary"]
+    print("Evidence summary:")
+    print(f"  Total recommendations: {ev['total_recommendations']}")
+    print(f"  Strong evidence:       {ev['strong_evidence_count']}")
+    print(f"  Moderate evidence:     {ev['moderate_evidence_count']}")
+    print(f"  Weak evidence:         {ev['weak_evidence_count']}")
+    print(f"  Overall health:        {ev['overall_evidence_health']}")
+    print()
+
+    summary = data["sample_summary"]
+    print(f"Overall state health:  {summary['overall_state_health']}")
+    print()
+
+    boundaries = data["governance_boundaries"]
+    print("Governance boundaries:")
+    print(f"  Execution allowed:           {boundaries['execution_allowed']}")
+    print(f"  Auto-apply mappings:         {boundaries['auto_apply_capability_mappings']}")
+    print(f"  Auto-resolve coverage gaps:  {boundaries['auto_resolve_coverage_gaps']}")
+    print(f"  Human approval required:     {boundaries['human_approval_required']}")
+    print()
+    print(STRATEGIC_STATE_SUMMARY_ADVISORY)
+    return 0

@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260610-0706-strategic-state-summary",
-    "title": "Strategic State Summary"
+    "id": "20260610-1024-strategic-governance-registry-alignment",
+    "title": "Strategic Governance Registry Alignment"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "Strategic State Summary",
+  "current_objective": "Strategic Governance Registry Alignment",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -14,26 +14,42 @@
         "status": " M"
       },
       {
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/COMMANDS.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
         "path": "tasks/DONE.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260610-0020-strategic-roadmap-governance-design.md",
+        "path": "tasks/active/20260610-0706-strategic-state-summary.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260610-0706-strategic-state-summary.md",
+        "path": "tasks/active/20260610-1024-strategic-governance-registry-alignment.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260610-0020-strategic-roadmap-governance-design.md",
+        "path": "tasks/done/20260610-0706-strategic-state-summary.md",
         "status": "??"
       }
     ],
-    "status_summary": "5 changed files"
+    "status_summary": "9 changed files"
   },
-  "last_completed_step": "Completed task 20260610-0020-strategic-roadmap-governance-design: Strategic Roadmap Governance Design",
-  "next_recommended_step": "Continue active task 20260610-0706-strategic-state-summary.",
-  "timestamp": "2026-06-10T05:06:15.976817+00:00",
+  "last_completed_step": "Completed task 20260610-0706-strategic-state-summary: Strategic State Summary",
+  "next_recommended_step": "Continue active task 20260610-1024-strategic-governance-registry-alignment.",
+  "timestamp": "2026-06-10T08:24:19.600729+00:00",
   "warnings": []
 }

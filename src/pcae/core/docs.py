@@ -1220,6 +1220,16 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae roadmap-recommendation-hardening`
 - `pcae roadmap-recommendation-hardening --json`
+
+## strategic-roadmap-governance
+
+- `pcae strategic-roadmap-governance`
+- `pcae strategic-roadmap-governance --json`
+
+## strategic-state-summary
+
+- `pcae strategic-state-summary`
+- `pcae strategic-state-summary --json`
 """
 
 

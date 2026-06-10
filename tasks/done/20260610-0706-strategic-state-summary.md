@@ -10,7 +10,7 @@ Strategic State Summary
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -23,6 +23,8 @@ Implement Phase 65B: add Strategic State Summary capability. Compute objective c
 ## Allowed Files
 
 - src/pcae/core/agent.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
 - tests/test_agent.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
@@ -38,6 +40,8 @@ Implement Phase 65B: add Strategic State Summary capability. Compute objective c
 ## Allowed Zones
 
 - core
+- commands
+- cli
 - tests
 - docs
 - tasks

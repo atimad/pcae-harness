@@ -186,6 +186,8 @@ from pcae.commands.agent import (
     run_orchestration_audit_model,
     run_orchestration_readiness_gate,
     run_runtime_coordination_policy,
+    run_strategic_roadmap_governance,
+    run_strategic_state_summary,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4723,6 +4725,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     rcp_parser.set_defaults(handler=run_runtime_coordination_policy)
+
+    srg_parser = subparsers.add_parser(
+        "strategic-roadmap-governance",
+        help="Inspect the strategic governance layer: project goals, vision, objectives, branch registry, and capability-objective map (Phase 65A).",
+    )
+    srg_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    srg_parser.set_defaults(handler=run_strategic_roadmap_governance)
+
+    sss_parser = subparsers.add_parser(
+        "strategic-state-summary",
+        help="Compute strategic state summary: objective coverage, unmapped capability detection, mapping recommendations, and evidence reports (Phase 65B).",
+    )
+    sss_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    sss_parser.set_defaults(handler=run_strategic_state_summary)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

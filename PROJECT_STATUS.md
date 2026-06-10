@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65B: Strategic State Summary.
+Phase 65C: Strategic Governance Registry Alignment.
 
 ## Post-61J Runtime Registry Checkpoint
 
