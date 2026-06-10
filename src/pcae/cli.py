@@ -190,6 +190,7 @@ from pcae.commands.agent import (
     run_strategic_state_summary,
     run_mapping_review_governance,
     run_governed_write_invocation_design,
+    run_governed_write_invocation_candidate,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4771,6 +4772,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     gwid_parser.set_defaults(handler=run_governed_write_invocation_design)
+
+    gwic_parser = subparsers.add_parser(
+        "governed-write-invocation-candidate",
+        help="Governed write invocation candidate contract with lifecycle, approval linkage, rollback linkage, and consumption protocol (Phase 65F).",
+    )
+    gwic_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    gwic_parser.set_defaults(handler=run_governed_write_invocation_candidate)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

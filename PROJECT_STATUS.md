@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65E: Governed Write Invocation Design.
+Phase 65F: Governed Write Invocation Candidate Contract.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -4106,11 +4106,11 @@ ConcurrencySafetyAssessment, ParallelAgentCoordinationAssessment,
 MultiAgentStateConsistencyAssessment, ConflictResolutionAssessment;
 `docs/COMMANDS.md` regenerated; 8 new tests; 4177 total tests passing.
 
-## Current Phase
+## Phase At Last Checkpoint
 
 Phase 64B.6A: Prompt Rendering Quality Hardening.
 
-## Next
+## Next Steps At Last Checkpoint
 
 - 64C: Governed Prompt Execution (planned)
 

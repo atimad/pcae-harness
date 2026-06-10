@@ -69175,6 +69175,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "strategic_capability-objective_bulk_mapping_governance",
             "strategic_state_summary",
         ],
+        "successor_capabilities": ["governed_write_invocation_candidate_contract"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Governed Write Invocation Candidate Contract",
+        "implemented_phase": "65F",
+        "status": "implemented",
+        "commands": [
+            "pcae governed-write-invocation-candidate",
+            "pcae governed-write-invocation-candidate --json",
+        ],
+        "dependencies": ["governed_write_invocation_design"],
         "successor_capabilities": [],
     },
 )
@@ -69967,8 +69979,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65E",
         "phase_title": "Governed Write Invocation Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65D",
+        "successor": "65F",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65F",
+        "phase_title": "Governed Write Invocation Candidate Contract",
+        "status": "active",
+        "predecessor": "65E",
         "successor": "",
         "superseded_by": "",
     },
@@ -70586,9 +70607,25 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "strategic_capability-objective_bulk_mapping_governance",
             "strategic_state_summary",
         ],
-        "successors": [],
+        "successors": ["governed_write_invocation_candidate_contract"],
         "aliases": [],
         "contribution": "extends write invocation governance (46N) with strategic alignment checks, branch impact assessment, objective-ref gating, pre-write state snapshots, rollback pre-staging model, rollback signal types (rollback_required, rollback_review_required), 10-step lifecycle, WriteApprovalRecord and RollbackPreStageRecord models, multi-runtime write policy, and 10-entry immutable audit trail; all advisory-only with execution_allowed=False",
+    },
+    {
+        "capability_name": "Governed Write Invocation Candidate Contract",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65F",
+        "status": "implemented",
+        "commands": [
+            "pcae governed-write-invocation-candidate",
+            "pcae governed-write-invocation-candidate --json",
+        ],
+        "dependencies": [
+            "governed_write_invocation_design",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "defines the GoverneWriteInvocationCandidate composite model (sealed artifact extending 46N + 65E), operation constraints (edit-only; create/delete/rename/append-outside-scope forbidden), six candidate statuses, four readiness states, approval and rollback cross-validation rules, objective and branch lineage chains, and the consumption protocol for future execution phases; all advisory-only with execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72238,7 +72275,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65E",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65E-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65E",
@@ -72246,7 +72283,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65E",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65E-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65E",
@@ -72254,10 +72291,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65E",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65E-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65E",
+    },
+    {
+        "phase_id": "65F",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65F-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65F",
+    },
+    {
+        "phase_id": "65F",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65F-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65F",
+    },
+    {
+        "phase_id": "65F",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65F-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65F",
     },
     {
         "phase_id": "64B.6E",
@@ -78513,6 +78574,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "decision_id": "",
         "recommendation_id": "",
     },
+    {
+        "capability_id": "governed_write_invocation_candidate_contract",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "defines the sealed candidate artifact model, edit-only operation constraints, "
+            "readiness states, approval and rollback cross-validation rules, and the "
+            "consumption protocol for future execution phases; enforces execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
 )
 
 
@@ -81207,4 +81280,507 @@ def build_governed_write_invocation_design(root: "HarnessPath | None" = None) ->
         "multi_runtime_write_policy": dict(_GWI_MULTI_RUNTIME_POLICY),
         "governance_boundaries": dict(_GWI_GOVERNANCE_BOUNDARIES),
         "advisory": GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 65F — Governed Write Invocation Candidate Contract
+# ---------------------------------------------------------------------------
+
+GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY = (
+    "Governed write invocation candidate contract is advisory-only; "
+    "execution_allowed=False; no file mutation, no write execution, no rollback "
+    "execution, no runtime invocation. The candidate is a sealed advisory artifact. "
+    "Allowed operations: edit existing allowed files only. "
+    "Forbidden: create, delete, rename, append outside existing file scope."
+)
+
+_WCC_PHASE_ID: str = "65F"
+_WCC_PHASE_TITLE: str = "Governed Write Invocation Candidate Contract"
+
+_WCC_ALLOWED_OPERATIONS: tuple[str, ...] = ("edit",)
+
+_WCC_FORBIDDEN_OPERATIONS: tuple[str, ...] = (
+    "create",
+    "delete",
+    "rename",
+    "append_outside_file_scope",
+)
+
+_WCC_OPERATION_CONSTRAINTS: tuple[dict, ...] = (
+    {
+        "operation": "edit",
+        "allowed": True,
+        "description": (
+            "Modify content within an existing file that is in allowed_files. "
+            "The file must already exist; this operation never creates a new file."
+        ),
+        "scope_constraint": "file must be in allowed_files and must pre-exist",
+    },
+    {
+        "operation": "create",
+        "allowed": False,
+        "description": "Creating new files is forbidden. All writes target pre-existing files within allowed_files.",
+        "scope_constraint": "n/a",
+    },
+    {
+        "operation": "delete",
+        "allowed": False,
+        "description": "Deleting files is forbidden.",
+        "scope_constraint": "n/a",
+    },
+    {
+        "operation": "rename",
+        "allowed": False,
+        "description": "Renaming files is forbidden.",
+        "scope_constraint": "n/a",
+    },
+    {
+        "operation": "append_outside_file_scope",
+        "allowed": False,
+        "description": (
+            "Adding content to a file not in allowed_files is forbidden even if the "
+            "content would be appended rather than replacing existing content. "
+            "Append is permitted only as a form of edit within an existing allowed file."
+        ),
+        "scope_constraint": "n/a",
+    },
+)
+
+_WCC_CANDIDATE_FIELDS: tuple[dict, ...] = (
+    # Identity
+    {"field": "candidate_id",              "type": "str",       "required": True,  "immutable": True,  "group": "identity"},
+    {"field": "candidate_version",         "type": "str",       "required": True,  "immutable": True,  "group": "identity"},
+    {"field": "created_at",                "type": "str",       "required": True,  "immutable": True,  "group": "identity"},
+    {"field": "phase_id",                  "type": "str",       "required": True,  "immutable": True,  "group": "identity"},
+    {"field": "task_id",                   "type": "str",       "required": True,  "immutable": True,  "group": "identity"},
+    # Prompt and authorization linkage (46N)
+    {"field": "prompt_id",                 "type": "str",       "required": True,  "immutable": True,  "group": "authorization"},
+    {"field": "prompt_approval_ref",       "type": "str",       "required": True,  "immutable": True,  "group": "authorization"},
+    {"field": "write_authorization_id",    "type": "str",       "required": True,  "immutable": True,  "group": "authorization"},
+    {"field": "authorization_expiration_timestamp", "type": "str", "required": True, "immutable": True, "group": "authorization"},
+    {"field": "approval_record_ref",       "type": "str",       "required": True,  "immutable": True,  "group": "authorization"},
+    {"field": "approval_tier",             "type": "str",       "required": True,  "immutable": True,  "group": "authorization"},
+    # File scope (46N, edit-only)
+    {"field": "allowed_files",             "type": "list[str]", "required": True,  "immutable": True,  "group": "file_scope"},
+    {"field": "forbidden_files",           "type": "list[str]", "required": True,  "immutable": True,  "group": "file_scope"},
+    {"field": "max_files",                 "type": "int",       "required": True,  "immutable": True,  "group": "file_scope"},
+    {"field": "allowed_operations",        "type": "list[str]", "required": True,  "immutable": True,  "group": "file_scope"},
+    {"field": "forbidden_operations",      "type": "list[str]", "required": True,  "immutable": True,  "group": "file_scope"},
+    # Runtime (46N + 64D)
+    {"field": "selected_runtime",          "type": "str",       "required": True,  "immutable": True,  "group": "runtime"},
+    {"field": "runtime_priority",          "type": "int",       "required": True,  "immutable": True,  "group": "runtime"},
+    {"field": "multi_runtime_consent",     "type": "bool",      "required": True,  "immutable": True,  "group": "runtime"},
+    {"field": "arbitration_ref",           "type": "str",       "required": False, "immutable": True,  "group": "runtime"},
+    # Strategic lineage (65E)
+    {"field": "capability_ref",            "type": "str",       "required": True,  "immutable": True,  "group": "strategic"},
+    {"field": "objective_refs",            "type": "list[str]", "required": True,  "immutable": True,  "group": "strategic"},
+    {"field": "branch_id",                 "type": "str",       "required": True,  "immutable": True,  "group": "strategic"},
+    {"field": "alignment_score",           "type": "float",     "required": True,  "immutable": True,  "group": "strategic"},
+    {"field": "alignment_outcome",         "type": "str",       "required": True,  "immutable": True,  "group": "strategic"},
+    {"field": "coverage_baseline_hash",    "type": "str",       "required": True,  "immutable": True,  "group": "strategic"},
+    # Rollback pre-stage (65E)
+    {"field": "rollback_prestage_ref",          "type": "str",  "required": True,  "immutable": True,  "group": "rollback"},
+    {"field": "rollback_verified_by_dry_run",   "type": "bool", "required": True,  "immutable": True,  "group": "rollback"},
+    # Audit
+    {"field": "audit_trail_ref",           "type": "str",       "required": True,  "immutable": True,  "group": "audit"},
+    # Status (only mutable fields)
+    {"field": "candidate_status",          "type": "str",       "required": True,  "immutable": False, "group": "status"},
+    {"field": "blocking_gate_ids",         "type": "list[str]", "required": True,  "immutable": False, "group": "status"},
+)
+
+_WCC_CANDIDATE_STATUSES: tuple[dict, ...] = (
+    {
+        "status": "draft",
+        "description": "Fields are being assembled. No gates have run. Not yet a valid artifact.",
+        "terminal": False,
+        "execution_allowed": False,
+        "preceding": [],
+        "following": ["preflight_pending"],
+    },
+    {
+        "status": "preflight_pending",
+        "description": "All fields populated. Static and dynamic gates are running.",
+        "terminal": False,
+        "execution_allowed": False,
+        "preceding": ["draft"],
+        "following": ["preflight_passed", "blocked"],
+    },
+    {
+        "status": "preflight_passed",
+        "description": (
+            "All 5 static gates and 4 dynamic gates pass. Candidate fields are sealed "
+            "(immutable except candidate_status). Ready for human approval submission."
+        ),
+        "terminal": False,
+        "execution_allowed": False,
+        "preceding": ["preflight_pending"],
+        "following": ["approval_pending"],
+    },
+    {
+        "status": "approval_pending",
+        "description": "Submitted for human review. Awaiting WriteApprovalRecord with approval_status=granted.",
+        "terminal": False,
+        "execution_allowed": False,
+        "preceding": ["preflight_passed"],
+        "following": ["approved", "blocked", "expired"],
+    },
+    {
+        "status": "approved",
+        "description": (
+            "WriteApprovalRecord.approval_status=granted, rollback_verified_by_dry_run=True, "
+            "coverage_baseline_hash captured. Candidate is sealed and eligible for consumption "
+            "by a future execution phase."
+        ),
+        "terminal": False,
+        "execution_allowed": False,
+        "preceding": ["approval_pending"],
+        "following": ["consumed", "expired"],
+    },
+    {
+        "status": "consumed",
+        "description": "Future execution phase accepted and began processing the candidate.",
+        "terminal": True,
+        "execution_allowed": False,
+        "preceding": ["approved"],
+        "following": [],
+    },
+    {
+        "status": "blocked",
+        "description": (
+            "One or more gates failed or approval was denied. Candidate is frozen. "
+            "A new candidate must be created for a new attempt; blocked candidates are never retried."
+        ),
+        "terminal": True,
+        "execution_allowed": False,
+        "preceding": ["preflight_pending", "approval_pending"],
+        "following": [],
+    },
+    {
+        "status": "expired",
+        "description": (
+            "Approval window elapsed before consumption. "
+            "A new write authorization request is required."
+        ),
+        "terminal": True,
+        "execution_allowed": False,
+        "preceding": ["approval_pending", "approved"],
+        "following": [],
+    },
+)
+
+_WCC_READINESS_STATES: tuple[dict, ...] = (
+    {
+        "readiness": "not_ready",
+        "description": "One or more required conditions unmet. Candidate cannot advance.",
+        "conditions_required": [],
+        "conditions_blocking": ["any_required_field_missing", "any_gate_not_passed"],
+        "eligible_for_approval": False,
+        "eligible_for_consumption": False,
+    },
+    {
+        "readiness": "preflight_ready",
+        "description": (
+            "All 5 static gates and 4 dynamic gates pass. Awaiting human approval. "
+            "Candidate is in preflight_passed or approval_pending status."
+        ),
+        "conditions_required": [
+            "all_static_gates_passed",
+            "all_dynamic_gates_passed",
+            "alignment_outcome_not_blocked",
+            "rollback_verified_by_dry_run",
+            "coverage_baseline_hash_captured",
+        ],
+        "conditions_blocking": [],
+        "eligible_for_approval": True,
+        "eligible_for_consumption": False,
+    },
+    {
+        "readiness": "approval_ready",
+        "description": (
+            "All gates pass and WriteApprovalRecord.approval_status=granted and not expired. "
+            "Candidate is sealed and eligible for consumption by a future execution phase."
+        ),
+        "conditions_required": [
+            "all_static_gates_passed",
+            "all_dynamic_gates_passed",
+            "alignment_outcome_not_blocked",
+            "rollback_verified_by_dry_run",
+            "coverage_baseline_hash_captured",
+            "approval_status_granted",
+            "approval_not_expired",
+            "multi_runtime_consent_if_needed",
+        ],
+        "conditions_blocking": [],
+        "eligible_for_approval": True,
+        "eligible_for_consumption": True,
+    },
+    {
+        "readiness": "stale",
+        "description": (
+            "Was approval_ready but approval window has elapsed or coverage_baseline_hash "
+            "is no longer current. Transitions candidate_status to expired at consumption attempt."
+        ),
+        "conditions_required": [],
+        "conditions_blocking": ["approval_expired_or_coverage_hash_stale"],
+        "eligible_for_approval": False,
+        "eligible_for_consumption": False,
+    },
+)
+
+_WCC_APPROVAL_VALIDATION_RULES: tuple[dict, ...] = (
+    {
+        "rule": "objective_refs_echo",
+        "description": "approval_record.objective_refs must equal candidate.objective_refs exactly.",
+        "blocking": True,
+        "check": "approval_record.objective_refs == candidate.objective_refs",
+    },
+    {
+        "rule": "branch_id_echo",
+        "description": "approval_record.branch_id must equal candidate.branch_id.",
+        "blocking": True,
+        "check": "approval_record.branch_id == candidate.branch_id",
+    },
+    {
+        "rule": "coverage_baseline_hash_echo",
+        "description": "approval_record.coverage_baseline_hash must equal candidate.coverage_baseline_hash.",
+        "blocking": True,
+        "check": "approval_record.coverage_baseline_hash == candidate.coverage_baseline_hash",
+    },
+    {
+        "rule": "rollback_ref_echo",
+        "description": "approval_record.rollback_ref must equal candidate.rollback_prestage_ref.",
+        "blocking": True,
+        "check": "approval_record.rollback_ref == candidate.rollback_prestage_ref",
+    },
+    {
+        "rule": "scope_allowed_files_echo",
+        "description": "approval_record.scope_allowed_files must equal candidate.allowed_files.",
+        "blocking": True,
+        "check": "approval_record.scope_allowed_files == candidate.allowed_files",
+    },
+    {
+        "rule": "alignment_outcome_not_blocked",
+        "description": "candidate.alignment_outcome must be full_alignment or partial_alignment at approval granting.",
+        "blocking": True,
+        "check": "candidate.alignment_outcome in {full_alignment, partial_alignment}",
+    },
+    {
+        "rule": "approval_tier_freshly_computed",
+        "description": (
+            "approval_tier is derived from current branch health at granting time, "
+            "not from the tier stored in the candidate at creation time. "
+            "If branch health degraded between candidate creation and approval, tier escalates."
+        ),
+        "blocking": False,
+        "check": "approval_tier == _srg_compute_branch_health(branch)[health_status] → tier",
+    },
+)
+
+_WCC_ROLLBACK_LINKAGE_RULES: tuple[dict, ...] = (
+    {
+        "rule": "scope_subset",
+        "description": "rollback_scope_files must be a subset of candidate.allowed_files.",
+        "checked_at": "candidate_sealing",
+        "blocking": True,
+        "check": "rollback_prestage.rollback_scope_files ⊆ candidate.allowed_files",
+    },
+    {
+        "rule": "cross_reference_match",
+        "description": "rollback_prestage_ref must equal approval_record.rollback_ref.",
+        "checked_at": "approval_granting",
+        "blocking": True,
+        "check": "candidate.rollback_prestage_ref == approval_record.rollback_ref",
+    },
+    {
+        "rule": "dry_run_verified",
+        "description": "rollback_verified_by_dry_run must be True at approval granting time.",
+        "checked_at": "approval_granting",
+        "blocking": True,
+        "check": "candidate.rollback_verified_by_dry_run == True",
+    },
+    {
+        "rule": "hash_resolvable",
+        "description": "rollback_hash must be a resolvable git SHA at consumption time.",
+        "checked_at": "consumption",
+        "blocking": True,
+        "check": "git rev-parse rollback_hash succeeds",
+    },
+    {
+        "rule": "expiration_aligns",
+        "description": (
+            "rollback_expiration_timestamp aligns with approval expiration. "
+            "Rollback expires when approval expires."
+        ),
+        "checked_at": "consumption",
+        "blocking": True,
+        "check": "rollback_prestage.rollback_expiration_timestamp == approval_record.expiration_timestamp",
+    },
+)
+
+_WCC_CONSUMPTION_PROTOCOL: tuple[dict, ...] = (
+    {"step": 1, "name": "receive_candidate_id",        "description": "Consuming phase receives candidate_id as primary input."},
+    {"step": 2, "name": "resolve_candidate",           "description": "Candidate artifact is resolved and loaded."},
+    {"step": 3, "name": "assert_approved_status",      "description": "candidate_status must be 'approved'. Any other status halts consumption."},
+    {"step": 4, "name": "check_expiration",            "description": "approval_timestamp + approval_window > now. If elapsed: candidate_status=expired, halt."},
+    {"step": 5, "name": "revalidate_coverage_hash",    "description": "Re-run strategic-state-summary; compare hash to coverage_baseline_hash. Material change: candidate_status=stale, halt."},
+    {"step": 6, "name": "rerun_dynamic_gates",         "description": "Re-run pcae check and pytest. Static gates are baked in and not re-run. If fail: candidate_status=blocked, halt."},
+    {"step": 7, "name": "verify_rollback_ref",         "description": "Confirm rollback_hash is a resolvable git SHA. If not: halt."},
+    {"step": 8, "name": "accept_candidate",            "description": "Transition candidate_status from 'approved' to 'consumed'. Execution phase is now authorized by candidate."},
+    {"step": 9, "name": "execute_under_scope",         "description": "Write execution proceeds under file_scope constraint. edit-only operations. No create/delete/rename."},
+    {"step": 10, "name": "run_post_execution_gates",   "description": "post_write_test_suite, post_write_strategic_summary, no_new_unmapped_capabilities."},
+    {"step": 11, "name": "emit_signals",               "description": "Test failure → rollback_required signal. Coverage regression → rollback_review_required signal. Both auto_trigger=False."},
+    {"step": 12, "name": "close_audit_trail",          "description": "Human review required to close audit_close entry. Candidate enters fully terminal state."},
+)
+
+_WCC_OBJECTIVE_LINEAGE_CHAIN: tuple[dict, ...] = (
+    {"step": 1, "from": "candidate.capability_ref",      "to": "_CRI_KNOWN_CAPABILITIES",       "resolves": "capability domain and implemented_phase"},
+    {"step": 2, "from": "_CRI_KNOWN_CAPABILITIES slug",  "to": "_SRG_CAPABILITY_OBJECTIVE_MAP", "resolves": "objective_ids and contribution_type"},
+    {"step": 3, "from": "objective_ids",                 "to": "_SRG_OBJECTIVE_REGISTRY",       "resolves": "parent_goal and objective_title"},
+    {"step": 4, "from": "candidate.objective_refs",      "to": "alignment_score",               "resolves": "ratio of refs with map entries (0.0–1.0)"},
+    {"step": 5, "from": "alignment_score",               "to": "alignment_outcome",             "resolves": "full_alignment|partial_alignment|misaligned|unaligned"},
+)
+
+_WCC_BRANCH_LINEAGE_CHAIN: tuple[dict, ...] = (
+    {"step": 1, "from": "candidate.objective_refs",      "to": "_SRG_BRANCH_REGISTRY",          "resolves": "branches serving those objectives"},
+    {"step": 2, "from": "_SRG_BRANCH_REGISTRY entries",  "to": "candidate.branch_id",           "resolves": "primary branch (BR-001|BR-002|BR-003)"},
+    {"step": 3, "from": "candidate.branch_id",           "to": "_srg_compute_branch_health",    "resolves": "health_status (healthy|at_risk|stalled|inactive)"},
+    {"step": 4, "from": "branch.health_status",          "to": "candidate.approval_tier",       "resolves": "standard (healthy) or elevated (at_risk|stalled)"},
+)
+
+_WCC_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "rollback_execution_allowed": False,
+    "runtime_invocation_allowed": False,
+    "auto_approval_allowed": False,
+    "allowed_operations": list(_WCC_ALLOWED_OPERATIONS),
+    "forbidden_operations": list(_WCC_FORBIDDEN_OPERATIONS),
+    "human_approval_required": True,
+    "rollback_prestage_required_before_approval": True,
+    "coverage_baseline_required": True,
+    "blocked_candidate_retryable": False,
+    "phase": "65F",
+}
+
+
+def build_governed_write_invocation_candidate(root: "HarnessPath | None" = None) -> dict:
+    """Candidate contract model for governed write invocation (Phase 65F)."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    all_fields = len(_WCC_CANDIDATE_FIELDS)
+    immutable_fields = sum(1 for f in _WCC_CANDIDATE_FIELDS if f["immutable"])
+    mutable_fields = all_fields - immutable_fields
+    required_fields = sum(1 for f in _WCC_CANDIDATE_FIELDS if f["required"])
+    terminal_statuses = [s for s in _WCC_CANDIDATE_STATUSES if s["terminal"]]
+    groups = sorted({f["group"] for f in _WCC_CANDIDATE_FIELDS})
+
+    sample_candidate = {
+        f["field"]: (
+            []    if "list" in f["type"] else
+            False if f["type"] == "bool" else
+            0     if f["type"] == "int"  else
+            0.0   if f["type"] == "float" else
+            ""
+        )
+        for f in _WCC_CANDIDATE_FIELDS
+    }
+    sample_candidate["allowed_operations"] = list(_WCC_ALLOWED_OPERATIONS)
+    sample_candidate["forbidden_operations"] = list(_WCC_FORBIDDEN_OPERATIONS)
+    sample_candidate["candidate_version"] = "1.0"
+    sample_candidate["candidate_status"] = "draft"
+    sample_candidate["runtime_priority"] = 1
+
+    return {
+        "governed_write_invocation_candidate_overview": {
+            "phase": _WCC_PHASE_ID,
+            "phase_title": _WCC_PHASE_TITLE,
+            "candidate_field_count": all_fields,
+            "immutable_field_count": immutable_fields,
+            "mutable_field_count": mutable_fields,
+            "required_field_count": required_fields,
+            "field_groups": groups,
+            "status_count": len(_WCC_CANDIDATE_STATUSES),
+            "terminal_status_count": len(terminal_statuses),
+            "readiness_state_count": len(_WCC_READINESS_STATES),
+            "allowed_operation_count": len(_WCC_ALLOWED_OPERATIONS),
+            "forbidden_operation_count": len(_WCC_FORBIDDEN_OPERATIONS),
+            "approval_validation_rule_count": len(_WCC_APPROVAL_VALIDATION_RULES),
+            "rollback_linkage_rule_count": len(_WCC_ROLLBACK_LINKAGE_RULES),
+            "consumption_protocol_steps": len(_WCC_CONSUMPTION_PROTOCOL),
+            "execution_allowed": False,
+        },
+        "candidate_model": {
+            "model": "GoverneWriteInvocationCandidate",
+            "field_count": all_fields,
+            "immutable_field_count": immutable_fields,
+            "mutable_field_count": mutable_fields,
+            "sealing_invariant": (
+                "All fields except candidate_status and blocking_gate_ids are immutable "
+                "once candidate reaches preflight_passed. No field may be updated after sealing "
+                "except these two."
+            ),
+            "fields": [dict(f) for f in _WCC_CANDIDATE_FIELDS],
+            "sample": sample_candidate,
+        },
+        "operation_constraints": {
+            "allowed_operations": list(_WCC_ALLOWED_OPERATIONS),
+            "forbidden_operations": list(_WCC_FORBIDDEN_OPERATIONS),
+            "constraints": [dict(c) for c in _WCC_OPERATION_CONSTRAINTS],
+            "append_note": (
+                "Append is permitted only as a form of edit within an existing allowed file. "
+                "It must not create a new file or expand the task file scope."
+            ),
+        },
+        "candidate_statuses": {
+            "status_count": len(_WCC_CANDIDATE_STATUSES),
+            "terminal_statuses": [s["status"] for s in _WCC_CANDIDATE_STATUSES if s["terminal"]],
+            "non_terminal_statuses": [s["status"] for s in _WCC_CANDIDATE_STATUSES if not s["terminal"]],
+            "statuses": [dict(s) for s in _WCC_CANDIDATE_STATUSES],
+        },
+        "readiness_states": {
+            "state_count": len(_WCC_READINESS_STATES),
+            "states": [dict(s) for s in _WCC_READINESS_STATES],
+        },
+        "approval_linkage": {
+            "primary_artifact": "WriteApprovalRecord (65E)",
+            "secondary_artifact": "WriteAuthorizationArtifact (50A)",
+            "validation_rule_count": len(_WCC_APPROVAL_VALIDATION_RULES),
+            "rules": [dict(r) for r in _WCC_APPROVAL_VALIDATION_RULES],
+            "expiration_checked_at": "consumption_time",
+            "tier_freshness": "approval_tier recomputed from current branch health at granting time",
+        },
+        "rollback_linkage": {
+            "artifact": "RollbackPreStageRecord (65E)",
+            "rule_count": len(_WCC_ROLLBACK_LINKAGE_RULES),
+            "rules": [dict(r) for r in _WCC_ROLLBACK_LINKAGE_RULES],
+            "signal_types": list(_GWI_ROLLBACK_SIGNAL_TYPES),
+            "auto_trigger": False,
+            "human_review_required_before_rollback": True,
+        },
+        "objective_lineage": {
+            "chain_steps": len(_WCC_OBJECTIVE_LINEAGE_CHAIN),
+            "chain": [dict(s) for s in _WCC_OBJECTIVE_LINEAGE_CHAIN],
+            "frozen_at": "strategic_alignment_check (lifecycle step 4)",
+            "recomputed_at_execution": False,
+        },
+        "branch_lineage": {
+            "chain_steps": len(_WCC_BRANCH_LINEAGE_CHAIN),
+            "chain": [dict(s) for s in _WCC_BRANCH_LINEAGE_CHAIN],
+            "frozen_at": "strategic_alignment_check (lifecycle step 4)",
+            "tier_freshness_exception": (
+                "approval_tier is re-derived from current branch health at approval granting "
+                "time — not from the tier frozen in the candidate"
+            ),
+        },
+        "consumption_protocol": {
+            "step_count": len(_WCC_CONSUMPTION_PROTOCOL),
+            "steps": [dict(s) for s in _WCC_CONSUMPTION_PROTOCOL],
+            "static_gates_rebaked": False,
+            "dynamic_gates_rerun": True,
+            "coverage_hash_revalidated": True,
+        },
+        "governance_boundaries": dict(_WCC_GOVERNANCE_BOUNDARIES),
+        "advisory": GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY,
     }

@@ -1240,6 +1240,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae governed-write-invocation-design`
 - `pcae governed-write-invocation-design --json`
+
+## governed-write-invocation-candidate
+
+- `pcae governed-write-invocation-candidate`
+- `pcae governed-write-invocation-candidate --json`
 """
 
 

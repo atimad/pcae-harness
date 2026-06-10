@@ -407,6 +407,8 @@ from pcae.core.agent import (
     MAPPING_REVIEW_GOVERNANCE_ADVISORY,
     build_governed_write_invocation_design,
     GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY,
+    build_governed_write_invocation_candidate,
+    GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14516,4 +14518,81 @@ def run_governed_write_invocation_design(args: argparse.Namespace) -> int:
     print()
 
     print(GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY)
+    return 0
+
+
+def run_governed_write_invocation_candidate(args: argparse.Namespace) -> int:
+    data = build_governed_write_invocation_candidate(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["governed_write_invocation_candidate_overview"]
+    print("Governed Write Invocation Candidate Contract")
+    print(f"  Phase:                          {overview['phase']} — {overview['phase_title']}")
+    print(f"  Candidate fields:               {overview['candidate_field_count']}")
+    print(f"  Immutable fields:               {overview['immutable_field_count']}")
+    print(f"  Mutable fields:                 {overview['mutable_field_count']}")
+    print(f"  Required fields:                {overview['required_field_count']}")
+    print(f"  Field groups:                   {', '.join(overview['field_groups'])}")
+    print(f"  Statuses:                       {overview['status_count']}")
+    print(f"  Terminal statuses:              {overview['terminal_status_count']}")
+    print(f"  Readiness states:               {overview['readiness_state_count']}")
+    print(f"  Allowed operations:             {overview['allowed_operation_count']}")
+    print(f"  Forbidden operations:           {overview['forbidden_operation_count']}")
+    print(f"  Approval validation rules:      {overview['approval_validation_rule_count']}")
+    print(f"  Rollback linkage rules:         {overview['rollback_linkage_rule_count']}")
+    print(f"  Consumption protocol steps:     {overview['consumption_protocol_steps']}")
+    print(f"  Execution allowed:              {overview['execution_allowed']}")
+    print()
+
+    print("Operation constraints:")
+    oc = data["operation_constraints"]
+    print(f"  Allowed:   {oc['allowed_operations']}")
+    print(f"  Forbidden: {oc['forbidden_operations']}")
+    print(f"  Append note: {oc['append_note'][:80]}{'...' if len(oc['append_note']) > 80 else ''}")
+    print()
+
+    print("Candidate statuses:")
+    cs = data["candidate_statuses"]
+    print(f"  Terminal:     {cs['terminal_statuses']}")
+    print(f"  Non-terminal: {cs['non_terminal_statuses']}")
+    print()
+
+    print("Readiness states:")
+    for s in data["readiness_states"]["states"]:
+        print(f"  {s['state']}: {s['description'][:70]}{'...' if len(s['description']) > 70 else ''}")
+    print()
+
+    print("Approval linkage:")
+    al = data["approval_linkage"]
+    print(f"  Primary artifact:   {al['primary_artifact']}")
+    print(f"  Secondary artifact: {al['secondary_artifact']}")
+    print(f"  Validation rules:   {al['validation_rule_count']}")
+    print(f"  Expiration checked: {al['expiration_checked_at']}")
+    print()
+
+    print("Rollback linkage:")
+    rl = data["rollback_linkage"]
+    print(f"  Artifact:                  {rl['artifact']}")
+    print(f"  Linkage rules:             {rl['rule_count']}")
+    print(f"  Signal types:              {rl['signal_types']}")
+    print(f"  Auto trigger:              {rl['auto_trigger']}")
+    print(f"  Human review required:     {rl['human_review_required_before_rollback']}")
+    print()
+
+    print("Governance boundaries:")
+    gb = data["governance_boundaries"]
+    print(f"  Execution allowed:             {gb['execution_allowed']}")
+    print(f"  File mutation allowed:         {gb['file_mutation_allowed']}")
+    print(f"  Rollback execution allowed:    {gb['rollback_execution_allowed']}")
+    print(f"  Runtime invocation allowed:    {gb['runtime_invocation_allowed']}")
+    print(f"  Auto approval allowed:         {gb['auto_approval_allowed']}")
+    print(f"  Human approval required:       {gb['human_approval_required']}")
+    print(f"  Blocked candidate retryable:   {gb['blocked_candidate_retryable']}")
+    print(f"  Allowed operations:            {gb['allowed_operations']}")
+    print(f"  Forbidden operations:          {gb['forbidden_operations']}")
+    print()
+
+    print(GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY)
     return 0
