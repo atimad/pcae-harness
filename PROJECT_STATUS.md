@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 66A: Independent Review Governance Model.
+Phase 66B: Strategic Review Model.
 
 ## Post-61J Runtime Registry Checkpoint
 

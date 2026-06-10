@@ -69220,6 +69220,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae independent-review-governance --json",
         ],
         "dependencies": ["commit_session_continuity_guard"],
+        "successor_capabilities": ["strategic_review_model"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Review Model",
+        "implemented_phase": "66B",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-review-governance",
+            "pcae strategic-review-governance --json",
+        ],
+        "dependencies": ["independent_review_governance"],
         "successor_capabilities": [],
     },
 )
@@ -70049,8 +70061,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "66A",
         "phase_title": "Independent Review Governance Model",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65H",
+        "successor": "66B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "66B",
+        "phase_title": "Strategic Review Model",
+        "status": "active",
+        "predecessor": "66A",
         "successor": "",
         "superseded_by": "",
     },
@@ -70176,7 +70197,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "capability_intelligence",
         "phase_id": "64B.6E",
         "phase_title": "Design Review Intelligence Rendering",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64B.6D",
         "successor": "",
         "superseded_by": "",
@@ -70729,9 +70750,25 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "commit_session_continuity_guard",
         ],
-        "successors": [],
+        "successors": ["strategic_review_model"],
         "aliases": [],
         "contribution": "introduces BR-004 independent_review_governance branch and the founding governance model: ReviewRecord model (14 fields), ReviewFinding model (5 fields), review class registry (8 classes with review_required policy), BLOCKER/MAJOR/MINOR/INFO finding severities, deterministic recommendation derivation rules, immutable append-only review lineage with supersedes_review_id, bootstrapping exception for BR-004 phases only, reviewer_is_approver=False, review_output_is_binding=False, review_depth_limit=1; all advisory-only with execution_allowed=False, file_mutation_allowed=False",
+    },
+    {
+        "capability_name": "Strategic Review Model",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "66B",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-review-governance",
+            "pcae strategic-review-governance --json",
+        ],
+        "dependencies": [
+            "independent_review_governance",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "defines strategic_review class behavior (4 domains, 7 finding rules, 8 extension fields); creates first real StrategicReviewRecord SRR-66B-001 in append-only _IRG_STRATEGIC_REVIEW_REGISTRY; real_review_record_creation_allowed=True for strategic_review class only; dual output (frozen record + live assessment) with staleness signal; coverage_auto_update_from_review=False; capability_mapping_auto_update_from_review=False; execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72477,7 +72514,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66A",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66A-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66A",
@@ -72485,7 +72522,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66A",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66A-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66A",
@@ -72493,10 +72530,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66A",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66A-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66A",
+    },
+    {
+        "phase_id": "66B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "66B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66B",
+    },
+    {
+        "phase_id": "66B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "66B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66B",
+    },
+    {
+        "phase_id": "66B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "66B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66B",
     },
     {
         "phase_id": "64B.6E",
@@ -78821,6 +78882,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "decision_id": "",
         "recommendation_id": "",
     },
+    {
+        "capability_id": "strategic_review_model",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "defines strategic_review class behavior (4 domains, 7 rules), creates first real "
+            "StrategicReviewRecord (SRR-66B-001) in append-only _IRG_STRATEGIC_REVIEW_REGISTRY; "
+            "real_review_record_creation_allowed=True for strategic_review class only; "
+            "coverage_auto_update_from_review=False; execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
 )
 
 
@@ -82271,7 +82345,7 @@ _IRG_REVIEW_CLASS_REGISTRY: tuple[dict, ...] = (
         "review_required": False,
         "bootstrapping_exempt": False,
         "reviewer_isolation": "reviewer must not be in any branch whose direction is being assessed",
-        "note": "on-demand; detailed behavior model deferred to 66B",
+        "behavior_model_phase": "66B",
     },
     {
         "review_class": "minor_documentation_change",
@@ -82537,6 +82611,492 @@ def build_independent_review_governance(root: "HarnessPath | None" = None) -> di
         "sample_review_records": [dict(r) for r in _IRG_SAMPLE_REVIEW_RECORDS],
         "governance_boundaries": dict(_IRG_GOVERNANCE_BOUNDARIES),
         "advisory": INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 66B — Strategic Review Model
+# ---------------------------------------------------------------------------
+
+STRATEGIC_REVIEW_MODEL_ADVISORY = (
+    "Phase 66B defines the Strategic Review Model: the first phase in BR-004 where "
+    "real_review_record_creation_allowed=True (scoped to strategic_review class only). "
+    "Introduces _SRS_REVIEW_DOMAINS (4 domains), _SRS_FINDING_RULES (7 rules), "
+    "_SRS_EXTENSION_FIELDS (8 strategic-context fields), and "
+    "_IRG_STRATEGIC_REVIEW_REGISTRY (append-only, ≤3 records before external persistence). "
+    "SRR-66B-001 is the first real StrategicReviewRecord: reviewer_id=pcae-irg-strategic, "
+    "review_target=roadmap-state-v66b, findings computed by running _SRS_FINDING_RULES "
+    "against live registries at implementation time and frozen. "
+    "Governance invariants: execution_allowed=False, file_mutation_allowed=False, "
+    "review_output_is_binding=False, reviewer_is_approver=False, "
+    "coverage_auto_update_from_review=False, capability_mapping_auto_update_from_review=False, "
+    "human_confirmation_required=True. "
+    "_IRG_STRATEGIC_REVIEW_REGISTRY stores one record per governance epoch. "
+    "If the registry exceeds 3 records, migrate to .pcae/strategic_reviews.json before adding more. "
+    "The command renders the frozen record, staleness signal, live finding results, and "
+    "open required-changes check only — it does not duplicate strategic-state-summary coverage output."
+)
+
+_SRS_PHASE_ID: str = "66B"
+_SRS_PHASE_TITLE: str = "Strategic Review Model"
+
+_SRS_REVIEW_DOMAINS: tuple[str, ...] = (
+    "branch_health",
+    "objective_coverage",
+    "capability_alignment",
+    "roadmap_depth",
+)
+
+_SRS_FINDING_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "SRS-RULE-001",
+        "domain": "branch_health",
+        "finding_type": "execution_risk",
+        "severity": "MAJOR",
+        "condition": "any_branch_at_risk_or_inactive",
+        "condition_description": "any branch health_status is at_risk or inactive",
+    },
+    {
+        "rule_id": "SRS-RULE-002",
+        "domain": "branch_health",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "condition": "any_branch_stalled",
+        "condition_description": "any branch health_status is stalled",
+    },
+    {
+        "rule_id": "SRS-RULE-003",
+        "domain": "objective_coverage",
+        "finding_type": "completeness_gap",
+        "severity": "MAJOR",
+        "condition": "any_objective_uncovered",
+        "condition_description": "any objective has objective_coverage_status=uncovered or partially_covered",
+    },
+    {
+        "rule_id": "SRS-RULE-004",
+        "domain": "objective_coverage",
+        "finding_type": "completeness_gap",
+        "severity": "MINOR",
+        "condition": "all_objectives_partial_completeness",
+        "condition_description": "all objectives have mapping_completeness_status=partial or thin with none complete",
+    },
+    {
+        "rule_id": "SRS-RULE-005",
+        "domain": "objective_coverage",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "condition": "any_objective_thin_primary_coverage",
+        "condition_description": "any objective has primary_count <= 2",
+    },
+    {
+        "rule_id": "SRS-RULE-006",
+        "domain": "capability_alignment",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "condition": "evidence_quality_weak",
+        "condition_description": "overall_evidence_health=weak in strategic state summary",
+    },
+    {
+        "rule_id": "SRS-RULE-007",
+        "domain": "roadmap_depth",
+        "finding_type": "scope_violation",
+        "severity": "MINOR",
+        "condition": "single_track_dominates",
+        "condition_description": "any non-legacy track has phase_count > 2 * median phase_count across non-legacy tracks",
+    },
+)
+
+_SRS_EXTENSION_FIELDS: tuple[dict, ...] = (
+    {"field": "review_scope",                   "type": "list[str]", "required": True,  "description": "domains reviewed"},
+    {"field": "branch_health_snapshot",          "type": "dict",      "required": True,  "description": "branch_id to health_status at review time"},
+    {"field": "objective_coverage_snapshot",     "type": "dict",      "required": True,  "description": "obj_id to coverage/completeness/primary_count/supporting_count at review time"},
+    {"field": "evidence_quality_at_review",      "type": "str",       "required": True,  "description": "overall_evidence_health from strategic-state-summary at review time"},
+    {"field": "track_count_at_review",           "type": "int",       "required": True,  "description": "total tracks in _CRI_KNOWN_PHASES at review time"},
+    {"field": "completed_phase_count_at_review", "type": "int",       "required": True,  "description": "total completed phases at review time"},
+    {"field": "capability_count_at_review",      "type": "int",       "required": True,  "description": "total capabilities in _CRI_KNOWN_CAPABILITIES at review time"},
+    {"field": "finding_rule_count",              "type": "int",       "required": True,  "description": "number of rules applied; must equal len(_SRS_FINDING_RULES)"},
+)
+
+_SRS_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "real_review_record_creation_allowed": True,
+    "strategic_review_class_record_creation_allowed": True,
+    "other_review_class_record_creation_allowed": False,
+    "reviewer_is_approver": False,
+    "review_output_is_binding": False,
+    "auto_approval_from_review_allowed": False,
+    "review_can_block_human_decision": False,
+    "coverage_auto_update_from_review": False,
+    "capability_mapping_auto_update_from_review": False,
+    "human_confirmation_required": True,
+    "review_depth_limit": 1,
+    "review_mutates_candidate": False,
+    "strategic_review_registry_record_limit": 3,
+}
+
+
+def _srs_compute_objective_snapshot() -> dict:
+    """Compute objective coverage data from live registries for strategic review."""
+    snapshot: dict = {}
+    for obj in _SRG_OBJECTIVE_REGISTRY:
+        obj_id = obj["objective_id"]
+        mappings = [e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if obj_id in e.get("objective_ids", [])]
+        primary_count = sum(1 for m in mappings if m.get("contribution_type") == "primary")
+        supporting_count = sum(1 for m in mappings if m.get("contribution_type") == "supporting")
+        total_implemented = len([c for c in _CRI_KNOWN_CAPABILITIES if c.get("status") == "implemented"])
+        ratio = (primary_count + supporting_count) / total_implemented if total_implemented > 0 else 0.0
+        if primary_count >= 1:
+            coverage_status = "covered"
+        elif supporting_count >= 1:
+            coverage_status = "partially_covered"
+        else:
+            coverage_status = "uncovered"
+        if ratio > _CCG_COMPLETENESS_PARTIAL_THRESHOLD:
+            completeness_status = "complete"
+        elif ratio >= _CCG_COMPLETENESS_THIN_THRESHOLD:
+            completeness_status = "partial"
+        else:
+            completeness_status = "thin"
+        snapshot[obj_id] = {
+            "coverage": coverage_status,
+            "completeness": completeness_status,
+            "primary_count": primary_count,
+            "supporting_count": supporting_count,
+        }
+    return snapshot
+
+
+def _srs_compute_track_phase_counts() -> dict:
+    """Return phase count per non-legacy track from _CRI_KNOWN_PHASES."""
+    counts: dict = {}
+    for p in _CRI_KNOWN_PHASES:
+        track = p.get("track_name", "")
+        if track == "legacy":
+            continue
+        counts[track] = counts.get(track, 0) + 1
+    return counts
+
+
+def _srs_run_finding_rules(
+    branch_health_records: list,
+    objective_snapshot: dict,
+    evidence_quality: str,
+    track_phase_counts: dict,
+    ts: str,
+) -> list:
+    """Apply all 7 SRS finding rules and return a list of ReviewFinding dicts."""
+    findings: list = []
+    idx = 1
+
+    def _f(rule_id: str, finding_type: str, severity: str, description: str, suggested_resolution: str = "") -> None:
+        nonlocal idx
+        entry: dict = {
+            "finding_id": f"F-{ts}-{idx:03d}",
+            "rule_id": rule_id,
+            "finding_type": finding_type,
+            "severity": severity,
+            "description": description,
+        }
+        if suggested_resolution:
+            entry["suggested_resolution"] = suggested_resolution
+        findings.append(entry)
+        idx += 1
+
+    # SRS-RULE-001: any branch at_risk or inactive
+    at_risk = [r for r in branch_health_records if r.get("health_status") in ("at_risk", "inactive")]
+    if at_risk:
+        names = ", ".join(r["branch_name"] for r in at_risk)
+        _f(
+            "SRS-RULE-001", "execution_risk", "MAJOR",
+            f"Branch(es) at_risk or inactive: {names}. Stalled governance development creates risk for capabilities depending on these branches.",
+            "Investigate gap phases in the affected track(s) and resolve blockers before opening new phases in dependent tracks.",
+        )
+
+    # SRS-RULE-002: any branch stalled
+    stalled = [r for r in branch_health_records if r.get("health_status") == "stalled"]
+    if stalled:
+        names = ", ".join(r["branch_name"] for r in stalled)
+        _f(
+            "SRS-RULE-002", "quality_concern", "MINOR",
+            f"Branch(es) stalled: {names}. Stalled branches should be investigated and unblocked.",
+            "Review gap_phase_count signals for the stalled branch and plan resolution.",
+        )
+
+    # SRS-RULE-003: any objective uncovered or partially_covered
+    uncovered = {oid: d for oid, d in objective_snapshot.items() if d["coverage"] in ("uncovered", "partially_covered")}
+    if uncovered:
+        ids = ", ".join(uncovered.keys())
+        _f(
+            "SRS-RULE-003", "completeness_gap", "MAJOR",
+            f"Objective(s) uncovered or only partially covered (no primary mapping): {ids}.",
+            "Add at least one primary capability mapping for each uncovered objective.",
+        )
+
+    # SRS-RULE-004: all objectives partial/thin completeness
+    non_complete = [oid for oid, d in objective_snapshot.items() if d["completeness"] != "complete"]
+    if len(non_complete) == len(objective_snapshot) and len(objective_snapshot) > 0:
+        _f(
+            "SRS-RULE-004", "completeness_gap", "MINOR",
+            f"All {len(objective_snapshot)} objectives have partial or thin mapping completeness — none have reached complete status.",
+            "Add primary mappings to move at least one objective above the 80% completeness threshold.",
+        )
+
+    # SRS-RULE-005: any objective with primary_count <= 2
+    thin_primary = {oid: d["primary_count"] for oid, d in objective_snapshot.items() if d["primary_count"] <= 2}
+    if thin_primary:
+        detail = ", ".join(f"{oid}(primary={cnt})" for oid, cnt in thin_primary.items())
+        _f(
+            "SRS-RULE-005", "quality_concern", "MINOR",
+            f"Objective(s) with primary_count ≤ 2: {detail}. Thin primary coverage reduces confidence in objective ownership.",
+            "Reclassify supporting capabilities as primary where direct service to the objective can be demonstrated, or add new primary capabilities.",
+        )
+
+    # SRS-RULE-006: evidence_quality weak
+    if evidence_quality == "weak":
+        _f(
+            "SRS-RULE-006", "quality_concern", "MINOR",
+            "Overall evidence quality is weak. Current capability-objective mapping evidence is insufficient to support high-confidence governance decisions.",
+            "Generate and approve mapping recommendations via pcae strategic-state-summary to build evidence reports; target moderate evidence quality.",
+        )
+
+    # SRS-RULE-007: single track dominates (phase_count > 2 * median)
+    if track_phase_counts:
+        counts_list = sorted(track_phase_counts.values())
+        n = len(counts_list)
+        median = counts_list[n // 2] if n % 2 == 1 else (counts_list[n // 2 - 1] + counts_list[n // 2]) / 2
+        threshold = 2 * median
+        dominant = {t: c for t, c in track_phase_counts.items() if c > threshold}
+        if dominant:
+            detail = ", ".join(f"{t}({c} phases)" for t, c in dominant.items())
+            _f(
+                "SRS-RULE-007", "scope_violation", "MINOR",
+                f"Track(s) with phase_count > 2×median({median:.0f}={threshold:.0f}): {detail}. Disproportionate depth may indicate over-investment in a single track.",
+                "Review whether the dominant track requires further expansion or has reached sufficient depth for current objectives.",
+            )
+
+    return findings
+
+
+def _srs_derive_recommendation(findings: list) -> str:
+    """Derive recommendation from findings using _IRG_RECOMMENDATION_DERIVATION_RULES."""
+    severities = {f["severity"] for f in findings}
+    if "BLOCKER" in severities:
+        return "reject"
+    if "MAJOR" in severities:
+        return "approve_with_changes"
+    return "approve"
+
+
+def _srs_compute_review_target_version() -> str:
+    """Return a deterministic snapshot string for the current registry state.
+
+    track_names includes all tracks (including legacy) for consistency with
+    the frozen SRR-66B-001 record which counted all 8 tracks.
+    """
+    track_names = {p.get("track_name", "") for p in _CRI_KNOWN_PHASES if p.get("track_name")}
+    completed = sum(1 for p in _CRI_KNOWN_PHASES if p.get("status") == "completed")
+    capabilities = len(_CRI_KNOWN_CAPABILITIES)
+    active_phases = [p for p in _CRI_KNOWN_PHASES if p.get("status") == "active"]
+    active_id = active_phases[0]["phase_id"] if active_phases else "none"
+    return f"tracks={len(track_names)},completed={completed},capabilities={capabilities},active={active_id}"
+
+
+# SRR-66B-001: first real StrategicReviewRecord.
+# Computed by running _srs_run_finding_rules against live registries at 66B implementation time
+# (2026-06-11) and frozen here. Human-reviewed before commit.
+# Findings: 4 MINOR findings — all objectives partial completeness (Rule 4), thin primary
+# coverage on OBJ-003/OBJ-004 (Rule 5), weak evidence quality (Rule 6),
+# capability_intelligence track dominance (Rule 7). Recommendation: approve.
+# Append-only registry. If record count exceeds 3, migrate to .pcae/strategic_reviews.json.
+_IRG_STRATEGIC_REVIEW_REGISTRY: tuple[dict, ...] = (
+    {
+        "review_id": "SRR-66B-001",
+        "review_target_type": "strategic_review",
+        "review_target_id": "roadmap-state-v66b",
+        "review_target_version": "tracks=8,completed=45,capabilities=43,active=66A",
+        "reviewer_id": "pcae-irg-strategic",
+        "review_timestamp": "2026-06-11T00:00:00+00:00",
+        "supersedes_review_id": "",
+        "findings": [
+            {
+                "finding_id": "F-66B-001",
+                "rule_id": "SRS-RULE-004",
+                "finding_type": "completeness_gap",
+                "severity": "MINOR",
+                "description": (
+                    "All 4 objectives have partial or thin mapping completeness — "
+                    "none have reached complete status."
+                ),
+                "suggested_resolution": (
+                    "Add primary mappings to move at least one objective above the 80% completeness threshold."
+                ),
+            },
+            {
+                "finding_id": "F-66B-002",
+                "rule_id": "SRS-RULE-005",
+                "finding_type": "quality_concern",
+                "severity": "MINOR",
+                "description": (
+                    "Objective(s) with primary_count ≤ 2: OBJ-003(primary=1), OBJ-004(primary=2). "
+                    "Thin primary coverage reduces confidence in objective ownership."
+                ),
+                "suggested_resolution": (
+                    "Reclassify supporting capabilities as primary where direct service to the objective "
+                    "can be demonstrated, or add new primary capabilities for OBJ-003 and OBJ-004."
+                ),
+            },
+            {
+                "finding_id": "F-66B-003",
+                "rule_id": "SRS-RULE-006",
+                "finding_type": "quality_concern",
+                "severity": "MINOR",
+                "description": (
+                    "Overall evidence quality is weak. Current capability-objective mapping evidence "
+                    "is insufficient to support high-confidence governance decisions."
+                ),
+                "suggested_resolution": (
+                    "Generate and approve mapping recommendations via pcae strategic-state-summary "
+                    "to build evidence reports; target moderate evidence quality."
+                ),
+            },
+            {
+                "finding_id": "F-66B-004",
+                "rule_id": "SRS-RULE-007",
+                "finding_type": "scope_violation",
+                "severity": "MINOR",
+                "description": (
+                    "Track(s) with phase_count > 2×median(6)=12: capability_intelligence(15 phases). "
+                    "Disproportionate depth may indicate over-investment in a single track."
+                ),
+                "suggested_resolution": (
+                    "Review whether the capability_intelligence track requires further expansion "
+                    "or has reached sufficient depth for current objectives."
+                ),
+            },
+        ],
+        "recommendation": "approve",
+        "rationale": (
+            "Four MINOR findings present; no MAJOR or BLOCKER findings. "
+            "All branches are healthy, all objectives are covered by primary mappings, "
+            "and no objective is uncovered. The findings indicate areas for improvement "
+            "(thin primary coverage, weak evidence quality, track depth imbalance) "
+            "but none constitute blockers to continued roadmap progress."
+        ),
+        "required_changes": [],
+        "rejection_reasons": [],
+        "human_confirmation_required": True,
+        "binding": False,
+        "strategic_context": {
+            "review_scope": list(_SRS_REVIEW_DOMAINS),
+            "branch_health_snapshot": {
+                "BR-001": "healthy",
+                "BR-002": "healthy",
+                "BR-003": "healthy",
+                "BR-004": "healthy",
+            },
+            "objective_coverage_snapshot": {
+                "OBJ-001": {"coverage": "covered", "completeness": "partial", "primary_count": 6,  "supporting_count": 20},
+                "OBJ-002": {"coverage": "covered", "completeness": "partial", "primary_count": 6,  "supporting_count": 18},
+                "OBJ-003": {"coverage": "covered", "completeness": "partial", "primary_count": 1,  "supporting_count": 14},
+                "OBJ-004": {"coverage": "covered", "completeness": "partial", "primary_count": 2,  "supporting_count": 13},
+            },
+            "evidence_quality_at_review": "weak",
+            "track_count_at_review": 8,
+            "completed_phase_count_at_review": 45,
+            "capability_count_at_review": 43,
+            "finding_rule_count": 7,
+        },
+    },
+)
+
+
+def build_strategic_review_governance(root: "HarnessPath | None" = None) -> dict:
+    """Strategic review model: behavior definition and first real ReviewRecord (Phase 66B)."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    # --- Frozen record from registry ---
+    frozen_record = dict(_IRG_STRATEGIC_REVIEW_REGISTRY[0]) if _IRG_STRATEGIC_REVIEW_REGISTRY else None
+    frozen_version = frozen_record["review_target_version"] if frozen_record else ""
+
+    # --- Live state for staleness and current assessment ---
+    branch_health_records = [_srg_compute_branch_health(b) for b in _SRG_BRANCH_REGISTRY]
+    objective_snapshot = _srs_compute_objective_snapshot()
+    track_phase_counts = _srs_compute_track_phase_counts()
+
+    # Derive evidence_quality from strategic state summary evidence logic (same algorithm as 65B)
+    state_summary = build_strategic_state_summary(root)
+    evidence_quality = state_summary.get("evidence_summary", {}).get("overall_evidence_health", "weak")
+
+    current_version = _srs_compute_review_target_version()
+    recorded_review_is_stale = current_version != frozen_version
+
+    state_drift: list = []
+    if recorded_review_is_stale and frozen_record:
+        fv = frozen_record["review_target_version"]
+        try:
+            frozen_parts = dict(kv.split("=") for kv in fv.split(","))
+            current_parts = dict(kv.split("=") for kv in current_version.split(","))
+            for key in ("tracks", "completed", "capabilities", "active"):
+                fval = frozen_parts.get(key, "?")
+                cval = current_parts.get(key, "?")
+                if fval != cval:
+                    state_drift.append(f"{key}: {fval} → {cval}")
+        except Exception:
+            state_drift.append(f"version changed: {fv} → {current_version}")
+
+    # --- Live finding run (current assessment) ---
+    live_findings = _srs_run_finding_rules(
+        branch_health_records, objective_snapshot, evidence_quality, track_phase_counts, ts
+    )
+    live_recommendation = _srs_derive_recommendation(live_findings)
+
+    # --- Open required-changes check ---
+    open_required_changes: list = []
+    if frozen_record and frozen_record.get("required_changes"):
+        open_required_changes = list(frozen_record["required_changes"])
+
+    return {
+        "strategic_review_model_overview": {
+            "phase": _SRS_PHASE_ID,
+            "phase_title": _SRS_PHASE_TITLE,
+            "branch": "BR-004",
+            "branch_name": "independent_review_governance",
+            "review_domain_count": len(_SRS_REVIEW_DOMAINS),
+            "finding_rule_count": len(_SRS_FINDING_RULES),
+            "extension_field_count": len(_SRS_EXTENSION_FIELDS),
+            "registry_record_count": len(_IRG_STRATEGIC_REVIEW_REGISTRY),
+            "registry_record_limit": _SRS_GOVERNANCE_BOUNDARIES["strategic_review_registry_record_limit"],
+            "execution_allowed": False,
+            "real_review_record_creation_allowed": True,
+            "strategic_review_class_only": True,
+            "review_output_is_binding": False,
+            "reviewer_is_approver": False,
+            "coverage_auto_update_from_review": False,
+            "human_confirmation_required": True,
+        },
+        "recorded_review": frozen_record,
+        "recorded_review_is_stale": recorded_review_is_stale,
+        "state_drift": state_drift,
+        "current_assessment": {
+            "review_target_version": current_version,
+            "findings": live_findings,
+            "recommendation": live_recommendation,
+            "finding_count": len(live_findings),
+            "reviewer_id": "pcae-irg-strategic",
+            "execution_allowed": False,
+        },
+        "open_required_changes": open_required_changes,
+        "open_required_changes_count": len(open_required_changes),
+        "review_domains": list(_SRS_REVIEW_DOMAINS),
+        "finding_rules": [dict(r) for r in _SRS_FINDING_RULES],
+        "extension_fields": [dict(f) for f in _SRS_EXTENSION_FIELDS],
+        "governance_boundaries": dict(_SRS_GOVERNANCE_BOUNDARIES),
+        "registry": [dict(r) for r in _IRG_STRATEGIC_REVIEW_REGISTRY],
+        "advisory": STRATEGIC_REVIEW_MODEL_ADVISORY,
     }
 
 

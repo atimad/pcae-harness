@@ -193,6 +193,7 @@ from pcae.commands.agent import (
     run_governed_write_invocation_candidate,
     run_write_invocation_approval_gateway,
     run_independent_review_governance,
+    run_strategic_review_governance,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4807,6 +4808,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     irg_parser.set_defaults(handler=run_independent_review_governance)
+
+    srg_parser = subparsers.add_parser(
+        "strategic-review-governance",
+        help="Strategic review model: frozen SRR-66B-001, live current assessment, staleness, finding rules, and governance boundaries (Phase 66B).",
+    )
+    srg_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    srg_parser.set_defaults(handler=run_strategic_review_governance)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

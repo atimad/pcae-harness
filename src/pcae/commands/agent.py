@@ -413,6 +413,8 @@ from pcae.core.agent import (
     WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY,
     build_independent_review_governance,
     INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY,
+    build_strategic_review_governance,
+    STRATEGIC_REVIEW_MODEL_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14736,4 +14738,66 @@ def run_independent_review_governance(args: argparse.Namespace) -> int:
     print()
 
     print(INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY)
+    return 0
+
+
+def run_strategic_review_governance(args: argparse.Namespace) -> int:
+    data = build_strategic_review_governance(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["strategic_review_model_overview"]
+    print("Strategic Review Governance")
+    print(f"  Phase:                    {overview['phase']} — {overview['phase_title']}")
+    print(f"  Branch:                   {overview['branch']} ({overview['branch_name']})")
+    print(f"  Review domains:           {overview['review_domain_count']}")
+    print(f"  Finding rules:            {overview['finding_rule_count']}")
+    print(f"  Registry records:         {overview['registry_record_count']} / {overview['registry_record_limit']} limit")
+    print(f"  Execution allowed:        {overview['execution_allowed']}")
+    print(f"  Review output binding:    {overview['review_output_is_binding']}")
+    print(f"  Real record creation:     {overview['real_review_record_creation_allowed']} (strategic_review class only)")
+    print(f"  Coverage auto-update:     {overview['coverage_auto_update_from_review']}")
+    print(f"  Human confirmation req'd: {overview['human_confirmation_required']}")
+    print()
+
+    rec = data["recorded_review"]
+    print("Recorded review (SRR-66B-001):")
+    print(f"  review_id:          {rec['review_id']}")
+    print(f"  review_target_id:   {rec['review_target_id']}")
+    print(f"  review_target_ver:  {rec['review_target_version']}")
+    print(f"  reviewer_id:        {rec['reviewer_id']}")
+    print(f"  review_timestamp:   {rec['review_timestamp']}")
+    print(f"  recommendation:     {rec['recommendation']}")
+    print(f"  findings:           {len(rec['findings'])}")
+    print(f"  binding:            {rec['binding']}")
+    if rec["findings"]:
+        for f in rec["findings"]:
+            print(f"    [{f['severity']:5}] {f['finding_id']} ({f['finding_type']}): {f['description'][:70]}...")
+    print()
+
+    stale = data["recorded_review_is_stale"]
+    print(f"Staleness:  {'STALE' if stale else 'current'}")
+    if stale and data["state_drift"]:
+        for d in data["state_drift"]:
+            print(f"  drift: {d}")
+    print()
+
+    ca = data["current_assessment"]
+    print(f"Current assessment (live, {ca['review_target_version']}):")
+    print(f"  findings:       {ca['finding_count']}")
+    print(f"  recommendation: {ca['recommendation']}")
+    if ca["findings"]:
+        for f in ca["findings"]:
+            print(f"  [{f['severity']:5}] {f['rule_id']}: {f['description'][:70]}...")
+    print()
+
+    orc = data["open_required_changes_count"]
+    print(f"Open required changes from SRR-66B-001: {orc}")
+    if orc:
+        for ch in data["open_required_changes"]:
+            print(f"  - {ch}")
+    print()
+
+    print(STRATEGIC_REVIEW_MODEL_ADVISORY)
     return 0

@@ -1,13 +1,13 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-09T17:59:16.787331+00:00
+Generated: 2026-06-10T21:37:10.991565+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 38
-Tracks: 6
+Total phases: 47
+Tracks: 8
 Superseded: 1
-Roadmap gaps: 1
+Roadmap gaps: 0
 Evolution events: 2
-Assessment status: intelligence_with_gaps
+Assessment status: intelligence_available
 
 ## Track: governance_core
 
@@ -43,13 +43,13 @@ Assessment status: intelligence_with_gaps
 | 64C | Multi-Runtime Orchestration Execution | completed | 64B | 64D |
 | 64D | Runtime Coordination Policy | completed | 64C | 64E |
 | 64E | Orchestration Audit Model | completed | 64D | 64F |
-| 64F | Orchestration Readiness Gate | active | 64E | 65A |
-| 65A | Multi-Runtime Execution Dispatch | roadmap_gap | 64F | — |
+| 64F | Orchestration Readiness Gate | completed | 64E | 64G |
 
 ## Track: capability_intelligence
 
 | Phase | Title | Status | Predecessor | Successor |
 |---|---|---|---|---|
+| 64G | Capability Inventory Alignment Hardening | completed | 64F | 65A |
 | 64B.0 | Capability Inventory | completed | — | 64B.1 |
 | 64B.1 | Capability and Roadmap Intelligence | completed | 64B.0 | 64B.2 |
 | 64B.2 | Roadmap Recommendation Hardening | completed | 64B.1 | 64B.3 |
@@ -64,6 +64,25 @@ Assessment status: intelligence_with_gaps
 | 64B.6C | Predecessor Capability Rendering | completed | 64B.6B | 64B.6D |
 | 64B.6D | Command & Architecture Intelligence Rendering | completed | 64B.6C | 64B.6E |
 | 64B.6E | Design Review Intelligence Rendering | active | 64B.6D | — |
+
+## Track: strategic_governance
+
+| Phase | Title | Status | Predecessor | Successor |
+|---|---|---|---|---|
+| 65A | Strategic Roadmap Governance Design | completed | 64G | 65B |
+| 65B | Strategic State Summary | completed | 65A | 65C |
+| 65C | Strategic Governance Registry Alignment | completed | 65B | 65D |
+| 65D | Strategic Capability-Objective Bulk Mapping Governance | completed | 65C | 65E |
+| 65E | Governed Write Invocation Design | completed | 65D | 65F |
+| 65F | Governed Write Invocation Candidate Contract | completed | 65E | 65G |
+| 65G | Write Invocation Approval Gateway Design | completed | 65F | 65H |
+| 65H | Commit Session Continuity Guard | completed | 65G | 66A |
+
+## Track: independent_review_governance
+
+| Phase | Title | Status | Predecessor | Successor |
+|---|---|---|---|---|
+| 66A | Independent Review Governance Model | active | 65H | — |
 
 ## Track: roadmap_intelligence
 
@@ -81,10 +100,6 @@ Assessment status: intelligence_with_gaps
 
 - **46A → 63A**: Invocation Pilot (46A-46J) was superseded by Multi-Runtime Registry (63A) which provides governed multi-runtime selection, arbitration, and audit.
 - **44A → 52A**: Governed Task Contracts (44A) evolved into Task Lifecycle Hardening (52A) which added session recovery, agent lock recovery, and corruption recovery.
-
-## Roadmap Gaps
-
-- **65A** (Multi-Runtime Execution Dispatch): not yet implemented
 
 ## Governance Notes
 

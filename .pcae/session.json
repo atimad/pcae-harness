@@ -1,36 +1,24 @@
 {
   "active_task": {
-    "id": "20260610-2037-write-invocation-approval-gateway-design",
-    "title": "Write Invocation Approval Gateway Design"
+    "id": "20260611-0030-66b-strategic-review-model",
+    "title": "66B Strategic Review Model"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "",
+  "current_objective": "66B Strategic Review Model",
   "git": {
     "branch": "main",
     "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
       },
       {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
+        "path": "docs/ROADMAP_REGISTRY.md",
         "status": " M"
       },
       {
@@ -38,18 +26,34 @@
         "status": " M"
       },
       {
-        "path": "src/pcae/core/docs.py",
+        "path": "tasks/DONE.md",
         "status": " M"
+      },
+      {
+        "path": "tasks/active/20260610-2037-write-invocation-approval-gateway-design.md",
+        "status": " D"
       },
       {
         "path": "tests/test_agent.py",
         "status": " M"
+      },
+      {
+        "path": "tasks/active/20260611-0030-66b-strategic-review-model.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260610-2037-write-invocation-approval-gateway-design.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260610-2351-resolve-64b-6e-registry-alignment.md",
+        "status": "??"
       }
     ],
-    "status_summary": "9 changed files"
+    "status_summary": "10 changed files"
   },
-  "last_completed_step": "",
-  "next_recommended_step": "",
-  "timestamp": "2026-06-10T21:23:12.754191+00:00",
+  "last_completed_step": "Completed task 20260610-2351-resolve-64b-6e-registry-alignment: Resolve 64B.6E Registry Alignment",
+  "next_recommended_step": "Continue active task 20260611-0030-66b-strategic-review-model.",
+  "timestamp": "2026-06-10T22:30:17.451075+00:00",
   "warnings": []
 }

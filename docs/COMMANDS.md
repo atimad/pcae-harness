@@ -1234,3 +1234,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae independent-review-governance`
 - `pcae independent-review-governance --json`
+
+## strategic-review-governance
+
+- `pcae strategic-review-governance`
+- `pcae strategic-review-governance --json`

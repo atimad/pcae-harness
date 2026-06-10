@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260610-2037-write-invocation-approval-gateway-design
+20260611-0030-66b-strategic-review-model
 
 ## Title
 
-Write Invocation Approval Gateway Design
+66B Strategic Review Model
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Write Invocation Approval Gateway Design
+Implement Phase 66B: Strategic Review Model. Define detailed strategic_review behavior, create first real StrategicReviewRecord (SRR-66B-001) in append-only _IRG_STRATEGIC_REVIEW_REGISTRY, expose via pcae strategic-review-governance command. Resolves 66A's strategic_review class deferral.
 
 ## Allowed Files
 
@@ -30,36 +30,24 @@ Write Invocation Approval Gateway Design
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/ROADMAP_REGISTRY.md
+- docs/COMMANDS.md
+- docs/CAPABILITY_INVENTORY.md
 - src/pcae/core/agent.py
-- src/pcae/core/check.py
-- src/pcae/core/health.py
 - src/pcae/core/docs.py
 - src/pcae/commands/agent.py
 - src/pcae/cli.py
 - tests/test_agent.py
-- docs/COMMANDS.md
-- docs/CAPABILITY_INVENTORY.md
 
 ## Forbidden Files
 
-- TBD
-
-
 ## Allowed Zones
-
-- TBD
 
 ## Forbidden Zones
 
-- TBD
-
 ## Allowed Dependencies
 
-- TBD
-
 ## Forbidden Dependencies
-
-- TBD
 
 ## Enforcement Mode
 
@@ -88,4 +76,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-10T20:37:18.463004+02:00
+2026-06-11T00:30:17.435790+02:00

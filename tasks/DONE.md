@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Resolve 64B.6E Registry Alignment (20260610-2351-resolve-64b-6e-registry-alignment)
 - Governed Write Invocation Candidate Contract (20260610-1906-governed-write-invocation-candidate-contract)
 - Governed Write Invocation Design (20260610-1712-governed-write-invocation-design)
 - Strategic Governance Registry Alignment (20260610-1024-strategic-governance-registry-alignment)
