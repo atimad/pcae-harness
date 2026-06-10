@@ -405,6 +405,8 @@ from pcae.core.agent import (
     STRATEGIC_STATE_SUMMARY_ADVISORY,
     build_mapping_review_governance,
     MAPPING_REVIEW_GOVERNANCE_ADVISORY,
+    build_governed_write_invocation_design,
+    GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14441,4 +14443,77 @@ def run_mapping_review_governance(args: argparse.Namespace) -> int:
     print()
 
     print(MAPPING_REVIEW_GOVERNANCE_ADVISORY)
+    return 0
+
+
+def run_governed_write_invocation_design(args: argparse.Namespace) -> int:
+    data = build_governed_write_invocation_design(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["governed_write_invocation_design_overview"]
+    print("Governed Write Invocation Design")
+    print(f"  Phase:                     {overview['phase']} — {overview['phase_title']}")
+    print(f"  Lifecycle steps:           {overview['lifecycle_steps']}")
+    print(f"  Strategic checkpoints:     {overview['strategic_checkpoints']}")
+    print(f"  Approval record fields:    {overview['approval_record_fields']}")
+    print(f"  Rollback prestage fields:  {overview['rollback_prestage_fields']}")
+    print(f"  Audit trail entries:       {overview['audit_trail_entries']}")
+    print(f"  Static validation gates:   {overview['static_validation_gates']}")
+    print(f"  Dynamic validation gates:  {overview['dynamic_validation_gates']}")
+    print(f"  Post-execution gates:      {overview['post_execution_gates']}")
+    print(f"  Execution allowed:         {overview['execution_allowed']}")
+    print()
+
+    print("Lifecycle:")
+    for step in data["lifecycle"]:
+        checkpoint = " [strategic checkpoint]" if step["strategic_checkpoint"] else ""
+        print(f"  {step['step']:2}. {step['name']}{checkpoint}")
+        print(f"      {step['description'][:80]}{'...' if len(step['description']) > 80 else ''}")
+    print()
+
+    print("Approval record model (WriteApprovalRecord):")
+    for f in data["approval_record_model"]["fields"]:
+        req = "required" if f["required"] else "optional"
+        print(f"  {f['field']} ({f['type']}, {req})")
+    print()
+
+    print("Approval tiers:")
+    for tier in data["approval_record_model"]["tiers"]:
+        print(f"  {tier['tier']}: {tier['description']}")
+    print()
+
+    print("Rollback signal model:")
+    rs = data["rollback_signal_model"]
+    print(f"  Signal types:                    {rs['signal_types']}")
+    print(f"  Auto trigger:                    {rs['auto_trigger']}")
+    print(f"  Auto rollback execution:         {rs['auto_rollback_execution']}")
+    print(f"  Human review required before:    {rs['human_review_required_before_rollback']}")
+    for sig in rs["signals"]:
+        print(f"  [{sig['signal']}] trigger={sig['trigger']} auto={sig['auto_trigger']}")
+    print()
+
+    print("Strategic alignment model:")
+    sa = data["strategic_alignment_model"]
+    print(f"  Full alignment:   score >= {sa['thresholds']['full_alignment_min']}")
+    print(f"  Partial:          score >= {sa['thresholds']['partial_alignment_min']}")
+    print(f"  Misaligned:       score <  {sa['thresholds']['misaligned_max']}")
+    print(f"  Minimum obj refs: {sa['minimum_objective_refs']}")
+    for o in sa["outcomes"]:
+        blocked = " [BLOCKED]" if o["blocked"] else ""
+        print(f"  {o['outcome']}: {o['action']}{blocked}")
+    print()
+
+    print("Governance boundaries:")
+    gb = data["governance_boundaries"]
+    print(f"  Execution allowed:                        {gb['execution_allowed']}")
+    print(f"  Auto write approval:                      {gb['auto_write_approval']}")
+    print(f"  Strategic alignment required:             {gb['strategic_alignment_required']}")
+    print(f"  Coverage regression allowed:              {gb['coverage_regression_allowed']}")
+    print(f"  Auto rollback trigger:                    {gb['auto_rollback_trigger']}")
+    print(f"  Human review required before rollback:    {gb['human_review_required_before_rollback']}")
+    print()
+
+    print(GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY)
     return 0

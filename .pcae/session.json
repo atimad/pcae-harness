@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260610-1024-strategic-governance-registry-alignment",
-    "title": "Strategic Governance Registry Alignment"
+    "id": "20260610-1712-governed-write-invocation-design",
+    "title": "Governed Write Invocation Design"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "Strategic Governance Registry Alignment",
+  "current_objective": "Governed Write Invocation Design",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -14,42 +14,26 @@
         "status": " M"
       },
       {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
         "path": "tasks/DONE.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260610-0706-strategic-state-summary.md",
+        "path": "tasks/active/20260610-1024-strategic-governance-registry-alignment.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260610-1024-strategic-governance-registry-alignment.md",
+        "path": "tasks/active/20260610-1712-governed-write-invocation-design.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260610-0706-strategic-state-summary.md",
+        "path": "tasks/done/20260610-1024-strategic-governance-registry-alignment.md",
         "status": "??"
       }
     ],
-    "status_summary": "9 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260610-0706-strategic-state-summary: Strategic State Summary",
-  "next_recommended_step": "Continue active task 20260610-1024-strategic-governance-registry-alignment.",
-  "timestamp": "2026-06-10T08:24:19.600729+00:00",
+  "last_completed_step": "Completed task 20260610-1024-strategic-governance-registry-alignment: Strategic Governance Registry Alignment",
+  "next_recommended_step": "Continue active task 20260610-1712-governed-write-invocation-design.",
+  "timestamp": "2026-06-10T15:12:40.576982+00:00",
   "warnings": []
 }

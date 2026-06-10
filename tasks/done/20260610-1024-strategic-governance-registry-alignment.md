@@ -10,7 +10,7 @@ Strategic Governance Registry Alignment
 
 ## Status
 
-active
+done
 
 ## Mode
 

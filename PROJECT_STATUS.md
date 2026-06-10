@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65D: Strategic Capability-Objective Bulk Mapping Governance.
+Phase 65E: Governed Write Invocation Design.
 
 ## Post-61J Runtime Registry Checkpoint
 

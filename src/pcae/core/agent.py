@@ -69160,6 +69160,21 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae mapping-review-governance --json",
         ],
         "dependencies": ["strategic_governance_registry_alignment"],
+        "successor_capabilities": ["governed_write_invocation_design"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Governed Write Invocation Design",
+        "implemented_phase": "65E",
+        "status": "implemented",
+        "commands": [
+            "pcae governed-write-invocation-design",
+            "pcae governed-write-invocation-design --json",
+        ],
+        "dependencies": [
+            "strategic_capability-objective_bulk_mapping_governance",
+            "strategic_state_summary",
+        ],
         "successor_capabilities": [],
     },
 )
@@ -69943,8 +69958,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65D",
         "phase_title": "Strategic Capability-Objective Bulk Mapping Governance",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65C",
+        "successor": "65E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65E",
+        "phase_title": "Governed Write Invocation Design",
+        "status": "active",
+        "predecessor": "65D",
         "successor": "",
         "superseded_by": "",
     },
@@ -70545,9 +70569,26 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "strategic_governance_registry_alignment",
         ],
-        "successors": [],
+        "successors": ["governed_write_invocation_design"],
         "aliases": [],
         "contribution": "introduces an append-only decision registry (_SRG_MAPPING_DECISION_REGISTRY) that encodes 31 human-reviewed capability-to-objective mapping decisions with full lineage (decision_id, recommendation_id), expands _SRG_CAPABILITY_OBJECTIVE_MAP from 6 to 37 entries, enforces governance history immutability, and validates batch-review governance with decision_batch_review_required=True",
+    },
+    {
+        "capability_name": "Governed Write Invocation Design",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65E",
+        "status": "implemented",
+        "commands": [
+            "pcae governed-write-invocation-design",
+            "pcae governed-write-invocation-design --json",
+        ],
+        "dependencies": [
+            "strategic_capability-objective_bulk_mapping_governance",
+            "strategic_state_summary",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "extends write invocation governance (46N) with strategic alignment checks, branch impact assessment, objective-ref gating, pre-write state snapshots, rollback pre-staging model, rollback signal types (rollback_required, rollback_review_required), 10-step lifecycle, WriteApprovalRecord and RollbackPreStageRecord models, multi-runtime write policy, and 10-entry immutable audit trail; all advisory-only with execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72173,7 +72214,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65D",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65D-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65D",
@@ -72181,7 +72222,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65D",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65D-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65D",
@@ -72189,10 +72230,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65D",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65D",
+    },
+    {
+        "phase_id": "65E",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65E-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65E",
+    },
+    {
+        "phase_id": "65E",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65E-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65E",
+    },
+    {
+        "phase_id": "65E",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65E-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65E",
     },
     {
         "phase_id": "64B.6E",
@@ -78436,6 +78501,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "decision_id": "DEC-65D-032",
         "recommendation_id": "REC-65D-032",
     },
+    {
+        "capability_id": "governed_write_invocation_design",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "extends write invocation governance with strategic alignment gating, objective-ref "
+            "requirements, branch impact assessment, and rollback signal model; enforces "
+            "human-approval-before-write as a non-bypassable gate"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
 )
 
 
@@ -80604,4 +80681,530 @@ def build_mapping_review_governance(root: "HarnessPath | None" = None) -> dict:
             "phase": "65D",
         },
         "advisory": MAPPING_REVIEW_GOVERNANCE_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 65E — Governed Write Invocation Design
+# ---------------------------------------------------------------------------
+
+GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY = (
+    "Governed write invocation design is advisory-only; execution_allowed=False; "
+    "no file modification, no write execution, no rollback execution, and no automatic "
+    "rollback triggering of any kind. Test failure produces a rollback_required signal; "
+    "coverage regression produces a rollback_review_required signal. Human review is "
+    "required before any rollback action."
+)
+
+_GWI_PHASE_ID: str = "65E"
+_GWI_PHASE_TITLE: str = "Governed Write Invocation Design"
+
+_GWI_LIFECYCLE: tuple[dict, ...] = (
+    {
+        "step": 1,
+        "name": "approved_prompt_artifact",
+        "description": "An approved prompt artifact is selected for write invocation.",
+        "required": True,
+        "completed_by": "prompt_approval_artifact",
+        "strategic_checkpoint": False,
+        "source_phase": "46N",
+    },
+    {
+        "step": 2,
+        "name": "write_authorization_request",
+        "description": (
+            "A write authorization request is prepared linking the approved "
+            "prompt artifact and execution authorization artifact."
+        ),
+        "required": True,
+        "completed_by": "write_authorization_request_artifact",
+        "strategic_checkpoint": False,
+        "source_phase": "46N",
+    },
+    {
+        "step": 3,
+        "name": "file_scope_declaration",
+        "description": (
+            "File scope is declared: allowed_files, forbidden_files, "
+            "max_files_changed, allowed_operations, forbidden_operations, "
+            "and scope_validation_required."
+        ),
+        "required": True,
+        "completed_by": "file_scope_artifact",
+        "strategic_checkpoint": False,
+        "source_phase": "46N",
+    },
+    {
+        "step": 4,
+        "name": "strategic_alignment_check",
+        "description": (
+            "Objective refs and branch impact are validated. Alignment score is computed "
+            "from _SRG_CAPABILITY_OBJECTIVE_MAP. Unaligned writes (no objective refs) are "
+            "auto-blocked. Misaligned writes (score < 0.4) are blocked."
+        ),
+        "required": True,
+        "completed_by": "alignment_check_passed",
+        "strategic_checkpoint": True,
+        "source_phase": "65E",
+    },
+    {
+        "step": 5,
+        "name": "governance_preflight",
+        "description": (
+            "All write preflight gates are evaluated against the write authorization request, "
+            "declared file scope, and strategic alignment result."
+        ),
+        "required": True,
+        "completed_by": "all_preflight_gates_pass",
+        "strategic_checkpoint": False,
+        "source_phase": "46N+65E",
+    },
+    {
+        "step": 6,
+        "name": "pre_write_state_snapshot",
+        "description": (
+            "A baseline hash of the strategic-state-summary output is captured before "
+            "any write proceeds. This hash is embedded in the approval record."
+        ),
+        "required": True,
+        "completed_by": "state_snapshot_captured",
+        "strategic_checkpoint": True,
+        "source_phase": "65E",
+    },
+    {
+        "step": 7,
+        "name": "human_write_approval",
+        "description": (
+            "Explicit human approval is required. The WriteApprovalRecord includes "
+            "objective_refs, branch_id, coverage_baseline_hash, and rollback_ref. "
+            "This gate is never bypassed regardless of preflight results."
+        ),
+        "required": True,
+        "completed_by": "explicit_human_write_approval",
+        "strategic_checkpoint": False,
+        "source_phase": "46N+65E",
+    },
+    {
+        "step": 8,
+        "name": "write_invocation_candidate",
+        "description": (
+            "A write invocation candidate is prepared with strategic metadata if all "
+            "preflight gates pass and human write approval is present."
+        ),
+        "required": True,
+        "completed_by": "write_invocation_candidate_artifact",
+        "strategic_checkpoint": False,
+        "source_phase": "46N+65E",
+    },
+    {
+        "step": 9,
+        "name": "future_write_execution",
+        "description": (
+            "A future phase will execute the write candidate under governed constraints. "
+            "Not implemented in this design phase."
+        ),
+        "required": True,
+        "completed_by": "future_phase_write_execution",
+        "strategic_checkpoint": False,
+        "source_phase": "future",
+    },
+    {
+        "step": 10,
+        "name": "post_write_state_verification",
+        "description": (
+            "After write execution (future phase), strategic-state-summary is re-run and "
+            "coverage must not regress vs. the baseline hash. Test failure produces "
+            "rollback_required signal. Coverage regression produces rollback_review_required "
+            "signal. Human review required before any rollback action."
+        ),
+        "required": True,
+        "completed_by": "coverage_non_regressing",
+        "strategic_checkpoint": True,
+        "source_phase": "65E",
+    },
+)
+
+_GWI_APPROVAL_RECORD_FIELDS: tuple[dict, ...] = (
+    {"field": "approver_id", "type": "str", "required": True},
+    {"field": "approval_timestamp", "type": "str", "required": True},
+    {"field": "expiration_timestamp", "type": "str", "required": True},
+    {"field": "scope_allowed_files", "type": "list[str]", "required": True},
+    {"field": "scope_forbidden_files", "type": "list[str]", "required": True},
+    {"field": "scope_max_files", "type": "int", "required": True},
+    {"field": "objective_refs", "type": "list[str]", "required": True},
+    {"field": "branch_id", "type": "str", "required": True},
+    {"field": "coverage_baseline_hash", "type": "str", "required": True},
+    {"field": "rollback_ref", "type": "str", "required": True},
+    {"field": "rationale", "type": "str", "required": True},
+    {"field": "approval_status", "type": "str", "required": True},
+    {"field": "approval_tier", "type": "str", "required": True},
+)
+
+_GWI_APPROVAL_STATUSES: tuple[str, ...] = (
+    "pending",
+    "granted",
+    "denied",
+    "expired",
+)
+
+_GWI_APPROVAL_TIERS: tuple[dict, ...] = (
+    {
+        "tier": "standard",
+        "description": "Branch health is healthy. Approval window: 8 hours.",
+        "branch_health_required": "healthy",
+        "approval_window_hours": 8,
+        "rationale_required": False,
+        "elevated_rationale_required": False,
+    },
+    {
+        "tier": "elevated",
+        "description": (
+            "Branch health is at_risk or stalled. Approval window shortened to 4 hours. "
+            "Explicit rationale referencing the branch health signal is required."
+        ),
+        "branch_health_required": "at_risk_or_stalled",
+        "approval_window_hours": 4,
+        "rationale_required": True,
+        "elevated_rationale_required": True,
+    },
+)
+
+_GWI_ROLLBACK_PRESTAGE_FIELDS: tuple[dict, ...] = (
+    {"field": "rollback_scope_files", "type": "list[str]", "required": True},
+    {"field": "rollback_hash", "type": "str", "required": True},
+    {"field": "rollback_strategy", "type": "str", "required": True},
+    {"field": "rollback_verified_by_dry_run", "type": "bool", "required": True},
+    {"field": "rollback_expiration_timestamp", "type": "str", "required": True},
+)
+
+_GWI_ROLLBACK_STRATEGIES: tuple[str, ...] = (
+    "git_revert",
+    "file_restore",
+    "task_contract_rollback",
+)
+
+_GWI_ROLLBACK_SIGNAL_TYPES: tuple[str, ...] = (
+    "rollback_required",
+    "rollback_review_required",
+)
+
+_GWI_ROLLBACK_SIGNALS: tuple[dict, ...] = (
+    {
+        "signal": "rollback_required",
+        "trigger": "post_write_test_failure",
+        "description": (
+            "Post-write pytest run failed. rollback_required signal is emitted. "
+            "Human review is required before any rollback action. "
+            "No automatic rollback is triggered."
+        ),
+        "auto_trigger": False,
+        "human_review_required": True,
+        "execution_allowed": False,
+    },
+    {
+        "signal": "rollback_review_required",
+        "trigger": "coverage_regression",
+        "description": (
+            "Post-write strategic-state-summary shows coverage regression vs. baseline hash. "
+            "rollback_review_required signal is emitted. "
+            "Human review is required before any rollback action. "
+            "No automatic rollback recommendation is triggered."
+        ),
+        "auto_trigger": False,
+        "human_review_required": True,
+        "execution_allowed": False,
+    },
+)
+
+_GWI_ALIGNMENT_THRESHOLDS: dict = {
+    "full_alignment_min": 0.7,
+    "partial_alignment_min": 0.4,
+    "misaligned_max": 0.4,
+}
+
+_GWI_ALIGNMENT_OUTCOMES: tuple[dict, ...] = (
+    {
+        "outcome": "full_alignment",
+        "score_range": ">=0.7",
+        "action": "proceed_normally",
+        "description": (
+            "All declared objective refs have capability-objective mappings. "
+            "Write proceeds normally."
+        ),
+        "blocked": False,
+        "acknowledgement_required": False,
+    },
+    {
+        "outcome": "partial_alignment",
+        "score_range": "0.4 to <0.7",
+        "action": "human_acknowledgement_required",
+        "description": (
+            "Some declared objective refs lack mappings. Human must acknowledge "
+            "with explicit note before approval."
+        ),
+        "blocked": False,
+        "acknowledgement_required": True,
+    },
+    {
+        "outcome": "misaligned",
+        "score_range": "<0.4",
+        "action": "blocked",
+        "description": (
+            "Most objective refs lack mappings. Write is blocked. "
+            "Scope must be revised or override rationale provided."
+        ),
+        "blocked": True,
+        "acknowledgement_required": False,
+    },
+    {
+        "outcome": "unaligned",
+        "score_range": "no_objective_refs_declared",
+        "action": "auto_blocked",
+        "description": (
+            "No objective refs declared. Write is auto-blocked. "
+            "At least one objective ref is required."
+        ),
+        "blocked": True,
+        "acknowledgement_required": False,
+    },
+)
+
+_GWI_BRANCH_IMPACT_FIELDS: tuple[dict, ...] = (
+    {"field": "capability_ref", "type": "str", "required": True},
+    {"field": "branch_id", "type": "str", "required": True},
+    {"field": "branch_health", "type": "str", "required": True},
+    {"field": "serving_objectives", "type": "list[str]", "required": True},
+    {"field": "approval_tier", "type": "str", "required": True},
+    {"field": "alignment_score", "type": "float", "required": True},
+    {"field": "alignment_outcome", "type": "str", "required": True},
+)
+
+_GWI_AUDIT_TRAIL_ENTRIES: tuple[dict, ...] = (
+    {"entry": 1, "name": "write_request_submitted", "immutable": True, "required": True, "phase": "65E"},
+    {"entry": 2, "name": "strategic_alignment_check", "immutable": True, "required": True, "phase": "65E"},
+    {"entry": 3, "name": "dry_run_result", "immutable": True, "required": True, "phase": "65E"},
+    {"entry": 4, "name": "pre_write_snapshot", "immutable": True, "required": True, "phase": "65E"},
+    {"entry": 5, "name": "approval_decision", "immutable": True, "required": True, "phase": "65E"},
+    {"entry": 6, "name": "execution_attempt", "immutable": True, "required": False, "phase": "future"},
+    {"entry": 7, "name": "post_write_snapshot", "immutable": True, "required": False, "phase": "future"},
+    {"entry": 8, "name": "coverage_delta", "immutable": True, "required": False, "phase": "future"},
+    {"entry": 9, "name": "rollback_signal", "immutable": True, "required": False, "phase": "future"},
+    {"entry": 10, "name": "audit_close", "immutable": True, "required": True, "phase": "65E"},
+)
+
+_GWI_STATIC_VALIDATION_GATES: tuple[dict, ...] = (
+    {
+        "gate": "task_contract_file_check",
+        "description": "Write targets are a subset of task contract allowed_files.",
+        "blocking": True,
+    },
+    {
+        "gate": "forbidden_zone_check",
+        "description": "No write target is in a forbidden_zone.",
+        "blocking": True,
+    },
+    {
+        "gate": "capability_ref_resolves",
+        "description": "capability_ref resolves in _CRI_KNOWN_CAPABILITIES.",
+        "blocking": True,
+    },
+    {
+        "gate": "phase_id_matches_active_task",
+        "description": "phase_id in the write request matches the active task's phase.",
+        "blocking": True,
+    },
+    {
+        "gate": "objective_refs_resolve",
+        "description": "All objective_refs resolve in _SRG_OBJECTIVE_REGISTRY.",
+        "blocking": True,
+    },
+)
+
+_GWI_DYNAMIC_VALIDATION_GATES: tuple[dict, ...] = (
+    {
+        "gate": "pcae_check",
+        "description": "pcae check passes before approval.",
+        "blocking": True,
+    },
+    {
+        "gate": "test_suite",
+        "description": "python -m pytest -n auto passes before approval.",
+        "blocking": True,
+    },
+    {
+        "gate": "pre_write_state_snapshot",
+        "description": "Pre-write strategic-state-summary baseline captured.",
+        "blocking": True,
+    },
+    {
+        "gate": "rollback_dry_run",
+        "description": (
+            "Rollback dry-run passes. rollback_verified_by_dry_run must be True "
+            "before approval is granted."
+        ),
+        "blocking": True,
+    },
+)
+
+_GWI_POST_EXECUTION_GATES: tuple[dict, ...] = (
+    {
+        "gate": "post_write_test_suite",
+        "description": (
+            "python -m pytest -n auto passes after write. "
+            "Failure emits rollback_required signal."
+        ),
+        "blocking": True,
+        "phase": "future",
+    },
+    {
+        "gate": "post_write_strategic_summary",
+        "description": (
+            "pcae strategic-state-summary coverage is non-regressing vs. baseline hash. "
+            "Regression emits rollback_review_required signal."
+        ),
+        "blocking": True,
+        "phase": "future",
+    },
+    {
+        "gate": "no_new_unmapped_capabilities",
+        "description": "No new unmapped capabilities introduced by the write.",
+        "blocking": True,
+        "phase": "future",
+    },
+    {
+        "gate": "audit_trail_complete",
+        "description": (
+            "Complete audit trail is closed with human review confirmation."
+        ),
+        "blocking": True,
+        "phase": "future",
+    },
+)
+
+_GWI_MULTI_RUNTIME_POLICY: dict = {
+    "default_runtime": "shell-local",
+    "default_priority": 1,
+    "multi_runtime_write_consent_required": True,
+    "arbitration_trigger": "overlapping_file_targets",
+    "quarantine_write_block": True,
+    "conflict_resolution_mode": "escalate_to_human",
+    "arbitration_source": "63C",
+    "coordination_policy_source": "64D",
+    "quarantine_source": "63F",
+}
+
+_GWI_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "auto_write_approval": False,
+    "strategic_alignment_required": True,
+    "coverage_regression_allowed": False,
+    "dry_run_required": True,
+    "rollback_prestage_required": True,
+    "multi_runtime_write_without_arbitration": False,
+    "auto_rollback_trigger": False,
+    "auto_rollback_recommendation": False,
+    "rollback_required_signal_auto_trigger": False,
+    "rollback_review_required_signal_auto_trigger": False,
+    "human_review_required_before_rollback": True,
+    "phase": "65E",
+}
+
+
+def build_governed_write_invocation_design(root: "HarnessPath | None" = None) -> dict:
+    """Design model for governed write invocation with strategic governance integration."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    lifecycle_steps = len(_GWI_LIFECYCLE)
+    strategic_checkpoints = [s for s in _GWI_LIFECYCLE if s["strategic_checkpoint"]]
+    approval_field_count = len(_GWI_APPROVAL_RECORD_FIELDS)
+    rollback_field_count = len(_GWI_ROLLBACK_PRESTAGE_FIELDS)
+    audit_entry_count = len(_GWI_AUDIT_TRAIL_ENTRIES)
+    static_gate_count = len(_GWI_STATIC_VALIDATION_GATES)
+    dynamic_gate_count = len(_GWI_DYNAMIC_VALIDATION_GATES)
+    post_gate_count = len(_GWI_POST_EXECUTION_GATES)
+
+    def _sample(fields: tuple[dict, ...]) -> dict:
+        result = {}
+        for f in fields:
+            t = f["type"]
+            if "list" in t:
+                result[f["field"]] = []
+            elif t == "bool":
+                result[f["field"]] = False
+            elif t == "int":
+                result[f["field"]] = 0
+            elif t == "float":
+                result[f["field"]] = 0.0
+            else:
+                result[f["field"]] = ""
+        return result
+
+    return {
+        "governed_write_invocation_design_overview": {
+            "phase": _GWI_PHASE_ID,
+            "phase_title": _GWI_PHASE_TITLE,
+            "lifecycle_steps": lifecycle_steps,
+            "strategic_checkpoints": len(strategic_checkpoints),
+            "approval_record_fields": approval_field_count,
+            "rollback_prestage_fields": rollback_field_count,
+            "audit_trail_entries": audit_entry_count,
+            "static_validation_gates": static_gate_count,
+            "dynamic_validation_gates": dynamic_gate_count,
+            "post_execution_gates": post_gate_count,
+            "execution_allowed": False,
+        },
+        "lifecycle": [dict(s) for s in _GWI_LIFECYCLE],
+        "approval_record_model": {
+            "model": "WriteApprovalRecord",
+            "field_count": approval_field_count,
+            "fields": [dict(f) for f in _GWI_APPROVAL_RECORD_FIELDS],
+            "statuses": list(_GWI_APPROVAL_STATUSES),
+            "tiers": [dict(t) for t in _GWI_APPROVAL_TIERS],
+            "sample": _sample(_GWI_APPROVAL_RECORD_FIELDS),
+        },
+        "rollback_prestage_model": {
+            "model": "RollbackPreStageRecord",
+            "field_count": rollback_field_count,
+            "fields": [dict(f) for f in _GWI_ROLLBACK_PRESTAGE_FIELDS],
+            "strategies": list(_GWI_ROLLBACK_STRATEGIES),
+            "sample": _sample(_GWI_ROLLBACK_PRESTAGE_FIELDS),
+            "prestage_required_before_approval": True,
+            "dry_run_required": True,
+        },
+        "rollback_signal_model": {
+            "signal_types": list(_GWI_ROLLBACK_SIGNAL_TYPES),
+            "signals": [dict(s) for s in _GWI_ROLLBACK_SIGNALS],
+            "auto_trigger": False,
+            "auto_rollback_execution": False,
+            "human_review_required_before_rollback": True,
+        },
+        "strategic_alignment_model": {
+            "thresholds": dict(_GWI_ALIGNMENT_THRESHOLDS),
+            "outcomes": [dict(o) for o in _GWI_ALIGNMENT_OUTCOMES],
+            "minimum_objective_refs": 1,
+            "alignment_score_range": "0.0 to 1.0",
+        },
+        "branch_impact_model": {
+            "model": "BranchImpactAssessment",
+            "field_count": len(_GWI_BRANCH_IMPACT_FIELDS),
+            "fields": [dict(f) for f in _GWI_BRANCH_IMPACT_FIELDS],
+            "approval_tier_source": "branch_health",
+            "elevated_tier_trigger": "at_risk_or_stalled",
+            "sample": _sample(_GWI_BRANCH_IMPACT_FIELDS),
+        },
+        "audit_trail_model": {
+            "entry_count": audit_entry_count,
+            "entries": [dict(e) for e in _GWI_AUDIT_TRAIL_ENTRIES],
+            "immutable_once_written": True,
+            "human_review_required_for_close": True,
+        },
+        "validation_model": {
+            "static_gates": [dict(g) for g in _GWI_STATIC_VALIDATION_GATES],
+            "dynamic_gates": [dict(g) for g in _GWI_DYNAMIC_VALIDATION_GATES],
+            "post_execution_gates": [dict(g) for g in _GWI_POST_EXECUTION_GATES],
+        },
+        "multi_runtime_write_policy": dict(_GWI_MULTI_RUNTIME_POLICY),
+        "governance_boundaries": dict(_GWI_GOVERNANCE_BOUNDARIES),
+        "advisory": GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY,
     }

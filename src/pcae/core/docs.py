@@ -1235,6 +1235,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae mapping-review-governance`
 - `pcae mapping-review-governance --json`
+
+## governed-write-invocation-design
+
+- `pcae governed-write-invocation-design`
+- `pcae governed-write-invocation-design --json`
 """
 
 
