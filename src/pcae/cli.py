@@ -188,6 +188,7 @@ from pcae.commands.agent import (
     run_runtime_coordination_policy,
     run_strategic_roadmap_governance,
     run_strategic_state_summary,
+    run_mapping_review_governance,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4747,6 +4748,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     sss_parser.set_defaults(handler=run_strategic_state_summary)
+
+    mrg_parser = subparsers.add_parser(
+        "mapping-review-governance",
+        help="Validate and report on capability-objective mapping decisions: decision registry integrity, batch review summary, supersession chain, and lineage audit (Phase 65D).",
+    )
+    mrg_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    mrg_parser.set_defaults(handler=run_mapping_review_governance)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

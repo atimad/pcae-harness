@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65C: Strategic Governance Registry Alignment.
+Phase 65D: Strategic Capability-Objective Bulk Mapping Governance.
 
 ## Post-61J Runtime Registry Checkpoint
 

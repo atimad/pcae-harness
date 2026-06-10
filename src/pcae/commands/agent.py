@@ -403,6 +403,8 @@ from pcae.core.agent import (
     STRATEGIC_ROADMAP_GOVERNANCE_ADVISORY,
     build_strategic_state_summary,
     STRATEGIC_STATE_SUMMARY_ADVISORY,
+    build_mapping_review_governance,
+    MAPPING_REVIEW_GOVERNANCE_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14392,4 +14394,51 @@ def run_strategic_state_summary(args: argparse.Namespace) -> int:
     print(f"  Human approval required:     {boundaries['human_approval_required']}")
     print()
     print(STRATEGIC_STATE_SUMMARY_ADVISORY)
+    return 0
+
+
+def run_mapping_review_governance(args: argparse.Namespace) -> int:
+    data = build_mapping_review_governance(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["mapping_review_governance_overview"]
+    print("Mapping Review Governance")
+    print(f"  Phase:                 {overview['phase']} — {overview['phase_title']}")
+    print(f"  Total decisions:       {overview['total_decisions']}")
+    print(f"  Total map entries:     {overview['total_map_entries']}")
+    print(f"  Entries with lineage:  {overview['entries_with_lineage']}")
+    print(f"  Pre-65D entries:       {overview['pre_65d_entries']}")
+    print(f"  Batch review required: {overview['decision_batch_review_required']}")
+    print(f"  Registry append-only:  {overview['registry_is_append_only']}")
+    print()
+
+    bs = data["batch_summary"]
+    print("Batch summary:")
+    print(f"  Total decisions: {bs['total_decisions']}")
+    print("  By objective:")
+    for oid, count in sorted(bs["by_objective"].items()):
+        print(f"    {oid}: {count} capabilities")
+    print()
+
+    vr = data["validation_results"]
+    print("Validation:")
+    print(f"  Passed:                    {vr['validation_passed']}")
+    print(f"  Decision IDs unique:       {vr['decision_ids_unique']}")
+    print(f"  Recommendation IDs unique: {vr['recommendation_ids_unique']}")
+    print(f"  Supersession chain valid:  {vr['supersession_chain_valid']}")
+    print(f"  Map lineage valid:         {vr['map_lineage_valid']}")
+    print()
+
+    imm = data["immutability"]
+    print("Immutability:")
+    print(f"  Append-only:                   {imm['registry_is_append_only']}")
+    print(f"  No modification allowed:       {imm['existing_decisions_must_not_be_modified']}")
+    print(f"  Supersession via lineage only: {imm['supersession_via_lineage_only']}")
+    print(f"  Audit chain traversable:       {imm['audit_chain_traversable']}")
+    print(f"  Superseded decisions:          {imm['superseded_count']}")
+    print()
+
+    print(MAPPING_REVIEW_GOVERNANCE_ADVISORY)
     return 0

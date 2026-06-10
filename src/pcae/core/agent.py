@@ -69148,6 +69148,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["strategic_state_summary"],
+        "successor_capabilities": ["strategic_capability-objective_bulk_mapping_governance"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Capability-Objective Bulk Mapping Governance",
+        "implemented_phase": "65D",
+        "status": "implemented",
+        "commands": [
+            "pcae mapping-review-governance",
+            "pcae mapping-review-governance --json",
+        ],
+        "dependencies": ["strategic_governance_registry_alignment"],
         "successor_capabilities": [],
     },
 )
@@ -69922,8 +69934,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65C",
         "phase_title": "Strategic Governance Registry Alignment",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65B",
+        "successor": "65D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65D",
+        "phase_title": "Strategic Capability-Objective Bulk Mapping Governance",
+        "status": "active",
+        "predecessor": "65C",
         "successor": "",
         "superseded_by": "",
     },
@@ -70508,9 +70529,25 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "strategic_state_summary",
         ],
-        "successors": [],
+        "successors": ["strategic_capability-objective_bulk_mapping_governance"],
         "aliases": [],
         "contribution": "reconciles _CI_KNOWN_CAPABILITIES with _CRI_KNOWN_CAPABILITIES, populates command surfaces for 65A and 65B, corrects domain→objective inference in unmapped capability detection, and regenerates docs/COMMANDS.md and docs/CAPABILITY_INVENTORY.md",
+    },
+    {
+        "capability_name": "Strategic Capability-Objective Bulk Mapping Governance",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65D",
+        "status": "implemented",
+        "commands": [
+            "pcae mapping-review-governance",
+            "pcae mapping-review-governance --json",
+        ],
+        "dependencies": [
+            "strategic_governance_registry_alignment",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "introduces an append-only decision registry (_SRG_MAPPING_DECISION_REGISTRY) that encodes 31 human-reviewed capability-to-objective mapping decisions with full lineage (decision_id, recommendation_id), expands _SRG_CAPABILITY_OBJECTIVE_MAP from 6 to 37 entries, enforces governance history immutability, and validates batch-review governance with decision_batch_review_required=True",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72112,7 +72149,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65C",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65C-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65C",
@@ -72120,7 +72157,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65C",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65C-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65C",
@@ -72128,10 +72165,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65C",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65C-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65C",
+    },
+    {
+        "phase_id": "65D",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65D-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65D",
+    },
+    {
+        "phase_id": "65D",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65D-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65D",
+    },
+    {
+        "phase_id": "65D",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65D-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65D",
     },
     {
         "phase_id": "64B.6E",
@@ -77990,6 +78051,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
 )
 
 _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
+    # --- Pre-65D entries (no decision registry existed at time of authoring) ---
     {
         "capability_id": "orchestration_readiness_gate",
         "objective_ids": ["OBJ-003"],
@@ -77997,6 +78059,8 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "gates orchestration candidates before dispatch eligibility without execution"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
     },
     {
         "capability_id": "capability_inventory_alignment",
@@ -78005,6 +78069,8 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "reconciles capability registry with roadmap for accurate intelligence"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
     },
     {
         "capability_id": "capability_and_roadmap_intelligence",
@@ -78013,6 +78079,8 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "provides navigable capability and roadmap intelligence commands"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
     },
     {
         "capability_id": "strategic_roadmap_governance",
@@ -78022,6 +78090,8 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "introduces strategic governance layer with advisory-only recommendations "
             "and human-approval-gated evolution proposals"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
     },
     {
         "capability_id": "runtime_coordination_policy",
@@ -78030,6 +78100,8 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "defines conflict resolution, synchronization, and isolation policies for multi-runtime"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
     },
     {
         "capability_id": "orchestration_audit_model",
@@ -78038,6 +78110,331 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "provides audit record and traceability for orchestration decisions"
         ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    # --- 65D bulk mapping decisions (DEC-65D-001 through DEC-65D-031) ---
+    {
+        "capability_id": "governed_task_contracts",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides foundational task-contract governance structure for supervised AI collaboration"
+        ),
+        "decision_id": "DEC-65D-001",
+        "recommendation_id": "REC-001",
+    },
+    {
+        "capability_id": "task_lifecycle_governance",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "governs task state transitions and lifecycle boundaries for human-supervised processes"
+        ),
+        "decision_id": "DEC-65D-002",
+        "recommendation_id": "REC-002",
+    },
+    {
+        "capability_id": "multi-agent_roadmap_generation",
+        "objective_ids": ["OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "generates multi-agent roadmap structure for governance-aligned phase planning"
+        ),
+        "decision_id": "DEC-65D-003",
+        "recommendation_id": "REC-003",
+    },
+    {
+        "capability_id": "phase_prompt_generation",
+        "objective_ids": ["OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "generates phase-scoped prompts for governance-aligned implementation guidance"
+        ),
+        "decision_id": "DEC-65D-004",
+        "recommendation_id": "REC-004",
+    },
+    {
+        "capability_id": "read-only_runtime_invocation_governance",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "establishes read-only runtime invocation boundary with human-approval gates"
+        ),
+        "decision_id": "DEC-65D-005",
+        "recommendation_id": "REC-005",
+    },
+    {
+        "capability_id": "runtime_approval_gates",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "enforces human-approval gates before any runtime execution transition"
+        ),
+        "decision_id": "DEC-65D-006",
+        "recommendation_id": "REC-006",
+    },
+    {
+        "capability_id": "runtime_rollback_boundaries",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "defines governed rollback boundaries for safe runtime state recovery"
+        ),
+        "decision_id": "DEC-65D-007",
+        "recommendation_id": "REC-007",
+    },
+    {
+        "capability_id": "multi-runtime_registry",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "maintains the governed list of runtime candidates available for selection"
+        ),
+        "decision_id": "DEC-65D-008",
+        "recommendation_id": "REC-008",
+    },
+    {
+        "capability_id": "runtime_selection_engine",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides runtime candidate scoring and selection decisions under governance constraints"
+        ),
+        "decision_id": "DEC-65D-009",
+        "recommendation_id": "REC-009",
+    },
+    {
+        "capability_id": "runtime_arbitration",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "resolves conflicts between qualified runtime candidates with audit trail"
+        ),
+        "decision_id": "DEC-65D-010",
+        "recommendation_id": "REC-010",
+    },
+    {
+        "capability_id": "multi-runtime_audit_chain",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides cross-runtime lineage and audit traceability for governance review"
+        ),
+        "decision_id": "DEC-65D-011",
+        "recommendation_id": "REC-011",
+    },
+    {
+        "capability_id": "runtime_failure_recovery",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides recovery classification and escalation guidance for runtime failures"
+        ),
+        "decision_id": "DEC-65D-012",
+        "recommendation_id": "REC-012",
+    },
+    {
+        "capability_id": "runtime_quarantine",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides quarantine recommendation and release-governance context for degraded runtimes"
+        ),
+        "decision_id": "DEC-65D-013",
+        "recommendation_id": "REC-013",
+    },
+    {
+        "capability_id": "multi-runtime_execution_readiness",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "validates whether a multi-runtime execution plan is ready to proceed"
+        ),
+        "decision_id": "DEC-65D-014",
+        "recommendation_id": "REC-014",
+    },
+    {
+        "capability_id": "multi-runtime_orchestration_execution",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides governed multi-runtime orchestration execution structure and policy linkage"
+        ),
+        "decision_id": "DEC-65D-015",
+        "recommendation_id": "REC-015",
+    },
+    {
+        "capability_id": "multi-runtime_execution_planning",
+        "objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides execution plan structure, constraints, and sequencing for multi-runtime dispatch"
+        ),
+        "decision_id": "DEC-65D-016",
+        "recommendation_id": "REC-016",
+    },
+    {
+        "capability_id": "strategic_state_summary",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "computes objective coverage governance, detects unmapped capabilities, "
+            "and generates mapping recommendations with evidence"
+        ),
+        "decision_id": "DEC-65D-017",
+        "recommendation_id": "REC-017",
+    },
+    {
+        "capability_id": "strategic_governance_registry_alignment",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "reconciles capability registries, corrects inference heuristics, and regenerates governance docs"
+        ),
+        "decision_id": "DEC-65D-018",
+        "recommendation_id": "REC-018",
+    },
+    {
+        "capability_id": "capability_inventory",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides navigable capability inventory with domain classification and status tracking"
+        ),
+        "decision_id": "DEC-65D-019",
+        "recommendation_id": "REC-019",
+    },
+    {
+        "capability_id": "roadmap_recommendation_hardening",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "hardens roadmap recommendation quality and evidence standards"
+        ),
+        "decision_id": "DEC-65D-020",
+        "recommendation_id": "REC-020",
+    },
+    {
+        "capability_id": "prompt_recommendation_hardening",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "hardens prompt recommendation quality for governance-aligned phase delivery"
+        ),
+        "decision_id": "DEC-65D-021",
+        "recommendation_id": "REC-021",
+    },
+    {
+        "capability_id": "skill_system_foundation",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "establishes skill registry and invocation foundation for governed capability delivery"
+        ),
+        "decision_id": "DEC-65D-022",
+        "recommendation_id": "REC-022",
+    },
+    {
+        "capability_id": "capability_projection_consolidation",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "consolidates capability projection into stable public record shape"
+        ),
+        "decision_id": "DEC-65D-023",
+        "recommendation_id": "REC-023",
+    },
+    {
+        "capability_id": "skill_registry_consolidation_hardening",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "hardens skill registry consolidation for consistent capability delivery"
+        ),
+        "decision_id": "DEC-65D-024",
+        "recommendation_id": "REC-024",
+    },
+    {
+        "capability_id": "skill_invocation_targeting",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "provides targeted skill invocation with type and target resolution"
+        ),
+        "decision_id": "DEC-65D-025",
+        "recommendation_id": "REC-025",
+    },
+    {
+        "capability_id": "prompt_rendering_skill",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "renders phase-scoped prompts via skill invocation for governance-aligned delivery"
+        ),
+        "decision_id": "DEC-65D-026",
+        "recommendation_id": "REC-026",
+    },
+    {
+        "capability_id": "prompt_rendering_quality_hardening",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "hardens prompt rendering quality standards for reliable skill-based delivery"
+        ),
+        "decision_id": "DEC-65D-027",
+        "recommendation_id": "REC-027",
+    },
+    {
+        "capability_id": "dependency_&_capability_intelligence_rendering",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "renders dependency and capability intelligence sections in phase prompts"
+        ),
+        "decision_id": "DEC-65D-028",
+        "recommendation_id": "REC-028",
+    },
+    {
+        "capability_id": "predecessor_capability_rendering",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "renders per-predecessor capability contribution descriptions in phase prompts"
+        ),
+        "decision_id": "DEC-65D-029",
+        "recommendation_id": "REC-029",
+    },
+    {
+        "capability_id": "command_&_architecture_intelligence_rendering",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "renders inferred command surfaces and architecture flows in implementation prompts"
+        ),
+        "decision_id": "DEC-65D-030",
+        "recommendation_id": "REC-030",
+    },
+    {
+        "capability_id": "design_review_intelligence_rendering",
+        "objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "renders pre-implementation design review sections in implementation and agent prompts"
+        ),
+        "decision_id": "DEC-65D-031",
+        "recommendation_id": "REC-031",
+    },
+    {
+        "capability_id": "strategic_capability-objective_bulk_mapping_governance",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "governs how the capability-objective map evolves: introduces append-only decision "
+            "registry, lineage enforcement, batch review requirements, and immutability contract"
+        ),
+        "decision_id": "DEC-65D-032",
+        "recommendation_id": "REC-65D-032",
     },
 )
 
@@ -79482,4 +79879,729 @@ def build_strategic_state_summary(root: "HarnessPath | None" = None) -> dict:
             "phase": "65B",
         },
         "advisory": STRATEGIC_STATE_SUMMARY_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 65D: Strategic Capability-Objective Bulk Mapping Governance
+# ---------------------------------------------------------------------------
+
+MAPPING_REVIEW_GOVERNANCE_ADVISORY = (
+    "Phase 65D introduces the Mapping Review Governance layer: an append-only decision registry "
+    "(_SRG_MAPPING_DECISION_REGISTRY) that encodes 31 human-reviewed capability-to-objective "
+    "mapping decisions with full lineage (decision_id → recommendation_id → evidence sources). "
+    "Governance invariants: execution_allowed=False, registry_is_append_only=True, "
+    "existing_decisions_must_not_be_modified=True, supersession_via_lineage_only=True. "
+    "The registry behaves as an audit log: decisions are historical facts, not mutable state. "
+    "Future phases add new DEC-65E-*/DEC-66A-* records; prior records are never rewritten. "
+    "Superseding a decision requires a new record with supersedes_id pointing to the original."
+)
+
+# Append-only governance history.  New phases add records; none are modified or removed.
+_SRG_MAPPING_DECISION_REGISTRY: tuple[dict, ...] = (
+    {
+        "decision_id": "DEC-65D-001",
+        "recommendation_id": "REC-001",
+        "capability_id": "governed_task_contracts",
+        "approved_objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Governed task contracts provide the foundational governance structure for "
+            "human-supervised AI collaboration, directly supporting OBJ-001 (governance "
+            "framework) and OBJ-002 (process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-002",
+        "recommendation_id": "REC-002",
+        "capability_id": "task_lifecycle_governance",
+        "approved_objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Task lifecycle governance enforces state transition rules and boundary conditions "
+            "for supervised processes, supporting both the governance framework (OBJ-001) "
+            "and process guardrails (OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-003",
+        "recommendation_id": "REC-003",
+        "capability_id": "multi-agent_roadmap_generation",
+        "approved_objective_ids": ["OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-agent roadmap generation produces the phase-level governance structure "
+            "that guides human-supervised delivery, directly supporting OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-004",
+        "recommendation_id": "REC-004",
+        "capability_id": "phase_prompt_generation",
+        "approved_objective_ids": ["OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Phase prompt generation provides governance-aligned implementation guidance "
+            "for each phase, supporting OBJ-001 (governance framework)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-005",
+        "recommendation_id": "REC-005",
+        "capability_id": "read-only_runtime_invocation_governance",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Read-only runtime invocation governance establishes the first controlled boundary "
+            "for runtime access with human-approval gates, supporting OBJ-003 (safe execution) "
+            "and OBJ-002 (process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-006",
+        "recommendation_id": "REC-006",
+        "capability_id": "runtime_approval_gates",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime approval gates enforce mandatory human review before any execution state "
+            "transition, directly supporting safe execution (OBJ-003) and process guardrails "
+            "(OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-007",
+        "recommendation_id": "REC-007",
+        "capability_id": "runtime_rollback_boundaries",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime rollback boundaries define governed recovery pathways ensuring no "
+            "irreversible state change occurs without approval, supporting OBJ-003 and OBJ-002."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-008",
+        "recommendation_id": "REC-008",
+        "capability_id": "multi-runtime_registry",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-runtime registry maintains the governed candidate pool for dispatch eligibility, "
+            "directly supporting safe multi-runtime execution (OBJ-003) and process guardrails "
+            "(OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-009",
+        "recommendation_id": "REC-009",
+        "capability_id": "runtime_selection_engine",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime selection engine provides scored and governed candidate selection decisions "
+            "within the safe execution framework (OBJ-003) and process guardrails (OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-010",
+        "recommendation_id": "REC-010",
+        "capability_id": "runtime_arbitration",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime arbitration resolves inter-runtime conflicts with a governed audit trail, "
+            "supporting safe execution (OBJ-003) and traceable process guardrails (OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-011",
+        "recommendation_id": "REC-011",
+        "capability_id": "multi-runtime_audit_chain",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-runtime audit chain provides cross-runtime lineage essential for governance "
+            "review and traceability, supporting OBJ-003 (safe execution) and OBJ-002 "
+            "(process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-012",
+        "recommendation_id": "REC-012",
+        "capability_id": "runtime_failure_recovery",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime failure recovery provides classification and escalation guidance ensuring "
+            "failures are handled safely within governed boundaries (OBJ-003, OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-013",
+        "recommendation_id": "REC-013",
+        "capability_id": "runtime_quarantine",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Runtime quarantine provides quarantine recommendation and human-gated release "
+            "governance for degraded runtimes, supporting OBJ-003 and OBJ-002."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-014",
+        "recommendation_id": "REC-014",
+        "capability_id": "multi-runtime_execution_readiness",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-runtime execution readiness validates plan safety before any dispatch transition, "
+            "directly supporting safe execution (OBJ-003) and process guardrails (OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-015",
+        "recommendation_id": "REC-015",
+        "capability_id": "multi-runtime_orchestration_execution",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-runtime orchestration execution provides the governed execution structure "
+            "and candidate dispatch framework, supporting OBJ-003 and OBJ-002."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-016",
+        "recommendation_id": "REC-016",
+        "capability_id": "multi-runtime_execution_planning",
+        "approved_objective_ids": ["OBJ-003", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Multi-runtime execution planning provides constraint-aware sequencing for safe "
+            "multi-runtime dispatch, supporting OBJ-003 (safe execution) and OBJ-002 "
+            "(process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-017",
+        "recommendation_id": "REC-017",
+        "capability_id": "strategic_state_summary",
+        "approved_objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Strategic state summary computes objective coverage and detects governance gaps "
+            "for human review, supporting OBJ-001 (governance framework) and OBJ-002 "
+            "(process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-018",
+        "recommendation_id": "REC-018",
+        "capability_id": "strategic_governance_registry_alignment",
+        "approved_objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Strategic governance registry alignment reconciles capability registries and "
+            "corrects inference heuristics, supporting governance framework integrity (OBJ-001) "
+            "and process guardrails (OBJ-002)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-019",
+        "recommendation_id": "REC-019",
+        "capability_id": "capability_inventory",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Capability inventory provides navigable capability status and domain classification, "
+            "supporting capability intelligence (OBJ-004) and governance framework (OBJ-001)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-020",
+        "recommendation_id": "REC-020",
+        "capability_id": "roadmap_recommendation_hardening",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Roadmap recommendation hardening improves evidence quality for phase planning, "
+            "supporting capability intelligence (OBJ-004) and governance framework (OBJ-001)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-021",
+        "recommendation_id": "REC-021",
+        "capability_id": "prompt_recommendation_hardening",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Prompt recommendation hardening improves prompt quality standards for reliable "
+            "phase delivery, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-022",
+        "recommendation_id": "REC-022",
+        "capability_id": "skill_system_foundation",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Skill system foundation establishes the registry and invocation primitives for "
+            "governed capability delivery, supporting OBJ-004 (capability intelligence) "
+            "and OBJ-001 (governance framework)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-023",
+        "recommendation_id": "REC-023",
+        "capability_id": "capability_projection_consolidation",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Capability projection consolidation produces stable public record shapes for "
+            "capability intelligence, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-024",
+        "recommendation_id": "REC-024",
+        "capability_id": "skill_registry_consolidation_hardening",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Skill registry consolidation hardening ensures consistent capability delivery "
+            "across skill invocations, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-025",
+        "recommendation_id": "REC-025",
+        "capability_id": "skill_invocation_targeting",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Skill invocation targeting provides type-safe and target-resolved skill dispatch, "
+            "supporting capability intelligence (OBJ-004) and governance framework (OBJ-001)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-026",
+        "recommendation_id": "REC-026",
+        "capability_id": "prompt_rendering_skill",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Prompt rendering skill enables phase-scoped prompt delivery via skill invocation, "
+            "supporting OBJ-004 (capability intelligence) and OBJ-001 (governance framework)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-027",
+        "recommendation_id": "REC-027",
+        "capability_id": "prompt_rendering_quality_hardening",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Prompt rendering quality hardening ensures reliable skill-based prompt delivery "
+            "with quality standards, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-028",
+        "recommendation_id": "REC-028",
+        "capability_id": "dependency_&_capability_intelligence_rendering",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Dependency and capability intelligence rendering embeds dependency context in "
+            "phase prompts, supporting capability intelligence (OBJ-004) and governance "
+            "framework (OBJ-001)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-029",
+        "recommendation_id": "REC-029",
+        "capability_id": "predecessor_capability_rendering",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Predecessor capability rendering provides per-predecessor contribution context "
+            "in phase prompts, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-030",
+        "recommendation_id": "REC-030",
+        "capability_id": "command_&_architecture_intelligence_rendering",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Command and architecture intelligence rendering exposes inferred command surfaces "
+            "in implementation prompts, supporting OBJ-004 and OBJ-001."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-031",
+        "recommendation_id": "REC-031",
+        "capability_id": "design_review_intelligence_rendering",
+        "approved_objective_ids": ["OBJ-004", "OBJ-001"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Design review intelligence rendering embeds pre-implementation design review "
+            "sections in prompts, supporting OBJ-004 (capability intelligence) and OBJ-001 "
+            "(governance framework)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+    {
+        "decision_id": "DEC-65D-032",
+        "recommendation_id": "REC-65D-032",
+        "capability_id": "strategic_capability-objective_bulk_mapping_governance",
+        "approved_objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "rationale": (
+            "Strategic capability-objective bulk mapping governance introduces the "
+            "append-only decision registry, lineage enforcement, and batch review "
+            "requirements that govern how the capability-objective map evolves under "
+            "human oversight. Governing the governance mechanism itself directly "
+            "supports OBJ-001 (governance framework) and OBJ-002 (process guardrails)."
+        ),
+        "status": "approved",
+        "supersedes_id": "",
+        "phase": "65D",
+        "human_reviewed": True,
+        "execution_allowed": False,
+    },
+)
+
+_SMD_DECISION_RECORD_FIELDS: tuple[dict, ...] = (
+    {"name": "decision_id", "type": "str", "required": True},
+    {"name": "recommendation_id", "type": "str", "required": True},
+    {"name": "capability_id", "type": "str", "required": True},
+    {"name": "approved_objective_ids", "type": "list", "required": True},
+    {"name": "contribution_type", "type": "str", "required": True},
+    {"name": "rationale", "type": "str", "required": True},
+    {"name": "status", "type": "str", "required": True},
+    {"name": "supersedes_id", "type": "str", "required": True},
+    {"name": "phase", "type": "str", "required": True},
+    {"name": "human_reviewed", "type": "bool", "required": True},
+    {"name": "execution_allowed", "type": "bool", "required": True},
+)
+
+
+def build_mapping_review_governance(root: "HarnessPath | None" = None) -> dict:
+    """Validate and report on governance history for capability-objective mapping decisions."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    decisions = list(_SRG_MAPPING_DECISION_REGISTRY)
+
+    # --- Validate unique decision_ids ---
+    all_decision_ids = [d["decision_id"] for d in decisions]
+    seen_decision_ids: set[str] = set()
+    duplicate_decision_ids: list[str] = []
+    for did in all_decision_ids:
+        if did in seen_decision_ids:
+            duplicate_decision_ids.append(did)
+        seen_decision_ids.add(did)
+
+    # --- Validate unique recommendation_ids ---
+    all_rec_ids = [d["recommendation_id"] for d in decisions]
+    seen_rec_ids: set[str] = set()
+    duplicate_rec_ids: list[str] = []
+    for rid in all_rec_ids:
+        if rid in seen_rec_ids:
+            duplicate_rec_ids.append(rid)
+        seen_rec_ids.add(rid)
+
+    # --- Compute supersession chain ---
+    # A decision is superseded if any other decision lists it in supersedes_id.
+    # We derive this from the registry without mutating any record.
+    superseded_by: dict[str, str] = {}
+    for d in decisions:
+        sid = d.get("supersedes_id", "")
+        if sid:
+            superseded_by[sid] = d["decision_id"]
+
+    decision_views: list[dict] = []
+    for d in decisions:
+        is_superseded = d["decision_id"] in superseded_by
+        decision_views.append({
+            **d,
+            "is_superseded": is_superseded,
+            "superseded_by_id": superseded_by.get(d["decision_id"], ""),
+        })
+
+    # --- Validate supersedes_id references ---
+    orphan_supersedes: list[str] = [
+        d["decision_id"] for d in decisions
+        if d.get("supersedes_id") and d["supersedes_id"] not in seen_decision_ids
+    ]
+
+    # --- Validate map lineage ---
+    orphan_map_lineage: list[str] = []
+    for entry in _SRG_CAPABILITY_OBJECTIVE_MAP:
+        did = entry.get("decision_id", "")
+        if did and did not in seen_decision_ids:
+            orphan_map_lineage.append(entry["capability_id"])
+
+    validation_passed = (
+        not duplicate_decision_ids
+        and not duplicate_rec_ids
+        and not orphan_supersedes
+        and not orphan_map_lineage
+    )
+
+    validation_results = {
+        "decision_ids_unique": not duplicate_decision_ids,
+        "recommendation_ids_unique": not duplicate_rec_ids,
+        "supersession_chain_valid": not orphan_supersedes,
+        "map_lineage_valid": not orphan_map_lineage,
+        "validation_passed": validation_passed,
+        "duplicate_decision_ids": duplicate_decision_ids,
+        "duplicate_recommendation_ids": duplicate_rec_ids,
+        "orphan_supersedes_ids": orphan_supersedes,
+        "orphan_map_lineage_capability_ids": orphan_map_lineage,
+    }
+
+    # --- Batch summary ---
+    by_objective: dict[str, int] = {}
+    for d in decisions:
+        for oid in d["approved_objective_ids"]:
+            by_objective[oid] = by_objective.get(oid, 0) + 1
+
+    batch_summary = {
+        "total_decisions": len(decisions),
+        "by_objective": by_objective,
+        "decision_batch_review_required": True,
+        "phase": "65D",
+    }
+
+    # --- Map coverage after 65D ---
+    total_map_entries = len(_SRG_CAPABILITY_OBJECTIVE_MAP)
+    entries_with_lineage = sum(
+        1 for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e.get("decision_id")
+    )
+    pre_65d_entries = total_map_entries - entries_with_lineage
+
+    # --- Cross-registry consistency ---
+    known_cap_ids = {
+        c["capability_name"].lower().replace(" ", "_") for c in _CRI_KNOWN_CAPABILITIES
+    }
+    orphan_decision_cap_ids = [
+        d["capability_id"] for d in decisions
+        if d["capability_id"] not in known_cap_ids
+    ]
+
+    return {
+        "mapping_review_governance_overview": {
+            "phase": "65D",
+            "phase_title": "Strategic Capability-Objective Bulk Mapping Governance",
+            "advisory": MAPPING_REVIEW_GOVERNANCE_ADVISORY,
+            "total_decisions": len(decisions),
+            "total_map_entries": total_map_entries,
+            "entries_with_lineage": entries_with_lineage,
+            "pre_65d_entries": pre_65d_entries,
+            "decision_batch_review_required": True,
+            "registry_is_append_only": True,
+            "execution_allowed": False,
+            "human_review_required": True,
+        },
+        "batch_summary": batch_summary,
+        "decisions": decision_views,
+        "validation_results": validation_results,
+        "decision_record_model": {
+            "model_name": "MappingDecisionRecord",
+            "field_count": len(_SMD_DECISION_RECORD_FIELDS),
+            "required_field_count": len(_SMD_DECISION_RECORD_FIELDS),
+            "execution_allowed": False,
+            "fields": [dict(f) for f in _SMD_DECISION_RECORD_FIELDS],
+        },
+        "immutability": {
+            "registry_is_append_only": True,
+            "existing_decisions_must_not_be_modified": True,
+            "supersession_via_lineage_only": True,
+            "audit_chain_traversable": True,
+            "superseded_count": len(superseded_by),
+            "orphan_capability_ids_in_decisions": orphan_decision_cap_ids,
+        },
+        "governance_boundaries": {
+            "may": [
+                "validate decision registry integrity",
+                "compute supersession chain from lineage",
+                "produce batch review summary",
+                "validate map lineage",
+                "report audit chain traversability",
+                "emit mapping review governance report",
+            ],
+            "may_not": [
+                "modify existing decision records",
+                "delete decision records",
+                "auto-apply mappings",
+                "invoke runtimes",
+                "execute commands",
+                "commit",
+                "push",
+            ],
+            "registry_is_append_only": True,
+            "auto_apply_allowed": False,
+            "execution_allowed": False,
+            "human_review_required": True,
+            "phase": "65D",
+        },
+        "advisory": MAPPING_REVIEW_GOVERNANCE_ADVISORY,
     }

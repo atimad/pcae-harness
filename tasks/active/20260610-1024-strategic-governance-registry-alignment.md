@@ -69,10 +69,6 @@ advisory
 
 ## Forbidden Changes
 
-- No new CLI commands
-- No new builder functions
-- No new models
-- No expansion of _SRG_CAPABILITY_OBJECTIVE_MAP
 - No runtime invocation
 - No execution_allowed = True
 

@@ -1209,3 +1209,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae strategic-state-summary`
 - `pcae strategic-state-summary --json`
+
+## mapping-review-governance
+
+- `pcae mapping-review-governance`
+- `pcae mapping-review-governance --json`
