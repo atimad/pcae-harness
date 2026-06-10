@@ -69208,6 +69208,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["write_invocation_approval_gateway"],
+        "successor_capabilities": ["independent_review_governance"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Independent Review Governance",
+        "implemented_phase": "66A",
+        "status": "implemented",
+        "commands": [
+            "pcae independent-review-governance",
+            "pcae independent-review-governance --json",
+        ],
+        "dependencies": ["commit_session_continuity_guard"],
         "successor_capabilities": [],
     },
 )
@@ -70027,8 +70039,18 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65H",
         "phase_title": "Commit Session Continuity Guard",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65G",
+        "successor": "66A",
+        "superseded_by": "",
+    },
+    # independent_review_governance track
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "66A",
+        "phase_title": "Independent Review Governance Model",
+        "status": "active",
+        "predecessor": "65H",
         "successor": "",
         "superseded_by": "",
     },
@@ -70691,9 +70713,25 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "write_invocation_approval_gateway",
         ],
-        "successors": [],
+        "successors": ["independent_review_governance"],
         "aliases": [],
         "contribution": "hardens commit-time governance by upgrading the missing-session-snapshot check from a warning to a violation in check_session_continuity; ensures that an absent or mismatched .pcae/session.json blocks pcae check and therefore blocks the pre-commit hook; auto_refresh_allowed=False; execution_allowed=False",
+    },
+    {
+        "capability_name": "Independent Review Governance",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "66A",
+        "status": "implemented",
+        "commands": [
+            "pcae independent-review-governance",
+            "pcae independent-review-governance --json",
+        ],
+        "dependencies": [
+            "commit_session_continuity_guard",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "introduces BR-004 independent_review_governance branch and the founding governance model: ReviewRecord model (14 fields), ReviewFinding model (5 fields), review class registry (8 classes with review_required policy), BLOCKER/MAJOR/MINOR/INFO finding severities, deterministic recommendation derivation rules, immutable append-only review lineage with supersedes_review_id, bootstrapping exception for BR-004 phases only, reviewer_is_approver=False, review_output_is_binding=False, review_depth_limit=1; all advisory-only with execution_allowed=False, file_mutation_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72415,7 +72453,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65H",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65H-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65H",
@@ -72423,7 +72461,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65H",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65H-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65H",
@@ -72431,10 +72469,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65H",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65H-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65H",
+    },
+    {
+        "phase_id": "66A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "66A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66A",
+    },
+    {
+        "phase_id": "66A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "66A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66A",
+    },
+    {
+        "phase_id": "66A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "66A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66A",
     },
     {
         "phase_id": "64B.6E",
@@ -78290,6 +78352,23 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "approved_by": "",
         "approved_at": "",
     },
+    {
+        "branch_id": "BR-004",
+        "branch_name": "independent_review_governance",
+        "branch_title": "Independent Review Governance",
+        "description": (
+            "Phases governing the independent review layer: review class registry, "
+            "finding models, recommendation derivation, and review lineage."
+        ),
+        "status": "active",
+        "parent_branch": "",
+        "child_branches": [],
+        "serving_objectives": ["OBJ-001", "OBJ-002"],
+        "entry_phase": "66A",
+        "current_phase": "66A",
+        "approved_by": "",
+        "approved_at": "",
+    },
 )
 
 _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
@@ -78724,6 +78803,20 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "from a warning to a violation; closes the gap where an absent .pcae/session.json "
             "was not treated as a commit blocker; auto_refresh_allowed=False; "
             "execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "independent_review_governance",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces the independent review governance layer: review class registry, "
+            "ReviewRecord and ReviewFinding models, BLOCKER/MAJOR/MINOR/INFO severity model, "
+            "deterministic recommendation derivation, immutable append-only review lineage, "
+            "bootstrapping exception for BR-004 phases, reviewer isolation, "
+            "review_output_is_binding=False; execution_allowed=False"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -82105,6 +82198,346 @@ _WAG_SAMPLE_ASSESSMENT: dict = {
     "human_reviewer_required": True,
     "execution_allowed": False,
 }
+
+
+# Phase 66A — Independent Review Governance Model
+# ---------------------------------------------------------------------------
+
+INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY = (
+    "Phase 66A defines the Independent Review Governance model: BR-004 branch, "
+    "ReviewRecord (14 fields), ReviewFinding (5 fields), 8 review classes with "
+    "review_required policy, BLOCKER/MAJOR/MINOR/INFO severity levels, deterministic "
+    "recommendation derivation (BLOCKER→reject, MAJOR→approve_with_changes, "
+    "MINOR/INFO/none→approve), and immutable append-only review lineage. "
+    "Governance invariants: execution_allowed=False, file_mutation_allowed=False, "
+    "reviewer_is_approver=False, review_output_is_binding=False, review_depth_limit=1, "
+    "auto_approval_from_review_allowed=False. "
+    "BR-004 phases are exempt from review_required because IRG cannot review itself "
+    "before it exists (bootstrapping exception). "
+    "The command renders the review governance model only — it does not create real "
+    "review records, execute reviews, or modify candidate state."
+)
+
+_IRG_PHASE_ID: str = "66A"
+_IRG_PHASE_TITLE: str = "Independent Review Governance Model"
+
+_IRG_REVIEW_CLASS_REGISTRY: tuple[dict, ...] = (
+    {
+        "review_class": "roadmap_proposal",
+        "description": "Review of a proposed change to the strategic roadmap or branch registry",
+        "review_required": True,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be in the branch being reviewed",
+    },
+    {
+        "review_class": "phase_proposal",
+        "description": "Review of a proposed new phase before it is added to the roadmap",
+        "review_required": True,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be in the track of the proposed phase",
+    },
+    {
+        "review_class": "phase_design",
+        "description": "Review of a phase design document before implementation begins",
+        "review_required": True,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be in the track of the phase being reviewed",
+    },
+    {
+        "review_class": "governance_change",
+        "description": "Review of a change to governance rules, policies, or registries",
+        "review_required": True,
+        "bootstrapping_exempt": True,
+        "bootstrapping_exempt_scope": "BR-004 phases only — IRG cannot review itself before it exists",
+        "reviewer_isolation": "reviewer must not be in the branch whose governance is changing",
+    },
+    {
+        "review_class": "commit_approval",
+        "description": "Review of a candidate commit before it reaches the approval gateway",
+        "review_required": True,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be the author of the candidate",
+    },
+    {
+        "review_class": "implementation_review",
+        "description": "Review of an implementation artifact against its phase contract",
+        "review_required": True,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be in the track of the artifact being reviewed",
+    },
+    {
+        "review_class": "strategic_review",
+        "description": "Review of strategic direction: branch health, roadmap coherence, objective coverage",
+        "review_required": False,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "reviewer must not be in any branch whose direction is being assessed",
+        "note": "on-demand; detailed behavior model deferred to 66B",
+    },
+    {
+        "review_class": "minor_documentation_change",
+        "description": "Review of a minor documentation-only change with no governance impact",
+        "review_required": False,
+        "bootstrapping_exempt": False,
+        "reviewer_isolation": "none required",
+    },
+)
+
+_IRG_FINDING_SEVERITIES: tuple[dict, ...] = (
+    {
+        "severity": "BLOCKER",
+        "description": "A finding that must be resolved before the artifact can be approved",
+        "recommendation_impact": "forces recommendation=reject",
+        "priority": 1,
+    },
+    {
+        "severity": "MAJOR",
+        "description": "A significant finding that requires changes before approval",
+        "recommendation_impact": "forces recommendation=approve_with_changes if no BLOCKER present",
+        "priority": 2,
+    },
+    {
+        "severity": "MINOR",
+        "description": "A non-blocking finding that should be addressed but does not block approval",
+        "recommendation_impact": "no impact on recommendation when no BLOCKER or MAJOR present",
+        "priority": 3,
+    },
+    {
+        "severity": "INFO",
+        "description": "An informational observation with no governance consequence",
+        "recommendation_impact": "no impact on recommendation",
+        "priority": 4,
+    },
+)
+
+_IRG_FINDING_TYPES: tuple[dict, ...] = (
+    {"finding_type": "scope_violation", "description": "artifact exceeds its governed scope"},
+    {"finding_type": "invariant_breach", "description": "a governance invariant is violated"},
+    {"finding_type": "objective_misalignment", "description": "artifact does not serve its stated objective"},
+    {"finding_type": "lineage_break", "description": "required lineage field is missing or inconsistent"},
+    {"finding_type": "execution_risk", "description": "artifact exposes an execution risk not accounted for"},
+    {"finding_type": "completeness_gap", "description": "required field or section is absent"},
+    {"finding_type": "quality_concern", "description": "artifact does not meet quality standards"},
+    {"finding_type": "observation", "description": "non-blocking observation for future consideration"},
+)
+
+_IRG_RECOMMENDATION_DERIVATION_RULES: tuple[dict, ...] = (
+    {
+        "priority": 1,
+        "condition": "any finding with severity=BLOCKER",
+        "derived_recommendation": "reject",
+        "rationale": "any blocker finding makes the artifact unapprovable",
+    },
+    {
+        "priority": 2,
+        "condition": "any finding with severity=MAJOR and no BLOCKER findings",
+        "derived_recommendation": "approve_with_changes",
+        "rationale": "major findings require changes but do not block outright",
+    },
+    {
+        "priority": 3,
+        "condition": "only MINOR and/or INFO findings, no BLOCKER or MAJOR",
+        "derived_recommendation": "approve",
+        "rationale": "minor and info findings do not block approval",
+    },
+    {
+        "priority": 4,
+        "condition": "no findings",
+        "derived_recommendation": "approve",
+        "rationale": "artifact passes review with no issues identified",
+    },
+)
+
+_IRG_RECORD_FIELDS: tuple[dict, ...] = (
+    {"field": "review_id", "type": "str", "required": True, "description": "unique review identifier"},
+    {"field": "review_target_type", "type": "str", "required": True, "description": "class from _IRG_REVIEW_CLASS_REGISTRY"},
+    {"field": "review_target_id", "type": "str", "required": True, "description": "identifier of the artifact being reviewed"},
+    {"field": "review_target_version", "type": "str", "required": True, "description": "version or hash of the artifact at review time"},
+    {"field": "reviewer_id", "type": "str", "required": True, "description": "identity of the reviewer"},
+    {"field": "review_timestamp", "type": "str", "required": True, "description": "ISO-8601 timestamp when review was recorded"},
+    {"field": "supersedes_review_id", "type": "str", "required": False, "description": "review_id of the prior review this record supersedes; empty if new"},
+    {"field": "findings", "type": "list[ReviewFinding]", "required": True, "description": "list of ReviewFinding records; empty list if no findings"},
+    {"field": "recommendation", "type": "str", "required": True, "description": "derived from findings via _IRG_RECOMMENDATION_DERIVATION_RULES; never set directly"},
+    {"field": "rationale", "type": "str", "required": True, "description": "human-readable explanation of the recommendation"},
+    {"field": "required_changes", "type": "list[str]", "required": False, "description": "enumerated required changes when recommendation=approve_with_changes"},
+    {"field": "rejection_reasons", "type": "list[str]", "required": False, "description": "enumerated rejection reasons when recommendation=reject"},
+    {"field": "human_confirmation_required", "type": "bool", "required": True, "description": "always True; human must see review before acting on artifact"},
+    {"field": "binding", "type": "bool", "required": True, "description": "always False; human is not bound by recommendation"},
+)
+
+_IRG_FINDING_FIELDS: tuple[dict, ...] = (
+    {"field": "finding_id", "type": "str", "required": True, "description": "unique finding identifier within the review"},
+    {"field": "finding_type", "type": "str", "required": True, "description": "type from _IRG_FINDING_TYPES"},
+    {"field": "severity", "type": "str", "required": True, "description": "one of BLOCKER, MAJOR, MINOR, INFO"},
+    {"field": "description", "type": "str", "required": True, "description": "human-readable description of the finding"},
+    {"field": "suggested_resolution", "type": "str", "required": False, "description": "optional suggested resolution for the finding"},
+)
+
+_IRG_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "real_review_record_creation_allowed": False,
+    "reviewer_is_approver": False,
+    "review_output_is_binding": False,
+    "auto_approval_from_review_allowed": False,
+    "review_can_block_human_decision": False,
+    "review_required_for_governed_artifact_types": True,
+    "review_recommendation_is_derived": True,
+    "review_registry_is_append_only": True,
+    "review_depth_limit": 1,
+    "review_mutates_candidate": False,
+    "human_confirmation_required": True,
+}
+
+_IRG_ANTI_RECURSION_RULES: tuple[dict, ...] = (
+    {
+        "rule_id": "ARR-001",
+        "rule": "depth_limit",
+        "description": "reviews are terminal — a ReviewRecord cannot trigger another review",
+        "enforcement": "review_depth_limit=1; no review_required applies to ReviewRecord artifacts",
+    },
+    {
+        "rule_id": "ARR-002",
+        "rule": "bootstrapping_exception",
+        "description": "BR-004 phase artifacts are exempt from review_required",
+        "enforcement": "bootstrapping_exempt=True on governance_change class for BR-004 phases only",
+    },
+    {
+        "rule_id": "ARR-003",
+        "rule": "scope_whitelist",
+        "description": "only artifact types registered in _IRG_REVIEW_CLASS_REGISTRY are reviewable",
+        "enforcement": "review_target_type must resolve in _IRG_REVIEW_CLASS_REGISTRY",
+    },
+    {
+        "rule_id": "ARR-004",
+        "rule": "reviewer_identity_isolation",
+        "description": "reviewer must satisfy the reviewer_isolation constraint for the review class",
+        "enforcement": "reviewer_id checked against review class isolation rule",
+    },
+    {
+        "rule_id": "ARR-005",
+        "rule": "review_of_review_prohibited",
+        "description": "a ReviewRecord itself cannot be a review target",
+        "enforcement": "review_target_type may not be 'review_record'",
+    },
+)
+
+_IRG_SAMPLE_REVIEW_RECORDS: tuple[dict, ...] = (
+    {
+        "review_id": "REV-SAMPLE-001",
+        "review_target_type": "phase_design",
+        "review_target_id": "66B",
+        "review_target_version": "draft-v1",
+        "reviewer_id": "independent-reviewer",
+        "review_timestamp": "2026-06-10T20:00:00+00:00",
+        "supersedes_review_id": "",
+        "findings": [
+            {
+                "finding_id": "F-001",
+                "finding_type": "completeness_gap",
+                "severity": "MAJOR",
+                "description": "strategic_review detailed field model is not specified",
+                "suggested_resolution": "defer to 66B as documented; ensure deferral is explicit in 66A scope",
+            }
+        ],
+        "recommendation": "approve_with_changes",
+        "rationale": "MAJOR finding present; changes required before artifact is presented for approval",
+        "required_changes": ["make strategic_review deferral explicit in 66A scope documentation"],
+        "rejection_reasons": [],
+        "human_confirmation_required": True,
+        "binding": False,
+    },
+    {
+        "review_id": "REV-SAMPLE-002",
+        "review_target_type": "commit_approval",
+        "review_target_id": "candidate-65G-001",
+        "review_target_version": "v1",
+        "reviewer_id": "independent-reviewer",
+        "review_timestamp": "2026-06-10T21:00:00+00:00",
+        "supersedes_review_id": "",
+        "findings": [],
+        "recommendation": "approve",
+        "rationale": "no findings; artifact passes review",
+        "required_changes": [],
+        "rejection_reasons": [],
+        "human_confirmation_required": True,
+        "binding": False,
+    },
+)
+
+
+def build_independent_review_governance(root: "HarnessPath | None" = None) -> dict:
+    """Independent review governance model: review class registry, finding model, and derivation rules (Phase 66A)."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    required_classes = [c for c in _IRG_REVIEW_CLASS_REGISTRY if c["review_required"]]
+    optional_classes = [c for c in _IRG_REVIEW_CLASS_REGISTRY if not c["review_required"]]
+    bootstrapping_exempt_classes = [c for c in _IRG_REVIEW_CLASS_REGISTRY if c.get("bootstrapping_exempt")]
+
+    return {
+        "independent_review_governance_overview": {
+            "phase": _IRG_PHASE_ID,
+            "phase_title": _IRG_PHASE_TITLE,
+            "branch": "BR-004",
+            "branch_name": "independent_review_governance",
+            "review_class_count": len(_IRG_REVIEW_CLASS_REGISTRY),
+            "review_required_class_count": len(required_classes),
+            "review_optional_class_count": len(optional_classes),
+            "bootstrapping_exempt_class_count": len(bootstrapping_exempt_classes),
+            "finding_severity_count": len(_IRG_FINDING_SEVERITIES),
+            "finding_type_count": len(_IRG_FINDING_TYPES),
+            "derivation_rule_count": len(_IRG_RECOMMENDATION_DERIVATION_RULES),
+            "record_field_count": len(_IRG_RECORD_FIELDS),
+            "finding_field_count": len(_IRG_FINDING_FIELDS),
+            "anti_recursion_rule_count": len(_IRG_ANTI_RECURSION_RULES),
+            "sample_record_count": len(_IRG_SAMPLE_REVIEW_RECORDS),
+            "execution_allowed": False,
+            "file_mutation_allowed": False,
+            "reviewer_is_approver": False,
+            "review_output_is_binding": False,
+            "review_depth_limit": 1,
+        },
+        "review_class_registry": {
+            "class_count": len(_IRG_REVIEW_CLASS_REGISTRY),
+            "required_classes": [c["review_class"] for c in required_classes],
+            "optional_classes": [c["review_class"] for c in optional_classes],
+            "bootstrapping_exempt_classes": [c["review_class"] for c in bootstrapping_exempt_classes],
+            "classes": [dict(c) for c in _IRG_REVIEW_CLASS_REGISTRY],
+        },
+        "finding_severity_model": {
+            "severity_count": len(_IRG_FINDING_SEVERITIES),
+            "severities": [dict(s) for s in _IRG_FINDING_SEVERITIES],
+            "finding_types": [dict(t) for t in _IRG_FINDING_TYPES],
+            "finding_field_count": len(_IRG_FINDING_FIELDS),
+            "finding_fields": [dict(f) for f in _IRG_FINDING_FIELDS],
+        },
+        "recommendation_derivation": {
+            "rule_count": len(_IRG_RECOMMENDATION_DERIVATION_RULES),
+            "rules": [dict(r) for r in _IRG_RECOMMENDATION_DERIVATION_RULES],
+            "possible_recommendations": ["reject", "approve_with_changes", "approve"],
+            "recommendation_is_derived": True,
+            "recommendation_set_by_human": False,
+        },
+        "review_record_model": {
+            "model": "ReviewRecord",
+            "field_count": len(_IRG_RECORD_FIELDS),
+            "fields": [dict(f) for f in _IRG_RECORD_FIELDS],
+            "lineage": {
+                "append_only": True,
+                "supersession_field": "supersedes_review_id",
+                "is_superseded_derived": True,
+                "superseded_by_id_derived": True,
+                "prior_records_never_rewritten": True,
+            },
+        },
+        "anti_recursion_rules": {
+            "rule_count": len(_IRG_ANTI_RECURSION_RULES),
+            "rules": [dict(r) for r in _IRG_ANTI_RECURSION_RULES],
+        },
+        "sample_review_records": [dict(r) for r in _IRG_SAMPLE_REVIEW_RECORDS],
+        "governance_boundaries": dict(_IRG_GOVERNANCE_BOUNDARIES),
+        "advisory": INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY,
+    }
 
 
 def build_write_invocation_approval_gateway(root: "HarnessPath | None" = None) -> dict:

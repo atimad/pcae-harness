@@ -411,6 +411,8 @@ from pcae.core.agent import (
     GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY,
     build_write_invocation_approval_gateway,
     WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY,
+    build_independent_review_governance,
+    INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14667,4 +14669,71 @@ def run_write_invocation_approval_gateway(args: argparse.Namespace) -> int:
     print()
 
     print(WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY)
+    return 0
+
+
+def run_independent_review_governance(args: argparse.Namespace) -> int:
+    data = build_independent_review_governance(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["independent_review_governance_overview"]
+    print("Independent Review Governance")
+    print(f"  Phase:                         {overview['phase']} — {overview['phase_title']}")
+    print(f"  Branch:                        {overview['branch']} ({overview['branch_name']})")
+    print(f"  Review classes:                {overview['review_class_count']}")
+    print(f"    review_required=True:        {overview['review_required_class_count']}")
+    print(f"    review_required=False:       {overview['review_optional_class_count']}")
+    print(f"    bootstrapping_exempt:        {overview['bootstrapping_exempt_class_count']}")
+    print(f"  Finding severities:            {overview['finding_severity_count']}")
+    print(f"  Finding types:                 {overview['finding_type_count']}")
+    print(f"  Derivation rules:              {overview['derivation_rule_count']}")
+    print(f"  Record fields:                 {overview['record_field_count']}")
+    print(f"  Finding fields:                {overview['finding_field_count']}")
+    print(f"  Anti-recursion rules:          {overview['anti_recursion_rule_count']}")
+    print(f"  Execution allowed:             {overview['execution_allowed']}")
+    print(f"  File mutation allowed:         {overview['file_mutation_allowed']}")
+    print(f"  Reviewer is approver:          {overview['reviewer_is_approver']}")
+    print(f"  Review output is binding:      {overview['review_output_is_binding']}")
+    print(f"  Review depth limit:            {overview['review_depth_limit']}")
+    print()
+
+    print("Review class registry:")
+    for cls in data["review_class_registry"]["classes"]:
+        req = "required" if cls["review_required"] else "optional"
+        exempt = " [bootstrapping_exempt]" if cls.get("bootstrapping_exempt") else ""
+        print(f"  {cls['review_class']:30} {req}{exempt}")
+    print()
+
+    print("Finding severities:")
+    for sev in data["finding_severity_model"]["severities"]:
+        print(f"  {sev['severity']:8} → {sev['recommendation_impact']}")
+    print()
+
+    print("Recommendation derivation rules:")
+    for rule in data["recommendation_derivation"]["rules"]:
+        print(f"  [{rule['priority']}] {rule['condition']}")
+        print(f"       → {rule['derived_recommendation']}")
+    print()
+
+    print("Anti-recursion rules:")
+    for rule in data["anti_recursion_rules"]["rules"]:
+        print(f"  {rule['rule_id']}: {rule['rule']} — {rule['description']}")
+    print()
+
+    print("Governance boundaries:")
+    gb = data["governance_boundaries"]
+    print(f"  Execution allowed:                     {gb['execution_allowed']}")
+    print(f"  File mutation allowed:                 {gb['file_mutation_allowed']}")
+    print(f"  Real review record creation allowed:   {gb['real_review_record_creation_allowed']}")
+    print(f"  Reviewer is approver:                  {gb['reviewer_is_approver']}")
+    print(f"  Review output is binding:              {gb['review_output_is_binding']}")
+    print(f"  Auto approval from review allowed:     {gb['auto_approval_from_review_allowed']}")
+    print(f"  Review can block human decision:       {gb['review_can_block_human_decision']}")
+    print(f"  Review depth limit:                    {gb['review_depth_limit']}")
+    print(f"  Human confirmation required:           {gb['human_confirmation_required']}")
+    print()
+
+    print(INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY)
     return 0

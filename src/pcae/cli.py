@@ -192,6 +192,7 @@ from pcae.commands.agent import (
     run_governed_write_invocation_design,
     run_governed_write_invocation_candidate,
     run_write_invocation_approval_gateway,
+    run_independent_review_governance,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4795,6 +4796,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     wiag_parser.set_defaults(handler=run_write_invocation_approval_gateway)
+
+    irg_parser = subparsers.add_parser(
+        "independent-review-governance",
+        help="Independent review governance model: review class registry, finding severities, derivation rules, and anti-recursion rules (Phase 66A).",
+    )
+    irg_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    irg_parser.set_defaults(handler=run_independent_review_governance)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

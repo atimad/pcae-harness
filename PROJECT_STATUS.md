@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65H: Commit Session Continuity Guard.
+Phase 66A: Independent Review Governance Model.
 
 ## Post-61J Runtime Registry Checkpoint
 

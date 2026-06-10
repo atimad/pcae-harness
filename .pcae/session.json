@@ -10,10 +10,6 @@
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/session.json",
-        "status": " M"
-      },
-      {
         "path": "CHANGELOG.md",
         "status": " M"
       },
@@ -26,19 +22,23 @@
         "status": " M"
       },
       {
+        "path": "docs/COMMANDS.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
         "path": "src/pcae/core/agent.py",
         "status": " M"
       },
       {
-        "path": "src/pcae/core/check.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/health.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260610-2037-write-invocation-approval-gateway-design.md",
+        "path": "src/pcae/core/docs.py",
         "status": " M"
       },
       {
@@ -50,6 +50,6 @@
   },
   "last_completed_step": "",
   "next_recommended_step": "",
-  "timestamp": "2026-06-10T19:55:27.268692+00:00",
+  "timestamp": "2026-06-10T21:23:12.754191+00:00",
   "warnings": []
 }

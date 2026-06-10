@@ -1229,3 +1229,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae write-invocation-approval-gateway`
 - `pcae write-invocation-approval-gateway --json`
+
+## independent-review-governance
+
+- `pcae independent-review-governance`
+- `pcae independent-review-governance --json`
