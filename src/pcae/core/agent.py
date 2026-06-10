@@ -69199,6 +69199,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae write-invocation-approval-gateway --json",
         ],
         "dependencies": ["governed_write_invocation_candidate_contract"],
+        "successor_capabilities": ["commit_session_continuity_guard"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Commit Session Continuity Guard",
+        "implemented_phase": "65H",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["write_invocation_approval_gateway"],
         "successor_capabilities": [],
     },
 )
@@ -70009,8 +70018,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65G",
         "phase_title": "Write Invocation Approval Gateway Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65F",
+        "successor": "65H",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65H",
+        "phase_title": "Commit Session Continuity Guard",
+        "status": "active",
+        "predecessor": "65G",
         "successor": "",
         "superseded_by": "",
     },
@@ -70660,9 +70678,22 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "governed_write_invocation_candidate_contract",
         ],
-        "successors": [],
+        "successors": ["commit_session_continuity_guard"],
         "aliases": [],
         "contribution": "designs the human approval gateway that transitions a candidate from approval_pending to approved or blocked; defines WriteApprovalRequest model, approval tier determination algorithm, echo-check runtime behavior, denial path, expiration enforcement, and gateway signals; all advisory-only with execution_allowed=False, real_candidate_processing_allowed=False",
+    },
+    {
+        "capability_name": "Commit Session Continuity Guard",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65H",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "write_invocation_approval_gateway",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "hardens commit-time governance by upgrading the missing-session-snapshot check from a warning to a violation in check_session_continuity; ensures that an absent or mismatched .pcae/session.json blocks pcae check and therefore blocks the pre-commit hook; auto_refresh_allowed=False; execution_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72360,7 +72391,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65G",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65G-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65G",
@@ -72368,7 +72399,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65G",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65G-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65G",
@@ -72376,10 +72407,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65G",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65G-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65G",
+    },
+    {
+        "phase_id": "65H",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65H-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65H",
+    },
+    {
+        "phase_id": "65H",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65H-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65H",
+    },
+    {
+        "phase_id": "65H",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65H-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65H",
     },
     {
         "phase_id": "64B.6E",
@@ -78656,6 +78711,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "defines WriteApprovalRequest model, tier determination algorithm, 7 echo-check "
             "runtime rules, denial path, and expiration enforcement; enforces "
             "auto_approval_allowed=False and human_approval_required=True always"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "commit_session_continuity_guard",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "hardens commit-time governance by upgrading the missing-session-snapshot check "
+            "from a warning to a violation; closes the gap where an absent .pcae/session.json "
+            "was not treated as a commit blocker; auto_refresh_allowed=False; "
+            "execution_allowed=False"
         ),
         "decision_id": "",
         "recommendation_id": "",

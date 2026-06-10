@@ -79,7 +79,7 @@ def active_task_data(check_result: CheckResult) -> dict | None:
 def session_continuity_status(check_result: CheckResult) -> str:
     if any("Session continuity verified." in info.text for info in check_result.infos):
         return "verified"
-    if any("Session snapshot missing" in warning.text for warning in check_result.warnings):
+    if any("Session snapshot missing" in violation.text for violation in check_result.violations):
         return "missing"
     if any(
         "Session active task does not match current active task" in violation.text

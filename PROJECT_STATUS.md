@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65G: Write Invocation Approval Gateway Design.
+Phase 65H: Commit Session Continuity Guard.
 
 ## Post-61J Runtime Registry Checkpoint
 

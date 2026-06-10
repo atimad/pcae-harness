@@ -5,7 +5,7 @@
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "Write Invocation Approval Gateway Design",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -18,26 +18,38 @@
         "status": " M"
       },
       {
-        "path": "tasks/DONE.md",
+        "path": "PROJECT_STATUS.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260610-1906-governed-write-invocation-candidate-contract.md",
-        "status": " D"
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/check.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/health.py",
+        "status": " M"
       },
       {
         "path": "tasks/active/20260610-2037-write-invocation-approval-gateway-design.md",
-        "status": "??"
+        "status": " M"
       },
       {
-        "path": "tasks/done/20260610-1906-governed-write-invocation-candidate-contract.md",
-        "status": "??"
+        "path": "tests/test_agent.py",
+        "status": " M"
       }
     ],
-    "status_summary": "6 changed files"
+    "status_summary": "9 changed files"
   },
-  "last_completed_step": "Completed task 20260610-1906-governed-write-invocation-candidate-contract: Governed Write Invocation Candidate Contract",
-  "next_recommended_step": "Continue active task 20260610-2037-write-invocation-approval-gateway-design.",
-  "timestamp": "2026-06-10T18:37:18.481670+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-10T19:55:27.268692+00:00",
   "warnings": []
 }

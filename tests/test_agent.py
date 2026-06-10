@@ -47522,7 +47522,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -47621,7 +47621,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "65G"
+    assert data["current_phase"]["phase_id"] == "65H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47736,7 +47736,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "65G"
+    assert data["current_phase"]["phase_id"] == "65H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47857,7 +47857,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "strategic_governance"
-    assert data["current_phase"]["phase_id"] == "65G"
+    assert data["current_phase"]["phase_id"] == "65H"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47875,7 +47875,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "strategic_governance"
-    assert data["current_phase"]["phase_id"] == "65G"
+    assert data["current_phase"]["phase_id"] == "65H"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47970,7 +47970,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "65G"
+    assert data["current_phase"]["phase_id"] == "65H"
     assert data["current_track"] == "strategic_governance"
 
 
@@ -48865,7 +48865,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -49081,7 +49081,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49312,7 +49312,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50052,7 +50052,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -50145,7 +50145,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "65G" in output
+    assert "65H" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51298,7 +51298,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -51574,7 +51574,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -51639,7 +51639,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -51977,7 +51977,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -52411,7 +52411,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -52517,16 +52517,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 41, (
-        f"Expected 41 map entries after 65G (38 from 65D + 1 65E + 1 65F + 1 65G mapping), got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 42, (
+        f"Expected 42 map entries after 65H (38 from 65D + 1 65E + 1 65F + 1 65G + 1 65H mapping), got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 41, (
-        f"Expected 41 map entries after 65G (6 pre-65D + 31 bulk + 1 65D self + 1 65E + 1 65F + 1 65G), "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 42, (
+        f"Expected 42 map entries after 65H (6 pre-65D + 31 bulk + 1 65D self + 1 65E + 1 65F + 1 65G + 1 65H), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52756,7 +52756,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -53059,7 +53059,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -53316,7 +53316,7 @@ def test_65f_state_summary_remains_healthy(tmp_path) -> None:
 from pcae.core.paths import HarnessPath as _HarnessPath65G  # noqa: E402
 
 
-def test_65g_phase_registered_as_active(tmp_path, monkeypatch) -> None:
+def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     from pcae.core.agent import build_capability_roadmap_intelligence
     from pcae.core.paths import HarnessPath
@@ -53326,12 +53326,13 @@ def test_65g_phase_registered_as_active(tmp_path, monkeypatch) -> None:
 
     phase_65g = next((p for p in phases if p["phase_id"] == "65G"), None)
     assert phase_65g is not None
-    assert phase_65g["status"] == "active"
+    assert phase_65g["status"] == "completed"
     assert phase_65g["track_name"] == "strategic_governance"
     assert phase_65g["predecessor"] == "65F"
+    assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "65G"
+    assert current["phase_id"] == "65H"
     assert current["status"] == "active"
 
 
@@ -53552,7 +53553,7 @@ def test_65g_prompt_profiles_registered(tmp_path, monkeypatch) -> None:
     assert "agent" in types
 
 
-def test_65g_prompt_profiles_are_recommended(tmp_path, monkeypatch) -> None:
+def test_65g_prompt_profiles_are_historical(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     from pcae.core.agent import build_prompt_recommendation_hardening
     from pcae.core.paths import HarnessPath
@@ -53561,8 +53562,8 @@ def test_65g_prompt_profiles_are_recommended(tmp_path, monkeypatch) -> None:
     registry = data["prompt_registry"]
     phase_65g = [r for r in registry if r["phase_id"] == "65G"]
     for r in phase_65g:
-        assert r["prompt_status"] == "recommended", (
-            f"65G prompt {r['prompt_type']} should be recommended, got {r['prompt_status']}"
+        assert r["prompt_status"] == "historical", (
+            f"65G prompt {r['prompt_type']} should be historical after 65H, got {r['prompt_status']}"
         )
 
 
@@ -53582,6 +53583,449 @@ def test_65g_state_summary_remains_healthy(tmp_path) -> None:
     from pcae.core.agent import build_strategic_state_summary
 
     data = build_strategic_state_summary(_HarnessPath65G(tmp_path))
+    summary = data["sample_summary"]
+    assert summary["warning_unmapped_count"] == 0, (
+        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+    )
+    assert summary["overall_state_health"] == "healthy", (
+        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+    )
+
+
+# Phase 65H — Commit Session Continuity Guard
+# ---------------------------------------------------------------------------
+
+import json as _json65H  # noqa: E402
+from pathlib import Path as _Path65H  # noqa: E402
+
+from pcae.core.paths import HarnessPath as _HarnessPath65H  # noqa: E402
+
+
+def _make_active_task_65h(tmp_path: _Path65H) -> None:
+    """Write a minimal active task contract so find_latest_active_task succeeds."""
+    task_dir = tmp_path / "tasks" / "active"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    task_file = task_dir / "20260610-9999-test-65h.md"
+    task_file.write_text(
+        "# Task Contract\n\n"
+        "## Task ID\n\n20260610-9999-test-65h\n\n"
+        "## Title\n\nTest 65H\n\n"
+        "## Status\n\nactive\n\n"
+        "## Mode\n\nimplementation\n\n"
+        "## Allowed Files\n\n- TBD\n\n"
+        "## Forbidden Files\n\n- TBD\n\n"
+        "## Enforcement Mode\n\nadvisory\n",
+        encoding="utf-8",
+    )
+
+
+def _write_matching_session_65h(tmp_path: _Path65H) -> None:
+    """Write a session.json that matches the test task."""
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    data = {
+        "active_task": {"id": "20260610-9999-test-65h", "title": "Test 65H"},
+        "architectural_notes": [],
+        "blockers": [],
+        "current_objective": "",
+        "git": {"branch": "main", "changed_files": [], "status_summary": "clean"},
+        "last_completed_step": "",
+        "next_recommended_step": "",
+        "timestamp": "2026-06-10T00:00:00+00:00",
+        "warnings": [],
+    }
+    (pcae_dir / "session.json").write_text(
+        _json65H.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+def test_65h_phase_registered_as_active(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+
+    phase_65h = next((p for p in phases if p["phase_id"] == "65H"), None)
+    assert phase_65h is not None
+    assert phase_65h["status"] == "active"
+    assert phase_65h["track_name"] == "strategic_governance"
+    assert phase_65h["predecessor"] == "65G"
+
+    current = data["current_phase"]
+    assert current["phase_id"] == "65H"
+    assert current["status"] == "active"
+
+
+def test_65h_65g_registered_as_completed(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phases = data["roadmap_registry"]
+
+    phase_65g = next((p for p in phases if p["phase_id"] == "65G"), None)
+    assert phase_65g is not None
+    assert phase_65g["status"] == "completed"
+    assert phase_65g["successor"] == "65H"
+
+
+def test_65h_capability_in_cri_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    cap_names = {c["capability_name"] for c in data["capability_registry"]}
+    assert "Commit Session Continuity Guard" in cap_names
+
+
+def test_65h_capability_in_ci_registry(tmp_path) -> None:
+    from pcae.core.agent import build_capability_inventory
+
+    data = build_capability_inventory(_HarnessPath65H(tmp_path))
+    cap_names = {r["capability_name"] for r in data["capability_records"]}
+    assert "Commit Session Continuity Guard" in cap_names
+
+
+def test_65h_missing_session_is_violation(tmp_path) -> None:
+    """An absent session.json must produce a violation, not a warning."""
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    active_task = ActiveTask(
+        task_id="20260610-9999-test-65h",
+        title="Test 65H",
+        status="active",
+        mode="implementation",
+        goal=None,
+        allowed_files=(),
+        forbidden_files=(),
+        allowed_zones=(),
+        forbidden_zones=(),
+        allowed_dependencies=(),
+        forbidden_dependencies=(),
+        override_protected_files=(),
+        enforcement_mode="advisory",
+        acceptance_checks=(),
+        documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
+    )
+    warnings: list = []
+    infos: list = []
+    violations = check_session_continuity(root, active_task, warnings, infos)
+
+    assert len(violations) == 1, (
+        f"Expected 1 violation for missing session, got {len(violations)}: {violations}"
+    )
+    assert "Session snapshot missing" in violations[0].text
+    assert len(warnings) == 0, (
+        f"Missing session must be a violation, not a warning; got warnings: {warnings}"
+    )
+
+
+def test_65h_missing_session_message_instructs_session_write(tmp_path) -> None:
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    active_task = ActiveTask(
+        task_id="t1", title="T1", status="active", mode="implementation", goal=None,
+        allowed_files=(), forbidden_files=(), allowed_zones=(), forbidden_zones=(),
+        allowed_dependencies=(), forbidden_dependencies=(), override_protected_files=(),
+        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "t1.md",
+    )
+    violations = check_session_continuity(root, active_task, [], [])
+    assert any("pcae session write" in v.text for v in violations)
+
+
+def test_65h_task_id_mismatch_is_violation(tmp_path) -> None:
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    stale = {
+        "active_task": {"id": "old-task-id", "title": "Old Task"},
+        "architectural_notes": [], "blockers": [], "current_objective": "",
+        "git": {"branch": "main", "changed_files": [], "status_summary": "clean"},
+        "last_completed_step": "", "next_recommended_step": "",
+        "timestamp": "2026-01-01T00:00:00+00:00", "warnings": [],
+    }
+    (pcae_dir / "session.json").write_text(
+        _json65H.dumps(stale, indent=2) + "\n", encoding="utf-8"
+    )
+    active_task = ActiveTask(
+        task_id="new-task-id", title="New Task", status="active", mode="implementation",
+        goal=None, allowed_files=(), forbidden_files=(), allowed_zones=(),
+        forbidden_zones=(), allowed_dependencies=(), forbidden_dependencies=(),
+        override_protected_files=(), enforcement_mode="advisory",
+        acceptance_checks=(), documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "new-task-id.md",
+    )
+    violations = check_session_continuity(root, active_task, [], [])
+    assert len(violations) == 1
+    assert "does not match" in violations[0].text
+
+
+def test_65h_task_title_mismatch_is_violation(tmp_path) -> None:
+    """Same task ID but stale title must still be a violation."""
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    stale = {
+        "active_task": {"id": "20260610-9999-test-65h", "title": "Stale Title"},
+        "architectural_notes": [], "blockers": [], "current_objective": "",
+        "git": {"branch": "main", "changed_files": [], "status_summary": "clean"},
+        "last_completed_step": "", "next_recommended_step": "",
+        "timestamp": "2026-01-01T00:00:00+00:00", "warnings": [],
+    }
+    (pcae_dir / "session.json").write_text(
+        _json65H.dumps(stale, indent=2) + "\n", encoding="utf-8"
+    )
+    active_task = ActiveTask(
+        task_id="20260610-9999-test-65h", title="Correct Title", status="active",
+        mode="implementation", goal=None, allowed_files=(), forbidden_files=(),
+        allowed_zones=(), forbidden_zones=(), allowed_dependencies=(),
+        forbidden_dependencies=(), override_protected_files=(),
+        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
+    )
+    violations = check_session_continuity(root, active_task, [], [])
+    assert len(violations) == 1
+    assert "does not match" in violations[0].text
+
+
+def test_65h_null_session_task_with_active_task_is_violation(tmp_path) -> None:
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    null_session = {
+        "active_task": None,
+        "architectural_notes": [], "blockers": [], "current_objective": "",
+        "git": {"branch": "main", "changed_files": [], "status_summary": "clean"},
+        "last_completed_step": "", "next_recommended_step": "",
+        "timestamp": "2026-01-01T00:00:00+00:00", "warnings": [],
+    }
+    (pcae_dir / "session.json").write_text(
+        _json65H.dumps(null_session, indent=2) + "\n", encoding="utf-8"
+    )
+    active_task = ActiveTask(
+        task_id="some-task", title="Some Task", status="active", mode="implementation",
+        goal=None, allowed_files=(), forbidden_files=(), allowed_zones=(),
+        forbidden_zones=(), allowed_dependencies=(), forbidden_dependencies=(),
+        override_protected_files=(), enforcement_mode="advisory",
+        acceptance_checks=(), documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "some-task.md",
+    )
+    violations = check_session_continuity(root, active_task, [], [])
+    assert len(violations) == 1
+
+
+def test_65h_valid_session_is_not_violation(tmp_path) -> None:
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    _make_active_task_65h(tmp_path)
+    _write_matching_session_65h(tmp_path)
+    active_task = ActiveTask(
+        task_id="20260610-9999-test-65h", title="Test 65H", status="active",
+        mode="implementation", goal=None, allowed_files=(), forbidden_files=(),
+        allowed_zones=(), forbidden_zones=(), allowed_dependencies=(),
+        forbidden_dependencies=(), override_protected_files=(),
+        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
+    )
+    warnings: list = []
+    infos: list = []
+    violations = check_session_continuity(root, active_task, warnings, infos)
+    assert len(violations) == 0
+    assert any("verified" in i.text for i in infos)
+
+
+def test_65h_invalid_json_is_violation(tmp_path) -> None:
+    from pcae.core.check import check_session_continuity
+    from pcae.core.tasks import ActiveTask
+
+    root = _HarnessPath65H(tmp_path)
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    (pcae_dir / "session.json").write_text("{not valid json", encoding="utf-8")
+    violations = check_session_continuity(root, None, [], [])
+    assert len(violations) == 1
+    assert "Invalid session JSON" in violations[0].text
+
+
+def test_65h_check_session_continuity_is_readonly() -> None:
+    """check_session_continuity must never import or call write_session_snapshot."""
+    import inspect
+    from pcae.core import check as _check_module
+
+    source = inspect.getsource(_check_module.check_session_continuity)
+    assert "write_session_snapshot" not in source, (
+        "check_session_continuity must not call write_session_snapshot (auto-refresh forbidden)"
+    )
+
+
+def test_65h_missing_session_blocks_check_end_to_end(tmp_path, monkeypatch) -> None:
+    """End-to-end: absent session.json → run_checks() fails → pre-commit path is blocked.
+
+    This test exercises the full run_checks() call path with all required manifest
+    files present, confirming that a missing session.json produces a violation that
+    causes check to fail, which is the same path the pre-commit hook takes.
+    """
+    monkeypatch.chdir(tmp_path)
+
+    # Stub git so the test does not require a real git repository.
+    import pcae.core.check as _check_mod
+    monkeypatch.setattr(_check_mod, "read_git_changes", lambda root: ())
+
+    from pcae.core.check import run_checks
+    from pcae.core.paths import HarnessPath
+
+    # Create all required PCAE manifest files so manifest violations don't obscure
+    # the session violation we're specifically testing.
+    (tmp_path / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase 65H: Commit Session Continuity Guard.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    (tasks_dir / "TODO.md").write_text("", encoding="utf-8")
+    (tasks_dir / "DONE.md").write_text("", encoding="utf-8")
+    (tasks_dir / "DECISIONS.md").write_text("", encoding="utf-8")
+    githooks_dir = tmp_path / ".githooks"
+    githooks_dir.mkdir(parents=True, exist_ok=True)
+    (githooks_dir / "pre-commit").write_text("#!/usr/bin/env sh\npcae check\n", encoding="utf-8")
+    scripts_dir = tmp_path / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    (scripts_dir / "check-docs-updated.sh").write_text("#!/usr/bin/env sh\n", encoding="utf-8")
+    (scripts_dir / "check-docs-updated.ps1").write_text("", encoding="utf-8")
+
+    _make_active_task_65h(tmp_path)
+
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    (pcae_dir / "policy.yaml").write_text(
+        "enforcement_mode: advisory\n"
+        "protected_patterns: []\n"
+        "architecture_zones: {}\n"
+        "architecture_rules: {}\n"
+        "orchestration:\n"
+        "  default_agent: test-agent\n"
+        "  agents: []\n",
+        encoding="utf-8",
+    )
+
+    # Deliberately do NOT write session.json — this is the condition being tested.
+    assert not (pcae_dir / "session.json").exists()
+
+    result = run_checks(HarnessPath.cwd())
+
+    assert not result.passed, (
+        "run_checks() must fail when session.json is absent"
+    )
+    session_violations = [
+        v for v in result.violations if "Session snapshot missing" in v.text
+    ]
+    assert len(session_violations) == 1, (
+        f"Expected exactly 1 session-missing violation; all violations: {[v.text for v in result.violations]}"
+    )
+    assert "pcae session write" in session_violations[0].text
+
+
+def test_65h_auto_refresh_allowed_is_false() -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c["capability_name"] == "Commit Session Continuity Guard"),
+        None,
+    )
+    assert cap is not None
+    assert "auto_refresh_allowed=False" in cap["contribution"]
+
+
+def test_65h_execution_always_false() -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c["capability_name"] == "Commit Session Continuity Guard"),
+        None,
+    )
+    assert cap is not None
+    assert "execution_allowed=False" in cap["contribution"]
+
+
+def test_65h_mapped_to_obj001_and_obj002(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    cap_id = "commit_session_continuity_guard"
+    entry = next((e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == cap_id), None)
+    assert entry is not None, "65H mapping entry not found in _SRG_CAPABILITY_OBJECTIVE_MAP"
+    assert "OBJ-001" in entry["objective_ids"]
+    assert "OBJ-002" in entry["objective_ids"]
+    assert entry["contribution_type"] == "primary"
+
+
+def test_65h_prompt_profiles_registered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    registry = data["prompt_registry"]
+    phase_65h = [r for r in registry if r["phase_id"] == "65H"]
+    assert len(phase_65h) >= 3
+    types = {r["prompt_type"] for r in phase_65h}
+    assert "implementation" in types
+    assert "validation" in types
+    assert "agent" in types
+
+
+def test_65h_prompt_profiles_are_recommended(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_prompt_recommendation_hardening(HarnessPath.cwd())
+    registry = data["prompt_registry"]
+    phase_65h = [r for r in registry if r["phase_id"] == "65H"]
+    for r in phase_65h:
+        assert r["prompt_status"] == "recommended", (
+            f"65H prompt {r['prompt_type']} should be recommended, got {r['prompt_status']}"
+        )
+
+
+def test_65h_no_orphan_map_entries(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP, _CRI_KNOWN_CAPABILITIES
+
+    known_cap_ids = {
+        c["capability_name"].lower().replace(" ", "_") for c in _CRI_KNOWN_CAPABILITIES
+    }
+    for entry in _SRG_CAPABILITY_OBJECTIVE_MAP:
+        assert entry["capability_id"] in known_cap_ids, (
+            f"Map entry capability_id {entry['capability_id']!r} not found in _CRI_KNOWN_CAPABILITIES"
+        )
+
+
+def test_65h_state_summary_remains_healthy(tmp_path) -> None:
+    from pcae.core.agent import build_strategic_state_summary
+
+    data = build_strategic_state_summary(_HarnessPath65H(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
         f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"

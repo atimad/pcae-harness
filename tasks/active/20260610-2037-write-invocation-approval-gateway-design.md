@@ -31,6 +31,8 @@ Write Invocation Approval Gateway Design
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - src/pcae/core/agent.py
+- src/pcae/core/check.py
+- src/pcae/core/health.py
 - src/pcae/core/docs.py
 - src/pcae/commands/agent.py
 - src/pcae/cli.py
