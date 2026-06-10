@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Governed Write Invocation Candidate Contract (20260610-1906-governed-write-invocation-candidate-contract)
 - Governed Write Invocation Design (20260610-1712-governed-write-invocation-design)
 - Strategic Governance Registry Alignment (20260610-1024-strategic-governance-registry-alignment)
 - Strategic State Summary (20260610-0706-strategic-state-summary)

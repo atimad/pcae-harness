@@ -409,6 +409,8 @@ from pcae.core.agent import (
     GOVERNED_WRITE_INVOCATION_DESIGN_ADVISORY,
     build_governed_write_invocation_candidate,
     GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY,
+    build_write_invocation_approval_gateway,
+    WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14595,4 +14597,74 @@ def run_governed_write_invocation_candidate(args: argparse.Namespace) -> int:
     print()
 
     print(GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY)
+    return 0
+
+
+def run_write_invocation_approval_gateway(args: argparse.Namespace) -> int:
+    data = build_write_invocation_approval_gateway(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["write_invocation_approval_gateway_overview"]
+    print("Write Invocation Approval Gateway")
+    print(f"  Phase:                              {overview['phase']} — {overview['phase_title']}")
+    print(f"  Approval request fields:            {overview['approval_request_field_count']}")
+    print(f"  Approval tier rules:                {overview['approval_tier_rule_count']}")
+    print(f"  Echo-check rules:                   {overview['echo_check_rule_count']}")
+    print(f"    Terminal (blocks on failure):      {overview['terminal_echo_rule_count']}")
+    print(f"    Non-terminal (renews request):     {overview['non_terminal_echo_rule_count']}")
+    print(f"  Record construction steps:          {overview['record_construction_steps']}")
+    print(f"  Denial path steps:                  {overview['denial_path_steps']}")
+    print(f"  Expiration enforcement steps:       {overview['expiration_enforcement_steps']}")
+    print(f"  Gateway signals:                    {overview['gateway_signal_count']}")
+    print(f"  Execution allowed:                  {overview['execution_allowed']}")
+    print(f"  Real candidate processing allowed:  {overview['real_candidate_processing_allowed']}")
+    print(f"  Auto approval allowed:              {overview['auto_approval_allowed']}")
+    print()
+
+    print("Approval tier rules:")
+    for rule in data["tier_determination"]["tier_rules"]:
+        req = " (rationale required)" if rule["rationale_required"] else ""
+        print(f"  {rule['branch_health']:8} → {rule['assigned_tier']:8} ({rule['window_hours']}hr){req}")
+    ep = data["tier_determination"]["escalation_policy"]
+    print(f"  Escalation: may escalate={ep['human_may_escalate_to_elevated']}, may downgrade={ep['human_may_downgrade_from_elevated']}")
+    print()
+
+    print("Echo-check rules:")
+    for rule in data["echo_check_rules"]["rules"]:
+        terminal = "[terminal]" if rule["candidate_terminal"] else "[non-terminal]"
+        print(f"  {rule['rule']:25} action={rule['failure_action']} {terminal}")
+    print()
+
+    print("Gateway signals:")
+    for sig in data["gateway_signals"]["signals"]:
+        print(f"  [{sig['severity']:7}] {sig['signal_id']} — {sig['description'][:60]}{'...' if len(sig['description']) > 60 else ''}")
+    print()
+
+    print("Sample assessment:")
+    sa = data["sample_assessment"]
+    print(f"  Branch health:       {sa['branch_health_at_request']}")
+    print(f"  Recommended tier:    {sa['recommended_approval_tier']}")
+    print(f"  Expiration window:   {sa['expiration_window_hours']}hr")
+    print(f"  Echo rules passed:   {sa['echo_check_rules_passed']}/{sa['echo_check_rules_evaluated']}")
+    print(f"  Gateway status:      {sa['overall_gateway_status']}")
+    print(f"  Execution allowed:   {sa['execution_allowed']}")
+    print()
+
+    print("Governance boundaries:")
+    gb = data["governance_boundaries"]
+    print(f"  Execution allowed:                       {gb['execution_allowed']}")
+    print(f"  File mutation allowed:                   {gb['file_mutation_allowed']}")
+    print(f"  Rollback execution allowed:              {gb['rollback_execution_allowed']}")
+    print(f"  Runtime invocation allowed:              {gb['runtime_invocation_allowed']}")
+    print(f"  Auto approval allowed:                   {gb['auto_approval_allowed']}")
+    print(f"  Real candidate processing allowed:       {gb['real_candidate_processing_allowed']}")
+    print(f"  Real approval record creation allowed:   {gb['real_approval_record_creation_allowed']}")
+    print(f"  Candidate status mutation allowed:       {gb['candidate_status_mutation_allowed']}")
+    print(f"  Human approval required:                 {gb['human_approval_required']}")
+    print(f"  Tier downgrade allowed:                  {gb['tier_downgrade_allowed']}")
+    print()
+
+    print(WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY)
     return 0

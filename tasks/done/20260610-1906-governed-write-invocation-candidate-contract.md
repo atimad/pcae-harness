@@ -10,7 +10,7 @@ Governed Write Invocation Candidate Contract
 
 ## Status
 
-active
+done
 
 ## Mode
 

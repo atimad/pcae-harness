@@ -69187,6 +69187,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae governed-write-invocation-candidate --json",
         ],
         "dependencies": ["governed_write_invocation_design"],
+        "successor_capabilities": ["write_invocation_approval_gateway"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Write Invocation Approval Gateway",
+        "implemented_phase": "65G",
+        "status": "implemented",
+        "commands": [
+            "pcae write-invocation-approval-gateway",
+            "pcae write-invocation-approval-gateway --json",
+        ],
+        "dependencies": ["governed_write_invocation_candidate_contract"],
         "successor_capabilities": [],
     },
 )
@@ -69988,8 +70000,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65F",
         "phase_title": "Governed Write Invocation Candidate Contract",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65E",
+        "successor": "65G",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65G",
+        "phase_title": "Write Invocation Approval Gateway Design",
+        "status": "active",
+        "predecessor": "65F",
         "successor": "",
         "superseded_by": "",
     },
@@ -70623,9 +70644,25 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "governed_write_invocation_design",
         ],
-        "successors": [],
+        "successors": ["write_invocation_approval_gateway"],
         "aliases": [],
         "contribution": "defines the GoverneWriteInvocationCandidate composite model (sealed artifact extending 46N + 65E), operation constraints (edit-only; create/delete/rename/append-outside-scope forbidden), six candidate statuses, four readiness states, approval and rollback cross-validation rules, objective and branch lineage chains, and the consumption protocol for future execution phases; all advisory-only with execution_allowed=False",
+    },
+    {
+        "capability_name": "Write Invocation Approval Gateway",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65G",
+        "status": "implemented",
+        "commands": [
+            "pcae write-invocation-approval-gateway",
+            "pcae write-invocation-approval-gateway --json",
+        ],
+        "dependencies": [
+            "governed_write_invocation_candidate_contract",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "designs the human approval gateway that transitions a candidate from approval_pending to approved or blocked; defines WriteApprovalRequest model, approval tier determination algorithm, echo-check runtime behavior, denial path, expiration enforcement, and gateway signals; all advisory-only with execution_allowed=False, real_candidate_processing_allowed=False",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72299,7 +72336,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65F",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65F-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65F",
@@ -72307,7 +72344,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65F",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65F-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65F",
@@ -72315,10 +72352,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65F",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65F-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65F",
+    },
+    {
+        "phase_id": "65G",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65G-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65G",
+    },
+    {
+        "phase_id": "65G",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65G-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65G",
+    },
+    {
+        "phase_id": "65G",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65G-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65G",
     },
     {
         "phase_id": "64B.6E",
@@ -78586,6 +78647,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "decision_id": "",
         "recommendation_id": "",
     },
+    {
+        "capability_id": "write_invocation_approval_gateway",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "designs the human approval gateway for the approval_pending→approved transition; "
+            "defines WriteApprovalRequest model, tier determination algorithm, 7 echo-check "
+            "runtime rules, denial path, and expiration enforcement; enforces "
+            "auto_approval_allowed=False and human_approval_required=True always"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
 )
 
 
@@ -81783,4 +81857,269 @@ def build_governed_write_invocation_candidate(root: "HarnessPath | None" = None)
         },
         "governance_boundaries": dict(_WCC_GOVERNANCE_BOUNDARIES),
         "advisory": GOVERNED_WRITE_INVOCATION_CANDIDATE_ADVISORY,
+    }
+
+
+# Phase 65G — Write Invocation Approval Gateway Design
+# ---------------------------------------------------------------------------
+
+WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY = (
+    "Phase 65G defines the Write Invocation Approval Gateway: governance model for the "
+    "approval_pending → approved transition. "
+    "execution_allowed=False, real_candidate_processing_allowed=False, "
+    "auto_approval_allowed=False, human_approval_required=True. "
+    "The command renders the approval gateway model and sample assessment only. "
+    "It does not process real candidates, create real approval records, or mutate candidate status."
+)
+
+_WAG_PHASE_ID: str = "65G"
+_WAG_PHASE_TITLE: str = "Write Invocation Approval Gateway Design"
+
+_WAG_APPROVAL_REQUEST_FIELDS: tuple[dict, ...] = (
+    {"field": "request_id",               "type": "str",       "required": True,  "source": "generated",           "description": "unique request identifier"},
+    {"field": "candidate_id",             "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "reference to sealed candidate"},
+    {"field": "candidate_version",        "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate"},
+    {"field": "scope_files",              "type": "list[str]", "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate scope_files"},
+    {"field": "objective_refs",           "type": "list[str]", "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate objective_refs"},
+    {"field": "branch_id",                "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate branch_id"},
+    {"field": "branch_health_at_request", "type": "str",       "required": True,  "source": "computed at creation","description": "branch health computed at request creation time"},
+    {"field": "recommended_approval_tier","type": "str",       "required": True,  "source": "derived",             "description": "standard or elevated, derived from branch_health_at_request"},
+    {"field": "coverage_baseline_hash",   "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate"},
+    {"field": "rollback_ref",             "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate rollback_ref"},
+    {"field": "preflight_passed_at",      "type": "str",       "required": True,  "source": "candidate (echoed)",  "description": "echoed from sealed candidate"},
+    {"field": "request_timestamp",        "type": "str",       "required": True,  "source": "generated",           "description": "wall-clock at request creation"},
+    {"field": "expiration_timestamp",     "type": "str",       "required": True,  "source": "derived",             "description": "request_timestamp + tier_window (8hr standard / 4hr elevated)"},
+    {"field": "human_reviewer_required",  "type": "bool",      "required": True,  "source": "constant",            "description": "always True"},
+    {"field": "request_status",           "type": "str",       "required": True,  "source": "lifecycle",           "description": "pending / approved / denied / expired"},
+)
+
+_WAG_APPROVAL_TIER_RULES: tuple[dict, ...] = (
+    {"branch_health": "healthy",  "assigned_tier": "standard",  "window_hours": 8, "rationale_required": False, "description": "healthy branch uses standard tier with 8-hour review window"},
+    {"branch_health": "stalled",  "assigned_tier": "elevated",  "window_hours": 4, "rationale_required": True,  "description": "stalled branch requires elevated tier with rationale and 4-hour window"},
+    {"branch_health": "at_risk",  "assigned_tier": "elevated",  "window_hours": 4, "rationale_required": True,  "description": "at_risk branch requires elevated tier with rationale and 4-hour window"},
+    {"branch_health": "inactive", "assigned_tier": "elevated",  "window_hours": 4, "rationale_required": True,  "description": "inactive branch requires elevated tier; write to stale branch is higher-risk"},
+)
+
+_WAG_TIER_WINDOWS: dict = {
+    "standard": 8,
+    "elevated": 4,
+}
+
+_WAG_TIER_ESCALATION_POLICY: dict = {
+    "human_may_escalate_to_elevated": True,
+    "human_may_downgrade_from_elevated": False,
+    "description": (
+        "Reviewer may escalate standard to elevated when context warrants. "
+        "Downgrade from elevated to standard is not permitted."
+    ),
+}
+
+_WAG_ECHO_CHECK_RULES: tuple[dict, ...] = (
+    {
+        "rule": "scope_files_echo",
+        "check": "approval_record.scope_files == candidate.scope_files",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "approval record scope_files must exactly match sealed candidate scope_files",
+    },
+    {
+        "rule": "objective_refs_echo",
+        "check": "approval_record.objective_refs == candidate.objective_refs",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "approval record objective_refs must exactly match sealed candidate objective_refs",
+    },
+    {
+        "rule": "branch_id_echo",
+        "check": "approval_record.branch_id == candidate.branch_id",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "approval record branch_id must exactly match sealed candidate branch_id",
+    },
+    {
+        "rule": "coverage_hash_echo",
+        "check": "approval_record.coverage_baseline_hash == candidate.coverage_baseline_hash",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "approval record coverage_baseline_hash must exactly match sealed candidate hash",
+    },
+    {
+        "rule": "rollback_ref_echo",
+        "check": "approval_record.rollback_ref == candidate.rollback_ref",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "approval record rollback_ref must exactly match sealed candidate rollback_ref",
+    },
+    {
+        "rule": "alignment_outcome",
+        "check": "candidate.strategic_alignment_outcome in ('full_alignment', 'partial_alignment')",
+        "failure_action": "deny",
+        "candidate_terminal": True,
+        "description": "candidate strategic alignment must be full_alignment or partial_alignment; misaligned and unaligned block approval",
+    },
+    {
+        "rule": "tier_freshness",
+        "check": "branch_health_at_request computed <= 30 minutes before approval decision",
+        "failure_action": "renew_request",
+        "candidate_terminal": False,
+        "description": "branch health must be fresh; staleness returns candidate to approval_pending for reviewer recheck",
+    },
+)
+
+_WAG_RECORD_CONSTRUCTION_STEPS: tuple[dict, ...] = (
+    {"step":  1, "action": "echo_candidate_fields",        "description": "copy candidate_id, scope_files, objective_refs, branch_id, coverage_baseline_hash, rollback_ref verbatim from sealed candidate"},
+    {"step":  2, "action": "assign_approval_tier",         "description": "human-confirmed tier (recommended or escalated; cannot be downgraded from recommended)"},
+    {"step":  3, "action": "record_approver_id",           "description": "identity of human reviewer"},
+    {"step":  4, "action": "record_approval_timestamp",    "description": "wall-clock at approval decision"},
+    {"step":  5, "action": "compute_expiration_timestamp", "description": "approval_timestamp + tier_window (8hr standard / 4hr elevated)"},
+    {"step":  6, "action": "record_rationale",             "description": "required if tier is elevated; empty string permitted if standard"},
+    {"step":  7, "action": "assign_approval_status",       "description": "approval_status = granted"},
+    {"step":  8, "action": "run_echo_check_rules",         "description": "evaluate all 7 echo-check validation rules; failure on rules 1-6 triggers denial; rule 7 failure renews request"},
+    {"step":  9, "action": "write_approval_record",        "description": "write immutable WriteApprovalRecord to audit trail"},
+    {"step": 10, "action": "transition_candidate_approved","description": "candidate approval_pending → approved; candidate.approval_ref = approval_record.approval_id"},
+)
+
+_WAG_DENIAL_PATH_STEPS: tuple[dict, ...] = (
+    {"step": 1, "action": "set_request_status_denied",   "description": "WriteApprovalRequest.request_status = denied"},
+    {"step": 2, "action": "transition_candidate_blocked","description": "candidate transitions to blocked (terminal)"},
+    {"step": 3, "action": "record_denial_reason",        "description": "denial reason recorded in audit trail entry approval_denied"},
+    {"step": 4, "action": "update_blocking_gate_ids",    "description": "blocking_gate_ids updated with approval_denied_by_reviewer"},
+    {"step": 5, "action": "no_retry_permitted",          "description": "blocked_candidate_retryable=False; new candidate with new candidate_id required for future attempt"},
+)
+
+_WAG_EXPIRATION_ENFORCEMENT_STEPS: tuple[dict, ...] = (
+    {"step": 1, "action": "set_request_status_expired",  "description": "WriteApprovalRequest.request_status = expired"},
+    {"step": 2, "action": "transition_candidate_expired","description": "candidate transitions to expired (terminal)"},
+    {"step": 3, "action": "record_expiration_event",     "description": "audit trail entry approval_expired written"},
+    {"step": 4, "action": "non_actionable",              "description": "expired request and expired candidate become non-actionable"},
+    {"step": 5, "action": "new_candidate_required",      "description": "new candidate required; may reuse scope/refs but must re-run preflight for fresh coverage_baseline_hash"},
+)
+
+_WAG_GATEWAY_SIGNALS: tuple[dict, ...] = (
+    {"signal_id": "WAG-SIG-001", "domain": "approval_request_validation",  "severity": "blocker", "description": "candidate not in preflight_passed status; request cannot be created"},
+    {"signal_id": "WAG-SIG-002", "domain": "tier_determination",           "severity": "warning", "description": "branch health not available at request creation; tier cannot be determined"},
+    {"signal_id": "WAG-SIG-003", "domain": "echo_check_validation",        "severity": "blocker", "description": "echo check rule failure (rules 1-6) blocks approval; candidate transitions to blocked"},
+    {"signal_id": "WAG-SIG-004", "domain": "tier_freshness_enforcement",   "severity": "warning", "description": "branch health staleness (rule 7); request renewal required; candidate stays approval_pending"},
+    {"signal_id": "WAG-SIG-005", "domain": "expiration_enforcement",       "severity": "info",    "description": "approval window expired before reviewer action; candidate transitions to expired"},
+    {"signal_id": "WAG-SIG-006", "domain": "denial_path_enforcement",      "severity": "info",    "description": "reviewer denied approval; candidate transitions to blocked (terminal)"},
+    {"signal_id": "WAG-SIG-007", "domain": "governance_boundary_enforcement","severity": "blocker","description": "attempted execution, mutation, or auto-approval blocked by gateway boundaries"},
+    {"signal_id": "WAG-SIG-008", "domain": "multi_approval_policy",        "severity": "info",    "description": "single-approver policy active; multi-approval not supported in this phase"},
+)
+
+_WAG_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "rollback_execution_allowed": False,
+    "runtime_invocation_allowed": False,
+    "auto_approval_allowed": False,
+    "real_candidate_processing_allowed": False,
+    "real_approval_record_creation_allowed": False,
+    "candidate_status_mutation_allowed": False,
+    "human_approval_required": True,
+    "tier_downgrade_allowed": False,
+    "future_multi_approval_support": False,
+    "phase": "65G",
+}
+
+_WAG_SAMPLE_ASSESSMENT: dict = {
+    "assessment_id": "WAG-SAMPLE-001",
+    "candidate_id": "wic-sample-001",
+    "candidate_status": "preflight_passed",
+    "branch_health_at_request": "healthy",
+    "recommended_approval_tier": "standard",
+    "expiration_window_hours": 8,
+    "echo_check_rules_evaluated": len(_WAG_ECHO_CHECK_RULES),
+    "echo_check_rules_passed": len(_WAG_ECHO_CHECK_RULES),
+    "echo_check_rules_failed": 0,
+    "denial_path_triggered": False,
+    "expiration_triggered": False,
+    "overall_gateway_status": "request_ready",
+    "human_reviewer_required": True,
+    "execution_allowed": False,
+}
+
+
+def build_write_invocation_approval_gateway(root: "HarnessPath | None" = None) -> dict:
+    """Approval gateway model for the write invocation approval workflow (Phase 65G)."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    terminal_echo_rules = [r for r in _WAG_ECHO_CHECK_RULES if r["candidate_terminal"]]
+    non_terminal_echo_rules = [r for r in _WAG_ECHO_CHECK_RULES if not r["candidate_terminal"]]
+    elevated_tier_branches = [r["branch_health"] for r in _WAG_APPROVAL_TIER_RULES if r["assigned_tier"] == "elevated"]
+
+    return {
+        "write_invocation_approval_gateway_overview": {
+            "phase": _WAG_PHASE_ID,
+            "phase_title": _WAG_PHASE_TITLE,
+            "approval_request_field_count": len(_WAG_APPROVAL_REQUEST_FIELDS),
+            "approval_tier_rule_count": len(_WAG_APPROVAL_TIER_RULES),
+            "echo_check_rule_count": len(_WAG_ECHO_CHECK_RULES),
+            "terminal_echo_rule_count": len(terminal_echo_rules),
+            "non_terminal_echo_rule_count": len(non_terminal_echo_rules),
+            "record_construction_steps": len(_WAG_RECORD_CONSTRUCTION_STEPS),
+            "denial_path_steps": len(_WAG_DENIAL_PATH_STEPS),
+            "expiration_enforcement_steps": len(_WAG_EXPIRATION_ENFORCEMENT_STEPS),
+            "gateway_signal_count": len(_WAG_GATEWAY_SIGNALS),
+            "execution_allowed": False,
+            "real_candidate_processing_allowed": False,
+            "auto_approval_allowed": False,
+        },
+        "approval_request_model": {
+            "model": "WriteApprovalRequest",
+            "field_count": len(_WAG_APPROVAL_REQUEST_FIELDS),
+            "fields": [dict(f) for f in _WAG_APPROVAL_REQUEST_FIELDS],
+            "purpose": (
+                "Read-only artifact presented to the human reviewer when a candidate "
+                "reaches approval_pending. Derived entirely from the sealed candidate."
+            ),
+            "request_statuses": ["pending", "approved", "denied", "expired"],
+        },
+        "tier_determination": {
+            "tier_rules": [dict(r) for r in _WAG_APPROVAL_TIER_RULES],
+            "tier_windows": dict(_WAG_TIER_WINDOWS),
+            "escalation_policy": dict(_WAG_TIER_ESCALATION_POLICY),
+            "elevated_tier_branches": elevated_tier_branches,
+            "tier_freshness_window_minutes": 30,
+            "tier_source": "branch_health_at_request computed at request creation time",
+        },
+        "record_construction_protocol": {
+            "model": "WriteApprovalRecord",
+            "step_count": len(_WAG_RECORD_CONSTRUCTION_STEPS),
+            "steps": [dict(s) for s in _WAG_RECORD_CONSTRUCTION_STEPS],
+            "approval_record_immutable_once_written": True,
+            "approval_ref_set_on_candidate": True,
+        },
+        "echo_check_rules": {
+            "rule_count": len(_WAG_ECHO_CHECK_RULES),
+            "terminal_rules": [r["rule"] for r in _WAG_ECHO_CHECK_RULES if r["candidate_terminal"]],
+            "non_terminal_rules": [r["rule"] for r in _WAG_ECHO_CHECK_RULES if not r["candidate_terminal"]],
+            "rules": [dict(r) for r in _WAG_ECHO_CHECK_RULES],
+        },
+        "denial_path": {
+            "trigger": "human reviewer active denial decision",
+            "step_count": len(_WAG_DENIAL_PATH_STEPS),
+            "steps": [dict(s) for s in _WAG_DENIAL_PATH_STEPS],
+            "candidate_terminal": True,
+            "retry_permitted": False,
+        },
+        "expiration_enforcement": {
+            "trigger": "expiration_timestamp reached before reviewer action",
+            "step_count": len(_WAG_EXPIRATION_ENFORCEMENT_STEPS),
+            "steps": [dict(s) for s in _WAG_EXPIRATION_ENFORCEMENT_STEPS],
+            "candidate_terminal": True,
+            "new_candidate_required": True,
+            "reuse_scope_refs_permitted": True,
+            "preflight_rerun_required": True,
+        },
+        "gateway_signals": {
+            "signal_count": len(_WAG_GATEWAY_SIGNALS),
+            "blocker_count": sum(1 for s in _WAG_GATEWAY_SIGNALS if s["severity"] == "blocker"),
+            "warning_count": sum(1 for s in _WAG_GATEWAY_SIGNALS if s["severity"] == "warning"),
+            "info_count": sum(1 for s in _WAG_GATEWAY_SIGNALS if s["severity"] == "info"),
+            "signals": [dict(s) for s in _WAG_GATEWAY_SIGNALS],
+        },
+        "sample_assessment": dict(_WAG_SAMPLE_ASSESSMENT),
+        "governance_boundaries": dict(_WAG_GOVERNANCE_BOUNDARIES),
+        "advisory": WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY,
     }

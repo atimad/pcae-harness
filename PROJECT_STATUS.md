@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65F: Governed Write Invocation Candidate Contract.
+Phase 65G: Write Invocation Approval Gateway Design.
 
 ## Post-61J Runtime Registry Checkpoint
 

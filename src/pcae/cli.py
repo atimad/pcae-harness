@@ -191,6 +191,7 @@ from pcae.commands.agent import (
     run_mapping_review_governance,
     run_governed_write_invocation_design,
     run_governed_write_invocation_candidate,
+    run_write_invocation_approval_gateway,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4783,6 +4784,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     gwic_parser.set_defaults(handler=run_governed_write_invocation_candidate)
+
+    wiag_parser = subparsers.add_parser(
+        "write-invocation-approval-gateway",
+        help="Write invocation approval gateway model: tier determination, echo-check rules, denial path, expiration enforcement (Phase 65G).",
+    )
+    wiag_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    wiag_parser.set_defaults(handler=run_write_invocation_approval_gateway)
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",
