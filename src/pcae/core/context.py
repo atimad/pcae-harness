@@ -199,6 +199,11 @@ def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
         lines.append(f"Referenced Review Findings: {findings_text or 'none'}")
         lines.append("Details: pcae strategic-continuity show current")
 
+    irg = pack.irg_review_summary
+    if irg.get("bootstrap_line"):
+        lines.append(irg["bootstrap_line"])
+        lines.append(irg.get("authority_line", ""))
+
     lines.append("Rules:")
     for rule in pack.operational_rules:
         lines.append(f"  - {rule}")
@@ -300,6 +305,7 @@ class ContextPack:
     advisory: str
     architecture_memory: dict
     strategic_continuity: dict
+    irg_review_summary: dict
 
     def to_dict(self) -> dict:
         return {
@@ -308,6 +314,7 @@ class ContextPack:
             "architecture_memory": self.architecture_memory,
             "bootstrap_handoff_notes": list(self.bootstrap_handoff_notes),
             "governance_state": self.governance_state,
+            "irg_review_summary": self.irg_review_summary,
             "operational_rules": list(self.operational_rules),
             "orchestration_state": self.orchestration_state,
             "provenance_summary": self.provenance_summary,
@@ -346,6 +353,8 @@ def _parse_project_status(root: HarnessPath) -> tuple[str, list[str]]:
 
 
 def build_context_pack(root: HarnessPath) -> ContextPack:
+    from pcae.core.agent import build_irg_loop_integration
+
     health = build_health_data(root)
     check_result = run_checks(root)
     policy = load_policy(root)
@@ -408,6 +417,7 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         advisory=CONTEXT_PACK_ADVISORY,
         architecture_memory=_build_architecture_memory_summary(root),
         strategic_continuity=strategic_continuity_summary(root),
+        irg_review_summary=build_irg_loop_integration(root),
     )
 
 

@@ -16,6 +16,7 @@ from pcae.core.strategic_lineage import (
 ACTIVATION_TIMESTAMP = "2026-06-11T11:00:00+00:00"
 ACTIVATION_TIMESTAMP_66C = "2026-06-11T12:00:00+00:00"
 ACTIVATION_TIMESTAMP_64H = "2026-06-11T17:00:00+00:00"
+ACTIVATION_TIMESTAMP_66D = "2026-06-11T21:00:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -60,6 +61,8 @@ def _valid_record() -> dict:
 
 
 def _valid_66c_record() -> dict:
+    # Historical approved lineage remains immutable even after BR-004 advances;
+    # supersession is derived from later supersedes_lineage_id references.
     return {
         "lineage_id": "SLR-66C-TEST",
         "lineage_timestamp": ACTIVATION_TIMESTAMP_66C,
@@ -141,6 +144,47 @@ def _valid_64h_record() -> dict:
     }
 
 
+def _valid_66d_record() -> dict:
+    return {
+        "lineage_id": "SLR-66D-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_66D,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "64H",
+        "predecessor_phase_id": "66C",
+        "activated_phase_id": "66D",
+        "selected_branch_id": "BR-004",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "rationale": "Surface latest IRG review state in session bootstrap; minimum viable scope.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [
+            {
+                "phase_id": "64G",
+                "branch_id": "BR-002",
+                "disposition": "deferred",
+                "reason": "Lower immediate governance priority.",
+            },
+            {
+                "phase_id": "64F",
+                "branch_id": "BR-001",
+                "disposition": "rejected",
+                "reason": "Already completed.",
+            },
+        ],
+        "rejected_alternatives": ["64F"],
+        "deferred_alternatives": ["64G"],
+        "roadmap_debt": ["Multi-trigger IRG surfacing deferred to a future phase decision."],
+        "supersedes_lineage_id": "SLR-64H-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_66D,
+        "activation_validation_status": "validated",
+    }
+
+
 def _write_registry(root: Path, records: list[dict], *, provenance: bool = True) -> None:
     pcae_dir = root / ".pcae"
     pcae_dir.mkdir(parents=True, exist_ok=True)
@@ -176,6 +220,14 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
                         "summary": "Human-approved activation of Phase 64H",
                         "timestamp": ACTIVATION_TIMESTAMP_64H,
                     },
+                    {
+                        "active_task": None,
+                        "agent_id": "codex-local",
+                        "event_type": "phase_activated",
+                        "git_branch": "main",
+                        "summary": "Human-approved activation of Phase 66D",
+                        "timestamp": ACTIVATION_TIMESTAMP_66D,
+                    },
                 ],
                 indent=2,
                 sort_keys=True,
@@ -186,15 +238,59 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
 
 
 def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tuple[str, ...]:
-    _write_registry(tmp_path, [record, _valid_66c_record(), _valid_64h_record()], provenance=provenance)
+    _write_registry(
+        tmp_path,
+        [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+        provenance=provenance,
+    )
     return validate_strategic_lineage(HarnessPath(tmp_path)).errors
 
 
 def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
-    _write_registry(tmp_path, [_valid_record(), _valid_66c_record(), _valid_64h_record()])
+    _write_registry(
+        tmp_path,
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+    )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-64H-TEST"
+    assert result.current_lineage_id == "SLR-66D-TEST"
+
+
+def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
+    tmp_path: Path,
+) -> None:
+    _write_registry(
+        tmp_path,
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+    )
+    result = validate_strategic_lineage(HarnessPath(tmp_path))
+    assert result.valid is True
+    assert not any("SLR-66C-TEST" in error for error in result.errors)
+
+
+def test_65j_current_approved_lineage_must_match_live_branch_phase(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from pcae.core import strategic_lineage as strategic_lineage_module
+
+    records = [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record()]
+    patched_branches = []
+    for branch in strategic_lineage_module._SRG_BRANCH_REGISTRY:
+        patched = dict(branch)
+        if patched["branch_id"] == "BR-004":
+            patched["current_phase"] = "66C"
+        patched_branches.append(patched)
+    monkeypatch.setattr(
+        strategic_lineage_module,
+        "_SRG_BRANCH_REGISTRY",
+        tuple(patched_branches),
+    )
+    _write_registry(tmp_path, records)
+    result = validate_strategic_lineage(HarnessPath(tmp_path))
+    assert any(
+        "SLR-66D-TEST: activated phase does not match branch current_phase." == error
+        for error in result.errors
+    )
 
 
 def test_65j_lineage_does_not_duplicate_activation_timestamp(tmp_path: Path) -> None:
@@ -278,7 +374,12 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     pcae_dir = tmp_path / ".pcae"
     pcae_dir.mkdir(parents=True, exist_ok=True)
     (pcae_dir / "strategic-lineage.json").write_text(
-        json.dumps([record, _valid_66c_record(), _valid_64h_record()], indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
         encoding="utf-8",
     )
     (pcae_dir / "provenance-history.json").write_text(
@@ -300,6 +401,14 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
                     "summary": "Human-approved activation of Phase 64H",
                     "timestamp": ACTIVATION_TIMESTAMP_64H,
                 },
+                {
+                    "active_task": None,
+                    "agent_id": "codex-local",
+                    "event_type": "phase_activated",
+                    "git_branch": "main",
+                    "summary": "Human-approved activation of Phase 66D",
+                    "timestamp": ACTIVATION_TIMESTAMP_66D,
+                },
             ],
             indent=2,
             sort_keys=True,
@@ -309,7 +418,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-64H-TEST"
+    assert result.current_lineage_id == "SLR-66D-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -336,7 +445,10 @@ def test_65j_migration_exemption_does_not_cover_other_phase(tmp_path: Path) -> N
 def test_65j_summary_uses_referenced_review_findings(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    _write_registry(tmp_path, [_valid_record(), _valid_66c_record(), _valid_64h_record()])
+    _write_registry(
+        tmp_path,
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+    )
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
@@ -349,7 +461,10 @@ def test_65j_summary_uses_referenced_review_findings(
 def test_65j_continuity_commands_are_read_only(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    _write_registry(tmp_path, [_valid_record(), _valid_66c_record(), _valid_64h_record()])
+    _write_registry(
+        tmp_path,
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record()],
+    )
     before = {
         path.name: path.read_bytes()
         for path in (tmp_path / ".pcae").iterdir()
@@ -357,9 +472,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-64H-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-66D-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 3
+    assert json.loads(capsys.readouterr().out)["record_count"] == 4
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

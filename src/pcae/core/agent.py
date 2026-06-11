@@ -69282,6 +69282,17 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae objective-coverage-hardening --json",
         ],
         "dependencies": ["orchestration_readiness_gate", "strategic_review_calibration"],
+        "successor_capabilities": ["bootstrap_irg_visibility_integration"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Bootstrap IRG Visibility Integration",
+        "implemented_phase": "66D",
+        "status": "implemented",
+        "commands": [
+            "pcae session bootstrap --compact",
+        ],
+        "dependencies": ["strategic_review_calibration"],
         "successor_capabilities": [],
     },
 )
@@ -70149,6 +70160,15 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "phase_title": "Strategic Review Calibration and BR-004 Closure",
         "status": "completed",
         "predecessor": "66B",
+        "successor": "66D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "66D",
+        "phase_title": "Bootstrap IRG Visibility Integration",
+        "status": "active",
+        "predecessor": "66C",
         "successor": "",
         "superseded_by": "",
     },
@@ -70156,7 +70176,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64H",
         "phase_title": "Multi-Runtime Objective Coverage Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "64F",
         "successor": "",
         "superseded_by": "",
@@ -70921,13 +70941,33 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "orchestration_readiness_gate",
             "strategic_review_calibration",
         ],
-        "successors": [],
+        "successors": ["bootstrap_irg_visibility_integration"],
         "aliases": [],
         "contribution": (
             "produces 5 reclassification proposals (OCH-PROP-64H-001 through OCH-PROP-64H-005) "
             "and 4 objective evidence reports (EBR-64H-001 through EBR-64H-004); "
             "activation lineage SLR-64H-001 recorded; direct_map_mutation_allowed=False; "
             "human_approval_required=True for all proposals; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Bootstrap IRG Visibility Integration",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "66D",
+        "status": "implemented",
+        "commands": [
+            "pcae session bootstrap --compact",
+        ],
+        "dependencies": [
+            "strategic_review_calibration",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "surfaces the latest non-superseded IRG review state as a compact advisory line "
+            "in session bootstrap output; supersession-aware latest-review selection; "
+            "no severity labels in bootstrap; review_blocks_any_operation=False; "
+            "no provenance event, no new registries; execution_allowed=False"
         ),
     },
     {
@@ -72936,7 +72976,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64H",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64H-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64H",
@@ -72944,7 +72984,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64H",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64H-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64H",
@@ -72952,10 +72992,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64H",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64H-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64H",
+    },
+    {
+        "phase_id": "66D",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "66D-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66D",
+    },
+    {
+        "phase_id": "66D",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "66D-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66D",
+    },
+    {
+        "phase_id": "66D",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "66D-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66D",
     },
 )
 
@@ -78800,7 +78864,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "66C",
+        "current_phase": "66D",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79311,6 +79375,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "produces reclassification proposals and evidence reports addressing the OBJ-003 "
             "primary coverage gap identified in SRS-RULE-005; advisory-only, "
             "direct_map_mutation_allowed=False, human_approval_required=True"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "bootstrap_irg_visibility_integration",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "surfaces latest IRG review state in session bootstrap so new agents start with "
+            "current review context; advisory-only, review_blocks_any_operation=False, "
+            "no blocking behavior at any governed boundary"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84072,4 +84148,169 @@ def build_objective_coverage_hardening(root: "HarnessPath | None" = None) -> dic
         "activation_lineage": dict(_OCH_ACTIVATION_LINEAGE),
         "governance_boundaries": dict(_OCH_GOVERNANCE_BOUNDARIES),
         "advisory": OBJECTIVE_COVERAGE_HARDENING_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 66D — Bootstrap IRG Visibility Integration
+# ---------------------------------------------------------------------------
+
+_IRL_PHASE_ID: str = "66D"
+_IRL_PHASE_TITLE: str = "Bootstrap IRG Visibility Integration"
+
+# IRGLoopSummary model fields. The summary is purely informational: it carries
+# no enforcement state and creates no governance constraint at any boundary.
+_IRL_SUMMARY_FIELDS: tuple[str, ...] = (
+    "latest_review_id",
+    "latest_review_timestamp",
+    "recommendation",
+    "finding_count",
+    "phases_completed_since_review",
+    "is_binding",
+)
+
+_IRL_GOVERNANCE_BOUNDARIES: dict = {
+    "review_output_is_binding": False,
+    "human_authority_required": True,
+    "auto_approval_from_review": False,
+    "reviewer_is_approver": False,
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "review_auto_invoked": True,
+    "review_blocks_any_operation": False,
+    "mandatory_acknowledgement_required": False,
+    "provenance_event_introduced": False,
+    "override_registry_introduced": False,
+    "trigger_boundaries": ["session_bootstrap"],
+}
+
+# Fixed advisory line shown beneath the IRG summary at every trigger boundary.
+# Deliberately invariant: it does not change with finding state, and it must
+# never contain conditional or obligation language ("required", "must").
+IRG_BOOTSTRAP_AUTHORITY_LINE: str = (
+    "Human authority is absolute. No governance constraint on this session."
+)
+
+BOOTSTRAP_IRG_VISIBILITY_ADVISORY: str = (
+    "Phase 66D surfaces the latest IRG review state in session bootstrap so new agents "
+    "start with current review context. The summary is advisory only: "
+    "review_blocks_any_operation=False — no finding blocks check, commit, task transition, "
+    "handoff, bootstrap, or phase activation. Severity labels are omitted from bootstrap "
+    "output; only the finding count is shown. Latest-review selection is supersession-aware "
+    "(superseded reviews are excluded; file records take precedence over in-memory records "
+    "on review_id collision). No provenance event, no new registries, no override model, "
+    "no stale-review enforcement. execution_allowed=False."
+)
+
+
+def _irl_collect_reviews(root: "HarnessPath") -> list[dict]:
+    """Collect review records from the in-memory registry and the refresh file.
+
+    File records take precedence on review_id collision: a committed artifact
+    outranks a compile-time constant.
+    """
+    by_id: dict[str, dict] = {}
+    for record in _IRG_STRATEGIC_REVIEW_REGISTRY:
+        review_id = record.get("review_id", "")
+        if review_id:
+            by_id[review_id] = dict(record)
+    for record in _srs_load_refresh_records(root):
+        if not isinstance(record, dict):
+            continue
+        review_id = record.get("review_id", "")
+        if review_id:
+            by_id[review_id] = dict(record)
+    return list(by_id.values())
+
+
+def _irl_select_latest_review(reviews: list[dict]) -> dict | None:
+    """Deterministic supersession-aware latest-review selection.
+
+    Excludes any review referenced by another review's supersedes_review_id,
+    then picks the newest remaining review by review_timestamp.
+    """
+    superseded = {
+        record.get("supersedes_review_id", "")
+        for record in reviews
+        if record.get("supersedes_review_id", "")
+    }
+    active = [r for r in reviews if r.get("review_id", "") not in superseded]
+    if not active:
+        return None
+    return max(active, key=lambda r: r.get("review_timestamp", ""))
+
+
+def _irl_phases_completed_since_review(review: dict) -> int | None:
+    """Completed-phase delta between now and when the review was taken.
+
+    Returns None when the review carries no completed_phase_count_at_review.
+    Purely informational; never used for enforcement.
+    """
+    context = review.get("strategic_context") or {}
+    at_review = context.get("completed_phase_count_at_review")
+    if not isinstance(at_review, int):
+        return None
+    current = sum(1 for p in _CRI_KNOWN_PHASES if p.get("status") == "completed")
+    return max(current - at_review, 0)
+
+
+def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
+    """Bootstrap IRG visibility — informational review summary (Phase 66D).
+
+    Returns the IRGLoopSummary plus a pre-rendered bootstrap line. No file is
+    written, no provenance event is recorded, and nothing here blocks any
+    operation.
+    """
+    if root is None:
+        root = HarnessPath.cwd()
+
+    latest = _irl_select_latest_review(_irl_collect_reviews(root))
+
+    if latest is None:
+        summary = {
+            "latest_review_id": "none",
+            "latest_review_timestamp": "",
+            "recommendation": "no_record",
+            "finding_count": 0,
+            "phases_completed_since_review": None,
+            "is_binding": False,
+        }
+        bootstrap_line = "IRG (advisory): no review on record"
+    else:
+        finding_count = len(latest.get("findings") or [])
+        phases_since = _irl_phases_completed_since_review(latest)
+        summary = {
+            "latest_review_id": latest.get("review_id", ""),
+            "latest_review_timestamp": latest.get("review_timestamp", ""),
+            "recommendation": latest.get("recommendation", ""),
+            "finding_count": finding_count,
+            "phases_completed_since_review": phases_since,
+            "is_binding": False,
+        }
+        if phases_since is None:
+            age_text = "age unknown"
+        elif phases_since == 1:
+            age_text = "1 phase old"
+        else:
+            age_text = f"{phases_since} phases old"
+        finding_text = "1 finding" if finding_count == 1 else f"{finding_count} findings"
+        bootstrap_line = (
+            f"IRG (advisory): {summary['latest_review_id']} — "
+            f"{summary['recommendation']} — {finding_text} — {age_text}"
+        )
+
+    return {
+        "irg_loop_overview": {
+            "phase": _IRL_PHASE_ID,
+            "phase_title": _IRL_PHASE_TITLE,
+            "review_auto_invoked": True,
+            "review_blocks_any_operation": False,
+            "is_binding": False,
+        },
+        "irg_loop_summary": summary,
+        "summary_fields": list(_IRL_SUMMARY_FIELDS),
+        "bootstrap_line": bootstrap_line,
+        "authority_line": IRG_BOOTSTRAP_AUTHORITY_LINE,
+        "governance_boundaries": dict(_IRL_GOVERNANCE_BOUNDARIES),
+        "advisory": BOOTSTRAP_IRG_VISIBILITY_ADVISORY,
     }

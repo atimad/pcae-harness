@@ -1,39 +1,71 @@
 {
   "active_task": {
-    "id": "20260611-1921-64h-multi-runtime-objective-coverage-hardening",
-    "title": "64H Multi-Runtime Objective Coverage Hardening"
+    "id": "20260611-2335-66d-bootstrap-irg-visibility-integration",
+    "title": "66D Bootstrap IRG Visibility Integration"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "64H Multi-Runtime Objective Coverage Hardening",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
+      {
+        "path": ".pcae/strategic-lineage.json",
+        "status": " M"
+      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
       },
       {
-        "path": "tasks/DONE.md",
+        "path": "PROJECT_STATUS.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260611-1541-66c-strategic-review-operationalization.md",
-        "status": " D"
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/ROADMAP_REGISTRY.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/context.py",
+        "status": " M"
       },
       {
         "path": "tasks/active/20260611-1921-64h-multi-runtime-objective-coverage-hardening.md",
+        "status": " D"
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": " M"
+      },
+      {
+        "path": "tests/test_strategic_lineage.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260611-2335-66d-bootstrap-irg-visibility-integration.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260611-1541-66c-strategic-review-operationalization.md",
+        "path": "tasks/done/20260611-1921-64h-multi-runtime-objective-coverage-hardening.md",
         "status": "??"
       }
     ],
-    "status_summary": "5 changed files"
+    "status_summary": "13 changed files"
   },
-  "last_completed_step": "Completed task 20260611-1541-66c-strategic-review-operationalization: 66C Strategic Review Operationalization",
-  "next_recommended_step": "Continue active task 20260611-1921-64h-multi-runtime-objective-coverage-hardening.",
-  "timestamp": "2026-06-11T17:21:39.823018+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-11T22:20:14.076234+00:00",
   "warnings": []
 }

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 64H: Multi-Runtime Objective Coverage Hardening.
+Phase 66D: Bootstrap IRG Visibility Integration.
 
 ## Post-61J Runtime Registry Checkpoint
 

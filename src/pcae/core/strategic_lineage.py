@@ -179,12 +179,18 @@ def validate_strategic_lineage(
     review_by_id = {
         review["review_id"]: review for review in _IRG_STRATEGIC_REVIEW_REGISTRY
     }
+    active_phase_id = current_active_phase_id()
     provenance_path = root.join(Path(".pcae") / "provenance-history.json")
     provenance_by_timestamp = {
         event.timestamp: event for event in read_provenance_history(root).events
     }
 
     lineage_ids = [str(record.get("lineage_id", "")) for record in registry]
+    superseded_ids = {
+        str(record.get("supersedes_lineage_id"))
+        for record in registry
+        if record.get("supersedes_lineage_id")
+    }
     duplicate_ids = sorted(
         lineage_id
         for lineage_id in set(lineage_ids)
@@ -207,6 +213,7 @@ def validate_strategic_lineage(
             continue
 
         status = record["lineage_status"]
+        is_superseded = lineage_id in superseded_ids
         if status not in LINEAGE_STATUS_VALUES:
             errors.append(f"{lineage_id}: invalid lineage_status {status!r}.")
         basis = record["decision_basis"]
@@ -318,7 +325,11 @@ def validate_strategic_lineage(
                     errors.append(
                         f"{lineage_id}: selected branch does not match activated phase track."
                     )
-                if branch["current_phase"] != activated_phase_id:
+                if (
+                    not is_superseded
+                    and activated_phase_id == active_phase_id
+                    and branch["current_phase"] != activated_phase_id
+                ):
                     if activated_phase_id not in PRE_65J_MIGRATION_EXEMPT_PHASE_IDS:
                         errors.append(
                             f"{lineage_id}: activated phase does not match branch current_phase."

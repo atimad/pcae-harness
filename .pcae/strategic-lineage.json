@@ -19,6 +19,10 @@
     ],
     "decided_by": "human-user",
     "decision_basis": "coherence_failure",
+    "deferred_alternatives": [
+      "66C",
+      "64H"
+    ],
     "execution_allowed": false,
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
@@ -32,10 +36,6 @@
     "predecessor_phase_id": "65H",
     "rationale": "Repair authoritative strategic registry coherence before extending independent review governance or opening lower-priority objective coverage work.",
     "recommendation": "approve_with_changes",
-    "deferred_alternatives": [
-      "66C",
-      "64H"
-    ],
     "rejected_alternatives": [],
     "review_ids": [
       "SRR-66B-001"
@@ -63,6 +63,9 @@
     ],
     "decided_by": "human-user",
     "decision_basis": "strategic_review",
+    "deferred_alternatives": [
+      "64H"
+    ],
     "execution_allowed": false,
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
@@ -76,9 +79,6 @@
     "predecessor_phase_id": "65I",
     "rationale": "Calibrate strategic review finding rules: SRS-RULE-007 recalibrated to fire only on active growth (not completed-track depth); SRS-RULE-004 and SRS-RULE-005 suggested_resolution updated to name 64H as designated corrective path. Close BR-004 (independent_review_governance) at advisory level. Scope constrained per IRG challenge review: no workflow coupling, review remains advisory, no broader operationalization.",
     "recommendation": "approve_with_changes",
-    "deferred_alternatives": [
-      "64H"
-    ],
     "rejected_alternatives": [],
     "review_ids": [
       "SRR-66B-001"
@@ -86,7 +86,7 @@
     "roadmap_debt": [
       "Broader independent review workflow operationalization not included (deferred per IRG challenge review constraints).",
       "BR-004 advisory closure represented in governance_boundaries; registry status remains active until 66C completes.",
-      "Recommended next phase: 64H — Multi-Runtime Objective Coverage Hardening."
+      "Recommended next phase: 64H \u2014 Multi-Runtime Objective Coverage Hardening."
     ],
     "selected_branch_id": "BR-004",
     "source_phase_id": "66B",
@@ -99,6 +99,7 @@
     "considered_alternatives": [],
     "decided_by": "human-user",
     "decision_basis": "strategic_review",
+    "deferred_alternatives": [],
     "execution_allowed": false,
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
@@ -112,7 +113,6 @@
     "predecessor_phase_id": "66C",
     "rationale": "Strategic Review findings SRS-RULE-004 and SRS-RULE-005 from 66C (per SRR-66B-001 authority) identified OBJ-003 primary_count=1 as a classification artifact from the 65D bulk mapping. 64H was the designated corrective path per SRS-RULE-004/005 suggested_resolution text. Cross-track movement from BR-004 closure (66C) to BR-001 resumption (64H) requires strategic lineage per the 65J model. IRG challenge review approved_with_changes; scope constrained to reclassification proposals + evidence reports; direct_map_mutation_allowed=False.",
     "recommendation": "approve_with_changes",
-    "deferred_alternatives": [],
     "rejected_alternatives": [],
     "review_ids": [
       "SRR-66B-001"
@@ -125,5 +125,39 @@
     "selected_branch_id": "BR-001",
     "source_phase_id": "66C",
     "supersedes_lineage_id": "SLR-66C-001"
+  },
+  {
+    "activated_phase_id": "66D",
+    "activation_event_id": "2026-06-11T21:42:46.162480+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-66D-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-11T21:42:46.162480+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "66C",
+    "rationale": "Recent phases (64H series) repeatedly surfaced post-'implementation complete' defects (stale lineage fixtures, task contract scope violations, evidence inconsistency, review supersession ambiguity), demonstrating that IRG review state should be automatically visible in the governed workflow rather than human-recall-dependent. The original automated-review-loop proposal was challenged twice by IRG self-review and reduced to minimum viable scope: surface the latest non-superseded review state in session bootstrap only, with review_blocks_any_operation=False. This extends BR-004 into a second arc (review loop visibility) per explicit human decision; no new branch created.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "pcae check / task transition / phase handoff IRG surfacing deferred to a future phase decision.",
+      "Phase activation gate, lineage write gate, and roadmap mutation gate explicitly deferred.",
+      "Warning-fatigue mitigation (display-state suppression) deferred until multi-trigger surfacing exists."
+    ],
+    "selected_branch_id": "BR-004",
+    "source_phase_id": "64H",
+    "supersedes_lineage_id": "SLR-64H-001"
   }
 ]
