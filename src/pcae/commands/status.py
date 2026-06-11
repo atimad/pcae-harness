@@ -47,9 +47,17 @@ def run_status_coherence(args: argparse.Namespace) -> int:
         if result.coherent:
             print("Status: coherent")
         else:
-            print("Status: warnings")
+            status = "blocking drift" if result.blocking_warning_count else "warnings"
+            print(f"Status: {status}")
             for warning in result.warnings:
-                print(f"  - warning [{warning.document}]: {warning.message}")
+                label = "blocker" if warning.blocking else warning.severity
+                print(f"  - {label} [{warning.document}]: {warning.message}")
+                if warning.detected_state:
+                    print(f"    detected: {warning.detected_state}")
+                if warning.expected_state:
+                    print(f"    expected: {warning.expected_state}")
+                if warning.remediation:
+                    print(f"    remediation: {warning.remediation}")
     return 0 if result.coherent else 1
 
 

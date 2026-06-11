@@ -74,6 +74,8 @@ class CheckResult:
 
 
 def run_checks(root: HarnessPath) -> CheckResult:
+    from pcae.core.status import check_strategic_registry_coherence
+
     violations: list[CheckMessage] = []
     warnings: list[CheckMessage] = []
     infos: list[CheckMessage] = []
@@ -128,6 +130,21 @@ def run_checks(root: HarnessPath) -> CheckResult:
         violations.append(
             CheckMessage("Source files changed without documentation file updates.")
         )
+
+    coherence_result = check_strategic_registry_coherence(root)
+    for warning in coherence_result.warnings:
+        message = warning.message
+        if warning.detected_state:
+            message = f"{message} Detected: {warning.detected_state}."
+        if warning.expected_state:
+            message = f"{message} Expected: {warning.expected_state}."
+        if warning.remediation:
+            message = f"{message} Remediation: {warning.remediation}"
+        check_message = CheckMessage(message, Path(warning.document))
+        if warning.blocking:
+            violations.append(check_message)
+        else:
+            warnings.append(check_message)
 
     architecture_enforcement_mode = policy.architecture_enforcement_mode
     if active_task is not None:

@@ -247,8 +247,8 @@ def session_continuity_status(check_result) -> str:
     if any("Session continuity verified." in info.text for info in check_result.infos):
         return "verified"
     if any(
-        "Session snapshot missing" in warning.text
-        for warning in check_result.warnings
+        "Session snapshot missing" in violation.text
+        for violation in check_result.violations
     ):
         return "missing"
     if any(

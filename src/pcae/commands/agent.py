@@ -126,6 +126,8 @@ from pcae.core.agent import (
     build_read_only_invocation_execution_pilot,
     READ_ONLY_INVOCATION_EXECUTION_PILOT_ADVISORY,
     build_write_invocation_design,
+    render_capability_inventory_markdown,
+    render_roadmap_registry_markdown,
     WRITE_INVOCATION_DESIGN_ADVISORY,
     build_write_preflight_dry_run,
     WRITE_PREFLIGHT_DRY_RUN_ADVISORY,
@@ -13402,53 +13404,11 @@ def run_runtime_coordination_policy(args: argparse.Namespace) -> int:
 
 def _write_capability_inventory_md(data: dict) -> None:
     import pathlib
-    overview = data["capability_inventory_overview"]
-    records = data["capability_records"]
-    lines = [
-        "# PCAE Capability Inventory",
-        "",
-        f"Generated: {overview['generated_at']}",
-        f"Phase: {overview['phase']} — {overview['title']}",
-        f"Total capabilities: {overview['capability_count']}",
-        f"Implemented: {overview['implemented_count']}",
-        f"Dormant: {overview['dormant_count']}",
-        f"Superseded: {overview['superseded_count']}",
-        f"Roadmap gaps: {overview['roadmap_gap_count']}",
-        f"Duplicates/overlaps: {overview['duplicate_count']}",
-        f"Prompt capabilities: {overview['prompt_capability_count']}",
-        f"Assessment status: {overview['assessment_status']}",
-        "",
-        "## Capability Records",
-        "",
-        "| Capability | Domain | Phase | Status | Commands | Dependencies | Successors |",
-        "|---|---|---|---|---|---|---|",
-    ]
-    for r in records:
-        cmds = "; ".join(r["commands"]) if r["commands"] else "(none)"
-        deps = "; ".join(r["dependencies"]) if r["dependencies"] else "(none)"
-        succs = "; ".join(r["successor_capabilities"]) if r["successor_capabilities"] else "(none)"
-        lines.append(
-            f"| {r['capability_name']} | {r['capability_domain']} "
-            f"| {r['implemented_phase']} | {r['status']} | {cmds} | {deps} | {succs} |"
-        )
-    lines.extend([
-        "",
-        "## Governance Notes",
-        "",
-        "- 64B.0 creates a capability inventory.",
-        "- 64B.3 adds prompt recommendation hardening as an implemented capability.",
-        "- 64B.4 adds a first-class skill system as an implemented capability.",
-        "- Skill Registry metadata is consolidated with the shared intelligence infrastructure.",
-        "- 64B.0 does not modify roadmap behavior.",
-        "- 64B.0 does not modify task lifecycle behavior.",
-        "- 64B.0 does not modify runtime behavior.",
-        "- 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.",
-        "",
-        f"*{overview['summary']}*",
-    ])
     docs_dir = pathlib.Path("docs")
     docs_dir.mkdir(exist_ok=True)
-    (docs_dir / "CAPABILITY_INVENTORY.md").write_text("\n".join(lines) + "\n")
+    (docs_dir / "CAPABILITY_INVENTORY.md").write_text(
+        render_capability_inventory_markdown(HarnessPath.cwd())
+    )
 
 
 def run_capability_inventory(args: argparse.Namespace) -> int:
@@ -13513,58 +13473,11 @@ def run_capability_inventory(args: argparse.Namespace) -> int:
 
 def _write_roadmap_registry_md(data: dict) -> None:
     import pathlib
-    overview = data["capability_roadmap_intelligence_overview"]
-    tracks = data["roadmap_tracks"]
-    evolutions = data["roadmap_evolution"]
-    gaps = data["roadmap_gaps"]
-    lines = [
-        "# PCAE Roadmap Registry",
-        "",
-        f"Generated: {overview['generated_at']}",
-        f"Phase: {overview['phase']} — {overview['title']}",
-        f"Total phases: {overview['roadmap_phase_count']}",
-        f"Tracks: {overview['track_count']}",
-        f"Superseded: {overview['superseded_phase_count']}",
-        f"Roadmap gaps: {overview['roadmap_gap_count']}",
-        f"Evolution events: {overview['evolution_count']}",
-        f"Assessment status: {overview['assessment_status']}",
-        "",
-    ]
-    for track_name, phases in tracks.items():
-        lines.append(f"## Track: {track_name}")
-        lines.append("")
-        lines.append("| Phase | Title | Status | Predecessor | Successor |")
-        lines.append("|---|---|---|---|---|")
-        for p in phases:
-            lines.append(
-                f"| {p['phase_id']} | {p['phase_title']} | {p['status']} "
-                f"| {p['predecessor'] or '—'} | {p['successor'] or '—'} |"
-            )
-        lines.append("")
-    if evolutions:
-        lines.extend(["## Roadmap Evolution", ""])
-        for e in evolutions:
-            lines.append(f"- **{e['original_phase']} → {e['replacement_phase']}**: {e['reason']}")
-        lines.append("")
-    if gaps:
-        lines.extend(["## Roadmap Gaps", ""])
-        for g in gaps:
-            lines.append(f"- **{g['phase_id']}** ({g['phase_title']}): not yet implemented")
-        lines.append("")
-    lines.extend([
-        "## Governance Notes",
-        "",
-        "- 64B.1 introduces Capability and Roadmap Intelligence.",
-        "- 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.",
-        "- 64B.4 introduces a first-class skill system in the capability_intelligence track.",
-        "- Skill Registry discovery is consolidated into the shared intelligence layer.",
-        "- Roadmap evolution is tracked.",
-        "- Superseded phases are tracked.",
-        "- No runtime behavior changes occur.",
-    ])
     docs_dir = pathlib.Path("docs")
     docs_dir.mkdir(exist_ok=True)
-    (docs_dir / "ROADMAP_REGISTRY.md").write_text("\n".join(lines) + "\n")
+    (docs_dir / "ROADMAP_REGISTRY.md").write_text(
+        render_roadmap_registry_markdown(HarnessPath.cwd())
+    )
 
 
 def run_capability_list(args: argparse.Namespace) -> int:

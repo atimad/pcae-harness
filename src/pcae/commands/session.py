@@ -33,6 +33,13 @@ from pcae.core.session import (
     update_session_snapshot,
     write_session_snapshot,
 )
+from pcae.core.tasks import find_latest_active_task
+
+
+def _refresh_session_snapshot_for_governed_flow(root: HarnessPath) -> None:
+    if find_latest_active_task(root) is None:
+        return
+    write_session_snapshot(root)
 
 
 def run_session_write(args: argparse.Namespace) -> int:
@@ -74,6 +81,7 @@ def run_session_update(args: argparse.Namespace) -> int:
 
 def run_session_end(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
+    _refresh_session_snapshot_for_governed_flow(root)
     check_result = run_checks(root)
     if not check_result.passed:
         print("Session end stopped: pcae check failed.")
@@ -116,6 +124,7 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
             agent_id=args.agent_id,
         )
 
+    _refresh_session_snapshot_for_governed_flow(root)
     health_data = build_health_data(root)
     health_status: str = health_data["overall_status"]
     check_passed = health_status == "healthy"

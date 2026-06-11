@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 66B: Strategic Review Model.
+Phase 65I: Strategic Registry Coherence Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -81,6 +81,18 @@ roadmap guidance must remain coherent. When they drift, run
 `pcae status coherence` to surface stale references.
 
 ## Current State
+
+PCAE can harden strategic registry coherence with `pcae status coherence` and
+the validation surfaces that consume it. Strategic coherence now distinguishes
+blocking authoritative-registry defects from non-blocking generated-artifact
+drift. Blocking defects include stale `_SRG_BRANCH_REGISTRY.current_phase`
+metadata, invalid active-phase cardinality in `_CRI_KNOWN_PHASES`, and
+unexplained CRI/CI capability projection differences. Generated drift in
+`docs/ROADMAP_REGISTRY.md`, `docs/CAPABILITY_INVENTORY.md`, and
+`docs/COMMANDS.md` is surfaced with actionable remediation but is not treated
+as equivalent to registry corruption. Validation remains read-only: no runtime
+invocation occurs, no docs are auto-regenerated, and no strategic state is
+mutated by `pcae status coherence`, `pcae check`, or `pcae health`.
 
 PCAE can define governed orchestration readiness gates with
 `pcae orchestration-readiness-gate` and

@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-10T21:37:10.991565+00:00
+Generated: 2026-06-11T01:41:03.600630+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 47
+Total phases: 49
 Tracks: 8
 Superseded: 1
 Roadmap gaps: 0
@@ -63,7 +63,7 @@ Assessment status: intelligence_available
 | 64B.6B | Dependency & Capability Intelligence Rendering | completed | 64B.6A | 64B.6C |
 | 64B.6C | Predecessor Capability Rendering | completed | 64B.6B | 64B.6D |
 | 64B.6D | Command & Architecture Intelligence Rendering | completed | 64B.6C | 64B.6E |
-| 64B.6E | Design Review Intelligence Rendering | active | 64B.6D | — |
+| 64B.6E | Design Review Intelligence Rendering | completed | 64B.6D | — |
 
 ## Track: strategic_governance
 
@@ -76,13 +76,15 @@ Assessment status: intelligence_available
 | 65E | Governed Write Invocation Design | completed | 65D | 65F |
 | 65F | Governed Write Invocation Candidate Contract | completed | 65E | 65G |
 | 65G | Write Invocation Approval Gateway Design | completed | 65F | 65H |
-| 65H | Commit Session Continuity Guard | completed | 65G | 66A |
+| 65H | Commit Session Continuity Guard | completed | 65G | 65I |
+| 65I | Strategic Registry Coherence Hardening | active | 65H | — |
 
 ## Track: independent_review_governance
 
 | Phase | Title | Status | Predecessor | Successor |
 |---|---|---|---|---|
-| 66A | Independent Review Governance Model | active | 65H | — |
+| 66A | Independent Review Governance Model | completed | 65H | 66B |
+| 66B | Strategic Review Model | completed | 66A | — |
 
 ## Track: roadmap_intelligence
 

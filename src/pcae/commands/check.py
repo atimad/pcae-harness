@@ -95,7 +95,7 @@ def git_status_data(changes: tuple[GitChange, ...]) -> dict[str, object]:
 def session_continuity_status(result: CheckResult) -> str:
     if any("Session continuity verified." in info.text for info in result.infos):
         return "verified"
-    if any("Session snapshot missing" in warning.text for warning in result.warnings):
+    if any("Session snapshot missing" in violation.text for violation in result.violations):
         return "missing"
     if any("Invalid session JSON" in violation.text for violation in result.violations):
         return "invalid"

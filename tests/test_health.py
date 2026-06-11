@@ -142,11 +142,12 @@ def test_health_command_reports_warnings_without_failing(
     exit_code = main(["health"])
 
     output = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Overall status: healthy" in output
+    assert exit_code == 1
+    assert "Overall status: unhealthy" in output
     assert "Session continuity: missing" in output
     assert "Architecture history entries: missing" in output
-    assert "warning: Session snapshot missing at .pcae/session.json." in output
+    assert "Health check failed:" in output
+    assert "Session snapshot missing at .pcae/session.json." in output
     assert "warning: No architecture history found at .pcae/architecture-history.json." in output
 
 
@@ -161,17 +162,19 @@ def test_health_json_command_reports_warnings_without_failing(
 
     output = capsys.readouterr().out
     data = json.loads(output)
-    assert exit_code == 0
-    assert data["overall_status"] == "healthy"
+    assert exit_code == 1
+    assert data["overall_status"] == "unhealthy"
     assert data["session_continuity"] == "missing"
     assert data["architecture_history_entries"] is None
     assert data["latest_dependency_warnings"] is None
-    assert "Session snapshot missing at .pcae/session.json." in data["warnings"][0]
+    assert (
+        "Session snapshot missing at .pcae/session.json."
+        in data["violations"][0]
+    )
     assert (
         "No architecture history found at .pcae/architecture-history.json."
-        in data["warnings"][1]
+        in data["warnings"][0]
     )
-    assert data["violations"] == []
 
 
 def test_health_command_returns_nonzero_when_check_fails(

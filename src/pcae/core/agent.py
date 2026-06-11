@@ -69208,7 +69208,16 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["write_invocation_approval_gateway"],
-        "successor_capabilities": ["independent_review_governance"],
+        "successor_capabilities": ["strategic_registry_coherence_hardening"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Registry Coherence Hardening",
+        "implemented_phase": "65I",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["commit_session_continuity_guard", "strategic_review_model"],
+        "successor_capabilities": [],
     },
     {
         "capability_domain": "strategic_governance",
@@ -70053,7 +70062,16 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "phase_title": "Commit Session Continuity Guard",
         "status": "completed",
         "predecessor": "65G",
-        "successor": "66A",
+        "successor": "65I",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "strategic_governance",
+        "phase_id": "65I",
+        "phase_title": "Strategic Registry Coherence Hardening",
+        "status": "active",
+        "predecessor": "65H",
+        "successor": "",
         "superseded_by": "",
     },
     # independent_review_governance track
@@ -70070,7 +70088,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "66B",
         "phase_title": "Strategic Review Model",
-        "status": "active",
+        "status": "completed",
         "predecessor": "66A",
         "successor": "",
         "superseded_by": "",
@@ -70734,9 +70752,23 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "write_invocation_approval_gateway",
         ],
-        "successors": ["independent_review_governance"],
+        "successors": ["strategic_registry_coherence_hardening"],
         "aliases": [],
         "contribution": "hardens commit-time governance by upgrading the missing-session-snapshot check from a warning to a violation in check_session_continuity; ensures that an absent or mismatched .pcae/session.json blocks pcae check and therefore blocks the pre-commit hook; auto_refresh_allowed=False; execution_allowed=False",
+    },
+    {
+        "capability_name": "Strategic Registry Coherence Hardening",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "65I",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "commit_session_continuity_guard",
+            "strategic_review_model",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "hardens strategic-governance coherence by validating authoritative phase state, branch current_phase metadata, CRI/CI capability projection differences, and generated governance artifact drift; integrates blocking registry defects into pcae check and pcae health without mutating state or auto-regenerating docs",
     },
     {
         "capability_name": "Independent Review Governance",
@@ -71152,6 +71184,63 @@ def _discover_skill_registry(root: HarnessPath, ts: str) -> dict:
     }
 
 
+def render_capability_inventory_markdown(root: HarnessPath | None = None) -> str:
+    """Render docs/CAPABILITY_INVENTORY.md from the authoritative CI registry."""
+    data = build_capability_inventory(root)
+    overview = data["capability_inventory_overview"]
+    records = data["capability_records"]
+    lines = [
+        "# PCAE Capability Inventory",
+        "",
+        f"Generated: {overview['generated_at']}",
+        f"Phase: {overview['phase']} — {overview['title']}",
+        f"Total capabilities: {overview['capability_count']}",
+        f"Implemented: {overview['implemented_count']}",
+        f"Dormant: {overview['dormant_count']}",
+        f"Superseded: {overview['superseded_count']}",
+        f"Roadmap gaps: {overview['roadmap_gap_count']}",
+        f"Duplicates/overlaps: {overview['duplicate_count']}",
+        f"Prompt capabilities: {overview['prompt_capability_count']}",
+        f"Assessment status: {overview['assessment_status']}",
+        "",
+        "## Capability Records",
+        "",
+        "| Capability | Domain | Phase | Status | Commands | Dependencies | Successors |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for record in records:
+        commands = "; ".join(record["commands"]) if record["commands"] else "(none)"
+        dependencies = "; ".join(record["dependencies"]) if record["dependencies"] else "(none)"
+        successors = (
+            "; ".join(record["successor_capabilities"])
+            if record["successor_capabilities"]
+            else "(none)"
+        )
+        lines.append(
+            f"| {record['capability_name']} | {record['capability_domain']} "
+            f"| {record['implemented_phase']} | {record['status']} | {commands} "
+            f"| {dependencies} | {successors} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Governance Notes",
+            "",
+            "- 64B.0 creates a capability inventory.",
+            "- 64B.3 adds prompt recommendation hardening as an implemented capability.",
+            "- 64B.4 adds a first-class skill system as an implemented capability.",
+            "- Skill Registry metadata is consolidated with the shared intelligence infrastructure.",
+            "- 64B.0 does not modify roadmap behavior.",
+            "- 64B.0 does not modify task lifecycle behavior.",
+            "- 64B.0 does not modify runtime behavior.",
+            "- 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.",
+            "",
+            f"*{overview['summary']}*",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> dict:
     """Build machine-readable capability and roadmap intelligence without invoking anything."""
     if root is None:
@@ -71546,6 +71635,67 @@ def build_capability_roadmap_intelligence(root: HarnessPath | None = None) -> di
         },
         "advisory": CAPABILITY_ROADMAP_INTELLIGENCE_ADVISORY,
     }
+
+
+def render_roadmap_registry_markdown(root: HarnessPath | None = None) -> str:
+    """Render docs/ROADMAP_REGISTRY.md from the authoritative CRI phase registry."""
+    data = build_capability_roadmap_intelligence(root)
+    overview = data["capability_roadmap_intelligence_overview"]
+    tracks = data["roadmap_tracks"]
+    evolutions = data["roadmap_evolution"]
+    gaps = data["roadmap_gaps"]
+    lines = [
+        "# PCAE Roadmap Registry",
+        "",
+        f"Generated: {overview['generated_at']}",
+        f"Phase: {overview['phase']} — {overview['title']}",
+        f"Total phases: {overview['roadmap_phase_count']}",
+        f"Tracks: {overview['track_count']}",
+        f"Superseded: {overview['superseded_phase_count']}",
+        f"Roadmap gaps: {overview['roadmap_gap_count']}",
+        f"Evolution events: {overview['evolution_count']}",
+        f"Assessment status: {overview['assessment_status']}",
+        "",
+    ]
+    for track_name, phases in tracks.items():
+        lines.append(f"## Track: {track_name}")
+        lines.append("")
+        lines.append("| Phase | Title | Status | Predecessor | Successor |")
+        lines.append("|---|---|---|---|---|")
+        for phase in phases:
+            lines.append(
+                f"| {phase['phase_id']} | {phase['phase_title']} | {phase['status']} "
+                f"| {phase['predecessor'] or '—'} | {phase['successor'] or '—'} |"
+            )
+        lines.append("")
+    if evolutions:
+        lines.extend(["## Roadmap Evolution", ""])
+        for evolution in evolutions:
+            lines.append(
+                f"- **{evolution['original_phase']} → {evolution['replacement_phase']}**: "
+                f"{evolution['reason']}"
+            )
+        lines.append("")
+    if gaps:
+        lines.extend(["## Roadmap Gaps", ""])
+        for gap in gaps:
+            lines.append(f"- **{gap['phase_id']}** ({gap['phase_title']}): not yet implemented")
+        lines.append("")
+    lines.extend(
+        [
+            "## Governance Notes",
+            "",
+            "- 64B.1 introduces Capability and Roadmap Intelligence.",
+            "- 64B.3 hardens prompt recommendations using the roadmap registry and capability registry.",
+            "- 64B.4 introduces a first-class skill system in the capability_intelligence track.",
+            "- Skill Registry discovery is consolidated into the shared intelligence layer.",
+            "- Roadmap evolution is tracked.",
+            "- Superseded phases are tracked.",
+            "- No runtime behavior changes occur.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
 
 # ---------------------------------------------------------------------------
 # Phase 64B.2 – Roadmap Recommendation Hardening
@@ -72512,6 +72662,30 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
         "capability_phase": "65H",
     },
     {
+        "phase_id": "65I",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "65I-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65I",
+    },
+    {
+        "phase_id": "65I",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "65I-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65I",
+    },
+    {
+        "phase_id": "65I",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "65I-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "65I",
+    },
+    {
         "phase_id": "66A",
         "prompt_type": "implementation",
         "prompt_status": "historical",
@@ -72538,7 +72712,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66B",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66B-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66B",
@@ -72546,7 +72720,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66B",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66B-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66B",
@@ -72554,7 +72728,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66B",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66B",
@@ -78392,7 +78566,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-004", "OBJ-001"],
         "entry_phase": "64B.0",
-        "current_phase": "64G",
+        "current_phase": "64B.6E",
         "approved_by": "",
         "approved_at": "",
     },
@@ -78409,7 +78583,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "65A",
-        "current_phase": "65A",
+        "current_phase": "65I",
         "approved_by": "",
         "approved_at": "",
     },
@@ -78426,7 +78600,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "66A",
+        "current_phase": "66B",
         "approved_by": "",
         "approved_at": "",
     },
@@ -78891,6 +79065,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "StrategicReviewRecord (SRR-66B-001) in append-only _IRG_STRATEGIC_REVIEW_REGISTRY; "
             "real_review_record_creation_allowed=True for strategic_review class only; "
             "coverage_auto_update_from_review=False; execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "strategic_registry_coherence_hardening",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "hardens strategic-governance coherence by enforcing branch current_phase validation, "
+            "CRI/CI projection classification, generated artifact drift detection, and blocking "
+            "registry-defect propagation into status coherence, check, and health without mutating state"
         ),
         "decision_id": "",
         "recommendation_id": "",

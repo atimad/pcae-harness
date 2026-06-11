@@ -11,6 +11,14 @@ from pcae.core.orchestration import (
 )
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
+from pcae.core.session import write_session_snapshot
+from pcae.core.tasks import find_latest_active_task
+
+
+def _refresh_session_snapshot_for_governed_flow(root: HarnessPath) -> None:
+    if find_latest_active_task(root) is None:
+        return
+    write_session_snapshot(root)
 
 
 def run_phase_complete(args: argparse.Namespace) -> int:
@@ -33,6 +41,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     explicit_next_agent: str | None = args.next_agent
 
     root = HarnessPath.cwd()
+    _refresh_session_snapshot_for_governed_flow(root)
 
     # Compute recommendation when work_type is provided.
     rec: dict | None = None
@@ -277,6 +286,7 @@ def _workflow_json_summary(workflow: dict | None) -> dict | None:
 
 def run_phase_start(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
+    _refresh_session_snapshot_for_governed_flow(root)
 
     check_result = run_checks(root)
     if not check_result.passed:

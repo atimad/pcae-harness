@@ -8,7 +8,13 @@ import subprocess
 import pytest
 
 from pcae.cli import main
+from pcae.core.agent import (
+    render_capability_inventory_markdown,
+    render_roadmap_registry_markdown,
+)
+from pcae.core.docs import render_commands_reference
 from pcae.core.paths import HarnessPath
+import pcae.core.status as status_module
 from pcae.core.status import (
     GOVERNANCE_REPAIR_ADVISORY,
     KNOWN_STALE_PHRASES,
@@ -38,6 +44,26 @@ from pcae.core.status import (
     recommend_next_roadmap_phase,
     validate_runtime_snapshot_restore_safety,
 )
+
+
+def write_strategic_coherence_artifacts(tmp_path: Path) -> None:
+    (tmp_path / "PROJECT_STATUS.md").write_text("# Project Status\n\n## Current Phase\n\nPhase 66B.\n")
+    (tmp_path / "src" / "pcae" / "core").mkdir(parents=True)
+    (tmp_path / "src" / "pcae" / "core" / "agent.py").write_text("# strategic repo marker\n")
+    (tmp_path / "docs").mkdir(parents=True)
+    root = HarnessPath(tmp_path)
+    (tmp_path / "docs" / "ROADMAP_REGISTRY.md").write_text(
+        render_roadmap_registry_markdown(root),
+        encoding="utf-8",
+    )
+    (tmp_path / "docs" / "CAPABILITY_INVENTORY.md").write_text(
+        render_capability_inventory_markdown(root),
+        encoding="utf-8",
+    )
+    (tmp_path / "docs" / "COMMANDS.md").write_text(
+        render_commands_reference(),
+        encoding="utf-8",
+    )
 
 
 def test_coherent_when_no_stale_phrases(tmp_path: Path) -> None:
@@ -119,6 +145,99 @@ def test_cli_status_coherence_json(tmp_path: Path, monkeypatch, capsys) -> None:
     assert data["coherent"] is True
     assert data["warning_count"] == 0
     assert data["warnings"] == []
+
+
+def test_status_coherence_detects_stale_roadmap_registry_doc(tmp_path: Path) -> None:
+    write_strategic_coherence_artifacts(tmp_path)
+    (tmp_path / "docs" / "ROADMAP_REGISTRY.md").write_text("# stale\n", encoding="utf-8")
+    result = check_project_status_coherence(HarnessPath(tmp_path))
+    assert not result.coherent
+    assert result.blocking_warning_count == 0
+    assert any(w.document == "docs/ROADMAP_REGISTRY.md" for w in result.warnings)
+
+
+def test_status_coherence_detects_stale_branch_current_phase(tmp_path: Path, monkeypatch) -> None:
+    write_strategic_coherence_artifacts(tmp_path)
+    monkeypatch.setattr(
+        status_module,
+        "_SRG_BRANCH_REGISTRY",
+        (
+            {
+                "branch_id": "BR-004",
+                "branch_name": "independent_review_governance",
+                "current_phase": "66A",
+            },
+        ),
+    )
+    monkeypatch.setattr(
+        status_module,
+        "_CRI_KNOWN_PHASES",
+        (
+            {
+                "track_name": "independent_review_governance",
+                "phase_id": "66A",
+                "status": "completed",
+            },
+            {
+                "track_name": "independent_review_governance",
+                "phase_id": "66B",
+                "status": "active",
+            },
+        ),
+    )
+    result = check_project_status_coherence(HarnessPath(tmp_path))
+    assert result.blocking_warning_count == 1
+    warning = next(w for w in result.warnings if w.blocking)
+    assert "current_phase is stale" in warning.message
+    assert "66A" in warning.detected_state
+    assert "66B" in warning.expected_state
+
+
+def test_status_coherence_detects_invalid_active_phase_cardinality(tmp_path: Path, monkeypatch) -> None:
+    write_strategic_coherence_artifacts(tmp_path)
+    monkeypatch.setattr(
+        status_module,
+        "_CRI_KNOWN_PHASES",
+        (
+            {"track_name": "a", "phase_id": "65H", "status": "active"},
+            {"track_name": "b", "phase_id": "66B", "status": "active"},
+        ),
+    )
+    monkeypatch.setattr(status_module, "_SRG_BRANCH_REGISTRY", ())
+    result = check_project_status_coherence(HarnessPath(tmp_path))
+    assert result.blocking_warning_count == 1
+    assert any("exactly one active phase" in w.message for w in result.warnings)
+
+
+def test_status_coherence_allows_classified_cri_ci_differences(tmp_path: Path) -> None:
+    write_strategic_coherence_artifacts(tmp_path)
+    result = check_project_status_coherence(HarnessPath(tmp_path))
+    assert result.coherent
+
+
+def test_status_coherence_blocks_unclassified_cri_ci_difference(tmp_path: Path, monkeypatch) -> None:
+    write_strategic_coherence_artifacts(tmp_path)
+    monkeypatch.setattr(
+        status_module,
+        "_CI_KNOWN_CAPABILITIES",
+        status_module._CI_KNOWN_CAPABILITIES
+        + (
+            {
+                "capability_name": "Unclassified Capability",
+                "capability_domain": "mystery_capabilities",
+                "implemented_phase": "99Z",
+                "status": "implemented",
+                "commands": [],
+                "dependencies": [],
+                "successor_capabilities": [],
+            },
+        ),
+    )
+    result = check_project_status_coherence(HarnessPath(tmp_path))
+    assert result.blocking_warning_count == 1
+    warning = next(w for w in result.warnings if w.blocking)
+    assert "not fully explained" in warning.message
+    assert "unclassified_capability" in warning.detected_state
 
 
 def test_governance_audit_valid_when_governance_artifacts_align(tmp_path: Path) -> None:

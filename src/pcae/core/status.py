@@ -8,13 +8,22 @@ from pathlib import Path
 import re
 import subprocess
 
-from pcae.core.agent import build_agent_lock_state
+from pcae.core.agent import (
+    _CI_KNOWN_CAPABILITIES,
+    _CRI_KNOWN_CAPABILITIES,
+    _CRI_KNOWN_PHASES,
+    _SRG_BRANCH_REGISTRY,
+    build_agent_lock_state,
+    render_capability_inventory_markdown,
+    render_roadmap_registry_markdown,
+)
 from pcae.core.architecture import (
     count_adr_parse_failures,
     get_adr_registry,
     validate_adr_registry,
 )
 from pcae.core.check import run_checks
+from pcae.core.docs import COMMANDS_RELATIVE_PATH, render_commands_reference
 from pcae.core.git_status import read_git_changes
 from pcae.core.health import build_health_data, session_continuity_status
 from pcae.core.orchestration import build_workflow_readiness
@@ -33,6 +42,8 @@ ROADMAP_RELATIVE_PATHS = (
     PROJECT_STATUS_RELATIVE_PATH,
     Path("tasks") / "TODO.md",
 )
+ROADMAP_REGISTRY_RELATIVE_PATH = Path("docs") / "ROADMAP_REGISTRY.md"
+CAPABILITY_INVENTORY_RELATIVE_PATH = Path("docs") / "CAPABILITY_INVENTORY.md"
 
 # Phrases known to be stale because the features they describe are already
 # implemented. Stale roadmap references in governance documents create
@@ -141,9 +152,22 @@ DEFAULT_RUNTIME_SNAPSHOT_RETENTION_KEEP_COUNT = 5
 class CoherenceWarning:
     document: str
     message: str
+    severity: str = "warning"
+    blocking: bool = False
+    detected_state: str = ""
+    expected_state: str = ""
+    remediation: str = ""
 
     def to_dict(self) -> dict:
-        return {"document": self.document, "message": self.message}
+        return {
+            "blocking": self.blocking,
+            "detected_state": self.detected_state,
+            "document": self.document,
+            "expected_state": self.expected_state,
+            "message": self.message,
+            "remediation": self.remediation,
+            "severity": self.severity,
+        }
 
 
 @dataclass(frozen=True)
@@ -154,8 +178,13 @@ class CoherenceResult:
     def coherent(self) -> bool:
         return len(self.warnings) == 0
 
+    @property
+    def blocking_warning_count(self) -> int:
+        return sum(1 for warning in self.warnings if warning.blocking)
+
     def to_dict(self) -> dict:
         return {
+            "blocking_warning_count": self.blocking_warning_count,
             "coherent": self.coherent,
             "warning_count": len(self.warnings),
             "warnings": [w.to_dict() for w in self.warnings],
@@ -535,7 +564,9 @@ class RestoreSafetyValidation:
 
 
 def check_project_status_coherence(root: HarnessPath) -> CoherenceResult:
-    """Return coherence warnings for PROJECT_STATUS.md stale roadmap references."""
+    """Return governance coherence issues across stale docs and strategic registries."""
+    warnings: list[CoherenceWarning] = []
+
     path = root.join(PROJECT_STATUS_RELATIVE_PATH)
     if not path.is_file():
         return CoherenceResult(
@@ -546,17 +577,231 @@ def check_project_status_coherence(root: HarnessPath) -> CoherenceResult:
                 ),
             )
         )
+
     text = path.read_text(encoding="utf-8")
-    warnings = []
     for phrase in KNOWN_STALE_PHRASES:
         if phrase in text:
             warnings.append(
                 CoherenceWarning(
                     document=str(PROJECT_STATUS_RELATIVE_PATH),
                     message=f"Stale roadmap reference: {phrase!r} — feature already implemented.",
+                    remediation="Update PROJECT_STATUS.md so implemented features are not described as future work.",
                 )
             )
+
+    warnings.extend(check_strategic_registry_coherence(root).warnings)
     return CoherenceResult(warnings=tuple(warnings))
+
+
+def check_strategic_registry_coherence(root: HarnessPath) -> CoherenceResult:
+    if not _supports_strategic_registry_coherence(root):
+        return CoherenceResult(warnings=())
+
+    warnings: list[CoherenceWarning] = []
+
+    active_phases = [phase for phase in _CRI_KNOWN_PHASES if phase["status"] == "active"]
+    if len(active_phases) != 1:
+        warnings.append(
+            CoherenceWarning(
+                document="src/pcae/core/agent.py",
+                message="Authoritative phase registry must contain exactly one active phase.",
+                severity="blocker",
+                blocking=True,
+                detected_state=f"active_phase_ids={[phase['phase_id'] for phase in active_phases]}",
+                expected_state="exactly one active phase is present in _CRI_KNOWN_PHASES",
+                remediation="Update _CRI_KNOWN_PHASES so one and only one phase is marked active.",
+            )
+        )
+
+    for branch in _SRG_BRANCH_REGISTRY:
+        expected_phase = _resolve_expected_branch_phase(branch["branch_name"])
+        if expected_phase and branch["current_phase"] != expected_phase:
+            warnings.append(
+                CoherenceWarning(
+                    document="src/pcae/core/agent.py",
+                    message=(
+                        f"Branch {branch['branch_id']} current_phase is stale relative to "
+                        f"the authoritative phase registry."
+                    ),
+                    severity="blocker",
+                    blocking=True,
+                    detected_state=(
+                        f"branch={branch['branch_name']}; current_phase={branch['current_phase']}"
+                    ),
+                    expected_state=f"branch={branch['branch_name']}; current_phase={expected_phase}",
+                    remediation=(
+                        "Update _SRG_BRANCH_REGISTRY.current_phase to the active phase for the branch, "
+                        "or the latest completed phase when the branch has no active phase."
+                    ),
+                )
+            )
+
+    warnings.extend(_check_capability_projection_coherence())
+    warnings.extend(_check_generated_artifact_drift(root))
+    return CoherenceResult(warnings=tuple(warnings))
+
+
+def _supports_strategic_registry_coherence(root: HarnessPath) -> bool:
+    return root.join(Path("src") / "pcae" / "core" / "agent.py").is_file()
+
+
+def _resolve_expected_branch_phase(track_name: str) -> str:
+    track_phases = [phase for phase in _CRI_KNOWN_PHASES if phase.get("track_name") == track_name]
+    active = [phase for phase in track_phases if phase["status"] == "active"]
+    if len(active) == 1:
+        return active[0]["phase_id"]
+    completed = [phase for phase in track_phases if phase["status"] == "completed"]
+    if completed:
+        return completed[-1]["phase_id"]
+    return ""
+
+
+def _normalize_generated_markdown(text: str) -> str:
+    lines = [line for line in text.splitlines() if not line.startswith("Generated: ")]
+    return "\n".join(lines).strip()
+
+
+def _normalize_capability_slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+
+
+def _check_generated_artifact_drift(root: HarnessPath) -> tuple[CoherenceWarning, ...]:
+    artifacts = [
+        (
+            ROADMAP_REGISTRY_RELATIVE_PATH,
+            _normalize_generated_markdown(render_roadmap_registry_markdown(root)),
+            "_CRI_KNOWN_PHASES",
+            "pcae roadmap evolution",
+        ),
+        (
+            CAPABILITY_INVENTORY_RELATIVE_PATH,
+            _normalize_generated_markdown(render_capability_inventory_markdown(root)),
+            "_CI_KNOWN_CAPABILITIES",
+            "pcae capability-inventory",
+        ),
+        (
+            COMMANDS_RELATIVE_PATH,
+            _normalize_generated_markdown(render_commands_reference()),
+            "registered CLI commands",
+            "pcae docs commands --force",
+        ),
+    ]
+    warnings: list[CoherenceWarning] = []
+    for relative_path, expected_text, source_name, remediation_command in artifacts:
+        path = root.join(relative_path)
+        if not path.is_file():
+            warnings.append(
+                CoherenceWarning(
+                    document=str(relative_path),
+                    message=f"Generated governance artifact is missing: {relative_path.as_posix()}.",
+                    detected_state="file_missing",
+                    expected_state=f"{relative_path.as_posix()} exists and matches {source_name}",
+                    remediation=f"Regenerate the artifact with `{remediation_command}`.",
+                )
+            )
+            continue
+        actual_text = _normalize_generated_markdown(path.read_text(encoding="utf-8"))
+        if actual_text != expected_text:
+            warnings.append(
+                CoherenceWarning(
+                    document=str(relative_path),
+                    message=(
+                        f"Generated governance artifact drift detected in {relative_path.as_posix()}."
+                    ),
+                    detected_state=f"{relative_path.as_posix()} does not match the current rendered output",
+                    expected_state=f"{relative_path.as_posix()} matches {source_name}",
+                    remediation=f"Regenerate the artifact with `{remediation_command}`.",
+                )
+            )
+    return tuple(warnings)
+
+
+def _check_capability_projection_coherence() -> tuple[CoherenceWarning, ...]:
+    cri_records = {
+        _normalize_capability_slug(record["capability_name"]): record
+        for record in _CRI_KNOWN_CAPABILITIES
+    }
+    ci_records = {
+        _normalize_capability_slug(record["capability_name"]): record
+        for record in _CI_KNOWN_CAPABILITIES
+    }
+
+    cri_only = sorted(set(cri_records) - set(ci_records))
+    ci_only = sorted(set(ci_records) - set(cri_records))
+    status_mismatches = [
+        slug
+        for slug in sorted(set(cri_records) & set(ci_records))
+        if cri_records[slug].get("status") != ci_records[slug].get("status")
+    ]
+
+    unclassified: list[str] = []
+    classified: list[str] = []
+    for slug in ci_only:
+        classification = _classify_capability_projection_difference(ci_records[slug], location="ci_only")
+        if classification:
+            classified.append(f"{slug}:{classification}")
+        else:
+            unclassified.append(slug)
+
+    for slug in cri_only:
+        classification = _classify_capability_projection_difference(cri_records[slug], location="cri_only")
+        if classification:
+            classified.append(f"{slug}:{classification}")
+        else:
+            unclassified.append(slug)
+
+    if not status_mismatches and not unclassified:
+        return ()
+
+    details = []
+    if unclassified:
+        details.append(f"unclassified_differences={unclassified}")
+    if status_mismatches:
+        details.append(f"status_mismatches={status_mismatches}")
+    if classified:
+        details.append(f"classified_differences={classified}")
+
+    return (
+        CoherenceWarning(
+            document="src/pcae/core/agent.py",
+            message=(
+                "Strategic capability projection drift is not fully explained between "
+                "_CRI_KNOWN_CAPABILITIES and _CI_KNOWN_CAPABILITIES."
+            ),
+            severity="blocker",
+            blocking=True,
+            detected_state="; ".join(details),
+            expected_state=(
+                "all CRI/CI capability differences are either absent or explicitly classified "
+                "by the strategic projection contract"
+            ),
+            remediation=(
+                "Align the registries or extend the explicit projection classification rules so "
+                "every difference is intentionally explained."
+            ),
+        ),
+    )
+
+
+def _classify_capability_projection_difference(record: dict, location: str) -> str:
+    status = record.get("status", "")
+    domain = record.get("capability_domain", "")
+    if status in {"dormant", "superseded"}:
+        return "inventory_only_non_implemented"
+    if location == "ci_only" and domain in {
+        "documentation_capabilities",
+        "repository_governance_capabilities",
+        "testing_capabilities",
+        "recovery_capabilities",
+    }:
+        return "inventory_only_support_surface"
+    if (
+        location == "ci_only"
+        and domain in {"runtime_audit_capabilities", "runtime_review_capabilities"}
+        and record.get("successor_capabilities")
+    ):
+        return "inventory_only_intermediate_runtime_capability"
+    return ""
 
 
 def _build_architecture_memory_audit_summary(root: HarnessPath) -> dict:

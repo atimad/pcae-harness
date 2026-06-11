@@ -89,6 +89,11 @@ def test_check_command_passes_when_changes_are_in_scope_and_documented(
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["src/allowed.py"])
     write_file(tmp_path / "src" / "allowed.py", "print('allowed')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -222,7 +227,7 @@ def test_check_json_command_reports_failed_result(
         "src/other.py: Changed file is outside active task scope" in violation
         for violation in data["violations"]
     )
-    assert any("Session snapshot missing" in warning for warning in data["warnings"])
+    assert any("Session snapshot missing" in violation for violation in data["violations"])
 
 
 def test_check_detects_missing_required_files(tmp_path: Path) -> None:
@@ -253,6 +258,11 @@ def test_check_uses_newest_active_task(tmp_path: Path) -> None:
         title="New task",
     )
     write_file(tmp_path / "src" / "new.py", "print('new')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1931-new-task",
+        title="New task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "new.py", "print('changed')\n")
@@ -269,6 +279,11 @@ def test_check_supports_direct_directory_wildcard_scope(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["src/pcae/core/*"])
     write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('ok')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('changed')\n")
@@ -302,6 +317,11 @@ def test_check_supports_recursive_directory_wildcard_scope(tmp_path: Path) -> No
     write_task(tmp_path, allowed_files=["src/pcae/commands/**"])
     nested = tmp_path / "src" / "pcae" / "commands" / "nested" / "file.py"
     write_file(nested, "print('nested')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(nested, "print('changed')\n")
@@ -316,6 +336,11 @@ def test_check_supports_basename_wildcard_scope(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["*.py"])
     write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('ok')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "core" / "allowed.py", "print('changed')\n")
@@ -362,6 +387,11 @@ def test_check_forbidden_direct_directory_wildcard_ignores_nested_files(
     )
     target = tmp_path / "src" / "pcae" / "core" / "nested" / "allowed.py"
     write_file(target, "print('nested')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(target, "print('changed')\n")
@@ -561,6 +591,11 @@ def test_check_override_protected_files_allows_protected_change(tmp_path: Path) 
         override_protected_files=["pyproject.toml"],
     )
     write_file(tmp_path / "pyproject.toml", "[project]\nname = 'demo'\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "pyproject.toml", "[project]\nname = 'changed'\n")
@@ -597,8 +632,8 @@ def test_check_warns_when_session_snapshot_is_missing(tmp_path: Path) -> None:
 
     result = run_checks(HarnessPath(tmp_path))
 
-    assert result.passed
-    assert has_warning(result, "Session snapshot missing at .pcae/session.json.")
+    assert not result.passed
+    assert has_violation(result, "Session snapshot missing at .pcae/session.json.")
 
 
 def test_check_passes_when_session_active_task_matches(tmp_path: Path) -> None:
@@ -684,9 +719,9 @@ def test_check_command_prints_missing_session_warning(
     exit_code = main(["check"])
 
     output = capsys.readouterr().out
-    assert exit_code == 0
-    assert "warning: Session snapshot missing at .pcae/session.json." in output
-    assert "PCAE check passed." in output
+    assert exit_code == 1
+    assert "Session snapshot missing at .pcae/session.json." in output
+    assert "PCAE check found violations:" in output
 
 
 def test_check_command_prints_session_continuity_info(
@@ -735,6 +770,11 @@ def test_check_classifies_changed_files_by_architecture_zone(tmp_path: Path) -> 
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "tests" / "test_changed.py", "def test_old(): pass\n")
     write_file(tmp_path / "misc.txt", "old\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
@@ -806,6 +846,11 @@ def test_check_omits_architecture_zone_summary_when_clean(tmp_path: Path) -> Non
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["src/allowed.py"])
     write_file(tmp_path / ".pcae" / "policy.toml", policy_with_architecture_zones({"core": ["src/**"]}))
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     result = run_checks(HarnessPath(tmp_path))
@@ -828,6 +873,11 @@ def test_check_command_prints_architecture_zone_summary(
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "misc.txt", "old\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -873,6 +923,11 @@ def test_check_command_prints_architecture_dependency_warnings(
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -923,6 +978,11 @@ def test_check_command_advisory_architecture_warning_does_not_fail(
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -1073,6 +1133,11 @@ def test_check_missing_architecture_enforcement_defaults_to_advisory(
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(
@@ -1112,6 +1177,11 @@ def test_check_task_allowed_dependency_overrides_repo_rules(tmp_path: Path) -> N
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(
@@ -1243,6 +1313,11 @@ def test_check_task_advisory_enforcement_overrides_policy_strict(
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
     write_file(tmp_path / "src" / "pcae" / "commands" / "task.py", "VALUE = 1\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(
@@ -1408,6 +1483,11 @@ def test_check_allowed_task_zone_passes(tmp_path: Path) -> None:
         ),
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('new')\n")
@@ -1598,6 +1678,11 @@ def test_check_warns_when_changed_python_file_cannot_be_parsed(
         ),
     )
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "print('old')\n")
+    write_session(
+        tmp_path,
+        task_id="20260522-1930-test-task",
+        title="Test task",
+    )
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "core" / "changed.py", "def broken(:\n")
