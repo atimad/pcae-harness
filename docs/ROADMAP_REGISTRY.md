@@ -1,6 +1,6 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-11T14:59:21.723175+00:00
+Generated: 2026-06-11T17:36:49.395157+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
 Total phases: 52
 Tracks: 8
@@ -44,7 +44,7 @@ Assessment status: intelligence_available
 | 64D | Runtime Coordination Policy | completed | 64C | 64E |
 | 64E | Orchestration Audit Model | completed | 64D | 64F |
 | 64F | Orchestration Readiness Gate | completed | 64E | 64G |
-| 64H | Multi-Runtime Objective Coverage Hardening | deferred | 64F | — |
+| 64H | Multi-Runtime Objective Coverage Hardening | active | 64F | — |
 
 ## Track: capability_intelligence
 
@@ -87,7 +87,7 @@ Assessment status: intelligence_available
 |---|---|---|---|---|
 | 66A | Independent Review Governance Model | completed | 65H | 66B |
 | 66B | Strategic Review Model | completed | 66A | 66C |
-| 66C | Strategic Review Calibration and BR-004 Closure | active | 66B | — |
+| 66C | Strategic Review Calibration and BR-004 Closure | completed | 66B | — |
 
 ## Track: roadmap_intelligence
 

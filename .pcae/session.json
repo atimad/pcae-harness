@@ -1,24 +1,16 @@
 {
   "active_task": {
-    "id": "20260611-1541-66c-strategic-review-operationalization",
-    "title": "66C Strategic Review Operationalization"
+    "id": "20260611-1921-64h-multi-runtime-objective-coverage-hardening",
+    "title": "64H Multi-Runtime Objective Coverage Hardening"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "66C Strategic Review Operationalization",
+  "current_objective": "64H Multi-Runtime Objective Coverage Hardening",
   "git": {
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/session.json",
-        "status": " M"
-      },
-      {
         "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
         "status": " M"
       },
       {
@@ -26,22 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260611-1600-65j-strategic-decision-continuity.md",
+        "path": "tasks/active/20260611-1541-66c-strategic-review-operationalization.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260611-1541-66c-strategic-review-operationalization.md",
+        "path": "tasks/active/20260611-1921-64h-multi-runtime-objective-coverage-hardening.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260611-1600-65j-strategic-decision-continuity.md",
+        "path": "tasks/done/20260611-1541-66c-strategic-review-operationalization.md",
         "status": "??"
       }
     ],
-    "status_summary": "7 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260611-1600-65j-strategic-decision-continuity: 65J Strategic Decision Continuity",
-  "next_recommended_step": "Continue active task 20260611-1541-66c-strategic-review-operationalization.",
-  "timestamp": "2026-06-11T13:41:40.496222+00:00",
+  "last_completed_step": "Completed task 20260611-1541-66c-strategic-review-operationalization: 66C Strategic Review Operationalization",
+  "next_recommended_step": "Continue active task 20260611-1921-64h-multi-runtime-objective-coverage-hardening.",
+  "timestamp": "2026-06-11T17:21:39.823018+00:00",
   "warnings": []
 }

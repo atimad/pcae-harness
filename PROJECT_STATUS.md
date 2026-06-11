@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 66C: Strategic Review Calibration and BR-004 Closure.
+Phase 64H: Multi-Runtime Objective Coverage Hardening.
 
 ## Post-61J Runtime Registry Checkpoint
 

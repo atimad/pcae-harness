@@ -1241,6 +1241,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae strategic-review-governance --json`
 - `pcae strategic-review-governance --refresh`
 
+## objective-coverage-hardening
+
+- `pcae objective-coverage-hardening`
+- `pcae objective-coverage-hardening --json`
+
 ## strategic-continuity
 
 - `pcae strategic-continuity show current`

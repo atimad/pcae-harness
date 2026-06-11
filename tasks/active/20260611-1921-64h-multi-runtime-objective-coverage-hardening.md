@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260611-0030-66b-strategic-review-model
+20260611-1921-64h-multi-runtime-objective-coverage-hardening
 
 ## Title
 
-66B Strategic Review Model
+64H Multi-Runtime Objective Coverage Hardening
 
 ## Status
 
@@ -18,11 +18,14 @@ implementation
 
 ## Goal
 
-Implement Phase 66B: Strategic Review Model. Define detailed strategic_review behavior, create first real StrategicReviewRecord (SRR-66B-001) in append-only _IRG_STRATEGIC_REVIEW_REGISTRY, expose via pcae strategic-review-governance command. Resolves 66A's strategic_review class deferral.
+64H Multi-Runtime Objective Coverage Hardening
 
 ## Allowed Files
 
 - .pcae/session.json
+- .pcae/strategic-lineage.json
+- .pcae/provenance-history.json
+- .pcae/strategic_reviews.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -30,24 +33,41 @@ Implement Phase 66B: Strategic Review Model. Define detailed strategic_review be
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/ROADMAP_REGISTRY.md
-- docs/COMMANDS.md
-- docs/CAPABILITY_INVENTORY.md
 - src/pcae/core/agent.py
 - src/pcae/core/docs.py
 - src/pcae/commands/agent.py
 - src/pcae/cli.py
 - tests/test_agent.py
+- docs/COMMANDS.md
+- docs/CAPABILITY_INVENTORY.md
+- docs/ROADMAP_REGISTRY.md
 
 ## Forbidden Files
 
+- src/pcae/core/strategic_lineage.py
+
 ## Allowed Zones
+
+- core
+- commands
+- cli
+- tests
+- docs
+- tasks
+- session
+- config
 
 ## Forbidden Zones
 
+- TBD
+
 ## Allowed Dependencies
 
+- TBD
+
 ## Forbidden Dependencies
+
+- TBD
 
 ## Enforcement Mode
 
@@ -76,4 +96,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-11T00:30:17.435790+02:00
+2026-06-11T19:21:39.807407+02:00

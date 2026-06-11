@@ -199,6 +199,7 @@ from pcae.commands.agent import (
     run_write_invocation_approval_gateway,
     run_independent_review_governance,
     run_strategic_review_governance,
+    run_objective_coverage_hardening,
     run_capability_inventory,
     run_capability_list,
     run_capability_show,
@@ -4833,6 +4834,17 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     srg_parser.set_defaults(handler=run_strategic_review_governance)
+
+    och_parser = subparsers.add_parser(
+        "objective-coverage-hardening",
+        help="Multi-Runtime Objective Coverage Hardening — advisory and evidence-producing (Phase 64H).",
+    )
+    och_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    och_parser.set_defaults(handler=run_objective_coverage_hardening)
 
     strategic_continuity_parser = subparsers.add_parser(
         "strategic-continuity",

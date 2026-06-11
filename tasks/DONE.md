@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 64H Multi-Runtime Objective Coverage Hardening (20260611-1921-64h-multi-runtime-objective-coverage-hardening)
+- 66C Strategic Review Operationalization (20260611-1541-66c-strategic-review-operationalization)
 - 65J Strategic Decision Continuity (20260611-1600-65j-strategic-decision-continuity)
 - 66B Strategic Review Model (20260611-0030-66b-strategic-review-model)
 - Resolve 64B.6E Registry Alignment (20260610-2351-resolve-64b-6e-registry-alignment)

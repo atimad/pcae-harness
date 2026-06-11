@@ -418,6 +418,8 @@ from pcae.core.agent import (
     build_strategic_review_governance,
     STRATEGIC_REVIEW_MODEL_ADVISORY,
     STRATEGIC_REVIEW_CALIBRATION_ADVISORY,
+    build_objective_coverage_hardening,
+    OBJECTIVE_COVERAGE_HARDENING_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14736,4 +14738,51 @@ def run_strategic_review_governance(args: argparse.Namespace) -> int:
     print()
 
     print(STRATEGIC_REVIEW_CALIBRATION_ADVISORY)
+    return 0
+
+
+def run_objective_coverage_hardening(args: argparse.Namespace) -> int:
+    data = build_objective_coverage_hardening(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["objective_coverage_hardening_overview"]
+    print("Objective Coverage Hardening")
+    print(f"  Phase:                         {overview['phase']} — {overview['phase_title']}")
+    print(f"  Reclassification proposals:    {overview['proposal_count']}")
+    print(f"  Evidence reports:              {overview['evidence_report_count']}")
+    print(f"  Human approval required:       {overview['human_approval_required']}")
+    print(f"  Direct map mutation allowed:   {overview['direct_map_mutation_allowed']}")
+    print(f"  Execution allowed:             {overview['execution_allowed']}")
+    print()
+
+    print("Reclassification Proposals:")
+    for p in data["reclassification_proposals"]:
+        print(f"  {p['proposal_id']}: {p['capability_id']}")
+        print(f"    from: {p['from_contribution_type']} → to: {p['to_contribution_type']}")
+        print(f"    supersedes: {p['supersedes_decision_id']}")
+        print(f"    human_approval_required: {p['human_approval_required']}")
+    print()
+
+    print("Evidence Reports:")
+    for r in data["evidence_reports"]:
+        print(f"  {r['report_id']}: {r['subject_id']} ({r['objective_name']})")
+        print(f"    evidence_quality_score: {r['evidence_quality_score']:.2f}  health: {r['recommendation_health']}")
+        print(f"    primary_count: {r['primary_count']}  supporting_count: {r['supporting_count']}")
+    print()
+
+    lineage = data["activation_lineage"]
+    print(f"Activation Lineage: {lineage['lineage_id']}")
+    print(f"  trigger: {', '.join(lineage['trigger_finding_rules'])}")
+    print(f"  target_branch: {lineage['target_branch']}")
+    print()
+
+    gb = data["governance_boundaries"]
+    print(f"Known limitations:")
+    print(f"  RULE-004: {gb['known_limitation_rule_004'][:80]}...")
+    print(f"  RULE-006: {gb['known_limitation_rule_006'][:80]}...")
+    print()
+
+    print(OBJECTIVE_COVERAGE_HARDENING_ADVISORY)
     return 0

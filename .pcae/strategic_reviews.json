@@ -1,0 +1,182 @@
+[
+  {
+    "review_id": "SRR-66C-001",
+    "review_target_type": "strategic_review",
+    "review_target_id": "roadmap-state-v66c-refresh-001",
+    "review_target_version": "tracks=8,completed=50,capabilities=48,active=64H",
+    "reviewer_id": "pcae-irg-strategic",
+    "review_timestamp": "2026-06-11T19:28:51.969733+00:00",
+    "supersedes_review_id": "",
+    "findings": [
+      {
+        "finding_id": "F-20260611T192851-001",
+        "rule_id": "SRS-RULE-004",
+        "finding_type": "completeness_gap",
+        "severity": "MINOR",
+        "description": "All 4 objectives have partial or thin mapping completeness \u2014 none have reached complete status.",
+        "suggested_resolution": "Add primary mappings to move at least one objective above the 80% completeness threshold."
+      },
+      {
+        "finding_id": "F-20260611T192851-002",
+        "rule_id": "SRS-RULE-005",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "description": "Objective(s) with primary_count \u2264 2: OBJ-003(primary=1), OBJ-004(primary=2). Thin primary coverage reduces confidence in objective ownership.",
+        "suggested_resolution": "Reclassify supporting capabilities as primary where direct service to the objective can be demonstrated, or add new primary capabilities."
+      },
+      {
+        "finding_id": "F-20260611T192851-003",
+        "rule_id": "SRS-RULE-006",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "description": "Overall evidence quality is weak. Current capability-objective mapping evidence is insufficient to support high-confidence governance decisions.",
+        "suggested_resolution": "Generate and approve mapping recommendations via pcae strategic-state-summary to build evidence reports; target moderate evidence quality."
+      },
+      {
+        "finding_id": "F-20260611T192851-004",
+        "rule_id": "SRS-RULE-007",
+        "finding_type": "scope_violation",
+        "severity": "MINOR",
+        "description": "Track(s) actively growing beyond 2\u00d7median(6=12): multi_runtime(13 phases). Active expansion of a single track may indicate over-investment.",
+        "suggested_resolution": "Review whether the growing track requires further expansion or has reached sufficient depth for current objectives."
+      }
+    ],
+    "recommendation": "approve",
+    "rationale": "4 finding(s) present. Human-initiated refresh via --refresh flag. Review is advisory only; binding=False.",
+    "required_changes": [],
+    "rejection_reasons": [],
+    "human_confirmation_required": true,
+    "binding": false,
+    "strategic_context": {
+      "review_scope": [
+        "branch_health",
+        "objective_coverage",
+        "capability_alignment",
+        "roadmap_depth"
+      ],
+      "branch_health_snapshot": {
+        "BR-001": "healthy",
+        "BR-002": "healthy",
+        "BR-003": "healthy",
+        "BR-004": "healthy"
+      },
+      "objective_coverage_snapshot": {
+        "OBJ-001": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 9,
+          "supporting_count": 21
+        },
+        "OBJ-002": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 9,
+          "supporting_count": 19
+        },
+        "OBJ-003": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 1,
+          "supporting_count": 15
+        },
+        "OBJ-004": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 2,
+          "supporting_count": 13
+        }
+      },
+      "evidence_quality_at_review": "weak",
+      "track_count_at_review": 8,
+      "completed_phase_count_at_review": 50,
+      "capability_count_at_review": 48,
+      "finding_rule_count": 7
+    }
+  },
+  {
+    "review_id": "SRR-66C-002",
+    "review_target_type": "strategic_review",
+    "review_target_id": "roadmap-state-v66c-refresh-002",
+    "review_target_version": "tracks=8,completed=50,capabilities=48,active=64H",
+    "reviewer_id": "pcae-irg-strategic",
+    "review_timestamp": "2026-06-11T19:31:15.730715+00:00",
+    "supersedes_review_id": "SRR-66C-001",
+    "findings": [
+      {
+        "finding_id": "F-20260611T193115-001",
+        "rule_id": "SRS-RULE-004",
+        "finding_type": "completeness_gap",
+        "severity": "MINOR",
+        "description": "All 4 objectives have partial or thin mapping completeness \u2014 none have reached complete status.",
+        "suggested_resolution": "Add primary mappings to move at least one objective above the 80% completeness threshold."
+      },
+      {
+        "finding_id": "F-20260611T193115-002",
+        "rule_id": "SRS-RULE-005",
+        "finding_type": "quality_concern",
+        "severity": "MINOR",
+        "description": "Objective(s) with primary_count \u2264 2: OBJ-003(primary=1), OBJ-004(primary=2). Thin primary coverage reduces confidence in objective ownership.",
+        "suggested_resolution": "Reclassify supporting capabilities as primary where direct service to the objective can be demonstrated, or add new primary capabilities."
+      },
+      {
+        "finding_id": "F-20260611T193115-003",
+        "rule_id": "SRS-RULE-007",
+        "finding_type": "scope_violation",
+        "severity": "MINOR",
+        "description": "Track(s) actively growing beyond 2\u00d7median(6=12): multi_runtime(13 phases). Active expansion of a single track may indicate over-investment.",
+        "suggested_resolution": "Review whether the growing track requires further expansion or has reached sufficient depth for current objectives."
+      }
+    ],
+    "recommendation": "approve",
+    "rationale": "3 finding(s) present. Human-initiated refresh via --refresh flag. Review is advisory only; binding=False.",
+    "required_changes": [],
+    "rejection_reasons": [],
+    "human_confirmation_required": true,
+    "binding": false,
+    "strategic_context": {
+      "review_scope": [
+        "branch_health",
+        "objective_coverage",
+        "capability_alignment",
+        "roadmap_depth"
+      ],
+      "branch_health_snapshot": {
+        "BR-001": "healthy",
+        "BR-002": "healthy",
+        "BR-003": "healthy",
+        "BR-004": "healthy"
+      },
+      "objective_coverage_snapshot": {
+        "OBJ-001": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 9,
+          "supporting_count": 21
+        },
+        "OBJ-002": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 9,
+          "supporting_count": 19
+        },
+        "OBJ-003": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 1,
+          "supporting_count": 15
+        },
+        "OBJ-004": {
+          "coverage": "covered",
+          "completeness": "partial",
+          "primary_count": 2,
+          "supporting_count": 13
+        }
+      },
+      "evidence_quality_at_review": "healthy",
+      "track_count_at_review": 8,
+      "completed_phase_count_at_review": 50,
+      "capability_count_at_review": 48,
+      "finding_rule_count": 7
+    }
+  }
+]

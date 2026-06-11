@@ -69270,6 +69270,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae strategic-review-governance --refresh",
         ],
         "dependencies": ["strategic_review_model"],
+        "successor_capabilities": ["objective_coverage_hardening"],
+    },
+    {
+        "capability_domain": "multi_runtime_capabilities",
+        "capability_name": "Objective Coverage Hardening",
+        "implemented_phase": "64H",
+        "status": "implemented",
+        "commands": [
+            "pcae objective-coverage-hardening",
+            "pcae objective-coverage-hardening --json",
+        ],
+        "dependencies": ["orchestration_readiness_gate", "strategic_review_calibration"],
         "successor_capabilities": [],
     },
 )
@@ -70135,7 +70147,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "66C",
         "phase_title": "Strategic Review Calibration and BR-004 Closure",
-        "status": "active",
+        "status": "completed",
         "predecessor": "66B",
         "successor": "",
         "superseded_by": "",
@@ -70144,7 +70156,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "multi_runtime",
         "phase_id": "64H",
         "phase_title": "Multi-Runtime Objective Coverage Hardening",
-        "status": "deferred",
+        "status": "active",
         "predecessor": "64F",
         "successor": "",
         "superseded_by": "",
@@ -70892,9 +70904,31 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "strategic_review_model",
         ],
-        "successors": [],
+        "successors": ["objective_coverage_hardening"],
         "aliases": [],
         "contribution": "recalibrates SRS-RULE-007 from point-in-time depth to active-growth detection; updates RULE-004/005 resolution text to name 64H as corrective path; adds --refresh command for voluntary review record creation; closes BR-004 (independent_review_governance branch); execution_allowed=False; no workflow coupling",
+    },
+    {
+        "capability_name": "Objective Coverage Hardening",
+        "capability_domain": "multi_runtime_capabilities",
+        "implemented_phase": "64H",
+        "status": "implemented",
+        "commands": [
+            "pcae objective-coverage-hardening",
+            "pcae objective-coverage-hardening --json",
+        ],
+        "dependencies": [
+            "orchestration_readiness_gate",
+            "strategic_review_calibration",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "produces 5 reclassification proposals (OCH-PROP-64H-001 through OCH-PROP-64H-005) "
+            "and 4 objective evidence reports (EBR-64H-001 through EBR-64H-004); "
+            "activation lineage SLR-64H-001 recorded; direct_map_mutation_allowed=False; "
+            "human_approval_required=True for all proposals; execution_allowed=False"
+        ),
     },
     {
         "capability_name": "Capability Inventory",
@@ -72878,7 +72912,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66C",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66C-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66C",
@@ -72886,7 +72920,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66C",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66C-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66C",
@@ -72894,10 +72928,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66C",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66C-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66C",
+    },
+    {
+        "phase_id": "64H",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "64H-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64H",
+    },
+    {
+        "phase_id": "64H",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "64H-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64H",
+    },
+    {
+        "phase_id": "64H",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "64H-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "64H",
     },
 )
 
@@ -78691,7 +78749,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-003", "OBJ-002"],
         "entry_phase": "51A",
-        "current_phase": "64F",
+        "current_phase": "64H",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79241,6 +79299,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "recalibrates SRS finding rules for accuracy and closes BR-004; "
             "no workflow coupling, no binding mechanisms, execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "objective_coverage_hardening",
+        "objective_ids": ["OBJ-003"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "produces reclassification proposals and evidence reports addressing the OBJ-003 "
+            "primary coverage gap identified in SRS-RULE-005; advisory-only, "
+            "direct_map_mutation_allowed=False, human_approval_required=True"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -80354,9 +80424,14 @@ def build_strategic_state_summary(root: "HarnessPath | None" = None) -> dict:
     moderate_count = sum(1 for r in evidence_reports if r["recommendation_health"] == "moderate")
     weak_count = sum(1 for r in evidence_reports if r["recommendation_health"] == "weak")
     none_count = sum(1 for r in evidence_reports if r["recommendation_health"] not in ("strong", "moderate", "weak"))
-    overall_health = "strong" if strong_count > len(evidence_reports) * 0.5 else (
-        "moderate" if moderate_count + strong_count > len(evidence_reports) * 0.5 else "weak"
-    )
+    # When no unmapped capabilities exist (all capabilities are mapped), evidence quality
+    # is not applicable — return "healthy" rather than "weak" (0 > 0 is False in the formula).
+    if not evidence_reports:
+        overall_health = "healthy"
+    else:
+        overall_health = "strong" if strong_count > len(evidence_reports) * 0.5 else (
+            "moderate" if moderate_count + strong_count > len(evidence_reports) * 0.5 else "weak"
+        )
 
     evidence_summary = {
         "total_recommendations": len(recommendations),
@@ -83694,4 +83769,307 @@ def build_write_invocation_approval_gateway(root: "HarnessPath | None" = None) -
         "sample_assessment": dict(_WAG_SAMPLE_ASSESSMENT),
         "governance_boundaries": dict(_WAG_GOVERNANCE_BOUNDARIES),
         "advisory": WRITE_INVOCATION_APPROVAL_GATEWAY_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 64H — Multi-Runtime Objective Coverage Hardening
+# ---------------------------------------------------------------------------
+
+_OCH_PHASE_ID: str = "64H"
+_OCH_PHASE_TITLE: str = "Multi-Runtime Objective Coverage Hardening"
+
+_OCH_RECLASSIFICATION_PROPOSALS: tuple[dict, ...] = (
+    {
+        "proposal_id": "OCH-PROP-64H-001",
+        "capability_id": "multi-runtime_orchestration_execution",
+        "from_contribution_type": "supporting",
+        "to_contribution_type": "primary",
+        "objective_ids": ["OBJ-003"],
+        "supersedes_decision_id": "DEC-65D-015",
+        "rationale": (
+            "multi-runtime_orchestration_execution is the definitional implementation of OBJ-003: "
+            "it executes coordination and dispatches tasks across runtimes. Classification as "
+            "supporting was a bulk 65D default; no rationale for non-primary was recorded."
+        ),
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+    },
+    {
+        "proposal_id": "OCH-PROP-64H-002",
+        "capability_id": "multi-runtime_execution_planning",
+        "from_contribution_type": "supporting",
+        "to_contribution_type": "primary",
+        "objective_ids": ["OBJ-003"],
+        "supersedes_decision_id": "DEC-65D-016",
+        "rationale": (
+            "multi-runtime_execution_planning is first-order governance: it defines how execution "
+            "is structured across runtimes before any operation begins. Planning is primary to "
+            "the governance objective, not merely supportive."
+        ),
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+    },
+    {
+        "proposal_id": "OCH-PROP-64H-003",
+        "capability_id": "multi-runtime_execution_readiness",
+        "from_contribution_type": "supporting",
+        "to_contribution_type": "primary",
+        "objective_ids": ["OBJ-003"],
+        "supersedes_decision_id": "DEC-65D-014",
+        "rationale": (
+            "multi-runtime_execution_readiness gates execution authorization. A readiness gate "
+            "is primary governance: without it, execution cannot be authorized. It directly "
+            "governs which runtimes may proceed."
+        ),
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+    },
+    {
+        "proposal_id": "OCH-PROP-64H-004",
+        "capability_id": "multi-runtime_registry",
+        "from_contribution_type": "supporting",
+        "to_contribution_type": "primary",
+        "objective_ids": ["OBJ-003"],
+        "supersedes_decision_id": "DEC-65D-008",
+        "rationale": (
+            "multi-runtime_registry is the foundational registry for multi-runtime governance: "
+            "it defines which runtimes exist, their trust levels, and their capability profiles. "
+            "Without registry, no multi-runtime governance is possible."
+        ),
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+    },
+    {
+        "proposal_id": "OCH-PROP-64H-005",
+        "capability_id": "runtime_arbitration",
+        "from_contribution_type": "supporting",
+        "to_contribution_type": "primary",
+        "objective_ids": ["OBJ-003"],
+        "supersedes_decision_id": "DEC-65D-010",
+        "rationale": (
+            "runtime_arbitration is the conflict resolution core of multi-runtime governance: "
+            "it determines precedence when runtimes conflict. Arbitration is primary to "
+            "governing multi-runtime coordination — not a support function."
+        ),
+        "human_approval_required": True,
+        "auto_apply_allowed": False,
+    },
+)
+
+_OCH_EVIDENCE_REPORTS: tuple[dict, ...] = (
+    {
+        "report_id": "EBR-64H-001",
+        "subject_id": "OBJ-001",
+        "subject_type": "objective",
+        "objective_name": "safe_ai_coding",
+        "evidence_sources": [
+            "strategic_roadmap_governance/primary",
+            "governed_write_invocation_design/primary",
+            "commit_session_continuity_guard/primary",
+            "independent_review_governance/primary",
+            "strategic_review_model/primary",
+        ],
+        "evidence_count": 5,
+        "evidence_quality_score": 1.0,
+        "primary_count": 9,
+        "supporting_count": 21,
+        "recommendation_health": "strong",
+        "lineage_depth": 0,
+        "notes": (
+            "OBJ-001 has strong primary coverage (9 primaries). "
+            "Evidence reports the existing coverage faithfully."
+        ),
+    },
+    {
+        "report_id": "EBR-64H-002",
+        "subject_id": "OBJ-002",
+        "subject_type": "objective",
+        "objective_name": "human_approval_mandatory",
+        "evidence_sources": [
+            "strategic_roadmap_governance/primary",
+            "write_invocation_approval_gateway/primary",
+            "governed_write_invocation_candidate_contract/primary",
+            "independent_review_governance/primary",
+            "strategic_review_model/primary",
+        ],
+        "evidence_count": 5,
+        "evidence_quality_score": 1.0,
+        "primary_count": 9,
+        "supporting_count": 19,
+        "recommendation_health": "strong",
+        "lineage_depth": 0,
+        "notes": (
+            "OBJ-002 has strong primary coverage (9 primaries). "
+            "All write and approval paths are primary contributors."
+        ),
+    },
+    {
+        "report_id": "EBR-64H-003",
+        "subject_id": "OBJ-003",
+        "subject_type": "objective",
+        "objective_name": "multi_runtime_governance",
+        "evidence_sources": [
+            "orchestration_readiness_gate/primary",
+            "multi-runtime_orchestration_execution/supporting",
+            "multi-runtime_execution_planning/supporting",
+            "multi-runtime_execution_readiness/supporting",
+            "multi-runtime_registry/supporting",
+            "objective_coverage_hardening/supporting",
+        ],
+        "evidence_count": 1,
+        "evidence_quality_score": 0.33,
+        "primary_count": 1,
+        "supporting_count": 15,
+        "recommendation_health": "weak",
+        "lineage_depth": 0,
+        "notes": (
+            "OBJ-003 primary_count=1 is a classification artifact from the 65D bulk mapping. "
+            "OCH-PROP-64H-001 through OCH-PROP-64H-005 propose reclassification; if approved, "
+            "primary_count rises to 6 and evidence quality will improve to strong. "
+            "Evidence quality is weak (1 primary source in live map at time of authoring)."
+        ),
+    },
+    {
+        "report_id": "EBR-64H-004",
+        "subject_id": "OBJ-004",
+        "subject_type": "objective",
+        "objective_name": "capability_intelligence",
+        "evidence_sources": [
+            "capability_inventory_alignment/primary",
+            "capability_and_roadmap_intelligence/primary",
+        ],
+        "evidence_count": 2,
+        "evidence_quality_score": 0.67,
+        "primary_count": 2,
+        "supporting_count": 13,
+        "recommendation_health": "moderate",
+        "lineage_depth": 0,
+        "notes": (
+            "OBJ-004 has 2 primary capabilities. Coverage is adequate but moderate. "
+            "No reclassification proposals target OBJ-004 in this phase."
+        ),
+    },
+)
+
+_OCH_ACTIVATION_LINEAGE: dict = {
+    "lineage_id": "SLR-64H-001",
+    "trigger_review_id": "SRR-66B-001",
+    "trigger_finding_rules": ["SRS-RULE-004", "SRS-RULE-005"],
+    "trigger_resolution_text": (
+        "Phase 64H designated as corrective path in SRS-RULE-004 and SRS-RULE-005 "
+        "suggested_resolution fields per 66C recalibration."
+    ),
+    "predecessor_branch_closed": "BR-004",
+    "target_branch": "BR-001",
+    "activated_phase_id": "64H",
+    "activation_rationale": (
+        "Strategic Review findings SRS-RULE-004/005 from 66C identified OBJ-003 primary_count=1 "
+        "as a coverage classification artifact. 64H was deferred as an alternative in SLR-66C-001. "
+        "Cross-track movement from BR-004 closure to BR-001 resumption requires this activation "
+        "lineage record per the 65J governance model."
+    ),
+    "human_record": True,
+    "execution_allowed": False,
+    "note": (
+        "This structure is the advisory activation lineage embedded in the OCH output. "
+        "The canonical governance artifact is SLR-64H-001 in .pcae/strategic-lineage.json."
+    ),
+}
+
+_OCH_GOVERNANCE_BOUNDARIES: dict = {
+    "phase": "64H",
+    "auto_reclassify_allowed": False,
+    "direct_map_mutation_allowed": False,
+    "human_approval_required": True,
+    "evidence_report_auto_apply": False,
+    "execution_allowed": False,
+    "cross_track_activation_requires_decision": True,
+    "activation_lineage_provided": True,
+    "known_limitation_rule_004": (
+        "SRS-RULE-004 (all objectives partial completeness) is NOT cleared by 64H. "
+        "Future phases adding new primary mappings via the normal evolution pathway are required."
+    ),
+    "known_limitation_rule_004_reclassification": (
+        "SRS-RULE-004 cannot be cleared by reclassification alone. The condition requires "
+        "mapping_completeness_status=complete (≥80% ratio = 38+ of 48 total capabilities mapped "
+        "to an objective). Reclassifying supporting→primary changes contribution_type only, "
+        "not the mapped capability count. New primary capabilities must be added to the map."
+    ),
+    "known_limitation_rule_005_obj004": (
+        "SRS-RULE-005 will persist even after all OCH-PROP-64H-001 through OCH-PROP-64H-005 are "
+        "approved. Approving all proposals raises OBJ-003 primary_count from 1 to 6, clearing "
+        "OBJ-003's contribution to RULE-005. However, OBJ-004 has primary_count=2 which satisfies "
+        "the ≤2 condition independently. RULE-005 will continue to fire due to OBJ-004 until "
+        "additional primary capabilities are added for OBJ-004 or the threshold is recalibrated."
+    ),
+    "known_limitation_rule_006": (
+        "SRS-RULE-006 (evidence quality weak) may improve only if evidence report coverage "
+        "is consumed by the strategic review model. 64H produces evidence reports but cannot "
+        "auto-apply them to the review model."
+    ),
+    "known_limitation_rule_007": (
+        "SRS-RULE-007 fires after 64H because adding the 64H phase raises the multi_runtime "
+        "track to 13 phases, crossing the 2×median threshold (median=6, threshold=12), and "
+        "BR-001 is active. This is expected behavior from resuming active multi-runtime work "
+        "after the 66A–66C strategic governance interlude. It is a growth signal, not a defect."
+    ),
+    "primary_target": (
+        "SRS-RULE-005 (OBJ-003 aspect only): OBJ-003 primary_count=1 addressed via "
+        "OCH-PROP-64H-001 through OCH-PROP-64H-005. Note: RULE-005 persists post-approval "
+        "due to OBJ-004 primary_count=2 — see known_limitation_rule_005_obj004."
+    ),
+    "refresh_lineage_note": (
+        "SRR-66C-001 was created during the 64H implementation session while a formula bug "
+        "(_ebr_build_evidence_summary returning 'weak' for empty evidence_reports) was still "
+        "present. It captured RULE-006 firing incorrectly. The formula was fixed and "
+        "SRR-66C-002 was created as the corrected canonical refresh record. "
+        "SRR-66C-002.supersedes_review_id='SRR-66C-001' was set pre-commit in "
+        ".pcae/strategic_reviews.json. SRR-66C-001 is preserved as an immutable artifact "
+        "per the append-only policy; it is marked superseded via the supersedes_review_id "
+        "linkage and should not be treated as an authoritative finding."
+    ),
+}
+
+OBJECTIVE_COVERAGE_HARDENING_ADVISORY: str = (
+    "Phase 64H produces reclassification proposals (OCH-PROP-64H-001 through OCH-PROP-64H-005) "
+    "and evidence reports (EBR-64H-001 through EBR-64H-004) for the strategic objective coverage map. "
+    "All proposals require human approval before any map update; direct_map_mutation_allowed=False. "
+    "64H addresses the OBJ-003 aspect of SRS-RULE-005 by proposing primary reclassification for "
+    "OBJ-003 (primary_count 1→6 if all proposals approved). SRS-RULE-005 will still fire after full "
+    "approval because OBJ-004 has primary_count=2, which independently satisfies the ≤2 condition. "
+    "SRS-RULE-004 is not clearable by reclassification alone: the completeness threshold requires "
+    "38+ of 48 total capabilities mapped to an objective; reclassifying supporting→primary does not "
+    "increase the mapped count. SRS-RULE-007 fires because 64H adds the 13th phase to the "
+    "multi_runtime track (active BR-001), crossing the 2×median(6)=12 threshold — this is expected "
+    "active-growth behavior, not a regression. "
+    "SRS-RULE-006 (evidence quality) may improve only when evidence reports are consumed by the "
+    "strategic review model. execution_allowed=False; advisory and evidence-producing only."
+)
+
+
+def build_objective_coverage_hardening(root: "HarnessPath | None" = None) -> dict:
+    """Multi-Runtime Objective Coverage Hardening — advisory and evidence-producing (Phase 64H)."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    return {
+        "objective_coverage_hardening_overview": {
+            "phase": _OCH_PHASE_ID,
+            "phase_title": _OCH_PHASE_TITLE,
+            "proposal_count": len(_OCH_RECLASSIFICATION_PROPOSALS),
+            "evidence_report_count": len(_OCH_EVIDENCE_REPORTS),
+            "auto_reclassify_allowed": False,
+            "direct_map_mutation_allowed": False,
+            "human_approval_required": True,
+            "evidence_report_auto_apply": False,
+            "execution_allowed": False,
+            "cross_track_activation_requires_decision": True,
+            "activation_lineage_provided": True,
+        },
+        "reclassification_proposals": [dict(p) for p in _OCH_RECLASSIFICATION_PROPOSALS],
+        "evidence_reports": [dict(r) for r in _OCH_EVIDENCE_REPORTS],
+        "activation_lineage": dict(_OCH_ACTIVATION_LINEAGE),
+        "governance_boundaries": dict(_OCH_GOVERNANCE_BOUNDARIES),
+        "advisory": OBJECTIVE_COVERAGE_HARDENING_ADVISORY,
     }

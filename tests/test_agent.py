@@ -47522,7 +47522,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -47621,7 +47621,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "66C"
+    assert data["current_phase"]["phase_id"] == "64H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47736,7 +47736,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "66C"
+    assert data["current_phase"]["phase_id"] == "64H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47745,7 +47745,7 @@ def test_roadmap_recommendation_current_track_capability_intelligence(tmp_path, 
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_track"] == "independent_review_governance"
+    assert data["current_track"] == "multi_runtime"
 
 
 def test_roadmap_recommendation_no_41c_in_valid_recommendations(tmp_path, monkeypatch) -> None:
@@ -47856,8 +47856,8 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     data = json.loads(capsys.readouterr().out)
     assert "recommendations" in data
     assert "assessment" in data
-    assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "66C"
+    assert data["current_track"] == "multi_runtime"
+    assert data["current_phase"]["phase_id"] == "64H"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47865,7 +47865,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "independent_review_governance" in output or "66C" in output
+    assert "multi_runtime" in output or "64H" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47874,8 +47874,8 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
     assert "current_track" in data
-    assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "66C"
+    assert data["current_track"] == "multi_runtime"
+    assert data["current_phase"]["phase_id"] == "64H"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47970,8 +47970,8 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "66C"
-    assert data["current_track"] == "independent_review_governance"
+    assert data["current_phase"]["phase_id"] == "64H"
+    assert data["current_track"] == "multi_runtime"
 
 
 def test_prompt_recommendation_registry_record_fields(tmp_path, monkeypatch) -> None:
@@ -48865,7 +48865,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -49081,7 +49081,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49312,7 +49312,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50052,7 +50052,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -50145,7 +50145,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "66C" in output
+    assert "64H" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -50153,7 +50153,7 @@ def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "next"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "independent_review_governance" in output or "66C" in output
+    assert "multi_runtime" in output or "64H" in output
 
 
 # ---------------------------------------------------------------------------
@@ -51298,7 +51298,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -51574,7 +51574,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -51639,7 +51639,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -51977,7 +51977,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -52411,7 +52411,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -52517,16 +52517,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 47, (
-        f"Expected 47 map entries after 66C, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 48, (
+        f"Expected 48 map entries after 64H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 47, (
-        f"Expected 47 map entries after 66C, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 48, (
+        f"Expected 48 map entries after 64H, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52714,10 +52714,10 @@ def test_65d_overall_state_health_is_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath65D(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -52756,7 +52756,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -53030,10 +53030,10 @@ def test_65e_state_summary_remains_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath65E(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -53059,7 +53059,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -53303,10 +53303,10 @@ def test_65f_state_summary_remains_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath65F(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -53332,7 +53332,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -53585,10 +53585,10 @@ def test_65g_state_summary_remains_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath65G(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -53655,7 +53655,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -54029,10 +54029,10 @@ def test_65h_state_summary_remains_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath65H(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -54058,7 +54058,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -54347,10 +54347,10 @@ def test_66a_state_summary_remains_healthy(tmp_path) -> None:
     data = build_strategic_state_summary(_HarnessPath66A(tmp_path))
     summary = data["sample_summary"]
     assert summary["warning_unmapped_count"] == 0, (
-        f"Expected 0 warning-unmapped capabilities, got {summary['warning_unmapped_count']}"
+        f"Expected 0 warning-unmapped capabilities (objective_coverage_hardening mapped to OBJ-003 in 64H), got {summary['warning_unmapped_count']}"
     )
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
 
 
@@ -54385,7 +54385,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "66C"
+    assert current["phase_id"] == "64H"
     assert current["status"] == "active"
 
 
@@ -54588,7 +54588,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "66C" in active_drift[0]
+    assert "64H" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54708,7 +54708,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "66C"
+    assert data["current_phase"]["phase_id"] == "64H"
     assert branch["current_phase"] == "65J"
 
 
@@ -54764,7 +54764,7 @@ def test_66c_phase_registered_as_active(tmp_path, monkeypatch) -> None:
 
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "66C"), None)
     assert phase is not None
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["phase_title"] == "Strategic Review Calibration and BR-004 Closure"
     assert phase["predecessor"] == "66B"
 
@@ -54878,9 +54878,13 @@ def test_66c_rule007_does_not_fire_on_completed_tracks(tmp_path, monkeypatch) ->
 
     findings = _srs_run_finding_rules(branch_health, obj_snapshot, evidence_quality, track_counts, "20260611T000000")
     rule007_findings = [f for f in findings if f["rule_id"] == "SRS-RULE-007"]
-    assert len(rule007_findings) == 0, (
-        "SRS-RULE-007 must not fire against completed tracks (multi_runtime and capability_intelligence are complete)"
-    )
+    # multi_runtime is no longer fully completed (64H is active), so RULE-007 fires for it.
+    # Verify: if RULE-007 fires, it fires only for tracks with active phases (not completed-only tracks).
+    for finding in rule007_findings:
+        desc = finding.get("description", "")
+        assert "capability_intelligence" not in desc, (
+            "SRS-RULE-007 must not fire for capability_intelligence (fully completed track)"
+        )
 
 
 def test_66c_rule004_resolution_references_64h(tmp_path) -> None:
@@ -54908,9 +54912,9 @@ def test_66c_active_tracks_helper_excludes_completed(tmp_path) -> None:
 
     active = _srs_compute_active_tracks()
     assert isinstance(active, set)
-    assert "multi_runtime" not in active, "multi_runtime is fully completed — must not be in active tracks"
+    assert "multi_runtime" in active, "multi_runtime has 64H active — must be included"
     assert "capability_intelligence" not in active, "capability_intelligence is fully completed — must not be in active tracks"
-    assert "independent_review_governance" in active, "independent_review_governance has 66C active — must be included"
+    assert "independent_review_governance" not in active, "independent_review_governance has no active phase after 66C completed"
 
 
 def test_66c_builder_returns_dict_with_refresh_key(tmp_path, monkeypatch) -> None:
@@ -54987,7 +54991,7 @@ def test_66c_prompt_profiles_recommended(tmp_path, monkeypatch) -> None:
     registry = build_prompt_recommendation_hardening(HarnessPath.cwd())["prompt_registry"]
     phase_66c = [r for r in registry if r["phase_id"] == "66C"]
     assert len(phase_66c) == 3
-    assert all(r["prompt_status"] == "recommended" for r in phase_66c)
+    assert all(r["prompt_status"] == "historical" for r in phase_66c)
 
 
 def test_66c_mapped_to_obj001_and_obj002(tmp_path) -> None:
@@ -55010,5 +55014,260 @@ def test_66c_state_summary_remains_healthy(tmp_path, monkeypatch) -> None:
     data = build_strategic_state_summary(HarnessPath.cwd())
     summary = data["sample_summary"]
     assert summary["overall_state_health"] == "healthy", (
-        f"Expected overall_state_health=healthy, got {summary['overall_state_health']!r}"
+        f"Expected overall_state_health=healthy (objective_coverage_hardening mapped in 64H), got {summary['overall_state_health']!r}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 64H — Multi-Runtime Objective Coverage Hardening
+# ---------------------------------------------------------------------------
+
+
+def test_64h_phase_registered_as_active(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "64H"), None)
+    assert phase is not None
+    assert phase["status"] == "active"
+    assert phase["phase_title"] == "Multi-Runtime Objective Coverage Hardening"
+    assert phase["predecessor"] == "64F"
+    assert phase["track_name"] == "multi_runtime"
+
+
+def test_64h_66c_registered_as_completed(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase_66c = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "66C"), None)
+    assert phase_66c is not None
+    assert phase_66c["status"] == "completed"
+
+
+def test_64h_capability_in_cri_registry(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+
+    cap = next((c for c in _CRI_KNOWN_CAPABILITIES if c["implemented_phase"] == "64H"), None)
+    assert cap is not None
+    assert cap["status"] == "implemented"
+    assert "pcae objective-coverage-hardening" in cap["commands"]
+
+
+def test_64h_advisory_exported(tmp_path) -> None:
+    from pcae.core.agent import OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+
+    assert isinstance(OBJECTIVE_COVERAGE_HARDENING_ADVISORY, str)
+    assert "64H" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+    assert "SRS-RULE-005" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+    assert "SRS-RULE-004" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+    assert "execution_allowed=False" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+
+
+def test_64h_builder_returns_dict(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_objective_coverage_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_objective_coverage_hardening(HarnessPath.cwd())
+    assert isinstance(data, dict)
+    assert "objective_coverage_hardening_overview" in data
+    assert "reclassification_proposals" in data
+    assert "evidence_reports" in data
+    assert "activation_lineage" in data
+    assert "governance_boundaries" in data
+    assert "advisory" in data
+
+
+def test_64h_reclassification_proposals_count(tmp_path) -> None:
+    from pcae.core.agent import _OCH_RECLASSIFICATION_PROPOSALS
+
+    assert len(_OCH_RECLASSIFICATION_PROPOSALS) == 5
+
+
+def test_64h_proposals_have_supersedes_decision_id(tmp_path) -> None:
+    from pcae.core.agent import _OCH_RECLASSIFICATION_PROPOSALS
+
+    for proposal in _OCH_RECLASSIFICATION_PROPOSALS:
+        assert proposal["supersedes_decision_id"], (
+            f"{proposal['proposal_id']} must have a non-empty supersedes_decision_id"
+        )
+        assert proposal["supersedes_decision_id"].startswith("DEC-65D-"), (
+            f"{proposal['proposal_id']} supersedes_decision_id must reference a DEC-65D-* record"
+        )
+
+
+def test_64h_proposal_supersedes_ids_are_unique(tmp_path) -> None:
+    from pcae.core.agent import _OCH_RECLASSIFICATION_PROPOSALS
+
+    ids = [p["supersedes_decision_id"] for p in _OCH_RECLASSIFICATION_PROPOSALS]
+    assert len(ids) == len(set(ids)), "All supersedes_decision_id values must be unique"
+
+
+def test_64h_human_approval_required_on_all_proposals(tmp_path) -> None:
+    from pcae.core.agent import _OCH_RECLASSIFICATION_PROPOSALS
+
+    for proposal in _OCH_RECLASSIFICATION_PROPOSALS:
+        assert proposal["human_approval_required"] is True
+        assert proposal["auto_apply_allowed"] is False
+
+
+def test_64h_direct_map_mutation_not_allowed(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert _OCH_GOVERNANCE_BOUNDARIES["direct_map_mutation_allowed"] is False
+    assert _OCH_GOVERNANCE_BOUNDARIES["auto_reclassify_allowed"] is False
+    assert _OCH_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _OCH_GOVERNANCE_BOUNDARIES["human_approval_required"] is True
+    assert _OCH_GOVERNANCE_BOUNDARIES["evidence_report_auto_apply"] is False
+
+
+def test_64h_activation_lineage_exists(tmp_path) -> None:
+    from pcae.core.agent import _OCH_ACTIVATION_LINEAGE
+
+    assert _OCH_ACTIVATION_LINEAGE["lineage_id"] == "SLR-64H-001"
+    assert "SRS-RULE-004" in _OCH_ACTIVATION_LINEAGE["trigger_finding_rules"]
+    assert "SRS-RULE-005" in _OCH_ACTIVATION_LINEAGE["trigger_finding_rules"]
+    assert _OCH_ACTIVATION_LINEAGE["target_branch"] == "BR-001"
+    assert _OCH_ACTIVATION_LINEAGE["activated_phase_id"] == "64H"
+    assert _OCH_ACTIVATION_LINEAGE["execution_allowed"] is False
+
+
+def test_64h_evidence_reports_cover_all_objectives(tmp_path) -> None:
+    from pcae.core.agent import _OCH_EVIDENCE_REPORTS
+
+    assert len(_OCH_EVIDENCE_REPORTS) == 4
+    subject_ids = {r["subject_id"] for r in _OCH_EVIDENCE_REPORTS}
+    assert subject_ids == {"OBJ-001", "OBJ-002", "OBJ-003", "OBJ-004"}
+
+
+def test_64h_evidence_report_ids_are_unique(tmp_path) -> None:
+    from pcae.core.agent import _OCH_EVIDENCE_REPORTS
+
+    report_ids = [r["report_id"] for r in _OCH_EVIDENCE_REPORTS]
+    assert report_ids == ["EBR-64H-001", "EBR-64H-002", "EBR-64H-003", "EBR-64H-004"]
+
+
+def test_64h_ebr_evidence_count_consistent_with_primary_sources(tmp_path) -> None:
+    from pcae.core.agent import _OCH_EVIDENCE_REPORTS
+
+    for r in _OCH_EVIDENCE_REPORTS:
+        primary_in_sources = sum(1 for s in r["evidence_sources"] if s.endswith("/primary"))
+        assert r["evidence_count"] == primary_in_sources, (
+            f"{r['report_id']}: evidence_count={r['evidence_count']} does not match "
+            f"primary sources in evidence_sources={primary_in_sources}"
+        )
+
+
+def test_64h_advisory_acknowledges_rule_004_not_cleared(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert "SRS-RULE-004" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_004"]
+    assert "NOT cleared" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_004"]
+
+
+def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert "SRS-RULE-006" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_006"]
+    assert "may improve" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_006"]
+
+
+def test_64h_adds_self_map_entry(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 48, (
+        f"Expected 48 map entries (64H adds 1 entry for objective_coverage_hardening→OBJ-003), "
+        f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "objective_coverage_hardening"),
+        None,
+    )
+    assert entry is not None, "objective_coverage_hardening must have a map entry"
+    assert entry["contribution_type"] == "supporting"
+    assert "OBJ-003" in entry["objective_ids"]
+
+
+def test_64h_br001_current_phase_updated(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _SRG_BRANCH_REGISTRY
+
+    br001 = next((b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-001"), None)
+    assert br001 is not None
+    assert br001["current_phase"] == "64H"
+
+
+def test_64h_proposal_target_capabilities_are_all_in_obj003(tmp_path) -> None:
+    from pcae.core.agent import _OCH_RECLASSIFICATION_PROPOSALS
+
+    for proposal in _OCH_RECLASSIFICATION_PROPOSALS:
+        assert "OBJ-003" in proposal["objective_ids"], (
+            f"{proposal['proposal_id']} must target OBJ-003"
+        )
+        assert proposal["from_contribution_type"] == "supporting"
+        assert proposal["to_contribution_type"] == "primary"
+
+
+def test_64h_prompt_profiles_registered(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+
+    profiles_64h = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "64H"]
+    assert len(profiles_64h) == 3
+    types = {p["prompt_type"] for p in profiles_64h}
+    assert types == {"implementation", "validation", "agent"}
+    for p in profiles_64h:
+        assert p["prompt_status"] == "recommended"
+
+
+def test_64h_governance_overview_invariants(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_objective_coverage_hardening
+    from pcae.core.paths import HarnessPath
+
+    data = build_objective_coverage_hardening(HarnessPath.cwd())
+    ov = data["objective_coverage_hardening_overview"]
+    assert ov["phase"] == "64H"
+    assert ov["execution_allowed"] is False
+    assert ov["direct_map_mutation_allowed"] is False
+    assert ov["human_approval_required"] is True
+    assert ov["proposal_count"] == 5
+    assert ov["evidence_report_count"] == 4
+
+
+def test_64h_governance_boundaries_document_rule_005_obj004(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert "known_limitation_rule_005_obj004" in _OCH_GOVERNANCE_BOUNDARIES
+    assert "OBJ-004" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_005_obj004"]
+    assert "persist" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_005_obj004"]
+
+
+def test_64h_governance_boundaries_document_rule_004_reclassification(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert "known_limitation_rule_004_reclassification" in _OCH_GOVERNANCE_BOUNDARIES
+    assert "reclassif" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_004_reclassification"].lower()
+
+
+def test_64h_governance_boundaries_document_rule_007(tmp_path) -> None:
+    from pcae.core.agent import _OCH_GOVERNANCE_BOUNDARIES
+
+    assert "known_limitation_rule_007" in _OCH_GOVERNANCE_BOUNDARIES
+    assert "RULE-007" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_007"]
+    assert "multi_runtime" in _OCH_GOVERNANCE_BOUNDARIES["known_limitation_rule_007"]
+
+
+def test_64h_advisory_documents_rule_005_obj004_persistence(tmp_path) -> None:
+    from pcae.core.agent import OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+
+    assert "OBJ-004" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+    assert "RULE-005" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+
+
+def test_64h_advisory_documents_rule_007_active_growth(tmp_path) -> None:
+    from pcae.core.agent import OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+
+    assert "RULE-007" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
+    assert "multi_runtime" in OBJECTIVE_COVERAGE_HARDENING_ADVISORY
