@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 65J Strategic Decision Continuity (20260611-1600-65j-strategic-decision-continuity)
 - 66B Strategic Review Model (20260611-0030-66b-strategic-review-model)
 - Resolve 64B.6E Registry Alignment (20260610-2351-resolve-64b-6e-registry-alignment)
 - Governed Write Invocation Candidate Contract (20260610-1906-governed-write-invocation-candidate-contract)

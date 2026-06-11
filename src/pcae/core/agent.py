@@ -69257,6 +69257,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae strategic-review-governance --json",
         ],
         "dependencies": ["independent_review_governance"],
+        "successor_capabilities": ["strategic_review_calibration"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Strategic Review Calibration",
+        "implemented_phase": "66C",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-review-governance",
+            "pcae strategic-review-governance --json",
+            "pcae strategic-review-governance --refresh",
+        ],
+        "dependencies": ["strategic_review_model"],
         "successor_capabilities": [],
     },
 )
@@ -70085,7 +70098,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65I",
         "phase_title": "Strategic Registry Coherence Hardening",
-        "status": "active",
+        "status": "completed",
         "predecessor": "65H",
         "successor": "65J",
         "superseded_by": "",
@@ -70094,7 +70107,7 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "strategic_governance",
         "phase_id": "65J",
         "phase_title": "Strategic Decision Continuity",
-        "status": "implemented",
+        "status": "completed",
         "predecessor": "65I",
         "successor": "",
         "superseded_by": "",
@@ -70121,8 +70134,8 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
     {
         "track_name": "independent_review_governance",
         "phase_id": "66C",
-        "phase_title": "Strategic Review Operationalization",
-        "status": "deferred",
+        "phase_title": "Strategic Review Calibration and BR-004 Closure",
+        "status": "active",
         "predecessor": "66B",
         "successor": "",
         "superseded_by": "",
@@ -70862,9 +70875,26 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "independent_review_governance",
         ],
-        "successors": [],
+        "successors": ["strategic_review_calibration"],
         "aliases": [],
         "contribution": "defines strategic_review class behavior (4 domains, 7 finding rules, 8 extension fields); creates first real StrategicReviewRecord SRR-66B-001 in append-only _IRG_STRATEGIC_REVIEW_REGISTRY; real_review_record_creation_allowed=True for strategic_review class only; dual output (frozen record + live assessment) with staleness signal; coverage_auto_update_from_review=False; capability_mapping_auto_update_from_review=False; execution_allowed=False",
+    },
+    {
+        "capability_name": "Strategic Review Calibration",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "66C",
+        "status": "implemented",
+        "commands": [
+            "pcae strategic-review-governance",
+            "pcae strategic-review-governance --json",
+            "pcae strategic-review-governance --refresh",
+        ],
+        "dependencies": [
+            "strategic_review_model",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": "recalibrates SRS-RULE-007 from point-in-time depth to active-growth detection; updates RULE-004/005 resolution text to name 64H as corrective path; adds --refresh command for voluntary review record creation; closes BR-004 (independent_review_governance branch); execution_allowed=False; no workflow coupling",
     },
     {
         "capability_name": "Capability Inventory",
@@ -72728,7 +72758,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65I",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65I-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65I",
@@ -72736,7 +72766,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65I",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65I-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65I",
@@ -72744,7 +72774,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "65I",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "65I-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "65I",
@@ -72840,10 +72870,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "64B.6E",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "64B.6E-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "64B.6E",
+    },
+    {
+        "phase_id": "66C",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "66C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66C",
+    },
+    {
+        "phase_id": "66C",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "66C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66C",
+    },
+    {
+        "phase_id": "66C",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "66C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66C",
     },
 )
 
@@ -78671,7 +78725,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "65A",
-        "current_phase": "65I",
+        "current_phase": "65J",
         "approved_by": "",
         "approved_at": "",
     },
@@ -78688,7 +78742,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "66B",
+        "current_phase": "66C",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79176,6 +79230,17 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
         "contribution_description": (
             "preserves human-approved strategic decision and activation lineage across "
             "agent, session, and model changes without duplicating roadmap or review authority"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "strategic_review_calibration",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "recalibrates SRS finding rules for accuracy and closes BR-004; "
+            "no workflow coupling, no binding mechanisms, execution_allowed=False"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -82922,8 +82987,31 @@ STRATEGIC_REVIEW_MODEL_ADVISORY = (
     "open required-changes check only — it does not duplicate strategic-state-summary coverage output."
 )
 
-_SRS_PHASE_ID: str = "66B"
-_SRS_PHASE_TITLE: str = "Strategic Review Model"
+# ---------------------------------------------------------------------------
+# Phase 66C — Strategic Review Calibration and BR-004 Closure
+# ---------------------------------------------------------------------------
+
+STRATEGIC_REVIEW_CALIBRATION_ADVISORY = (
+    "Phase 66C recalibrates the SRS finding rules and closes BR-004 "
+    "(independent_review_governance branch). "
+    "SRS-RULE-007 condition changed from point-in-time depth (phase_count > 2×median) to "
+    "active-growth detection (same condition AND track has ≥1 active or implemented phase). "
+    "Fully completed tracks no longer trigger RULE-007 based on historical depth alone. "
+    "SRS-RULE-004 and SRS-RULE-005 suggested_resolution text updated to name "
+    "Phase 64H (Multi-Runtime Objective Coverage Hardening) as the designated corrective path. "
+    "Adds pcae strategic-review-governance --refresh: human-initiated voluntary refresh "
+    "that creates a new StrategicReviewRecord from the live state and appends it to "
+    ".pcae/strategic_reviews.json. No workflow coupling: --refresh does not affect "
+    "pcae task transition, pcae check, pcae health, or any other command path. "
+    "No acknowledgement requirements, no expiration, no mandatory refresh, no gating. "
+    "BR-004 is closed at 66C; future independent review work requires a new roadmap decision. "
+    "Recommended next phase: 64H — Multi-Runtime Objective Coverage Hardening. "
+    "Governance invariants: execution_allowed=False, review_output_is_binding=False, "
+    "human_authority_required=True, reviewer_is_approver=False, auto_approval_from_review=False."
+)
+
+_SRS_PHASE_ID: str = "66C"
+_SRS_PHASE_TITLE: str = "Strategic Review Calibration and BR-004 Closure"
 
 _SRS_REVIEW_DOMAINS: tuple[str, ...] = (
     "branch_health",
@@ -82964,6 +83052,11 @@ _SRS_FINDING_RULES: tuple[dict, ...] = (
         "severity": "MINOR",
         "condition": "all_objectives_partial_completeness",
         "condition_description": "all objectives have mapping_completeness_status=partial or thin with none complete",
+        "suggested_resolution": (
+            "Add primary mappings to move at least one objective above the 80% completeness threshold. "
+            "Phase 64H (Multi-Runtime Objective Coverage Hardening) is the designated corrective path "
+            "for OBJ-003 primary coverage."
+        ),
     },
     {
         "rule_id": "SRS-RULE-005",
@@ -82972,6 +83065,11 @@ _SRS_FINDING_RULES: tuple[dict, ...] = (
         "severity": "MINOR",
         "condition": "any_objective_thin_primary_coverage",
         "condition_description": "any objective has primary_count <= 2",
+        "suggested_resolution": (
+            "Reclassify supporting capabilities as primary where direct service to the objective "
+            "can be demonstrated. Phase 64H (Multi-Runtime Objective Coverage Hardening) is the "
+            "designated corrective path for OBJ-003 (primary_count=1)."
+        ),
     },
     {
         "rule_id": "SRS-RULE-006",
@@ -82986,8 +83084,11 @@ _SRS_FINDING_RULES: tuple[dict, ...] = (
         "domain": "roadmap_depth",
         "finding_type": "scope_violation",
         "severity": "MINOR",
-        "condition": "single_track_dominates",
-        "condition_description": "any non-legacy track has phase_count > 2 * median phase_count across non-legacy tracks",
+        "condition": "active_track_dominates",
+        "condition_description": (
+            "any non-legacy track has phase_count > 2 * median phase_count across non-legacy tracks "
+            "AND has at least one active or implemented phase (completed-only tracks are excluded)"
+        ),
     },
 )
 
@@ -83018,6 +83119,12 @@ _SRS_GOVERNANCE_BOUNDARIES: dict = {
     "review_depth_limit": 1,
     "review_mutates_candidate": False,
     "strategic_review_registry_record_limit": 3,
+    "refresh_command_allowed": True,
+    "refresh_is_human_initiated_only": True,
+    "refresh_auto_trigger_allowed": False,
+    "refresh_affects_workflow_commands": False,
+    "br_004_closed": True,
+    "recommended_next_phase": "64H",
 }
 
 
@@ -83061,6 +83168,23 @@ def _srs_compute_track_phase_counts() -> dict:
             continue
         counts[track] = counts.get(track, 0) + 1
     return counts
+
+
+def _srs_compute_active_tracks() -> set:
+    """Return track names that have at least one active or implemented phase.
+
+    Used by SRS-RULE-007 to exclude fully-completed tracks from depth checks.
+    A track with only completed or deferred phases is not actively growing and
+    should not trigger the scope_violation finding based on historical depth.
+    """
+    active: set = set()
+    for p in _CRI_KNOWN_PHASES:
+        track = p.get("track_name", "")
+        if track == "legacy":
+            continue
+        if p.get("status") in ("active", "implemented"):
+            active.add(track)
+    return active
 
 
 def _srs_run_finding_rules(
@@ -83145,19 +83269,21 @@ def _srs_run_finding_rules(
             "Generate and approve mapping recommendations via pcae strategic-state-summary to build evidence reports; target moderate evidence quality.",
         )
 
-    # SRS-RULE-007: single track dominates (phase_count > 2 * median)
+    # SRS-RULE-007: active track dominates (phase_count > 2 * median AND has active/implemented phases)
+    # Recalibrated in 66C: completed-only tracks are excluded — historical depth is not a current risk.
     if track_phase_counts:
         counts_list = sorted(track_phase_counts.values())
         n = len(counts_list)
         median = counts_list[n // 2] if n % 2 == 1 else (counts_list[n // 2 - 1] + counts_list[n // 2]) / 2
         threshold = 2 * median
-        dominant = {t: c for t, c in track_phase_counts.items() if c > threshold}
+        active_tracks = _srs_compute_active_tracks()
+        dominant = {t: c for t, c in track_phase_counts.items() if c > threshold and t in active_tracks}
         if dominant:
             detail = ", ".join(f"{t}({c} phases)" for t, c in dominant.items())
             _f(
                 "SRS-RULE-007", "scope_violation", "MINOR",
-                f"Track(s) with phase_count > 2×median({median:.0f}={threshold:.0f}): {detail}. Disproportionate depth may indicate over-investment in a single track.",
-                "Review whether the dominant track requires further expansion or has reached sufficient depth for current objectives.",
+                f"Track(s) actively growing beyond 2×median({median:.0f}={threshold:.0f}): {detail}. Active expansion of a single track may indicate over-investment.",
+                "Review whether the growing track requires further expansion or has reached sufficient depth for current objectives.",
             )
 
     return findings
@@ -83296,8 +83422,40 @@ _IRG_STRATEGIC_REVIEW_REGISTRY: tuple[dict, ...] = (
 )
 
 
-def build_strategic_review_governance(root: "HarnessPath | None" = None) -> dict:
-    """Strategic review model: behavior definition and first real ReviewRecord (Phase 66B)."""
+def _srs_load_refresh_records(root: "HarnessPath") -> list:
+    """Load persisted refresh records from .pcae/strategic_reviews.json, if present."""
+    import json as _json
+    reviews_path = root.join(Path(".pcae/strategic_reviews.json"))
+    if not reviews_path.exists():
+        return []
+    try:
+        with open(reviews_path) as f:
+            data = _json.load(f)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def _srs_write_refresh_record(root: "HarnessPath", record: dict) -> None:
+    """Append a new review record to .pcae/strategic_reviews.json."""
+    import json as _json
+    reviews_path = root.join(Path(".pcae/strategic_reviews.json"))
+    existing = _srs_load_refresh_records(root)
+    existing.append(record)
+    with open(reviews_path, "w") as f:
+        _json.dump(existing, f, indent=2)
+
+
+def build_strategic_review_governance(
+    root: "HarnessPath | None" = None,
+    refresh: bool = False,
+) -> dict:
+    """Strategic review model: calibration and BR-004 closure (Phase 66C).
+
+    When refresh=True, creates a new StrategicReviewRecord from the live state
+    and appends it to .pcae/strategic_reviews.json.  Human-initiated only.
+    No workflow coupling — does not affect task transition, check, health, or roadmap.
+    """
     if root is None:
         root = HarnessPath.cwd()
 
@@ -83344,12 +83502,72 @@ def build_strategic_review_governance(root: "HarnessPath | None" = None) -> dict
     if frozen_record and frozen_record.get("required_changes"):
         open_required_changes = list(frozen_record["required_changes"])
 
+    # --- Refresh: create and persist a new review record ---
+    refresh_record: dict | None = None
+    refresh_written: bool = False
+    refresh_error: str = ""
+    if refresh:
+        existing_refresh = _srs_load_refresh_records(root)
+        cap = _SRS_GOVERNANCE_BOUNDARIES["strategic_review_registry_record_limit"]
+        total_records = len(_IRG_STRATEGIC_REVIEW_REGISTRY) + len(existing_refresh)
+        if total_records >= cap:
+            refresh_error = (
+                f"Registry cap reached ({total_records}/{cap} records). "
+                "Migrate existing records before adding more."
+            )
+        else:
+            seq = len(existing_refresh) + 1
+            new_id = f"SRR-66C-{seq:03d}"
+            completed_count = sum(1 for p in _CRI_KNOWN_PHASES if p.get("status") == "completed")
+            capabilities_count = len(_CRI_KNOWN_CAPABILITIES)
+            refresh_record = {
+                "review_id": new_id,
+                "review_target_type": "strategic_review",
+                "review_target_id": f"roadmap-state-v66c-refresh-{seq:03d}",
+                "review_target_version": current_version,
+                "reviewer_id": "pcae-irg-strategic",
+                "review_timestamp": datetime.now(timezone.utc).isoformat(),
+                "supersedes_review_id": "",
+                "findings": live_findings,
+                "recommendation": live_recommendation,
+                "rationale": (
+                    f"{len(live_findings)} finding(s) present. "
+                    "Human-initiated refresh via --refresh flag. "
+                    "Review is advisory only; binding=False."
+                ),
+                "required_changes": [],
+                "rejection_reasons": [],
+                "human_confirmation_required": True,
+                "binding": False,
+                "strategic_context": {
+                    "review_scope": list(_SRS_REVIEW_DOMAINS),
+                    "branch_health_snapshot": {
+                        b["branch_id"]: b.get("health_status", "unknown")
+                        for b in branch_health_records
+                    },
+                    "objective_coverage_snapshot": {
+                        oid: d for oid, d in objective_snapshot.items()
+                    },
+                    "evidence_quality_at_review": evidence_quality,
+                    "track_count_at_review": len(track_phase_counts) + 1,  # +1 for legacy
+                    "completed_phase_count_at_review": completed_count,
+                    "capability_count_at_review": capabilities_count,
+                    "finding_rule_count": len(_SRS_FINDING_RULES),
+                },
+            }
+            _srs_write_refresh_record(root, refresh_record)
+            refresh_written = True
+
     return {
         "strategic_review_model_overview": {
             "phase": _SRS_PHASE_ID,
             "phase_title": _SRS_PHASE_TITLE,
             "branch": "BR-004",
             "branch_name": "independent_review_governance",
+            "branch_status": next(
+                (b["status"] for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-004"),
+                "unknown",
+            ),
             "review_domain_count": len(_SRS_REVIEW_DOMAINS),
             "finding_rule_count": len(_SRS_FINDING_RULES),
             "extension_field_count": len(_SRS_EXTENSION_FIELDS),
@@ -83362,6 +83580,8 @@ def build_strategic_review_governance(root: "HarnessPath | None" = None) -> dict
             "reviewer_is_approver": False,
             "coverage_auto_update_from_review": False,
             "human_confirmation_required": True,
+            "br_004_closed": True,
+            "recommended_next_phase": "64H",
         },
         "recorded_review": frozen_record,
         "recorded_review_is_stale": recorded_review_is_stale,
@@ -83381,7 +83601,13 @@ def build_strategic_review_governance(root: "HarnessPath | None" = None) -> dict
         "extension_fields": [dict(f) for f in _SRS_EXTENSION_FIELDS],
         "governance_boundaries": dict(_SRS_GOVERNANCE_BOUNDARIES),
         "registry": [dict(r) for r in _IRG_STRATEGIC_REVIEW_REGISTRY],
-        "advisory": STRATEGIC_REVIEW_MODEL_ADVISORY,
+        "advisory": STRATEGIC_REVIEW_CALIBRATION_ADVISORY,
+        "refresh": {
+            "requested": refresh,
+            "written": refresh_written,
+            "record": refresh_record,
+            "error": refresh_error,
+        },
     }
 
 

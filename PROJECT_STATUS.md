@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 65I: Strategic Registry Coherence Hardening.
+Phase 66C: Strategic Review Calibration and BR-004 Closure.
 
 ## Post-61J Runtime Registry Checkpoint
 

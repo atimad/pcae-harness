@@ -14,6 +14,7 @@ from pcae.core.strategic_lineage import (
 
 
 ACTIVATION_TIMESTAMP = "2026-06-11T11:00:00+00:00"
+ACTIVATION_TIMESTAMP_66C = "2026-06-11T12:00:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -57,6 +58,47 @@ def _valid_record() -> dict:
     }
 
 
+def _valid_66c_record() -> dict:
+    return {
+        "lineage_id": "SLR-66C-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_66C,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "strategic_review",
+        "source_phase_id": "66B",
+        "predecessor_phase_id": "65J",
+        "activated_phase_id": "66C",
+        "selected_branch_id": "BR-004",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "rationale": "Calibrate strategic review rules and close BR-004.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [
+            {
+                "phase_id": "64H",
+                "branch_id": "BR-001",
+                "disposition": "deferred",
+                "reason": "Deferred pending 66C completion.",
+            },
+            {
+                "phase_id": "65H",
+                "branch_id": "BR-003",
+                "disposition": "rejected",
+                "reason": "Already completed, not a viable alternative.",
+            },
+        ],
+        "rejected_alternatives": ["65H"],
+        "deferred_alternatives": ["64H"],
+        "roadmap_debt": [],
+        "supersedes_lineage_id": "",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_66C,
+        "activation_validation_status": "validated",
+    }
+
+
 def _write_registry(root: Path, records: list[dict], *, provenance: bool = True) -> None:
     pcae_dir = root / ".pcae"
     pcae_dir.mkdir(parents=True, exist_ok=True)
@@ -75,7 +117,15 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
                         "git_branch": "main",
                         "summary": "Human-approved activation of Phase 65I",
                         "timestamp": ACTIVATION_TIMESTAMP,
-                    }
+                    },
+                    {
+                        "active_task": None,
+                        "agent_id": "codex-local",
+                        "event_type": "phase_activated",
+                        "git_branch": "main",
+                        "summary": "Human-approved activation of Phase 66C",
+                        "timestamp": ACTIVATION_TIMESTAMP_66C,
+                    },
                 ],
                 indent=2,
                 sort_keys=True,
@@ -86,15 +136,15 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
 
 
 def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tuple[str, ...]:
-    _write_registry(tmp_path, [record], provenance=provenance)
+    _write_registry(tmp_path, [record, _valid_66c_record()], provenance=provenance)
     return validate_strategic_lineage(HarnessPath(tmp_path)).errors
 
 
 def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
-    _write_registry(tmp_path, [_valid_record()])
+    _write_registry(tmp_path, [_valid_record(), _valid_66c_record()])
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-65I-TEST"
+    assert result.current_lineage_id == "SLR-66C-TEST"
 
 
 def test_65j_lineage_does_not_duplicate_activation_timestamp(tmp_path: Path) -> None:
@@ -175,10 +225,33 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     record = _valid_record()
     record["activation_validation_status"] = "migration_exempt"
     record["activation_event_id"] = ""
-    _write_registry(tmp_path, [record], provenance=False)
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    (pcae_dir / "strategic-lineage.json").write_text(
+        json.dumps([record, _valid_66c_record()], indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (pcae_dir / "provenance-history.json").write_text(
+        json.dumps(
+            [
+                {
+                    "active_task": None,
+                    "agent_id": "codex-local",
+                    "event_type": "phase_activated",
+                    "git_branch": "main",
+                    "summary": "Human-approved activation of Phase 66C",
+                    "timestamp": ACTIVATION_TIMESTAMP_66C,
+                }
+            ],
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-65I-TEST"
+    assert result.current_lineage_id == "SLR-66C-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -205,7 +278,7 @@ def test_65j_migration_exemption_does_not_cover_other_phase(tmp_path: Path) -> N
 def test_65j_summary_uses_referenced_review_findings(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    _write_registry(tmp_path, [_valid_record()])
+    _write_registry(tmp_path, [_valid_record(), _valid_66c_record()])
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
@@ -218,7 +291,7 @@ def test_65j_summary_uses_referenced_review_findings(
 def test_65j_continuity_commands_are_read_only(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    _write_registry(tmp_path, [_valid_record()])
+    _write_registry(tmp_path, [_valid_record(), _valid_66c_record()])
     before = {
         path.name: path.read_bytes()
         for path in (tmp_path / ".pcae").iterdir()
@@ -226,9 +299,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-65I-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-66C-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 1
+    assert json.loads(capsys.readouterr().out)["record_count"] == 2
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

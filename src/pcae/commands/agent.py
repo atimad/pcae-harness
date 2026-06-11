@@ -417,6 +417,7 @@ from pcae.core.agent import (
     INDEPENDENT_REVIEW_GOVERNANCE_ADVISORY,
     build_strategic_review_governance,
     STRATEGIC_REVIEW_MODEL_ADVISORY,
+    STRATEGIC_REVIEW_CALIBRATION_ADVISORY,
     build_capability_inventory,
     CAPABILITY_INVENTORY_ADVISORY,
     build_capability_roadmap_intelligence,
@@ -14655,15 +14656,36 @@ def run_independent_review_governance(args: argparse.Namespace) -> int:
 
 
 def run_strategic_review_governance(args: argparse.Namespace) -> int:
-    data = build_strategic_review_governance(HarnessPath.cwd())
+    refresh = getattr(args, "refresh", False)
+    data = build_strategic_review_governance(HarnessPath.cwd(), refresh=refresh)
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    # --refresh: show the new record and exit
+    if refresh:
+        rf = data["refresh"]
+        if rf.get("error"):
+            print(f"Refresh failed: {rf['error']}")
+            return 1
+        if rf.get("written") and rf.get("record"):
+            rec = rf["record"]
+            print(f"Refresh record created: {rec['review_id']}")
+            print(f"  review_target_version: {rec['review_target_version']}")
+            print(f"  recommendation:        {rec['recommendation']}")
+            print(f"  findings:              {len(rec['findings'])}")
+            for f in rec["findings"]:
+                print(f"    [{f['severity']:5}] {f['rule_id']}: {f['description'][:70]}...")
+            print(f"  binding:               {rec['binding']}")
+            print(f"  timestamp:             {rec['review_timestamp']}")
+            print()
+            print("Written to .pcae/strategic_reviews.json")
         return 0
 
     overview = data["strategic_review_model_overview"]
     print("Strategic Review Governance")
     print(f"  Phase:                    {overview['phase']} — {overview['phase_title']}")
-    print(f"  Branch:                   {overview['branch']} ({overview['branch_name']})")
+    print(f"  Branch:                   {overview['branch']} ({overview['branch_name']}) [closed]")
     print(f"  Review domains:           {overview['review_domain_count']}")
     print(f"  Finding rules:            {overview['finding_rule_count']}")
     print(f"  Registry records:         {overview['registry_record_count']} / {overview['registry_record_limit']} limit")
@@ -14672,10 +14694,11 @@ def run_strategic_review_governance(args: argparse.Namespace) -> int:
     print(f"  Real record creation:     {overview['real_review_record_creation_allowed']} (strategic_review class only)")
     print(f"  Coverage auto-update:     {overview['coverage_auto_update_from_review']}")
     print(f"  Human confirmation req'd: {overview['human_confirmation_required']}")
+    print(f"  Recommended next phase:   {overview['recommended_next_phase']}")
     print()
 
     rec = data["recorded_review"]
-    print("Recorded review (SRR-66B-001):")
+    print(f"Recorded review ({rec['review_id']}):")
     print(f"  review_id:          {rec['review_id']}")
     print(f"  review_target_id:   {rec['review_target_id']}")
     print(f"  review_target_ver:  {rec['review_target_version']}")
@@ -14706,11 +14729,11 @@ def run_strategic_review_governance(args: argparse.Namespace) -> int:
     print()
 
     orc = data["open_required_changes_count"]
-    print(f"Open required changes from SRR-66B-001: {orc}")
+    print(f"Open required changes from {rec['review_id']}: {orc}")
     if orc:
         for ch in data["open_required_changes"]:
             print(f"  - {ch}")
     print()
 
-    print(STRATEGIC_REVIEW_MODEL_ADVISORY)
+    print(STRATEGIC_REVIEW_CALIBRATION_ADVISORY)
     return 0

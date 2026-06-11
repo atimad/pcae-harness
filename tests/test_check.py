@@ -2051,7 +2051,7 @@ def test_65j_implemented_task_does_not_require_activation_alignment(
 ) -> None:
     _write_project_status(
         tmp_path,
-        "Phase 65I: Strategic Registry Coherence Hardening.",
+        "Phase 65J: Strategic Decision Continuity.",
     )
     task = _write_task_with_phase(tmp_path, "65J Strategic Decision Continuity")
     violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)

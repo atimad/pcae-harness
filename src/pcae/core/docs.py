@@ -1260,6 +1260,7 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae strategic-review-governance`
 - `pcae strategic-review-governance --json`
+- `pcae strategic-review-governance --refresh`
 
 ## strategic-continuity
 

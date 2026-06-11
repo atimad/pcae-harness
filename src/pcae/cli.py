@@ -4816,12 +4816,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     srg_parser = subparsers.add_parser(
         "strategic-review-governance",
-        help="Strategic review model: frozen SRR-66B-001, live current assessment, staleness, finding rules, and governance boundaries (Phase 66B).",
+        help="Strategic review governance: calibrated finding rules, BR-004 closure, voluntary refresh (Phase 66C).",
     )
     srg_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON output.",
+    )
+    srg_parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help=(
+            "Create a new StrategicReviewRecord from the current live state and append it "
+            "to .pcae/strategic_reviews.json. Human-initiated only. Does not affect "
+            "task transition, check, health, or any other workflow command."
+        ),
     )
     srg_parser.set_defaults(handler=run_strategic_review_governance)
 
