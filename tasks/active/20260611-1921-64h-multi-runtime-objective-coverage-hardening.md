@@ -38,6 +38,7 @@ implementation
 - src/pcae/commands/agent.py
 - src/pcae/cli.py
 - tests/test_agent.py
+- tests/test_strategic_lineage.py
 - docs/COMMANDS.md
 - docs/CAPABILITY_INVENTORY.md
 - docs/ROADMAP_REGISTRY.md
