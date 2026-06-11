@@ -254,6 +254,7 @@ def test_to_dict_has_all_required_keys(tmp_path: Path) -> None:
     assert "advisory" in d
     assert "scope_boundaries" in d
     assert "bootstrap_handoff_notes" in d
+    assert "strategic_continuity" in d
 
 
 def test_to_dict_operational_rules_is_list(tmp_path: Path) -> None:

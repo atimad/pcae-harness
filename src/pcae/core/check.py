@@ -667,12 +667,27 @@ def check_active_task_phase_alignment(
     if status_phase.upper() == task_phase.upper():
         return ()
 
+    # Implementation and activation are separate governance decisions. A task
+    # may remain active for an implemented phase pending explicit activation.
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    task_phase_record = next(
+        (
+            phase
+            for phase in _CRI_KNOWN_PHASES
+            if phase["phase_id"].upper() == task_phase.upper()
+        ),
+        None,
+    )
+    if task_phase_record is not None and task_phase_record["status"] == "implemented":
+        return ()
+
     return (
         CheckMessage(
             reason=(
                 f"Active task phase '{task_phase}' does not match "
                 f"PROJECT_STATUS.md current phase '{status_phase}'. "
-                "Run `pcae task transition` to advance task state."
+                "Run `pcae task transition` only after explicit activation approval."
             ),
         ),
     )

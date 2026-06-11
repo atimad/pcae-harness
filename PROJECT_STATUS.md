@@ -82,6 +82,19 @@ roadmap guidance must remain coherent. When they drift, run
 
 ## Current State
 
+PCAE implements strategic decision continuity through the append-only
+`.pcae/strategic-lineage.json` registry. A fresh agent can inspect why Phase
+65I is active, which alternatives were deferred, and which strategic reviews
+informed the decision with `pcae strategic-continuity show current`; history
+and validation are available through `pcae strategic-continuity history` and
+`pcae strategic-continuity validate`. Bootstrap and phase handoff render only
+bounded derived summaries. Review findings remain owned by the strategic
+review registry, roadmap and branch state remain owned by their existing
+registries, operational provenance remains separate, and every command is
+read-only. Phase 65J is implemented but not activated. Lineage cannot execute
+work, approve itself, select phases or
+branches autonomously, mutate roadmap state, or archive conversations.
+
 PCAE can harden strategic registry coherence with `pcae status coherence` and
 the validation surfaces that consume it. Strategic coherence now distinguishes
 blocking authoritative-registry defects from non-blocking generated-artifact

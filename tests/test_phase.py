@@ -454,6 +454,7 @@ def test_phase_handoff_json_output(
         "recommended_agent",
         "released_agent",
         "restart_workflows",
+        "strategic_continuity",
         "summary",
         "suggested_workflow",
         "workflow",

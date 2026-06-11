@@ -1,0 +1,52 @@
+[
+  {
+    "activated_phase_id": "65I",
+    "activation_event_id": "",
+    "activation_validation_status": "migration_exempt",
+    "considered_alternatives": [
+      {
+        "branch_id": "BR-004",
+        "disposition": "deferred",
+        "phase_id": "66C",
+        "reason": "Independent review operationalization would build on strategic registries that still contained coherence drift."
+      },
+      {
+        "branch_id": "BR-001",
+        "disposition": "deferred",
+        "phase_id": "64H",
+        "reason": "Objective coverage hardening had lower immediate governance value than repairing authoritative strategic metadata."
+      }
+    ],
+    "decided_by": "human-user",
+    "decision_basis": "coherence_failure",
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-65I-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-11T11:00:00+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "65H",
+    "rationale": "Repair authoritative strategic registry coherence before extending independent review governance or opening lower-priority objective coverage work.",
+    "recommendation": "approve_with_changes",
+    "deferred_alternatives": [
+      "66C",
+      "64H"
+    ],
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "Objective coverage remains partial.",
+      "Strategic evidence quality remains weak.",
+      "Capability intelligence remains the dominant roadmap track."
+    ],
+    "selected_branch_id": "BR-003",
+    "source_phase_id": "66B",
+    "supersedes_lineage_id": ""
+  }
+]

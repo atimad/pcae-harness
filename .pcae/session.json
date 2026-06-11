@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260611-1300-65i-strategic-registry-coherence-hardening",
-    "title": "65I Strategic Registry Coherence Hardening"
+    "id": "20260611-1600-65j-strategic-decision-continuity",
+    "title": "65J Strategic Decision Continuity"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "65I Strategic Registry Coherence Hardening",
+  "current_objective": "65J Strategic Decision Continuity",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -52,8 +52,8 @@
     ],
     "status_summary": "10 changed files"
   },
-  "last_completed_step": "Completed task 20260611-0030-66b-strategic-review-model: 66B Strategic Review Model",
-  "next_recommended_step": "Continue active task 20260611-1300-65i-strategic-registry-coherence-hardening.",
-  "timestamp": "2026-06-11T11:00:00+00:00",
+  "last_completed_step": "Completed task 20260611-1300-65i-strategic-registry-coherence-hardening: 65I Strategic Registry Coherence Hardening",
+  "next_recommended_step": "Continue active task 20260611-1600-65j-strategic-decision-continuity.",
+  "timestamp": "2026-06-11T14:00:00+00:00",
   "warnings": []
 }

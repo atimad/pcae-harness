@@ -4,6 +4,11 @@ import argparse
 from collections.abc import Sequence
 
 from pcae.commands.analytics import run_analytics_risk, run_analytics_trends
+from pcae.commands.strategic_lineage import (
+    run_strategic_continuity_history,
+    run_strategic_continuity_show,
+    run_strategic_continuity_validate,
+)
 from pcae.commands.agent import (
     run_agent_acquire,
     run_agent_release,
@@ -4819,6 +4824,59 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     srg_parser.set_defaults(handler=run_strategic_review_governance)
+
+    strategic_continuity_parser = subparsers.add_parser(
+        "strategic-continuity",
+        help="Inspect and validate append-only strategic decision lineage (Phase 65J).",
+    )
+    strategic_continuity_subparsers = strategic_continuity_parser.add_subparsers(
+        dest="strategic_continuity_command",
+        required=True,
+    )
+
+    strategic_continuity_show_parser = strategic_continuity_subparsers.add_parser(
+        "show",
+        help="Show the strategic lineage for the active phase.",
+    )
+    strategic_continuity_show_parser.add_argument(
+        "target",
+        choices=("current",),
+        help="Lineage target to display.",
+    )
+    strategic_continuity_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    strategic_continuity_show_parser.set_defaults(
+        handler=run_strategic_continuity_show
+    )
+
+    strategic_continuity_history_parser = strategic_continuity_subparsers.add_parser(
+        "history",
+        help="Show append-only strategic lineage history.",
+    )
+    strategic_continuity_history_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    strategic_continuity_history_parser.set_defaults(
+        handler=run_strategic_continuity_history
+    )
+
+    strategic_continuity_validate_parser = strategic_continuity_subparsers.add_parser(
+        "validate",
+        help="Validate strategic lineage references, activation evidence, and governance boundaries.",
+    )
+    strategic_continuity_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    strategic_continuity_validate_parser.set_defaults(
+        handler=run_strategic_continuity_validate
+    )
 
     ci_parser = subparsers.add_parser(
         "capability-inventory",

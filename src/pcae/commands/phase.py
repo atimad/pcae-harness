@@ -12,6 +12,7 @@ from pcae.core.orchestration import (
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
 from pcae.core.session import write_session_snapshot
+from pcae.core.strategic_lineage import strategic_continuity_summary
 from pcae.core.tasks import find_latest_active_task
 
 
@@ -42,6 +43,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
 
     root = HarnessPath.cwd()
     _refresh_session_snapshot_for_governed_flow(root)
+    strategic_continuity = strategic_continuity_summary(root)
 
     # Compute recommendation when work_type is provided.
     rec: dict | None = None
@@ -100,6 +102,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
                     "released_agent": result.released_agent,
                     "restart_workflows": restart_workflows,
                     "summary": result.summary,
+                    "strategic_continuity": strategic_continuity,
                     "suggested_workflow": _workflow_json_summary(suggested_workflow),
                     "workflow": workflow,
                     "workflow_valid": (
@@ -127,6 +130,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
 
     print("Phase handoff.")
     print(f"Summary: {result.summary}")
+    _print_strategic_continuity(strategic_continuity)
     if rec is not None:
         print("Recommendations are advisory; the user may override them.")
         print(f"Recommended agent: {rec['recommended_agent']} (work type: {work_type})")
@@ -205,6 +209,44 @@ def _build_manual_steps(next_agent: str) -> list[str]:
     ]
 
 
+def _print_strategic_continuity(data: dict) -> None:
+    current = data.get("current")
+    if not isinstance(current, dict):
+        print("Strategic continuity: unavailable")
+        return
+
+    print("Strategic continuity:")
+    print(f"  Lineage ID: {current['lineage_id']}")
+    print(f"  Decision basis: {current['decision_basis']}")
+    print(
+        f"  Selected phase: {current['activated_phase_id']} "
+        f"({current['selected_branch_id']})"
+    )
+    deferred = data.get("deferred_alternatives") or []
+    print("  Deferred alternatives:")
+    if deferred:
+        for alternative in deferred:
+            print(
+                f"    - {alternative['phase_id']}: {alternative['reason']}"
+            )
+    else:
+        print("    - none")
+    rejected = data.get("rejected_alternatives") or []
+    print("  Rejected alternatives:")
+    if rejected:
+        for alternative in rejected:
+            print(
+                f"    - {alternative['phase_id']}: {alternative['reason']}"
+            )
+    else:
+        print("    - none")
+    referenced_findings = data.get("referenced_review_findings") or []
+    references = ", ".join(
+        reference["review_id"] for reference in referenced_findings
+    )
+    print(f"  Referenced review findings: {references or 'none'}")
+
+
 def _build_bootstrap_prompt(next_agent: str) -> str:
     return (
         "You are resuming a governed engineering session in the PCAE harness.\n\n"
@@ -213,6 +255,8 @@ def _build_bootstrap_prompt(next_agent: str) -> str:
         "This will acquire the agent lock, validate governance state (health and\n"
         "check), display the active task, current session, and provenance timeline,\n"
         "and confirm the environment is ready for governed work."
+        "\n\nReview strategic decision continuity with:\n"
+        "  pcae strategic-continuity show current"
     )
 
 

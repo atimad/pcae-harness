@@ -2046,6 +2046,18 @@ def test_62e_check_case_insensitive_comparison(tmp_path: Path) -> None:
     assert violations == ()
 
 
+def test_65j_implemented_task_does_not_require_activation_alignment(
+    tmp_path: Path,
+) -> None:
+    _write_project_status(
+        tmp_path,
+        "Phase 65I: Strategic Registry Coherence Hardening.",
+    )
+    task = _write_task_with_phase(tmp_path, "65J Strategic Decision Continuity")
+    violations = check_active_task_phase_alignment(HarnessPath(tmp_path), task)
+    assert violations == ()
+
+
 def test_62e_check_integrated_in_run_checks(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     write_task(tmp_path, allowed_files=["src/allowed.py"], title="62B runtime output capture")

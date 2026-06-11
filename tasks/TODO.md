@@ -2,6 +2,7 @@
 
 ## Pending
 
+- Design explicit Phase Activation Governance that separates implementation approval, activation approval, commit approval, and push approval so implemented capabilities cannot be made active by inference.
 ## Future Explorations (from Phase 32C/32D/32E/32F/32G)
 
 - Automatic low-context detection triggering handoff.

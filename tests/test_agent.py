@@ -52517,16 +52517,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 45, (
-        f"Expected 45 map entries after 65I (38 from 65D + 1 65E + 1 65F + 1 65G + 1 65H + 1 66A + 1 66B + 1 65I mapping), got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 46, (
+        f"Expected 46 map entries after 65J, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 45, (
-        f"Expected 45 map entries after 65I (6 pre-65D + 31 bulk + 1 65D self + 1 65E + 1 65F + 1 65G + 1 65H + 1 66A + 1 66B + 1 65I), "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 46, (
+        f"Expected 46 map entries after 65J, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -54685,3 +54685,70 @@ def test_66b_state_summary_remains_healthy(tmp_path) -> None:
         assert status in ("healthy", "stalled", "at_risk", "inactive"), (
             f"{branch_id} has unexpected health_status {status!r}"
         )
+
+
+# Phase 65J - Strategic Decision Continuity
+# ---------------------------------------------------------------------------
+
+
+def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import (
+        _SRG_BRANCH_REGISTRY,
+        build_capability_roadmap_intelligence,
+    )
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath.cwd())
+    phase_65i = next(p for p in data["roadmap_registry"] if p["phase_id"] == "65I")
+    phase_65j = next(p for p in data["roadmap_registry"] if p["phase_id"] == "65J")
+    branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-003")
+
+    assert phase_65i["status"] == "active"
+    assert phase_65i["successor"] == "65J"
+    assert phase_65j["status"] == "implemented"
+    assert phase_65j["predecessor"] == "65I"
+    assert data["current_phase"]["phase_id"] == "65I"
+    assert branch["current_phase"] == "65I"
+
+
+def test_65j_capability_and_objective_mapping_registered(tmp_path) -> None:
+    from pcae.core.agent import (
+        _CI_KNOWN_CAPABILITIES,
+        _CRI_KNOWN_CAPABILITIES,
+        _SRG_CAPABILITY_OBJECTIVE_MAP,
+    )
+
+    ci = next(c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "65J")
+    cri = next(c for c in _CRI_KNOWN_CAPABILITIES if c["implemented_phase"] == "65J")
+    mapping = next(
+        m
+        for m in _SRG_CAPABILITY_OBJECTIVE_MAP
+        if m["capability_id"] == "strategic_decision_continuity"
+    )
+
+    assert ci["capability_name"] == "Strategic Decision Continuity"
+    assert cri["capability_name"] == "Strategic Decision Continuity"
+    assert mapping["objective_ids"] == ["OBJ-001", "OBJ-002"]
+    assert mapping["contribution_type"] == "primary"
+
+
+def test_65j_prompt_profiles_are_historical_until_activation(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_prompt_recommendation_hardening
+    from pcae.core.paths import HarnessPath
+
+    registry = build_prompt_recommendation_hardening(HarnessPath.cwd())[
+        "prompt_registry"
+    ]
+    phase_65i = [record for record in registry if record["phase_id"] == "65I"]
+    phase_65j = [record for record in registry if record["phase_id"] == "65J"]
+
+    assert len(phase_65j) == 3
+    assert {record["prompt_type"] for record in phase_65j} == {
+        "implementation",
+        "validation",
+        "agent",
+    }
+    assert all(record["prompt_status"] == "historical" for record in phase_65j)
+    assert all(record["prompt_status"] == "recommended" for record in phase_65i)

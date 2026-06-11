@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-11T01:41:03.600630+00:00
+Generated: 2026-06-11T11:31:33.010287+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 49
+Total phases: 52
 Tracks: 8
 Superseded: 1
 Roadmap gaps: 0
@@ -44,6 +44,7 @@ Assessment status: intelligence_available
 | 64D | Runtime Coordination Policy | completed | 64C | 64E |
 | 64E | Orchestration Audit Model | completed | 64D | 64F |
 | 64F | Orchestration Readiness Gate | completed | 64E | 64G |
+| 64H | Multi-Runtime Objective Coverage Hardening | deferred | 64F | — |
 
 ## Track: capability_intelligence
 
@@ -77,14 +78,16 @@ Assessment status: intelligence_available
 | 65F | Governed Write Invocation Candidate Contract | completed | 65E | 65G |
 | 65G | Write Invocation Approval Gateway Design | completed | 65F | 65H |
 | 65H | Commit Session Continuity Guard | completed | 65G | 65I |
-| 65I | Strategic Registry Coherence Hardening | active | 65H | — |
+| 65I | Strategic Registry Coherence Hardening | active | 65H | 65J |
+| 65J | Strategic Decision Continuity | implemented | 65I | — |
 
 ## Track: independent_review_governance
 
 | Phase | Title | Status | Predecessor | Successor |
 |---|---|---|---|---|
 | 66A | Independent Review Governance Model | completed | 65H | 66B |
-| 66B | Strategic Review Model | completed | 66A | — |
+| 66B | Strategic Review Model | completed | 66A | 66C |
+| 66C | Strategic Review Operationalization | deferred | 66B | — |
 
 ## Track: roadmap_intelligence
 

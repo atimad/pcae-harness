@@ -1,0 +1,247 @@
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+
+from pcae.cli import main
+from pcae.core.paths import HarnessPath
+from pcae.core.strategic_lineage import (
+    PRE_65J_MIGRATION_EXEMPT_PHASE_IDS,
+    strategic_review_snapshot_hash,
+    validate_strategic_lineage,
+)
+
+
+ACTIVATION_TIMESTAMP = "2026-06-11T11:00:00+00:00"
+
+
+def _valid_record() -> dict:
+    return {
+        "lineage_id": "SLR-65I-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "coherence_failure",
+        "source_phase_id": "66B",
+        "predecessor_phase_id": "65H",
+        "activated_phase_id": "65I",
+        "selected_branch_id": "BR-003",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "rationale": "Repair strategic registry coherence before roadmap expansion.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [
+            {
+                "phase_id": "66C",
+                "branch_id": "BR-004",
+                "disposition": "deferred",
+                "reason": "Coherence must be repaired first.",
+            },
+            {
+                "phase_id": "64H",
+                "branch_id": "BR-001",
+                "disposition": "rejected",
+                "reason": "Lower immediate governance value.",
+            },
+        ],
+        "rejected_alternatives": ["64H"],
+        "deferred_alternatives": ["66C"],
+        "roadmap_debt": ["Review findings remain advisory."],
+        "supersedes_lineage_id": "",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP,
+        "activation_validation_status": "validated",
+    }
+
+
+def _write_registry(root: Path, records: list[dict], *, provenance: bool = True) -> None:
+    pcae_dir = root / ".pcae"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    (pcae_dir / "strategic-lineage.json").write_text(
+        json.dumps(records, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    if provenance:
+        (pcae_dir / "provenance-history.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "active_task": None,
+                        "agent_id": "codex-local",
+                        "event_type": "phase_activated",
+                        "git_branch": "main",
+                        "summary": "Human-approved activation of Phase 65I",
+                        "timestamp": ACTIVATION_TIMESTAMP,
+                    }
+                ],
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+
+def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tuple[str, ...]:
+    _write_registry(tmp_path, [record], provenance=provenance)
+    return validate_strategic_lineage(HarnessPath(tmp_path)).errors
+
+
+def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
+    _write_registry(tmp_path, [_valid_record()])
+    result = validate_strategic_lineage(HarnessPath(tmp_path))
+    assert result.valid is True
+    assert result.current_lineage_id == "SLR-65I-TEST"
+
+
+def test_65j_lineage_does_not_duplicate_activation_timestamp(tmp_path: Path) -> None:
+    record = _valid_record()
+    assert "activation_timestamp" not in record
+    assert _errors_for(tmp_path, record) == ()
+
+
+def test_65j_decision_basis_is_classified(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["decision_basis"] = "conversation_memory"
+    assert any("invalid decision_basis" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_execution_is_always_forbidden(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["execution_allowed"] = True
+    assert any("execution_allowed must be False" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_review_reference_and_hash_are_validated(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["finding_snapshot_hash"] = "stale"
+    assert any("finding_snapshot_hash" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_alternative_tracking_is_structured(tmp_path: Path) -> None:
+    record = _valid_record()
+    del record["considered_alternatives"][0]["reason"]
+    assert any("alternative missing fields" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_rejected_and_deferred_alternatives_are_distinct(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["rejected_alternatives"] = ["66C", "64H"]
+    errors = _errors_for(tmp_path, record)
+    assert any("rejected_alternatives" in error for error in errors)
+    assert not any("deferred_alternatives" in error for error in errors)
+
+
+def test_65j_activated_phase_cannot_be_an_alternative(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["considered_alternatives"][0]["phase_id"] = "65I"
+    record["considered_alternatives"][0]["branch_id"] = "BR-003"
+    record["deferred_alternatives"] = ["65I"]
+    assert any("activated phase cannot" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_activation_evidence_is_required(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["activation_event_id"] = ""
+    assert any("requires activation_event_id" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_missing_provenance_is_blocking(tmp_path: Path) -> None:
+    record = _valid_record()
+    errors = _errors_for(tmp_path, record, provenance=False)
+    assert any("requires authoritative provenance history" in error for error in errors)
+
+
+def test_65j_human_approval_is_required(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["human_approved"] = False
+    assert any("human_approved=True" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_supersession_reference_is_validated(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["supersedes_lineage_id"] = "SLR-MISSING"
+    assert any("supersedes_lineage_id" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_migration_exemption_allowlist_is_explicit() -> None:
+    assert PRE_65J_MIGRATION_EXEMPT_PHASE_IDS == frozenset({"65I"})
+
+
+def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["activation_validation_status"] = "migration_exempt"
+    record["activation_event_id"] = ""
+    _write_registry(tmp_path, [record], provenance=False)
+    result = validate_strategic_lineage(HarnessPath(tmp_path))
+    assert result.valid is True
+    assert result.current_lineage_id == "SLR-65I-TEST"
+
+
+def test_65j_migration_exemption_cannot_claim_provenance_event(
+    tmp_path: Path,
+) -> None:
+    record = _valid_record()
+    record["activation_validation_status"] = "migration_exempt"
+    errors = _errors_for(tmp_path, record)
+    assert any("must not claim activation_event_id" in error for error in errors)
+
+
+def test_65j_migration_exemption_does_not_cover_other_phase(tmp_path: Path) -> None:
+    record = _valid_record()
+    record["activated_phase_id"] = "66C"
+    record["selected_branch_id"] = "BR-004"
+    record["activation_validation_status"] = "migration_exempt"
+    record["activation_event_id"] = ""
+    record["considered_alternatives"] = []
+    record["rejected_alternatives"] = []
+    record["deferred_alternatives"] = []
+    assert any("limited to pre-65J phases" in error for error in _errors_for(tmp_path, record))
+
+
+def test_65j_summary_uses_referenced_review_findings(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_registry(tmp_path, [_valid_record()])
+    monkeypatch.chdir(tmp_path)
+    assert main(["strategic-continuity", "show", "current", "--json"]) == 0
+    data = json.loads(capsys.readouterr().out)
+    assert "referenced_review_findings" in data
+    assert "open_strategic_findings" not in data
+    assert data["deferred_alternatives"][0]["disposition"] == "deferred"
+    assert data["rejected_alternatives"][0]["disposition"] == "rejected"
+
+
+def test_65j_continuity_commands_are_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_registry(tmp_path, [_valid_record()])
+    before = {
+        path.name: path.read_bytes()
+        for path in (tmp_path / ".pcae").iterdir()
+        if path.is_file()
+    }
+    monkeypatch.chdir(tmp_path)
+    assert main(["strategic-continuity", "show", "current", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-65I-TEST"
+    assert main(["strategic-continuity", "history", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["record_count"] == 1
+    assert main(["strategic-continuity", "validate", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["valid"] is True
+    after = {
+        path.name: path.read_bytes()
+        for path in (tmp_path / ".pcae").iterdir()
+        if path.is_file()
+    }
+    assert after == before
+
+
+def test_65j_duplicate_lineage_ids_fail(tmp_path: Path) -> None:
+    record = _valid_record()
+    duplicate = copy.deepcopy(record)
+    _write_registry(tmp_path, [record, duplicate])
+    result = validate_strategic_lineage(HarnessPath(tmp_path))
+    assert any("Duplicate lineage_id" in error for error in result.errors)

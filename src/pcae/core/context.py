@@ -12,6 +12,7 @@ from pcae.core.architecture import (
 from pcae.core.check import run_checks
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.strategic_lineage import strategic_continuity_summary
 from pcae.core.policy import load_policy
 from pcae.core.provenance import build_provenance_timeline
 from pcae.core.tasks import find_latest_active_task
@@ -174,6 +175,30 @@ def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
     lines.append(f"Phase: {rs['current_phase']}")
     lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
 
+    continuity = pack.strategic_continuity
+    current_lineage = continuity.get("current")
+    if isinstance(current_lineage, dict):
+        lines.append(f"Strategic Decision: {current_lineage['lineage_id']}")
+        lines.append(
+            f"Activated: {current_lineage['activated_phase_id']} "
+            f"on {current_lineage['selected_branch_id']}"
+        )
+        lines.append(f"Decision Basis: {current_lineage['decision_basis']}")
+        lines.append(f"Reason: {current_lineage['rationale']}")
+        deferred = continuity.get("deferred_alternatives") or []
+        deferred_text = "; ".join(
+            f"{alternative['phase_id']} ({alternative['reason']})"
+            for alternative in deferred[:3]
+        )
+        lines.append(f"Deferred Alternatives: {deferred_text or 'none'}")
+        referenced_findings = continuity.get("referenced_review_findings") or []
+        findings_text = "; ".join(
+            f"{reference['review_id']} ({reference['finding_count']} findings)"
+            for reference in referenced_findings[:3]
+        )
+        lines.append(f"Referenced Review Findings: {findings_text or 'none'}")
+        lines.append("Details: pcae strategic-continuity show current")
+
     lines.append("Rules:")
     for rule in pack.operational_rules:
         lines.append(f"  - {rule}")
@@ -274,6 +299,7 @@ class ContextPack:
     bootstrap_handoff_notes: tuple[str, ...]
     advisory: str
     architecture_memory: dict
+    strategic_continuity: dict
 
     def to_dict(self) -> dict:
         return {
@@ -287,6 +313,7 @@ class ContextPack:
             "provenance_summary": self.provenance_summary,
             "roadmap_summary": self.roadmap_summary,
             "scope_boundaries": self.scope_boundaries,
+            "strategic_continuity": self.strategic_continuity,
             "validation_commands": list(self.validation_commands),
         }
 
@@ -380,6 +407,7 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         bootstrap_handoff_notes=CONTEXT_PACK_BOOTSTRAP_HANDOFF_NOTES,
         advisory=CONTEXT_PACK_ADVISORY,
         architecture_memory=_build_architecture_memory_summary(root),
+        strategic_continuity=strategic_continuity_summary(root),
     )
 
 

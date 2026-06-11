@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-11T01:41:30.704162+00:00
+Generated: 2026-06-11T11:31:33.024189+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 53
-Implemented: 51
+Total capabilities: 54
+Implemented: 52
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 0
@@ -65,7 +65,8 @@ Assessment status: inventory_complete
 | Governed Write Invocation Candidate Contract | strategic_governance | 65F | implemented | pcae governed-write-invocation-candidate; pcae governed-write-invocation-candidate --json | governed_write_invocation_design | write_invocation_approval_gateway |
 | Write Invocation Approval Gateway | strategic_governance | 65G | implemented | pcae write-invocation-approval-gateway; pcae write-invocation-approval-gateway --json | governed_write_invocation_candidate_contract | commit_session_continuity_guard |
 | Commit Session Continuity Guard | strategic_governance | 65H | implemented | (none) | write_invocation_approval_gateway | strategic_registry_coherence_hardening |
-| Strategic Registry Coherence Hardening | strategic_governance | 65I | implemented | (none) | commit_session_continuity_guard; strategic_review_model | (none) |
+| Strategic Registry Coherence Hardening | strategic_governance | 65I | implemented | (none) | commit_session_continuity_guard; strategic_review_model | strategic_decision_continuity |
+| Strategic Decision Continuity | strategic_governance | 65J | implemented | pcae strategic-continuity show current; pcae strategic-continuity history; pcae strategic-continuity validate | strategic_registry_coherence_hardening; strategic_review_model | (none) |
 | Independent Review Governance | strategic_governance | 66A | implemented | pcae independent-review-governance; pcae independent-review-governance --json | commit_session_continuity_guard | strategic_review_model |
 | Strategic Review Model | strategic_governance | 66B | implemented | pcae strategic-review-governance; pcae strategic-review-governance --json | independent_review_governance | (none) |
 
@@ -80,4 +81,4 @@ Assessment status: inventory_complete
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=53. implemented_count=51. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=54. implemented_count=52. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
