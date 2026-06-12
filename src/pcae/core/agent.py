@@ -69338,6 +69338,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["challenge_impact_architecture"],
+        "successor_capabilities": ["challenge_attention_rendering_integration"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Challenge Attention Rendering Integration",
+        "implemented_phase": "68B",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["challenge_attention_architecture"],
         "successor_capabilities": [],
     },
 )
@@ -70248,8 +70257,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "68A",
         "phase_title": "Adaptive Challenge Attention Architecture Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "67B",
+        "successor": "68B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "68B",
+        "phase_title": "Challenge Attention Rendering Integration",
+        "status": "active",
+        "predecessor": "68A",
         "successor": "",
         "superseded_by": "",
     },
@@ -71130,7 +71148,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "challenge_impact_architecture",
         ],
-        "successors": [],
+        "successors": ["challenge_attention_rendering_integration"],
         "aliases": [],
         "contribution": (
             "designs a deterministic, stateless attention allocation layer for IRGC: computes "
@@ -71140,6 +71158,28 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "(bootstrap/handoff/completion/irg_challenge), and produces AttentionDecisions "
             "(surface/background); visibility_is_importance=False; suppression_is_resolution=False; "
             "attention_allocation_affects_governance=False; stateless by design; "
+            "execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Challenge Attention Rendering Integration",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "68B",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "challenge_attention_architecture",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "wires the 68A attention allocator into the automatic challenge rendering path: "
+            "session bootstrap, phase handoff, and phase completion now filter compact display "
+            "findings through _irca_allocate_attention(); explicit pcae irg-challenge retains "
+            "full-detail display of all findings; JSON output retains all findings and "
+            "background_finding_ids; allocator_changes_visibility_only=True; "
+            "findings_unchanged_by_allocator=True; suppressed_findings_remain_available=True; "
+            "attention_allocation_does_not_affect_command_outcomes=True; "
             "execution_allowed=False"
         ),
     },
@@ -73269,7 +73309,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68A",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68A-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68A",
@@ -73277,7 +73317,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68A",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68A-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68A",
@@ -73285,10 +73325,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68A",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68A-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68A",
+    },
+    {
+        "phase_id": "68B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "68B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68B",
+    },
+    {
+        "phase_id": "68B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "68B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68B",
+    },
+    {
+        "phase_id": "68B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "68B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68B",
     },
 )
 
@@ -79133,7 +79197,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "68A",
+        "current_phase": "68B",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79705,6 +79769,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "adds deterministic attention allocation layer to IRGC engine: surface-specific "
             "AttentionBudgets, AttentionSignals, and AttentionDecisions maximize informational "
             "diversity across findings; visibility_is_importance=False; stateless; advisory-only"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "challenge_attention_rendering_integration",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "wires the 68A allocator into automatic compact rendering: bootstrap, handoff, "
+            "and completion surfaces now filter findings via attention allocation; explicit "
+            "irg-challenge command and JSON retain all findings; visibility is not authority"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84638,8 +84714,8 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
 # Phase 66E — Automated IRG Challenge Architecture
 # ---------------------------------------------------------------------------
 
-_IRGC_PHASE_ID: str = "68A"
-_IRGC_PHASE_TITLE: str = "Adaptive Challenge Attention Architecture Design"
+_IRGC_PHASE_ID: str = "68B"
+_IRGC_PHASE_TITLE: str = "Challenge Attention Rendering Integration"
 _IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
 _IRGC_DISPLAY_FOOTER: str = (
     "Displayed for context only. Command outcomes stay unchanged."
@@ -84899,6 +84975,137 @@ def render_irg_challenge_compact_lines(
     for question in questions:
         lines.append(
             f"  [{question['attention_level']}] {question['domain']}: {question['question']}"
+        )
+    if footer:
+        lines.append(footer)
+    return tuple(lines)
+
+
+def render_irg_challenge_compact_lines_with_allocation(
+    data: dict | None,
+    allocation: dict | None,
+    surface: str = "bootstrap",
+) -> tuple[str, ...]:
+    """Render compact challenge lines filtered by attention allocation.
+
+    allocation: the 'allocation' dict from build_challenge_attention_assessment().
+    If None, falls back to unfiltered render_irg_challenge_compact_lines().
+
+    allocator_changes_visibility_only=True: allocated findings are not more important.
+    suppression_is_resolution=False: background findings still exist.
+    background_is_resolved=False: background is a rendering decision, not governance.
+    All findings remain accessible via pcae irg-challenge and --json output.
+    """
+    if allocation is None:
+        return render_irg_challenge_compact_lines(data, surface)
+
+    if not isinstance(data, dict) or data.get("display_enabled", True) is False:
+        return ()
+
+    compact_display = data.get("compact_display")
+    if not isinstance(compact_display, dict):
+        return ()
+
+    allocated_ids = set(allocation.get("allocated_finding_ids", []))
+    background_ids = allocation.get("background_finding_ids", [])
+    background_count = len(background_ids)
+    # Vacuous allocation: no findings were present, so no filter should apply.
+    # This preserves existing test behavior and handles environments with no findings.
+    vacuous = not allocated_ids and not background_ids
+
+    header = compact_display.get("header", _IRGC_DISPLAY_HEADER)
+    footer = compact_display.get("footer", _IRGC_DISPLAY_FOOTER)
+    evolution = compact_display.get("evolution_summary", "")
+    calibration = compact_display.get("calibration_state", "")
+    calibration_detail = compact_display.get("calibration_detail", "")
+    questions = compact_display.get("questions") or []
+
+    if surface == "completion":
+        # completion: only evolution + calibration; no per-finding filter needed
+        if not evolution and not calibration:
+            return ()
+        lines: list[str] = [header]
+        if evolution:
+            lines.append(evolution)
+        if calibration:
+            cal_line = f"Challenge calibration: {calibration}"
+            if calibration_detail:
+                cal_line += f" ({calibration_detail})"
+            lines.append(cal_line)
+        if footer:
+            lines.append(footer)
+        return tuple(lines)
+
+    if surface == "handoff":
+        comparative = data.get("comparative", {})
+        new_ids = set(comparative.get("new_concern_ids", []))
+        persistent_count = len(comparative.get("persistent_concern_ids", []))
+        if vacuous:
+            new_questions = [q for q in questions if q.get("finding_id") in new_ids]
+        else:
+            new_questions = [
+                q for q in questions
+                if q.get("finding_id") in new_ids and q.get("finding_id") in allocated_ids
+            ]
+        resolved_questions = list(compact_display.get("resolved_questions", []))
+        if not new_questions and not resolved_questions and persistent_count == 0:
+            if not evolution:
+                return ()
+        lines = [header]
+        if evolution:
+            lines.append(evolution)
+        if calibration:
+            cal_line = f"Challenge calibration: {calibration}"
+            if calibration_detail:
+                cal_line += f" ({calibration_detail})"
+            lines.append(cal_line)
+        if new_questions:
+            for q in new_questions:
+                lines.append(
+                    f"  [new] [{q['attention_level']}] {q['domain']}: {q['question']}"
+                )
+        if resolved_questions:
+            for q in resolved_questions:
+                lines.append(f"  [resolved] {q['domain']}: {q['question']}")
+        if persistent_count and not new_questions and not resolved_questions:
+            lines.append(
+                f"  {persistent_count} persistent concern(s) unchanged — see pcae irg-challenge"
+            )
+        if background_count:
+            lines.append(
+                f"  {background_count} finding(s) not shown — see pcae irg-challenge for full detail"
+            )
+        if footer:
+            lines.append(footer)
+        return tuple(lines)
+
+    # bootstrap surface (default)
+    if vacuous:
+        # No findings in allocation — show all questions without allocation filter
+        allocated_questions = questions
+    else:
+        allocated_questions = [q for q in questions if q.get("finding_id") in allocated_ids]
+    if not allocated_questions and not evolution:
+        return ()
+
+    lines = [header]
+    if evolution:
+        lines.append(evolution)
+    if calibration:
+        cal_line = f"Challenge calibration: {calibration}"
+        if calibration_detail:
+            cal_line += f" ({calibration_detail})"
+        lines.append(cal_line)
+    summary = compact_display.get("summary", "")
+    if summary and not evolution:
+        lines.append(summary)
+    for question in allocated_questions:
+        lines.append(
+            f"  [{question['attention_level']}] {question['domain']}: {question['question']}"
+        )
+    if background_count:
+        lines.append(
+            f"  {background_count} finding(s) not shown — see pcae irg-challenge for full detail"
         )
     if footer:
         lines.append(footer)
@@ -86124,11 +86331,11 @@ def render_irg_impact_compact_lines(data: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Phase 68A — Adaptive Challenge Attention Architecture Design
+# Phase 68A/68B — Adaptive Challenge Attention Architecture and Rendering Integration
 # ---------------------------------------------------------------------------
 
-_IRCA_PHASE_ID: str = "68A"
-_IRCA_PHASE_TITLE: str = "Adaptive Challenge Attention Architecture Design"
+_IRCA_PHASE_ID: str = "68B"
+_IRCA_PHASE_TITLE: str = "Challenge Attention Rendering Integration"
 
 _IRCA_ATTENTION_SIGNAL_TYPES: tuple[str, ...] = (
     "new_concern",
@@ -86239,6 +86446,12 @@ _IRCA_GOVERNANCE_BOUNDARIES: dict[str, bool] = {
     "novelty_implies_higher_priority": False,
     "persistence_implies_lower_priority": False,
     "allocation_creates_obligation": False,
+    # 68B rendering integration boundaries
+    "allocator_changes_visibility_only": True,
+    "findings_unchanged_by_allocator": True,
+    "suppressed_findings_remain_available": True,
+    "attention_allocation_does_not_modify_findings": True,
+    "attention_allocation_does_not_affect_command_outcomes": True,
 }
 
 _IRCA_ADVISORY: str = (
@@ -86663,17 +86876,23 @@ def _irca_allocate_attention(
 def build_challenge_attention_assessment(
     root: "HarnessPath | None" = None,
     surface: str = "bootstrap",
+    challenge_data: "dict | None" = None,
 ) -> dict:
     """Compute AttentionAllocation for the given surface.
 
     Stateless — derived entirely from existing 66E–67B state each run.
     visibility_is_importance=False always. suppression_is_resolution=False always.
     background_is_resolved=False always. attention_allocation_affects_governance=False always.
+
+    challenge_data: optional pre-computed result of build_irg_challenge_context().
+    If provided, skips the internal call and uses it directly — ensures consistency
+    when the caller already fetched the challenge context.
     """
     if root is None:
         root = HarnessPath.cwd()
 
-    challenge_data = build_irg_challenge_context(root)
+    if challenge_data is None:
+        challenge_data = build_irg_challenge_context(root)
     findings = challenge_data.get("findings", [])
     comparative = challenge_data.get("comparative", {})
     calibration_state = challenge_data.get("calibration_state", "consistent")

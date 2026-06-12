@@ -288,12 +288,42 @@
       "SRR-66B-001"
     ],
     "roadmap_debt": [
-      "AttentionDecisions are computed but not yet applied to render_irg_challenge_compact_lines output — actual surface filtering deferred to a future phase.",
+      "AttentionDecisions are computed but not yet applied to render_irg_challenge_compact_lines output \u2014 actual surface filtering deferred to a future phase.",
       "Calibration effects from 67B remain unapplied; their interaction with attention allocation deferred.",
       "Persistent attention memory explicitly rejected; future phases must re-evaluate if compelling evidence emerges."
     ],
     "selected_branch_id": "BR-004",
     "source_phase_id": "67B",
     "supersedes_lineage_id": "SLR-67B-001"
+  },
+  {
+    "activated_phase_id": "68B",
+    "activation_event_id": "2026-06-12T16:10:49+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "architecture_requirement",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "",
+    "human_approved": true,
+    "lineage_id": "SLR-68B-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-12T16:10:49+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "68A",
+    "rationale": "68A designed the adaptive attention allocation layer but left AttentionDecisions unconnected to the rendering path. 68B wires the allocator into automatic compact rendering surfaces (bootstrap, handoff, completion) via render_irg_challenge_compact_lines_with_allocation(). Explicit pcae irg-challenge command and JSON output retain all findings. allocator_changes_visibility_only=True; findings_unchanged_by_allocator=True; suppressed_findings_remain_available=True; attention_allocation_does_not_affect_command_outcomes=True. No governance outcomes are changed.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [],
+    "selected_branch_id": "BR-004",
+    "source_phase_id": "68A",
+    "supersedes_lineage_id": "SLR-68A-001"
   }
 ]

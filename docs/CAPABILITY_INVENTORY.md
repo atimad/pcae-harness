@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-12T11:49:13.710581+00:00
+Generated: 2026-06-12T14:47:03.731591+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 61
-Implemented: 59
+Total capabilities: 62
+Implemented: 60
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 0
@@ -75,7 +75,8 @@ Assessment status: inventory_complete
 | Automated IRG Challenge Architecture | strategic_governance | 66E | implemented | pcae irg-challenge; pcae irg-challenge --json | bootstrap_irg_visibility_integration | comparative_irg_challenge_architecture |
 | Comparative IRG Challenge Architecture | strategic_governance | 67A | implemented | pcae irg-challenge; pcae irg-challenge --json | automated_irg_challenge_architecture | challenge_impact_architecture |
 | Challenge Impact Architecture | strategic_governance | 67B | implemented | pcae irg-challenge --impact; pcae irg-challenge --impact --json | comparative_irg_challenge_architecture | challenge_attention_architecture |
-| Challenge Attention Architecture | strategic_governance | 68A | implemented | (none) | challenge_impact_architecture | (none) |
+| Challenge Attention Architecture | strategic_governance | 68A | implemented | (none) | challenge_impact_architecture | challenge_attention_rendering_integration |
+| Challenge Attention Rendering Integration | strategic_governance | 68B | implemented | (none) | challenge_attention_architecture | (none) |
 
 ## Governance Notes
 
@@ -88,4 +89,4 @@ Assessment status: inventory_complete
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=61. implemented_count=59. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=62. implemented_count=60. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*

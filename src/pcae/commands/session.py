@@ -6,8 +6,9 @@ from typing import Any
 
 from pcae.core.agent import (
     acquire_agent_lock_idempotent,
+    build_challenge_attention_assessment,
     build_irg_challenge_context,
-    render_irg_challenge_compact_lines,
+    render_irg_challenge_compact_lines_with_allocation,
 )
 from pcae.core.architecture import (
     read_architecture_history_summary,
@@ -192,7 +193,10 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print("Latest event: none")
     print(f"Ready: {'yes' if ready else 'no'}")
     challenge = build_irg_challenge_context(root)
-    lines = render_irg_challenge_compact_lines(challenge)
+    assessment = build_challenge_attention_assessment(root, surface="bootstrap", challenge_data=challenge)
+    lines = render_irg_challenge_compact_lines_with_allocation(
+        challenge, assessment["allocation"], surface="bootstrap"
+    )
     if lines:
         print()
         for line in lines:
@@ -239,7 +243,10 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     print("Token optimization note: bootstrap prompt is compact by design.")
     print(f"Vendor-neutral note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
     print(f"Quality preservation note: {BOOTSTRAP_COMPACT_ADVISORY}")
-    lines = render_irg_challenge_compact_lines(challenge)
+    assessment = build_challenge_attention_assessment(root, surface="bootstrap", challenge_data=challenge)
+    lines = render_irg_challenge_compact_lines_with_allocation(
+        challenge, assessment["allocation"], surface="bootstrap"
+    )
     if lines:
         print()
         for line in lines:

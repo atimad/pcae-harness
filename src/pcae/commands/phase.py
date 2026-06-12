@@ -10,8 +10,9 @@ from pcae.core.orchestration import (
     recommend_agent,
 )
 from pcae.core.agent import (
+    build_challenge_attention_assessment,
     build_irg_challenge_context,
-    render_irg_challenge_compact_lines,
+    render_irg_challenge_compact_lines_with_allocation,
 )
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
@@ -37,8 +38,10 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print(f"Agent lock: released (by {result.agent_id})")
     else:
         print("Agent lock: none")
-    lines = render_irg_challenge_compact_lines(
-        build_irg_challenge_context(root), surface="completion"
+    challenge = build_irg_challenge_context(root)
+    assessment = build_challenge_attention_assessment(root, surface="completion", challenge_data=challenge)
+    lines = render_irg_challenge_compact_lines_with_allocation(
+        challenge, assessment["allocation"], surface="completion"
     )
     if lines:
         print()
@@ -208,8 +211,10 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     print()
     print(_build_restart_workflows_text())
 
-    lines = render_irg_challenge_compact_lines(
-        build_irg_challenge_context(root), surface="handoff"
+    challenge = build_irg_challenge_context(root)
+    assessment = build_challenge_attention_assessment(root, surface="handoff", challenge_data=challenge)
+    lines = render_irg_challenge_compact_lines_with_allocation(
+        challenge, assessment["allocation"], surface="handoff"
     )
     if lines:
         print()
