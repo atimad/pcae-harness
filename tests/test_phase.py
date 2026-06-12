@@ -119,14 +119,26 @@ def test_phase_complete_shows_independent_challenge_context(
             "compact_display": {
                 "header": "Independent Challenge Context — advisory only",
                 "summary": "1 question surfaced across architecture.",
+                "evolution_summary": "1 new",
+                "calibration_state": "diversifying",
+                "calibration_detail": "1 new concern(s) detected",
                 "questions": [
                     {
+                        "finding_id": "IRC-001-arch",
                         "domain": "architecture",
                         "attention_level": "medium_attention",
                         "question": "What counterfactual deserves attention?",
                     }
                 ],
+                "resolved_questions": [],
+                "suppressed_count": 0,
                 "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+            "comparative": {
+                "new_concern_ids": ["IRC-001-arch"],
+                "persistent_concern_ids": [],
+                "resolved_concern_ids": [],
+                "persistence_claims": {},
             },
         },
     )
@@ -137,7 +149,7 @@ def test_phase_complete_shows_independent_challenge_context(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Independent Challenge Context — advisory only" in output
-    assert "What counterfactual deserves attention?" in output
+    assert "1 new" in output
 
 
 def test_phase_complete_phase_completed_captures_agent_id(
@@ -461,19 +473,32 @@ def test_phase_handoff_shows_independent_challenge_context(
             "compact_display": {
                 "header": "Independent Challenge Context — advisory only",
                 "summary": "2 questions surfaced across governance and capability.",
+                "evolution_summary": "2 new",
+                "calibration_state": "diversifying",
+                "calibration_detail": "2 new concern(s) across 2 domain(s)",
                 "questions": [
                     {
+                        "finding_id": "IRC-001-gov",
                         "domain": "governance",
                         "attention_level": "high_attention",
                         "question": "What assumption might be wrong?",
                     },
                     {
+                        "finding_id": "IRC-001-cap",
                         "domain": "capability",
                         "attention_level": "medium_attention",
                         "question": "What blind spot exists?",
                     },
                 ],
+                "resolved_questions": [],
+                "suppressed_count": 0,
                 "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+            "comparative": {
+                "new_concern_ids": ["IRC-001-gov", "IRC-001-cap"],
+                "persistent_concern_ids": [],
+                "resolved_concern_ids": [],
+                "persistence_claims": {},
             },
         },
     )

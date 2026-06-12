@@ -14809,9 +14809,28 @@ def run_irg_challenge(args: argparse.Namespace) -> int:
     )
     print()
 
+    comparative = data.get("comparative", {})
+    new_ids = set(comparative.get("new_concern_ids", []))
+    persistent_ids = set(comparative.get("persistent_concern_ids", []))
+    resolved_ids = set(comparative.get("resolved_concern_ids", []))
+    persistence_claims = comparative.get("persistence_claims", {})
+
     compact = data["compact_display"]
-    print(compact["header"])
-    print(compact["summary"])
+    evolution = compact.get("evolution_summary", "")
+    cal_state = compact.get("calibration_state", "")
+    cal_detail = compact.get("calibration_detail", "")
+    suppressed_count = compact.get("suppressed_count", 0)
+
+    print(compact.get("header", ""))
+    if evolution:
+        print(f"Evolution: {evolution}")
+    if cal_state:
+        cal_line = f"Calibration: {cal_state}"
+        if cal_detail:
+            cal_line += f" ({cal_detail})"
+        print(cal_line)
+    if suppressed_count:
+        print(f"Suppressed from compact: {suppressed_count} persistent concern(s) unchanged")
     print()
 
     findings = data["findings"]
@@ -14828,12 +14847,36 @@ def run_irg_challenge(args: argparse.Namespace) -> int:
     for domain in sorted(grouped):
         print(f"{domain}:")
         for finding in grouped[domain]:
-            print(f"  [{finding['attention_level']}] {finding['question']}")
+            fid = finding["finding_id"]
+            tag = "[new]" if fid in new_ids else "[persistent]" if fid in persistent_ids else ""
+            print(f"  {tag} [{finding['attention_level']}] {finding['question']}")
             print(f"    observation: {finding['observation']}")
             print(f"    why it matters: {finding['why_it_might_matter']}")
             if finding["evidence_refs"]:
                 print(f"    evidence refs: {', '.join(finding['evidence_refs'])}")
             print(f"    freshness: {finding['freshness_state']}")
+            if fid in persistent_ids and fid in persistence_claims:
+                claim = persistence_claims[fid]
+                print(
+                    f"    persistence: {claim['confidence']}, "
+                    f"derivable from {claim['first_derivable_phase']}"
+                )
+        print()
+
+    contradiction_synthesis = data.get("contradiction_synthesis", [])
+    if contradiction_synthesis:
+        print("Contradiction synthesis:")
+        for syn in contradiction_synthesis:
+            print(f"  [{syn['pattern_id']}] {syn['tension_label']}")
+            print(f"    {syn['synthesis_note']}")
+            print(f"    findings: {', '.join(syn['finding_ids'])}")
+        print()
+
+    resolved_questions = compact.get("resolved_questions", [])
+    if resolved_questions:
+        print("Resolved concerns:")
+        for q in resolved_questions:
+            print(f"  [resolved] {q['domain']}: {q['question']}")
         print()
 
     print(compact["footer"])

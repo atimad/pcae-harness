@@ -145,7 +145,7 @@
       "OBJ-002"
     ],
     "predecessor_phase_id": "66C",
-    "rationale": "Recent phases (64H series) repeatedly surfaced post-'implementation complete' defects (stale lineage fixtures, task contract scope violations, evidence inconsistency, review supersession ambiguity), demonstrating that IRG review state should be automatically visible in the governed workflow rather than human-recall-dependent. The original automated-review-loop proposal was challenged twice by IRG self-review and reduced to minimum viable scope: surface the latest non-superseded review state in session bootstrap only, with review_blocks_any_operation=False. This extends BR-004 into a second arc (review loop visibility) per explicit human decision; no new branch created.",
+    "rationale": "Recent phases (64H series) repeatedly surfaced post-\u2018implementation complete\u2019 defects (stale lineage fixtures, task contract scope violations, evidence inconsistency, review supersession ambiguity), demonstrating that IRG review state should be automatically visible in the governed workflow rather than human-recall-dependent. The original automated-review-loop proposal was challenged twice by IRG self-review and reduced to minimum viable scope: surface the latest non-superseded review state in session bootstrap only, with review_blocks_any_operation=False. This extends BR-004 into a second arc (review loop visibility) per explicit human decision; no new branch created.",
     "recommendation": "approve_with_changes",
     "rejected_alternatives": [],
     "review_ids": [
@@ -193,5 +193,39 @@
     "selected_branch_id": "BR-004",
     "source_phase_id": "66D",
     "supersedes_lineage_id": "SLR-66D-001"
+  },
+  {
+    "activated_phase_id": "67A",
+    "activation_event_id": "2026-06-12T08:32:36.268986+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "architecture_requirement",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-67A-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-12T08:32:36.268986+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "66E",
+    "rationale": "66E deterministic challenge engine was identified as generating the same questions every session regardless of governance evolution, undermining skepticism quality. 67A upgrades to comparative assessment (new/persistent/resolved), historical confidence model (high/medium/low epistemic reliability), contradiction synthesis via synthesis anchors and tension patterns, persistent-concern suppression after threshold phases, and differentiated surface strategy per lifecycle boundary. derived_history_is_historically_observed=False; confidence_modifies_attention_level=False.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "Challenge persistence remains stateless; no archived challenge history introduced.",
+      "Resolved concern derivation is not implemented (stateless engine cannot derive resolutions).",
+      "Attention-level escalation with age explicitly rejected (regression_finding_implies_failure=False)."
+    ],
+    "selected_branch_id": "BR-004",
+    "source_phase_id": "66E",
+    "supersedes_lineage_id": "SLR-66E-001"
   }
 ]

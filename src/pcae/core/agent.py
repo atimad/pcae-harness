@@ -69305,6 +69305,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae irg-challenge --json",
         ],
         "dependencies": ["bootstrap_irg_visibility_integration"],
+        "successor_capabilities": ["comparative_irg_challenge_architecture"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Comparative IRG Challenge Architecture",
+        "implemented_phase": "67A",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge",
+            "pcae irg-challenge --json",
+        ],
+        "dependencies": ["automated_irg_challenge_architecture"],
         "successor_capabilities": [],
     },
 )
@@ -70188,8 +70200,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "66E",
         "phase_title": "Automated IRG Challenge Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "66D",
+        "successor": "67A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "67A",
+        "phase_title": "Comparative IRG Challenge Architecture",
+        "status": "active",
+        "predecessor": "66E",
         "successor": "",
         "superseded_by": "",
     },
@@ -71003,7 +71024,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "bootstrap_irg_visibility_integration",
         ],
-        "successors": [],
+        "successors": ["comparative_irg_challenge_architecture"],
         "aliases": [],
         "contribution": (
             "builds a deterministic, advisory-only challenge assessment layer that surfaces "
@@ -71012,6 +71033,29 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "domains; auto-surfaces compact challenge context at session bootstrap, phase handoff, "
             "and phase completion without affecting command outcomes, readiness, approval state, or "
             "persistence; uses attention levels instead of review severities; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Comparative IRG Challenge Architecture",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "67A",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge",
+            "pcae irg-challenge --json",
+        ],
+        "dependencies": [
+            "automated_irg_challenge_architecture",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "upgrades the IRGC engine with comparative assessment (new/persistent/resolved), "
+            "historical confidence model (high/medium/low epistemic reliability), contradiction "
+            "synthesis via synthesis anchors and tension patterns, persistent-concern suppression "
+            "after threshold phases, differentiated surface strategy per lifecycle boundary, "
+            "and calibration state token; derived_history_is_historically_observed=False; "
+            "confidence_modifies_attention_level=False; execution_allowed=False"
         ),
     },
     {
@@ -73068,7 +73112,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66E",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66E-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66E",
@@ -73076,7 +73120,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66E",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66E-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66E",
@@ -73084,10 +73128,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66E",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66E-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66E",
+    },
+    {
+        "phase_id": "67A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "67A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67A",
+    },
+    {
+        "phase_id": "67A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "67A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67A",
+    },
+    {
+        "phase_id": "67A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "67A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67A",
     },
 )
 
@@ -78932,7 +79000,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "66E",
+        "current_phase": "67A",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79467,6 +79535,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "surfaces independent challenge context at summary-oriented lifecycle boundaries "
             "so humans and agents see assumptions, blind spots, counterfactuals, and uncertainty "
             "without changing approvals, readiness, or command outcomes"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "comparative_irg_challenge_architecture",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "upgrades challenge engine with comparative assessment, historical confidence model, "
+            "contradiction synthesis, suppression, and differentiated surface strategy; "
+            "advisory-only; no persistence, no blocking, no governance authority"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84400,8 +84480,8 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
 # Phase 66E — Automated IRG Challenge Architecture
 # ---------------------------------------------------------------------------
 
-_IRGC_PHASE_ID: str = "66E"
-_IRGC_PHASE_TITLE: str = "Automated IRG Challenge Architecture"
+_IRGC_PHASE_ID: str = "67A"
+_IRGC_PHASE_TITLE: str = "Comparative IRG Challenge Architecture"
 _IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
 _IRGC_DISPLAY_FOOTER: str = (
     "Displayed for context only. Command outcomes stay unchanged."
@@ -84443,6 +84523,17 @@ _IRGC_GOVERNANCE_BOUNDARIES: dict = {
     "change_list_emitted": False,
     "recommendation_is_approval_authority": False,
     "trigger_boundaries": list(_IRGC_AUTOMATIC_TRIGGER_BOUNDARIES),
+    # 67A comparative boundaries
+    "challenge_history_is_authoritative": False,
+    "calibration_state_is_persisted": False,
+    "confidence_modifies_attention_level": False,
+    "tension_pattern_registry_is_governance_document": False,
+    "synthesis_anchor_creates_governance_obligation": False,
+    "derived_history_is_historically_observed": False,
+    "persistent_concern_requires_action": False,
+    "regression_finding_implies_failure": False,
+    "attention_level_escalates_with_age": False,
+    "contradiction_finding_is_blocking": False,
 }
 IRG_CHALLENGE_ADVISORY: str = (
     "Phase 66E adds a deterministic, advisory-only challenge layer that identifies assumptions, "
@@ -84493,6 +84584,8 @@ def _irc_append_finding(
     why_it_might_matter: str,
     evidence_refs: list[str],
     freshness_state: str,
+    synthesis_anchors: list[tuple[str, str]] | None = None,
+    observation_type: str = "",
 ) -> None:
     if attention_level not in _IRGC_ALLOWED_ATTENTION_LEVELS:
         raise ValueError(f"Unsupported attention level: {attention_level}")
@@ -84509,6 +84602,8 @@ def _irc_append_finding(
             "why_it_might_matter": why_it_might_matter,
             "evidence_refs": list(evidence_refs),
             "freshness_state": freshness_state,
+            "synthesis_anchors": list(synthesis_anchors) if synthesis_anchors else [],
+            "observation_type": observation_type,
         }
     )
 
@@ -84557,7 +84652,14 @@ def _irc_compact_questions(findings: list[dict], *, max_domains: int = 3) -> lis
     return compact[:max_domains]
 
 
-def render_irg_challenge_compact_lines(data: dict | None) -> tuple[str, ...]:
+def render_irg_challenge_compact_lines(
+    data: dict | None,
+    surface: str = "bootstrap",
+) -> tuple[str, ...]:
+    """Render compact challenge lines for a lifecycle surface.
+
+    surface values: "bootstrap", "handoff", "completion", "explicit"
+    """
     if not isinstance(data, dict) or data.get("display_enabled", True) is False:
         return ()
 
@@ -84565,19 +84667,81 @@ def render_irg_challenge_compact_lines(data: dict | None) -> tuple[str, ...]:
     if not isinstance(compact_display, dict):
         return ()
 
+    header = compact_display.get("header", _IRGC_DISPLAY_HEADER)
+    footer = compact_display.get("footer", _IRGC_DISPLAY_FOOTER)
+    evolution = compact_display.get("evolution_summary", "")
+    calibration = compact_display.get("calibration_state", "")
+    calibration_detail = compact_display.get("calibration_detail", "")
     questions = compact_display.get("questions") or []
-    if not questions:
+
+    if surface == "completion":
+        if not evolution and not calibration:
+            return ()
+        lines = [header]
+        if evolution:
+            lines.append(evolution)
+        if calibration:
+            cal_line = f"Challenge calibration: {calibration}"
+            if calibration_detail:
+                cal_line += f" ({calibration_detail})"
+            lines.append(cal_line)
+        if footer:
+            lines.append(footer)
+        return tuple(lines)
+
+    if surface == "handoff":
+        comparative = data.get("comparative", {})
+        new_ids = set(comparative.get("new_concern_ids", []))
+        resolved_ids = set(comparative.get("resolved_concern_ids", []))
+        persistent_count = len(comparative.get("persistent_concern_ids", []))
+        new_questions = [q for q in questions if q.get("finding_id") in new_ids]
+        resolved_questions = [q for q in compact_display.get("resolved_questions", [])]
+        if not new_questions and not resolved_questions and persistent_count == 0:
+            if not evolution:
+                return ()
+        lines = [header]
+        if evolution:
+            lines.append(evolution)
+        if calibration:
+            cal_line = f"Challenge calibration: {calibration}"
+            if calibration_detail:
+                cal_line += f" ({calibration_detail})"
+            lines.append(cal_line)
+        if new_questions:
+            for q in new_questions:
+                lines.append(
+                    f"  [new] [{q['attention_level']}] {q['domain']}: {q['question']}"
+                )
+        if resolved_questions:
+            for q in resolved_questions:
+                lines.append(f"  [resolved] {q['domain']}: {q['question']}")
+        if persistent_count and not new_questions and not resolved_questions:
+            lines.append(
+                f"  {persistent_count} persistent concern(s) unchanged — see pcae irg-challenge"
+            )
+        if footer:
+            lines.append(footer)
+        return tuple(lines)
+
+    # bootstrap surface (default): evolution + calibration + new + one representative persistent
+    if not questions and not evolution:
         return ()
 
-    lines = [compact_display.get("header", _IRGC_DISPLAY_HEADER)]
+    lines = [header]
+    if evolution:
+        lines.append(evolution)
+    if calibration:
+        cal_line = f"Challenge calibration: {calibration}"
+        if calibration_detail:
+            cal_line += f" ({calibration_detail})"
+        lines.append(cal_line)
     summary = compact_display.get("summary", "")
-    if summary:
+    if summary and not evolution:
         lines.append(summary)
     for question in questions:
         lines.append(
             f"  [{question['attention_level']}] {question['domain']}: {question['question']}"
         )
-    footer = compact_display.get("footer", _IRGC_DISPLAY_FOOTER)
     if footer:
         lines.append(footer)
     return tuple(lines)
@@ -84589,7 +84753,6 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
         root = HarnessPath.cwd()
 
     active_phase = _irc_active_phase_record()
-    active_branch = _irc_current_branch_for_phase(active_phase)
     current_lineage = _irc_current_lineage_reference(root)
     latest_review, phases_since_review = _irc_latest_review_context(root)
     objective_snapshot = _srs_compute_objective_snapshot()
@@ -84625,11 +84788,10 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
                 f"latest canonical review is {latest_review['review_id']}."
             ),
             why_it_might_matter="Lineage assumptions can remain coherent while review context shifts.",
-            evidence_refs=[
-                current_lineage["lineage_id"],
-                latest_review["review_id"],
-            ],
+            evidence_refs=[current_lineage["lineage_id"], latest_review["review_id"]],
             freshness_state="aging",
+            synthesis_anchors=[("review_id", latest_review["review_id"]), ("lineage_id", current_lineage["lineage_id"])],
+            observation_type="lineage_review_drift",
         )
 
     if latest_review is not None and latest_review.get("findings"):
@@ -84650,6 +84812,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             why_it_might_matter="Open review context can stay relevant even when no workflow authority exists.",
             evidence_refs=[latest_review["review_id"]],
             freshness_state="current" if not phases_since_review else "aging",
+            synthesis_anchors=[("review_id", latest_review["review_id"])],
+            observation_type="open_review_assumptions",
         )
 
     if isinstance(phases_since_review, int) and phases_since_review > 0 and latest_review is not None:
@@ -84672,6 +84836,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             why_it_might_matter="System evolution can outpace the assumptions frozen into an older review.",
             evidence_refs=[latest_review["review_id"], "completed_phase_count"],
             freshness_state="stale" if phases_since_review >= 3 else "aging",
+            synthesis_anchors=[("review_id", latest_review["review_id"])],
+            observation_type="review_age",
         )
 
     thin_objectives = sorted(
@@ -84701,6 +84867,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             why_it_might_matter="Thin primary coverage can hide over-reliance on supporting mappings.",
             evidence_refs=[objective_id, "objective_coverage_snapshot"],
             freshness_state="current",
+            synthesis_anchors=[("objective_id", objective_id)],
+            observation_type="thin_primary_coverage",
         )
 
     if active_phase is not None and not active_phase.get("successor"):
@@ -84712,7 +84880,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             target_id=active_phase["phase_id"],
             attention_level="medium_attention",
             question=(
-                f"What sequencing assumption says {active_phase['phase_id']} is a stopping point rather than the start of another governance arc?"
+                f"What sequencing assumption says {active_phase['phase_id']} is a stopping point"
+                " rather than the start of another governance arc?"
             ),
             observation=(
                 f"Active phase {active_phase['phase_id']} has no registered successor."
@@ -84720,6 +84889,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             why_it_might_matter="A terminal-looking phase can still hide unresolved sequencing uncertainty.",
             evidence_refs=[active_phase["phase_id"]],
             freshness_state="current",
+            synthesis_anchors=[("phase_id", active_phase["phase_id"])],
+            observation_type="phase_no_successor",
         )
 
     if strategic_capability_count >= 5:
@@ -84731,7 +84902,8 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             target_id="strategic_governance",
             attention_level="medium_attention",
             question=(
-                "Where is governance complexity growing faster than explanation quality across strategic_governance surfaces?"
+                "Where is governance complexity growing faster than explanation quality"
+                " across strategic_governance surfaces?"
             ),
             observation=(
                 f"strategic_governance currently has {strategic_capability_count} implemented capabilities."
@@ -84739,19 +84911,59 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
             why_it_might_matter="Complexity growth can create blind spots even when each individual phase is coherent.",
             evidence_refs=["strategic_governance", "implemented_capability_count"],
             freshness_state="current",
+            synthesis_anchors=[("capability_id", "strategic_governance")],
+            observation_type="complexity_growth",
         )
 
     findings = _irc_sort_findings(_irc_unique_findings(findings))
-    compact_questions = _irc_compact_questions(findings)
-    compact_domains = [question["domain"] for question in compact_questions]
 
-    if compact_domains:
-        summary = (
-            f"{len(compact_questions)} questions surfaced across "
-            f"{', '.join(compact_domains)}."
+    # 67A comparative engine
+    comparative = _irc_compute_comparative_assessment(root, findings)
+    calibration_state, calibration_detail = _irc_compute_calibration_state(
+        findings, comparative
+    )
+    evolution_summary = _irc_compute_evolution_summary(comparative)
+    contradiction_synthesis = _irc_compute_contradiction_synthesis(findings)
+
+    # Apply suppression: persistent concerns beyond threshold hidden from compact
+    suppressed_ids = _irc_compute_suppressed_ids(findings, comparative)
+    unsuppressed_findings = [
+        f for f in findings if f["finding_id"] not in suppressed_ids
+    ]
+
+    compact_questions_base = _irc_compact_questions(unsuppressed_findings)
+    compact_domains = [q["domain"] for q in compact_questions_base]
+
+    summary_parts: list[str] = []
+    if evolution_summary:
+        summary_parts.append(evolution_summary)
+    elif compact_domains:
+        summary_parts.append(
+            f"{len(compact_questions_base)} questions surfaced across {', '.join(compact_domains)}."
         )
     else:
-        summary = "No material challenge questions surfaced."
+        summary_parts.append("No material challenge questions surfaced.")
+
+    compact_questions_with_ids = [
+        {
+            "finding_id": f["finding_id"],
+            "domain": f["domain"],
+            "attention_level": f["attention_level"],
+            "question": f["question"],
+        }
+        for f in compact_questions_base
+    ]
+
+    resolved_questions = [
+        {
+            "finding_id": fid,
+            "domain": comparative.get("resolved_detail", {}).get(fid, {}).get("domain", ""),
+            "question": comparative.get("resolved_detail", {}).get(fid, {}).get("question", ""),
+        }
+        for fid in comparative.get("resolved_concern_ids", [])
+    ]
+
+    suppressed_count = len(suppressed_ids)
 
     return {
         "display_enabled": True,
@@ -84774,19 +84986,378 @@ def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
         },
         "attention_levels": list(_IRGC_ALLOWED_ATTENTION_LEVELS),
         "findings": findings,
+        "comparative": comparative,
+        "contradiction_synthesis": contradiction_synthesis,
         "compact_display": {
             "header": _IRGC_DISPLAY_HEADER,
-            "summary": summary,
-            "questions": [
-                {
-                    "domain": finding["domain"],
-                    "attention_level": finding["attention_level"],
-                    "question": finding["question"],
-                }
-                for finding in compact_questions
-            ],
+            "summary": summary_parts[0] if summary_parts else "",
+            "evolution_summary": evolution_summary,
+            "calibration_state": calibration_state,
+            "calibration_detail": calibration_detail,
+            "questions": compact_questions_with_ids,
+            "resolved_questions": resolved_questions,
+            "suppressed_count": suppressed_count,
             "footer": _IRGC_DISPLAY_FOOTER,
         },
         "governance_boundaries": dict(_IRGC_GOVERNANCE_BOUNDARIES),
         "advisory": IRG_CHALLENGE_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 67A — Comparative IRG Challenge Architecture
+# ---------------------------------------------------------------------------
+
+_IRGC_RULE_REGISTRY: dict[str, str] = {
+    "governance-001": "66E",
+    "strategic_review-001": "66E",
+    "historical_drift-001": "66E",
+    "capability-001": "66E",
+    "roadmap-001": "66E",
+    "architecture-001": "66E",
+}
+
+_IRGC_SUPPRESSION_THRESHOLD_PHASES: int = 3
+_IRGC_LOOKBACK_PHASES: int = 3
+
+_IRGC_SYNTHESIS_ANCHOR_TYPES: tuple[str, ...] = (
+    "review_id",
+    "lineage_id",
+    "branch_id",
+    "objective_id",
+    "phase_id",
+    "capability_id",
+)
+
+_IRGC_TENSION_PATTERNS: tuple[dict, ...] = (
+    {
+        "pattern_id": "TP-001",
+        "domain_a": "governance",
+        "observation_type_a": "lineage_review_drift",
+        "domain_b": "historical_drift",
+        "observation_type_b": "",
+        "anchor_type": "lineage_id",
+        "tension_label": "review_and_lineage_drift",
+        "synthesis_note": (
+            "Governance lineage drift and historical drift co-occurring may share "
+            "a common root in sustained misalignment between review cadence and phase velocity."
+        ),
+    },
+    {
+        "pattern_id": "TP-002",
+        "domain_a": "capability",
+        "observation_type_a": "thin_primary_coverage",
+        "domain_b": "architecture",
+        "observation_type_b": "complexity_growth",
+        "anchor_type": "",
+        "tension_label": "coverage_gap_with_complexity",
+        "synthesis_note": (
+            "Thin objective coverage while strategic governance complexity grows "
+            "suggests capability debt may be accumulating in a high-density area."
+        ),
+    },
+    {
+        "pattern_id": "TP-003",
+        "domain_a": "governance",
+        "observation_type_a": "lineage_review_drift",
+        "domain_b": "capability",
+        "observation_type_b": "thin_primary_coverage",
+        "anchor_type": "",
+        "tension_label": "review_debt_and_coverage_debt",
+        "synthesis_note": (
+            "Review debt and coverage debt co-occurring may indicate that "
+            "governance investment is not keeping pace with capability expansion."
+        ),
+    },
+    {
+        "pattern_id": "TP-004",
+        "domain_a": "roadmap",
+        "observation_type_a": "phase_no_successor",
+        "domain_b": "architecture",
+        "observation_type_b": "complexity_growth",
+        "anchor_type": "",
+        "tension_label": "terminal_phase_with_complexity_growth",
+        "synthesis_note": (
+            "An active phase with no registered successor while governance complexity is growing "
+            "suggests sequencing assumptions may not account for emerging complexity."
+        ),
+    },
+    {
+        "pattern_id": "TP-005",
+        "domain_a": "governance",
+        "observation_type_a": "lineage_review_drift",
+        "domain_b": "roadmap",
+        "observation_type_b": "phase_no_successor",
+        "anchor_type": "",
+        "tension_label": "review_drift_with_open_roadmap",
+        "synthesis_note": (
+            "Review drift combined with an active phase lacking a successor suggests "
+            "that review governance and planning governance may be operating independently."
+        ),
+    },
+)
+
+_IRGC_CALIBRATION_STATES: tuple[str, ...] = (
+    "diversifying",
+    "consistent",
+    "narrowing",
+    "static",
+)
+
+_IRGC_CONFIDENCE_LEVELS: tuple[str, ...] = (
+    "high_confidence",
+    "medium_confidence",
+    "low_confidence",
+)
+
+
+def _irc_phase_id_sort_key(phase_id: str) -> tuple[int, str, int, str]:
+    """Return a sortable tuple for phase IDs like '66E' or '64B.6A'."""
+    s = phase_id.strip()
+    parts = s.split(".", 1)
+
+    def _parse(p: str) -> tuple[int, str]:
+        i = 0
+        while i < len(p) and p[i].isdigit():
+            i += 1
+        num = int(p[:i]) if i > 0 else 0
+        return (num, p[i:].upper())
+
+    major = _parse(parts[0])
+    minor = _parse(parts[1]) if len(parts) > 1 else (0, "")
+    return (major[0], major[1], minor[0], minor[1])
+
+
+def _irc_rule_existed_at_phase(rule_id: str, phase_id: str) -> bool:
+    """Return True if rule_id was introduced at or before phase_id."""
+    intro_phase = _IRGC_RULE_REGISTRY.get(rule_id)
+    if intro_phase is None:
+        return False
+    return _irc_phase_id_sort_key(intro_phase) <= _irc_phase_id_sort_key(phase_id)
+
+
+def _irc_review_completed_count(review: dict) -> int | None:
+    """Extract completed_phase_count_at_review from a review record if present."""
+    return review.get("completed_phase_count_at_review")
+
+
+def _irc_completed_phases_in_order() -> list[dict]:
+    """Return completed phases from the phase registry in chronological order."""
+    completed = [p for p in _CRI_KNOWN_PHASES if p.get("status") == "completed"]
+    return sorted(completed, key=lambda p: _irc_phase_id_sort_key(p["phase_id"]))
+
+
+def _irc_compute_persistence_confidence(rule_id: str, comparison_phase_id: str) -> str:
+    """
+    Epistemic confidence that a persistence claim is derivable from authoritative records.
+
+    Annotates reliability of the derivation, NOT urgency.
+    governance boundary: confidence_modifies_attention_level=False.
+    """
+    intro_phase = _IRGC_RULE_REGISTRY.get(rule_id)
+    if intro_phase is None:
+        return "low_confidence"
+    completed = _irc_completed_phases_in_order()
+    intro_key = _irc_phase_id_sort_key(intro_phase)
+    comp_key = _irc_phase_id_sort_key(comparison_phase_id)
+    phases_in_range = [
+        p
+        for p in completed
+        if intro_key <= _irc_phase_id_sort_key(p["phase_id"]) <= comp_key
+    ]
+    count = len(phases_in_range)
+    if count >= _IRGC_SUPPRESSION_THRESHOLD_PHASES:
+        return "high_confidence"
+    if count >= 1:
+        return "medium_confidence"
+    return "low_confidence"
+
+
+def _irc_compute_comparative_assessment(
+    root: "HarnessPath | None",
+    findings: list[dict],
+) -> dict:
+    """
+    Classify each finding as new or persistent relative to derived history.
+
+    governance boundary: derived_history_is_historically_observed=False.
+    This reconstructs what current rules would have said at prior phases,
+    not what was actually shown to the agent.
+    resolved_concern_ids is always empty: stateless engine cannot derive resolutions.
+    """
+    completed = _irc_completed_phases_in_order()
+    lookback = completed[-_IRGC_LOOKBACK_PHASES:] if completed else []
+
+    new_concern_ids: list[str] = []
+    persistent_concern_ids: list[str] = []
+    persistence_claims: dict[str, dict] = {}
+
+    for finding in findings:
+        fid = finding["finding_id"]
+        full_rule_key = f"{finding['domain']}-{finding['rule_id']}"
+        phases_with_rule = [
+            p["phase_id"]
+            for p in lookback
+            if _irc_rule_existed_at_phase(full_rule_key, p["phase_id"])
+        ]
+        if not phases_with_rule:
+            new_concern_ids.append(fid)
+        else:
+            persistent_concern_ids.append(fid)
+            first_phase = phases_with_rule[0]
+            confidence = _irc_compute_persistence_confidence(full_rule_key, first_phase)
+            persistence_claims[fid] = {
+                "confidence": confidence,
+                "first_derivable_phase": first_phase,
+                "phases_derivable": phases_with_rule,
+                "historically_derivable": True,
+                "historically_observed": False,
+            }
+
+    return {
+        "new_concern_ids": list(dict.fromkeys(new_concern_ids)),
+        "persistent_concern_ids": list(dict.fromkeys(persistent_concern_ids)),
+        "resolved_concern_ids": [],
+        "resolved_detail": {},
+        "persistence_claims": persistence_claims,
+    }
+
+
+def _irc_compute_calibration_state(
+    findings: list[dict],
+    comparative: dict,
+) -> tuple[str, str]:
+    """
+    Classify challenge engine sensitivity as a single token.
+
+    Not a governance finding. calibration_state_is_persisted=False.
+    """
+    new_ids = set(comparative.get("new_concern_ids", []))
+    persistent_ids = set(comparative.get("persistent_concern_ids", []))
+    resolved_ids = set(comparative.get("resolved_concern_ids", []))
+    new_count = len(new_ids)
+    persistent_count = len(persistent_ids)
+    resolved_count = len(resolved_ids)
+
+    if not findings:
+        return "static", "no challenge questions surfaced this run"
+
+    new_domains = {f["domain"] for f in findings if f["finding_id"] in new_ids}
+
+    if new_count > 0 and len(new_domains) >= 2:
+        return (
+            "diversifying",
+            f"{new_count} new concern(s) across {len(new_domains)} domain(s)",
+        )
+    if resolved_count > 0 and new_count == 0:
+        return (
+            "narrowing",
+            f"{resolved_count} concern(s) resolved, {persistent_count} persistent",
+        )
+    if persistent_count > 0 and new_count == 0 and resolved_count == 0:
+        return "consistent", f"{persistent_count} persistent concern(s), no change detected"
+    if new_count > 0:
+        return "diversifying", f"{new_count} new concern(s) detected"
+    return "static", "challenge state unchanged"
+
+
+def _irc_compute_evolution_summary(comparative: dict) -> str:
+    """One-line description of how challenge findings evolved relative to derived history."""
+    new_count = len(comparative.get("new_concern_ids", []))
+    persistent_count = len(comparative.get("persistent_concern_ids", []))
+    resolved_count = len(comparative.get("resolved_concern_ids", []))
+    if new_count == 0 and persistent_count == 0 and resolved_count == 0:
+        return ""
+    parts: list[str] = []
+    if new_count:
+        parts.append(f"{new_count} new")
+    if persistent_count:
+        parts.append(f"{persistent_count} persistent")
+    if resolved_count:
+        parts.append(f"{resolved_count} resolved")
+    return ", ".join(parts)
+
+
+def _irc_compute_contradiction_synthesis(findings: list[dict]) -> list[dict]:
+    """
+    Match co-present findings against known tension patterns via synthesis anchors.
+
+    synthesis_anchor_creates_governance_obligation=False.
+    contradiction_finding_is_blocking=False.
+    """
+    synthesis: list[dict] = []
+    for pattern in _IRGC_TENSION_PATTERNS:
+        findings_a = [
+            f
+            for f in findings
+            if f["domain"] == pattern["domain_a"]
+            and (
+                not pattern["observation_type_a"]
+                or f.get("observation_type", "") == pattern["observation_type_a"]
+            )
+        ]
+        findings_b = [
+            f
+            for f in findings
+            if f["domain"] == pattern["domain_b"]
+            and (
+                not pattern["observation_type_b"]
+                or f.get("observation_type", "") == pattern["observation_type_b"]
+            )
+        ]
+        if not findings_a or not findings_b:
+            continue
+        anchor_type = pattern.get("anchor_type", "")
+        if anchor_type:
+            anchors_a = {
+                anchor_id
+                for f in findings_a
+                for (atype, anchor_id) in f.get("synthesis_anchors", [])
+                if atype == anchor_type
+            }
+            anchors_b = {
+                anchor_id
+                for f in findings_b
+                for (atype, anchor_id) in f.get("synthesis_anchors", [])
+                if atype == anchor_type
+            }
+            if not (anchors_a & anchors_b):
+                continue
+        all_finding_ids = list(
+            dict.fromkeys(
+                [f["finding_id"] for f in findings_a]
+                + [f["finding_id"] for f in findings_b]
+            )
+        )
+        synthesis.append(
+            {
+                "pattern_id": pattern["pattern_id"],
+                "tension_label": pattern["tension_label"],
+                "finding_ids": all_finding_ids,
+                "synthesis_note": pattern["synthesis_note"],
+                "synthesis_anchor_creates_governance_obligation": False,
+                "contradiction_finding_is_blocking": False,
+            }
+        )
+    return synthesis
+
+
+def _irc_compute_suppressed_ids(
+    findings: list[dict],
+    comparative: dict,
+) -> set[str]:
+    """
+    Return finding_ids suppressed from compact display due to sustained persistence.
+
+    Suppressed findings remain available in full JSON output.
+    persistent_concern_requires_action=False.
+    """
+    threshold = _IRGC_SUPPRESSION_THRESHOLD_PHASES
+    persistent_ids = set(comparative.get("persistent_concern_ids", []))
+    persistence_claims = comparative.get("persistence_claims", {})
+    suppressed: set[str] = set()
+    for fid in persistent_ids:
+        claim = persistence_claims.get(fid, {})
+        if len(claim.get("phases_derivable", [])) >= threshold:
+            suppressed.add(fid)
+    return suppressed

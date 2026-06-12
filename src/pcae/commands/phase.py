@@ -37,7 +37,9 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print(f"Agent lock: released (by {result.agent_id})")
     else:
         print("Agent lock: none")
-    lines = render_irg_challenge_compact_lines(build_irg_challenge_context(root))
+    lines = render_irg_challenge_compact_lines(
+        build_irg_challenge_context(root), surface="completion"
+    )
     if lines:
         print()
         for line in lines:
@@ -206,7 +208,9 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     print()
     print(_build_restart_workflows_text())
 
-    lines = render_irg_challenge_compact_lines(build_irg_challenge_context(root))
+    lines = render_irg_challenge_compact_lines(
+        build_irg_challenge_context(root), surface="handoff"
+    )
     if lines:
         print()
         for line in lines:

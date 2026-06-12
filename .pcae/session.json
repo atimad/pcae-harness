@@ -1,68 +1,16 @@
 {
   "active_task": {
-    "id": "20260612-0734-66e-automated-irg-challenge-architecture",
-    "title": "66E Automated IRG Challenge Architecture"
+    "id": "20260612-1032-67a-comparative-irg-challenge-architecture",
+    "title": "67A Comparative IRG Challenge Architecture"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "",
+  "current_objective": "67A Comparative IRG Challenge Architecture",
   "git": {
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/session.json",
-        "status": " M"
-      },
-      {
-        "path": ".pcae/strategic-lineage.json",
-        "status": " M"
-      },
-      {
         "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/ROADMAP_REGISTRY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/phase.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/session.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DECISIONS.md",
         "status": " M"
       },
       {
@@ -70,42 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260611-2335-66d-bootstrap-irg-visibility-integration.md",
+        "path": "tasks/active/20260612-0734-66e-automated-irg-challenge-architecture.md",
         "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_docs.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_phase.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_session.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_strategic_lineage.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260612-0734-66e-automated-irg-challenge-architecture.md",
+        "path": "tasks/active/20260612-1032-67a-comparative-irg-challenge-architecture.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260611-2335-66d-bootstrap-irg-visibility-integration.md",
+        "path": "tasks/done/20260612-0734-66e-automated-irg-challenge-architecture.md",
         "status": "??"
       }
     ],
-    "status_summary": "23 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "",
-  "next_recommended_step": "",
-  "timestamp": "2026-06-12T06:03:04.128263+00:00",
+  "last_completed_step": "Completed task 20260612-0734-66e-automated-irg-challenge-architecture: 66E Automated IRG Challenge Architecture",
+  "next_recommended_step": "Continue active task 20260612-1032-67a-comparative-irg-challenge-architecture.",
+  "timestamp": "2026-06-12T08:32:36.268986+00:00",
   "warnings": []
 }
