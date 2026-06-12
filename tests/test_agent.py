@@ -47308,6 +47308,7 @@ def test_capability_inventory_all_domains_covered(tmp_path) -> None:
         "recovery_capabilities",
         "capability_intelligence",
         "strategic_governance",
+        "execution_governance",
     }
     actual_domains = {r["capability_domain"] for r in data["capability_records"]}
     assert expected_domains == actual_domains
@@ -47522,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -47621,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "68D"
+    assert data["current_phase"]["phase_id"] == "69A"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47736,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "68D"
+    assert data["current_phase"]["phase_id"] == "69A"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47745,7 +47746,7 @@ def test_roadmap_recommendation_current_track_capability_intelligence(tmp_path, 
     from pcae.core.agent import build_roadmap_recommendation_hardening
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_track"] == "independent_review_governance"
+    assert data["current_track"] == "execution_governance_activation"
 
 
 def test_roadmap_recommendation_no_41c_in_valid_recommendations(tmp_path, monkeypatch) -> None:
@@ -47856,8 +47857,8 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     data = json.loads(capsys.readouterr().out)
     assert "recommendations" in data
     assert "assessment" in data
-    assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "68D"
+    assert data["current_track"] == "execution_governance_activation"
+    assert data["current_phase"]["phase_id"] == "69A"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47865,7 +47866,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "independent_review_governance" in output or "66D" in output
+    assert "execution_governance_activation" in output or "69A" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47874,8 +47875,8 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
     assert "current_track" in data
-    assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "68D"
+    assert data["current_track"] == "execution_governance_activation"
+    assert data["current_phase"]["phase_id"] == "69A"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47970,8 +47971,8 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "68D"
-    assert data["current_track"] == "independent_review_governance"
+    assert data["current_phase"]["phase_id"] == "69A"
+    assert data["current_track"] == "execution_governance_activation"
 
 
 def test_prompt_recommendation_registry_record_fields(tmp_path, monkeypatch) -> None:
@@ -48865,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -49081,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49312,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50052,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -50145,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "68D" in output
+    assert "69A" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -50153,7 +50154,7 @@ def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "next"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "independent_review_governance" in output or "68D" in output
+    assert "execution_governance_activation" in output or "69A" in output
 
 
 # ---------------------------------------------------------------------------
@@ -51298,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -51574,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -51639,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -51977,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -52411,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -52517,16 +52518,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 56, (
-        f"Expected 56 map entries after 68D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 57, (
+        f"Expected 57 map entries after 69A, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 56, (
-        f"Expected 56 map entries after 68D, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 57, (
+        f"Expected 57 map entries after 69A, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52756,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -53059,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -53332,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -53655,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -54058,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -54385,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
 
 
@@ -54588,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "68D" in active_drift[0]
+    assert "69A" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54708,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "68D"
+    assert data["current_phase"]["phase_id"] == "69A"
     assert branch["current_phase"] == "65J"
 
 
@@ -54912,7 +54913,8 @@ def test_66c_active_tracks_helper_excludes_completed(tmp_path) -> None:
 
     active = _srs_compute_active_tracks()
     assert isinstance(active, set)
-    assert "independent_review_governance" in active, "independent_review_governance has 66D active — must be included"
+    assert "execution_governance_activation" in active, "execution_governance_activation has 69A active — must be included"
+    assert "independent_review_governance" not in active, "independent_review_governance BR-004 is closed — must not be in active tracks"
     assert "capability_intelligence" not in active, "capability_intelligence is fully completed — must not be in active tracks"
     assert "multi_runtime" not in active, "multi_runtime has no active phase after 64H completed"
 
@@ -55176,12 +55178,13 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 56, (
-        f"Expected 56 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 57, (
+        f"Expected 57 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
         f"68A added challenge_attention_architecture, 68B added challenge_attention_rendering_integration, "
-        f"68C added challenge_attention_effectiveness_review, 68D added challenge_attention_rebalancing), "
+        f"68C added challenge_attention_effectiveness_review, 68D added challenge_attention_rebalancing, "
+        f"69A added runtime_activation_architecture_review), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -56672,9 +56675,9 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
-    assert current["track_name"] == "independent_review_governance"
+    assert current["track_name"] == "execution_governance_activation"
 
 
 def test_68a_capability_registered(tmp_path) -> None:
@@ -56932,9 +56935,9 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
-    assert current["track_name"] == "independent_review_governance"
+    assert current["track_name"] == "execution_governance_activation"
 
 
 def test_68b_68a_registered_as_completed(tmp_path, monkeypatch) -> None:
@@ -57244,9 +57247,9 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "68D"
+    assert current["phase_id"] == "69A"
     assert current["status"] == "active"
-    assert current["track_name"] == "independent_review_governance"
+    assert current["track_name"] == "execution_governance_activation"
 
 
 def test_68d_68b_registered_as_completed(tmp_path) -> None:
@@ -57280,7 +57283,7 @@ def test_68d_capability_registered(tmp_path) -> None:
     assert cap["status"] == "implemented"
     profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "68D"]
     assert len(profiles) == 3
-    assert all(p["prompt_status"] == "recommended" for p in profiles)
+    assert all(p["prompt_status"] == "historical" for p in profiles)
 
 
 def test_68d_68c_capability_registered(tmp_path) -> None:

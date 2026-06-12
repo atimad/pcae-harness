@@ -69365,6 +69365,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["challenge_attention_effectiveness_review"],
+        "successor_capabilities": ["runtime_activation_architecture_review"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Runtime Activation Architecture Review",
+        "implemented_phase": "69A",
+        "status": "partially_implemented",
+        "commands": [],
+        "dependencies": ["challenge_attention_rebalancing"],
         "successor_capabilities": [],
     },
 )
@@ -70302,8 +70311,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "68D",
         "phase_title": "Persistent Attention Rebalancing Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "68C",
+        "successor": "69A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69A",
+        "phase_title": "Runtime Activation Architecture Review",
+        "status": "active",
+        "predecessor": "68D",
         "successor": "",
         "superseded_by": "",
     },
@@ -71248,7 +71266,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "challenge_attention_effectiveness_review",
         ],
-        "successors": [],
+        "successors": ["runtime_activation_architecture_review"],
         "aliases": [],
         "contribution": (
             "competitive persistence demotion: modifies _irca_allocate_attention() Step 3 "
@@ -71261,6 +71279,24 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "decision_reason='rebalanced_persistence' assigned when applicable; "
             "persistence_implies_lower_priority=False maintained; "
             "demotion_is_scheduling_not_priority_ranking=True; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Runtime Activation Architecture Review",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69A",
+        "status": "partially_implemented",
+        "commands": [],
+        "dependencies": [
+            "challenge_attention_rebalancing",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "BR-005 opening phase: architecture review determining what prevents PCAE from "
+            "governing actual execution; reviews Controlled Runtime Execution Pilot (62A) "
+            "dormancy conditions; identifies activation criteria and governance gaps; "
+            "design-only phase; execution_allowed=False; no runtime behavior introduced"
         ),
     },
     {
@@ -73461,7 +73497,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68D",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68D-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68D",
@@ -73469,7 +73505,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68D",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68D-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68D",
@@ -73477,10 +73513,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68D",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68D",
+    },
+    {
+        "phase_id": "69A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69A",
+    },
+    {
+        "phase_id": "69A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69A",
+    },
+    {
+        "phase_id": "69A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69A",
     },
 )
 
@@ -79329,6 +79389,24 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "approved_by": "",
         "approved_at": "",
     },
+    {
+        "branch_id": "BR-005",
+        "branch_name": "execution_governance_activation",
+        "branch_title": "Execution Governance Activation",
+        "description": (
+            "Phases governing the activation of dormant execution capabilities: "
+            "reviewing dormancy conditions, defining activation criteria, and enabling "
+            "governed execution of real runtime activity."
+        ),
+        "status": "active",
+        "parent_branch": "",
+        "child_branches": [],
+        "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
+        "entry_phase": "69A",
+        "current_phase": "69A",
+        "approved_by": "",
+        "approved_at": "",
+    },
 )
 
 _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
@@ -79934,6 +80012,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "persistence demotion: persistent findings yield slots to non-persistent findings "
             "under budget pressure; demotion_is_scheduling_not_priority_ranking=True; "
             "stateless; advisory-only; all governance boundaries preserved"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "runtime_activation_architecture_review",
+        "objective_ids": ["OBJ-001", "OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "opens BR-005 Execution Governance Activation branch; reviews what prevents "
+            "PCAE from governing actual execution; identifies activation criteria for "
+            "dormant Controlled Runtime Execution Pilot (62A); design-only"
         ),
         "decision_id": "",
         "recommendation_id": "",

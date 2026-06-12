@@ -86,7 +86,7 @@
     "roadmap_debt": [
       "Broader independent review workflow operationalization not included (deferred per IRG challenge review constraints).",
       "BR-004 advisory closure represented in governance_boundaries; registry status remains active until 66C completes.",
-      "Recommended next phase: 64H \u2014 Multi-Runtime Objective Coverage Hardening."
+      "Recommended next phase: 64H — Multi-Runtime Objective Coverage Hardening."
     ],
     "selected_branch_id": "BR-004",
     "source_phase_id": "66B",
@@ -145,7 +145,7 @@
       "OBJ-002"
     ],
     "predecessor_phase_id": "66C",
-    "rationale": "Recent phases (64H series) repeatedly surfaced post-\u2018implementation complete\u2019 defects (stale lineage fixtures, task contract scope violations, evidence inconsistency, review supersession ambiguity), demonstrating that IRG review state should be automatically visible in the governed workflow rather than human-recall-dependent. The original automated-review-loop proposal was challenged twice by IRG self-review and reduced to minimum viable scope: surface the latest non-superseded review state in session bootstrap only, with review_blocks_any_operation=False. This extends BR-004 into a second arc (review loop visibility) per explicit human decision; no new branch created.",
+    "rationale": "Recent phases (64H series) repeatedly surfaced post-‘implementation complete’ defects (stale lineage fixtures, task contract scope violations, evidence inconsistency, review supersession ambiguity), demonstrating that IRG review state should be automatically visible in the governed workflow rather than human-recall-dependent. The original automated-review-loop proposal was challenged twice by IRG self-review and reduced to minimum viable scope: surface the latest non-superseded review state in session bootstrap only, with review_blocks_any_operation=False. This extends BR-004 into a second arc (review loop visibility) per explicit human decision; no new branch created.",
     "recommendation": "approve_with_changes",
     "rejected_alternatives": [],
     "review_ids": [
@@ -247,16 +247,16 @@
       "OBJ-002"
     ],
     "predecessor_phase_id": "67A",
-    "rationale": "67A identified that IRGC measures challenge generation but not challenge impact \u2014 it can classify new/persistent/resolved concerns but cannot detect whether challenge output appears correlated with governance evolution. 67B adds a non-binding correlation observation layer: domain-aligned artifact detection, temporal proximity signals, CorrelationPatterns (public), and calibration effects. InfluenceHypothesis is computed internally and never surfaced; humans see correlation, not influence. The principle: the engine may reason about influence internally, but output must remain correlation-framed. No persistence, no blocking, no governance authority.",
+    "rationale": "67A identified that IRGC measures challenge generation but not challenge impact — it can classify new/persistent/resolved concerns but cannot detect whether challenge output appears correlated with governance evolution. 67B adds a non-binding correlation observation layer: domain-aligned artifact detection, temporal proximity signals, CorrelationPatterns (public), and calibration effects. InfluenceHypothesis is computed internally and never surfaced; humans see correlation, not influence. The principle: the engine may reason about influence internally, but output must remain correlation-framed. No persistence, no blocking, no governance authority.",
     "recommendation": "approve_with_changes",
     "rejected_alternatives": [],
     "review_ids": [
       "SRR-66B-001"
     ],
     "roadmap_debt": [
-      "Calibration effects (suppression_weight_delta) are computed but not applied \u2014 actual suppression modification deferred to a future phase.",
+      "Calibration effects (suppression_weight_delta) are computed but not applied — actual suppression modification deferred to a future phase.",
       "Resolved concern derivation remains stateless (inherited from 67A).",
-      "Temporal proximity uses phase sort-key gap, not calendar time \u2014 coarse but deterministic."
+      "Temporal proximity uses phase sort-key gap, not calendar time — coarse but deterministic."
     ],
     "selected_branch_id": "BR-004",
     "source_phase_id": "67A",
@@ -288,7 +288,7 @@
       "SRR-66B-001"
     ],
     "roadmap_debt": [
-      "AttentionDecisions are computed but not yet applied to render_irg_challenge_compact_lines output \u2014 actual surface filtering deferred to a future phase.",
+      "AttentionDecisions are computed but not yet applied to render_irg_challenge_compact_lines output — actual surface filtering deferred to a future phase.",
       "Calibration effects from 67B remain unapplied; their interaction with attention allocation deferred.",
       "Persistent attention memory explicitly rejected; future phases must re-evaluate if compelling evidence emerges."
     ],
@@ -305,7 +305,7 @@
     "decision_basis": "architecture_requirement",
     "deferred_alternatives": [],
     "execution_allowed": false,
-    "finding_snapshot_hash": "",
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
     "lineage_id": "SLR-68B-001",
     "lineage_status": "approved",
@@ -330,16 +330,12 @@
     "activated_phase_id": "68D",
     "activation_event_id": "2026-06-12T17:31:22+00:00",
     "activation_validation_status": "validated",
-    "considered_alternatives": [
-      "hard_demotion_persistent_always_last",
-      "weight_based_demotion",
-      "rotational_visibility"
-    ],
+    "considered_alternatives": [],
     "decided_by": "human-user",
     "decision_basis": "architecture_requirement",
     "deferred_alternatives": [],
     "execution_allowed": false,
-    "finding_snapshot_hash": "",
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
     "lineage_id": "SLR-68D-001",
     "lineage_status": "approved",
@@ -351,17 +347,52 @@
     "predecessor_phase_id": "68C",
     "rationale": "68C effectiveness review identified that persistent_background signal was computed but not actively used as a demotion criterion in _irca_allocate_attention() Step 3. Persistent findings competed equally with non-persistent findings during diversity_fill, reducing repetition reduction to incidental rather than structural. 68D adds competitive persistence demotion: Step 3 sort key becomes (is_persistent_background, domain, finding_id) so non-persistent findings precede persistent ones when budget is binding. Demotion is conditional — persistent findings surface unchanged when no non-persistent alternatives compete. demotion_is_scheduling_not_priority_ranking=True. persistence_implies_lower_priority=False maintained. Completion surface bypass documented as intentional via _IRCA_COMPLETION_SURFACE_NOTE. Rejected: hard demotion (makes absolute governance claim), weight-based scoring (implies importance ordering), rotational visibility (requires persistence). This closes the structural gap identified in 68C and completes the BR-004 attention arc.",
     "recommendation": "approve_with_changes",
-    "rejected_alternatives": [
-      "hard_demotion_persistent_always_last",
-      "weight_based_demotion",
-      "rotational_visibility"
-    ],
+    "rejected_alternatives": [],
     "review_ids": [
       "SRR-66B-001"
     ],
     "roadmap_debt": [],
     "selected_branch_id": "BR-004",
     "source_phase_id": "68C",
-    "supersedes_lineage_id": "SLR-68B-001"
+    "supersedes_lineage_id": "SLR-68B-001",
+    "branch_closure": {
+      "branch_id": "BR-004",
+      "closed_at_phase": "68D",
+      "closure_basis": "retrospective_review",
+      "objectives_achieved": "Independent review governance operational. Challenge generation, comparison, impact analysis, attention allocation, effectiveness review, and competitive persistence rebalancing completed across phases 66A-68D. OBJ-001 and OBJ-002 served throughout: review_output_is_binding=False, execution_allowed=False.",
+      "descoped_debt": "67B calibration effects (suppression_weight_delta) are computed but not applied. Explicitly descoped from BR-004 closure criteria. Future work requires separate branch justification.",
+      "closure_observation": "BR-004 reached a level of sophistication that exceeds current finding volume. Future challenge-system enhancements should be justified by observed contention rather than architectural possibility."
+    }
+  },
+  {
+    "activated_phase_id": "69A",
+    "activation_event_id": "2026-06-12T21:09:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-69A-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-12T21:09:00+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "68D",
+    "rationale": "BR-004 retrospective identified that PCAE now governs itself extremely well but the largest remaining capability gap is governed execution of real runtime activity. The Controlled Runtime Execution Pilot (62A) is dormant; multi-runtime governance infrastructure (BR-001) is complete but no actual execution flows through it. 69A is a design-only architecture review: what prevents PCAE from governing actual execution? The question is about governance readiness, not execution implementation. BR-005 Execution Governance Activation opens on this finding.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "68D",
+    "supersedes_lineage_id": "SLR-68D-001"
   }
 ]

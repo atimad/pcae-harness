@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 68D: Persistent Attention Rebalancing Architecture (BR-004 closed; inter-branch period before BR-005).
+Phase 69A: Runtime Activation Architecture Review (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

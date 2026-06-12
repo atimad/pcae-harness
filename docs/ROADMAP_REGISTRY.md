@@ -1,9 +1,9 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-12T18:44:41.794282+00:00
+Generated: 2026-06-12T19:20:41.239969+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 60
-Tracks: 8
+Total phases: 61
+Tracks: 9
 Superseded: 1
 Roadmap gaps: 0
 Evolution events: 2
@@ -95,7 +95,13 @@ Assessment status: intelligence_available
 | 68A | Adaptive Challenge Attention Architecture Design | completed | 67B | 68B |
 | 68B | Challenge Attention Rendering Integration | completed | 68A | 68C |
 | 68C | Challenge Attention Effectiveness Review | completed | 68B | 68D |
-| 68D | Persistent Attention Rebalancing Architecture | active | 68C | — |
+| 68D | Persistent Attention Rebalancing Architecture | completed | 68C | 69A |
+
+## Track: execution_governance_activation
+
+| Phase | Title | Status | Predecessor | Successor |
+|---|---|---|---|---|
+| 69A | Runtime Activation Architecture Review | active | 68D | — |
 
 ## Track: roadmap_intelligence
 
