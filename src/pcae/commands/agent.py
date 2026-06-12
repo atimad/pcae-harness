@@ -419,6 +419,8 @@ from pcae.core.agent import (
     STRATEGIC_REVIEW_MODEL_ADVISORY,
     STRATEGIC_REVIEW_CALIBRATION_ADVISORY,
     build_irg_challenge_context,
+    build_irg_impact_assessment,
+    render_irg_impact_compact_lines,
     IRG_CHALLENGE_ADVISORY,
     build_objective_coverage_hardening,
     OBJECTIVE_COVERAGE_HARDENING_ADVISORY,
@@ -14791,9 +14793,16 @@ def run_objective_coverage_hardening(args: argparse.Namespace) -> int:
 
 
 def run_irg_challenge(args: argparse.Namespace) -> int:
-    data = build_irg_challenge_context(HarnessPath.cwd())
+    root = HarnessPath.cwd()
+    data = build_irg_challenge_context(root)
+    impact_data: dict | None = None
+    if getattr(args, "impact", False):
+        impact_data = build_irg_impact_assessment(root)
     if args.json:
-        print(json.dumps(data, indent=2, sort_keys=True))
+        output = dict(data)
+        if impact_data is not None:
+            output["impact_assessment"] = impact_data
+        print(json.dumps(output, indent=2, sort_keys=True))
         return 0
 
     overview = data["independent_challenge_overview"]
@@ -14881,4 +14890,10 @@ def run_irg_challenge(args: argparse.Namespace) -> int:
 
     print(compact["footer"])
     print(IRG_CHALLENGE_ADVISORY)
+
+    if impact_data is not None:
+        print()
+        for line in render_irg_impact_compact_lines(impact_data):
+            print(line)
+
     return 0

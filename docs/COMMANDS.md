@@ -1250,6 +1250,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae irg-challenge`
 - `pcae irg-challenge --json`
+- `pcae irg-challenge --impact`
+- `pcae irg-challenge --impact --json`
 
 ## strategic-continuity
 

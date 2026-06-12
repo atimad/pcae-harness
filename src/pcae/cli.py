@@ -4856,6 +4856,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON output.",
     )
+    irg_challenge_parser.add_argument(
+        "--impact",
+        action="store_true",
+        help="Include challenge impact assessment: correlation observations, patterns, and calibration effects (Phase 67B).",
+    )
     irg_challenge_parser.set_defaults(handler=run_irg_challenge)
 
     strategic_continuity_parser = subparsers.add_parser(

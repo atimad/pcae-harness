@@ -69317,6 +69317,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae irg-challenge --json",
         ],
         "dependencies": ["automated_irg_challenge_architecture"],
+        "successor_capabilities": ["challenge_impact_architecture"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Challenge Impact Architecture",
+        "implemented_phase": "67B",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge --impact",
+            "pcae irg-challenge --impact --json",
+        ],
+        "dependencies": ["comparative_irg_challenge_architecture"],
         "successor_capabilities": [],
     },
 )
@@ -70209,8 +70221,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "67A",
         "phase_title": "Comparative IRG Challenge Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "66E",
+        "successor": "67B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "67B",
+        "phase_title": "Challenge Impact Architecture",
+        "status": "active",
+        "predecessor": "67A",
         "successor": "",
         "superseded_by": "",
     },
@@ -71047,7 +71068,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "automated_irg_challenge_architecture",
         ],
-        "successors": [],
+        "successors": ["challenge_impact_architecture"],
         "aliases": [],
         "contribution": (
             "upgrades the IRGC engine with comparative assessment (new/persistent/resolved), "
@@ -71056,6 +71077,30 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "after threshold phases, differentiated surface strategy per lifecycle boundary, "
             "and calibration state token; derived_history_is_historically_observed=False; "
             "confidence_modifies_attention_level=False; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Challenge Impact Architecture",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "67B",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge --impact",
+            "pcae irg-challenge --impact --json",
+        ],
+        "dependencies": [
+            "comparative_irg_challenge_architecture",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "adds a non-binding challenge impact assessment layer: collects governance artifacts "
+            "(lineage records, strategic reviews, phase activations), produces CorrelationObservations "
+            "via domain alignment and temporal proximity, aggregates ImpactSignals, derives "
+            "CorrelationPatterns (never InfluenceConclusions), and computes calibration effects "
+            "(suppression weight deltas) for the challenge engine; InfluenceHypothesis is internal "
+            "and never surfaced; humans see correlation not influence; impact_modifies_governance=False; "
+            "challenge_non_influence_is_failure=False; execution_allowed=False"
         ),
     },
     {
@@ -73136,7 +73181,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67A",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67A-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67A",
@@ -73144,7 +73189,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67A",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67A-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67A",
@@ -73152,10 +73197,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67A",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67A-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67A",
+    },
+    {
+        "phase_id": "67B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "67B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67B",
+    },
+    {
+        "phase_id": "67B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "67B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67B",
+    },
+    {
+        "phase_id": "67B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "67B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "67B",
     },
 )
 
@@ -79000,7 +79069,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "67A",
+        "current_phase": "67B",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79547,6 +79616,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "upgrades challenge engine with comparative assessment, historical confidence model, "
             "contradiction synthesis, suppression, and differentiated surface strategy; "
             "advisory-only; no persistence, no blocking, no governance authority"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "challenge_impact_architecture",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "adds correlation observation layer to IRGC engine: domain-aligned artifact detection, "
+            "temporal proximity signals, CorrelationPatterns, and calibration effects; "
+            "InfluenceHypothesis is internal; humans see correlation not influence; "
+            "impact_modifies_governance=False; no persistence, no blocking"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84480,8 +84562,8 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
 # Phase 66E — Automated IRG Challenge Architecture
 # ---------------------------------------------------------------------------
 
-_IRGC_PHASE_ID: str = "67A"
-_IRGC_PHASE_TITLE: str = "Comparative IRG Challenge Architecture"
+_IRGC_PHASE_ID: str = "67B"
+_IRGC_PHASE_TITLE: str = "Challenge Impact Architecture"
 _IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
 _IRGC_DISPLAY_FOOTER: str = (
     "Displayed for context only. Command outcomes stay unchanged."
@@ -85361,3 +85443,605 @@ def _irc_compute_suppressed_ids(
         if len(claim.get("phases_derivable", [])) >= threshold:
             suppressed.add(fid)
     return suppressed
+
+
+# ---------------------------------------------------------------------------
+# Phase 67B — Challenge Impact Architecture
+# ---------------------------------------------------------------------------
+
+_IRGC_IMPACT_ARTIFACT_TYPES: tuple[str, ...] = (
+    "lineage_record",
+    "strategic_review",
+    "phase_activation",
+)
+
+_IRGC_IMPACT_SIGNAL_TYPES: tuple[str, ...] = (
+    "domain_alignment",
+    "temporal_proximity",
+    "repeated_nonresponse",
+)
+
+_IRGC_IMPACT_PATTERN_TYPES: tuple[str, ...] = (
+    "domain_convergence",
+    "temporal_cluster",
+    "repeated_nonresponse",
+    "single_domain_alignment",
+)
+
+# gap_phases (str) -> signal_strength; gap > 3 produces no signal
+_IRGC_TEMPORAL_SIGNAL_THRESHOLDS: dict[str, str] = {
+    "1": "strong",
+    "2": "moderate",
+    "3": "weak",
+}
+
+# branch_id -> domain tags for domain alignment detection
+_IRGC_BRANCH_DOMAIN_MAP: dict[str, list[str]] = {
+    "BR-001": ["capability", "architecture"],
+    "BR-002": ["capability", "roadmap"],
+    "BR-003": ["governance", "strategic_review"],
+    "BR-004": ["governance", "historical_drift", "architecture"],
+}
+
+# track_name -> domain tags (parallel to branch map)
+_IRGC_TRACK_DOMAIN_MAP: dict[str, list[str]] = {
+    "multi_runtime": ["capability", "architecture"],
+    "capability_intelligence": ["capability", "roadmap"],
+    "strategic_governance": ["governance", "strategic_review"],
+    "independent_review_governance": ["governance", "historical_drift", "architecture"],
+}
+
+_IRGC_IMPACT_GOVERNANCE_BOUNDARIES: dict[str, bool] = {
+    "challenge_impact_is_performance_metric": False,
+    "challenge_influence_is_success": False,
+    "challenge_non_influence_is_failure": False,
+    "correlation_implies_causation": False,
+    "impact_assessment_modifies_governance": False,
+    "impact_assessment_blocks_operations": False,
+    "impact_assessment_affects_approval": False,
+    "impact_signal_creates_obligation": False,
+    "correlation_pattern_is_influence_conclusion": False,
+    "correlation_pattern_creates_obligation": False,
+    "repeated_nonresponse_triggers_escalation": False,
+    "impact_tier_is_governance_ranking": False,
+    "no_correlation_is_challenge_failure": False,
+    "assessment_confidence_modifies_governance": False,
+}
+
+_IRGC_IMPACT_ADVISORY: str = (
+    "Challenge Impact Assessment — correlation observations only. "
+    "Signals reflect domain alignment between challenge findings and governance artifacts. "
+    "No signal implies causation. No tier implies success or failure. "
+    "impact_modifies_governance=False. challenge_non_influence_is_failure=False. "
+    "InfluenceHypothesis is computed internally and never surfaced."
+)
+
+
+def _irc_track_to_domains(track_name: str) -> list[str]:
+    """Map a roadmap track name to IRGC domain tags."""
+    return list(_IRGC_TRACK_DOMAIN_MAP.get(track_name, []))
+
+
+def _irc_collect_governance_artifacts(root: str) -> list[dict]:
+    """Collect typed governance artifacts from lineage, reviews, and provenance.
+
+    Safe sources only: artifacts that exist for independent governance reasons.
+    Evidence is safe if its absence produces no signal — no_correlation_is_challenge_failure=False.
+    """
+    import json as _json
+    import os as _os
+
+    artifacts: list[dict] = []
+
+    # Strategic lineage records
+    lineage_path = _os.path.join(root, ".pcae", "strategic-lineage.json")
+    if _os.path.exists(lineage_path):
+        with open(lineage_path) as f:
+            records = _json.load(f)
+        for rec in records:
+            branch_id = rec.get("selected_branch_id", "")
+            domain_tags = list(_IRGC_BRANCH_DOMAIN_MAP.get(branch_id, []))
+            artifacts.append({
+                "artifact_id": rec.get("lineage_id", ""),
+                "artifact_type": "lineage_record",
+                "phase_id": rec.get("activated_phase_id", ""),
+                "domain_tags": domain_tags,
+                "timestamp": rec.get("lineage_timestamp", ""),
+            })
+
+    # Strategic reviews (in-memory registry + file)
+    reviews: list[dict] = list(_IRG_STRATEGIC_REVIEW_REGISTRY)
+    review_path = _os.path.join(root, ".pcae", "strategic_reviews.json")
+    if _os.path.exists(review_path):
+        with open(review_path) as f:
+            file_reviews = _json.load(f)
+        seen_ids = {r.get("review_id", "") for r in reviews}
+        for r in file_reviews:
+            if r.get("review_id", "") not in seen_ids:
+                reviews.append(r)
+    for rev in reviews:
+        domain_tags = list({
+            f.get("domain", "")
+            for f in rev.get("findings", [])
+            if f.get("domain")
+        })
+        artifacts.append({
+            "artifact_id": rev.get("review_id", ""),
+            "artifact_type": "strategic_review",
+            "phase_id": rev.get("source_phase_id", ""),
+            "domain_tags": domain_tags,
+            "timestamp": rev.get("review_timestamp", ""),
+        })
+
+    # Phase activations from provenance history
+    provenance_path = _os.path.join(root, ".pcae", "provenance-history.json")
+    if _os.path.exists(provenance_path):
+        with open(provenance_path) as f:
+            events = _json.load(f)
+        for ev in events:
+            if ev.get("event_type") == "phase_activated":
+                phase_id = ev.get("activated_phase_id", "") or ev.get("phase_id", "")
+                phase_rec = _CRI_KNOWN_PHASES.get(phase_id, {})
+                track = phase_rec.get("track_name", "")
+                domain_tags = _irc_track_to_domains(track)
+                artifacts.append({
+                    "artifact_id": f"PA-{phase_id}",
+                    "artifact_type": "phase_activation",
+                    "phase_id": phase_id,
+                    "domain_tags": domain_tags,
+                    "timestamp": ev.get("timestamp", ""),
+                })
+
+    return artifacts
+
+
+def _irc_phase_gap(phase_a: str, phase_b: str) -> int:
+    """Count of known phases strictly between phase_a and phase_b (in ordering sense).
+
+    Returns a positive integer when phase_b is later than phase_a, 0 when equal,
+    negative when phase_b is earlier.  Uses sort-key tuples for comparison and
+    the completed-phase list for counting.
+    """
+    key_a = _irc_phase_id_sort_key(phase_a)
+    key_b = _irc_phase_id_sort_key(phase_b)
+    if key_a == key_b:
+        return 0
+    if key_b < key_a:
+        # phase_b is before phase_a — return negative count
+        return -_irc_phase_gap(phase_b, phase_a)
+    # Count completed phases in (phase_a, phase_b] range
+    completed = _irc_completed_phases_in_order()
+    count = sum(
+        1
+        for p in completed
+        if _irc_phase_id_sort_key(p["phase_id"]) > key_a
+        and _irc_phase_id_sort_key(p["phase_id"]) <= key_b
+    )
+    return count if count > 0 else 1  # always at least 1 if ordering is later
+
+
+def _irc_compute_correlation_observations(
+    findings: list[dict],
+    artifacts: list[dict],
+) -> list[dict]:
+    """Produce CorrelationObservation for each (finding, artifact) pair with domain overlap.
+
+    finding_predates_artifact: artifact phase is strictly later than rule introduction phase.
+    correlation_is_causation=False always. correlation_creates_obligation=False always.
+    """
+    observations: list[dict] = []
+    for finding in findings:
+        f_domain = finding.get("domain", "")
+        f_id = finding.get("finding_id", "")
+        full_rule_key = f"{f_domain}-{finding.get('rule_id', '')}"
+        rule_intro_phase = _IRGC_RULE_REGISTRY.get(full_rule_key, _IRGC_PHASE_ID)
+
+        for art in artifacts:
+            if f_domain not in art.get("domain_tags", []):
+                continue
+            art_phase = art.get("phase_id", "")
+            if not art_phase:
+                continue
+            gap_from_intro = _irc_phase_gap(rule_intro_phase, art_phase)
+            if gap_from_intro <= 0:
+                continue  # artifact predates or equals rule introduction — not a valid observation
+
+            obs_id = f"CORR-{f_id}-{art['artifact_id']}"
+            observations.append({
+                "observation_id": obs_id,
+                "finding_id": f_id,
+                "artifact_id": art["artifact_id"],
+                "artifact_type": art["artifact_type"],
+                "domain_match": True,
+                "temporal_gap_phases": gap_from_intro,
+                "finding_predates_artifact": True,
+                "correlation_is_causation": False,
+                "correlation_creates_obligation": False,
+            })
+    return observations
+
+
+def _irc_compute_impact_signals(
+    findings: list[dict],
+    observations: list[dict],
+    comparative: dict,
+) -> list[dict]:
+    """Produce ImpactSignal records from CorrelationObservations.
+
+    signal_is_causation_claim=False always. signal_modifies_governance=False always.
+    repeated_nonresponse signals feed into calibration effects, not governance output.
+    """
+    signals: list[dict] = []
+    obs_by_finding: dict[str, list[dict]] = {}
+    for obs in observations:
+        obs_by_finding.setdefault(obs["finding_id"], []).append(obs)
+
+    persistent_ids = set(comparative.get("persistent_concern_ids", []))
+    persistence_claims = comparative.get("persistence_claims", {})
+
+    for finding in findings:
+        fid = finding.get("finding_id", "")
+        f_obs = obs_by_finding.get(fid, [])
+
+        if f_obs:
+            min_gap = min(obs["temporal_gap_phases"] for obs in f_obs)
+            strength = _IRGC_TEMPORAL_SIGNAL_THRESHOLDS.get(str(min_gap))
+            if strength:
+                signals.append({
+                    "signal_id": f"SIG-DA-{fid}",
+                    "signal_type": "domain_alignment",
+                    "signal_strength": strength,
+                    "finding_id": fid,
+                    "supporting_observation_ids": [obs["observation_id"] for obs in f_obs],
+                    "signal_is_causation_claim": False,
+                    "signal_modifies_governance": False,
+                })
+            # Temporal proximity signal when nearest gap is 1 phase
+            if min_gap == 1:
+                signals.append({
+                    "signal_id": f"SIG-TP-{fid}",
+                    "signal_type": "temporal_proximity",
+                    "signal_strength": "strong",
+                    "finding_id": fid,
+                    "supporting_observation_ids": [
+                        obs["observation_id"] for obs in f_obs
+                        if obs["temporal_gap_phases"] == 1
+                    ],
+                    "signal_is_causation_claim": False,
+                    "signal_modifies_governance": False,
+                })
+        else:
+            # Repeated non-response: persistent concern with no correlated artifacts
+            if fid in persistent_ids:
+                claim = persistence_claims.get(fid, {})
+                if len(claim.get("phases_derivable", [])) >= _IRGC_SUPPRESSION_THRESHOLD_PHASES:
+                    signals.append({
+                        "signal_id": f"SIG-RNR-{fid}",
+                        "signal_type": "repeated_nonresponse",
+                        "signal_strength": "informational",
+                        "finding_id": fid,
+                        "supporting_observation_ids": [],
+                        "signal_is_causation_claim": False,
+                        "signal_modifies_governance": False,
+                    })
+
+    return signals
+
+
+def _irc_compute_influence_hypotheses_internal(
+    signals: list[dict],
+    observations: list[dict],
+) -> list[dict]:
+    """Internal only — never surfaced or returned to any caller outside this module.
+
+    Produces InfluenceHypothesis records where multiple independent signal types converge.
+    hypothesis_is_factual=False always. hypothesis_creates_obligation=False always.
+    These are converted to CorrelationPattern (public) before any output is produced.
+    """
+    sigs_by_finding: dict[str, list[dict]] = {}
+    for sig in signals:
+        sigs_by_finding.setdefault(sig["finding_id"], []).append(sig)
+
+    hypotheses: list[dict] = []
+    for fid, f_sigs in sigs_by_finding.items():
+        sig_types = {s["signal_type"] for s in f_sigs}
+        # Require multiple independent signal types; non-response is not evidence for influence
+        if len(sig_types) < 2 or "repeated_nonresponse" in sig_types:
+            continue
+        strong_sigs = [
+            s for s in f_sigs
+            if s["signal_strength"] in ("strong", "moderate")
+        ]
+        if not strong_sigs:
+            continue
+        confidence = "plausible" if len(strong_sigs) >= 2 else "speculative"
+        hypotheses.append({
+            "hypothesis_id": f"HYP-{fid}",
+            "finding_id": fid,
+            "hypothesis_confidence": confidence,
+            "supporting_signal_ids": [s["signal_id"] for s in strong_sigs],
+            "contradicting_signal_ids": [],
+            "hypothesis_is_factual": False,
+            "hypothesis_creates_obligation": False,
+        })
+    return hypotheses
+
+
+def _irc_compute_correlation_patterns(
+    _internal_hypotheses: list[dict],
+    signals: list[dict],
+    observations: list[dict],
+) -> list[dict]:
+    """Convert internal influence analysis into public CorrelationPattern records.
+
+    Humans see correlation, not influence. InfluenceHypothesis confidence and framing
+    are discarded here. correlation_pattern_is_influence_conclusion=False always.
+    """
+    patterns: list[dict] = []
+    obs_by_finding: dict[str, list[dict]] = {}
+    for obs in observations:
+        obs_by_finding.setdefault(obs["finding_id"], []).append(obs)
+
+    sigs_by_finding: dict[str, list[dict]] = {}
+    for sig in signals:
+        sigs_by_finding.setdefault(sig["finding_id"], []).append(sig)
+
+    hyp_finding_ids = {h["finding_id"] for h in _internal_hypotheses}
+
+    # Repeated non-response patterns (from signals, independent of hypotheses)
+    rnr_signals = [s for s in signals if s["signal_type"] == "repeated_nonresponse"]
+    for sig in rnr_signals:
+        fid = sig["finding_id"]
+        patterns.append({
+            "pattern_id": f"CP-RNR-{fid}",
+            "finding_ids": [fid],
+            "pattern_type": "repeated_nonresponse",
+            "observation_ids": [],
+            "signal_ids": [sig["signal_id"]],
+            "pattern_note": (
+                "finding has been persistent across multiple phases "
+                "with no domain-aligned governance artifact in the lookback window"
+            ),
+            "correlation_pattern_is_influence_conclusion": False,
+            "correlation_pattern_creates_obligation": False,
+        })
+
+    # Correlation patterns for findings that have both domain_alignment and temporal_proximity
+    for fid in hyp_finding_ids:
+        f_obs = obs_by_finding.get(fid, [])
+        f_sigs = sigs_by_finding.get(fid, [])
+
+        # Check for domain convergence: other findings share the same correlated artifacts
+        art_ids = {obs["artifact_id"] for obs in f_obs}
+        convergent_fids = list(dict.fromkeys(
+            obs["finding_id"]
+            for obs in observations
+            if obs["artifact_id"] in art_ids and obs["finding_id"] != fid
+        ))
+
+        pattern_type = "domain_convergence" if convergent_fids else "single_domain_alignment"
+        all_finding_ids = list(dict.fromkeys([fid] + convergent_fids))
+
+        patterns.append({
+            "pattern_id": f"CP-{pattern_type[:4].upper()}-{fid}",
+            "finding_ids": all_finding_ids,
+            "pattern_type": pattern_type,
+            "observation_ids": [obs["observation_id"] for obs in f_obs],
+            "signal_ids": [s["signal_id"] for s in f_sigs],
+            "pattern_note": (
+                f"finding domain appeared in {len(f_obs)} governance artifact(s) "
+                "in the lookback window"
+            ),
+            "correlation_pattern_is_influence_conclusion": False,
+            "correlation_pattern_creates_obligation": False,
+        })
+
+    # Deduplicate by pattern_id
+    seen: set[str] = set()
+    deduped: list[dict] = []
+    for p in patterns:
+        if p["pattern_id"] not in seen:
+            seen.add(p["pattern_id"])
+            deduped.append(p)
+    return deduped
+
+
+def _irc_compute_calibration_effects(
+    findings: list[dict],
+    signals: list[dict],
+    observations: list[dict],
+) -> list[dict]:
+    """Compute per-finding calibration effect recommendations.
+
+    Effects are advisory recommendations for future engine calibration.
+    calibration_effect_is_applied=False always — actual suppression modification is deferred.
+    calibration_effect_modifies_governance=False always.
+    """
+    sigs_by_finding: dict[str, list[dict]] = {}
+    for sig in signals:
+        sigs_by_finding.setdefault(sig["finding_id"], []).append(sig)
+
+    effects: list[dict] = []
+    for finding in findings:
+        fid = finding.get("finding_id", "")
+        f_sigs = sigs_by_finding.get(fid, [])
+
+        has_rnr = any(s["signal_type"] == "repeated_nonresponse" for s in f_sigs)
+        has_strong = any(
+            s["signal_type"] == "domain_alignment"
+            and s["signal_strength"] in ("strong", "moderate")
+            for s in f_sigs
+        )
+
+        if has_rnr:
+            delta = 1
+            rationale = (
+                "repeated_nonresponse: domain has not correlated with any governance artifact "
+                "in the lookback window; suppression weight increased"
+            )
+        elif has_strong:
+            delta = -1
+            rationale = (
+                "strong_domain_alignment: domain appears active in recent governance artifacts; "
+                "suppression weight decreased"
+            )
+        else:
+            delta = 0
+            rationale = "no_signal: no calibration adjustment"
+
+        effects.append({
+            "finding_id": fid,
+            "suppression_weight_delta": delta,
+            "suppression_weight_rationale": rationale,
+            "calibration_effect_is_applied": False,
+            "calibration_effect_modifies_governance": False,
+        })
+    return effects
+
+
+def _irc_compute_impact_tier(fid: str, observations: list[dict]) -> str:
+    """Compute the highest public impact tier for a finding.
+
+    Tiers (ascending): generated -> acknowledged -> correlated.
+    InfluenceHypothesis tier is internal; never exposed.
+    """
+    f_obs = [obs for obs in observations if obs["finding_id"] == fid]
+    if f_obs:
+        return "correlated"
+    return "acknowledged"
+
+
+def build_irg_impact_assessment(root: "HarnessPath | None" = None) -> dict:
+    """Build Challenge Impact Assessment for the current session's IRGC findings.
+
+    Returns observations, signals, correlation_patterns, and calibration_effects.
+    Does NOT return influence_hypotheses (internal only — never exposed).
+    impact_modifies_governance=False always.
+    challenge_non_influence_is_failure=False always.
+    """
+    if root is None:
+        root = HarnessPath.cwd()
+
+    challenge_data = build_irg_challenge_context(root)
+    findings = challenge_data.get("findings", [])
+    comparative = challenge_data.get("comparative", {})
+
+    artifacts = _irc_collect_governance_artifacts(str(root))
+    observations = _irc_compute_correlation_observations(findings, artifacts)
+    signals = _irc_compute_impact_signals(findings, observations, comparative)
+
+    # Internal only — discards InfluenceHypothesis framing before any output
+    _internal_hypotheses = _irc_compute_influence_hypotheses_internal(signals, observations)
+
+    # Public — correlation framing only
+    patterns = _irc_compute_correlation_patterns(_internal_hypotheses, signals, observations)
+    effects = _irc_compute_calibration_effects(findings, signals, observations)
+
+    assessments: list[dict] = []
+    sigs_by_finding = {s["finding_id"]: [] for s in signals}
+    for s in signals:
+        sigs_by_finding[s["finding_id"]].append(s)
+    patterns_by_finding: dict[str, list[dict]] = {}
+    for p in patterns:
+        for fid in p.get("finding_ids", []):
+            patterns_by_finding.setdefault(fid, []).append(p)
+    effects_by_finding = {e["finding_id"]: e for e in effects}
+
+    for finding in findings:
+        fid = finding.get("finding_id", "")
+        tier = _irc_compute_impact_tier(fid, observations)
+        f_obs = [obs for obs in observations if obs["finding_id"] == fid]
+        assessments.append({
+            "assessment_id": f"CIA-{fid}",
+            "finding_id": fid,
+            "impact_tier": tier,
+            "correlation_observations": f_obs,
+            "signals": sigs_by_finding.get(fid, []),
+            "correlation_patterns": patterns_by_finding.get(fid, []),
+            "calibration_effect": effects_by_finding.get(fid, {}),
+            "assessment_is_governance_evidence": False,
+            "impact_modifies_governance": False,
+        })
+
+    combined_boundaries = {
+        **dict(_IRGC_GOVERNANCE_BOUNDARIES),
+        **_IRGC_IMPACT_GOVERNANCE_BOUNDARIES,
+    }
+
+    return {
+        "phase_id": _IRGC_PHASE_ID,
+        "assessments": assessments,
+        "signals": signals,
+        "correlation_patterns": patterns,
+        "calibration_effects": effects,
+        "artifact_count": len(artifacts),
+        "observation_count": len(observations),
+        "governance_boundaries": combined_boundaries,
+        "influence_hypotheses_are_internal": True,
+        "impact_is_causal": False,
+        "impact_modifies_governance": False,
+        "advisory": _IRGC_IMPACT_ADVISORY,
+    }
+
+
+def render_irg_impact_compact_lines(data: dict) -> list[str]:
+    """Compact display lines for pcae irg-challenge --impact.
+
+    Shows: correlation observations, correlation patterns, calibration effects.
+    Does NOT show: influence conclusions, influence rankings, influence confidence.
+    """
+    lines: list[str] = []
+    lines.append("[Challenge Impact — correlation observations, not causation]")
+
+    assessments = data.get("assessments", [])
+    patterns = data.get("correlation_patterns", [])
+    effects = data.get("calibration_effects", [])
+
+    if not assessments:
+        lines.append("  no findings to assess")
+        lines.append("  [impact_modifies_governance=False]")
+        return lines
+
+    correlated = [a for a in assessments if a["impact_tier"] == "correlated"]
+    unmatched = [a for a in assessments if a["impact_tier"] != "correlated"]
+
+    if correlated:
+        lines.append(f"  domain-aligned artifacts detected: {len(correlated)} finding(s)")
+        for a in correlated:
+            f_obs = a.get("correlation_observations", [])
+            if f_obs:
+                min_gap = min(obs["temporal_gap_phases"] for obs in f_obs)
+                lines.append(
+                    f"    {a['finding_id']}: {len(f_obs)} artifact(s), "
+                    f"nearest gap={min_gap} phase(s)"
+                )
+    if unmatched:
+        lines.append(
+            f"  no correlated artifacts: {len(unmatched)} finding(s) "
+            "[absence of correlation is not a finding]"
+        )
+
+    if patterns:
+        lines.append(f"  correlation patterns: {len(patterns)}")
+        for p in patterns:
+            lines.append(f"    [{p['pattern_type']}] {p['pattern_note']}")
+
+    suppression_increases = [e for e in effects if e.get("suppression_weight_delta", 0) > 0]
+    suppression_decreases = [e for e in effects if e.get("suppression_weight_delta", 0) < 0]
+    if suppression_increases:
+        lines.append(
+            f"  calibration: +suppression weight for {len(suppression_increases)} finding(s) "
+            "(repeated_nonresponse — deferred)"
+        )
+    if suppression_decreases:
+        lines.append(
+            f"  calibration: -suppression weight for {len(suppression_decreases)} finding(s) "
+            "(active domain — deferred)"
+        )
+
+    lines.append(
+        "  [correlation_pattern_is_influence_conclusion=False, "
+        "impact_modifies_governance=False, "
+        "challenge_non_influence_is_failure=False]"
+    )
+    return lines

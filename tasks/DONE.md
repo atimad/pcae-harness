@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 67A Comparative IRG Challenge Architecture (20260612-1032-67a-comparative-irg-challenge-architecture)
 - 66E Automated IRG Challenge Architecture (20260612-0734-66e-automated-irg-challenge-architecture)
 - 66D Bootstrap IRG Visibility Integration (20260611-2335-66d-bootstrap-irg-visibility-integration)
 - 64H Multi-Runtime Objective Coverage Hardening (20260611-1921-64h-multi-runtime-objective-coverage-hardening)

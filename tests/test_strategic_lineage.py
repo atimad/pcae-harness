@@ -19,6 +19,7 @@ ACTIVATION_TIMESTAMP_64H = "2026-06-11T17:00:00+00:00"
 ACTIVATION_TIMESTAMP_66D = "2026-06-11T21:00:00+00:00"
 ACTIVATION_TIMESTAMP_66E = "2026-06-12T05:34:03+00:00"
 ACTIVATION_TIMESTAMP_67A = "2026-06-12T08:32:36+00:00"
+ACTIVATION_TIMESTAMP_67B = "2026-06-12T12:17:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -269,6 +270,34 @@ def _valid_67a_record() -> dict:
     }
 
 
+def _valid_67b_record() -> dict:
+    return {
+        "lineage_id": "SLR-67B-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_67B,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "architecture_requirement",
+        "source_phase_id": "67A",
+        "predecessor_phase_id": "67A",
+        "activated_phase_id": "67B",
+        "selected_branch_id": "BR-004",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "rationale": "Add correlation observation layer to IRGC; humans see correlation not influence.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": ["Calibration effects computed but not applied in 67B."],
+        "supersedes_lineage_id": "SLR-67A-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_67B,
+        "activation_validation_status": "validated",
+    }
+
+
 def _write_registry(root: Path, records: list[dict], *, provenance: bool = True) -> None:
     pcae_dir = root / ".pcae"
     pcae_dir.mkdir(parents=True, exist_ok=True)
@@ -328,6 +357,14 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
                         "summary": "Human-approved activation of Phase 67A",
                         "timestamp": ACTIVATION_TIMESTAMP_67A,
                     },
+                    {
+                        "active_task": None,
+                        "agent_id": "codex-local",
+                        "event_type": "phase_activated",
+                        "git_branch": "main",
+                        "summary": "Human-approved activation of Phase 67B",
+                        "timestamp": ACTIVATION_TIMESTAMP_67B,
+                    },
                 ],
                 indent=2,
                 sort_keys=True,
@@ -340,7 +377,7 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
 def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tuple[str, ...]:
     _write_registry(
         tmp_path,
-        [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+        [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
         provenance=provenance,
     )
     return validate_strategic_lineage(HarnessPath(tmp_path)).errors
@@ -349,11 +386,11 @@ def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tup
 def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-67A-TEST"
+    assert result.current_lineage_id == "SLR-67B-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -361,7 +398,7 @@ def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
@@ -373,7 +410,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
 ) -> None:
     from pcae.core import strategic_lineage as strategic_lineage_module
 
-    records = [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()]
+    records = [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()]
     patched_branches = []
     for branch in strategic_lineage_module._SRG_BRANCH_REGISTRY:
         patched = dict(branch)
@@ -388,7 +425,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-67A-TEST: activated phase does not match branch current_phase." == error
+        "SLR-67B-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -475,7 +512,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     pcae_dir.mkdir(parents=True, exist_ok=True)
     (pcae_dir / "strategic-lineage.json").write_text(
         json.dumps(
-            [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+            [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
             indent=2,
             sort_keys=True,
         )
@@ -525,6 +562,14 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
                     "summary": "Human-approved activation of Phase 67A",
                     "timestamp": ACTIVATION_TIMESTAMP_67A,
                 },
+                {
+                    "active_task": None,
+                    "agent_id": "codex-local",
+                    "event_type": "phase_activated",
+                    "git_branch": "main",
+                    "summary": "Human-approved activation of Phase 67B",
+                    "timestamp": ACTIVATION_TIMESTAMP_67B,
+                },
             ],
             indent=2,
             sort_keys=True,
@@ -534,7 +579,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-67A-TEST"
+    assert result.current_lineage_id == "SLR-67B-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -563,15 +608,16 @@ def test_65j_summary_uses_referenced_review_findings(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
     )
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert "referenced_review_findings" in data
     assert "open_strategic_findings" not in data
-    assert data["deferred_alternatives"][0]["disposition"] == "deferred"
-    assert data["rejected_alternatives"][0]["disposition"] == "rejected"
+    # 67B has no considered alternatives (approve_with_changes, no deferred/rejected)
+    assert isinstance(data["deferred_alternatives"], list)
+    assert isinstance(data["rejected_alternatives"], list)
 
 
 def test_65j_continuity_commands_are_read_only(
@@ -579,7 +625,7 @@ def test_65j_continuity_commands_are_read_only(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record()],
+        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record()],
     )
     before = {
         path.name: path.read_bytes()
@@ -588,9 +634,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-67A-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-67B-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 6
+    assert json.loads(capsys.readouterr().out)["record_count"] == 7
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

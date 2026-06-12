@@ -227,5 +227,39 @@
     "selected_branch_id": "BR-004",
     "source_phase_id": "66E",
     "supersedes_lineage_id": "SLR-66E-001"
+  },
+  {
+    "activated_phase_id": "67B",
+    "activation_event_id": "2026-06-12T12:17:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "architecture_requirement",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-67B-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-12T12:17:00+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "67A",
+    "rationale": "67A identified that IRGC measures challenge generation but not challenge impact \u2014 it can classify new/persistent/resolved concerns but cannot detect whether challenge output appears correlated with governance evolution. 67B adds a non-binding correlation observation layer: domain-aligned artifact detection, temporal proximity signals, CorrelationPatterns (public), and calibration effects. InfluenceHypothesis is computed internally and never surfaced; humans see correlation, not influence. The principle: the engine may reason about influence internally, but output must remain correlation-framed. No persistence, no blocking, no governance authority.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "Calibration effects (suppression_weight_delta) are computed but not applied \u2014 actual suppression modification deferred to a future phase.",
+      "Resolved concern derivation remains stateless (inherited from 67A).",
+      "Temporal proximity uses phase sort-key gap, not calendar time \u2014 coarse but deterministic."
+    ],
+    "selected_branch_id": "BR-004",
+    "source_phase_id": "67A",
+    "supersedes_lineage_id": "SLR-67A-001"
   }
 ]

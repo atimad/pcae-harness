@@ -47522,7 +47522,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -47621,7 +47621,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47736,7 +47736,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47857,7 +47857,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47875,7 +47875,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "independent_review_governance"
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47970,7 +47970,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
     assert data["current_track"] == "independent_review_governance"
 
 
@@ -48865,7 +48865,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -49081,7 +49081,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49312,7 +49312,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50052,7 +50052,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -50145,7 +50145,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "67A" in output
+    assert "67B" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -50153,7 +50153,7 @@ def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "next"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "independent_review_governance" in output or "67A" in output
+    assert "independent_review_governance" in output or "67B" in output
 
 
 # ---------------------------------------------------------------------------
@@ -51298,7 +51298,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -51574,7 +51574,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -51639,7 +51639,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -51977,7 +51977,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -52411,7 +52411,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -52517,16 +52517,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 51, (
-        f"Expected 51 map entries after 67A, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 52, (
+        f"Expected 52 map entries after 67B, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 51, (
-        f"Expected 51 map entries after 67A, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 52, (
+        f"Expected 52 map entries after 67B, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52756,7 +52756,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -53059,7 +53059,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -53332,7 +53332,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -53655,7 +53655,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -54058,7 +54058,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -54385,7 +54385,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "67A"
+    assert current["phase_id"] == "67B"
     assert current["status"] == "active"
 
 
@@ -54588,7 +54588,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "67A" in active_drift[0]
+    assert "67B" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54708,7 +54708,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "67A"
+    assert data["current_phase"]["phase_id"] == "67B"
     assert branch["current_phase"] == "65J"
 
 
@@ -54815,7 +54815,7 @@ def test_66c_br004_active_while_66c_in_progress(tmp_path, monkeypatch) -> None:
     br004 = next((b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-004"), None)
     assert br004 is not None
     assert br004["status"] == "active", "BR-004 remains active; 66D extends it as a second arc"
-    assert br004["current_phase"] == "67A"
+    assert br004["current_phase"] == "67B"
     assert _SRS_GOVERNANCE_BOUNDARIES["br_004_closed"] is True, "BR-004 closure is advisory intent in governance_boundaries"
 
 
@@ -55176,10 +55176,10 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 51, (
-        f"Expected 51 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 52, (
+        f"Expected 52 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
-        f"67A added comparative_irg_challenge_architecture), "
+        f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -55614,7 +55614,7 @@ def test_66e_phase_and_map_entry_registered(tmp_path) -> None:
 
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "67A"), None)
     assert phase is not None
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["track_name"] == "independent_review_governance"
     assert phase["predecessor"] == "66E"
     entry = next(
@@ -56069,7 +56069,370 @@ def test_67a_capability_and_prompt_registry_updated(tmp_path) -> None:
 
     profiles_67a = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "67A"]
     assert len(profiles_67a) == 3
-    assert all(p["prompt_status"] == "recommended" for p in profiles_67a)
+    assert all(p["prompt_status"] == "historical" for p in profiles_67a)
 
     profiles_66e = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "66E"]
     assert all(p["prompt_status"] == "historical" for p in profiles_66e)
+
+
+# ---------------------------------------------------------------------------
+# Phase 67B — Challenge Impact Architecture
+# ---------------------------------------------------------------------------
+
+
+def test_67b_phase_id_updated(tmp_path) -> None:
+    from pcae.core.agent import _IRGC_PHASE_ID, _IRGC_PHASE_TITLE
+
+    assert _IRGC_PHASE_ID == "67B"
+    assert _IRGC_PHASE_TITLE == "Challenge Impact Architecture"
+
+
+def test_67b_impact_governance_boundaries_present(tmp_path) -> None:
+    from pcae.core.agent import _IRGC_IMPACT_GOVERNANCE_BOUNDARIES
+
+    required = [
+        "challenge_impact_is_performance_metric",
+        "challenge_influence_is_success",
+        "challenge_non_influence_is_failure",
+        "correlation_implies_causation",
+        "impact_assessment_modifies_governance",
+        "impact_assessment_blocks_operations",
+        "impact_assessment_affects_approval",
+        "impact_signal_creates_obligation",
+        "correlation_pattern_is_influence_conclusion",
+        "correlation_pattern_creates_obligation",
+        "repeated_nonresponse_triggers_escalation",
+        "impact_tier_is_governance_ranking",
+        "no_correlation_is_challenge_failure",
+        "assessment_confidence_modifies_governance",
+    ]
+    for key in required:
+        assert key in _IRGC_IMPACT_GOVERNANCE_BOUNDARIES, f"missing boundary: {key}"
+        assert _IRGC_IMPACT_GOVERNANCE_BOUNDARIES[key] is False, f"boundary {key} must be False"
+
+
+def test_67b_influence_hypotheses_never_in_output(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    assert "influence_hypotheses" not in data, "InfluenceHypothesis must not appear in output"
+    assert data.get("influence_hypotheses_are_internal") is True
+    for assessment in data.get("assessments", []):
+        assert "influence_hypothesis" not in assessment
+        assert "hypothesis_confidence" not in assessment
+
+
+def test_67b_correlation_is_never_causation(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    assert data.get("impact_is_causal") is False
+    for obs in data.get("assessments", []):
+        for corr_obs in obs.get("correlation_observations", []):
+            assert corr_obs["correlation_is_causation"] is False
+            assert corr_obs["correlation_creates_obligation"] is False
+
+
+def test_67b_correlation_pattern_not_influence_conclusion(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    for pattern in data.get("correlation_patterns", []):
+        assert pattern["correlation_pattern_is_influence_conclusion"] is False
+        assert pattern["correlation_pattern_creates_obligation"] is False
+
+
+def test_67b_impact_assessment_modifies_governance_false(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    assert data.get("impact_modifies_governance") is False
+    for assessment in data.get("assessments", []):
+        assert assessment["impact_modifies_governance"] is False
+        assert assessment["assessment_is_governance_evidence"] is False
+
+
+def test_67b_signals_never_causation_claims(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    for signal in data.get("signals", []):
+        assert signal["signal_is_causation_claim"] is False
+        assert signal["signal_modifies_governance"] is False
+
+
+def test_67b_calibration_effects_not_applied(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    for effect in data.get("calibration_effects", []):
+        assert effect["calibration_effect_is_applied"] is False
+        assert effect["calibration_effect_modifies_governance"] is False
+
+
+def test_67b_assessment_id_deterministic(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    data = build_irg_impact_assessment()
+    for assessment in data.get("assessments", []):
+        fid = assessment["finding_id"]
+        assert assessment["assessment_id"] == f"CIA-{fid}"
+
+
+def test_67b_impact_tier_values_are_valid(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment
+
+    valid_tiers = {"generated", "acknowledged", "correlated"}
+    data = build_irg_impact_assessment()
+    for assessment in data.get("assessments", []):
+        assert assessment["impact_tier"] in valid_tiers, (
+            f"invalid tier: {assessment['impact_tier']}"
+        )
+
+
+def test_67b_observation_requires_domain_match(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_correlation_observations
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    artifacts = [
+        {
+            "artifact_id": "ART-001",
+            "artifact_type": "lineage_record",
+            "phase_id": "67A",
+            "domain_tags": ["capability"],
+            "timestamp": "",
+        }
+    ]
+    observations = _irc_compute_correlation_observations(findings, artifacts)
+    assert observations == [], "observation must not be created when domain does not match"
+
+
+def test_67b_observation_domain_match_produces_observation(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_correlation_observations
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    # artifact phase must be strictly after rule intro phase (66E)
+    artifacts = [
+        {
+            "artifact_id": "SLR-67A",
+            "artifact_type": "lineage_record",
+            "phase_id": "67A",  # after 66E
+            "domain_tags": ["governance"],
+            "timestamp": "",
+        }
+    ]
+    observations = _irc_compute_correlation_observations(findings, artifacts)
+    assert len(observations) == 1
+    obs = observations[0]
+    assert obs["domain_match"] is True
+    assert obs["finding_predates_artifact"] is True
+    assert obs["correlation_is_causation"] is False
+
+
+def test_67b_domain_alignment_signal_produced_on_match(tmp_path) -> None:
+    from pcae.core.agent import (
+        _irc_compute_correlation_observations,
+        _irc_compute_impact_signals,
+    )
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    artifacts = [
+        {
+            "artifact_id": "SLR-67A",
+            "artifact_type": "lineage_record",
+            "phase_id": "67A",
+            "domain_tags": ["governance"],
+            "timestamp": "",
+        }
+    ]
+    observations = _irc_compute_correlation_observations(findings, artifacts)
+    signals = _irc_compute_impact_signals(findings, observations, {})
+    da_signals = [s for s in signals if s["signal_type"] == "domain_alignment"]
+    assert len(da_signals) == 1
+    assert da_signals[0]["signal_is_causation_claim"] is False
+
+
+def test_67b_no_signal_when_no_domain_match(tmp_path) -> None:
+    from pcae.core.agent import (
+        _irc_compute_correlation_observations,
+        _irc_compute_impact_signals,
+    )
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    artifacts = [
+        {
+            "artifact_id": "SLR-67A",
+            "artifact_type": "lineage_record",
+            "phase_id": "67A",
+            "domain_tags": ["capability"],
+            "timestamp": "",
+        }
+    ]
+    observations = _irc_compute_correlation_observations(findings, artifacts)
+    signals = _irc_compute_impact_signals(findings, observations, {})
+    da_signals = [s for s in signals if s["signal_type"] == "domain_alignment"]
+    assert da_signals == []
+
+
+def test_67b_repeated_nonresponse_signal_requires_persistence(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_impact_signals, _IRGC_SUPPRESSION_THRESHOLD_PHASES
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    # Persistent with threshold phases derivable but no observations
+    comparative = {
+        "persistent_concern_ids": ["IRC-001-X"],
+        "persistence_claims": {
+            "IRC-001-X": {
+                "phases_derivable": ["66C", "64H", "66D"],  # 3 = threshold
+            }
+        },
+    }
+    signals = _irc_compute_impact_signals(findings, [], comparative)
+    rnr = [s for s in signals if s["signal_type"] == "repeated_nonresponse"]
+    assert len(rnr) == 1
+    assert rnr[0]["signal_strength"] == "informational"
+    assert rnr[0]["signal_is_causation_claim"] is False
+    assert rnr[0]["signal_modifies_governance"] is False
+
+
+def test_67b_repeated_nonresponse_below_threshold_no_signal(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_impact_signals
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    comparative = {
+        "persistent_concern_ids": ["IRC-001-X"],
+        "persistence_claims": {
+            "IRC-001-X": {
+                "phases_derivable": ["66C"],  # 1 < threshold (3)
+            }
+        },
+    }
+    signals = _irc_compute_impact_signals(findings, [], comparative)
+    rnr = [s for s in signals if s["signal_type"] == "repeated_nonresponse"]
+    assert rnr == []
+
+
+def test_67b_calibration_effect_rnr_increases_suppression(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_calibration_effects
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    signals = [
+        {
+            "signal_id": "SIG-RNR-IRC-001-X",
+            "signal_type": "repeated_nonresponse",
+            "signal_strength": "informational",
+            "finding_id": "IRC-001-X",
+            "supporting_observation_ids": [],
+            "signal_is_causation_claim": False,
+            "signal_modifies_governance": False,
+        }
+    ]
+    effects = _irc_compute_calibration_effects(findings, signals, [])
+    assert len(effects) == 1
+    assert effects[0]["suppression_weight_delta"] == 1
+    assert effects[0]["calibration_effect_is_applied"] is False
+
+
+def test_67b_calibration_effect_strong_alignment_decreases_suppression(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_calibration_effects
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    signals = [
+        {
+            "signal_id": "SIG-DA-IRC-001-X",
+            "signal_type": "domain_alignment",
+            "signal_strength": "strong",
+            "finding_id": "IRC-001-X",
+            "supporting_observation_ids": ["CORR-IRC-001-X-SLR-67A"],
+            "signal_is_causation_claim": False,
+            "signal_modifies_governance": False,
+        }
+    ]
+    effects = _irc_compute_calibration_effects(findings, signals, [])
+    assert len(effects) == 1
+    assert effects[0]["suppression_weight_delta"] == -1
+    assert effects[0]["calibration_effect_is_applied"] is False
+
+
+def test_67b_calibration_no_signal_zero_delta(tmp_path) -> None:
+    from pcae.core.agent import _irc_compute_calibration_effects
+
+    findings = [{"finding_id": "IRC-001-X", "domain": "governance", "rule_id": "001"}]
+    effects = _irc_compute_calibration_effects(findings, [], [])
+    assert effects[0]["suppression_weight_delta"] == 0
+
+
+def test_67b_collect_governance_artifacts_includes_lineage(tmp_path) -> None:
+    import json
+    from pcae.core.agent import _irc_collect_governance_artifacts
+
+    pcae_dir = tmp_path / ".pcae"
+    pcae_dir.mkdir()
+    (pcae_dir / "strategic-lineage.json").write_text(
+        json.dumps([
+            {
+                "lineage_id": "SLR-TEST-001",
+                "activated_phase_id": "67A",
+                "selected_branch_id": "BR-004",
+                "lineage_timestamp": "2026-06-12T00:00:00+00:00",
+            }
+        ])
+    )
+    artifacts = _irc_collect_governance_artifacts(str(tmp_path))
+    lineage_arts = [a for a in artifacts if a["artifact_type"] == "lineage_record"]
+    assert len(lineage_arts) == 1
+    assert lineage_arts[0]["artifact_id"] == "SLR-TEST-001"
+    assert "governance" in lineage_arts[0]["domain_tags"]
+
+
+def test_67b_render_impact_compact_lines_returns_list(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment, render_irg_impact_compact_lines
+
+    data = build_irg_impact_assessment()
+    lines = render_irg_impact_compact_lines(data)
+    assert isinstance(lines, list)
+    assert len(lines) > 0
+    assert all(isinstance(line, str) for line in lines)
+
+
+def test_67b_render_shows_no_influence_conclusion_language(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_irg_impact_assessment, render_irg_impact_compact_lines
+
+    data = build_irg_impact_assessment()
+    lines = render_irg_impact_compact_lines(data)
+    combined = "\n".join(lines)
+    # These phrases would indicate influence framing in the output
+    forbidden = ["influenced decision", "caused by", "proves influence", "influence confirmed"]
+    for phrase in forbidden:
+        assert phrase not in combined.lower(), f"forbidden phrase found: {phrase!r}"
+    # Required advisory boundary must appear
+    assert "impact_modifies_governance=False" in combined
+
+
+def test_67b_capability_and_prompt_registry_updated(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES, _PRH_PROMPT_PROFILES
+
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c["capability_name"] == "Challenge Impact Architecture"),
+        None,
+    )
+    assert cap is not None
+    assert cap["implemented_phase"] == "67B"
+    assert cap["status"] == "implemented"
+
+    profiles_67b = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "67B"]
+    assert len(profiles_67b) == 3
+    assert all(p["prompt_status"] == "recommended" for p in profiles_67b)
+
+    profiles_67a = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "67A"]
+    assert all(p["prompt_status"] == "historical" for p in profiles_67a)
