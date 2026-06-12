@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 67B: Challenge Impact Architecture.
+Phase 68A: Adaptive Challenge Attention Architecture Design.
 
 ## Post-61J Runtime Registry Checkpoint
 

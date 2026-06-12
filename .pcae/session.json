@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260612-1217-67b-challenge-impact-architecture",
-    "title": "67B Challenge Impact Architecture"
+    "id": "20260612-1331-68a-adaptive-challenge-attention-architecture-design",
+    "title": "68A Adaptive Challenge Attention Architecture Design"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "67B Challenge Impact Architecture",
+  "current_objective": "68A Adaptive Challenge Attention Architecture Design",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -18,22 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260612-1032-67a-comparative-irg-challenge-architecture.md",
+        "path": "tasks/active/20260612-1217-67b-challenge-impact-architecture.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260612-1217-67b-challenge-impact-architecture.md",
+        "path": "tasks/active/20260612-1331-68a-adaptive-challenge-attention-architecture-design.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260612-1032-67a-comparative-irg-challenge-architecture.md",
+        "path": "tasks/done/20260612-1217-67b-challenge-impact-architecture.md",
         "status": "??"
       }
     ],
     "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260612-1032-67a-comparative-irg-challenge-architecture: 67A Comparative IRG Challenge Architecture",
-  "next_recommended_step": "Continue active task 20260612-1217-67b-challenge-impact-architecture.",
-  "timestamp": "2026-06-12T10:17:32.170142+00:00",
+  "last_completed_step": "Completed task 20260612-1217-67b-challenge-impact-architecture: 67B Challenge Impact Architecture",
+  "next_recommended_step": "Continue active task 20260612-1331-68a-adaptive-challenge-attention-architecture-design.",
+  "timestamp": "2026-06-12T11:31:57.154012+00:00",
   "warnings": []
 }

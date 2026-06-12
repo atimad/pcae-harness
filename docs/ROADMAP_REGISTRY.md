@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-12T10:33:45.268604+00:00
+Generated: 2026-06-12T11:49:13.613037+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 56
+Total phases: 57
 Tracks: 8
 Superseded: 1
 Roadmap gaps: 0
@@ -91,7 +91,8 @@ Assessment status: intelligence_available
 | 66D | Bootstrap IRG Visibility Integration | completed | 66C | 66E |
 | 66E | Automated IRG Challenge Architecture | completed | 66D | 67A |
 | 67A | Comparative IRG Challenge Architecture | completed | 66E | 67B |
-| 67B | Challenge Impact Architecture | active | 67A | — |
+| 67B | Challenge Impact Architecture | completed | 67A | 68A |
+| 68A | Adaptive Challenge Attention Architecture Design | active | 67B | — |
 
 ## Track: roadmap_intelligence
 

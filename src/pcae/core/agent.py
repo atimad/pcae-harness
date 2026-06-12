@@ -69329,6 +69329,15 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae irg-challenge --impact --json",
         ],
         "dependencies": ["comparative_irg_challenge_architecture"],
+        "successor_capabilities": ["challenge_attention_architecture"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Challenge Attention Architecture",
+        "implemented_phase": "68A",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["challenge_impact_architecture"],
         "successor_capabilities": [],
     },
 )
@@ -70230,8 +70239,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "67B",
         "phase_title": "Challenge Impact Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "67A",
+        "successor": "68A",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "68A",
+        "phase_title": "Adaptive Challenge Attention Architecture Design",
+        "status": "active",
+        "predecessor": "67B",
         "successor": "",
         "superseded_by": "",
     },
@@ -71091,7 +71109,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "comparative_irg_challenge_architecture",
         ],
-        "successors": [],
+        "successors": ["challenge_attention_architecture"],
         "aliases": [],
         "contribution": (
             "adds a non-binding challenge impact assessment layer: collects governance artifacts "
@@ -71101,6 +71119,28 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "(suppression weight deltas) for the challenge engine; InfluenceHypothesis is internal "
             "and never surfaced; humans see correlation not influence; impact_modifies_governance=False; "
             "challenge_non_influence_is_failure=False; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Challenge Attention Architecture",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "68A",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "challenge_impact_architecture",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "designs a deterministic, stateless attention allocation layer for IRGC: computes "
+            "AttentionSignals (new_concern, contradiction_synthesis, recent_change, "
+            "persistent_background, strong_correlation_pattern, repeated_nonresponse, "
+            "calibration_narrowing, domain_concentration), enforces surface-specific AttentionBudgets "
+            "(bootstrap/handoff/completion/irg_challenge), and produces AttentionDecisions "
+            "(surface/background); visibility_is_importance=False; suppression_is_resolution=False; "
+            "attention_allocation_affects_governance=False; stateless by design; "
+            "execution_allowed=False"
         ),
     },
     {
@@ -73205,7 +73245,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67B",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67B-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67B",
@@ -73213,7 +73253,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67B",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67B-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67B",
@@ -73221,10 +73261,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "67B",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "67B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "67B",
+    },
+    {
+        "phase_id": "68A",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "68A-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68A",
+    },
+    {
+        "phase_id": "68A",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "68A-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68A",
+    },
+    {
+        "phase_id": "68A",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "68A-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68A",
     },
 )
 
@@ -79069,7 +79133,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "67B",
+        "current_phase": "68A",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79629,6 +79693,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "temporal proximity signals, CorrelationPatterns, and calibration effects; "
             "InfluenceHypothesis is internal; humans see correlation not influence; "
             "impact_modifies_governance=False; no persistence, no blocking"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "challenge_attention_architecture",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "adds deterministic attention allocation layer to IRGC engine: surface-specific "
+            "AttentionBudgets, AttentionSignals, and AttentionDecisions maximize informational "
+            "diversity across findings; visibility_is_importance=False; stateless; advisory-only"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84562,8 +84638,8 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
 # Phase 66E — Automated IRG Challenge Architecture
 # ---------------------------------------------------------------------------
 
-_IRGC_PHASE_ID: str = "67B"
-_IRGC_PHASE_TITLE: str = "Challenge Impact Architecture"
+_IRGC_PHASE_ID: str = "68A"
+_IRGC_PHASE_TITLE: str = "Adaptive Challenge Attention Architecture Design"
 _IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
 _IRGC_DISPLAY_FOOTER: str = (
     "Displayed for context only. Command outcomes stay unchanged."
@@ -86045,3 +86121,744 @@ def render_irg_impact_compact_lines(data: dict) -> list[str]:
         "challenge_non_influence_is_failure=False]"
     )
     return lines
+
+
+# ---------------------------------------------------------------------------
+# Phase 68A — Adaptive Challenge Attention Architecture Design
+# ---------------------------------------------------------------------------
+
+_IRCA_PHASE_ID: str = "68A"
+_IRCA_PHASE_TITLE: str = "Adaptive Challenge Attention Architecture Design"
+
+_IRCA_ATTENTION_SIGNAL_TYPES: tuple[str, ...] = (
+    "new_concern",
+    "contradiction_synthesis",
+    "recent_change",
+    "persistent_background",
+    "strong_correlation_pattern",
+    "repeated_nonresponse",
+    "calibration_narrowing",
+    "domain_concentration",
+)
+
+# surface -> budget config
+_IRCA_SURFACE_BUDGETS: dict[str, dict] = {
+    "bootstrap": {
+        "max_total": 3,
+        "max_per_domain": 1,
+        "novelty_reserved": 1,
+        "contradiction_reserved": 1,
+        "emphasis": "new_concerns",
+    },
+    "handoff": {
+        "max_total": 3,
+        "max_per_domain": 2,
+        "novelty_reserved": 0,
+        "contradiction_reserved": 1,
+        "emphasis": "changes",
+    },
+    "completion": {
+        "max_total": 3,
+        "max_per_domain": 1,
+        "novelty_reserved": 0,
+        "contradiction_reserved": 0,
+        "emphasis": "evolution",
+    },
+    "irg_challenge": {
+        "max_total": None,
+        "max_per_domain": None,
+        "novelty_reserved": 0,
+        "contradiction_reserved": 0,
+        "emphasis": "all_unsuppressed",
+    },
+    "irg_challenge_impact": {
+        "max_total": None,
+        "max_per_domain": None,
+        "novelty_reserved": 0,
+        "contradiction_reserved": 0,
+        "emphasis": "all_unsuppressed",
+    },
+}
+
+# Signals describe informational characteristics only — never governance properties.
+_IRCA_SIGNAL_DEFINITIONS: dict[str, dict] = {
+    "new_concern": {
+        "meaning": "finding has not appeared in the persistent_concern_ids history",
+        "intended_effect": "increases informational novelty in the allocation",
+        "governance_risk": "novelty_implies_higher_priority if misframed as importance",
+    },
+    "contradiction_synthesis": {
+        "meaning": "finding is referenced by at least one contradiction synthesis anchor",
+        "intended_effect": "increases informational tension representation in the allocation",
+        "governance_risk": "contradiction_implies_severity if misframed as governance urgency",
+    },
+    "recent_change": {
+        "meaning": "finding's status changed (new→persistent or resolved) since the last comparison",
+        "intended_effect": "increases informational recency in the allocation",
+        "governance_risk": "recency_implies_urgency if recency is read as requiring action",
+    },
+    "persistent_background": {
+        "meaning": "finding has been persistent for >= suppression threshold phases",
+        "intended_effect": "deprioritizes informational novelty for this slot; does not suppress",
+        "governance_risk": "persistence_implies_resolution if background is confused with suppressed",
+    },
+    "strong_correlation_pattern": {
+        "meaning": "finding has a domain_convergence or temporal_cluster pattern from 67B impact assessment",
+        "intended_effect": "increases depth signal for this finding in the allocation",
+        "governance_risk": "correlation_implies_importance if depth signal is misread as governance weight",
+    },
+    "repeated_nonresponse": {
+        "meaning": "finding is persistent with no correlated governance artifacts in the lookback window",
+        "intended_effect": "informs diversity: this domain has not appeared in recent governance artifacts",
+        "governance_risk": "repeated_nonresponse_is_failure if absence of correlation is misread as a defect",
+    },
+    "calibration_narrowing": {
+        "meaning": "calibration_state is narrowing or static across recent phases",
+        "intended_effect": "increases diversity signal: challenge engine may be stale",
+        "governance_risk": "calibration_narrowing_implies_engine_failure if misread as a performance indicator",
+    },
+    "domain_concentration": {
+        "meaning": "the finding's domain has already reached max_per_domain in this surface's allocation",
+        "intended_effect": "promotes domain diversity by deprioritizing already-saturated domains",
+        "governance_risk": "not a governance signal; purely informational slot management",
+    },
+}
+
+_IRCA_GOVERNANCE_BOUNDARIES: dict[str, bool] = {
+    "visibility_is_importance": False,
+    "suppression_is_resolution": False,
+    "background_is_resolved": False,
+    "attention_allocation_affects_governance": False,
+    "attention_allocation_affects_approval": False,
+    "attention_allocation_affects_transition": False,
+    "attention_allocation_affects_readiness": False,
+    "attention_allocation_affects_health": False,
+    "attention_budget_is_governance_ranking": False,
+    "diversity_is_governance_requirement": False,
+    "attention_signal_implies_urgency": False,
+    "novelty_implies_higher_priority": False,
+    "persistence_implies_lower_priority": False,
+    "allocation_creates_obligation": False,
+}
+
+_IRCA_ADVISORY: str = (
+    "Adaptive Challenge Attention Architecture — informational allocation only. "
+    "AttentionDecisions determine presentation, not governance significance. "
+    "visibility_is_importance=False. suppression_is_resolution=False. "
+    "background_is_resolved=False. attention_allocation_affects_governance=False. "
+    "All findings still exist regardless of surface decision."
+)
+
+_IRCA_SELF_CHALLENGE: dict = {
+    "premise": (
+        "68A assumes that adaptive attention allocation improves challenge quality "
+        "by maximizing informational diversity. This premise must be challenged."
+    ),
+    "questions": [
+        {
+            "question": "Does adaptive attention improve challenge quality?",
+            "analysis": (
+                "Yes, if it increases informational diversity and reduces fatigue without "
+                "becoming hidden prioritization. No, if signals map to governance importance. "
+                "The improvement is conditional on strict separation of informational value "
+                "from governance authority."
+            ),
+        },
+        {
+            "question": "Can attention allocation become hidden prioritization?",
+            "analysis": (
+                "Yes. If attention signals include governance properties (severity, urgency, "
+                "importance), surfaced findings acquire implicit priority status. Mitigation: "
+                "signals must describe informational characteristics only (novelty, diversity, "
+                "contradiction, correlation strength). visibility_is_importance=False invariant."
+            ),
+        },
+        {
+            "question": "Can visibility become authority?",
+            "analysis": (
+                "Yes. Repeated surfacing of the same finding can create soft-binding — humans "
+                "may treat consistently-visible findings as de facto critical. Mitigation: "
+                "domain diversity controls, explicit irg_challenge bypass showing all findings, "
+                "and invariant framing that visibility != importance."
+            ),
+        },
+        {
+            "question": "Can suppression be interpreted as resolution?",
+            "analysis": (
+                "Yes, easily and dangerously. Mitigation: 'background' status is explicitly "
+                "distinct from 'suppressed'. Background means not surfaced this run; suppressed "
+                "means suppression weight >= threshold. suppression_is_resolution=False and "
+                "background_is_resolved=False are enforced invariants."
+            ),
+        },
+        {
+            "question": "Can repeated surfacing create soft-binding?",
+            "analysis": (
+                "Yes. If a finding always occupies the first slot, humans may treat it as the "
+                "critical finding regardless of framing. Mitigation: novelty_reserved slots "
+                "ensure new findings get surface priority; persistent findings yield to new ones "
+                "within the budget. diversity controls prevent domain monopoly."
+            ),
+        },
+        {
+            "question": "Can adaptive attention become a governance ranking system?",
+            "analysis": (
+                "Yes, if attention signals are derived from governance properties or if budget "
+                "position is correlated with governance outcomes. Mitigation: attention_budget_"
+                "is_governance_ranking=False invariant; signals are informational only; "
+                "allocation decisions do not feed into any approval, transition, or health check."
+            ),
+        },
+        {
+            "question": "Does adaptation require persistence?",
+            "analysis": (
+                "No. All attention signals can be derived from existing 66E–67B state, which "
+                "is deterministic from phase history. Stateless is strongly preferred. Persistent "
+                "attention memory would introduce path-dependence, authority acquisition risk, "
+                "and maintenance burden without meaningful informational benefit."
+            ),
+        },
+        {
+            "question": "What governance risks emerge if attention allocation is introduced?",
+            "analysis": (
+                "Authority acquisition (attention becomes de facto priority); visibility bias "
+                "(surfaced findings appear more important); suppression bias (background confused "
+                "with resolved); domain favoritism (some domains always surface); optimization "
+                "pressure (challenge engine learns to generate surfaceable findings). "
+                "All mitigated by explicit invariants and stateless, advisory-only architecture."
+            ),
+        },
+    ],
+    "explicit_risks": {
+        "authority_acquisition_risk": (
+            "attention allocation accumulates implicit governance weight if repeated surfacing "
+            "creates expectation that visible findings require response"
+        ),
+        "visibility_bias": (
+            "surfaced findings appear more important than background findings regardless "
+            "of explicit framing"
+        ),
+        "suppression_bias": (
+            "background findings can be misread as suppressed, and suppressed findings can be "
+            "misread as resolved"
+        ),
+        "domain_favoritism": (
+            "deterministic allocation with fixed domain ordering could consistently favor "
+            "certain domains; mitigated by alphabetical tiebreaking and novelty rotation"
+        ),
+        "optimization_pressure": (
+            "the challenge engine could drift toward generating findings that match "
+            "attention-friendly signal types; mitigated by stateless, per-run allocation"
+        ),
+        "challenge_gaming": (
+            "the system could be engineered to always surface specific findings by tuning "
+            "the phase history; mitigated by advisory-only, non-binding architecture"
+        ),
+    },
+    "conclusion": (
+        "Adaptive attention allocation can improve informational value without acquiring "
+        "governance authority, provided that: (1) signals are strictly informational, "
+        "(2) visibility is invariantly distinct from importance, (3) background is invariantly "
+        "distinct from suppression, (4) the architecture is stateless, and (5) explicit "
+        "commands always bypass the budget."
+    ),
+}
+
+_IRCA_ARCHITECTURE_RECOMMENDATION: dict = {
+    "stateless_preferred": True,
+    "rationale": (
+        "All attention signals are derivable from existing 66E–67B state (challenge findings, "
+        "comparative assessment, calibration state, impact signals). No new files required. "
+        "Persistent attention memory would introduce authority acquisition risk, path-dependence, "
+        "and maintenance burden without compensating informational benefit."
+    ),
+    "persistent_option_rejected": True,
+    "persistent_rejection_reason": (
+        "Persistent attention weights accumulate implicit governance authority over time. "
+        "A weight that grows with each phase becomes indistinguishable from a governance score. "
+        "No compelling case exists for persistence given the stateless alternative."
+    ),
+    "minimum_viable": (
+        "Constants (_IRCA_PHASE_ID, _IRCA_ATTENTION_SIGNAL_TYPES, _IRCA_SURFACE_BUDGETS, "
+        "_IRCA_GOVERNANCE_BOUNDARIES), self-challenge analysis, "
+        "build_challenge_attention_architecture() returning the design review, "
+        "and governance boundary invariants."
+    ),
+    "recommended": (
+        "All of minimum viable plus: AttentionSignal computation "
+        "(_irca_compute_attention_signals), AttentionBudget enforcement "
+        "(_irca_enforce_attention_budget), deterministic AttentionAllocation engine "
+        "(_irca_allocate_attention), build_challenge_attention_assessment() for "
+        "operational use, and full governance boundary validation in 23 tests."
+    ),
+    "over_engineered_rejected": (
+        "Persistent attention weights file, numeric attention scores, domain importance "
+        "hierarchy, cross-session attention learning, attention confidence intervals, "
+        "attention performance metrics. All rejected: each converts attention into "
+        "an implicit governance ranking system."
+    ),
+    "final_answer": (
+        "Yes — PCAE can allocate attention more intelligently without turning attention "
+        "into a governance signal, provided that: signals are strictly informational "
+        "(novelty, diversity, contradiction), visibility is invariantly distinct from "
+        "importance (visibility_is_importance=False), background is invariantly distinct "
+        "from suppression (background_is_resolved=False), the architecture is stateless, "
+        "and explicit commands (irg_challenge) always bypass the budget and show everything."
+    ),
+}
+
+
+def _irca_compute_attention_signals(
+    findings: list[dict],
+    comparative: dict,
+    calibration_state: str,
+    impact_signals: list[dict],
+) -> dict[str, list[dict]]:
+    """Compute AttentionSignals per finding from IRGC challenge, comparative, and impact state.
+
+    Returns dict: finding_id -> list of AttentionSignal records.
+    Signals describe informational characteristics only.
+    No signal implies governance importance, urgency, or obligation.
+    """
+    persistent_ids = set(comparative.get("persistent_concern_ids", []))
+    new_finding_ids = set(comparative.get("new_finding_ids", []))
+    resolved_ids = set(comparative.get("resolved_concern_ids", []))
+
+    contradiction_finding_ids: set[str] = set()
+    for synth in comparative.get("contradiction_synthesis", []):
+        for fid in synth.get("finding_ids", []):
+            contradiction_finding_ids.add(fid)
+
+    strong_pattern_finding_ids: set[str] = set()
+    for sig in impact_signals:
+        if sig.get("signal_type") in ("domain_alignment",) and sig.get("signal_strength") in ("strong", "moderate"):
+            strong_pattern_finding_ids.add(sig.get("finding_id", ""))
+
+    rnr_finding_ids: set[str] = set()
+    for sig in impact_signals:
+        if sig.get("signal_type") == "repeated_nonresponse":
+            rnr_finding_ids.add(sig.get("finding_id", ""))
+
+    is_narrowing = calibration_state in ("narrowing", "static")
+
+    result: dict[str, list[dict]] = {}
+    for finding in findings:
+        fid = finding.get("finding_id", "")
+        signals: list[dict] = []
+
+        if fid in new_finding_ids:
+            signals.append({
+                "signal_id": f"AS-NEW-{fid}",
+                "signal_type": "new_concern",
+                "finding_id": fid,
+                "informational_value": "novelty",
+                "affects_governance": False,
+            })
+
+        if fid in contradiction_finding_ids:
+            signals.append({
+                "signal_id": f"AS-CONTR-{fid}",
+                "signal_type": "contradiction_synthesis",
+                "finding_id": fid,
+                "informational_value": "tension",
+                "affects_governance": False,
+            })
+
+        if fid in resolved_ids:
+            signals.append({
+                "signal_id": f"AS-CHG-{fid}",
+                "signal_type": "recent_change",
+                "finding_id": fid,
+                "informational_value": "recency",
+                "affects_governance": False,
+            })
+        elif fid in persistent_ids and len(comparative.get("persistent_concern_ids", [])) >= _IRGC_SUPPRESSION_THRESHOLD_PHASES:
+            signals.append({
+                "signal_id": f"AS-PBKG-{fid}",
+                "signal_type": "persistent_background",
+                "finding_id": fid,
+                "informational_value": "low_novelty",
+                "affects_governance": False,
+            })
+
+        if fid in strong_pattern_finding_ids:
+            signals.append({
+                "signal_id": f"AS-CORR-{fid}",
+                "signal_type": "strong_correlation_pattern",
+                "finding_id": fid,
+                "informational_value": "depth",
+                "affects_governance": False,
+            })
+
+        if fid in rnr_finding_ids:
+            signals.append({
+                "signal_id": f"AS-RNR-{fid}",
+                "signal_type": "repeated_nonresponse",
+                "finding_id": fid,
+                "informational_value": "domain_gap",
+                "affects_governance": False,
+            })
+
+        if is_narrowing:
+            signals.append({
+                "signal_id": f"AS-CAL-{fid}",
+                "signal_type": "calibration_narrowing",
+                "finding_id": fid,
+                "informational_value": "diversity_need",
+                "affects_governance": False,
+            })
+
+        result[fid] = signals
+
+    return result
+
+
+def _irca_allocate_attention(
+    findings: list[dict],
+    signals_by_finding: dict[str, list[dict]],
+    surface: str,
+) -> dict:
+    """Produce deterministic AttentionAllocation for a surface.
+
+    Algorithm:
+    1. new_concern findings fill novelty_reserved slots first (alphabetical tiebreak).
+    2. contradiction_synthesis findings fill contradiction_reserved slots not yet taken.
+    3. Remaining budget fills by domain diversity: alternate domains alphabetically,
+       respect max_per_domain constraint.
+    4. All allocated findings get decision=surface; rest get decision=background.
+    background != suppressed. background_is_resolved=False always.
+    allocation_creates_obligation=False always.
+    """
+    budget_cfg = _IRCA_SURFACE_BUDGETS.get(surface, _IRCA_SURFACE_BUDGETS["irg_challenge"])
+    max_total = budget_cfg["max_total"]
+    max_per_domain = budget_cfg["max_per_domain"]
+    novelty_reserved = budget_cfg["novelty_reserved"]
+    contradiction_reserved = budget_cfg["contradiction_reserved"]
+
+    if max_total is None:
+        # No budget: all findings get decision=surface
+        allocated = [f["finding_id"] for f in findings]
+        decisions = [
+            {
+                "finding_id": f["finding_id"],
+                "decision": "surface",
+                "decision_reason": "no_budget_limit",
+                "attention_signals": signals_by_finding.get(f["finding_id"], []),
+                "visibility_is_importance": False,
+                "allocation_creates_obligation": False,
+            }
+            for f in findings
+        ]
+        return {
+            "surface": surface,
+            "budget": budget_cfg,
+            "allocated_finding_ids": allocated,
+            "background_finding_ids": [],
+            "domain_distribution": {},
+            "decisions": decisions,
+            "allocation_creates_obligation": False,
+            "attention_allocation_affects_governance": False,
+        }
+
+    allocated_ids: list[str] = []
+    domain_counts: dict[str, int] = {}
+    remaining = list(findings)
+
+    def _has_signal_type(fid: str, stype: str) -> bool:
+        return any(s["signal_type"] == stype for s in signals_by_finding.get(fid, []))
+
+    def _is_domain_available(domain: str) -> bool:
+        if max_per_domain is None:
+            return True
+        return domain_counts.get(domain, 0) < max_per_domain
+
+    def _add(fid: str, domain: str, reason: str) -> None:
+        allocated_ids.append(fid)
+        domain_counts[domain] = domain_counts.get(domain, 0) + 1
+
+    # Step 1: novelty_reserved — new_concern findings, alphabetical by finding_id
+    novelty_candidates = sorted(
+        [f for f in remaining if _has_signal_type(f["finding_id"], "new_concern")],
+        key=lambda f: f["finding_id"],
+    )
+    for f in novelty_candidates:
+        if len(allocated_ids) >= novelty_reserved:
+            break
+        domain = f.get("domain", "")
+        if _is_domain_available(domain):
+            _add(f["finding_id"], domain, "novelty_reserved")
+
+    allocated_set = set(allocated_ids)
+    remaining = [f for f in remaining if f["finding_id"] not in allocated_set]
+
+    # Step 2: contradiction_reserved — contradiction_synthesis findings not yet allocated
+    contr_candidates = sorted(
+        [f for f in remaining if _has_signal_type(f["finding_id"], "contradiction_synthesis")],
+        key=lambda f: f["finding_id"],
+    )
+    contr_filled = 0
+    for f in contr_candidates:
+        if contr_filled >= contradiction_reserved:
+            break
+        domain = f.get("domain", "")
+        if _is_domain_available(domain):
+            _add(f["finding_id"], domain, "contradiction_reserved")
+            contr_filled += 1
+
+    allocated_set = set(allocated_ids)
+    remaining = [f for f in remaining if f["finding_id"] not in allocated_set]
+
+    # Step 3: fill remaining budget with domain diversity
+    # Sort by domain alphabetically for determinism, then by finding_id within domain
+    diversity_candidates = sorted(remaining, key=lambda f: (f.get("domain", ""), f.get("finding_id", "")))
+    for f in diversity_candidates:
+        if len(allocated_ids) >= max_total:
+            break
+        domain = f.get("domain", "")
+        if _is_domain_available(domain):
+            _add(f["finding_id"], domain, "diversity_fill")
+
+    allocated_set = set(allocated_ids)
+    background_ids = [f["finding_id"] for f in findings if f["finding_id"] not in allocated_set]
+
+    decision_map: dict[str, str] = {}
+    reason_map: dict[str, str] = {}
+    for fid in allocated_ids:
+        decision_map[fid] = "surface"
+        reason_map[fid] = "within_attention_budget"
+    for fid in background_ids:
+        decision_map[fid] = "background"
+        # determine reason
+        f_obj = next((f for f in findings if f["finding_id"] == fid), {})
+        domain = f_obj.get("domain", "")
+        if domain_counts.get(domain, 0) >= (max_per_domain or 0):
+            reason_map[fid] = "domain_budget_exhausted"
+        else:
+            reason_map[fid] = "total_budget_exhausted"
+
+    decisions = [
+        {
+            "finding_id": f["finding_id"],
+            "decision": decision_map.get(f["finding_id"], "background"),
+            "decision_reason": reason_map.get(f["finding_id"], "total_budget_exhausted"),
+            "attention_signals": signals_by_finding.get(f["finding_id"], []),
+            "visibility_is_importance": False,
+            "allocation_creates_obligation": False,
+        }
+        for f in findings
+    ]
+
+    return {
+        "surface": surface,
+        "budget": budget_cfg,
+        "allocated_finding_ids": allocated_ids,
+        "background_finding_ids": background_ids,
+        "domain_distribution": dict(domain_counts),
+        "decisions": decisions,
+        "allocation_creates_obligation": False,
+        "attention_allocation_affects_governance": False,
+    }
+
+
+def build_challenge_attention_assessment(
+    root: "HarnessPath | None" = None,
+    surface: str = "bootstrap",
+) -> dict:
+    """Compute AttentionAllocation for the given surface.
+
+    Stateless — derived entirely from existing 66E–67B state each run.
+    visibility_is_importance=False always. suppression_is_resolution=False always.
+    background_is_resolved=False always. attention_allocation_affects_governance=False always.
+    """
+    if root is None:
+        root = HarnessPath.cwd()
+
+    challenge_data = build_irg_challenge_context(root)
+    findings = challenge_data.get("findings", [])
+    comparative = challenge_data.get("comparative", {})
+    calibration_state = challenge_data.get("calibration_state", "consistent")
+
+    impact_data = build_irg_impact_assessment(root)
+    impact_signals = impact_data.get("signals", [])
+
+    signals_by_finding = _irca_compute_attention_signals(
+        findings, comparative, calibration_state, impact_signals
+    )
+    allocation = _irca_allocate_attention(findings, signals_by_finding, surface)
+
+    combined_boundaries = {
+        **dict(_IRGC_GOVERNANCE_BOUNDARIES),
+        **_IRGC_IMPACT_GOVERNANCE_BOUNDARIES,
+        **_IRCA_GOVERNANCE_BOUNDARIES,
+    }
+
+    return {
+        "phase_id": _IRCA_PHASE_ID,
+        "surface": surface,
+        "finding_count": len(findings),
+        "allocation": allocation,
+        "signals_by_finding": signals_by_finding,
+        "governance_boundaries": combined_boundaries,
+        "advisory": _IRCA_ADVISORY,
+    }
+
+
+def build_challenge_attention_architecture(
+    root: "HarnessPath | None" = None,
+) -> dict:
+    """Return the complete 68A architecture design review.
+
+    Covers: self-challenge, adaptation model, stateless recommendation,
+    attention signals, allocation strategy, surface strategy, diversity
+    architecture, attention budget, governance boundaries, validation
+    strategy, risk analysis, and recommendation.
+
+    execution_allowed=False. attention_allocation_affects_governance=False.
+    """
+    if root is None:
+        root = HarnessPath.cwd()
+
+    combined_boundaries = {
+        **dict(_IRGC_GOVERNANCE_BOUNDARIES),
+        **_IRGC_IMPACT_GOVERNANCE_BOUNDARIES,
+        **_IRCA_GOVERNANCE_BOUNDARIES,
+    }
+
+    return {
+        "phase_id": _IRCA_PHASE_ID,
+        "phase_title": _IRCA_PHASE_TITLE,
+        "self_challenge": _IRCA_SELF_CHALLENGE,
+        "adaptation_model": {
+            "models": [
+                {
+                    "name": "AttentionSignal",
+                    "fields": ["signal_id", "signal_type", "finding_id",
+                               "informational_value", "affects_governance"],
+                    "description": "describes an informational characteristic of a finding",
+                },
+                {
+                    "name": "AttentionBudget",
+                    "fields": ["surface", "max_total", "max_per_domain",
+                               "novelty_reserved", "contradiction_reserved", "emphasis"],
+                    "description": "constrains the allocation for a surface",
+                },
+                {
+                    "name": "AttentionAllocation",
+                    "fields": ["surface", "budget", "allocated_finding_ids",
+                               "background_finding_ids", "domain_distribution", "decisions"],
+                    "description": "result of applying signals and budget to a finding set",
+                },
+                {
+                    "name": "ChallengeAttentionAssessment",
+                    "fields": ["finding_id", "attention_signals", "attention_decision"],
+                    "description": "per-finding aggregation of signals and decision",
+                },
+                {
+                    "name": "AttentionDecision",
+                    "fields": ["finding_id", "decision", "decision_reason",
+                               "attention_signals", "visibility_is_importance",
+                               "allocation_creates_obligation"],
+                    "description": "surface or background; never implies governance significance",
+                },
+            ],
+            "design_goal": (
+                "maximize informational value — novelty, diversity, contradiction representation "
+                "— not governance importance, governance urgency, or governance authority"
+            ),
+            "informational_properties": [
+                "informational_value", "visibility", "novelty", "diversity",
+            ],
+            "not_governance_properties": [
+                "importance", "severity", "urgency", "authority",
+            ],
+        },
+        "architecture_recommendation": _IRCA_ARCHITECTURE_RECOMMENDATION,
+        "attention_signal_types": list(_IRCA_ATTENTION_SIGNAL_TYPES),
+        "signal_definitions": _IRCA_SIGNAL_DEFINITIONS,
+        "surface_budgets": _IRCA_SURFACE_BUDGETS,
+        "surface_strategy": {
+            "bootstrap": {
+                "goal": "session orientation",
+                "emphasis": "new concerns and contradictions",
+                "budget": _IRCA_SURFACE_BUDGETS["bootstrap"],
+            },
+            "handoff": {
+                "goal": "continuity across lifecycle boundary",
+                "emphasis": "findings that changed and contradictions",
+                "budget": _IRCA_SURFACE_BUDGETS["handoff"],
+            },
+            "completion": {
+                "goal": "trajectory retrospection",
+                "emphasis": "evolution and domain breadth",
+                "budget": _IRCA_SURFACE_BUDGETS["completion"],
+            },
+            "irg_challenge": {
+                "goal": "full challenge view on explicit request",
+                "emphasis": "all unsuppressed findings",
+                "budget": _IRCA_SURFACE_BUDGETS["irg_challenge"],
+            },
+            "irg_challenge_impact": {
+                "goal": "full assessment view on explicit request",
+                "emphasis": "all unsuppressed findings with impact signals",
+                "budget": _IRCA_SURFACE_BUDGETS["irg_challenge_impact"],
+            },
+        },
+        "diversity_architecture": {
+            "rule": "no single domain may take more than max_per_domain slots",
+            "tiebreak": "alphabetical by finding_id for full determinism",
+            "diversity_is_governance_requirement": False,
+            "rationale": (
+                "diversity is an informational strategy, not a governance constraint; "
+                "it prevents domain monopoly and improves breadth of challenge coverage"
+            ),
+        },
+        "validation_strategy": {
+            "determinism": "same inputs produce same allocation — verified by identical-call test",
+            "finding_immutability": "allocation does not modify finding records",
+            "background_persistence": "background findings still exist; background != suppressed",
+            "command_outcomes_unchanged": "allocation decisions do not feed into governance commands",
+            "budget_enforcement": "allocated_finding_ids.length <= max_total always",
+            "domain_diversity": "no domain exceeds max_per_domain in any surface",
+            "reserved_slots": "novelty_reserved and contradiction_reserved honored before general fill",
+            "empty_handling": "empty findings produces empty allocation without error",
+            "boundary_invariants": "all governance_boundaries values are False",
+            "irg_challenge_bypass": "max_total=None surfaces always show all unsuppressed findings",
+        },
+        "risk_analysis": {
+            "hidden_prioritization": {
+                "risk": "attention allocation becomes implicit governance ranking",
+                "mitigation": "signals are informational only; visibility_is_importance=False invariant",
+            },
+            "authority_acquisition": {
+                "risk": "repeated surfacing creates obligation to respond",
+                "mitigation": "allocation_creates_obligation=False; advisory-only; non-binding",
+            },
+            "suppression_misuse": {
+                "risk": "background findings treated as resolved",
+                "mitigation": "background_is_resolved=False; irg_challenge always shows everything",
+            },
+            "visibility_bias": {
+                "risk": "surfaced findings appear more important than background findings",
+                "mitigation": "explicit framing; diversity controls; all findings accessible via command",
+            },
+            "diversity_gaming": {
+                "risk": "domain diversity becomes a way to engineer which findings always surface",
+                "mitigation": "diversity_is_governance_requirement=False; purely informational",
+            },
+            "challenge_fatigue": {
+                "risk": "too many findings reduce attention quality",
+                "mitigation": "attention budget controls max_total per surface",
+            },
+            "optimization_pressure": {
+                "risk": "engine drifts toward generating findings that match attention signals",
+                "mitigation": "stateless per-run allocation; no persistent weights to optimize against",
+            },
+            "calibration_drift": {
+                "risk": "persistent weights accumulate and diverge from actual governance state",
+                "mitigation": "stateless architecture; no persistent weights",
+            },
+        },
+        "governance_boundaries": combined_boundaries,
+        "advisory": _IRCA_ADVISORY,
+        "execution_allowed": False,
+    }
