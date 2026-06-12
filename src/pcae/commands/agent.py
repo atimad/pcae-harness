@@ -418,6 +418,8 @@ from pcae.core.agent import (
     build_strategic_review_governance,
     STRATEGIC_REVIEW_MODEL_ADVISORY,
     STRATEGIC_REVIEW_CALIBRATION_ADVISORY,
+    build_irg_challenge_context,
+    IRG_CHALLENGE_ADVISORY,
     build_objective_coverage_hardening,
     OBJECTIVE_COVERAGE_HARDENING_ADVISORY,
     build_capability_inventory,
@@ -14785,4 +14787,55 @@ def run_objective_coverage_hardening(args: argparse.Namespace) -> int:
     print()
 
     print(OBJECTIVE_COVERAGE_HARDENING_ADVISORY)
+    return 0
+
+
+def run_irg_challenge(args: argparse.Namespace) -> int:
+    data = build_irg_challenge_context(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    overview = data["independent_challenge_overview"]
+    print("Independent IRG Challenge")
+    print(f"  Phase:                    {overview['phase']} — {overview['phase_title']}")
+    print(f"  Questions surfaced:       {overview['question_count']}")
+    print(f"  Top attention level:      {overview['top_attention_level']}")
+    print(f"  Advisory only:            {not overview['binding']}")
+    print(f"  Execution allowed:        {overview['execution_allowed']}")
+    print(
+        "  Changes command outcomes: "
+        f"{overview['challenge_blocks_any_operation']}"
+    )
+    print()
+
+    compact = data["compact_display"]
+    print(compact["header"])
+    print(compact["summary"])
+    print()
+
+    findings = data["findings"]
+    if not findings:
+        print("No material challenge questions surfaced.")
+        print()
+        print(IRG_CHALLENGE_ADVISORY)
+        return 0
+
+    grouped: dict[str, list[dict]] = {}
+    for finding in findings:
+        grouped.setdefault(finding["domain"], []).append(finding)
+
+    for domain in sorted(grouped):
+        print(f"{domain}:")
+        for finding in grouped[domain]:
+            print(f"  [{finding['attention_level']}] {finding['question']}")
+            print(f"    observation: {finding['observation']}")
+            print(f"    why it matters: {finding['why_it_might_matter']}")
+            if finding["evidence_refs"]:
+                print(f"    evidence refs: {', '.join(finding['evidence_refs'])}")
+            print(f"    freshness: {finding['freshness_state']}")
+        print()
+
+    print(compact["footer"])
+    print(IRG_CHALLENGE_ADVISORY)
     return 0

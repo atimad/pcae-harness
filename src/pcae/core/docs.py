@@ -1267,6 +1267,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae objective-coverage-hardening`
 - `pcae objective-coverage-hardening --json`
 
+## irg-challenge
+
+- `pcae irg-challenge`
+- `pcae irg-challenge --json`
+
 ## strategic-continuity
 
 - `pcae strategic-continuity show current`

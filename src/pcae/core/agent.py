@@ -69293,6 +69293,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "pcae session bootstrap --compact",
         ],
         "dependencies": ["strategic_review_calibration"],
+        "successor_capabilities": ["automated_irg_challenge_architecture"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Automated IRG Challenge Architecture",
+        "implemented_phase": "66E",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge",
+            "pcae irg-challenge --json",
+        ],
+        "dependencies": ["bootstrap_irg_visibility_integration"],
         "successor_capabilities": [],
     },
 )
@@ -70167,8 +70179,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "66D",
         "phase_title": "Bootstrap IRG Visibility Integration",
-        "status": "active",
+        "status": "completed",
         "predecessor": "66C",
+        "successor": "66E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "66E",
+        "phase_title": "Automated IRG Challenge Architecture",
+        "status": "active",
+        "predecessor": "66D",
         "successor": "",
         "superseded_by": "",
     },
@@ -70961,13 +70982,36 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "strategic_review_calibration",
         ],
-        "successors": [],
+        "successors": ["automated_irg_challenge_architecture"],
         "aliases": [],
         "contribution": (
             "surfaces the latest non-superseded IRG review state as a compact advisory line "
             "in session bootstrap output; supersession-aware latest-review selection; "
             "no severity labels in bootstrap; review_blocks_any_operation=False; "
             "no provenance event, no new registries; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Automated IRG Challenge Architecture",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "66E",
+        "status": "implemented",
+        "commands": [
+            "pcae irg-challenge",
+            "pcae irg-challenge --json",
+        ],
+        "dependencies": [
+            "bootstrap_irg_visibility_integration",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "builds a deterministic, advisory-only challenge assessment layer that surfaces "
+            "assumptions, blind spots, inconsistencies, counterfactuals, and uncertainty across "
+            "governance, strategic review, roadmap, capability, historical drift, and architecture "
+            "domains; auto-surfaces compact challenge context at session bootstrap, phase handoff, "
+            "and phase completion without affecting command outcomes, readiness, approval state, or "
+            "persistence; uses attention levels instead of review severities; execution_allowed=False"
         ),
     },
     {
@@ -73000,7 +73044,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66D",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66D-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66D",
@@ -73008,7 +73052,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66D",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66D-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66D",
@@ -73016,10 +73060,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "66D",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "66D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "66D",
+    },
+    {
+        "phase_id": "66E",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "66E-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66E",
+    },
+    {
+        "phase_id": "66E",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "66E-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66E",
+    },
+    {
+        "phase_id": "66E",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "66E-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "66E",
     },
 )
 
@@ -78864,7 +78932,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "66D",
+        "current_phase": "66E",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79387,6 +79455,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "surfaces latest IRG review state in session bootstrap so new agents start with "
             "current review context; advisory-only, review_blocks_any_operation=False, "
             "no blocking behavior at any governed boundary"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "automated_irg_challenge_architecture",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "surfaces independent challenge context at summary-oriented lifecycle boundaries "
+            "so humans and agents see assumptions, blind spots, counterfactuals, and uncertainty "
+            "without changing approvals, readiness, or command outcomes"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84313,4 +84393,400 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
         "authority_line": IRG_BOOTSTRAP_AUTHORITY_LINE,
         "governance_boundaries": dict(_IRL_GOVERNANCE_BOUNDARIES),
         "advisory": BOOTSTRAP_IRG_VISIBILITY_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 66E — Automated IRG Challenge Architecture
+# ---------------------------------------------------------------------------
+
+_IRGC_PHASE_ID: str = "66E"
+_IRGC_PHASE_TITLE: str = "Automated IRG Challenge Architecture"
+_IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
+_IRGC_DISPLAY_FOOTER: str = (
+    "Displayed for context only. Command outcomes stay unchanged."
+)
+_IRGC_ALLOWED_ATTENTION_LEVELS: tuple[str, ...] = (
+    "critical_question",
+    "high_attention",
+    "medium_attention",
+    "low_attention",
+)
+_IRGC_ATTENTION_RANK: dict[str, int] = {
+    "critical_question": 4,
+    "high_attention": 3,
+    "medium_attention": 2,
+    "low_attention": 1,
+}
+_IRGC_AUTOMATIC_TRIGGER_BOUNDARIES: tuple[str, ...] = (
+    "session_bootstrap",
+    "phase_handoff",
+    "phase_completion_control_review",
+)
+_IRGC_GOVERNANCE_BOUNDARIES: dict = {
+    "review_output_is_binding": False,
+    "human_authority_required": True,
+    "reviewer_is_approver": False,
+    "execution_allowed": False,
+    "file_mutation_allowed": False,
+    "challenge_blocks_any_operation": False,
+    "challenge_affects_check_result": False,
+    "challenge_affects_transition_result": False,
+    "challenge_affects_handoff_result": False,
+    "challenge_affects_bootstrap_result": False,
+    "challenge_affects_completion_result": False,
+    "challenge_affects_approval_result": False,
+    "mandatory_acknowledgement_required": False,
+    "override_registry_introduced": False,
+    "challenge_registry_introduced": False,
+    "persistence_by_default": False,
+    "change_list_emitted": False,
+    "recommendation_is_approval_authority": False,
+    "trigger_boundaries": list(_IRGC_AUTOMATIC_TRIGGER_BOUNDARIES),
+}
+IRG_CHALLENGE_ADVISORY: str = (
+    "Phase 66E adds a deterministic, advisory-only challenge layer that identifies assumptions, "
+    "blind spots, inconsistencies, counterfactuals, and uncertainty that deserve human attention. "
+    "It auto-surfaces compact challenge context only at session bootstrap, phase handoff, and "
+    "phase completion/control review. It does not recommend approval or rejection, prescribe "
+    "implementation, emit change lists, alter command outcomes, change readiness, create "
+    "workflow authority, or persist challenge state by default. execution_allowed=False."
+)
+
+
+def _irc_latest_review_context(root: "HarnessPath") -> tuple[dict | None, int | None]:
+    latest = _irl_select_latest_review(_irl_collect_reviews(root))
+    return latest, (_irl_phases_completed_since_review(latest) if latest is not None else None)
+
+
+def _irc_active_phase_record() -> dict | None:
+    active = [phase for phase in _CRI_KNOWN_PHASES if phase.get("status") == "active"]
+    return dict(active[0]) if len(active) == 1 else None
+
+
+def _irc_current_branch_for_phase(active_phase: dict | None) -> dict | None:
+    if active_phase is None:
+        return None
+    track_name = active_phase.get("track_name")
+    for branch in _SRG_BRANCH_REGISTRY:
+        if branch.get("branch_name") == track_name:
+            return dict(branch)
+    return None
+
+
+def _irc_current_lineage_reference(root: "HarnessPath") -> dict | None:
+    from pcae.core.strategic_lineage import current_strategic_lineage
+
+    return current_strategic_lineage(root)
+
+
+def _irc_append_finding(
+    findings: list[dict],
+    *,
+    domain: str,
+    rule_id: str,
+    target_type: str,
+    target_id: str,
+    attention_level: str,
+    question: str,
+    observation: str,
+    why_it_might_matter: str,
+    evidence_refs: list[str],
+    freshness_state: str,
+) -> None:
+    if attention_level not in _IRGC_ALLOWED_ATTENTION_LEVELS:
+        raise ValueError(f"Unsupported attention level: {attention_level}")
+    findings.append(
+        {
+            "finding_id": f"IRC-{rule_id}-{target_id}".replace("/", "-"),
+            "domain": domain,
+            "rule_id": rule_id,
+            "target_type": target_type,
+            "target_id": target_id,
+            "attention_level": attention_level,
+            "question": question,
+            "observation": observation,
+            "why_it_might_matter": why_it_might_matter,
+            "evidence_refs": list(evidence_refs),
+            "freshness_state": freshness_state,
+        }
+    )
+
+
+def _irc_unique_findings(findings: list[dict]) -> list[dict]:
+    unique: list[dict] = []
+    seen: set[tuple[str, str, str]] = set()
+    for finding in findings:
+        key = (
+            finding["domain"],
+            finding["target_id"],
+            finding["question"],
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(finding)
+    return unique
+
+
+def _irc_sort_findings(findings: list[dict]) -> list[dict]:
+    return sorted(
+        findings,
+        key=lambda finding: (
+            -_IRGC_ATTENTION_RANK[finding["attention_level"]],
+            finding["domain"],
+            finding["target_id"],
+            finding["rule_id"],
+        ),
+    )
+
+
+def _irc_compact_questions(findings: list[dict], *, max_domains: int = 3) -> list[dict]:
+    by_domain: dict[str, dict] = {}
+    for finding in _irc_sort_findings(findings):
+        domain = finding["domain"]
+        if domain not in by_domain:
+            by_domain[domain] = finding
+    compact = list(by_domain.values())
+    compact.sort(
+        key=lambda finding: (
+            -_IRGC_ATTENTION_RANK[finding["attention_level"]],
+            finding["domain"],
+        )
+    )
+    return compact[:max_domains]
+
+
+def render_irg_challenge_compact_lines(data: dict | None) -> tuple[str, ...]:
+    if not isinstance(data, dict) or data.get("display_enabled", True) is False:
+        return ()
+
+    compact_display = data.get("compact_display")
+    if not isinstance(compact_display, dict):
+        return ()
+
+    questions = compact_display.get("questions") or []
+    if not questions:
+        return ()
+
+    lines = [compact_display.get("header", _IRGC_DISPLAY_HEADER)]
+    summary = compact_display.get("summary", "")
+    if summary:
+        lines.append(summary)
+    for question in questions:
+        lines.append(
+            f"  [{question['attention_level']}] {question['domain']}: {question['question']}"
+        )
+    footer = compact_display.get("footer", _IRGC_DISPLAY_FOOTER)
+    if footer:
+        lines.append(footer)
+    return tuple(lines)
+
+
+def build_irg_challenge_context(root: "HarnessPath | None" = None) -> dict:
+    """Deterministic advisory-only challenge context for summary-oriented surfaces."""
+    if root is None:
+        root = HarnessPath.cwd()
+
+    active_phase = _irc_active_phase_record()
+    active_branch = _irc_current_branch_for_phase(active_phase)
+    current_lineage = _irc_current_lineage_reference(root)
+    latest_review, phases_since_review = _irc_latest_review_context(root)
+    objective_snapshot = _srs_compute_objective_snapshot()
+    strategic_capability_count = sum(
+        1
+        for capability in _CRI_KNOWN_CAPABILITIES
+        if capability.get("capability_domain") == "strategic_governance"
+        and capability.get("status") == "implemented"
+    )
+
+    findings: list[dict] = []
+
+    if (
+        current_lineage is not None
+        and latest_review is not None
+        and current_lineage.get("review_ids")
+        and latest_review.get("review_id") not in current_lineage.get("review_ids", [])
+    ):
+        _irc_append_finding(
+            findings,
+            domain="governance",
+            rule_id="001",
+            target_type="strategic_lineage",
+            target_id=current_lineage["lineage_id"],
+            attention_level="high_attention",
+            question=(
+                f"What changed since {current_lineage['lineage_id']} cited "
+                f"{', '.join(current_lineage['review_ids'])} while the latest canonical review is "
+                f"{latest_review['review_id']}?"
+            ),
+            observation=(
+                f"Active lineage references {', '.join(current_lineage['review_ids'])}; "
+                f"latest canonical review is {latest_review['review_id']}."
+            ),
+            why_it_might_matter="Lineage assumptions can remain coherent while review context shifts.",
+            evidence_refs=[
+                current_lineage["lineage_id"],
+                latest_review["review_id"],
+            ],
+            freshness_state="aging",
+        )
+
+    if latest_review is not None and latest_review.get("findings"):
+        _irc_append_finding(
+            findings,
+            domain="strategic_review",
+            rule_id="001",
+            target_type="review_record",
+            target_id=latest_review["review_id"],
+            attention_level="high_attention",
+            question=(
+                f"Which open assumptions from {latest_review['review_id']} still frame the current phase?"
+            ),
+            observation=(
+                f"{latest_review['review_id']} carries {len(latest_review.get('findings') or [])} "
+                "recorded findings."
+            ),
+            why_it_might_matter="Open review context can stay relevant even when no workflow authority exists.",
+            evidence_refs=[latest_review["review_id"]],
+            freshness_state="current" if not phases_since_review else "aging",
+        )
+
+    if isinstance(phases_since_review, int) and phases_since_review > 0 and latest_review is not None:
+        attention = "critical_question" if phases_since_review >= 3 else "medium_attention"
+        _irc_append_finding(
+            findings,
+            domain="historical_drift",
+            rule_id="001",
+            target_type="review_record",
+            target_id=latest_review["review_id"],
+            attention_level=attention,
+            question=(
+                f"What reasoning from {latest_review['review_id']} may have aged after "
+                f"{phases_since_review} completed phases?"
+            ),
+            observation=(
+                f"{phases_since_review} completed phases were recorded after "
+                f"{latest_review['review_id']}."
+            ),
+            why_it_might_matter="System evolution can outpace the assumptions frozen into an older review.",
+            evidence_refs=[latest_review["review_id"], "completed_phase_count"],
+            freshness_state="stale" if phases_since_review >= 3 else "aging",
+        )
+
+    thin_objectives = sorted(
+        (
+            (objective_id, snapshot)
+            for objective_id, snapshot in objective_snapshot.items()
+            if snapshot.get("primary_count", 0) <= 2
+        ),
+        key=lambda item: (item[1].get("primary_count", 0), item[0]),
+    )
+    if thin_objectives:
+        objective_id, snapshot = thin_objectives[0]
+        _irc_append_finding(
+            findings,
+            domain="capability",
+            rule_id="001",
+            target_type="objective",
+            target_id=objective_id,
+            attention_level="high_attention",
+            question=(
+                f"What objective claim depends on thin primary coverage for {objective_id}?"
+            ),
+            observation=(
+                f"{objective_id} currently has primary_count={snapshot.get('primary_count', 0)} "
+                f"and supporting_count={snapshot.get('supporting_count', 0)}."
+            ),
+            why_it_might_matter="Thin primary coverage can hide over-reliance on supporting mappings.",
+            evidence_refs=[objective_id, "objective_coverage_snapshot"],
+            freshness_state="current",
+        )
+
+    if active_phase is not None and not active_phase.get("successor"):
+        _irc_append_finding(
+            findings,
+            domain="roadmap",
+            rule_id="001",
+            target_type="phase",
+            target_id=active_phase["phase_id"],
+            attention_level="medium_attention",
+            question=(
+                f"What sequencing assumption says {active_phase['phase_id']} is a stopping point rather than the start of another governance arc?"
+            ),
+            observation=(
+                f"Active phase {active_phase['phase_id']} has no registered successor."
+            ),
+            why_it_might_matter="A terminal-looking phase can still hide unresolved sequencing uncertainty.",
+            evidence_refs=[active_phase["phase_id"]],
+            freshness_state="current",
+        )
+
+    if strategic_capability_count >= 5:
+        _irc_append_finding(
+            findings,
+            domain="architecture",
+            rule_id="001",
+            target_type="capability_domain",
+            target_id="strategic_governance",
+            attention_level="medium_attention",
+            question=(
+                "Where is governance complexity growing faster than explanation quality across strategic_governance surfaces?"
+            ),
+            observation=(
+                f"strategic_governance currently has {strategic_capability_count} implemented capabilities."
+            ),
+            why_it_might_matter="Complexity growth can create blind spots even when each individual phase is coherent.",
+            evidence_refs=["strategic_governance", "implemented_capability_count"],
+            freshness_state="current",
+        )
+
+    findings = _irc_sort_findings(_irc_unique_findings(findings))
+    compact_questions = _irc_compact_questions(findings)
+    compact_domains = [question["domain"] for question in compact_questions]
+
+    if compact_domains:
+        summary = (
+            f"{len(compact_questions)} questions surfaced across "
+            f"{', '.join(compact_domains)}."
+        )
+    else:
+        summary = "No material challenge questions surfaced."
+
+    return {
+        "display_enabled": True,
+        "independent_challenge_overview": {
+            "phase": _IRGC_PHASE_ID,
+            "phase_title": _IRGC_PHASE_TITLE,
+            "question_count": len(findings),
+            "domains_run": [
+                "governance",
+                "strategic_review",
+                "roadmap",
+                "capability",
+                "historical_drift",
+                "architecture",
+            ],
+            "top_attention_level": findings[0]["attention_level"] if findings else "low_attention",
+            "binding": False,
+            "execution_allowed": False,
+            "challenge_blocks_any_operation": False,
+        },
+        "attention_levels": list(_IRGC_ALLOWED_ATTENTION_LEVELS),
+        "findings": findings,
+        "compact_display": {
+            "header": _IRGC_DISPLAY_HEADER,
+            "summary": summary,
+            "questions": [
+                {
+                    "domain": finding["domain"],
+                    "attention_level": finding["attention_level"],
+                    "question": finding["question"],
+                }
+                for finding in compact_questions
+            ],
+            "footer": _IRGC_DISPLAY_FOOTER,
+        },
+        "governance_boundaries": dict(_IRGC_GOVERNANCE_BOUNDARIES),
+        "advisory": IRG_CHALLENGE_ADVISORY,
     }

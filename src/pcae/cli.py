@@ -199,6 +199,7 @@ from pcae.commands.agent import (
     run_write_invocation_approval_gateway,
     run_independent_review_governance,
     run_strategic_review_governance,
+    run_irg_challenge,
     run_objective_coverage_hardening,
     run_capability_inventory,
     run_capability_list,
@@ -4845,6 +4846,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     och_parser.set_defaults(handler=run_objective_coverage_hardening)
+
+    irg_challenge_parser = subparsers.add_parser(
+        "irg-challenge",
+        help="Advisory-only IRG challenge context: assumptions, blind spots, counterfactuals, and uncertainty (Phase 66E).",
+    )
+    irg_challenge_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    irg_challenge_parser.set_defaults(handler=run_irg_challenge)
 
     strategic_continuity_parser = subparsers.add_parser(
         "strategic-continuity",

@@ -41,6 +41,7 @@ def test_docs_commands_writes_reference_when_missing(
     assert "## task" in content
     assert "## daemon" in content
     assert "## agent" in content
+    assert "`pcae irg-challenge --json`" in content
 
 
 def test_docs_commands_does_not_overwrite_without_force(

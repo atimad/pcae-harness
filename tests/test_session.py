@@ -679,6 +679,118 @@ def test_session_bootstrap_prints_ready_status(
     assert "Ready: yes" in output
 
 
+def test_session_bootstrap_shows_independent_challenge_context(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.session as session_commands
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap challenge task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.setattr(
+        session_commands,
+        "build_irg_challenge_context",
+        lambda root: {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "2 questions surfaced across governance and roadmap.",
+                "questions": [
+                    {
+                        "domain": "governance",
+                        "attention_level": "high_attention",
+                        "question": "What assumption might be wrong?",
+                    },
+                    {
+                        "domain": "roadmap",
+                        "attention_level": "medium_attention",
+                        "question": "What changed since this reasoning was established?",
+                    },
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Independent Challenge Context — advisory only" in output
+    assert "What assumption might be wrong?" in output
+    assert "Displayed for context only. Command outcomes stay unchanged." in output
+
+
+def test_session_bootstrap_challenge_independence_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.session as session_commands
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Bootstrap independence task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    scenarios = [
+        None,
+        {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "No material challenge questions surfaced.",
+                "questions": [],
+                "footer": "",
+            },
+        },
+        {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "3 questions surfaced across governance, roadmap, and architecture.",
+                "questions": [
+                    {"domain": "governance", "attention_level": "high_attention", "question": "What changed?"},
+                    {"domain": "roadmap", "attention_level": "medium_attention", "question": "What blind spot exists?"},
+                    {"domain": "architecture", "attention_level": "low_attention", "question": "What counterfactual deserves attention?"},
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+        {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "1 question surfaced across historical_drift.",
+                "questions": [
+                    {
+                        "domain": "historical_drift",
+                        "attention_level": "critical_question",
+                        "question": "What reasoning may have aged?",
+                    }
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    ]
+
+    for scenario in scenarios:
+        monkeypatch.setattr(
+            session_commands,
+            "build_irg_challenge_context",
+            (lambda root, payload=scenario: payload),
+        )
+        exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+        output = capsys.readouterr().out
+        assert exit_code == 0
+        assert "Health: healthy" in output
+        assert "Check: passed" in output
+        assert "Ready: yes" in output
+
+
 def test_session_bootstrap_fails_when_lock_already_held(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -834,6 +946,54 @@ def test_session_bootstrap_same_agent_shows_full_summary(
     assert "Check:" in output
     assert "Active task:" in output
     assert "Ready:" in output
+
+
+def test_session_bootstrap_same_agent_uses_refreshed_session_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.agent import acquire_agent_lock
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Bootstrap stale lock task",
+        created_at=datetime(2026, 5, 23, 7, 30, tzinfo=timezone.utc),
+    )
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+
+    stale_task = (
+        tmp_path
+        / "tasks"
+        / "active"
+        / "20260523-0730-bootstrap-stale-lock-task.md"
+    )
+    done_task = (
+        tmp_path
+        / "tasks"
+        / "done"
+        / "20260523-0730-bootstrap-stale-lock-task.md"
+    )
+    done_task.parent.mkdir(parents=True, exist_ok=True)
+    stale_task.rename(done_task)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Bootstrap current task",
+        created_at=datetime(2026, 5, 23, 8, 0, tzinfo=timezone.utc),
+    )
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Active task: 20260523-0800-bootstrap-current-task" in output
+    assert "Title: Bootstrap current task" in output
+    assert "20260523-0730-bootstrap-stale-lock-task" not in output
 
 
 def test_session_bootstrap_same_agent_does_not_append_provenance(
@@ -1051,6 +1211,45 @@ def test_session_bootstrap_compact_shows_quality_preservation_note(
 
     output = capsys.readouterr().out
     assert "Quality preservation note:" in output
+
+
+def test_session_bootstrap_compact_shows_independent_challenge_context(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.session as session_commands
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact challenge task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.setattr(
+        session_commands,
+        "build_irg_challenge_context",
+        lambda root: {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "1 question surfaced across strategic_review.",
+                "questions": [
+                    {
+                        "domain": "strategic_review",
+                        "attention_level": "high_attention",
+                        "question": "What blind spot exists?",
+                    }
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Independent Challenge Context — advisory only" in output
+    assert "What blind spot exists?" in output
     assert "Bootstrap compression" in output
     assert "relaxing governance constraints" in output
 

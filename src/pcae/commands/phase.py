@@ -9,6 +9,10 @@ from pcae.core.orchestration import (
     build_workflow_validation,
     recommend_agent,
 )
+from pcae.core.agent import (
+    build_irg_challenge_context,
+    render_irg_challenge_compact_lines,
+)
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
 from pcae.core.session import write_session_snapshot
@@ -33,6 +37,11 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print(f"Agent lock: released (by {result.agent_id})")
     else:
         print("Agent lock: none")
+    lines = render_irg_challenge_compact_lines(build_irg_challenge_context(root))
+    if lines:
+        print()
+        for line in lines:
+            print(line)
     return 0
 
 
@@ -196,6 +205,12 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
 
     print()
     print(_build_restart_workflows_text())
+
+    lines = render_irg_challenge_compact_lines(build_irg_challenge_context(root))
+    if lines:
+        print()
+        for line in lines:
+            print(line)
 
     return 0 if result.next_lock_acquired else 1
 

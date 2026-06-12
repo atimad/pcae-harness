@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-11T21:58:26.809177+00:00
+Generated: 2026-06-12T05:48:56+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 53
+Total phases: 54
 Tracks: 8
 Superseded: 1
 Roadmap gaps: 0
@@ -88,7 +88,8 @@ Assessment status: intelligence_available
 | 66A | Independent Review Governance Model | completed | 65H | 66B |
 | 66B | Strategic Review Model | completed | 66A | 66C |
 | 66C | Strategic Review Calibration and BR-004 Closure | completed | 66B | 66D |
-| 66D | Bootstrap IRG Visibility Integration | active | 66C | — |
+| 66D | Bootstrap IRG Visibility Integration | completed | 66C | 66E |
+| 66E | Automated IRG Challenge Architecture | active | 66D | — |
 
 ## Track: roadmap_intelligence
 

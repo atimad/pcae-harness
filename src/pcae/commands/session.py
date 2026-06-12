@@ -4,7 +4,11 @@ import argparse
 import json
 from typing import Any
 
-from pcae.core.agent import acquire_agent_lock_idempotent
+from pcae.core.agent import (
+    acquire_agent_lock_idempotent,
+    build_irg_challenge_context,
+    render_irg_challenge_compact_lines,
+)
 from pcae.core.architecture import (
     read_architecture_history_summary,
     write_architecture_history_snapshot,
@@ -129,9 +133,12 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     health_status: str = health_data["overall_status"]
     check_passed = health_status == "healthy"
 
-    active_task = lock.data.get("active_task")
-    if not isinstance(active_task, dict):
-        active_task = None
+    session_snapshot = read_session_snapshot(root)
+    active_task = None
+    if session_snapshot is not None:
+        task_data = session_snapshot.data.get("active_task")
+        if isinstance(task_data, dict):
+            active_task = task_data
 
     sessions = build_provenance_sessions(root)
     current_session = find_active_session(sessions)
@@ -184,12 +191,19 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     else:
         print("Latest event: none")
     print(f"Ready: {'yes' if ready else 'no'}")
+    challenge = build_irg_challenge_context(root)
+    lines = render_irg_challenge_compact_lines(challenge)
+    if lines:
+        print()
+        for line in lines:
+            print(line)
     return 0 if ready else 1
 
 
 def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     pack = build_context_pack(root)
+    challenge = build_irg_challenge_context(root)
     profile_name: str | None = getattr(args, "profile", None)
     profile, is_unknown = resolve_profile(profile_name)
     prompt = build_bootstrap_prompt(pack, profile)
@@ -201,6 +215,7 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
                     "advisory": BOOTSTRAP_COMPACT_ADVISORY,
                     "bootstrap_prompt": prompt,
                     "governance_state": pack.governance_state,
+                    "independent_challenge_context": challenge,
                     "operational_rules": list(pack.operational_rules),
                     "orchestration_state": pack.orchestration_state,
                     "profile_type": profile.profile_type,
@@ -224,6 +239,11 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     print("Token optimization note: bootstrap prompt is compact by design.")
     print(f"Vendor-neutral note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
     print(f"Quality preservation note: {BOOTSTRAP_COMPACT_ADVISORY}")
+    lines = render_irg_challenge_compact_lines(challenge)
+    if lines:
+        print()
+        for line in lines:
+            print(line)
     return 0
 
 

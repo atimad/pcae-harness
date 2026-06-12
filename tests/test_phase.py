@@ -103,6 +103,43 @@ def test_phase_complete_with_lock_prints_released(
     assert "Agent lock: released (by claude-local)" in output
 
 
+def test_phase_complete_shows_independent_challenge_context(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.phase as phase_commands
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.setattr(
+        phase_commands,
+        "build_irg_challenge_context",
+        lambda harness_root: {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "1 question surfaced across architecture.",
+                "questions": [
+                    {
+                        "domain": "architecture",
+                        "attention_level": "medium_attention",
+                        "question": "What counterfactual deserves attention?",
+                    }
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Independent Challenge Context — advisory only" in output
+    assert "What counterfactual deserves attention?" in output
+
+
 def test_phase_complete_phase_completed_captures_agent_id(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -402,6 +439,129 @@ def test_phase_handoff_prints_human_readable_output(
     assert "pcae session bootstrap --agent-id claude-next" in output
     assert "Bootstrap prompt (copy-ready):" in output
     assert "pcae session bootstrap --agent-id claude-next" in output
+
+
+def test_phase_handoff_shows_independent_challenge_context(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.phase as phase_commands
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff challenge task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.setattr(
+        phase_commands,
+        "build_irg_challenge_context",
+        lambda harness_root: {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "2 questions surfaced across governance and capability.",
+                "questions": [
+                    {
+                        "domain": "governance",
+                        "attention_level": "high_attention",
+                        "question": "What assumption might be wrong?",
+                    },
+                    {
+                        "domain": "capability",
+                        "attention_level": "medium_attention",
+                        "question": "What blind spot exists?",
+                    },
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "32C complete", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Independent Challenge Context — advisory only" in output
+    assert "What assumption might be wrong?" in output
+
+
+def test_phase_lifecycle_challenge_independence_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import pcae.commands.phase as phase_commands
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Phase lifecycle independence task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    complete_scenarios = [
+        None,
+        {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "3 questions surfaced across governance, roadmap, and architecture.",
+                "questions": [
+                    {"domain": "governance", "attention_level": "high_attention", "question": "What changed?"},
+                    {"domain": "roadmap", "attention_level": "medium_attention", "question": "What blind spot exists?"},
+                    {"domain": "architecture", "attention_level": "critical_question", "question": "What counterfactual deserves attention?"},
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    ]
+    for scenario in complete_scenarios:
+        monkeypatch.setattr(
+            phase_commands,
+            "build_irg_challenge_context",
+            (lambda harness_root, payload=scenario: payload),
+        )
+        exit_code = main(["phase", "complete", "--summary", "Phase done"])
+        output = capsys.readouterr().out
+        assert exit_code == 0
+        assert "Phase complete." in output
+        assert "Summary: Phase done" in output
+
+    acquire_agent_lock(root, "claude-local")
+    handoff_scenarios = [
+        None,
+        {
+            "display_enabled": True,
+            "compact_display": {
+                "header": "Independent Challenge Context — advisory only",
+                "summary": "1 question surfaced across historical_drift.",
+                "questions": [
+                    {
+                        "domain": "historical_drift",
+                        "attention_level": "critical_question",
+                        "question": "What reasoning may have aged?",
+                    }
+                ],
+                "footer": "Displayed for context only. Command outcomes stay unchanged.",
+            },
+        },
+    ]
+    for scenario in handoff_scenarios:
+        monkeypatch.setattr(
+            phase_commands,
+            "build_irg_challenge_context",
+            (lambda harness_root, payload=scenario: payload),
+        )
+        exit_code = main(
+            ["phase", "handoff", "--summary", "Switch agents", "--next-agent", "claude-next"]
+        )
+        output = capsys.readouterr().out
+        assert exit_code == 0
+        assert "Phase handoff." in output
+        assert "Summary: Switch agents" in output
 
 
 def test_phase_handoff_json_output(
