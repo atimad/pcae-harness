@@ -1,6 +1,6 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-12T15:39:19.670353+00:00
+Generated: 2026-06-12T18:44:41.891410+00:00
 Phase: 64B.0 — Capability Inventory
 Total capabilities: 64
 Implemented: 62

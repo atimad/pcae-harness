@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Persistent Attention Rebalancing Architecture (20260612-1731-persistent-attention-rebalancing-architecture)
 - Challenge Attention Effectiveness Review (20260612-1731-challenge-attention-effectiveness-review)
 - 68B Challenge Attention Rendering Integration (20260612-1610-68b-challenge-attention-rendering-integration)
 - 68A Adaptive Challenge Attention Architecture Design (20260612-1331-68a-adaptive-challenge-attention-architecture-design)

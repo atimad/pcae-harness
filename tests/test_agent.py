@@ -51412,7 +51412,7 @@ def test_65a_branch_registry_non_empty(tmp_path) -> None:
     for b in branches:
         assert b["branch_id"].startswith("BR-")
         assert b["branch_name"]
-        assert b["status"] in ("active", "proposed", "deferred", "retired")
+        assert b["status"] in ("active", "proposed", "deferred", "retired", "closed")
         assert isinstance(b["serving_objectives"], list)
 
 
@@ -54286,7 +54286,7 @@ def test_66a_br004_in_branch_registry(tmp_path) -> None:
     assert "OBJ-001" in br004["serving_objectives"]
     assert "OBJ-002" in br004["serving_objectives"]
     assert br004["entry_phase"] == "66A"
-    assert br004["status"] == "active"
+    assert br004["status"] == "closed"
 
 
 def test_66a_mapped_to_obj001_and_obj002(tmp_path) -> None:
@@ -54814,7 +54814,7 @@ def test_66c_br004_active_while_66c_in_progress(tmp_path, monkeypatch) -> None:
 
     br004 = next((b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-004"), None)
     assert br004 is not None
-    assert br004["status"] == "active", "BR-004 remains active; 66D extends it as a second arc"
+    assert br004["status"] == "closed", "BR-004 closed after 68D; retrospective review approved closure"
     assert br004["current_phase"] == "68D"
     assert _SRS_GOVERNANCE_BOUNDARIES["br_004_closed"] is True, "BR-004 closure is advisory intent in governance_boundaries"
 
@@ -57309,3 +57309,43 @@ def test_68d_branch_current_phase_updated(tmp_path) -> None:
     br004 = next((b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-004"), None)
     assert br004 is not None
     assert br004["current_phase"] == "68D"
+
+
+# --- BR-004 Closure Tests ---
+
+
+def test_br004_closure_branch_status_is_closed(tmp_path) -> None:
+    from pcae.core.agent import _SRG_BRANCH_REGISTRY
+
+    br004 = next((b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-004"), None)
+    assert br004 is not None
+    assert br004["status"] == "closed", "BR-004 closed after 68D retrospective review approval"
+    assert br004["current_phase"] == "68D"
+
+
+def test_br004_closure_achieved_documents_objectives(tmp_path) -> None:
+    from pcae.core.agent import _BR004_CLOSURE_ACHIEVED
+
+    assert "Independent review governance operational" in _BR004_CLOSURE_ACHIEVED
+    assert "66A" in _BR004_CLOSURE_ACHIEVED
+    assert "68D" in _BR004_CLOSURE_ACHIEVED
+    assert "OBJ-001" in _BR004_CLOSURE_ACHIEVED
+    assert "OBJ-002" in _BR004_CLOSURE_ACHIEVED
+    assert "execution_allowed=False" in _BR004_CLOSURE_ACHIEVED
+
+
+def test_br004_closure_descoped_debt_names_67b_calibration(tmp_path) -> None:
+    from pcae.core.agent import _BR004_CLOSURE_DESCOPED_DEBT
+
+    assert "67B" in _BR004_CLOSURE_DESCOPED_DEBT
+    assert "suppression_weight_delta" in _BR004_CLOSURE_DESCOPED_DEBT
+    assert "descoped" in _BR004_CLOSURE_DESCOPED_DEBT
+    assert "separate branch" in _BR004_CLOSURE_DESCOPED_DEBT
+
+
+def test_br004_closure_observation_names_finding_volume(tmp_path) -> None:
+    from pcae.core.agent import _BR004_CLOSURE_OBSERVATION
+
+    assert "sophistication" in _BR004_CLOSURE_OBSERVATION
+    assert "contention" in _BR004_CLOSURE_OBSERVATION
+    assert "architectural possibility" in _BR004_CLOSURE_OBSERVATION

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 68D: Persistent Attention Rebalancing Architecture.
+Phase 68D: Persistent Attention Rebalancing Architecture (BR-004 closed; inter-branch period before BR-005).
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -16,7 +16,7 @@ refresh, and phase test selection hardening.
 PCAE has completed a three-series implementation cycle covering phases 50A–52Q.
 This is a release-quality checkpoint before runtime integration work begins.
 
-**Test count:** 5281 passing tests (as of Phase 68D).
+**Test count:** 5285 passing tests (as of BR-004 closure).
 
 **License:** Apache License 2.0.
 

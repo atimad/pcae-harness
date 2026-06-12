@@ -79320,7 +79320,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
             "Phases governing the independent review layer: review class registry, "
             "finding models, recommendation derivation, and review lineage."
         ),
-        "status": "active",
+        "status": "closed",
         "parent_branch": "",
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
@@ -83824,6 +83824,29 @@ _SRS_GOVERNANCE_BOUNDARIES: dict = {
     "br_004_closed": True,
     "recommended_next_phase": "64H",
 }
+
+_BR004_CLOSURE_ACHIEVED: str = (
+    "Independent review governance operational. "
+    "Challenge generation, comparison, impact analysis, attention allocation, effectiveness review, "
+    "and competitive persistence rebalancing completed across phases 66A–68D. "
+    "OBJ-001 (Safe AI-Assisted Coding) and OBJ-002 (Mandatory Human Approval) served throughout: "
+    "review_output_is_binding=False, execution_allowed=False, file_mutation_allowed=False enforced "
+    "by architecture at every phase."
+)
+
+_BR004_CLOSURE_DESCOPED_DEBT: str = (
+    "67B calibration effects (suppression_weight_delta) are computed but not applied — "
+    "this debt is explicitly descoped from BR-004 closure criteria and does not represent "
+    "a deficiency in the closed arc. Future work applying calibration effects to attention "
+    "allocation requires separate branch justification and human approval."
+)
+
+_BR004_CLOSURE_OBSERVATION: str = (
+    "BR-004 reached a level of sophistication that exceeds current finding volume. "
+    "Future challenge-system enhancements should be justified by observed contention "
+    "rather than architectural possibility. The next order-of-magnitude capability gap "
+    "is governed execution of real runtime activity, not further attention allocation refinement."
+)
 
 
 def _srs_compute_objective_snapshot() -> dict:

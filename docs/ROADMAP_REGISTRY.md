@@ -1,6 +1,6 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-12T15:39:19.564303+00:00
+Generated: 2026-06-12T18:44:41.794282+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
 Total phases: 60
 Tracks: 8
