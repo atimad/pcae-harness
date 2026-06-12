@@ -325,5 +325,43 @@
     "selected_branch_id": "BR-004",
     "source_phase_id": "68A",
     "supersedes_lineage_id": "SLR-68A-001"
+  },
+  {
+    "activated_phase_id": "68D",
+    "activation_event_id": "2026-06-12T17:31:22+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [
+      "hard_demotion_persistent_always_last",
+      "weight_based_demotion",
+      "rotational_visibility"
+    ],
+    "decided_by": "human-user",
+    "decision_basis": "architecture_requirement",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "",
+    "human_approved": true,
+    "lineage_id": "SLR-68D-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-12T17:31:22+00:00",
+    "objective_ids": [
+      "OBJ-001",
+      "OBJ-002"
+    ],
+    "predecessor_phase_id": "68C",
+    "rationale": "68C effectiveness review identified that persistent_background signal was computed but not actively used as a demotion criterion in _irca_allocate_attention() Step 3. Persistent findings competed equally with non-persistent findings during diversity_fill, reducing repetition reduction to incidental rather than structural. 68D adds competitive persistence demotion: Step 3 sort key becomes (is_persistent_background, domain, finding_id) so non-persistent findings precede persistent ones when budget is binding. Demotion is conditional — persistent findings surface unchanged when no non-persistent alternatives compete. demotion_is_scheduling_not_priority_ranking=True. persistence_implies_lower_priority=False maintained. Completion surface bypass documented as intentional via _IRCA_COMPLETION_SURFACE_NOTE. Rejected: hard demotion (makes absolute governance claim), weight-based scoring (implies importance ordering), rotational visibility (requires persistence). This closes the structural gap identified in 68C and completes the BR-004 attention arc.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [
+      "hard_demotion_persistent_always_last",
+      "weight_based_demotion",
+      "rotational_visibility"
+    ],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [],
+    "selected_branch_id": "BR-004",
+    "source_phase_id": "68C",
+    "supersedes_lineage_id": "SLR-68B-001"
   }
 ]

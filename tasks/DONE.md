@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Challenge Attention Effectiveness Review (20260612-1731-challenge-attention-effectiveness-review)
+- 68B Challenge Attention Rendering Integration (20260612-1610-68b-challenge-attention-rendering-integration)
 - 68A Adaptive Challenge Attention Architecture Design (20260612-1331-68a-adaptive-challenge-attention-architecture-design)
 - 67B Challenge Impact Architecture (20260612-1217-67b-challenge-impact-architecture)
 - 67A Comparative IRG Challenge Architecture (20260612-1032-67a-comparative-irg-challenge-architecture)

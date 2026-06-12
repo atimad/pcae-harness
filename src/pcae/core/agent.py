@@ -69347,6 +69347,24 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": [],
         "dependencies": ["challenge_attention_architecture"],
+        "successor_capabilities": ["challenge_attention_effectiveness_review"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Challenge Attention Effectiveness Review",
+        "implemented_phase": "68C",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["challenge_attention_rendering_integration"],
+        "successor_capabilities": ["challenge_attention_rebalancing"],
+    },
+    {
+        "capability_domain": "strategic_governance",
+        "capability_name": "Challenge Attention Rebalancing",
+        "implemented_phase": "68D",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": ["challenge_attention_effectiveness_review"],
         "successor_capabilities": [],
     },
 )
@@ -70266,8 +70284,26 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "independent_review_governance",
         "phase_id": "68B",
         "phase_title": "Challenge Attention Rendering Integration",
-        "status": "active",
+        "status": "completed",
         "predecessor": "68A",
+        "successor": "68C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "68C",
+        "phase_title": "Challenge Attention Effectiveness Review",
+        "status": "completed",
+        "predecessor": "68B",
+        "successor": "68D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "independent_review_governance",
+        "phase_id": "68D",
+        "phase_title": "Persistent Attention Rebalancing Architecture",
+        "status": "active",
+        "predecessor": "68C",
         "successor": "",
         "superseded_by": "",
     },
@@ -71170,7 +71206,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "challenge_attention_architecture",
         ],
-        "successors": [],
+        "successors": ["challenge_attention_effectiveness_review"],
         "aliases": [],
         "contribution": (
             "wires the 68A attention allocator into the automatic challenge rendering path: "
@@ -71181,6 +71217,50 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "findings_unchanged_by_allocator=True; suppressed_findings_remain_available=True; "
             "attention_allocation_does_not_affect_command_outcomes=True; "
             "execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Challenge Attention Effectiveness Review",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "68C",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "challenge_attention_rendering_integration",
+        ],
+        "successors": ["challenge_attention_rebalancing"],
+        "aliases": [],
+        "contribution": (
+            "68C effectiveness review: evaluates whether the 68A/68B allocator produces "
+            "measurable improvements in challenge diversity, novelty exposure, and repetition "
+            "reduction; identifies structural gap — persistent_background signal computed but "
+            "not actively used as demotion criterion in diversity_fill; completion surface "
+            "confirmed intentionally summary-only; classifies allocator as partially effective; "
+            "recommends competitive persistence demotion in 68D; execution_allowed=False"
+        ),
+    },
+    {
+        "capability_name": "Challenge Attention Rebalancing",
+        "capability_domain": "strategic_governance",
+        "implemented_phase": "68D",
+        "status": "implemented",
+        "commands": [],
+        "dependencies": [
+            "challenge_attention_effectiveness_review",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "competitive persistence demotion: modifies _irca_allocate_attention() Step 3 "
+            "sort key to (is_persistent_background, domain, finding_id) so non-persistent "
+            "findings precede persistent ones in diversity_fill; demotion is conditional — "
+            "persistent findings are backgrounded only when budget is binding and non-persistent "
+            "alternatives exist; documents completion surface bypass as intentional; adds "
+            "_IRCA_COMPLETION_SURFACE_NOTE and _IRCA_REBALANCING_RATIONALE constants; adds "
+            "rebalancing_strategy='competitive_persistence_demotion' to assessment output; "
+            "decision_reason='rebalanced_persistence' assigned when applicable; "
+            "persistence_implies_lower_priority=False maintained; "
+            "demotion_is_scheduling_not_priority_ranking=True; execution_allowed=False"
         ),
     },
     {
@@ -73333,7 +73413,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68B",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68B-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68B",
@@ -73341,7 +73421,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68B",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68B-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68B",
@@ -73349,10 +73429,58 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "68B",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "68B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "68B",
+    },
+    {
+        "phase_id": "68C",
+        "prompt_type": "implementation",
+        "prompt_status": "historical",
+        "prompt_version": "68C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68C",
+    },
+    {
+        "phase_id": "68C",
+        "prompt_type": "validation",
+        "prompt_status": "historical",
+        "prompt_version": "68C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68C",
+    },
+    {
+        "phase_id": "68C",
+        "prompt_type": "agent",
+        "prompt_status": "historical",
+        "prompt_version": "68C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68C",
+    },
+    {
+        "phase_id": "68D",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "68D-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68D",
+    },
+    {
+        "phase_id": "68D",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "68D-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68D",
+    },
+    {
+        "phase_id": "68D",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "68D-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "68D",
     },
 )
 
@@ -79197,7 +79325,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002"],
         "entry_phase": "66A",
-        "current_phase": "68B",
+        "current_phase": "68D",
         "approved_by": "",
         "approved_at": "",
     },
@@ -79781,6 +79909,31 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "wires the 68A allocator into automatic compact rendering: bootstrap, handoff, "
             "and completion surfaces now filter findings via attention allocation; explicit "
             "irg-challenge command and JSON retain all findings; visibility is not authority"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "challenge_attention_effectiveness_review",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "validates allocator effectiveness via structured analysis of diversity, novelty, "
+            "repetition, and governance boundaries; identifies competitive persistence demotion "
+            "gap; classifies allocator as partially effective; informs 68D scope"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "challenge_attention_rebalancing",
+        "objective_ids": ["OBJ-001", "OBJ-002"],
+        "contribution_type": "supporting",
+        "contribution_description": (
+            "completes the 68A attention allocation capability by activating competitive "
+            "persistence demotion: persistent findings yield slots to non-persistent findings "
+            "under budget pressure; demotion_is_scheduling_not_priority_ranking=True; "
+            "stateless; advisory-only; all governance boundaries preserved"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -84714,8 +84867,8 @@ def build_irg_loop_integration(root: "HarnessPath | None" = None) -> dict:
 # Phase 66E — Automated IRG Challenge Architecture
 # ---------------------------------------------------------------------------
 
-_IRGC_PHASE_ID: str = "68B"
-_IRGC_PHASE_TITLE: str = "Challenge Attention Rendering Integration"
+_IRGC_PHASE_ID: str = "68D"
+_IRGC_PHASE_TITLE: str = "Persistent Attention Rebalancing Architecture"
 _IRGC_DISPLAY_HEADER: str = "Independent Challenge Context — advisory only"
 _IRGC_DISPLAY_FOOTER: str = (
     "Displayed for context only. Command outcomes stay unchanged."
@@ -86334,8 +86487,8 @@ def render_irg_impact_compact_lines(data: dict) -> list[str]:
 # Phase 68A/68B — Adaptive Challenge Attention Architecture and Rendering Integration
 # ---------------------------------------------------------------------------
 
-_IRCA_PHASE_ID: str = "68B"
-_IRCA_PHASE_TITLE: str = "Challenge Attention Rendering Integration"
+_IRCA_PHASE_ID: str = "68D"
+_IRCA_PHASE_TITLE: str = "Persistent Attention Rebalancing Architecture"
 
 _IRCA_ATTENTION_SIGNAL_TYPES: tuple[str, ...] = (
     "new_concern",
@@ -86452,6 +86605,13 @@ _IRCA_GOVERNANCE_BOUNDARIES: dict[str, bool] = {
     "suppressed_findings_remain_available": True,
     "attention_allocation_does_not_modify_findings": True,
     "attention_allocation_does_not_affect_command_outcomes": True,
+    # 68D rebalancing boundaries
+    "persistent_demotion_implies_resolved": False,
+    "background_allocation_implies_lower_importance": False,
+    "repetition_reduction_reflects_governance_assessment": False,
+    "demotion_changes_finding_contents": False,
+    "completion_surface_allocation_bypass_is_resolution": False,
+    "demotion_is_scheduling_not_priority_ranking": True,
 }
 
 _IRCA_ADVISORY: str = (
@@ -86459,7 +86619,30 @@ _IRCA_ADVISORY: str = (
     "AttentionDecisions determine presentation, not governance significance. "
     "visibility_is_importance=False. suppression_is_resolution=False. "
     "background_is_resolved=False. attention_allocation_affects_governance=False. "
-    "All findings still exist regardless of surface decision."
+    "All findings still exist regardless of surface decision. "
+    "Competitive persistence demotion: persistent findings yield slots to non-persistent "
+    "findings only when budget is binding; demotion_is_scheduling_not_priority_ranking=True."
+)
+
+_IRCA_COMPLETION_SURFACE_NOTE: str = (
+    "The completion surface renders aggregate evolution summary and calibration state only. "
+    "Per-finding allocation is computed but not applied in the completion render path — "
+    "this is intentional by design, not an oversight. Completion answers 'how did the "
+    "challenge arc evolve?' not 'which findings warrant attention now?'. "
+    "All findings remain accessible via pcae irg-challenge regardless of surface."
+)
+
+_IRCA_REBALANCING_RATIONALE: str = (
+    "68D adds competitive persistence demotion to _irca_allocate_attention() Step 3. "
+    "The diversity_fill sort key becomes (is_persistent_background, domain, finding_id) "
+    "so non-persistent findings precede persistent ones within the iteration order. "
+    "Demotion is conditional: a persistent finding is backgrounded only when the total "
+    "budget is binding and non-persistent findings exist to fill freed slots. "
+    "When no competition exists, persistent findings surface unchanged. "
+    "persistence_implies_lower_priority=False remains true: demotion is scheduling, "
+    "not a governance assessment of finding merit. The finding's attention_level, domain, "
+    "question, and finding_id are never modified. decision_reason='rebalanced_persistence' "
+    "is assigned when a persistent finding is backgrounded due to rebalancing."
 )
 
 _IRCA_SELF_CHALLENGE: dict = {
@@ -86822,8 +87005,18 @@ def _irca_allocate_attention(
     remaining = [f for f in remaining if f["finding_id"] not in allocated_set]
 
     # Step 3: fill remaining budget with domain diversity
-    # Sort by domain alphabetically for determinism, then by finding_id within domain
-    diversity_candidates = sorted(remaining, key=lambda f: (f.get("domain", ""), f.get("finding_id", "")))
+    # Sort: non-persistent findings before persistent ones (competitive demotion),
+    # then domain alphabetically, then finding_id for determinism.
+    # persistent_background signal marks findings seen across >= suppression_threshold phases.
+    # Demotion is scheduling-only; persistence_implies_lower_priority=False governs this.
+    diversity_candidates = sorted(
+        remaining,
+        key=lambda f: (
+            1 if _has_signal_type(f["finding_id"], "persistent_background") else 0,
+            f.get("domain", ""),
+            f.get("finding_id", ""),
+        ),
+    )
     for f in diversity_candidates:
         if len(allocated_ids) >= max_total:
             break
@@ -86841,11 +87034,14 @@ def _irca_allocate_attention(
         reason_map[fid] = "within_attention_budget"
     for fid in background_ids:
         decision_map[fid] = "background"
-        # determine reason
         f_obj = next((f for f in findings if f["finding_id"] == fid), {})
         domain = f_obj.get("domain", "")
         if domain_counts.get(domain, 0) >= (max_per_domain or 0):
             reason_map[fid] = "domain_budget_exhausted"
+        elif _has_signal_type(fid, "persistent_background"):
+            # Finding was demoted by competitive rebalancing: a non-persistent finding
+            # in a different domain was preferred; demotion_is_scheduling_not_priority_ranking=True
+            reason_map[fid] = "rebalanced_persistence"
         else:
             reason_map[fid] = "total_budget_exhausted"
 
@@ -86918,6 +87114,7 @@ def build_challenge_attention_assessment(
         "allocation": allocation,
         "signals_by_finding": signals_by_finding,
         "governance_boundaries": combined_boundaries,
+        "rebalancing_strategy": "competitive_persistence_demotion",
         "advisory": _IRCA_ADVISORY,
     }
 
