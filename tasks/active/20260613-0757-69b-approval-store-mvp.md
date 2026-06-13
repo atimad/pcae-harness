@@ -42,6 +42,7 @@ implementation
 - docs/COMMANDS.md
 - docs/CAPABILITY_INVENTORY.md
 - docs/ROADMAP_REGISTRY.md
+- .gitignore
 
 ## Forbidden Files
 
