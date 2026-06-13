@@ -26,6 +26,7 @@ ACTIVATION_TIMESTAMP_68C = "2026-06-12T17:31:00+00:00"
 ACTIVATION_TIMESTAMP_68D = "2026-06-12T17:31:22+00:00"
 ACTIVATION_TIMESTAMP_69A = "2026-06-12T21:09:00+00:00"
 ACTIVATION_TIMESTAMP_69B = "2026-06-13T07:57:40+00:00"
+ACTIVATION_TIMESTAMP_69C = "2026-06-13T06:49:36+00:00"
 
 
 def _valid_record() -> dict:
@@ -472,6 +473,172 @@ def _valid_69b_record() -> dict:
     }
 
 
+def _valid_69c_record() -> dict:
+    return {
+        "lineage_id": "SLR-69C-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69C,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69B",
+        "predecessor_phase_id": "69B",
+        "activated_phase_id": "69C",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": "Validates approved-agent and invocation-contract prerequisites without enabling execution.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [],
+        "supersedes_lineage_id": "SLR-69B-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69C,
+        "activation_validation_status": "validated",
+    }
+
+
+def _post_65i_records() -> list[dict]:
+    return [
+        _valid_66c_record(),
+        _valid_64h_record(),
+        _valid_66d_record(),
+        _valid_66e_record(),
+        _valid_67a_record(),
+        _valid_67b_record(),
+        _valid_68a_record(),
+        _valid_68b_record(),
+        _valid_68c_record(),
+        _valid_68d_record(),
+        _valid_69a_record(),
+        _valid_69b_record(),
+        _valid_69c_record(),
+    ]
+
+
+def _provenance_events(include_65i: bool = True) -> list[dict]:
+    events = []
+    if include_65i:
+        events.append({
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 65I",
+            "timestamp": ACTIVATION_TIMESTAMP,
+        })
+    events.extend([
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 66C",
+            "timestamp": ACTIVATION_TIMESTAMP_66C,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 64H",
+            "timestamp": ACTIVATION_TIMESTAMP_64H,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 66D",
+            "timestamp": ACTIVATION_TIMESTAMP_66D,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 66E",
+            "timestamp": ACTIVATION_TIMESTAMP_66E,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 67A",
+            "timestamp": ACTIVATION_TIMESTAMP_67A,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 67B",
+            "timestamp": ACTIVATION_TIMESTAMP_67B,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 68A",
+            "timestamp": ACTIVATION_TIMESTAMP_68A,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 68B",
+            "timestamp": ACTIVATION_TIMESTAMP_68B,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 68C",
+            "timestamp": ACTIVATION_TIMESTAMP_68C,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 68D",
+            "timestamp": ACTIVATION_TIMESTAMP_68D,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69A",
+            "timestamp": ACTIVATION_TIMESTAMP_69A,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69B",
+            "timestamp": ACTIVATION_TIMESTAMP_69B,
+        },
+        {
+            "active_task": None,
+            "agent_id": "codex-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69C",
+            "timestamp": ACTIVATION_TIMESTAMP_69C,
+        },
+    ])
+    return events
+
+
 def _write_registry(root: Path, records: list[dict], *, provenance: bool = True) -> None:
     pcae_dir = root / ".pcae"
     pcae_dir.mkdir(parents=True, exist_ok=True)
@@ -481,116 +648,7 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
     )
     if provenance:
         (pcae_dir / "provenance-history.json").write_text(
-            json.dumps(
-                [
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 65I",
-                        "timestamp": ACTIVATION_TIMESTAMP,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 66C",
-                        "timestamp": ACTIVATION_TIMESTAMP_66C,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 64H",
-                        "timestamp": ACTIVATION_TIMESTAMP_64H,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 66D",
-                        "timestamp": ACTIVATION_TIMESTAMP_66D,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 66E",
-                        "timestamp": ACTIVATION_TIMESTAMP_66E,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 67A",
-                        "timestamp": ACTIVATION_TIMESTAMP_67A,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 67B",
-                        "timestamp": ACTIVATION_TIMESTAMP_67B,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 68A",
-                        "timestamp": ACTIVATION_TIMESTAMP_68A,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 68B",
-                        "timestamp": ACTIVATION_TIMESTAMP_68B,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 68C",
-                        "timestamp": ACTIVATION_TIMESTAMP_68C,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 68D",
-                        "timestamp": ACTIVATION_TIMESTAMP_68D,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 69A",
-                        "timestamp": ACTIVATION_TIMESTAMP_69A,
-                    },
-                    {
-                        "active_task": None,
-                        "agent_id": "codex-local",
-                        "event_type": "phase_activated",
-                        "git_branch": "main",
-                        "summary": "Human-approved activation of Phase 69B",
-                        "timestamp": ACTIVATION_TIMESTAMP_69B,
-                    },
-                ],
-                indent=2,
-                sort_keys=True,
-            )
+            json.dumps(_provenance_events(), indent=2, sort_keys=True)
             + "\n",
             encoding="utf-8",
         )
@@ -599,7 +657,7 @@ def _write_registry(root: Path, records: list[dict], *, provenance: bool = True)
 def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tuple[str, ...]:
     _write_registry(
         tmp_path,
-        [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+        [record, *_post_65i_records()],
         provenance=provenance,
     )
     return validate_strategic_lineage(HarnessPath(tmp_path)).errors
@@ -608,11 +666,11 @@ def _errors_for(tmp_path: Path, record: dict, *, provenance: bool = True) -> tup
 def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+        [_valid_record(), *_post_65i_records()],
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69B-TEST"
+    assert result.current_lineage_id == "SLR-69C-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -620,7 +678,7 @@ def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+        [_valid_record(), *_post_65i_records()],
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
@@ -632,7 +690,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
 ) -> None:
     from pcae.core import strategic_lineage as strategic_lineage_module
 
-    records = [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()]
+    records = [_valid_record(), *_post_65i_records()]
     patched_branches = []
     for branch in strategic_lineage_module._SRG_BRANCH_REGISTRY:
         patched = dict(branch)
@@ -647,7 +705,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69B-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69C-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -734,7 +792,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     pcae_dir.mkdir(parents=True, exist_ok=True)
     (pcae_dir / "strategic-lineage.json").write_text(
         json.dumps(
-            [record, _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+            [record, *_post_65i_records()],
             indent=2,
             sort_keys=True,
         )
@@ -742,114 +800,13 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (pcae_dir / "provenance-history.json").write_text(
-        json.dumps(
-            [
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 66C",
-                    "timestamp": ACTIVATION_TIMESTAMP_66C,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 64H",
-                    "timestamp": ACTIVATION_TIMESTAMP_64H,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 66D",
-                    "timestamp": ACTIVATION_TIMESTAMP_66D,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 66E",
-                    "timestamp": ACTIVATION_TIMESTAMP_66E,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 67A",
-                    "timestamp": ACTIVATION_TIMESTAMP_67A,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 67B",
-                    "timestamp": ACTIVATION_TIMESTAMP_67B,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 68A",
-                    "timestamp": ACTIVATION_TIMESTAMP_68A,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 68B",
-                    "timestamp": ACTIVATION_TIMESTAMP_68B,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 68C",
-                    "timestamp": ACTIVATION_TIMESTAMP_68C,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 68D",
-                    "timestamp": ACTIVATION_TIMESTAMP_68D,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 69A",
-                    "timestamp": ACTIVATION_TIMESTAMP_69A,
-                },
-                {
-                    "active_task": None,
-                    "agent_id": "codex-local",
-                    "event_type": "phase_activated",
-                    "git_branch": "main",
-                    "summary": "Human-approved activation of Phase 69B",
-                    "timestamp": ACTIVATION_TIMESTAMP_69B,
-                },
-            ],
-            indent=2,
-            sort_keys=True,
-        )
+        json.dumps(_provenance_events(include_65i=False), indent=2, sort_keys=True)
         + "\n",
         encoding="utf-8",
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69B-TEST"
+    assert result.current_lineage_id == "SLR-69C-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -878,7 +835,7 @@ def test_65j_summary_uses_referenced_review_findings(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+        [_valid_record(), *_post_65i_records()],
     )
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
@@ -895,7 +852,7 @@ def test_65j_continuity_commands_are_read_only(
 ) -> None:
     _write_registry(
         tmp_path,
-        [_valid_record(), _valid_66c_record(), _valid_64h_record(), _valid_66d_record(), _valid_66e_record(), _valid_67a_record(), _valid_67b_record(), _valid_68a_record(), _valid_68b_record(), _valid_68c_record(), _valid_68d_record(), _valid_69a_record(), _valid_69b_record()],
+        [_valid_record(), *_post_65i_records()],
     )
     before = {
         path.name: path.read_bytes()
@@ -904,9 +861,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69B-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69C-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 13
+    assert json.loads(capsys.readouterr().out)["record_count"] == 14
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

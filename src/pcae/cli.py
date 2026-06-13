@@ -63,6 +63,7 @@ from pcae.commands.agent import (
     run_human_agent_execution_design,
     run_governed_execution_pilot,
     run_approval_store_write,
+    run_invocation_contract_validation,
     run_live_execution_readiness,
     run_execution_audit_design,
     run_execution_consensus_framework,
@@ -1938,11 +1939,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Human approver identifier.",
     )
     approval_store_write_parser.add_argument(
+        "--approved-agent",
+        dest="approved_agents",
+        action="append",
+        default=[],
+        help="Approved agent ID. Repeat for each approved agent.",
+    )
+    approval_store_write_parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON output.",
     )
     approval_store_write_parser.set_defaults(handler=run_approval_store_write)
+
+    invocation_contract_validation_parser = subparsers.add_parser(
+        "invocation-contract-validation",
+        help="Validate selected agent approval and invocation contracts without executing anything (Phase 69C).",
+    )
+    invocation_contract_validation_parser.add_argument(
+        "--prompt-id",
+        required=True,
+        help="Prompt identifier to validate against the approval store.",
+    )
+    invocation_contract_validation_parser.add_argument(
+        "--selected-agent",
+        dest="selected_agents",
+        action="append",
+        default=[],
+        help="Selected agent ID. Repeat for each selected agent.",
+    )
+    invocation_contract_validation_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON validation output.",
+    )
+    invocation_contract_validation_parser.set_defaults(handler=run_invocation_contract_validation)
 
     live_execution_readiness_parser = subparsers.add_parser(
         "live-execution-readiness",

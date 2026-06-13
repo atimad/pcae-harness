@@ -1,39 +1,18 @@
 {
   "active_task": {
-    "id": "20260613-0757-69b-approval-store-mvp",
-    "title": "69B Approval Store MVP"
+    "id": "20260613-0849-69c-invocation-contract-validation",
+    "title": "69C Invocation Contract Validation"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69B Approval Store MVP",
+  "current_objective": "69C Invocation Contract Validation",
   "git": {
     "branch": "main",
-    "changed_files": [
-      {
-        "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DONE.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260612-2109-69a-runtime-activation-architecture-review.md",
-        "status": " D"
-      },
-      {
-        "path": "tasks/active/20260613-0757-69b-approval-store-mvp.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260612-2109-69a-runtime-activation-architecture-review.md",
-        "status": "??"
-      }
-    ],
-    "status_summary": "5 changed files"
+    "changed_files": [],
+    "status_summary": "clean"
   },
-  "last_completed_step": "Completed task 20260612-2109-69a-runtime-activation-architecture-review: 69A Runtime Activation Architecture Review",
-  "next_recommended_step": "Continue active task 20260613-0757-69b-approval-store-mvp.",
-  "timestamp": "2026-06-13T05:57:40.165146+00:00",
+  "last_completed_step": "69B Approval Store MVP",
+  "next_recommended_step": "Validate gep-gate-006 and gep-gate-007 without enabling execution.",
+  "timestamp": "2026-06-13T06:49:36+00:00",
   "warnings": []
 }

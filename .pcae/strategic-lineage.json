@@ -407,7 +407,7 @@
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
     "lineage_id": "SLR-69B-001",
-    "lineage_status": "approved",
+    "lineage_status": "superseded",
     "lineage_timestamp": "2026-06-13T07:57:40+00:00",
     "objective_ids": [
       "OBJ-002",
@@ -430,5 +430,39 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "69A",
     "supersedes_lineage_id": "SLR-69A-001"
+  },
+  {
+    "activated_phase_id": "69C",
+    "activation_event_id": "2026-06-13T06:49:36+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-69C-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-13T06:49:36+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69B",
+    "rationale": "69C advances BR-005 by validating the remaining non-executing invocation prerequisites left open by 69B. Scope is intentionally exclusive: approved-agent validation (gep-gate-006), invocation-contract availability (gep-gate-007), codex-local contract verification, claude-local contract verification, and runtime contract registry consistency. Execution activation remains out of scope and execution_allowed=False remains invariant.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "69C validates invocation prerequisites only; execution activation remains out of scope.",
+      "execution_allowed=False remains mandatory throughout 69C.",
+      "No runtime invocation, prompt execution, or write authorization is introduced by 69C."
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69B",
+    "supersedes_lineage_id": "SLR-69B-001"
   }
 ]

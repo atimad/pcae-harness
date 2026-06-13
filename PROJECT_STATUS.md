@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69B: Approval Store MVP (BR-005 Execution Governance Activation).
+Phase 69C: Invocation Contract Validation (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 
@@ -81,6 +81,20 @@ roadmap guidance must remain coherent. When they drift, run
 `pcae status coherence` to surface stale references.
 
 ## Current State
+
+PCAE has activated Phase 69C: Invocation Contract Validation on BR-005. This
+phase is limited to approved-agent validation (gep-gate-006),
+invocation-contract availability (gep-gate-007), codex-local contract
+verification, claude-local contract verification, and runtime contract registry
+consistency. Execution remains non-active: `execution_allowed=False` is
+preserved, runtime invocation remains disabled, and human review remains
+required.
+PCAE can now persist explicit `approved_agents` with
+`pcae approval-store write --approved-agent <id>` and validate selected-agent
+approval plus codex-local/claude-local invocation contract consistency with
+`pcae invocation-contract-validation` and `--json`. Validation is read-only:
+missing `approved_agents` blocks legacy artifacts honestly, authorization may
+advance only to `conditionally_authorized`, and execution remains disabled.
 
 PCAE implements strategic decision continuity through the append-only
 `.pcae/strategic-lineage.json` registry. A fresh agent can inspect why Phase

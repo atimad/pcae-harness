@@ -14681,6 +14681,11 @@ def _apa_validate(artifact: dict) -> list[str]:
             errors.append("approved artifact requires non-empty approved_by")
         if not artifact.get("approved_at"):
             errors.append("approved artifact requires non-empty approved_at")
+        approved_agents = artifact.get("approved_agents")
+        if not isinstance(approved_agents, list) or not approved_agents:
+            errors.append("approved artifact requires non-empty approved_agents")
+        elif any(not isinstance(agent_id, str) or not agent_id.strip() for agent_id in approved_agents):
+            errors.append("approved artifact requires approved_agents to contain non-empty strings")
     vs = artifact.get("validation_snapshot")
     if not isinstance(vs, dict) or not vs:
         errors.append("validation_snapshot must be a non-empty dict")
@@ -14727,6 +14732,259 @@ def lookup_approved_prompt_artifact(root: HarnessPath, prompt_id: str) -> dict |
         if record.get("approval_state") == "approved" and not record.get("superseded_by"):
             return record
     return None
+
+
+# ---------------------------------------------------------------------------
+# Phase 69C — Invocation Contract Validation
+# ---------------------------------------------------------------------------
+
+INVOCATION_CONTRACT_VALIDATION_ADVISORY = (
+    "Invocation contract validation is read-only; no runtimes are invoked and "
+    "execution_allowed remains False."
+)
+
+_IVCV_SUPPORTED_SELECTED_AGENTS: tuple[str, ...] = ("codex-local", "claude-local")
+_IVCV_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "contract_validation_is_read_only": True,
+    "selected_agent_mismatch_blocks_authorization": True,
+    "missing_contract_blocks_authorization": True,
+    "invalid_contract_blocks_authorization": True,
+    "contract_validation_does_not_execute": True,
+    "contract_validation_does_not_select_runtime": True,
+    "approved_agents_required_for_gate_006": True,
+}
+
+
+def _ivcv_normalize_selected_agents(selected_agents: list[str] | tuple[str, ...]) -> list[str]:
+    if not selected_agents:
+        raise ValueError("At least one --selected-agent is required.")
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for agent_id in selected_agents:
+        if agent_id not in _IVCV_SUPPORTED_SELECTED_AGENTS:
+            raise ValueError(
+                "69C scope only supports codex-local and claude-local selected agents."
+            )
+        if agent_id not in seen:
+            seen.add(agent_id)
+            normalized.append(agent_id)
+    return normalized
+
+
+def _ivcv_find_invocation_contract(agent_id: str) -> dict | None:
+    for contract in _ICONV_VALIDATED_CONTRACTS:
+        if contract.get("runtime_id") == agent_id:
+            return dict(contract)
+    return None
+
+
+def _ivcv_find_runtime_contract(agent_id: str) -> dict | None:
+    for contract in _RCV_RUNTIME_CONTRACTS:
+        if contract.get("runtime_id") == agent_id:
+            return dict(contract)
+    return None
+
+
+def _ivcv_validate_gate_006(
+    artifact: dict | None,
+    selected_agents: list[str],
+) -> dict:
+    if artifact is None:
+        return {
+            "gate_id": "gep-gate-006",
+            "gate": "selected_agents_approved",
+            "status": "blocked",
+            "reason": "approved_prompt_artifact_missing",
+            "rationale": "No ApprovedPromptArtifact was found for the selected prompt.",
+            "required": True,
+        }
+
+    approved_agents = artifact.get("approved_agents")
+    if approved_agents is None:
+        return {
+            "gate_id": "gep-gate-006",
+            "gate": "selected_agents_approved",
+            "status": "blocked",
+            "reason": "approved_agents_missing",
+            "rationale": (
+                "Legacy artifact without approved_agents cannot satisfy selected agent approval."
+            ),
+            "required": True,
+        }
+
+    if (
+        not isinstance(approved_agents, list)
+        or not approved_agents
+        or any(not isinstance(agent_id, str) or not agent_id.strip() for agent_id in approved_agents)
+    ):
+        return {
+            "gate_id": "gep-gate-006",
+            "gate": "selected_agents_approved",
+            "status": "blocked",
+            "reason": "approved_agents_invalid",
+            "rationale": "ApprovedPromptArtifact.approved_agents must be a non-empty list of agent IDs.",
+            "required": True,
+        }
+
+    approved_set = {agent_id.strip() for agent_id in approved_agents}
+    missing_agents = [agent_id for agent_id in selected_agents if agent_id not in approved_set]
+    if missing_agents:
+        return {
+            "gate_id": "gep-gate-006",
+            "gate": "selected_agents_approved",
+            "status": "blocked",
+            "reason": "selected_agents_not_fully_approved",
+            "rationale": (
+                "Selected agents are not fully covered by ApprovedPromptArtifact.approved_agents: "
+                + ", ".join(missing_agents)
+            ),
+            "required": True,
+        }
+
+    return {
+        "gate_id": "gep-gate-006",
+        "gate": "selected_agents_approved",
+        "status": "satisfied",
+        "reason": "selected_agents_approved",
+        "rationale": "All selected agents are explicitly listed in ApprovedPromptArtifact.approved_agents.",
+        "required": True,
+    }
+
+
+def _ivcv_validate_invocation_contract(contract: dict | None, agent_id: str) -> list[str]:
+    if contract is None:
+        return ["missing_invocation_contract"]
+
+    blockers: list[str] = []
+    if contract.get("runtime_id") != agent_id:
+        blockers.append("invocation_contract_runtime_id_mismatch")
+    if contract.get("status") != "validated":
+        blockers.append("invocation_contract_not_validated")
+
+    read_only = contract.get("read_only")
+    if not isinstance(read_only, dict):
+        blockers.append("missing_read_only_contract")
+    else:
+        if not isinstance(read_only.get("command"), str) or not read_only.get("command"):
+            blockers.append("read_only_command_missing")
+        if read_only.get("mode") != "read_only":
+            blockers.append("read_only_mode_invalid")
+        if read_only.get("writable_allowed") is not False:
+            blockers.append("read_only_contract_not_read_only")
+
+    writable = contract.get("writable")
+    if not isinstance(writable, dict):
+        blockers.append("missing_writable_contract")
+    else:
+        if not isinstance(writable.get("command"), str) or not writable.get("command"):
+            blockers.append("writable_command_missing")
+        if writable.get("mode") != "writable":
+            blockers.append("writable_mode_invalid")
+        if writable.get("writable_allowed") is not True:
+            blockers.append("writable_contract_invalid")
+
+    return blockers
+
+
+def _ivcv_validate_runtime_contract(contract: dict | None, agent_id: str) -> list[str]:
+    if contract is None:
+        return ["missing_runtime_contract"]
+
+    blockers: list[str] = []
+    if contract.get("runtime_id") != agent_id:
+        blockers.append("runtime_contract_runtime_id_mismatch")
+    if contract.get("readonly_supported") is not True:
+        blockers.append("runtime_contract_readonly_unsupported")
+    return blockers
+
+
+def build_invocation_contract_validation(
+    root: HarnessPath,
+    prompt_id: str,
+    selected_agents: list[str] | tuple[str, ...],
+) -> dict:
+    normalized_agents = _ivcv_normalize_selected_agents(selected_agents)
+    artifact = lookup_approved_prompt_artifact(root, prompt_id)
+    gate_006 = _ivcv_validate_gate_006(artifact, normalized_agents)
+
+    agent_results: list[dict] = []
+    gate_007_blockers: list[str] = []
+    for agent_id in normalized_agents:
+        invocation_contract = _ivcv_find_invocation_contract(agent_id)
+        runtime_contract = _ivcv_find_runtime_contract(agent_id)
+        invocation_blockers = _ivcv_validate_invocation_contract(invocation_contract, agent_id)
+        runtime_blockers = _ivcv_validate_runtime_contract(runtime_contract, agent_id)
+        blockers = invocation_blockers + runtime_blockers
+        if blockers:
+            gate_007_blockers.extend(f"{agent_id}:{blocker}" for blocker in blockers)
+        agent_results.append(
+            {
+                "agent_id": agent_id,
+                "invocation_contract_present": invocation_contract is not None,
+                "runtime_contract_present": runtime_contract is not None,
+                "invocation_contract_runtime_id": (
+                    invocation_contract.get("runtime_id") if invocation_contract else None
+                ),
+                "runtime_contract_runtime_id": (
+                    runtime_contract.get("runtime_id") if runtime_contract else None
+                ),
+                "read_only_supported": (
+                    runtime_contract.get("readonly_supported") if runtime_contract else None
+                ),
+                "status": "satisfied" if not blockers else "blocked",
+                "blocking_reasons": blockers,
+            }
+        )
+
+    if gate_007_blockers:
+        gate_007 = {
+            "gate_id": "gep-gate-007",
+            "gate": "invocation_contracts_available",
+            "status": "blocked",
+            "reason": gate_007_blockers[0].split(":", 1)[1],
+            "rationale": (
+                "Selected agents do not all have structurally valid and registry-consistent "
+                "invocation contracts: " + ", ".join(gate_007_blockers)
+            ),
+            "required": True,
+        }
+    else:
+        gate_007 = {
+            "gate_id": "gep-gate-007",
+            "gate": "invocation_contracts_available",
+            "status": "satisfied",
+            "reason": "selected_agent_invocation_contracts_valid",
+            "rationale": (
+                "All selected agents have valid invocation contracts and matching runtime "
+                "contract records with read-only support."
+            ),
+            "required": True,
+        }
+
+    if gate_006["status"] == "satisfied" and gate_007["status"] == "satisfied":
+        authorization_status = "conditionally_authorized"
+    else:
+        authorization_status = "blocked"
+
+    validation_id = f"ivcv-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    return {
+        "summary": {
+            "validation_id": validation_id,
+            "prompt_id": prompt_id,
+            "selected_agents": list(normalized_agents),
+            "gate_006_status": gate_006["status"],
+            "gate_007_status": gate_007["status"],
+            "authorization_status": authorization_status,
+            "execution_allowed": False,
+            "human_review_required": True,
+        },
+        "approved_prompt_artifact_found": artifact is not None,
+        "gate_results": [gate_006, gate_007],
+        "selected_agent_results": agent_results,
+        "governance_boundaries": dict(_IVCV_GOVERNANCE_BOUNDARIES),
+        "advisory": INVOCATION_CONTRACT_VALIDATION_ADVISORY,
+    }
 
 
 LIVE_EXECUTION_READINESS_ADVISORY = (
@@ -69497,6 +69755,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "status": "implemented",
         "commands": ["approval-store"],
         "dependencies": ["runtime_activation_architecture_review"],
+        "successor_capabilities": ["invocation_contract_validation"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Invocation Contract Validation",
+        "implemented_phase": "69C",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+        ],
+        "dependencies": ["approval_store_mvp"],
         "successor_capabilities": [],
     },
 )
@@ -70452,8 +70722,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69B",
         "phase_title": "Approval Store MVP",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69A",
+        "successor": "69C",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69C",
+        "phase_title": "Invocation Contract Validation",
+        "status": "active",
+        "predecessor": "69B",
         "successor": "",
         "superseded_by": "",
     },
@@ -71440,7 +71719,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "runtime_activation_architecture_review",
         ],
-        "successors": [],
+        "successors": ["invocation_contract_validation"],
         "aliases": [],
         "contribution": (
             "implements ApprovedPromptArtifact persistent storage (_APA_STORE_DIR, "
@@ -71449,6 +71728,29 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "authorization_status advances to conditionally_authorized when approval "
             "gates satisfied; execution_allowed=False invariant preserved; "
             "pcae approval-store write CLI surface added"
+        ),
+    },
+    {
+        "capability_name": "Invocation Contract Validation",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69C",
+        "status": "implemented",
+        "commands": [
+            "pcae approval-store write --prompt-id <id> --approved-by <human> --approved-agent <id>",
+            "pcae invocation-contract-validation --prompt-id <id> --selected-agent <id>",
+            "pcae invocation-contract-validation --prompt-id <id> --selected-agent <id> --json",
+        ],
+        "dependencies": [
+            "approval_store_mvp",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "hardens governed execution activation readiness by limiting scope to "
+            "approved-agent validation (gep-gate-006), invocation-contract availability "
+            "(gep-gate-007), codex-local contract verification, claude-local contract "
+            "verification, and runtime contract registry consistency; execution_allowed=False "
+            "remains unchanged and no runtime invocation is introduced"
         ),
     },
     {
@@ -73697,7 +73999,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69B",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69B-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69B",
@@ -73705,7 +74007,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69B",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69B-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69B",
@@ -73713,10 +74015,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69B",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69B-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69B",
+    },
+    {
+        "phase_id": "69C",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69C-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69C",
+    },
+    {
+        "phase_id": "69C",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69C-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69C",
+    },
+    {
+        "phase_id": "69C",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69C-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69C",
     },
 )
 
@@ -79579,7 +79905,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69B",
+        "current_phase": "69C",
         "approved_by": "",
         "approved_at": "",
     },
@@ -80212,6 +80538,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "implements ApprovedPromptArtifact persistent storage and wires gep-gate-001 "
             "and gep-gate-005; advances authorization_status to conditionally_authorized "
             "when human approval gates are satisfied; execution_allowed=False preserved"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "invocation_contract_validation",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "validates approved agents and invocation contracts for codex-local and "
+            "claude-local, verifies runtime contract registry consistency, and keeps "
+            "execution_allowed=False while execution activation remains out of scope"
         ),
         "decision_id": "",
         "recommendation_id": "",

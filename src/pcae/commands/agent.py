@@ -102,6 +102,8 @@ from pcae.core.agent import (
     store_approved_prompt_artifact,
     lookup_approved_prompt_artifact,
     APPROVAL_STORE_ADVISORY,
+    build_invocation_contract_validation,
+    INVOCATION_CONTRACT_VALIDATION_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4564,6 +4566,7 @@ def run_approval_store_write(args: argparse.Namespace) -> int:
         "approval_state": "approved",
         "approved_by": args.approved_by,
         "approved_at": datetime.now(timezone.utc).isoformat(),
+        "approved_agents": list(args.approved_agents or []),
         "validation_snapshot": {"snapshot_status": "not_populated_in_69b_mvt"},
         "governance_snapshot": {"snapshot_status": "not_populated_in_69b_mvt"},
     }
@@ -4577,6 +4580,42 @@ def run_approval_store_write(args: argparse.Namespace) -> int:
             for err in result["errors"]:
                 print(f"Error: {err}")
     return 0 if result["stored"] else 1
+
+
+def run_invocation_contract_validation(args: argparse.Namespace) -> int:
+    data = build_invocation_contract_validation(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        list(args.selected_agents or []),
+    )
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        summary = data["summary"]
+        print("Invocation contract validation")
+        print(f"Validation: {summary['validation_id']}")
+        print(f"Prompt: {summary['prompt_id']}")
+        print(f"Selected agents: {', '.join(summary['selected_agents'])}")
+        print()
+        print("Gate results:")
+        for gate in data["gate_results"]:
+            print(f"  {gate['gate_id']} {gate['gate']}: {gate['status']}")
+            print(f"    reason: {gate['reason']}")
+            print(f"    {gate['rationale']}")
+        print()
+        print("Selected agent checks:")
+        for result in data["selected_agent_results"]:
+            print(f"  {result['agent_id']}: {result['status']}")
+            if result["blocking_reasons"]:
+                for blocker in result["blocking_reasons"]:
+                    print(f"    - {blocker}")
+        print()
+        print("Authorization:")
+        print(f"  status: {summary['authorization_status']}")
+        print(f"  execution_allowed: {summary['execution_allowed']}")
+        print()
+        print(data["advisory"])
+    return 0
 
 
 def run_live_execution_readiness(args: argparse.Namespace) -> int:
