@@ -99,6 +99,9 @@ from pcae.core.agent import (
     HUMAN_AGENT_EXECUTION_DESIGN_ADVISORY,
     build_governed_execution_pilot,
     GOVERNED_EXECUTION_PILOT_ADVISORY,
+    store_approved_prompt_artifact,
+    lookup_approved_prompt_artifact,
+    APPROVAL_STORE_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4489,7 +4492,7 @@ def run_human_agent_execution_design(args: argparse.Namespace) -> int:
 
 
 def run_governed_execution_pilot(args: argparse.Namespace) -> int:
-    data = build_governed_execution_pilot()
+    data = build_governed_execution_pilot(HarnessPath.cwd())
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
@@ -4551,6 +4554,29 @@ def run_governed_execution_pilot(args: argparse.Namespace) -> int:
         print()
         print(data["advisory"])
     return 0
+
+
+def run_approval_store_write(args: argparse.Namespace) -> int:
+    from datetime import datetime, timezone
+
+    artifact = {
+        "prompt_id": args.prompt_id,
+        "approval_state": "approved",
+        "approved_by": args.approved_by,
+        "approved_at": datetime.now(timezone.utc).isoformat(),
+        "validation_snapshot": {"snapshot_status": "not_populated_in_69b_mvt"},
+        "governance_snapshot": {"snapshot_status": "not_populated_in_69b_mvt"},
+    }
+    result = store_approved_prompt_artifact(HarnessPath.cwd(), artifact)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        if result["stored"]:
+            print(f"Stored: {result['path']}")
+        else:
+            for err in result["errors"]:
+                print(f"Error: {err}")
+    return 0 if result["stored"] else 1
 
 
 def run_live_execution_readiness(args: argparse.Namespace) -> int:

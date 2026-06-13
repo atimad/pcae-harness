@@ -1,18 +1,14 @@
 {
   "active_task": {
-    "id": "20260612-2109-69a-runtime-activation-architecture-review",
-    "title": "69A Runtime Activation Architecture Review"
+    "id": "20260613-0757-69b-approval-store-mvp",
+    "title": "69B Approval Store MVP"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69A Runtime Activation Architecture Review",
+  "current_objective": "69B Approval Store MVP",
   "git": {
     "branch": "main",
     "changed_files": [
-      {
-        "path": ".pcae/strategic-lineage.json",
-        "status": " M"
-      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
@@ -22,22 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260612-2035-br-004-branch-closure.md",
+        "path": "tasks/active/20260612-2109-69a-runtime-activation-architecture-review.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260612-2109-69a-runtime-activation-architecture-review.md",
+        "path": "tasks/active/20260613-0757-69b-approval-store-mvp.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260612-2035-br-004-branch-closure.md",
+        "path": "tasks/done/20260612-2109-69a-runtime-activation-architecture-review.md",
         "status": "??"
       }
     ],
-    "status_summary": "6 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260612-2035-br-004-branch-closure: BR-004 Branch Closure",
-  "next_recommended_step": "Continue active task 20260612-2109-69a-runtime-activation-architecture-review.",
-  "timestamp": "2026-06-12T19:09:33.618092+00:00",
+  "last_completed_step": "Completed task 20260612-2109-69a-runtime-activation-architecture-review: 69A Runtime Activation Architecture Review",
+  "next_recommended_step": "Continue active task 20260613-0757-69b-approval-store-mvp.",
+  "timestamp": "2026-06-13T05:57:40.165146+00:00",
   "warnings": []
 }

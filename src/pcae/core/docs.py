@@ -460,6 +460,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae governed-execution-pilot`
 - `pcae governed-execution-pilot --json`
 
+## approval-store
+
+- `pcae approval-store write --prompt-id <id> --approved-by <human>`
+- `pcae approval-store write --prompt-id <id> --approved-by <human> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

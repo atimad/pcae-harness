@@ -62,6 +62,7 @@ from pcae.commands.agent import (
     run_prompt_execution_dry_run,
     run_human_agent_execution_design,
     run_governed_execution_pilot,
+    run_approval_store_write,
     run_live_execution_readiness,
     run_execution_audit_design,
     run_execution_consensus_framework,
@@ -1916,6 +1917,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governed execution pilot output.",
     )
     governed_execution_pilot_parser.set_defaults(handler=run_governed_execution_pilot)
+
+    approval_store_parser = subparsers.add_parser(
+        "approval-store",
+        help="Manage ApprovedPromptArtifact persistent storage (Phase 69B).",
+    )
+    approval_store_subparsers = approval_store_parser.add_subparsers(dest="approval_store_command")
+    approval_store_write_parser = approval_store_subparsers.add_parser(
+        "write",
+        help="Write an approved prompt artifact to the store.",
+    )
+    approval_store_write_parser.add_argument(
+        "--prompt-id",
+        required=True,
+        help="Prompt identifier for the artifact.",
+    )
+    approval_store_write_parser.add_argument(
+        "--approved-by",
+        required=True,
+        help="Human approver identifier.",
+    )
+    approval_store_write_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    approval_store_write_parser.set_defaults(handler=run_approval_store_write)
 
     live_execution_readiness_parser = subparsers.add_parser(
         "live-execution-readiness",

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69A: Runtime Activation Architecture Review (BR-005 Execution Governance Activation).
+Phase 69B: Approval Store MVP (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

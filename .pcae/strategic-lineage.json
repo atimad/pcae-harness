@@ -376,7 +376,7 @@
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
     "lineage_id": "SLR-69A-001",
-    "lineage_status": "approved",
+    "lineage_status": "superseded",
     "lineage_timestamp": "2026-06-12T21:09:00+00:00",
     "objective_ids": [
       "OBJ-001",
@@ -394,5 +394,41 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "68D",
     "supersedes_lineage_id": "SLR-68D-001"
+  },
+  {
+    "activated_phase_id": "69B",
+    "activation_event_id": "2026-06-13T07:57:40+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-69B-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-13T07:57:40+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69A",
+    "rationale": "69A identified that gep-gate-001 (prompt_approved) was permanently blocked because no ApprovedPromptArtifact runtime store existed. 69B implements the MVT approval store: persistent JSON storage under .pcae/approvals/, _apa_validate enforcing approval_state, approved_by, approved_at, and snapshot completeness, and CLI surface pcae approval-store write. gep-gate-001 and gep-gate-005 are wired to the live store; authorization_status advances to conditionally_authorized when both human-approval gates satisfy. execution_allowed=False invariant preserved throughout.",
+    "recommendation": "approve_with_changes",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "69B clears approval-storage blockers only. Execution authorization remains incomplete: invocation contract validation (gep-gate-007) and approved-agent validation (gep-gate-006 partial) are unresolved. These are deferred to a future phase (target: 69C).",
+      "Execution activation remains out of scope; 69B is an authorization-foundation phase, not an execution phase.",
+      "Approval index, supersession mutation, and approval history queries deferred.",
+      "Full validation_snapshot and governance_snapshot population deferred (placeholder used).",
+      "Provenance event integration deferred."
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69A",
+    "supersedes_lineage_id": "SLR-69A-001"
   }
 ]

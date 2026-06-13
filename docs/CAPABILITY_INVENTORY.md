@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-13T00:22:29.419502+00:00
+Generated: 2026-06-13T06:11:07.251775+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 65
-Implemented: 62
+Total capabilities: 66
+Implemented: 64
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 0
@@ -79,7 +79,8 @@ Assessment status: inventory_complete
 | Challenge Attention Rendering Integration | strategic_governance | 68B | implemented | (none) | challenge_attention_architecture | challenge_attention_effectiveness_review |
 | Challenge Attention Effectiveness Review | strategic_governance | 68C | implemented | (none) | challenge_attention_rendering_integration | challenge_attention_rebalancing |
 | Challenge Attention Rebalancing | strategic_governance | 68D | implemented | (none) | challenge_attention_effectiveness_review | runtime_activation_architecture_review |
-| Runtime Activation Architecture Review | execution_governance | 69A | partially_implemented | (none) | challenge_attention_rebalancing | (none) |
+| Runtime Activation Architecture Review | execution_governance | 69A | implemented | (none) | challenge_attention_rebalancing | approval_store_mvp |
+| Approval Store MVP | execution_governance | 69B | implemented | approval-store | runtime_activation_architecture_review | (none) |
 
 ## Governance Notes
 
@@ -92,4 +93,4 @@ Assessment status: inventory_complete
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=65. implemented_count=62. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=66. implemented_count=64. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*

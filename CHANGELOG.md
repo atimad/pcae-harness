@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from 69A Runtime Activation Architecture Review to 69B Approval Store MVP; session refreshed and governance continuity revalidated.
 - Transitioned active task from BR-004 Branch Closure to 69A Runtime Activation Architecture Review; session refreshed and governance continuity revalidated.
 - Transitioned active task from Persistent Attention Rebalancing Architecture to BR-004 Branch Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Challenge Attention Effectiveness Review to Persistent Attention Rebalancing Architecture; session refreshed and governance continuity revalidated.

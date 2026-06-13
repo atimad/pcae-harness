@@ -14468,7 +14468,7 @@ _GEP_FUTURE_EVOLUTION: tuple[dict, ...] = (
 )
 
 
-def build_governed_execution_pilot() -> dict:
+def build_governed_execution_pilot(root: "HarnessPath | None" = None) -> dict:
     """Simulate the governed prompt execution workflow. Read-only; no prompts executed."""
     generated_at = datetime.now(timezone.utc).isoformat()
     pilot_id = f"gep-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
@@ -14482,12 +14482,45 @@ def build_governed_execution_pilot() -> dict:
     warnings = [dict(w) for w in _GEP_WARNINGS]
     recommendations = [dict(r) for r in _GEP_RECOMMENDATIONS]
 
+    # 69B: Wire gate-001 and gate-005 against the live approval store
+    _pilot_prompt_id = "appp-canonical-dry-run-candidate"
+    _approved_artifact: "dict | None" = None
+    if root is not None:
+        _approved_artifact = lookup_approved_prompt_artifact(root, _pilot_prompt_id)
+
+    for _gate in governance_gate_results:
+        if _gate["gate_id"] == "gep-gate-001":
+            if _approved_artifact is not None:
+                _gate["status"] = "satisfied"
+                _gate["rationale"] = "ApprovedPromptArtifact found in approval store."
+        elif _gate["gate_id"] == "gep-gate-005":
+            if _approved_artifact is not None:
+                if _approved_artifact.get("approved_by") and _approved_artifact.get("approved_at"):
+                    _gate["status"] = "satisfied"
+                    _gate["rationale"] = "Human approval recorded (approved_by and approved_at present)."
+                else:
+                    _gate["status"] = "blocked"
+                    _gate["rationale"] = (
+                        "Artifact found but approved_by or approved_at is missing."
+                    )
+
+    # When the two human-approval gates are satisfied, authorization advances to
+    # conditionally_authorized even if technical gates (e.g. gate-007) remain blocked.
+    gate_by_id = {g["gate_id"]: g for g in governance_gate_results}
+    approval_gates_satisfied = (
+        gate_by_id.get("gep-gate-001", {}).get("status") == "satisfied"
+        and gate_by_id.get("gep-gate-005", {}).get("status") == "satisfied"
+    )
+
     blocked_gates = [g for g in governance_gate_results if g["status"] == "blocked"]
     pending_gates = [g for g in governance_gate_results if g["status"] == "pending"]
     partial_gates = [g for g in governance_gate_results if g["status"] == "partially_satisfied"]
     advisory_gates = [g for g in governance_gate_results if g["status"] == "advisory_only"]
 
-    if blocked_gates or pending_gates:
+    if approval_gates_satisfied:
+        governance_status = "partial"
+        authorization_status = "conditionally_authorized"
+    elif blocked_gates or pending_gates:
         governance_status = "blocked"
         authorization_status = "blocked"
     elif partial_gates:
@@ -14613,6 +14646,87 @@ def build_governed_execution_pilot() -> dict:
         "human_review_required": True,
         "advisory": GOVERNED_EXECUTION_PILOT_ADVISORY,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69B — Approval Store MVP
+# ---------------------------------------------------------------------------
+
+_APA_STORE_DIR: Path = Path(".pcae") / "approvals"
+_APA_VALID_STATES: frozenset[str] = frozenset({"approved", "pending", "denied"})
+_APA_PHASE_ID: str = "69B"
+_APA_GOVERNANCE_BOUNDARIES: dict = {
+    "auto_approval_allowed": False,
+    "execution_allowed": False,
+    "approval_satisfies_execution_authorization": False,
+    "gate_check_is_read_only": True,
+    "artifact_deletion_allowed": False,
+    "artifact_mutation_after_approval": False,
+}
+APPROVAL_STORE_ADVISORY: str = (
+    "Approval store is read/write for artifact persistence; no execution is triggered."
+)
+
+
+def _apa_validate(artifact: dict) -> list[str]:
+    errors: list[str] = []
+    state = artifact.get("approval_state", "")
+    if state not in _APA_VALID_STATES:
+        errors.append(
+            f"invalid approval_state: {state!r}; "
+            f"must be one of {sorted(_APA_VALID_STATES)}"
+        )
+    if state == "approved":
+        if not artifact.get("approved_by"):
+            errors.append("approved artifact requires non-empty approved_by")
+        if not artifact.get("approved_at"):
+            errors.append("approved artifact requires non-empty approved_at")
+    vs = artifact.get("validation_snapshot")
+    if not isinstance(vs, dict) or not vs:
+        errors.append("validation_snapshot must be a non-empty dict")
+    gs = artifact.get("governance_snapshot")
+    if not isinstance(gs, dict) or not gs:
+        errors.append("governance_snapshot must be a non-empty dict")
+    return errors
+
+
+def store_approved_prompt_artifact(root: HarnessPath, artifact: dict) -> dict:
+    errors = _apa_validate(artifact)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _APA_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    prompt_id = artifact["prompt_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    filename = f"{prompt_id}-{ts}.json"
+    path = store_dir / filename
+    record = dict(artifact)
+    record["stored_at"] = datetime.now(timezone.utc).isoformat()
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(record, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    return {
+        "stored": True,
+        "errors": [],
+        "path": str(path.relative_to(root.path)),
+    }
+
+
+def lookup_approved_prompt_artifact(root: HarnessPath, prompt_id: str) -> dict | None:
+    store_dir = root.path / _APA_STORE_DIR
+    if not store_dir.exists():
+        return None
+    candidates = sorted(
+        store_dir.glob(f"{prompt_id}-*.json"),
+        key=lambda p: p.name,
+        reverse=True,
+    )
+    for cand_path in candidates:
+        with cand_path.open(encoding="utf-8") as fh:
+            record = json.load(fh)
+        if record.get("approval_state") == "approved" and not record.get("superseded_by"):
+            return record
+    return None
 
 
 LIVE_EXECUTION_READINESS_ADVISORY = (
@@ -69371,9 +69485,18 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_domain": "execution_governance",
         "capability_name": "Runtime Activation Architecture Review",
         "implemented_phase": "69A",
-        "status": "partially_implemented",
+        "status": "implemented",
         "commands": [],
         "dependencies": ["challenge_attention_rebalancing"],
+        "successor_capabilities": ["approval_store_mvp"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Approval Store MVP",
+        "implemented_phase": "69B",
+        "status": "implemented",
+        "commands": ["approval-store"],
+        "dependencies": ["runtime_activation_architecture_review"],
         "successor_capabilities": [],
     },
 )
@@ -70320,8 +70443,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69A",
         "phase_title": "Runtime Activation Architecture Review",
-        "status": "active",
+        "status": "completed",
         "predecessor": "68D",
+        "successor": "69B",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69B",
+        "phase_title": "Approval Store MVP",
+        "status": "active",
+        "predecessor": "69A",
         "successor": "",
         "superseded_by": "",
     },
@@ -71285,18 +71417,38 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "capability_name": "Runtime Activation Architecture Review",
         "capability_domain": "execution_governance",
         "implemented_phase": "69A",
-        "status": "partially_implemented",
+        "status": "implemented",
         "commands": [],
         "dependencies": [
             "challenge_attention_rebalancing",
         ],
-        "successors": [],
+        "successors": ["approval_store_mvp"],
         "aliases": [],
         "contribution": (
             "BR-005 opening phase: architecture review determining what prevents PCAE from "
             "governing actual execution; reviews Controlled Runtime Execution Pilot (62A) "
             "dormancy conditions; identifies activation criteria and governance gaps; "
             "design-only phase; execution_allowed=False; no runtime behavior introduced"
+        ),
+    },
+    {
+        "capability_name": "Approval Store MVP",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69B",
+        "status": "implemented",
+        "commands": ["approval-store"],
+        "dependencies": [
+            "runtime_activation_architecture_review",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "implements ApprovedPromptArtifact persistent storage (_APA_STORE_DIR, "
+            "_apa_validate, store_approved_prompt_artifact, lookup_approved_prompt_artifact); "
+            "wires gep-gate-001 and gep-gate-005 in build_governed_execution_pilot; "
+            "authorization_status advances to conditionally_authorized when approval "
+            "gates satisfied; execution_allowed=False invariant preserved; "
+            "pcae approval-store write CLI surface added"
         ),
     },
     {
@@ -73521,7 +73673,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69A",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69A-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69A",
@@ -73529,7 +73681,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69A",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69A-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69A",
@@ -73537,10 +73689,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69A",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69A-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69A",
+    },
+    {
+        "phase_id": "69B",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69B-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69B",
+    },
+    {
+        "phase_id": "69B",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69B-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69B",
+    },
+    {
+        "phase_id": "69B",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69B-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69B",
     },
 )
 
@@ -79403,7 +79579,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69A",
+        "current_phase": "69B",
         "approved_by": "",
         "approved_at": "",
     },
@@ -80024,6 +80200,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "opens BR-005 Execution Governance Activation branch; reviews what prevents "
             "PCAE from governing actual execution; identifies activation criteria for "
             "dormant Controlled Runtime Execution Pilot (62A); design-only"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "approval_store_mvp",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "implements ApprovedPromptArtifact persistent storage and wires gep-gate-001 "
+            "and gep-gate-005; advances authorization_status to conditionally_authorized "
+            "when human approval gates are satisfied; execution_allowed=False preserved"
         ),
         "decision_id": "",
         "recommendation_id": "",

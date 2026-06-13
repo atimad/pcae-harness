@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260612-2109-69a-runtime-activation-architecture-review
+20260613-0757-69b-approval-store-mvp
 
 ## Title
 
-69A Runtime Activation Architecture Review
+69B Approval Store MVP
 
 ## Status
 
@@ -18,11 +18,12 @@ implementation
 
 ## Goal
 
-69A Runtime Activation Architecture Review
+69B Approval Store MVP
 
 ## Allowed Files
 
 - .pcae/session.json
+- .pcae/approvals/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -33,10 +34,14 @@ implementation
 - .pcae/strategic-lineage.json
 - .pcae/provenance-history.json
 - src/pcae/core/agent.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
+- src/pcae/core/docs.py
 - tests/test_agent.py
 - tests/test_strategic_lineage.py
-- docs/ROADMAP_REGISTRY.md
+- docs/COMMANDS.md
 - docs/CAPABILITY_INVENTORY.md
+- docs/ROADMAP_REGISTRY.md
 
 ## Forbidden Files
 
@@ -67,8 +72,14 @@ advisory
 
 - No runtime invocation
 - No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
+- No execution authorization (execution_allowed=False invariant)
+- No approval index or supersession mutation
+- No provenance event integration
+- No approval-store list/show commands
+- No full snapshot population
+- No execution activation
+- No invocation contract validation
+- No multi-runtime routing
 - No commit
 - No push
 - No rollback
@@ -86,4 +97,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-12T21:09:33.604123+02:00
+2026-06-13T07:57:40.143148+02:00
