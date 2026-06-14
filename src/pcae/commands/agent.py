@@ -110,6 +110,11 @@ from pcae.core.agent import (
     store_authorization_artifact,
     lookup_authorization_artifact,
     AUTHORIZATION_STORE_ADVISORY,
+    create_execution_audit_record,
+    lookup_execution_audit_record,
+    lookup_execution_audits_for_prompt,
+    lookup_execution_audits_for_authorization,
+    EXECUTION_AUDIT_RECORD_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4677,6 +4682,67 @@ def run_authorization_store_write(args: argparse.Namespace) -> int:
         print()
         print(AUTHORIZATION_STORE_ADVISORY)
     return 0 if result["authorization_state"] == "authorized" else 1
+
+
+def run_audit_record_create(args: argparse.Namespace) -> int:
+    result = create_execution_audit_record(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        args.authorization_id,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print("Audit record")
+        print(f"Prompt: {result['prompt_id']}")
+        print(f"Authorization: {result['authorization_id']}")
+        if result["stored"]:
+            print(f"Audit ID: {result['audit_id']}")
+            print(f"Path: {result['path']}")
+        else:
+            print("Blockers:")
+            for b in result.get("blockers", result.get("errors", [])):
+                print(f"  - {b}")
+        print()
+        print(f"execution_allowed: {result['execution_allowed']}")
+        print(f"execution_occurred: {result['execution_occurred']}")
+        print()
+        print(EXECUTION_AUDIT_RECORD_ADVISORY)
+    return 0 if result["stored"] else 1
+
+
+def run_audit_record_show(args: argparse.Namespace) -> int:
+    result = lookup_execution_audit_record(HarnessPath.cwd(), args.audit_id)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True) if result else "null")
+    else:
+        if result is None:
+            print(f"No audit record found for audit_id: {args.audit_id}")
+        else:
+            print(f"Audit ID: {result['audit_id']}")
+            print(f"Prompt: {result['prompt_id']}")
+            print(f"Authorization: {result['authorization_id']}")
+            print(f"Pathway: {result['pathway_id']}")
+            print(f"execution_allowed: {result['execution_allowed']}")
+            print(f"execution_occurred: {result['execution_occurred']}")
+    return 0 if result is not None else 1
+
+
+def run_audit_record_list(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    if args.prompt_id:
+        records = lookup_execution_audits_for_prompt(root, args.prompt_id)
+        label = f"prompt_id={args.prompt_id}"
+    else:
+        records = lookup_execution_audits_for_authorization(root, args.authorization_id)
+        label = f"authorization_id={args.authorization_id}"
+    if args.json:
+        print(json.dumps(records, indent=2, sort_keys=True))
+    else:
+        print(f"Audit records for {label}: {len(records)}")
+        for r in records:
+            print(f"  {r['audit_id']} — prompt={r['prompt_id']} auth={r['authorization_id']}")
+    return 0
 
 
 def run_live_execution_readiness(args: argparse.Namespace) -> int:

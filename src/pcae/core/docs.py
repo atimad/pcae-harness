@@ -480,6 +480,16 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id>`
 - `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id> --json`
 
+## audit-record
+
+- `pcae audit-record create --authorization-id <id> --prompt-id <id>`
+- `pcae audit-record create --authorization-id <id> --prompt-id <id> --json`
+- `pcae audit-record show --audit-id <id>`
+- `pcae audit-record show --audit-id <id> --json`
+- `pcae audit-record list --prompt-id <id>`
+- `pcae audit-record list --authorization-id <id>`
+- `pcae audit-record list --prompt-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

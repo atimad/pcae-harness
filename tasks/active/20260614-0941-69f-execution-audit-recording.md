@@ -30,10 +30,19 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/COMMANDS.md
+- docs/CAPABILITY_INVENTORY.md
+- docs/ROADMAP_REGISTRY.md
+- src/pcae/cli.py
+- src/pcae/commands/agent.py
+- src/pcae/core/agent.py
+- src/pcae/core/docs.py
+- tests/test_agent.py
+- tests/test_strategic_lineage.py
 
 ## Forbidden Files
 
-- TBD
+- none
 
 
 ## Allowed Zones

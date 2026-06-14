@@ -64,6 +64,9 @@ from pcae.commands.agent import (
     run_governed_execution_pilot,
     run_approval_store_write,
     run_authorization_store_write,
+    run_audit_record_create,
+    run_audit_record_show,
+    run_audit_record_list,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -1988,6 +1991,71 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     authorization_store_write_parser.set_defaults(handler=run_authorization_store_write)
+
+    audit_record_parser = subparsers.add_parser(
+        "audit-record",
+        help="Manage ExecutionAuditRecord persistent storage (Phase 69F).",
+    )
+    audit_record_subparsers = audit_record_parser.add_subparsers(dest="audit_record_command")
+
+    audit_record_create_parser = audit_record_subparsers.add_parser(
+        "create",
+        help="Create an ExecutionAuditRecord from an authorized execution candidate.",
+    )
+    audit_record_create_parser.add_argument(
+        "--authorization-id",
+        required=True,
+        help="Authorization artifact ID to audit.",
+    )
+    audit_record_create_parser.add_argument(
+        "--prompt-id",
+        required=True,
+        help="Prompt identifier associated with the authorization.",
+    )
+    audit_record_create_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    audit_record_create_parser.set_defaults(handler=run_audit_record_create)
+
+    audit_record_show_parser = audit_record_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionAuditRecord by audit_id.",
+    )
+    audit_record_show_parser.add_argument(
+        "--audit-id",
+        required=True,
+        help="Audit record ID to retrieve.",
+    )
+    audit_record_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    audit_record_show_parser.set_defaults(handler=run_audit_record_show)
+
+    audit_record_list_parser = audit_record_subparsers.add_parser(
+        "list",
+        help="List ExecutionAuditRecords by prompt_id or authorization_id.",
+    )
+    audit_record_list_group = audit_record_list_parser.add_mutually_exclusive_group(required=True)
+    audit_record_list_group.add_argument(
+        "--prompt-id",
+        default=None,
+        help="List audit records for this prompt.",
+    )
+    audit_record_list_group.add_argument(
+        "--authorization-id",
+        default=None,
+        help="List audit records for this authorization.",
+    )
+    audit_record_list_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    audit_record_list_parser.set_defaults(handler=run_audit_record_list)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

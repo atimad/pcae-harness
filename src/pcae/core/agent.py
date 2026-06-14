@@ -70060,6 +70060,22 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["authorization-store"],
         "dependencies": ["execution_pathway_integration"],
+        "successor_capabilities": ["execution_audit_recording"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Audit Recording",
+        "implemented_phase": "69F",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+            "authorization-store",
+            "audit-record",
+        ],
+        "introduced_commands": ["audit-record"],
+        "dependencies": ["execution_authorization_recording"],
         "successor_capabilities": [],
     },
 )
@@ -71042,8 +71058,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69E",
         "phase_title": "Authorization Recording",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69D",
+        "successor": "69F",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69F",
+        "phase_title": "Execution Audit Recording",
+        "status": "active",
+        "predecessor": "69E",
         "successor": "",
         "superseded_by": "",
     },
@@ -72098,7 +72123,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_pathway_integration",
         ],
-        "successors": [],
+        "successors": ["execution_audit_recording"],
         "aliases": [],
         "contribution": (
             "persists human authorization decisions for specific execution candidates; "
@@ -72107,6 +72132,31 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "gates pass and authorized_by is non-empty; duplicate active authorization "
             "is blocked; execution_allowed=False invariant preserved; "
             "authorization_is_execution=False enforced throughout"
+        ),
+    },
+    {
+        "capability_name": "Execution Audit Recording",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69F",
+        "status": "implemented",
+        "commands": [
+            "pcae audit-record create --authorization-id <id>",
+            "pcae audit-record create --authorization-id <id> --json",
+            "pcae audit-record show --audit-id <id>",
+            "pcae audit-record list --prompt-id <id>",
+            "pcae audit-record list --authorization-id <id>",
+        ],
+        "dependencies": [
+            "execution_authorization_recording",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "persists ExecutionAuditRecords to .pcae/audit/; "
+            "create_execution_audit_record requires a valid authorized authorization artifact; "
+            "completes the governance chain ApprovedPromptArtifact → ExecutionAuthorizationArtifact "
+            "→ ExecutionAuditRecord; execution_allowed=False and execution_occurred=False "
+            "invariants enforced throughout; audit_creation_is_not_execution=True"
         ),
     },
     {
@@ -74427,7 +74477,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69E",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69E-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69E",
@@ -74435,7 +74485,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69E",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69E-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69E",
@@ -74443,10 +74493,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69E",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69E-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69E",
+    },
+    {
+        "phase_id": "69F",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69F-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69F",
+    },
+    {
+        "phase_id": "69F",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69F-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69F",
+    },
+    {
+        "phase_id": "69F",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69F-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69F",
     },
 )
 
@@ -80309,7 +80383,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69E",
+        "current_phase": "69F",
         "approved_by": "",
         "approved_at": "",
     },
@@ -80981,6 +81055,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "satisfied and non-empty authorized_by before writing; duplicate active "
             "authorization blocked; execution_allowed=False and "
             "authorization_is_execution=False invariants preserved"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_audit_recording",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "persists ExecutionAuditRecords to .pcae/audit/; completes governance chain "
+            "ApprovedPromptArtifact → ExecutionAuthorizationArtifact → ExecutionAuditRecord; "
+            "creation requires valid authorized artifact; execution_allowed=False and "
+            "execution_occurred=False invariants enforced; audit_creation_is_not_execution=True"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -88534,3 +88621,219 @@ def _get_active_task_id(root: "HarnessPath") -> str:
     except Exception:
         pass
     return ""
+
+
+# ---------------------------------------------------------------------------
+# Phase 69F — Execution Audit Recording
+# ---------------------------------------------------------------------------
+
+EXECUTION_AUDIT_RECORD_ADVISORY: str = (
+    "Execution audit recording is write-only for governance evidence persistence; "
+    "no execution is triggered, execution_allowed remains False, and "
+    "execution_occurred is always False."
+)
+
+_EAR_STORE_DIR: Path = Path(".pcae") / "audit"
+_EAR_PHASE_ID: str = "69F"
+_EAR_AUDIT_VERSION: str = "1.0"
+_EAR_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "execution_occurred": False,
+    "audit_record_is_not_execution_record": True,
+    "audit_creation_is_not_execution": True,
+    "audit_creation_can_not_activate_runtime": True,
+    "audit_creation_can_not_modify_files_except_audit_store": True,
+    "audit_creation_requires_authorization": True,
+    "audit_creation_requires_human_governance": True,
+    "audit_creation_can_not_bypass_gates": True,
+    "audit_record_can_not_authorize_execution": True,
+    "audit_record_can_not_change_authorization_state": True,
+    "audit_record_can_not_change_prompt_approval": True,
+    "audit_record_retention_required": True,
+    "audit_record_deletion_allowed": False,
+}
+
+
+def _ear_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    if not record.get("audit_id"):
+        errors.append("audit_id must be non-empty")
+    if record.get("audit_type") != "readiness_evaluation":
+        errors.append("audit_type must be 'readiness_evaluation'")
+    if not record.get("prompt_id"):
+        errors.append("prompt_id must be non-empty")
+    if not record.get("authorization_id"):
+        errors.append("authorization_id must be non-empty")
+    if not record.get("pathway_id"):
+        errors.append("pathway_id must be non-empty")
+    selected_agents = record.get("selected_agents")
+    if not isinstance(selected_agents, list) or not selected_agents:
+        errors.append("selected_agents must be a non-empty list")
+    gate_snapshot = record.get("gate_snapshot")
+    if not isinstance(gate_snapshot, list) or not gate_snapshot:
+        errors.append("gate_snapshot must be a non-empty list")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed must be False")
+    if record.get("execution_occurred") is not False:
+        errors.append("execution_occurred must be False")
+    return errors
+
+
+def store_execution_audit_record(root: "HarnessPath", record: dict) -> dict:
+    errors = _ear_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    audit_id = record["audit_id"]
+    existing = lookup_execution_audit_record(root, audit_id)
+    if existing is not None:
+        return {
+            "stored": False,
+            "errors": [f"duplicate audit_id: {audit_id!r}"],
+            "path": None,
+        }
+    store_dir = root.path / _EAR_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    filename = f"{audit_id}-{ts}.json"
+    path = store_dir / filename
+    stored_record = dict(record)
+    stored_record["stored_at"] = datetime.now(timezone.utc).isoformat()
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(stored_record, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    return {
+        "stored": True,
+        "errors": [],
+        "path": str(path.relative_to(root.path)),
+    }
+
+
+def lookup_execution_audit_record(root: "HarnessPath", audit_id: str) -> dict | None:
+    store_dir = root.path / _EAR_STORE_DIR
+    if not store_dir.exists():
+        return None
+    for candidate in store_dir.glob(f"{audit_id}-*.json"):
+        with candidate.open(encoding="utf-8") as fh:
+            record = json.load(fh)
+        if record.get("audit_id") == audit_id:
+            return record
+    return None
+
+
+def lookup_execution_audits_for_prompt(root: "HarnessPath", prompt_id: str) -> list[dict]:
+    store_dir = root.path / _EAR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    results: list[dict] = []
+    for candidate in sorted(store_dir.glob("ear-*.json")):
+        try:
+            with candidate.open(encoding="utf-8") as fh:
+                record = json.load(fh)
+            if record.get("prompt_id") == prompt_id:
+                results.append(record)
+        except Exception:
+            continue
+    return results
+
+
+def lookup_execution_audits_for_authorization(
+    root: "HarnessPath", authorization_id: str
+) -> list[dict]:
+    store_dir = root.path / _EAR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    results: list[dict] = []
+    for candidate in sorted(store_dir.glob("ear-*.json")):
+        try:
+            with candidate.open(encoding="utf-8") as fh:
+                record = json.load(fh)
+            if record.get("authorization_id") == authorization_id:
+                results.append(record)
+        except Exception:
+            continue
+    return results
+
+
+def create_execution_audit_record(
+    root: "HarnessPath",
+    prompt_id: str,
+    authorization_id: str,
+) -> dict:
+    generated_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    blockers: list[str] = []
+
+    auth_artifact = lookup_authorization_artifact(root, prompt_id)
+    if auth_artifact is None:
+        blockers.append("missing_authorization_artifact")
+    elif auth_artifact.get("authorization_state") != "authorized":
+        blockers.append("authorization_not_authorized")
+    elif auth_artifact.get("authorization_id") != authorization_id:
+        blockers.append("authorization_id_mismatch")
+
+    if blockers:
+        return {
+            "audit_id": None,
+            "authorization_id": authorization_id,
+            "prompt_id": prompt_id,
+            "blockers": blockers,
+            "stored": False,
+            "path": None,
+            "execution_allowed": False,
+            "execution_occurred": False,
+            "governance_boundaries": dict(_EAR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_AUDIT_RECORD_ADVISORY,
+        }
+
+    pathway_id = auth_artifact.get("pathway_id", "")
+    gate_snapshot = auth_artifact.get("gate_snapshot", [])
+    selected_agents = auth_artifact.get("selected_agents", [])
+    authorization_status = auth_artifact.get("authorization_status", "conditionally_authorized")
+    if not authorization_status:
+        authorization_status = "conditionally_authorized"
+
+    audit_id = f"ear-{ts}"
+    record = {
+        "audit_id": audit_id,
+        "audit_type": "readiness_evaluation",
+        "audit_version": _EAR_AUDIT_VERSION,
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "task_id": _get_active_task_id(root),
+        "pathway_id": pathway_id,
+        "selected_agents": selected_agents,
+        "gate_snapshot": gate_snapshot,
+        "authorization_state": "authorized",
+        "authorization_status": authorization_status,
+        "execution_allowed": False,
+        "execution_occurred": False,
+        "generated_at": generated_at,
+    }
+
+    store_result = store_execution_audit_record(root, record)
+
+    return {
+        "audit_id": audit_id,
+        "audit_type": "readiness_evaluation",
+        "authorization_id": authorization_id,
+        "prompt_id": prompt_id,
+        "selected_agents": selected_agents,
+        "pathway_id": pathway_id,
+        "gate_snapshot": gate_snapshot,
+        "blockers": [],
+        "stored": store_result["stored"],
+        "errors": store_result["errors"],
+        "path": store_result["path"],
+        "execution_allowed": False,
+        "execution_occurred": False,
+        "governance_boundaries": dict(_EAR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_AUDIT_RECORD_ADVISORY,
+    }
+
+
+def _ear_lookup_by_authorization_id(
+    root: "HarnessPath", authorization_id: str
+) -> dict | None:
+    results = lookup_execution_audits_for_authorization(root, authorization_id)
+    return results[-1] if results else None
