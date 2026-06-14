@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69F: Execution Audit Recording (BR-005 Execution Governance Activation).
+Phase 69G: Execution Activation (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

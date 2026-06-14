@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260614-0941-69f-execution-audit-recording
+20260614-1736-69g-execution-activation
 
 ## Title
 
-69F Execution Audit Recording
+69G Execution Activation
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-69F Execution Audit Recording
+69G Execution Activation
 
 ## Allowed Files
 
@@ -38,11 +38,10 @@ implementation
 - src/pcae/core/agent.py
 - src/pcae/core/docs.py
 - tests/test_agent.py
-- tests/test_strategic_lineage.py
 
 ## Forbidden Files
 
-- none
+- TBD
 
 
 ## Allowed Zones
@@ -88,4 +87,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-14T09:41:40.987908+02:00
+2026-06-14T17:36:56.990017+02:00

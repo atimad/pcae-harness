@@ -67,6 +67,10 @@ from pcae.commands.agent import (
     run_audit_record_create,
     run_audit_record_show,
     run_audit_record_list,
+    run_execution_governance_readiness_review,
+    run_execution_activation_invoke,
+    run_execution_activation_show,
+    run_execution_activation_list,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2056,6 +2060,71 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     audit_record_list_parser.set_defaults(handler=run_audit_record_list)
+
+    review_parser = subparsers.add_parser(
+        "review",
+        help="PCAE self-review commands (Phase 69G).",
+    )
+    review_subparsers = review_parser.add_subparsers(dest="review_command")
+    egr_parser = review_subparsers.add_parser(
+        "execution-governance-readiness",
+        help=(
+            "Review gate evaluation correctness and APA → ARA → EAR chain completability "
+            "(Phase 69G pre-flight)."
+        ),
+    )
+    egr_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    egr_parser.set_defaults(handler=run_execution_governance_readiness_review)
+
+    execution_activation_parser = subparsers.add_parser(
+        "execution-activation",
+        help=(
+            "Read-only execution activation for claude-local (Phase 69G). "
+            "First PCAE command that sets execution_allowed=True within invocation boundary."
+        ),
+    )
+    execution_activation_subparsers = execution_activation_parser.add_subparsers(
+        dest="execution_activation_command"
+    )
+    ea_invoke_parser = execution_activation_subparsers.add_parser(
+        "invoke",
+        help="Invoke claude-local in read-only mode against a fully authorized EAR.",
+    )
+    ea_invoke_parser.add_argument("--prompt-id", required=True, help="Prompt identifier.")
+    ea_invoke_parser.add_argument(
+        "--authorization-id", required=True, help="Authorization artifact ID."
+    )
+    ea_invoke_parser.add_argument("--audit-id", required=True, help="Audit record ID.")
+    ea_invoke_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ea_invoke_parser.set_defaults(handler=run_execution_activation_invoke)
+
+    ea_show_parser = execution_activation_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionResultRecord by result_id.",
+    )
+    ea_show_parser.add_argument("--result-id", required=True, help="ExecutionResultRecord ID.")
+    ea_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ea_show_parser.set_defaults(handler=run_execution_activation_show)
+
+    ea_list_parser = execution_activation_subparsers.add_parser(
+        "list",
+        help="List ExecutionResultRecords for a prompt.",
+    )
+    ea_list_parser.add_argument(
+        "--prompt-id", required=True, help="List results for this prompt."
+    )
+    ea_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ea_list_parser.set_defaults(handler=run_execution_activation_list)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

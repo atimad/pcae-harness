@@ -469,6 +469,20 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae audit-record list --authorization-id <id>`
 - `pcae audit-record list --prompt-id <id> --json`
 
+## review
+
+- `pcae review execution-governance-readiness`
+- `pcae review execution-governance-readiness --json`
+
+## execution-activation
+
+- `pcae execution-activation invoke --prompt-id <id> --authorization-id <id> --audit-id <id>`
+- `pcae execution-activation invoke --prompt-id <id> --authorization-id <id> --audit-id <id> --json`
+- `pcae execution-activation show --result-id <id>`
+- `pcae execution-activation show --result-id <id> --json`
+- `pcae execution-activation list --prompt-id <id>`
+- `pcae execution-activation list --prompt-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

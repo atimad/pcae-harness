@@ -115,6 +115,12 @@ from pcae.core.agent import (
     lookup_execution_audits_for_prompt,
     lookup_execution_audits_for_authorization,
     EXECUTION_AUDIT_RECORD_ADVISORY,
+    build_execution_governance_readiness_review,
+    EXECUTION_GOVERNANCE_READINESS_REVIEW_ADVISORY,
+    invoke_readonly_execution,
+    lookup_execution_result,
+    lookup_execution_results_for_prompt,
+    EXECUTION_ACTIVATION_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4742,6 +4748,184 @@ def run_audit_record_list(args: argparse.Namespace) -> int:
         print(f"Audit records for {label}: {len(records)}")
         for r in records:
             print(f"  {r['audit_id']} — prompt={r['prompt_id']} auth={r['authorization_id']}")
+    return 0
+
+
+def run_execution_activation_invoke(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+
+    result = invoke_readonly_execution(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        args.authorization_id,
+        args.audit_id,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if result.get("blocked"):
+        print("Execution activation: BLOCKED")
+        print(f"  prompt_id:        {result['prompt_id']}")
+        print(f"  authorization_id: {result['authorization_id']}")
+        print(f"  audit_id:         {result['audit_id']}")
+        print(f"  Blockers:")
+        for b in result.get("blockers", []):
+            print(f"    - {b}")
+        print()
+        print(result["advisory"])
+        return 1
+
+    status_tag = "SUCCESS" if result.get("execution_status") == "success" else result.get("execution_status", "").upper()
+    print(f"Execution activation: {status_tag}")
+    print(f"  result_id:          {result['execution_result_id']}")
+    print(f"  prompt_id:          {result['prompt_id']}")
+    print(f"  authorization_id:   {result['authorization_id']}")
+    print(f"  audit_id:           {result['audit_id']}")
+    print(f"  agent_id:           {result['agent_id']}")
+    print(f"  execution_allowed:  {result['execution_allowed']}  (per-invocation local variable; historical fact in ERR)")
+    print(f"  execution_occurred: {result['execution_occurred']}")
+    print(f"  execution_status:   {result['execution_status']}")
+    print(f"  return_code:        {result['return_code']}")
+    print(f"  timed_out:          {result['timed_out']}")
+    print(f"  duration_ms:        {result['execution_duration_ms']}")
+    print(f"  sandbox_mode:       {result['sandbox_mode']}")
+    print(f"  stored:             {result['stored']}")
+    if result.get("path"):
+        print(f"  path:               {result['path']}")
+    print()
+    print(result["advisory"])
+    return 0
+
+
+def run_execution_activation_show(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+
+    record = lookup_execution_result(HarnessPath.cwd(), args.result_id)
+    if record is None:
+        print(f"No ExecutionResultRecord found for result_id: {args.result_id}")
+        return 1
+    if args.json:
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    print(f"ExecutionResultRecord: {record['execution_result_id']}")
+    print(f"  prompt_id:          {record.get('prompt_id')}")
+    print(f"  authorization_id:   {record.get('authorization_id')}")
+    print(f"  audit_id:           {record.get('audit_id')}")
+    print(f"  agent_id:           {record.get('agent_id')}")
+    print(f"  execution_status:   {record.get('execution_status')}")
+    print(f"  return_code:        {record.get('return_code')}")
+    print(f"  execution_allowed:  {record.get('execution_allowed')}")
+    print(f"  execution_occurred: {record.get('execution_occurred')}")
+    print(f"  timed_out:          {record.get('timed_out')}")
+    print(f"  capture_status:     {record.get('capture_status')}")
+    print(f"  duration_ms:        {record.get('execution_duration_ms')}")
+    print(f"  sandbox_mode:       {record.get('sandbox_mode')}")
+    print(f"  executed_at:        {record.get('executed_at')}")
+    print()
+    print(EXECUTION_ACTIVATION_ADVISORY)
+    return 0
+
+
+def run_execution_activation_list(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+
+    records = lookup_execution_results_for_prompt(HarnessPath.cwd(), args.prompt_id)
+    if args.json:
+        print(json.dumps(records, indent=2, sort_keys=True))
+        return 0
+
+    print(f"ExecutionResultRecords for prompt_id={args.prompt_id}: {len(records)} record(s)")
+    for r in records:
+        print(
+            f"  {r['execution_result_id']}  status={r.get('execution_status')}  "
+            f"executed_at={r.get('executed_at')}"
+        )
+    if not records:
+        print("  (none)")
+    print()
+    print(EXECUTION_ACTIVATION_ADVISORY)
+    return 0
+
+
+def run_execution_governance_readiness_review(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_governance_readiness_review(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    verdict = data["verdict"]
+    auth_path = data["authorize_path_finding"]
+    chain = data["chain_findings"]
+    stores = data["store_probe"]
+    ea_audit = data["execution_allowed_audit"]
+    claude = data["claude_contract_findings"]
+
+    print("Execution governance readiness review")
+    print(f"Review: {data['review_id']}  Generated: {data['generated_at']}")
+    print(f"Phase: {data['review_phase']} — {data['title']}")
+    print()
+
+    print("── Gate model audit ──────────────────────────────────────────────")
+    for f in data["gate_model_findings"]:
+        tag = "ADVISORY" if f["advisory_only"] else "REQUIRED"
+        scope = "in_auth_path" if f["in_pathway_evaluation"] else "display_only"
+        print(f"  [{tag}] {f['gate_id']} ({f['gate']})  status={f['static_status']}  scope={scope}")
+    print()
+
+    print("── authorize_execution_candidate path trace ──────────────────────")
+    defect = "DEFECT PRESENT" if auth_path["defect_present"] else "NO DEFECT"
+    print(f"  [{defect}]  gate_scope_correct={auth_path['gate_scope_correct']}")
+    print(f"  Gates evaluated: {', '.join(auth_path['gates_evaluated'])}")
+    if auth_path["advisory_gates_in_evaluated_set"]:
+        print(f"  Advisory gates incorrectly in auth path: {auth_path['advisory_gates_in_evaluated_set']}")
+    print(f"  Finding: {auth_path['finding']}")
+    print()
+
+    print("── claude-local contract capability ──────────────────────────────")
+    print(f"  Invocation contract: present={claude['invocation_contract_present']}  status={claude['invocation_contract_status']}")
+    print(f"  Read-only command:   {claude['read_only_command']}")
+    print(f"  Runtime readonly:    {claude['runtime_contract_readonly_supported']}")
+    print(f"  gate-007 status:     {claude['gate_007_status']}")
+    print(f"  Finding: {claude['finding']}")
+    print()
+
+    print("── Store probe ───────────────────────────────────────────────────")
+    for store_name, store in stores.items():
+        print(f"  {store_name}: {store['path']}  artifacts={store['artifact_count']}")
+    print()
+
+    print("── execution_allowed audit ───────────────────────────────────────")
+    print(f"  ARA boundary: execution_allowed={ea_audit['ara_governance_boundary_execution_allowed']}")
+    print(f"  EAR boundary: execution_allowed={ea_audit['ear_governance_boundary_execution_allowed']}")
+    print(f"  EGR boundary: execution_allowed={ea_audit['egr_governance_boundary_execution_allowed']}")
+    print(f"  ever_true_69B_69F: {ea_audit['execution_allowed_ever_true_in_69b_69f']}")
+    print(f"  Finding: {ea_audit['finding']}")
+    print()
+
+    print("── APA → ARA → EAR chain completability ─────────────────────────")
+    print(f"  Scope: {chain['scope']}")
+    for step in chain["chain_steps"]:
+        status_tag = "✓" if step["status"] == "implemented" else "○"
+        print(f"  [{status_tag}] Step {step['step']} ({step['phase']}): {step['name']}")
+    print()
+
+    print("── Verdict ──────────────────────────────────────────────────────")
+    print(f"  gate_scope_defect_present:             {verdict['gate_scope_defect_present']}")
+    print(f"  gate_scope_correct:                    {verdict['gate_scope_correct']}")
+    print(f"  chain_completable_claude_local_ro:     {verdict['chain_completable_for_claude_local_readonly']}")
+    print(f"  execution_allowed_ever_true:           {verdict['execution_allowed_ever_true']}")
+    print(f"  ready_for_69g_activation:              {verdict['ready_for_69g_activation']}")
+    print()
+    print(f"  Remaining gap: {verdict['remaining_gap']}")
+    print()
+    if verdict["ready_for_69g_activation"]:
+        print(f"  Activation scope: {verdict['activation_scope']}")
+    print()
+    print(data["advisory"])
     return 0
 
 

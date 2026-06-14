@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69E" in output
+    assert "69G" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -52412,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -52518,16 +52518,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries after 69F, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries after 69F, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52757,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -53060,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -53333,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -53656,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -54059,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -54386,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
 
 
@@ -54589,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69F" in active_drift[0]
+    assert "69G" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54709,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69F"
+    assert data["current_phase"]["phase_id"] == "69G"
     assert branch["current_phase"] == "65J"
 
 
@@ -55178,8 +55178,8 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
         f"68A added challenge_attention_architecture, 68B added challenge_attention_rendering_integration, "
@@ -55188,7 +55188,8 @@ def test_64h_adds_self_map_entry(tmp_path) -> None:
         f"69B added approval_store_mvp, 69C added invocation_contract_validation, "
         f"69D added execution_pathway_integration, "
         f"69E added execution_authorization_recording, "
-        f"69F added execution_audit_recording), "
+        f"69F added execution_audit_recording, "
+        f"69G added readonly_execution_activation), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -56679,7 +56680,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56939,7 +56940,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57251,7 +57252,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69F"
+    assert current["phase_id"] == "69G"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -58147,8 +58148,8 @@ def test_69d_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69d_map_count_is_60(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries after 69F, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_pathway_integration"),
@@ -58432,8 +58433,8 @@ def test_69e_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69e_map_count_is_61(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries after 69F, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_authorization_recording"),
@@ -58827,8 +58828,8 @@ def test_69f_cli_list_by_prompt_json(tmp_path, monkeypatch, capsys) -> None:
 def test_69f_map_count_is_62(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 62, (
-        f"Expected 62 map entries after 69F, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_audit_recording"),
@@ -58842,10 +58843,801 @@ def test_69f_phase_is_active_in_roadmap(tmp_path) -> None:
 
     phase_69f = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69F"), None)
     assert phase_69f is not None, "69F must be registered in _CRI_KNOWN_PHASES"
-    assert phase_69f["status"] == "active"
+    assert phase_69f["status"] == "completed"
     assert phase_69f["predecessor"] == "69E"
+    assert phase_69f["successor"] == "69G"
 
     phase_69e = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69E"), None)
     assert phase_69e is not None
     assert phase_69e["status"] == "completed"
     assert phase_69e["successor"] == "69F"
+
+
+# ---------------------------------------------------------------------------
+# Phase 69G — Read-Only Execution Activation tests
+# ---------------------------------------------------------------------------
+
+_EGA_VALID_AGENTS = ["claude-local"]
+
+
+def _make_apa_artifact_69g(
+    prompt_id: str = "test-69g-prompt",
+    approved_agents: list | None = None,
+    approval_state: str = "approved",
+    approved_by: str = "human-authorizer",
+    approved_at: str = "2026-06-14T09:00:00+00:00",
+    prompt_text: str = "list the files in the repository",
+) -> dict:
+    return {
+        "artifact_id": f"appp-{prompt_id}",
+        "approval_state": approval_state,
+        "prompt_id": prompt_id,
+        "prompt_text": prompt_text,
+        "approved_agents": approved_agents if approved_agents is not None else ["claude-local"],
+        "approved_by": approved_by,
+        "approved_at": approved_at,
+    }
+
+
+def _make_ara_artifact_69g(
+    prompt_id: str = "test-69g-prompt",
+    authorization_id: str = "auth-test-69g-prompt-20260614T090000",
+    authorization_state: str = "authorized",
+) -> dict:
+    return {
+        "authorization_id": authorization_id,
+        "authorization_state": authorization_state,
+        "prompt_id": prompt_id,
+        "selected_agents": ["claude-local"],
+        "authorized_by": "human-authorizer",
+        "authorized_at": "2026-06-14T09:01:00+00:00",
+        "task_id": "test-task-69g",
+        "pathway_id": "epid-test",
+        "gate_snapshot": [],
+        "execution_allowed": False,
+    }
+
+
+def _make_ear_artifact_69g(
+    prompt_id: str = "test-69g-prompt",
+    authorization_id: str = "auth-test-69g-prompt-20260614T090000",
+    audit_id: str = "ear-20260614T090200",
+    execution_occurred: bool = False,
+    execution_allowed: bool = False,
+) -> dict:
+    return {
+        "audit_id": audit_id,
+        "audit_type": "readiness_evaluation",
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "pathway_id": "epid-test",
+        "selected_agents": ["claude-local"],
+        "gate_snapshot": [],
+        "execution_allowed": execution_allowed,
+        "execution_occurred": execution_occurred,
+        "generated_at": "2026-06-14T09:02:00+00:00",
+    }
+
+
+def _store_apa_69g(root, artifact: dict) -> None:
+    from pcae.core.agent import _APA_STORE_DIR
+    import json as _json
+
+    store = root.path / _APA_STORE_DIR
+    store.mkdir(parents=True, exist_ok=True)
+    ts = "20260614T090000000000"
+    (store / f"{artifact['prompt_id']}-{ts}.json").write_text(_json.dumps(artifact))
+
+
+def _store_ara_69g(root, artifact: dict) -> None:
+    from pcae.core.agent import _ARA_STORE_DIR
+    import json as _json
+
+    store = root.path / _ARA_STORE_DIR
+    store.mkdir(parents=True, exist_ok=True)
+    ts = "20260614T090100000000"
+    (store / f"{artifact['prompt_id']}-{ts}.json").write_text(_json.dumps(artifact))
+
+
+def _store_ear_69g(root, artifact: dict) -> None:
+    from pcae.core.agent import _EAR_STORE_DIR
+    import json as _json
+
+    store = root.path / _EAR_STORE_DIR
+    store.mkdir(parents=True, exist_ok=True)
+    ts = "20260614T090200000000"
+    (store / f"{artifact['audit_id']}-{ts}.json").write_text(_json.dumps(artifact))
+
+
+def _mock_subprocess_success(cmd: list, timeout: int) -> dict:
+    return {
+        "stdout": "mock output",
+        "stderr": "",
+        "return_code": 0,
+        "timed_out": False,
+        "execution_status": "success",
+        "capture_status": "complete",
+    }
+
+
+def _mock_subprocess_timeout(cmd: list, timeout: int) -> dict:
+    return {
+        "stdout": "",
+        "stderr": "",
+        "return_code": -1,
+        "timed_out": True,
+        "execution_status": "timeout",
+        "capture_status": "partial",
+    }
+
+
+def _mock_subprocess_invocation_error(cmd: list, timeout: int) -> dict:
+    return {
+        "stdout": "",
+        "stderr": "",
+        "return_code": -1,
+        "timed_out": False,
+        "execution_status": "invocation_error",
+        "capture_status": "none",
+    }
+
+
+def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase_69g = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69G"), None)
+    assert phase_69g is not None, "69G must be registered in _CRI_KNOWN_PHASES"
+    assert phase_69g["status"] == "active"
+    assert phase_69g["predecessor"] == "69F"
+
+    phase_69f = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69F"), None)
+    assert phase_69f is not None
+    assert phase_69f["status"] == "completed"
+    assert phase_69f["successor"] == "69G"
+
+
+def test_69g_map_count_is_63(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
+        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "readonly_execution_activation"),
+        None,
+    )
+    assert entry is not None, "readonly_execution_activation must be in _SRG_CAPABILITY_OBJECTIVE_MAP"
+
+
+def test_69g_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "69G"),
+        None,
+    )
+    assert cap is not None, "69G capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_domain"] == "execution_governance"
+    assert "execution-activation" in cap["introduced_commands"]
+
+
+def test_69g_constants_defined(tmp_path) -> None:
+    from pcae.core.agent import (
+        _EGA_DEFAULT_TIMEOUT_SECONDS,
+        _EGA_MAX_OUTPUT_BYTES,
+        _EGA_ERR_STORE_DIR,
+        _EGA_PHASE_ID,
+    )
+
+    assert _EGA_DEFAULT_TIMEOUT_SECONDS == 120
+    assert _EGA_MAX_OUTPUT_BYTES == 65536
+    assert str(_EGA_ERR_STORE_DIR) == ".pcae/results"
+    assert _EGA_PHASE_ID == "69G"
+
+
+def test_69g_governance_boundaries_execution_allowed_false(tmp_path) -> None:
+    from pcae.core.agent import _EGA_GOVERNANCE_BOUNDARIES
+
+    assert _EGA_GOVERNANCE_BOUNDARIES["execution_allowed_global"] is False
+    assert _EGA_GOVERNANCE_BOUNDARIES["shell_true_forbidden"] is True
+    assert _EGA_GOVERNANCE_BOUNDARIES["write_mode_forbidden"] is True
+    assert _EGA_GOVERNANCE_BOUNDARIES["re_execution_of_same_ear_forbidden"] is True
+    assert _EGA_GOVERNANCE_BOUNDARIES["allowed_agent"] == "claude-local"
+    assert _EGA_GOVERNANCE_BOUNDARIES["allowed_mode"] == "read_only"
+    assert _EGA_GOVERNANCE_BOUNDARIES["max_selected_agents"] == 1
+
+
+def test_69g_sandbox_limitations_documented(tmp_path) -> None:
+    from pcae.core.agent import _EGA_SANDBOX_LIMITATIONS
+
+    assert _EGA_SANDBOX_LIMITATIONS["sandbox_mode"] == "none"
+    assert _EGA_SANDBOX_LIMITATIONS["filesystem_isolation"] is False
+    assert _EGA_SANDBOX_LIMITATIONS["network_isolation"] is False
+
+
+def test_69g_err_validate_valid_record(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "execution_result_id": "err-test-prompt-20260614T090000",
+        "result_type": "readonly_execution",
+        "prompt_id": "test-prompt",
+        "authorization_id": "auth-test-prompt-20260614T090000",
+        "audit_id": "ear-20260614T090200",
+        "agent_id": "claude-local",
+        "execution_occurred": True,
+        "execution_allowed": True,
+        "shell_used": False,
+        "mode": "read_only",
+        "sandbox_mode": "none",
+    }
+    assert _ega_validate(record) == []
+
+
+def test_69g_err_validate_missing_result_id(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "result_type": "readonly_execution",
+        "prompt_id": "p", "authorization_id": "a", "audit_id": "e",
+        "agent_id": "claude-local", "execution_occurred": True,
+        "execution_allowed": True, "shell_used": False,
+        "mode": "read_only", "sandbox_mode": "none",
+    }
+    assert "missing_execution_result_id" in _ega_validate(record)
+
+
+def test_69g_err_validate_wrong_agent_id(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "execution_result_id": "err-x", "result_type": "readonly_execution",
+        "prompt_id": "p", "authorization_id": "a", "audit_id": "e",
+        "agent_id": "codex-local",
+        "execution_occurred": True, "execution_allowed": True,
+        "shell_used": False, "mode": "read_only", "sandbox_mode": "none",
+    }
+    assert "invalid_agent_id_must_be_claude_local" in _ega_validate(record)
+
+
+def test_69g_err_validate_execution_occurred_false_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "execution_result_id": "err-x", "result_type": "readonly_execution",
+        "prompt_id": "p", "authorization_id": "a", "audit_id": "e",
+        "agent_id": "claude-local",
+        "execution_occurred": False, "execution_allowed": True,
+        "shell_used": False, "mode": "read_only", "sandbox_mode": "none",
+    }
+    assert "execution_occurred_must_be_true_in_err" in _ega_validate(record)
+
+
+def test_69g_err_validate_shell_used_true_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "execution_result_id": "err-x", "result_type": "readonly_execution",
+        "prompt_id": "p", "authorization_id": "a", "audit_id": "e",
+        "agent_id": "claude-local",
+        "execution_occurred": True, "execution_allowed": True,
+        "shell_used": True, "mode": "read_only", "sandbox_mode": "none",
+    }
+    assert "shell_used_must_be_false" in _ega_validate(record)
+
+
+def test_69g_err_validate_write_mode_rejected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _ega_validate
+
+    record = {
+        "execution_result_id": "err-x", "result_type": "readonly_execution",
+        "prompt_id": "p", "authorization_id": "a", "audit_id": "e",
+        "agent_id": "claude-local",
+        "execution_occurred": True, "execution_allowed": True,
+        "shell_used": False, "mode": "writable", "sandbox_mode": "none",
+    }
+    assert "mode_must_be_read_only" in _ega_validate(record)
+
+
+def test_69g_store_and_lookup_execution_result(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_execution_result, lookup_execution_result
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = {
+        "execution_result_id": "err-store-test-20260614T090000",
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "store-test-prompt",
+        "authorization_id": "auth-store-test",
+        "audit_id": "ear-store-test",
+        "agent_id": "claude-local",
+        "agent_count": 1,
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt_text_from_apa_artifact>"],
+        "return_code": 0,
+        "stdout": "ok",
+        "stderr": "",
+        "capture_status": "complete",
+        "timed_out": False,
+        "execution_status": "success",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": "2026-06-14T09:00:00+00:00",
+        "execution_duration_ms": 1234,
+        "sandbox_mode": "none",
+        "timeout_seconds": 120,
+        "max_output_bytes": 65536,
+        "shell_used": False,
+    }
+    result = store_execution_result(root, record)
+    assert result["stored"] is True
+    assert result["errors"] == []
+
+    fetched = lookup_execution_result(root, "err-store-test-20260614T090000")
+    assert fetched is not None
+    assert fetched["execution_result_id"] == "err-store-test-20260614T090000"
+    assert fetched["execution_occurred"] is True
+    assert fetched["execution_allowed"] is True
+    assert fetched["shell_used"] is False
+
+
+def test_69g_invoke_blocks_missing_apa(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    result = invoke_readonly_execution(root, "no-such-prompt", "auth-x", "ear-x")
+    assert result["blocked"] is True
+    assert result["execution_allowed"] is False
+    assert result["execution_occurred"] is False
+    assert "condition_01_apa_artifact_missing" in result["blockers"]
+
+
+def test_69g_invoke_blocks_apa_not_approved(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    # lookup_approved_prompt_artifact filters to approval_state=="approved" only.
+    # A pending APA is invisible to the lookup → condition_01 fires.
+    apa = _make_apa_artifact_69g(approval_state="pending")
+    _store_apa_69g(root, apa)
+    result = invoke_readonly_execution(root, "test-69g-prompt", "auth-x", "ear-x")
+    assert result["blocked"] is True
+    assert "condition_01_apa_artifact_missing" in result["blockers"]
+
+
+def test_69g_invoke_blocks_claude_local_not_in_approved_agents(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g(approved_agents=["codex-local"])
+    _store_apa_69g(root, apa)
+    result = invoke_readonly_execution(root, "test-69g-prompt", "auth-x", "ear-x")
+    assert result["blocked"] is True
+    assert "condition_05_claude_local_not_in_approved_agents" in result["blockers"]
+
+
+def test_69g_invoke_blocks_missing_ara(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    _store_apa_69g(root, apa)
+    result = invoke_readonly_execution(root, "test-69g-prompt", "auth-x", "ear-x")
+    assert result["blocked"] is True
+    assert "condition_07_ara_artifact_missing" in result["blockers"]
+
+
+def test_69g_invoke_blocks_ara_not_authorized(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    # lookup_authorization_artifact filters to authorization_state=="authorized" only.
+    # A blocked ARA is invisible to the lookup → condition_07 fires.
+    ara = _make_ara_artifact_69g(authorization_state="blocked")
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    result = invoke_readonly_execution(root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-x")
+    assert result["blocked"] is True
+    assert "condition_07_ara_artifact_missing" in result["blockers"]
+
+
+def test_69g_invoke_blocks_missing_ear(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    result = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-no-such"
+    )
+    assert result["blocked"] is True
+    assert "condition_09_ear_artifact_missing" in result["blockers"]
+
+
+def test_69g_invoke_blocks_ear_already_executed(tmp_path, monkeypatch) -> None:
+    # Condition 11 is enforced by consulting the ERR store. EAR is immutable.
+    # A second invocation for the same audit_id is blocked once an ERR exists.
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()  # execution_occurred=False — EAR is always immutable
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    first = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert first["blocked"] is False
+    assert first["execution_occurred"] is True
+
+    second = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert second["blocked"] is True
+    assert "condition_11_ear_already_executed_re_execution_forbidden" in second["blockers"]
+
+
+def test_69g_ear_remains_immutable_after_execution(tmp_path, monkeypatch) -> None:
+    # EAR file must still have execution_occurred=False after a successful execution.
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_audit_record
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+
+    reloaded_ear = lookup_execution_audit_record(root, "ear-20260614T090200")
+    assert reloaded_ear is not None
+    assert reloaded_ear["execution_occurred"] is False
+    assert reloaded_ear["execution_allowed"] is False
+
+
+def test_69g_reexecution_does_not_call_subprocess(tmp_path, monkeypatch) -> None:
+    # On a second invocation with the same audit_id, _ega_run_subprocess must not be called.
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+
+    subprocess_call_count = 0
+
+    def _counting_mock(cmd: list, timeout: int) -> dict:
+        nonlocal subprocess_call_count
+        subprocess_call_count += 1
+        return _mock_subprocess_success(cmd, timeout)
+
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _counting_mock)
+
+    second = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert second["blocked"] is True
+    assert subprocess_call_count == 0
+
+
+def test_69g_invoke_uses_contract_for_command_source(tmp_path, monkeypatch) -> None:
+    # invoke_readonly_execution must call _ivcv_find_invocation_contract and use its result.
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    contract_calls: list[str] = []
+    original_finder = _agent_mod._ivcv_find_invocation_contract
+
+    def _tracking_finder(agent_id: str) -> dict | None:
+        contract_calls.append(agent_id)
+        return original_finder(agent_id)
+
+    monkeypatch.setattr(_agent_mod, "_ivcv_find_invocation_contract", _tracking_finder)
+
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    _agent_mod.invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert "claude-local" in contract_calls
+
+
+def test_69g_invoke_blocks_contract_not_found(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_ivcv_find_invocation_contract", lambda _: None)
+
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = _agent_mod.invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert result["blocked"] is True
+    assert "condition_contract_claude_local_not_found" in result["blockers"]
+
+
+def test_69g_invoke_blocks_unsupported_contract_pattern(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    bad_contract = {
+        "runtime_id": "claude-local",
+        "status": "validated",
+        "read_only": {"command": 'claude -p --permission-mode acceptEdits "<prompt>"', "mode": "read_only"},
+    }
+    monkeypatch.setattr(_agent_mod, "_ivcv_find_invocation_contract", lambda _: bad_contract)
+
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = _agent_mod.invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert result["blocked"] is True
+    assert "condition_contract_command_pattern_rejected" in result["blockers"]
+
+
+def test_69g_lookup_results_by_audit_id(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    assert _agent_mod._ega_lookup_results_by_audit_id(root, "ear-20260614T090200") == []
+
+    _agent_mod.invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+
+    found = _agent_mod._ega_lookup_results_by_audit_id(root, "ear-20260614T090200")
+    assert len(found) == 1
+    assert found[0]["audit_id"] == "ear-20260614T090200"
+    assert found[0]["execution_occurred"] is True
+
+    assert _agent_mod._ega_lookup_results_by_audit_id(root, "ear-other-id") == []
+
+
+def test_69g_invoke_all_conditions_met_stores_err(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert result["blocked"] is False
+    assert result["execution_allowed"] is True
+    assert result["execution_occurred"] is True
+    assert result["execution_status"] == "success"
+    assert result["return_code"] == 0
+    assert result["stored"] is True
+
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    assert stored is not None
+    assert stored["execution_allowed"] is True
+    assert stored["execution_occurred"] is True
+    assert stored["shell_used"] is False
+    assert stored["sandbox_mode"] == "none"
+    assert stored["agent_id"] == "claude-local"
+
+
+def test_69g_invoke_records_timeout_as_execution_occurred(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_timeout)
+
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert result["blocked"] is False
+    assert result["execution_occurred"] is True
+    assert result["timed_out"] is True
+    assert result["execution_status"] == "timeout"
+    assert result["stored"] is True
+
+
+def test_69g_invoke_records_invocation_error_as_execution_occurred(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_invocation_error)
+
+    from pcae.core.agent import invoke_readonly_execution
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    assert result["blocked"] is False
+    assert result["execution_occurred"] is True
+    assert result["execution_status"] == "invocation_error"
+    assert result["stored"] is True
+
+
+def test_69g_err_sandbox_mode_none_in_stored_record(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    result = invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    assert stored["sandbox_mode"] == "none"
+    assert stored["shell_used"] is False
+    assert stored["timeout_seconds"] == 120
+    assert stored["max_output_bytes"] == 65536
+
+
+def test_69g_lookup_execution_results_for_prompt(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import pcae.core.agent as _agent_mod
+    monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_results_for_prompt
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    apa = _make_apa_artifact_69g()
+    ara = _make_ara_artifact_69g()
+    ear = _make_ear_artifact_69g()
+    _store_apa_69g(root, apa)
+    _store_ara_69g(root, ara)
+    _store_ear_69g(root, ear)
+
+    invoke_readonly_execution(
+        root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
+    )
+    records = lookup_execution_results_for_prompt(root, "test-69g-prompt")
+    assert len(records) == 1
+    assert records[0]["prompt_id"] == "test-69g-prompt"
+
+
+def test_69g_execution_governance_review_no_defect(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_governance_readiness_review
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_governance_readiness_review(HarnessPath(tmp_path))
+    verdict = data["verdict"]
+    assert verdict["gate_scope_defect_present"] is False
+    assert verdict["gate_scope_correct"] is True
+    assert verdict["chain_completable_for_claude_local_readonly"] is True
+    assert verdict["execution_allowed_ever_true"] is False
+    assert verdict["ready_for_69g_activation"] is True
+
+
+def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_capability_roadmap_intelligence
+    from pcae.core.paths import HarnessPath
+
+    data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
+    assert data["current_phase"]["phase_id"] == "69G"

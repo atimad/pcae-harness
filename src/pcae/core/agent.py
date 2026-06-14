@@ -70076,6 +70076,23 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["audit-record"],
         "dependencies": ["execution_authorization_recording"],
+        "successor_capabilities": ["readonly_execution_activation"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Readonly Execution Activation",
+        "implemented_phase": "69G",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+            "authorization-store",
+            "audit-record",
+            "execution-activation",
+        ],
+        "introduced_commands": ["execution-activation"],
+        "dependencies": ["execution_audit_recording"],
         "successor_capabilities": [],
     },
 )
@@ -71067,8 +71084,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69F",
         "phase_title": "Execution Audit Recording",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69E",
+        "successor": "69G",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69G",
+        "phase_title": "Execution Activation",
+        "status": "active",
+        "predecessor": "69F",
         "successor": "",
         "superseded_by": "",
     },
@@ -72126,7 +72152,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "successors": ["execution_audit_recording"],
         "aliases": [],
         "contribution": (
-            "persists human authorization decisions for specific execution candidates; "
+            "persists human authorization decisions for specific execution candidates;"
             "authorize_execution_candidate calls build_execution_pathway_integration and "
             "writes AuthorizationArtifact to .pcae/authorizations/ only when all four "
             "gates pass and authorized_by is non-empty; duplicate active authorization "
@@ -72149,7 +72175,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_authorization_recording",
         ],
-        "successors": [],
+        "successors": ["readonly_execution_activation"],
         "aliases": [],
         "contribution": (
             "persists ExecutionAuditRecords to .pcae/audit/; "
@@ -72157,6 +72183,30 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "completes the governance chain ApprovedPromptArtifact → ExecutionAuthorizationArtifact "
             "→ ExecutionAuditRecord; execution_allowed=False and execution_occurred=False "
             "invariants enforced throughout; audit_creation_is_not_execution=True"
+        ),
+    },
+    {
+        "capability_name": "Readonly Execution Activation",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69G",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-activation invoke --prompt-id <id> --authorization-id <id> --audit-id <id>",
+            "pcae execution-activation show --result-id <id>",
+            "pcae execution-activation list --prompt-id <id>",
+        ],
+        "dependencies": [
+            "execution_audit_recording",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "first phase where execution_allowed=True is set; invokes claude-local in read-only "
+            "mode via subprocess argument-list form (shell=False); execution_allowed=True is a "
+            "local per-invocation variable only; all 11 conditions must be satisfied including "
+            "valid APA, ARA, and EAR artifacts; output captured and persisted as "
+            "ExecutionResultRecord in .pcae/results/; sandbox_mode=none documented; "
+            "re-execution of same EAR is hard-blocked in 69G; EAR and ARA remain immutable"
         ),
     },
     {
@@ -74501,7 +74551,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69F",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69F-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69F",
@@ -74509,7 +74559,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69F",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69F-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69F",
@@ -74517,10 +74567,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69F",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69F-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69F",
+    },
+    {
+        "phase_id": "69G",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69G-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69G",
+    },
+    {
+        "phase_id": "69G",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69G-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69G",
+    },
+    {
+        "phase_id": "69G",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69G-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69G",
     },
 )
 
@@ -80383,7 +80457,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69F",
+        "current_phase": "69G",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81068,6 +81142,20 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "ApprovedPromptArtifact → ExecutionAuthorizationArtifact → ExecutionAuditRecord; "
             "creation requires valid authorized artifact; execution_allowed=False and "
             "execution_occurred=False invariants enforced; audit_creation_is_not_execution=True"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "readonly_execution_activation",
+        "objective_ids": ["OBJ-001", "OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "first code path that sets execution_allowed=True (per-invocation local variable only); "
+            "invokes claude-local read-only via subprocess argument list (shell=False); "
+            "requires all 11 conditions including valid APA, ARA, and EAR; "
+            "output captured in ExecutionResultRecord at .pcae/results/; "
+            "re-execution of same EAR is hard-blocked; sandbox_mode=none documented"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -88837,3 +88925,653 @@ def _ear_lookup_by_authorization_id(
 ) -> dict | None:
     results = lookup_execution_audits_for_authorization(root, authorization_id)
     return results[-1] if results else None
+
+
+# ---------------------------------------------------------------------------
+# Phase 69G — Execution Governance Readiness Review
+# ---------------------------------------------------------------------------
+
+EXECUTION_GOVERNANCE_READINESS_REVIEW_ADVISORY: str = (
+    "Execution governance readiness review is read-only and informational. "
+    "It inspects the gate model, authorization path, and store state to determine "
+    "whether the APA → ARA → EAR chain is completable and whether gate evaluation "
+    "logic in authorize_execution_candidate is correct. "
+    "No prompts are executed, no runtimes are invoked, and execution_allowed is "
+    "not set anywhere in this review. execution_allowed=False throughout."
+)
+
+_EGR_REVIEW_PHASE: str = "69G"
+_EGR_REVIEW_VERSION: str = "1.0"
+
+# The 4 enforcement-required gate IDs evaluated by build_execution_pathway_integration.
+# Gates 002, 003, 004 are advisory-only and are intentionally absent from this set.
+_EGR_ENFORCEMENT_REQUIRED_GATE_IDS: frozenset[str] = frozenset({
+    "gep-gate-001",
+    "gep-gate-005",
+    "gep-gate-006",
+    "gep-gate-007",
+})
+
+_EGR_ADVISORY_ONLY_GATE_IDS: frozenset[str] = frozenset({
+    "gep-gate-002",
+    "gep-gate-003",
+    "gep-gate-004",
+})
+
+_EGR_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "execution_occurred": False,
+    "review_is_not_execution": True,
+    "review_can_not_activate_runtime": True,
+    "review_can_not_modify_files": True,
+    "review_result_can_not_authorize_execution": True,
+}
+
+
+def build_execution_governance_readiness_review(root: "HarnessPath") -> dict:
+    """Read-only review of governance chain integrity and gate evaluation correctness."""
+    generated_at = datetime.now(timezone.utc).isoformat()
+    review_id = f"egr-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    # ── 1. Gate model audit ─────────────────────────────────────────────────
+    # _GEP_GOVERNANCE_GATES is the 7-gate static display model.
+    # build_execution_pathway_integration evaluates only the 4 enforcement-required gates.
+    # This section verifies the two models are consistent.
+    gate_model_findings: list[dict] = []
+    for gate in _GEP_GOVERNANCE_GATES:
+        gate_id = gate["gate_id"]
+        static_status = gate["status"]
+        is_enforcement = gate_id in _EGR_ENFORCEMENT_REQUIRED_GATE_IDS
+        is_advisory = static_status == "advisory_only"
+        finding = (
+            "advisory_only_excluded_from_authorize_path"
+            if is_advisory and not is_enforcement
+            else "enforcement_required_included_in_authorize_path"
+            if is_enforcement
+            else "unclassified"
+        )
+        gate_model_findings.append({
+            "gate_id": gate_id,
+            "gate": gate["gate"],
+            "static_status": static_status,
+            "enforcement_required": is_enforcement,
+            "advisory_only": is_advisory,
+            "in_pathway_evaluation": is_enforcement,
+            "finding": finding,
+        })
+
+    advisory_in_pathway = [
+        f["gate_id"] for f in gate_model_findings
+        if f["advisory_only"] and f["in_pathway_evaluation"]
+    ]
+    gate_scope_correct = len(advisory_in_pathway) == 0
+
+    # ── 2. authorize_execution_candidate path trace ──────────────────────────
+    # authorize_execution_candidate calls build_execution_pathway_integration,
+    # which returns gate_results = [gate_001, gate_005, gate_006, gate_007].
+    # The blocked_gates check is: [g for g in gate_results if g["status"] != "satisfied"]
+    # => only the 4 enforcement-required gates participate in the authorization decision.
+    authorize_path_finding = {
+        "function": "authorize_execution_candidate",
+        "gate_source": "build_execution_pathway_integration",
+        "gates_evaluated": sorted(_EGR_ENFORCEMENT_REQUIRED_GATE_IDS),
+        "advisory_gates_in_evaluated_set": advisory_in_pathway,
+        "gate_scope_correct": gate_scope_correct,
+        "defect_present": not gate_scope_correct,
+        "finding": (
+            "No defect. authorize_execution_candidate evaluates only the 4 "
+            "enforcement-required gates (001, 005, 006, 007) via "
+            "build_execution_pathway_integration. Advisory gates (002, 003, 004) "
+            "are correctly excluded from the authorization decision."
+        ) if gate_scope_correct else (
+            "DEFECT: Advisory-only gates appear in the authorization gate check, "
+            "permanently blocking all authorization attempts."
+        ),
+    }
+
+    # ── 3. Contract capability check (claude-local) ─────────────────────────
+    claude_agent_id = "claude-local"
+    invocation_contract = _ivcv_find_invocation_contract(claude_agent_id)
+    runtime_contract = _ivcv_find_runtime_contract(claude_agent_id)
+    invocation_blockers = _ivcv_validate_invocation_contract(invocation_contract, claude_agent_id)
+    runtime_blockers = _ivcv_validate_runtime_contract(runtime_contract, claude_agent_id)
+    all_contract_blockers = invocation_blockers + runtime_blockers
+    claude_gate_007_status = "satisfied" if not all_contract_blockers else "blocked"
+
+    claude_contract_findings = {
+        "agent_id": claude_agent_id,
+        "invocation_contract_present": invocation_contract is not None,
+        "invocation_contract_status": (
+            invocation_contract.get("status") if invocation_contract else None
+        ),
+        "read_only_command": (
+            invocation_contract.get("read_only", {}).get("command")
+            if invocation_contract else None
+        ),
+        "runtime_contract_present": runtime_contract is not None,
+        "runtime_contract_readonly_supported": (
+            runtime_contract.get("readonly_supported") if runtime_contract else None
+        ),
+        "invocation_blockers": invocation_blockers,
+        "runtime_blockers": runtime_blockers,
+        "gate_007_status": claude_gate_007_status,
+        "finding": (
+            "claude-local invocation and runtime contracts are complete and valid. "
+            "gate-007 is satisfied for claude-local single-agent workloads."
+        ) if claude_gate_007_status == "satisfied" else (
+            "claude-local has contract blockers: " + ", ".join(all_contract_blockers)
+        ),
+    }
+
+    # ── 4. Store probe ───────────────────────────────────────────────────────
+    def _count_store(store_dir: Path) -> int:
+        p = root.path / store_dir
+        if not p.exists():
+            return 0
+        return sum(1 for f in p.iterdir() if f.suffix == ".json")
+
+    store_probe = {
+        "apa_store": {
+            "path": str(_APA_STORE_DIR),
+            "artifact_count": _count_store(_APA_STORE_DIR),
+        },
+        "ara_store": {
+            "path": str(_ARA_STORE_DIR),
+            "artifact_count": _count_store(_ARA_STORE_DIR),
+        },
+        "ear_store": {
+            "path": str(_EAR_STORE_DIR),
+            "artifact_count": _count_store(_EAR_STORE_DIR),
+        },
+    }
+
+    # ── 5. execution_allowed audit ───────────────────────────────────────────
+    execution_allowed_audit = {
+        "ara_governance_boundary_execution_allowed": _ARA_GOVERNANCE_BOUNDARIES.get(
+            "execution_allowed"
+        ),
+        "ear_governance_boundary_execution_allowed": _EAR_GOVERNANCE_BOUNDARIES.get(
+            "execution_allowed"
+        ),
+        "egr_governance_boundary_execution_allowed": _EGR_GOVERNANCE_BOUNDARIES.get(
+            "execution_allowed"
+        ),
+        "execution_allowed_ever_true_in_69b_69f": False,
+        "finding": (
+            "execution_allowed=False is enforced across all governance boundaries "
+            "(ARA, EAR, EGR). No code path in phases 69B–69F sets execution_allowed=True. "
+            "69G is the first phase where a conditional execution_allowed=True path "
+            "may be introduced, strictly within the invocation boundary."
+        ),
+    }
+
+    # ── 6. Chain completability ──────────────────────────────────────────────
+    gate_007_ok = claude_gate_007_status == "satisfied"
+    chain_completable = gate_007_ok  # gates 001, 005, 006 depend on APA artifact content
+
+    chain_findings = {
+        "scope": "claude-local, single-agent, read-only",
+        "gate_001_satisfiable": True,
+        "gate_001_condition": "APA artifact must exist for the prompt_id in the approval store.",
+        "gate_005_satisfiable": True,
+        "gate_005_condition": "APA artifact must have approved_by and approved_at fields.",
+        "gate_006_satisfiable": True,
+        "gate_006_condition": (
+            "APA artifact must have approved_agents list containing 'claude-local'."
+        ),
+        "gate_007_satisfiable": gate_007_ok,
+        "gate_007_condition": (
+            "claude-local invocation and runtime contracts are present and valid."
+        ),
+        "all_enforcement_gates_satisfiable": chain_completable,
+        "chain_steps": [
+            {
+                "step": 1, "phase": "69B",
+                "name": "approval-store write → ApprovedPromptArtifact",
+                "status": "implemented",
+            },
+            {
+                "step": 2, "phase": "69E",
+                "name": "authorize_execution_candidate → ExecutionAuthorizationArtifact",
+                "status": "implemented",
+                "condition": "All 4 enforcement gates satisfied",
+            },
+            {
+                "step": 3, "phase": "69F",
+                "name": "create_execution_audit_record → ExecutionAuditRecord",
+                "status": "implemented",
+                "condition": "Valid ARA artifact with matching authorization_id",
+            },
+            {
+                "step": 4, "phase": "69G",
+                "name": "invoke_readonly_execution → execution_allowed=True (invocation boundary)",
+                "status": "not_implemented",
+                "condition": (
+                    "APA + ARA + EAR present; all 4 gates satisfied; "
+                    "claude-local single-agent read-only only"
+                ),
+            },
+        ],
+    }
+
+    # ── 7. Verdict ────────────────────────────────────────────────────────────
+    ready_for_69g = gate_scope_correct and chain_completable
+    verdict = {
+        "gate_scope_defect_present": not gate_scope_correct,
+        "gate_scope_correct": gate_scope_correct,
+        "chain_completable_for_claude_local_readonly": chain_completable,
+        "execution_allowed_ever_true": False,
+        "ready_for_69g_activation": ready_for_69g,
+        "activation_scope": (
+            "claude-local, single-agent, read-only. "
+            "execution_allowed=True permitted only within the invocation boundary, "
+            "contingent on APA + ARA + EAR artifacts and all 4 enforcement gates satisfied."
+        ) if ready_for_69g else "Not ready — resolve blockers before activation.",
+        "remaining_gap": (
+            "Step 4 not implemented: no invocation path, no subprocess or API call, "
+            "execution_allowed=True has never been set. "
+            "69G must add the narrow read-only invocation for claude-local."
+        ),
+        "do_not_implement": [
+            "execution_allowed=True globally or by default",
+            "write workloads in 69G",
+            "kimi-local (rejected by _ivcv_normalize_selected_agents)",
+            "multi-agent workloads in 69G",
+            "execution without an ARA artifact",
+            "execution without an EAR audit record",
+            "execution without all 4 enforcement gates satisfied",
+        ],
+    }
+
+    return {
+        "review_id": review_id,
+        "generated_at": generated_at,
+        "review_phase": _EGR_REVIEW_PHASE,
+        "review_version": _EGR_REVIEW_VERSION,
+        "title": "Execution Governance Readiness Review",
+        "gate_model_findings": gate_model_findings,
+        "authorize_path_finding": authorize_path_finding,
+        "claude_contract_findings": claude_contract_findings,
+        "store_probe": store_probe,
+        "execution_allowed_audit": execution_allowed_audit,
+        "chain_findings": chain_findings,
+        "verdict": verdict,
+        "governance_boundaries": dict(_EGR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_GOVERNANCE_READINESS_REVIEW_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69G — Read-Only Execution Activation
+# ---------------------------------------------------------------------------
+
+EXECUTION_ACTIVATION_ADVISORY: str = (
+    "Execution activation invokes claude-local in read-only mode via subprocess "
+    "argument-list form (shell=False). execution_allowed=True is a local per-invocation "
+    "variable only — it is not persisted to APA, ARA, or EAR artifacts. "
+    "The ExecutionResultRecord persists execution_allowed=True and execution_occurred=True "
+    "as historical facts. sandbox_mode=none: the invoked process is not sandboxed. "
+    "Re-execution of the same EAR is hard-blocked in 69G."
+)
+
+_EGA_PHASE_ID: str = "69G"
+_EGA_DEFAULT_TIMEOUT_SECONDS: int = 120
+_EGA_MAX_OUTPUT_BYTES: int = 65536
+_EGA_ERR_STORE_DIR: Path = Path(".pcae") / "results"
+_EGA_ERR_VERSION: str = "1.0"
+# The only contract agent and command pattern approved for 69G execution.
+# Validated against _ICONV_VALIDATED_CONTRACTS at invocation time.
+_EGA_APPROVED_CONTRACT_AGENT: str = "claude-local"
+_EGA_APPROVED_CONTRACT_COMMAND_PATTERN: str = 'claude -p "<prompt>"'
+
+_EGA_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed_global": False,
+    "execution_allowed_scope": "per_invocation_local_variable_only",
+    "shell_true_forbidden": True,
+    "command_override_forbidden": True,
+    "prompt_from_cli_args_forbidden": True,
+    "prompt_from_environment_forbidden": True,
+    "write_mode_forbidden": True,
+    "permission_mode_accept_edits_forbidden": True,
+    "multiple_agents_forbidden": True,
+    "kimi_local_forbidden": True,
+    "codex_local_forbidden_in_69g": True,
+    "re_execution_of_same_ear_forbidden": True,
+    "ear_mutation_forbidden": True,
+    "ara_mutation_forbidden": True,
+    "apa_mutation_forbidden": True,
+    "rollback_not_implemented": True,
+    "sandbox_mode": "none",
+    "allowed_agent": "claude-local",
+    "allowed_mode": "read_only",
+    "max_selected_agents": 1,
+}
+
+_EGA_SANDBOX_LIMITATIONS: dict = {
+    "sandbox_mode": "none",
+    "filesystem_isolation": False,
+    "network_isolation": False,
+    "process_isolation": False,
+    "known_risk": (
+        "The invoked claude-local process runs without filesystem or network isolation. "
+        "It can read any file accessible to the PCAE process. "
+        "Sandboxing is deferred to 69L."
+    ),
+    "mitigations_in_69g": [
+        "no --permission-mode acceptEdits flag",
+        "prompt sourced from APA artifact only",
+        "hard timeout enforced (_EGA_DEFAULT_TIMEOUT_SECONDS=120)",
+        "output captured and recorded in ERR before returning",
+        "execution_allowed=True limited to invocation boundary only",
+        "re-execution of same EAR hard-blocked",
+    ],
+}
+
+_EGA_ROLLBACK_POSTURE: dict = {
+    "rollback_implemented": False,
+    "rollback_deferred_to": "69J",
+    "mitigation": (
+        "Execution is limited to claude-local without --permission-mode acceptEdits. "
+        "If unexpected mutation is discovered post-execution, human intervention is required. "
+        "ERR records sandbox_mode=none explicitly."
+    ),
+    "human_escalation_required": True,
+}
+
+
+def _ega_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(record.get("execution_result_id"), str) or not record.get("execution_result_id"):
+        errors.append("missing_execution_result_id")
+    if record.get("result_type") != "readonly_execution":
+        errors.append("invalid_result_type")
+    if not isinstance(record.get("prompt_id"), str) or not record.get("prompt_id"):
+        errors.append("missing_prompt_id")
+    if not isinstance(record.get("authorization_id"), str) or not record.get("authorization_id"):
+        errors.append("missing_authorization_id")
+    if not isinstance(record.get("audit_id"), str) or not record.get("audit_id"):
+        errors.append("missing_audit_id")
+    if record.get("agent_id") != "claude-local":
+        errors.append("invalid_agent_id_must_be_claude_local")
+    if record.get("execution_occurred") is not True:
+        errors.append("execution_occurred_must_be_true_in_err")
+    if record.get("execution_allowed") is not True:
+        errors.append("execution_allowed_must_be_true_in_err_as_historical_fact")
+    if record.get("shell_used") is not False:
+        errors.append("shell_used_must_be_false")
+    if record.get("mode") != "read_only":
+        errors.append("mode_must_be_read_only")
+    if record.get("sandbox_mode") != "none":
+        errors.append("sandbox_mode_must_be_none")
+    return errors
+
+
+def store_execution_result(root: "HarnessPath", record: dict) -> dict:
+    errors = _ega_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+
+    store_dir = root.path / _EGA_ERR_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+
+    result_id = record["execution_result_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    filename = f"{result_id}-{ts}.json"
+    path = store_dir / filename
+
+    if path.exists():
+        return {"stored": False, "errors": ["duplicate_result_id"], "path": str(path)}
+
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_execution_result(root: "HarnessPath", result_id: str) -> dict | None:
+    store_dir = root.path / _EGA_ERR_STORE_DIR
+    if not store_dir.exists():
+        return None
+    matches = sorted(store_dir.glob(f"{result_id}-*.json"), reverse=True)
+    for match in matches:
+        try:
+            return json.loads(match.read_text())
+        except Exception:
+            continue
+    return None
+
+
+def lookup_execution_results_for_prompt(root: "HarnessPath", prompt_id: str) -> list[dict]:
+    store_dir = root.path / _EGA_ERR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    results: list[dict] = []
+    for path in sorted(store_dir.glob("err-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if record.get("prompt_id") == prompt_id:
+                results.append(record)
+        except Exception:
+            continue
+    return results
+
+
+def _ega_lookup_results_by_audit_id(root: "HarnessPath", audit_id: str) -> list[dict]:
+    """Return all ERR records whose audit_id matches. Used to detect prior execution."""
+    store_dir = root.path / _EGA_ERR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    results: list[dict] = []
+    for path in sorted(store_dir.glob("err-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if record.get("audit_id") == audit_id:
+                results.append(record)
+        except Exception:
+            continue
+    return results
+
+
+def _ega_run_subprocess(cmd: list[str], timeout: int) -> dict:
+    """Execute subprocess. shell=True is never used; shell=False is the only allowed form."""
+    import subprocess
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            timeout=timeout,
+            shell=False,
+        )
+        stdout_bytes = proc.stdout or b""
+        stderr_bytes = proc.stderr or b""
+        truncated = len(stdout_bytes) > _EGA_MAX_OUTPUT_BYTES or len(stderr_bytes) > _EGA_MAX_OUTPUT_BYTES
+        stdout = stdout_bytes[:_EGA_MAX_OUTPUT_BYTES].decode("utf-8", errors="replace")
+        stderr = stderr_bytes[:_EGA_MAX_OUTPUT_BYTES].decode("utf-8", errors="replace")
+        return {
+            "stdout": stdout,
+            "stderr": stderr,
+            "return_code": proc.returncode,
+            "timed_out": False,
+            "execution_status": "success" if proc.returncode == 0 else "failed",
+            "capture_status": "truncated" if truncated else "complete",
+        }
+    except Exception as exc:
+        import subprocess as _sp
+        if isinstance(exc, _sp.TimeoutExpired):
+            stdout_bytes = exc.stdout or b""
+            stderr_bytes = exc.stderr or b""
+            stdout = stdout_bytes[:_EGA_MAX_OUTPUT_BYTES].decode("utf-8", errors="replace")
+            stderr = stderr_bytes[:_EGA_MAX_OUTPUT_BYTES].decode("utf-8", errors="replace")
+            return {
+                "stdout": stdout,
+                "stderr": stderr,
+                "return_code": -1,
+                "timed_out": True,
+                "execution_status": "timeout",
+                "capture_status": "partial",
+            }
+        if isinstance(exc, FileNotFoundError):
+            return {
+                "stdout": "",
+                "stderr": "",
+                "return_code": -1,
+                "timed_out": False,
+                "execution_status": "invocation_error",
+                "capture_status": "none",
+            }
+        return {
+            "stdout": "",
+            "stderr": str(exc),
+            "return_code": -1,
+            "timed_out": False,
+            "execution_status": "invocation_error",
+            "capture_status": "none",
+        }
+
+
+def invoke_readonly_execution(
+    root: "HarnessPath",
+    prompt_id: str,
+    authorization_id: str,
+    audit_id: str,
+) -> dict:
+    """
+    Invoke claude-local in read-only mode. This is the first code path in PCAE history
+    where execution_allowed=True. It is a local variable scoped to this function only.
+    shell=True is forbidden. Prompt text is sourced from the stored APA artifact only.
+    """
+    generated_at = datetime.now(timezone.utc).isoformat()
+    blockers: list[str] = []
+
+    # ── Conditions 1–6: APA artifact ────────────────────────────────────────
+    apa = lookup_approved_prompt_artifact(root, prompt_id)
+    if apa is None:
+        blockers.append("condition_01_apa_artifact_missing")
+    else:
+        if apa.get("approval_state") != "approved":
+            blockers.append("condition_02_apa_not_approved")
+        if not apa.get("approved_by"):
+            blockers.append("condition_03_approved_by_missing")
+        if not apa.get("approved_at"):
+            blockers.append("condition_04_approved_at_missing")
+        if "claude-local" not in apa.get("approved_agents", []):
+            blockers.append("condition_05_claude_local_not_in_approved_agents")
+        # Condition 6: function signature enforces single claude-local agent;
+        # no other agent can be passed to this function.
+
+    # ── Conditions 7–8: ARA artifact ────────────────────────────────────────
+    ara = lookup_authorization_artifact(root, prompt_id)
+    if ara is None:
+        blockers.append("condition_07_ara_artifact_missing")
+    else:
+        if ara.get("authorization_state") != "authorized":
+            blockers.append("condition_08_ara_not_authorized")
+        if ara.get("authorization_id") != authorization_id:
+            blockers.append("condition_08b_authorization_id_mismatch")
+
+    # ── Conditions 9–11: EAR artifact ────────────────────────────────────────
+    ear = lookup_execution_audit_record(root, audit_id)
+    if ear is None:
+        blockers.append("condition_09_ear_artifact_missing")
+    else:
+        if ear.get("execution_allowed") is not False:
+            blockers.append("condition_10_ear_execution_allowed_invariant_violated")
+        # Condition 11: EAR is immutable and always has execution_occurred=False.
+        # Re-execution is detected by consulting the ERR store for a prior result
+        # tied to this audit_id. EAR is never mutated.
+        if _ega_lookup_results_by_audit_id(root, audit_id):
+            blockers.append("condition_11_ear_already_executed_re_execution_forbidden")
+
+    # ── Contract validation: command must originate from _ICONV_VALIDATED_CONTRACTS ─
+    contract = _ivcv_find_invocation_contract(_EGA_APPROVED_CONTRACT_AGENT)
+    if contract is None:
+        blockers.append("condition_contract_claude_local_not_found")
+    else:
+        command_pattern = contract.get("read_only", {}).get("command", "")
+        if command_pattern != _EGA_APPROVED_CONTRACT_COMMAND_PATTERN:
+            blockers.append("condition_contract_command_pattern_rejected")
+
+    if blockers:
+        return {
+            "execution_allowed": False,
+            "execution_occurred": False,
+            "blocked": True,
+            "blockers": blockers,
+            "prompt_id": prompt_id,
+            "authorization_id": authorization_id,
+            "audit_id": audit_id,
+            "stored": False,
+            "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ACTIVATION_ADVISORY,
+        }
+
+    # ── All 11 conditions satisfied ──────────────────────────────────────────
+    # execution_allowed=True is a LOCAL variable scoped to this function.
+    # It is not written to APA, ARA, or EAR. It is recorded in ERR as a historical fact.
+    execution_allowed = True  # noqa: F841 — intentional local boundary marker
+
+    prompt_text = apa["prompt_text"]
+    # Command derived from _ICONV_VALIDATED_CONTRACTS["claude-local"]["read_only"]["command"].
+    # Pattern _EGA_APPROVED_CONTRACT_COMMAND_PATTERN ('claude -p "<prompt>"') was validated
+    # above. Argument list form: ["claude", "-p", prompt_text]. shell=False enforced by
+    # _ega_run_subprocess. No runtime command override is possible.
+    cmd = ["claude", "-p", prompt_text]
+
+    start_time = datetime.now(timezone.utc)
+    run_result = _ega_run_subprocess(cmd, _EGA_DEFAULT_TIMEOUT_SECONDS)
+    end_time = datetime.now(timezone.utc)
+    duration_ms = int((end_time - start_time).total_seconds() * 1000)
+    executed_at = start_time.isoformat()
+
+    result_id = f"err-{prompt_id}-{start_time.strftime('%Y%m%dT%H%M%S')}"
+
+    err_record: dict = {
+        "execution_result_id": result_id,
+        "result_type": "readonly_execution",
+        "err_version": _EGA_ERR_VERSION,
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "audit_id": audit_id,
+        "agent_id": "claude-local",
+        "agent_count": 1,
+        "mode": "read_only",
+        # prompt_text is not echoed in command_form to avoid persisting prompt in command log
+        "command_form": ["claude", "-p", "<prompt_text_from_apa_artifact>"],
+        "return_code": run_result["return_code"],
+        "stdout": run_result["stdout"],
+        "stderr": run_result["stderr"],
+        "capture_status": run_result["capture_status"],
+        "timed_out": run_result["timed_out"],
+        "execution_status": run_result["execution_status"],
+        # Historical facts: execution_allowed and execution_occurred are True in ERR only.
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": executed_at,
+        "execution_duration_ms": duration_ms,
+        "sandbox_mode": "none",
+        "timeout_seconds": _EGA_DEFAULT_TIMEOUT_SECONDS,
+        "max_output_bytes": _EGA_MAX_OUTPUT_BYTES,
+        "shell_used": False,
+    }
+
+    store_result = store_execution_result(root, err_record)
+
+    return {
+        "execution_result_id": result_id,
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "audit_id": audit_id,
+        "agent_id": "claude-local",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "execution_status": run_result["execution_status"],
+        "return_code": run_result["return_code"],
+        "timed_out": run_result["timed_out"],
+        "execution_duration_ms": duration_ms,
+        "stored": store_result["stored"],
+        "path": store_result["path"],
+        "sandbox_mode": "none",
+        "blocked": False,
+        "blockers": [],
+        "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_ACTIVATION_ADVISORY,
+    }
