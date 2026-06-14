@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260614-0905-69e-authorization-recording
+20260614-0941-69f-execution-audit-recording
 
 ## Title
 
-69E Authorization Recording
+69F Execution Audit Recording
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-69E Authorization Recording
+69F Execution Audit Recording
 
 ## Allowed Files
 
@@ -30,19 +30,10 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/COMMANDS.md
-- docs/CAPABILITY_INVENTORY.md
-- docs/ROADMAP_REGISTRY.md
-- src/pcae/cli.py
-- src/pcae/commands/agent.py
-- src/pcae/core/agent.py
-- src/pcae/core/docs.py
-- tests/test_agent.py
-- tests/test_strategic_lineage.py
 
 ## Forbidden Files
 
-- none
+- TBD
 
 
 ## Allowed Zones
@@ -88,4 +79,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-14T09:05:56.176897+02:00
+2026-06-14T09:41:40.987908+02:00
