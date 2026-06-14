@@ -70093,6 +70093,24 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["execution-activation"],
         "dependencies": ["execution_audit_recording"],
+        "successor_capabilities": ["execution_result_governance"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Result Governance",
+        "implemented_phase": "69H",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+            "authorization-store",
+            "audit-record",
+            "execution-activation",
+            "execution-result-governance",
+        ],
+        "introduced_commands": ["execution-result-governance"],
+        "dependencies": ["readonly_execution_activation"],
         "successor_capabilities": [],
     },
 )
@@ -71093,8 +71111,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69G",
         "phase_title": "Execution Activation",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69F",
+        "successor": "69H",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69H",
+        "phase_title": "Execution Result Governance",
+        "status": "active",
+        "predecessor": "69G",
         "successor": "",
         "superseded_by": "",
     },
@@ -72198,7 +72225,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_audit_recording",
         ],
-        "successors": [],
+        "successors": ["execution_result_governance"],
         "aliases": [],
         "contribution": (
             "first phase where execution_allowed=True is set; invokes claude-local in read-only "
@@ -72207,6 +72234,30 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "valid APA, ARA, and EAR artifacts; output captured and persisted as "
             "ExecutionResultRecord in .pcae/results/; sandbox_mode=none documented; "
             "re-execution of same EAR is hard-blocked in 69G; EAR and ARA remain immutable"
+        ),
+    },
+    {
+        "capability_name": "Execution Result Governance",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69H",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-result-governance --result-id <id>",
+            "pcae execution-result-governance --result-id <id> --json",
+        ],
+        "dependencies": [
+            "readonly_execution_activation",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "classifies ExecutionResultRecord outcomes on two independent axes: "
+            "technical_status (success/failed/timeout/invocation_error/indeterminate) and "
+            "governance_attention (clear/requires_attention/requires_review); "
+            "adds governance_severity (low/medium/high/critical) as a third informational axis; "
+            "surfaces attention_signals explaining the classification; "
+            "entirely read-only — no ERR, APA, ARA, or EAR state is mutated; "
+            "no subprocess is invoked; result_review_does_not_authorize_execution=True"
         ),
     },
     {
@@ -74575,7 +74626,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69G",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69G-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69G",
@@ -74583,7 +74634,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69G",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69G-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69G",
@@ -74591,10 +74642,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69G",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69G-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69G",
+    },
+    {
+        "phase_id": "69H",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69H-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69H",
+    },
+    {
+        "phase_id": "69H",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69H-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69H",
+    },
+    {
+        "phase_id": "69H",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69H-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69H",
     },
 )
 
@@ -80457,7 +80532,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69G",
+        "current_phase": "69H",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81156,6 +81231,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "requires all 11 conditions including valid APA, ARA, and EAR; "
             "output captured in ExecutionResultRecord at .pcae/results/; "
             "re-execution of same EAR is hard-blocked; sandbox_mode=none documented"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_result_governance",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "classifies ERR outcomes on technical_status and governance_attention axes; "
+            "adds governance_severity; surfaces attention_signals; "
+            "entirely read-only; no subprocess; no state mutation"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -89574,4 +89661,230 @@ def invoke_readonly_execution(
         "blockers": [],
         "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ACTIVATION_ADVISORY,
+    }
+
+
+# ── Phase 69H: Execution Result Governance ───────────────────────────────────
+
+_ERG_PHASE_ID: str = "69H"
+
+_ERG_TECHNICAL_STATUS_VALUES: frozenset[str] = frozenset({
+    "success",
+    "failed",
+    "timeout",
+    "invocation_error",
+    "indeterminate",
+})
+
+_ERG_GOVERNANCE_ATTENTION_VALUES: frozenset[str] = frozenset({
+    "clear",
+    "requires_attention",
+    "requires_review",
+})
+
+_ERG_GOVERNANCE_SEVERITY_VALUES: frozenset[str] = frozenset({
+    "low",
+    "medium",
+    "high",
+    "critical",
+})
+
+_ERG_REQUIRED_ERR_FIELDS: frozenset[str] = frozenset({
+    "execution_result_id",
+    "return_code",
+    "timed_out",
+    "execution_status",
+    "capture_status",
+    "execution_occurred",
+    "stdout",
+    "stderr",
+})
+
+_ERG_GOVERNANCE_BOUNDARIES: dict = {
+    "result_governance_does_not_execute": True,
+    "result_review_does_not_authorize_execution": True,
+    "err_success_does_not_imply_governance_acceptance": True,
+    "return_code_zero_is_not_governance_approval": True,
+    "stderr_presence_requires_attention": True,
+    "timeout_requires_attention": True,
+    "invocation_error_requires_attention": True,
+    "result_review_can_not_modify_files": True,
+    "result_review_can_not_commit": True,
+    "result_review_can_not_push": True,
+    "follow_on_execution_requires_new_authorization": True,
+    "automatic_acceptance_allowed": False,
+}
+
+EXECUTION_RESULT_GOVERNANCE_ADVISORY: str = (
+    "Execution result governance classifies ExecutionResultRecord outcomes on two independent "
+    "axes: technical_status (objective subprocess outcome) and governance_attention (conservative "
+    "human-attention signal). technical_status=success does not imply governance_attention=clear "
+    "when warning signals are present. No ERR, APA, ARA, or EAR state is modified. "
+    "No subprocess is invoked. result_review_does_not_authorize_execution=True. "
+    "follow_on_execution_requires_new_authorization=True."
+)
+
+
+def _erg_validate_err_fields(record: dict) -> list[str]:
+    missing = [f for f in _ERG_REQUIRED_ERR_FIELDS if f not in record]
+    return [f"missing_required_field:{f}" for f in missing]
+
+
+def _erg_classify_technical_status(record: dict) -> str:
+    if record.get("execution_status") == "invocation_error":
+        return "invocation_error"
+    if record.get("timed_out") is True:
+        return "timeout"
+    if record.get("execution_occurred") is False:
+        return "indeterminate"
+    if record.get("capture_status") == "failed":
+        return "indeterminate"
+    rc = record.get("return_code")
+    if rc == 0 and record.get("capture_status") in ("captured", "complete"):
+        return "success"
+    if rc != 0:
+        return "failed"
+    return "indeterminate"
+
+
+def _erg_compute_attention_signals(record: dict, technical_status: str) -> list[str]:
+    signals: list[str] = []
+    if technical_status == "timeout":
+        signals.append("timeout_detected")
+    if technical_status == "invocation_error":
+        signals.append("invocation_error_detected")
+    if technical_status in ("indeterminate",) and record.get("capture_status") == "failed":
+        signals.append("capture_failed")
+    if record.get("capture_status") in ("truncated", "partial"):
+        signals.append("output_truncated")
+    if record.get("stderr"):
+        signals.append("stderr_present")
+    if technical_status == "success" and not record.get("stdout"):
+        signals.append("stdout_empty")
+    if technical_status == "failed":
+        signals.append("execution_failed")
+    return signals
+
+
+def _erg_classify_governance_attention(technical_status: str, signals: list[str]) -> str:
+    if technical_status in ("failed", "timeout", "invocation_error", "indeterminate"):
+        return "requires_review"
+    review_signals = {"execution_failed", "timeout_detected", "invocation_error_detected", "capture_failed"}
+    if any(s in review_signals for s in signals):
+        return "requires_review"
+    attention_signals = {"stderr_present", "stdout_empty", "output_truncated"}
+    if any(s in attention_signals for s in signals):
+        return "requires_attention"
+    return "clear"
+
+
+def _erg_classify_governance_severity(technical_status: str, signals: list[str]) -> str:
+    if technical_status == "indeterminate":
+        return "critical"
+    if technical_status in ("failed", "timeout", "invocation_error"):
+        return "high"
+    attention_signals = {"stderr_present", "stdout_empty", "output_truncated"}
+    if any(s in attention_signals for s in signals):
+        return "medium"
+    return "low"
+
+
+def _erg_build_classification_basis(record: dict, technical_status: str) -> dict:
+    return {
+        "return_code": record.get("return_code"),
+        "timed_out": record.get("timed_out"),
+        "execution_status": record.get("execution_status"),
+        "capture_status": record.get("capture_status"),
+        "execution_occurred": record.get("execution_occurred"),
+        "stderr_present": bool(record.get("stderr")),
+        "stdout_empty": not bool(record.get("stdout")),
+        "technical_status_derived_from": _erg_primary_basis(record, technical_status),
+    }
+
+
+def _erg_primary_basis(record: dict, technical_status: str) -> str:
+    if technical_status == "invocation_error":
+        return "execution_status==invocation_error"
+    if technical_status == "timeout":
+        return "timed_out==True"
+    if technical_status == "indeterminate" and record.get("execution_occurred") is False:
+        return "execution_occurred==False"
+    if technical_status == "indeterminate" and record.get("capture_status") == "failed":
+        return "capture_status==failed"
+    if technical_status == "success":
+        return "return_code==0 AND capture_status==captured"
+    if technical_status == "failed":
+        return f"return_code=={record.get('return_code')}"
+    return "indeterminate_fallback"
+
+
+def _erg_check_duplicate_errs(root: "HarnessPath", record: dict) -> list[str]:
+    audit_id = record.get("audit_id")
+    if not audit_id:
+        return []
+    existing = _ega_lookup_results_by_audit_id(root, audit_id)
+    result_id = record.get("execution_result_id")
+    duplicates = [r for r in existing if r.get("execution_result_id") != result_id]
+    if duplicates:
+        return ["duplicate_err_detected"]
+    return []
+
+
+def build_execution_result_governance(
+    root: "HarnessPath",
+    execution_result_id: str,
+) -> dict:
+    """
+    Classify an ExecutionResultRecord on two independent axes:
+    technical_status and governance_attention. Read-only; no state is mutated.
+    No subprocess is invoked. No file writes.
+    """
+    record = lookup_execution_result(root, execution_result_id)
+    if record is None:
+        return {
+            "execution_result_id": execution_result_id,
+            "error": "err_not_found",
+            "technical_status": "indeterminate",
+            "governance_attention": "requires_review",
+            "governance_severity": "critical",
+            "attention_signals": ["err_not_found"],
+            "classification_basis": {},
+            "governance_boundaries": dict(_ERG_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_RESULT_GOVERNANCE_ADVISORY,
+        }
+
+    field_errors = _erg_validate_err_fields(record)
+    if field_errors:
+        return {
+            "execution_result_id": execution_result_id,
+            "error": "malformed_err",
+            "technical_status": "indeterminate",
+            "governance_attention": "requires_review",
+            "governance_severity": "critical",
+            "attention_signals": ["malformed_err"] + field_errors,
+            "classification_basis": {},
+            "governance_boundaries": dict(_ERG_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_RESULT_GOVERNANCE_ADVISORY,
+        }
+
+    technical_status = _erg_classify_technical_status(record)
+    signals = _erg_compute_attention_signals(record, technical_status)
+    duplicate_signals = _erg_check_duplicate_errs(root, record)
+    if duplicate_signals:
+        signals = signals + duplicate_signals
+        technical_status = "indeterminate"
+
+    governance_attention = _erg_classify_governance_attention(technical_status, signals)
+    governance_severity = _erg_classify_governance_severity(technical_status, signals)
+    classification_basis = _erg_build_classification_basis(record, technical_status)
+
+    return {
+        "execution_result_id": execution_result_id,
+        "technical_status": technical_status,
+        "governance_attention": governance_attention,
+        "governance_severity": governance_severity,
+        "attention_signals": signals,
+        "classification_basis": classification_basis,
+        "governance_boundaries": dict(_ERG_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_RESULT_GOVERNANCE_ADVISORY,
     }

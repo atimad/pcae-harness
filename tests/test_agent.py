@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69G" in output
+    assert "69H" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -52412,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -52518,16 +52518,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52757,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -53060,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -53333,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -53656,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -54059,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -54386,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
 
 
@@ -54589,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69G" in active_drift[0]
+    assert "69H" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54709,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
     assert branch["current_phase"] == "65J"
 
 
@@ -55178,8 +55178,8 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
         f"68A added challenge_attention_architecture, 68B added challenge_attention_rendering_integration, "
@@ -56680,7 +56680,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56940,7 +56940,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57252,7 +57252,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69G"
+    assert current["phase_id"] == "69H"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -58148,8 +58148,8 @@ def test_69d_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69d_map_count_is_60(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_pathway_integration"),
@@ -58433,8 +58433,8 @@ def test_69e_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69e_map_count_is_61(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_authorization_recording"),
@@ -58828,8 +58828,8 @@ def test_69f_cli_list_by_prompt_json(tmp_path, monkeypatch, capsys) -> None:
 def test_69f_map_count_is_62(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_audit_recording"),
@@ -58987,8 +58987,9 @@ def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
 
     phase_69g = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69G"), None)
     assert phase_69g is not None, "69G must be registered in _CRI_KNOWN_PHASES"
-    assert phase_69g["status"] == "active"
+    assert phase_69g["status"] == "completed"
     assert phase_69g["predecessor"] == "69F"
+    assert phase_69g["successor"] == "69H"
 
     phase_69f = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69F"), None)
     assert phase_69f is not None
@@ -58999,8 +59000,8 @@ def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
 def test_69g_map_count_is_63(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 63, (
-        f"Expected 63 map entries after 69G, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "readonly_execution_activation"),
@@ -59640,4 +59641,395 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69G"
+    assert data["current_phase"]["phase_id"] == "69H"
+
+
+# ── Phase 69H: Execution Result Governance ───────────────────────────────────
+
+def _make_err_record(
+    *,
+    result_id: str = "err-test-prompt-20260615T090000",
+    return_code: int = 0,
+    timed_out: bool = False,
+    execution_status: str = "success",
+    capture_status: str = "captured",
+    execution_occurred: bool = True,
+    stdout: str = "output",
+    stderr: str = "",
+    audit_id: str = "ear-test-20260615T090000",
+) -> dict:
+    return {
+        "execution_result_id": result_id,
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "test-prompt",
+        "authorization_id": "auth-test-20260615T090000",
+        "audit_id": audit_id,
+        "agent_id": "claude-local",
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt>"],
+        "return_code": return_code,
+        "stdout": stdout,
+        "stderr": stderr,
+        "capture_status": capture_status,
+        "timed_out": timed_out,
+        "execution_status": execution_status,
+        "execution_allowed": True,
+        "execution_occurred": execution_occurred,
+        "executed_at": "2026-06-15T09:00:00+00:00",
+        "execution_duration_ms": 1500,
+        "sandbox_mode": "none",
+        "shell_used": False,
+    }
+
+
+def _store_err(root, record: dict) -> None:
+    from pcae.core.agent import store_execution_result
+    result = store_execution_result(root, record)
+    assert result["stored"] is True, f"Store failed: {result['errors']}"
+
+
+def test_69h_phase_is_active_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase_69h = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69H"), None)
+    assert phase_69h is not None, "69H must be registered in _CRI_KNOWN_PHASES"
+    assert phase_69h["status"] == "active"
+    assert phase_69h["predecessor"] == "69G"
+
+    phase_69g = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69G"), None)
+    assert phase_69g is not None
+    assert phase_69g["status"] == "completed"
+    assert phase_69g["successor"] == "69H"
+
+
+def test_69h_map_count_is_64(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
+        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_result_governance"),
+        None,
+    )
+    assert entry is not None, "execution_result_governance must be in _SRG_CAPABILITY_OBJECTIVE_MAP"
+
+
+def test_69h_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "69H"),
+        None,
+    )
+    assert cap is not None, "69H capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_domain"] == "execution_governance"
+    assert "execution-result-governance" in cap["introduced_commands"]
+
+
+def test_69h_constants_defined(tmp_path) -> None:
+    from pcae.core.agent import _ERG_PHASE_ID, _ERG_GOVERNANCE_BOUNDARIES
+
+    assert _ERG_PHASE_ID == "69H"
+    assert _ERG_GOVERNANCE_BOUNDARIES["result_governance_does_not_execute"] is True
+    assert _ERG_GOVERNANCE_BOUNDARIES["result_review_does_not_authorize_execution"] is True
+    assert _ERG_GOVERNANCE_BOUNDARIES["automatic_acceptance_allowed"] is False
+
+
+def test_69h_return_code_zero_is_technical_success(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_technical_status
+
+    record = _make_err_record(return_code=0, capture_status="captured")
+    assert _erg_classify_technical_status(record) == "success"
+
+
+def test_69h_return_code_nonzero_is_technical_failure(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_technical_status
+
+    record = _make_err_record(return_code=1, execution_status="failed")
+    assert _erg_classify_technical_status(record) == "failed"
+
+
+def test_69h_timeout_classification(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_technical_status
+
+    record = _make_err_record(timed_out=True, return_code=-1, execution_status="timeout")
+    assert _erg_classify_technical_status(record) == "timeout"
+
+
+def test_69h_invocation_error_classification(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_technical_status
+
+    record = _make_err_record(execution_status="invocation_error", return_code=-1)
+    assert _erg_classify_technical_status(record) == "invocation_error"
+
+
+def test_69h_malformed_err_is_indeterminate(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    # Write a malformed ERR directly (bypassing _ega_validate)
+    import json
+    pcae_dir = tmp_path / ".pcae" / "results"
+    pcae_dir.mkdir(parents=True, exist_ok=True)
+    malformed = {"execution_result_id": "err-malformed-20260615T090000"}
+    (pcae_dir / "err-malformed-20260615T090000-20260615T090000000000.json").write_text(
+        json.dumps(malformed)
+    )
+    result = build_execution_result_governance(root, "err-malformed-20260615T090000")
+    assert result["technical_status"] == "indeterminate"
+    assert result["governance_attention"] == "requires_review"
+    assert result["governance_severity"] == "critical"
+    assert "malformed_err" in result["attention_signals"]
+
+
+def test_69h_missing_err_surfaces_error(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    result = build_execution_result_governance(root, "err-does-not-exist")
+    assert result["error"] == "err_not_found"
+    assert result["technical_status"] == "indeterminate"
+    assert result["governance_attention"] == "requires_review"
+    assert result["governance_severity"] == "critical"
+
+
+def test_69h_clean_success_is_clear(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="results here", stderr="")
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert result["technical_status"] == "success"
+    assert result["governance_attention"] == "clear"
+    assert result["governance_severity"] == "low"
+    assert result["attention_signals"] == []
+
+
+def test_69h_stderr_with_success_requires_attention(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(
+        result_id="err-test-stderr-20260615T090000",
+        return_code=0,
+        stdout="output",
+        stderr="warning: something happened",
+    )
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert result["technical_status"] == "success"
+    assert result["governance_attention"] == "requires_attention"
+    assert "stderr_present" in result["attention_signals"]
+
+
+def test_69h_success_plus_stderr_does_not_imply_clear(tmp_path, monkeypatch) -> None:
+    """technical_status=success does not imply governance_attention=clear when stderr is present."""
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(
+        result_id="err-test-stderr2-20260615T090000",
+        return_code=0,
+        stdout="ok",
+        stderr="deprecation warning",
+    )
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert result["technical_status"] == "success"
+    assert result["governance_attention"] != "clear"
+
+
+def test_69h_empty_stdout_requires_attention(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(
+        result_id="err-test-empty-stdout-20260615T090000",
+        return_code=0,
+        stdout="",
+        stderr="",
+    )
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert result["technical_status"] == "success"
+    assert result["governance_attention"] == "requires_attention"
+    assert "stdout_empty" in result["attention_signals"]
+
+
+def test_69h_truncated_output_requires_attention(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(
+        result_id="err-test-truncated-20260615T090000",
+        return_code=0,
+        stdout="partial output",
+        stderr="",
+        capture_status="truncated",
+    )
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert result["governance_attention"] in ("requires_attention", "requires_review")
+    assert "output_truncated" in result["attention_signals"]
+
+
+def test_69h_governance_acceptance_is_never_automatic(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance, _ERG_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok", stderr="")
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert _ERG_GOVERNANCE_BOUNDARIES["automatic_acceptance_allowed"] is False
+    assert _ERG_GOVERNANCE_BOUNDARIES["err_success_does_not_imply_governance_acceptance"] is True
+    assert result["governance_attention"] != "accepted"
+
+
+def test_69h_governance_does_not_enable_execution(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance, _ERG_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+    result = build_execution_result_governance(root, record["execution_result_id"])
+    assert _ERG_GOVERNANCE_BOUNDARIES["result_governance_does_not_execute"] is True
+    assert _ERG_GOVERNANCE_BOUNDARIES["result_review_does_not_authorize_execution"] is True
+    assert "execution_allowed" not in result
+
+
+def test_69h_governance_does_not_modify_files(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    results_dir = tmp_path / ".pcae" / "results"
+    before = {p.name: p.read_bytes() for p in results_dir.iterdir()}
+
+    build_execution_result_governance(root, record["execution_result_id"])
+
+    after = {p.name: p.read_bytes() for p in results_dir.iterdir()}
+    assert before == after
+
+
+def test_69h_governance_severity_mapping(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_governance_severity
+
+    assert _erg_classify_governance_severity("success", []) == "low"
+    assert _erg_classify_governance_severity("success", ["stderr_present"]) == "medium"
+    assert _erg_classify_governance_severity("failed", []) == "high"
+    assert _erg_classify_governance_severity("timeout", []) == "high"
+    assert _erg_classify_governance_severity("invocation_error", []) == "high"
+    assert _erg_classify_governance_severity("indeterminate", []) == "critical"
+
+
+def test_69h_technical_and_governance_axes_are_independent(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import _erg_classify_technical_status, _erg_classify_governance_attention
+
+    record = _make_err_record(return_code=0, stdout="ok", stderr="warning")
+    ts = _erg_classify_technical_status(record)
+    signals = ["stderr_present"]
+    ga = _erg_classify_governance_attention(ts, signals)
+
+    assert ts == "success"
+    assert ga == "requires_attention"
+    assert ts != ga
+
+
+def test_69h_duplicate_err_detected(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_result_governance, store_execution_result
+    from pcae.core.paths import HarnessPath
+    import time
+
+    root = HarnessPath(tmp_path)
+    shared_audit_id = "ear-shared-20260615T090000"
+    record1 = _make_err_record(
+        result_id="err-dup-1-20260615T090000",
+        audit_id=shared_audit_id,
+        return_code=0,
+        stdout="ok",
+    )
+    _store_err(root, record1)
+    time.sleep(0.01)
+    record2 = _make_err_record(
+        result_id="err-dup-2-20260615T090001",
+        audit_id=shared_audit_id,
+        return_code=0,
+        stdout="ok",
+    )
+    _store_err(root, record2)
+
+    result = build_execution_result_governance(root, record2["execution_result_id"])
+    assert "duplicate_err_detected" in result["attention_signals"]
+    assert result["technical_status"] == "indeterminate"
+    assert result["governance_attention"] == "requires_review"
+
+
+def test_69h_no_subprocess_execution(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    import subprocess as _sp
+    from pcae.core.agent import build_execution_result_governance
+    from pcae.core.paths import HarnessPath
+
+    called = []
+
+    def mock_run(*args, **kwargs):
+        called.append(args)
+        raise AssertionError("subprocess.run must not be called by ERG")
+
+    monkeypatch.setattr(_sp, "run", mock_run)
+
+    root = HarnessPath(tmp_path)
+    build_execution_result_governance(root, "err-no-such-id")
+    assert called == [], "ERG must not invoke any subprocess"
+
+
+def test_69h_governance_boundaries_are_complete(tmp_path) -> None:
+    from pcae.core.agent import _ERG_GOVERNANCE_BOUNDARIES
+
+    required = {
+        "result_governance_does_not_execute",
+        "result_review_does_not_authorize_execution",
+        "err_success_does_not_imply_governance_acceptance",
+        "return_code_zero_is_not_governance_approval",
+        "stderr_presence_requires_attention",
+        "timeout_requires_attention",
+        "invocation_error_requires_attention",
+        "result_review_can_not_modify_files",
+        "result_review_can_not_commit",
+        "result_review_can_not_push",
+        "follow_on_execution_requires_new_authorization",
+        "automatic_acceptance_allowed",
+    }
+    assert required.issubset(set(_ERG_GOVERNANCE_BOUNDARIES.keys()))

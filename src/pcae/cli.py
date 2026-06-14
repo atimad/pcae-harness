@@ -71,6 +71,7 @@ from pcae.commands.agent import (
     run_execution_activation_invoke,
     run_execution_activation_show,
     run_execution_activation_list,
+    run_execution_result_governance,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2125,6 +2126,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     ea_list_parser.set_defaults(handler=run_execution_activation_list)
+
+    erg_parser = subparsers.add_parser(
+        "execution-result-governance",
+        help=(
+            "Classify an ExecutionResultRecord on technical and governance axes (Phase 69H). "
+            "Read-only: no ERR state is modified."
+        ),
+    )
+    erg_parser.add_argument("--result-id", required=True, help="ExecutionResultRecord ID to classify.")
+    erg_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    erg_parser.set_defaults(handler=run_execution_result_governance)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

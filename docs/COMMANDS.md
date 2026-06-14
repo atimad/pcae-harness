@@ -483,6 +483,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae execution-activation list --prompt-id <id>`
 - `pcae execution-activation list --prompt-id <id> --json`
 
+## execution-result-governance
+
+- `pcae execution-result-governance --result-id <id>`
+- `pcae execution-result-governance --result-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

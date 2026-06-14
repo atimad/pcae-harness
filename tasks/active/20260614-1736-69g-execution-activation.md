@@ -6,7 +6,7 @@
 
 ## Title
 
-69G Execution Activation
+69H Execution Result Governance
 
 ## Status
 
@@ -18,11 +18,13 @@ implementation
 
 ## Goal
 
-69G Execution Activation
+69H Execution Result Governance
 
 ## Allowed Files
 
 - .pcae/session.json
+- .pcae/strategic-lineage.json
+- .pcae/provenance-history.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -38,6 +40,7 @@ implementation
 - src/pcae/core/agent.py
 - src/pcae/core/docs.py
 - tests/test_agent.py
+- tests/test_strategic_lineage.py
 
 ## Forbidden Files
 

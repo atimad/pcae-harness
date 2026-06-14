@@ -121,6 +121,8 @@ from pcae.core.agent import (
     lookup_execution_result,
     lookup_execution_results_for_prompt,
     EXECUTION_ACTIVATION_ADVISORY,
+    build_execution_result_governance,
+    EXECUTION_RESULT_GOVERNANCE_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4846,6 +4848,48 @@ def run_execution_activation_list(args: argparse.Namespace) -> int:
         print("  (none)")
     print()
     print(EXECUTION_ACTIVATION_ADVISORY)
+    return 0
+
+
+def run_execution_result_governance(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_result_governance(HarnessPath.cwd(), args.result_id)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    if data.get("error") == "err_not_found":
+        print(f"ExecutionResultGovernance: ERR NOT FOUND")
+        print(f"  result_id:            {data['execution_result_id']}")
+        print(f"  governance_attention: {data['governance_attention']}")
+        print(f"  governance_severity:  {data['governance_severity']}")
+        print()
+        print(EXECUTION_RESULT_GOVERNANCE_ADVISORY)
+        return 1
+
+    if data.get("error") == "malformed_err":
+        print(f"ExecutionResultGovernance: MALFORMED ERR")
+        print(f"  result_id:            {data['execution_result_id']}")
+        print(f"  governance_attention: {data['governance_attention']}")
+        print(f"  governance_severity:  {data['governance_severity']}")
+        for sig in data.get("attention_signals", []):
+            print(f"    - {sig}")
+        print()
+        print(EXECUTION_RESULT_GOVERNANCE_ADVISORY)
+        return 1
+
+    print(f"ExecutionResultGovernance")
+    print(f"  result_id:            {data['execution_result_id']}")
+    print(f"  technical_status:     {data['technical_status']}")
+    print(f"  governance_attention: {data['governance_attention']}")
+    print(f"  governance_severity:  {data['governance_severity']}")
+    if data.get("attention_signals"):
+        print(f"  attention_signals:")
+        for sig in data["attention_signals"]:
+            print(f"    - {sig}")
+    print()
+    print(EXECUTION_RESULT_GOVERNANCE_ADVISORY)
     return 0
 
 
