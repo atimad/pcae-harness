@@ -106,6 +106,10 @@ from pcae.core.agent import (
     INVOCATION_CONTRACT_VALIDATION_ADVISORY,
     build_execution_pathway_integration,
     EXECUTION_PATHWAY_INTEGRATION_ADVISORY,
+    authorize_execution_candidate,
+    store_authorization_artifact,
+    lookup_authorization_artifact,
+    AUTHORIZATION_STORE_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4645,6 +4649,34 @@ def run_execution_pathway_integration(args: argparse.Namespace) -> int:
         print()
         print(data["advisory"])
     return 0
+
+
+def run_authorization_store_write(args: argparse.Namespace) -> int:
+    result = authorize_execution_candidate(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        list(args.selected_agents or []),
+        args.authorized_by,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print("Authorization store")
+        print(f"Prompt: {result['prompt_id']}")
+        print(f"State: {result['authorization_state']}")
+        if result["authorization_state"] == "authorized":
+            print(f"Authorization ID: {result['authorization_id']}")
+            print(f"Authorized by: {result['authorized_by']}")
+            print(f"Path: {result['path']}")
+        else:
+            print("Blockers:")
+            for blocker in result["blockers"]:
+                print(f"  - {blocker}")
+        print()
+        print(f"execution_allowed: {result['execution_allowed']}")
+        print()
+        print(AUTHORIZATION_STORE_ADVISORY)
+    return 0 if result["authorization_state"] == "authorized" else 1
 
 
 def run_live_execution_readiness(args: argparse.Namespace) -> int:

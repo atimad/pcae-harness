@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260614-0208-69d-execution-pathway-integration-architecture",
-    "title": "69D Execution Pathway Integration Architecture"
+    "id": "20260614-0905-69e-authorization-recording",
+    "title": "69E Authorization Recording"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69D Execution Pathway Integration Architecture",
+  "current_objective": "69E Authorization Recording",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -18,66 +18,26 @@
         "status": " M"
       },
       {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/ROADMAP_REGISTRY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
-        "status": " M"
-      },
-      {
         "path": "tasks/DONE.md",
         "status": " M"
       },
       {
-        "path": "tasks/active/20260613-0849-69c-invocation-contract-validation.md",
+        "path": "tasks/active/20260614-0208-69d-execution-pathway-integration-architecture.md",
         "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_strategic_lineage.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260614-0208-69d-execution-pathway-integration-architecture.md",
+        "path": "tasks/active/20260614-0905-69e-authorization-recording.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260613-0849-69c-invocation-contract-validation.md",
+        "path": "tasks/done/20260614-0208-69d-execution-pathway-integration-architecture.md",
         "status": "??"
       }
     ],
-    "status_summary": "16 changed files"
+    "status_summary": "6 changed files"
   },
-  "last_completed_step": "Completed task 20260613-0849-69c-invocation-contract-validation: 69C Invocation Contract Validation",
-  "next_recommended_step": "Continue active task 20260614-0208-69d-execution-pathway-integration-architecture.",
-  "timestamp": "2026-06-14T00:08:41.709748+00:00",
+  "last_completed_step": "Completed task 20260614-0208-69d-execution-pathway-integration-architecture: 69D Execution Pathway Integration Architecture",
+  "next_recommended_step": "Continue active task 20260614-0905-69e-authorization-recording.",
+  "timestamp": "2026-06-14T07:05:56.202113+00:00",
   "warnings": []
 }

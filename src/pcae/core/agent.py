@@ -70045,6 +70045,21 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["execution-pathway-integration"],
         "dependencies": ["invocation_contract_validation"],
+        "successor_capabilities": ["execution_authorization_recording"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Authorization Recording",
+        "implemented_phase": "69E",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+            "authorization-store",
+        ],
+        "introduced_commands": ["authorization-store"],
+        "dependencies": ["execution_pathway_integration"],
         "successor_capabilities": [],
     },
 )
@@ -71018,8 +71033,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69D",
         "phase_title": "Execution Pathway Integration Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69C",
+        "successor": "69E",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69E",
+        "phase_title": "Authorization Recording",
+        "status": "active",
+        "predecessor": "69D",
         "successor": "",
         "superseded_by": "",
     },
@@ -72052,7 +72076,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "invocation_contract_validation",
         ],
-        "successors": [],
+        "successors": ["execution_authorization_recording"],
         "aliases": [],
         "contribution": (
             "integrates 69B approval store, 69C invocation contract validation, and gate "
@@ -72060,6 +72084,29 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "(gep-gate-001/005/006/007) must be satisfied for authorization_status to reach "
             "conditionally_authorized and execution_ready=True; execution_allowed=False "
             "invariant enforced at every pathway stage; audit_type=readiness_evaluation only"
+        ),
+    },
+    {
+        "capability_name": "Execution Authorization Recording",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69E",
+        "status": "implemented",
+        "commands": [
+            "pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id>",
+            "pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id> --json",
+        ],
+        "dependencies": [
+            "execution_pathway_integration",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "persists human authorization decisions for specific execution candidates; "
+            "authorize_execution_candidate calls build_execution_pathway_integration and "
+            "writes AuthorizationArtifact to .pcae/authorizations/ only when all four "
+            "gates pass and authorized_by is non-empty; duplicate active authorization "
+            "is blocked; execution_allowed=False invariant preserved; "
+            "authorization_is_execution=False enforced throughout"
         ),
     },
     {
@@ -74356,7 +74403,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69D",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69D-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69D",
@@ -74364,7 +74411,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69D",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69D-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69D",
@@ -74372,10 +74419,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69D",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69D-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69D",
+    },
+    {
+        "phase_id": "69E",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69E-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69E",
+    },
+    {
+        "phase_id": "69E",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69E-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69E",
+    },
+    {
+        "phase_id": "69E",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69E-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69E",
     },
 )
 
@@ -80238,7 +80309,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69D",
+        "current_phase": "69E",
         "approved_by": "",
         "approved_at": "",
     },
@@ -80896,6 +80967,20 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "authorization_status=conditionally_authorized only when gates 001/005/006/007 "
             "all satisfied; execution_allowed=False invariant preserved throughout; "
             "audit_type=readiness_evaluation only — no execution claimed"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_authorization_recording",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "persists human authorization decisions as AuthorizationArtifacts in "
+            ".pcae/authorizations/; authorize_execution_candidate requires all four gates "
+            "satisfied and non-empty authorized_by before writing; duplicate active "
+            "authorization blocked; execution_allowed=False and "
+            "authorization_is_execution=False invariants preserved"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -88263,3 +88348,189 @@ def build_challenge_attention_architecture(
         "advisory": _IRCA_ADVISORY,
         "execution_allowed": False,
     }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69E — Authorization Recording
+# ---------------------------------------------------------------------------
+
+AUTHORIZATION_STORE_ADVISORY: str = (
+    "Authorization store is write-only for artifact persistence; "
+    "no execution is triggered and execution_allowed remains False."
+)
+
+_ARA_STORE_DIR: Path = Path(".pcae") / "authorizations"
+_ARA_PHASE_ID: str = "69E"
+_ARA_VALID_STATES: frozenset[str] = frozenset({"authorized"})
+_ARA_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "authorization_implies_execution": False,
+    "authorization_is_execution": False,
+    "authorization_can_activate_runtime": False,
+    "auto_authorization_allowed": False,
+    "authorization_can_bypass_gates": False,
+    "authorization_can_bypass_human_approval": False,
+    "authorization_recording_is_not_execution_record": True,
+    "artifact_deletion_allowed": False,
+    "duplicate_authorization_allowed": False,
+    "gate_check_is_read_only": True,
+}
+
+
+def _ara_validate(artifact: dict) -> list[str]:
+    errors: list[str] = []
+    state = artifact.get("authorization_state", "")
+    if state not in _ARA_VALID_STATES:
+        errors.append(
+            f"invalid authorization_state: {state!r}; "
+            f"must be one of {sorted(_ARA_VALID_STATES)}"
+        )
+    if not artifact.get("authorization_id"):
+        errors.append("authorization_id must be non-empty")
+    if not artifact.get("prompt_id"):
+        errors.append("prompt_id must be non-empty")
+    selected_agents = artifact.get("selected_agents")
+    if not isinstance(selected_agents, list) or not selected_agents:
+        errors.append("selected_agents must be a non-empty list")
+    if not artifact.get("authorized_by"):
+        errors.append("authorized_by must be non-empty")
+    if not artifact.get("authorized_at"):
+        errors.append("authorized_at must be non-empty")
+    if not artifact.get("pathway_id"):
+        errors.append("pathway_id must be non-empty")
+    gate_snapshot = artifact.get("gate_snapshot")
+    if not isinstance(gate_snapshot, list) or not gate_snapshot:
+        errors.append("gate_snapshot must be a non-empty list")
+    if artifact.get("execution_allowed") is not False:
+        errors.append("execution_allowed must be False")
+    return errors
+
+
+def store_authorization_artifact(root: "HarnessPath", artifact: dict) -> dict:
+    errors = _ara_validate(artifact)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _ARA_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    prompt_id = artifact["prompt_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    filename = f"{prompt_id}-{ts}.json"
+    path = store_dir / filename
+    record = dict(artifact)
+    record["stored_at"] = datetime.now(timezone.utc).isoformat()
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(record, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    return {
+        "stored": True,
+        "errors": [],
+        "path": str(path.relative_to(root.path)),
+    }
+
+
+def lookup_authorization_artifact(root: "HarnessPath", prompt_id: str) -> dict | None:
+    store_dir = root.path / _ARA_STORE_DIR
+    if not store_dir.exists():
+        return None
+    candidates = sorted(
+        store_dir.glob(f"{prompt_id}-*.json"),
+        key=lambda p: p.name,
+        reverse=True,
+    )
+    for cand_path in candidates:
+        with cand_path.open(encoding="utf-8") as fh:
+            record = json.load(fh)
+        if record.get("authorization_state") == "authorized":
+            return record
+    return None
+
+
+def authorize_execution_candidate(
+    root: "HarnessPath",
+    prompt_id: str,
+    selected_agents: "list[str] | tuple[str, ...]",
+    authorized_by: str,
+) -> dict:
+    generated_at = datetime.now(timezone.utc).isoformat()
+    normalized_agents = list(selected_agents)
+
+    blockers: list[str] = []
+
+    if not authorized_by or not authorized_by.strip():
+        blockers.append("missing_authorized_by")
+
+    existing = lookup_authorization_artifact(root, prompt_id)
+    if existing is not None:
+        blockers.append("duplicate_active_authorization")
+
+    pathway_data = build_execution_pathway_integration(root, prompt_id, normalized_agents)
+    gate_results = pathway_data.get("gate_results", [])
+    blocked_gates = [g["gate_id"] for g in gate_results if g["status"] != "satisfied"]
+    if blocked_gates:
+        for gate_id in blocked_gates:
+            blockers.append(f"gate_blocked:{gate_id}")
+
+    if blockers:
+        return {
+            "authorization_state": "blocked",
+            "prompt_id": prompt_id,
+            "selected_agents": normalized_agents,
+            "authorized_by": authorized_by,
+            "blockers": blockers,
+            "pathway_id": pathway_data.get("pathway_id", ""),
+            "gate_results": gate_results,
+            "stored": False,
+            "path": None,
+            "execution_allowed": False,
+            "authorization_is_execution": False,
+            "human_review_required": True,
+            "governance_boundaries": dict(_ARA_GOVERNANCE_BOUNDARIES),
+            "advisory": AUTHORIZATION_STORE_ADVISORY,
+        }
+
+    authorization_id = f"auth-{prompt_id}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    artifact = {
+        "authorization_id": authorization_id,
+        "authorization_state": "authorized",
+        "prompt_id": prompt_id,
+        "selected_agents": normalized_agents,
+        "authorized_by": authorized_by.strip(),
+        "authorized_at": generated_at,
+        "task_id": _get_active_task_id(root),
+        "pathway_id": pathway_data.get("pathway_id", ""),
+        "gate_snapshot": gate_results,
+        "execution_allowed": False,
+    }
+    store_result = store_authorization_artifact(root, artifact)
+
+    return {
+        "authorization_id": authorization_id,
+        "authorization_state": "authorized",
+        "prompt_id": prompt_id,
+        "selected_agents": normalized_agents,
+        "authorized_by": authorized_by.strip(),
+        "authorized_at": generated_at,
+        "task_id": artifact["task_id"],
+        "pathway_id": artifact["pathway_id"],
+        "gate_results": gate_results,
+        "blockers": [],
+        "stored": store_result["stored"],
+        "path": store_result["path"],
+        "execution_allowed": False,
+        "authorization_is_execution": False,
+        "human_review_required": True,
+        "governance_boundaries": dict(_ARA_GOVERNANCE_BOUNDARIES),
+        "advisory": AUTHORIZATION_STORE_ADVISORY,
+    }
+
+
+def _get_active_task_id(root: "HarnessPath") -> str:
+    try:
+        session_path = root.path / ".pcae" / "session.json"
+        if session_path.exists():
+            with session_path.open(encoding="utf-8") as fh:
+                session = json.load(fh)
+            return session.get("active_task_id", "")
+    except Exception:
+        pass
+    return ""

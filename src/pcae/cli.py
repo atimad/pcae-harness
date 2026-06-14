@@ -63,6 +63,7 @@ from pcae.commands.agent import (
     run_human_agent_execution_design,
     run_governed_execution_pilot,
     run_approval_store_write,
+    run_authorization_store_write,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -1952,6 +1953,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     approval_store_write_parser.set_defaults(handler=run_approval_store_write)
+
+    authorization_store_parser = subparsers.add_parser(
+        "authorization-store",
+        help="Manage AuthorizationArtifact persistent storage (Phase 69E).",
+    )
+    authorization_store_subparsers = authorization_store_parser.add_subparsers(
+        dest="authorization_store_command"
+    )
+    authorization_store_write_parser = authorization_store_subparsers.add_parser(
+        "write",
+        help="Authorize an execution candidate and write the authorization artifact.",
+    )
+    authorization_store_write_parser.add_argument(
+        "--prompt-id",
+        required=True,
+        help="Prompt identifier to authorize.",
+    )
+    authorization_store_write_parser.add_argument(
+        "--authorized-by",
+        required=True,
+        help="Human authorizer identifier.",
+    )
+    authorization_store_write_parser.add_argument(
+        "--selected-agent",
+        dest="selected_agents",
+        action="append",
+        default=[],
+        help="Selected agent ID. Repeat for each selected agent.",
+    )
+    authorization_store_write_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    authorization_store_write_parser.set_defaults(handler=run_authorization_store_write)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

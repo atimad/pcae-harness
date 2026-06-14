@@ -454,6 +454,11 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae execution-pathway-integration --prompt-id <id> --selected-agent <id>`
 - `pcae execution-pathway-integration --prompt-id <id> --selected-agent <id> --json`
 
+## authorization-store
+
+- `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id>`
+- `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`
