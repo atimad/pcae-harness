@@ -104,6 +104,8 @@ from pcae.core.agent import (
     APPROVAL_STORE_ADVISORY,
     build_invocation_contract_validation,
     INVOCATION_CONTRACT_VALIDATION_ADVISORY,
+    build_execution_pathway_integration,
+    EXECUTION_PATHWAY_INTEGRATION_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -4613,6 +4615,33 @@ def run_invocation_contract_validation(args: argparse.Namespace) -> int:
         print("Authorization:")
         print(f"  status: {summary['authorization_status']}")
         print(f"  execution_allowed: {summary['execution_allowed']}")
+        print()
+        print(data["advisory"])
+    return 0
+
+
+def run_execution_pathway_integration(args: argparse.Namespace) -> int:
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        list(args.selected_agents or []),
+    )
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print("Execution pathway integration")
+        print(f"Pathway: {data['pathway_id']}")
+        print(f"Prompt: {data['prompt_id']}")
+        print(f"Selected agents: {', '.join(data['selected_agents'])}")
+        print()
+        print("Gate results:")
+        for gate in data["gate_results"]:
+            print(f"  {gate['gate_id']} {gate['gate']}: {gate['status']}")
+        print()
+        print("Authorization:")
+        print(f"  status: {data['authorization_status']}")
+        print(f"  execution_ready: {data['execution_ready']}")
+        print(f"  execution_allowed: {data['execution_allowed']}")
         print()
         print(data["advisory"])
     return 0

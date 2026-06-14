@@ -27,6 +27,7 @@ ACTIVATION_TIMESTAMP_68D = "2026-06-12T17:31:22+00:00"
 ACTIVATION_TIMESTAMP_69A = "2026-06-12T21:09:00+00:00"
 ACTIVATION_TIMESTAMP_69B = "2026-06-13T07:57:40+00:00"
 ACTIVATION_TIMESTAMP_69C = "2026-06-13T06:49:36+00:00"
+ACTIVATION_TIMESTAMP_69D = "2026-06-14T08:49:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -501,6 +502,34 @@ def _valid_69c_record() -> dict:
     }
 
 
+def _valid_69d_record() -> dict:
+    return {
+        "lineage_id": "SLR-69D-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69D,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69C",
+        "predecessor_phase_id": "69C",
+        "activated_phase_id": "69D",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": "Integrates all four required gates into a single governed pathway without enabling execution.",
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve_with_changes",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [],
+        "supersedes_lineage_id": "SLR-69C-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69D,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -516,6 +545,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69a_record(),
         _valid_69b_record(),
         _valid_69c_record(),
+        _valid_69d_record(),
     ]
 
 
@@ -635,6 +665,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69C",
             "timestamp": ACTIVATION_TIMESTAMP_69C,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69D",
+            "timestamp": ACTIVATION_TIMESTAMP_69D,
+        },
     ])
     return events
 
@@ -670,7 +708,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69C-TEST"
+    assert result.current_lineage_id == "SLR-69D-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -705,7 +743,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69C-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69D-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -806,7 +844,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69C-TEST"
+    assert result.current_lineage_id == "SLR-69D-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -861,9 +899,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69C-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69D-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 14
+    assert json.loads(capsys.readouterr().out)["record_count"] == 15
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

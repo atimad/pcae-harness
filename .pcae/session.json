@@ -1,18 +1,83 @@
 {
   "active_task": {
-    "id": "20260613-0849-69c-invocation-contract-validation",
-    "title": "69C Invocation Contract Validation"
+    "id": "20260614-0208-69d-execution-pathway-integration-architecture",
+    "title": "69D Execution Pathway Integration Architecture"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69C Invocation Contract Validation",
+  "current_objective": "69D Execution Pathway Integration Architecture",
   "git": {
     "branch": "main",
-    "changed_files": [],
-    "status_summary": "clean"
+    "changed_files": [
+      {
+        "path": ".pcae/session.json",
+        "status": " M"
+      },
+      {
+        "path": "CHANGELOG.md",
+        "status": " M"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/CAPABILITY_INVENTORY.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/COMMANDS.md",
+        "status": " M"
+      },
+      {
+        "path": "docs/ROADMAP_REGISTRY.md",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/cli.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/commands/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/agent.py",
+        "status": " M"
+      },
+      {
+        "path": "src/pcae/core/docs.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260613-0849-69c-invocation-contract-validation.md",
+        "status": " D"
+      },
+      {
+        "path": "tests/test_agent.py",
+        "status": " M"
+      },
+      {
+        "path": "tests/test_strategic_lineage.py",
+        "status": " M"
+      },
+      {
+        "path": "tasks/active/20260614-0208-69d-execution-pathway-integration-architecture.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260613-0849-69c-invocation-contract-validation.md",
+        "status": "??"
+      }
+    ],
+    "status_summary": "16 changed files"
   },
-  "last_completed_step": "69B Approval Store MVP",
-  "next_recommended_step": "Validate gep-gate-006 and gep-gate-007 without enabling execution.",
-  "timestamp": "2026-06-13T06:49:36+00:00",
+  "last_completed_step": "Completed task 20260613-0849-69c-invocation-contract-validation: 69C Invocation Contract Validation",
+  "next_recommended_step": "Continue active task 20260614-0208-69d-execution-pathway-integration-architecture.",
+  "timestamp": "2026-06-14T00:08:41.709748+00:00",
   "warnings": []
 }

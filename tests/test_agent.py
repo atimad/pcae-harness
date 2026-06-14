@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47866,7 +47866,7 @@ def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> N
     main(["roadmap", "next"])
     output = capsys.readouterr().out
     assert "41C" not in output, "41C must not appear in roadmap next output"
-    assert "execution_governance_activation" in output or "69C" in output
+    assert "execution_governance_activation" in output or "69D" in output
 
 
 def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69C" in output
+    assert "69D" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -50154,7 +50154,7 @@ def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "next"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "execution_governance_activation" in output or "69C" in output
+    assert "execution_governance_activation" in output or "69D" in output
 
 
 # ---------------------------------------------------------------------------
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -52412,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -52518,16 +52518,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 59, (
-        f"Expected 59 map entries after 69C, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 60, (
+        f"Expected 60 map entries after 69D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 59, (
-        f"Expected 59 map entries after 69C, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 60, (
+        f"Expected 60 map entries after 69D, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52757,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -53060,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -53333,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -53656,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -54059,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -54386,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
 
 
@@ -54589,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69C" in active_drift[0]
+    assert "69D" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54709,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69C"
+    assert data["current_phase"]["phase_id"] == "69D"
     assert branch["current_phase"] == "65J"
 
 
@@ -55178,14 +55178,15 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 59, (
-        f"Expected 59 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 60, (
+        f"Expected 60 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
         f"68A added challenge_attention_architecture, 68B added challenge_attention_rendering_integration, "
         f"68C added challenge_attention_effectiveness_review, 68D added challenge_attention_rebalancing, "
         f"69A added runtime_activation_architecture_review, "
-        f"69B added approval_store_mvp, 69C added invocation_contract_validation), "
+        f"69B added approval_store_mvp, 69C added invocation_contract_validation, "
+        f"69D added execution_pathway_integration), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -56676,7 +56677,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56936,7 +56937,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57248,7 +57249,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69C"
+    assert current["phase_id"] == "69D"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57861,3 +57862,294 @@ def test_69c_cli_validation_json_structure(tmp_path, monkeypatch, capsys) -> Non
     assert "summary" in data
     assert "gate_results" in data
     assert data["summary"]["execution_allowed"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 69D — Execution Pathway Integration Architecture
+# ---------------------------------------------------------------------------
+
+
+def test_69d_missing_artifact_blocks_gates_001_005(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local"]
+    )
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-001"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-005"]["status"] == "blocked"
+
+
+def test_69d_valid_artifact_satisfies_gates_001_005(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_approved_prompt_artifact, build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    store_approved_prompt_artifact(root, _make_valid_artifact("test-69d-prompt"))
+    data = build_execution_pathway_integration(root, "test-69d-prompt", ["codex-local", "claude-local"])
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-001"]["status"] == "satisfied"
+    assert gate_by_id["gep-gate-005"]["status"] == "satisfied"
+
+
+def test_69d_missing_approved_agents_blocks_gate_006(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    _write_legacy_approved_artifact(tmp_path, "test-69d-legacy")
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "test-69d-legacy", ["codex-local"]
+    )
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-006"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-006"]["reason"] == "approved_agents_missing"
+
+
+def test_69d_selected_agent_not_in_approved_agents_blocks_gate_006(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_approved_prompt_artifact, build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    artifact = _make_valid_artifact("test-69d-partial")
+    artifact["approved_agents"] = ["codex-local"]
+    store_approved_prompt_artifact(root, artifact)
+    data = build_execution_pathway_integration(root, "test-69d-partial", ["codex-local", "claude-local"])
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-006"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-006"]["reason"] == "selected_agents_not_fully_approved"
+
+
+def test_69d_valid_selected_agents_satisfy_gate_006(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_approved_prompt_artifact, build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    store_approved_prompt_artifact(root, _make_valid_artifact("test-69d-agents"))
+    data = build_execution_pathway_integration(root, "test-69d-agents", ["codex-local", "claude-local"])
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-006"]["status"] == "satisfied"
+
+
+def test_69d_missing_invocation_contract_blocks_gate_007(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core import agent as agent_module
+    from pcae.core.paths import HarnessPath
+
+    monkeypatch.setattr(
+        agent_module,
+        "_ICONV_VALIDATED_CONTRACTS",
+        tuple(c for c in agent_module._ICONV_VALIDATED_CONTRACTS if c["runtime_id"] != "claude-local"),
+    )
+    data = agent_module.build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local", "claude-local"]
+    )
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-007"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-007"]["reason"] == "missing_invocation_contract"
+
+
+def test_69d_missing_runtime_contract_blocks_gate_007(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core import agent as agent_module
+    from pcae.core.paths import HarnessPath
+
+    monkeypatch.setattr(
+        agent_module,
+        "_RCV_RUNTIME_CONTRACTS",
+        tuple(c for c in agent_module._RCV_RUNTIME_CONTRACTS if c["runtime_id"] != "claude-local"),
+    )
+    data = agent_module.build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local", "claude-local"]
+    )
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-007"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-007"]["reason"] == "missing_runtime_contract"
+
+
+def test_69d_runtime_id_mismatch_blocks_gate_007(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core import agent as agent_module
+    from pcae.core.paths import HarnessPath
+
+    original = agent_module._ivcv_find_invocation_contract
+
+    def _mismatch(agent_id: str):
+        contract = original(agent_id)
+        if agent_id == "claude-local" and contract is not None:
+            mutated = dict(contract)
+            mutated["runtime_id"] = "claude-local-mismatch"
+            return mutated
+        return contract
+
+    monkeypatch.setattr(agent_module, "_ivcv_find_invocation_contract", _mismatch)
+    data = agent_module.build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local", "claude-local"]
+    )
+    gate_by_id = {g["gate_id"]: g for g in data["gate_results"]}
+    assert gate_by_id["gep-gate-007"]["status"] == "blocked"
+    assert gate_by_id["gep-gate-007"]["reason"] == "invocation_contract_runtime_id_mismatch"
+
+
+def test_69d_all_gates_satisfied_produces_conditionally_authorized(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_approved_prompt_artifact, build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    store_approved_prompt_artifact(root, _make_valid_artifact("test-69d-full"))
+    data = build_execution_pathway_integration(root, "test-69d-full", ["codex-local", "claude-local"])
+    assert data["authorization_status"] == "conditionally_authorized"
+
+
+def test_69d_any_blocked_gate_produces_blocked(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local", "claude-local"]
+    )
+    assert data["authorization_status"] == "blocked"
+
+
+def test_69d_all_gates_satisfied_produces_execution_ready_true(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import store_approved_prompt_artifact, build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    store_approved_prompt_artifact(root, _make_valid_artifact("test-69d-ready"))
+    data = build_execution_pathway_integration(root, "test-69d-ready", ["codex-local", "claude-local"])
+    assert data["execution_ready"] is True
+
+
+def test_69d_any_blocked_gate_produces_execution_ready_false(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local"]
+    )
+    assert data["execution_ready"] is False
+
+
+def test_69d_execution_allowed_always_false(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import (
+        store_approved_prompt_artifact,
+        build_execution_pathway_integration,
+        _EPID_GOVERNANCE_BOUNDARIES,
+    )
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath.cwd()
+    store_approved_prompt_artifact(root, _make_valid_artifact("test-69d-exec"))
+    data = build_execution_pathway_integration(root, "test-69d-exec", ["codex-local", "claude-local"])
+    assert _EPID_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert data["execution_allowed"] is False
+    assert data["audit_record"]["execution_allowed"] is False
+    assert data["readiness_summary"]["execution_allowed"] is False
+
+
+def test_69d_audit_type_is_readiness_evaluation(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local"]
+    )
+    assert data["audit_record"]["audit_type"] == "readiness_evaluation"
+
+
+def test_69d_audit_record_has_no_execution_claim(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration
+    from pcae.core.paths import HarnessPath
+    import json as json_module
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local"]
+    )
+    audit_text = json_module.dumps(data["audit_record"])
+    assert "execution_occurred" not in audit_text
+    assert "executed" not in audit_text.replace("execution_allowed", "").replace("execution_ready", "").replace("execution_pathway", "")
+
+
+def test_69d_cli_json_returns_core_fields(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    main(
+        [
+            "execution-pathway-integration",
+            "--prompt-id",
+            "appp-canonical-dry-run-candidate",
+            "--selected-agent",
+            "codex-local",
+            "--selected-agent",
+            "claude-local",
+            "--json",
+        ]
+    )
+    data = json.loads(capsys.readouterr().out)
+    assert "pathway_id" in data
+    assert "gate_results" in data
+    assert "authorization_status" in data
+    assert "execution_ready" in data
+    assert data["execution_allowed"] is False
+    assert "audit_record" in data
+    assert "governance_boundaries" in data
+
+
+def test_69d_explicit_governance_boundaries_present(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core.agent import build_execution_pathway_integration, _EPID_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    data = build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local"]
+    )
+    gb = data["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["readiness_implies_execution"] is False
+    assert gb["authorization_implies_execution"] is False
+    assert gb["runtime_selection_implies_execution"] is False
+    assert gb["pathway_integration_does_not_execute"] is True
+    assert gb["audit_record_implies_execution"] is False
+    assert gb["human_approval_remains_required"] is True
+    assert gb["pathway_is_advisory_only"] is True
+    assert len(gb) == len(_EPID_GOVERNANCE_BOUNDARIES)
+
+
+def test_69d_no_subprocess_execution(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    from pcae.core import agent as agent_module
+    from pcae.core.paths import HarnessPath
+
+    def _fail(*args, **kwargs):
+        raise AssertionError("subprocess must not be invoked during 69D pathway integration")
+
+    monkeypatch.setattr(agent_module, "_run_agent_subprocess", _fail)
+    data = agent_module.build_execution_pathway_integration(
+        HarnessPath.cwd(), "missing-prompt", ["codex-local", "claude-local"]
+    )
+    assert data["execution_allowed"] is False
+
+
+def test_69d_map_count_is_60(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 60, (
+        f"Expected 60 map entries after 69D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_pathway_integration"),
+        None,
+    )
+    assert entry is not None, "execution_pathway_integration must be in _SRG_CAPABILITY_OBJECTIVE_MAP"

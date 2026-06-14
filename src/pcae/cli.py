@@ -64,6 +64,7 @@ from pcae.commands.agent import (
     run_governed_execution_pilot,
     run_approval_store_write,
     run_invocation_contract_validation,
+    run_execution_pathway_integration,
     run_live_execution_readiness,
     run_execution_audit_design,
     run_execution_consensus_framework,
@@ -1974,6 +1975,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON validation output.",
     )
     invocation_contract_validation_parser.set_defaults(handler=run_invocation_contract_validation)
+
+    execution_pathway_integration_parser = subparsers.add_parser(
+        "execution-pathway-integration",
+        help="Integrate governance artifacts into a single end-to-end pathway without executing (Phase 69D).",
+    )
+    execution_pathway_integration_parser.add_argument(
+        "--prompt-id",
+        required=True,
+        help="Prompt identifier to evaluate through the integrated pathway.",
+    )
+    execution_pathway_integration_parser.add_argument(
+        "--selected-agent",
+        dest="selected_agents",
+        action="append",
+        default=[],
+        help="Selected agent ID. Repeat for each selected agent.",
+    )
+    execution_pathway_integration_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON pathway output.",
+    )
+    execution_pathway_integration_parser.set_defaults(handler=run_execution_pathway_integration)
 
     live_execution_readiness_parser = subparsers.add_parser(
         "live-execution-readiness",

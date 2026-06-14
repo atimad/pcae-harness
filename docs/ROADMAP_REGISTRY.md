@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-13T06:54:38.322036+00:00
+Generated: 2026-06-14T00:06:41.757507+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 63
+Total phases: 64
 Tracks: 9
 Superseded: 1
 Roadmap gaps: 0
@@ -103,7 +103,8 @@ Assessment status: intelligence_available
 |---|---|---|---|---|
 | 69A | Runtime Activation Architecture Review | completed | 68D | 69B |
 | 69B | Approval Store MVP | completed | 69A | 69C |
-| 69C | Invocation Contract Validation | active | 69B | — |
+| 69C | Invocation Contract Validation | completed | 69B | 69D |
+| 69D | Execution Pathway Integration Architecture | active | 69C | — |
 
 ## Track: roadmap_intelligence
 

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 69C Invocation Contract Validation (20260613-0849-69c-invocation-contract-validation)
 - 69B Approval Store MVP (20260613-0757-69b-approval-store-mvp)
 - 69A Runtime Activation Architecture Review (20260612-2109-69a-runtime-activation-architecture-review)
 - BR-004 Branch Closure (20260612-2035-br-004-branch-closure)

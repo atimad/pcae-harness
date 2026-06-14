@@ -14987,6 +14987,270 @@ def build_invocation_contract_validation(
     }
 
 
+# ---------------------------------------------------------------------------
+# Phase 69D — Execution Pathway Integration Architecture
+# ---------------------------------------------------------------------------
+
+EXECUTION_PATHWAY_INTEGRATION_ADVISORY: str = (
+    "Execution pathway integration is read-only; no runtimes are invoked, "
+    "no artifacts are written, and execution_allowed remains False."
+)
+
+_EPID_PHASE_ID: str = "69D"
+
+_EPID_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "readiness_implies_execution": False,
+    "authorization_implies_execution": False,
+    "runtime_selection_implies_execution": False,
+    "pathway_integration_does_not_execute": True,
+    "audit_record_implies_execution": False,
+    "human_approval_remains_required": True,
+    "pathway_is_advisory_only": True,
+    "pathway_output_is_not_execution_authorization": True,
+    "pathway_integration_is_read_only": True,
+    "conditionally_authorized_does_not_activate_runtime": True,
+    "execution_candidate_does_not_invoke_subprocess": True,
+    "pathway_id_is_not_execution_record": True,
+}
+
+_EPID_REQUIRED_GATE_IDS: tuple[str, ...] = (
+    "gep-gate-001",
+    "gep-gate-005",
+    "gep-gate-006",
+    "gep-gate-007",
+)
+
+
+def _epid_evaluate_gates_001_005(artifact: dict | None) -> tuple[dict, dict]:
+    if artifact is None:
+        gate_001 = {
+            "gate_id": "gep-gate-001",
+            "gate": "prompt_approved",
+            "status": "blocked",
+            "reason": "approved_prompt_artifact_missing",
+            "rationale": "No ApprovedPromptArtifact found in approval store for the given prompt_id.",
+            "required": True,
+        }
+        gate_005 = {
+            "gate_id": "gep-gate-005",
+            "gate": "human_approval_present",
+            "status": "blocked",
+            "reason": "approved_prompt_artifact_missing",
+            "rationale": "No ApprovedPromptArtifact found; human approval cannot be verified.",
+            "required": True,
+        }
+        return gate_001, gate_005
+
+    gate_001 = {
+        "gate_id": "gep-gate-001",
+        "gate": "prompt_approved",
+        "status": "satisfied",
+        "reason": "approved_prompt_artifact_present",
+        "rationale": "ApprovedPromptArtifact found in approval store.",
+        "required": True,
+    }
+
+    if artifact.get("approved_by") and artifact.get("approved_at"):
+        gate_005 = {
+            "gate_id": "gep-gate-005",
+            "gate": "human_approval_present",
+            "status": "satisfied",
+            "reason": "human_approval_recorded",
+            "rationale": "Human approval recorded: approved_by and approved_at are present.",
+            "required": True,
+        }
+    else:
+        gate_005 = {
+            "gate_id": "gep-gate-005",
+            "gate": "human_approval_present",
+            "status": "blocked",
+            "reason": "human_approval_fields_missing",
+            "rationale": "Artifact found but approved_by or approved_at is missing.",
+            "required": True,
+        }
+
+    return gate_001, gate_005
+
+
+def build_execution_pathway_integration(
+    root: "HarnessPath",
+    prompt_id: str,
+    selected_agents: "list[str] | tuple[str, ...]",
+) -> dict:
+    """Integrate execution governance components into a single evaluated pathway. Read-only."""
+    from datetime import datetime, timezone
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    pathway_id = f"epid-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+
+    normalized_agents = _ivcv_normalize_selected_agents(selected_agents)
+
+    # Stage 2 — Approved Prompt (gates 001 and 005)
+    artifact = lookup_approved_prompt_artifact(root, prompt_id)
+    gate_001, gate_005 = _epid_evaluate_gates_001_005(artifact)
+
+    # Stage 3 — Execution Candidate + Gate 006
+    gate_006 = _ivcv_validate_gate_006(artifact, normalized_agents)
+
+    # Stages 5–6 — Runtime Selection + Invocation Contract Resolution (gate 007)
+    agent_results: list[dict] = []
+    gate_007_blockers: list[str] = []
+    for agent_id in normalized_agents:
+        invocation_contract = _ivcv_find_invocation_contract(agent_id)
+        runtime_contract = _ivcv_find_runtime_contract(agent_id)
+        invocation_blockers = _ivcv_validate_invocation_contract(invocation_contract, agent_id)
+        runtime_blockers = _ivcv_validate_runtime_contract(runtime_contract, agent_id)
+        blockers = invocation_blockers + runtime_blockers
+        if blockers:
+            gate_007_blockers.extend(f"{agent_id}:{b}" for b in blockers)
+        agent_results.append(
+            {
+                "agent_id": agent_id,
+                "invocation_contract_present": invocation_contract is not None,
+                "runtime_contract_present": runtime_contract is not None,
+                "read_only_supported": (
+                    runtime_contract.get("readonly_supported") if runtime_contract else None
+                ),
+                "overall_resolution": "resolved" if not blockers else "not_resolved",
+                "blocking_reasons": blockers,
+            }
+        )
+
+    if gate_007_blockers:
+        gate_007 = {
+            "gate_id": "gep-gate-007",
+            "gate": "invocation_contracts_available",
+            "status": "blocked",
+            "reason": gate_007_blockers[0].split(":", 1)[1],
+            "rationale": (
+                "Selected agents do not all have valid and registry-consistent invocation "
+                "contracts: " + ", ".join(gate_007_blockers)
+            ),
+            "required": True,
+        }
+    else:
+        gate_007 = {
+            "gate_id": "gep-gate-007",
+            "gate": "invocation_contracts_available",
+            "status": "satisfied",
+            "reason": "all_agent_contracts_valid",
+            "rationale": (
+                "All selected agents have valid invocation contracts and matching runtime "
+                "contract records with read-only support."
+            ),
+            "required": True,
+        }
+
+    gate_results = [gate_001, gate_005, gate_006, gate_007]
+
+    # Stage 4 / 7 — Authorization Evaluation + Readiness Assessment
+    all_gates_satisfied = all(g["status"] == "satisfied" for g in gate_results)
+    authorization_status = "conditionally_authorized" if all_gates_satisfied else "blocked"
+    execution_ready = all_gates_satisfied
+
+    readiness_summary = {
+        "gates_satisfied": sum(1 for g in gate_results if g["status"] == "satisfied"),
+        "gates_blocked": sum(1 for g in gate_results if g["status"] == "blocked"),
+        "gate_count": len(gate_results),
+        "execution_ready": execution_ready,
+        "execution_allowed": False,
+        "readiness_implies_execution": False,
+        "authorization_implies_execution": False,
+    }
+
+    # Stage 1 — Task Contract (advisory; task_id recorded but not required for execution_ready)
+    stage_results = [
+        {
+            "stage": 1,
+            "stage_name": "task_contract",
+            "description": "Active task contract provides scope and traceability.",
+            "status": "advisory",
+        },
+        {
+            "stage": 2,
+            "stage_name": "approved_prompt",
+            "description": "ApprovedPromptArtifact lookup determines gate-001 and gate-005.",
+            "status": gate_001["status"],
+            "artifact_found": artifact is not None,
+        },
+        {
+            "stage": 3,
+            "stage_name": "execution_candidate",
+            "description": "Selected agents validated against approved_agents (gate-006).",
+            "status": gate_006["status"],
+        },
+        {
+            "stage": 4,
+            "stage_name": "authorization_evaluation",
+            "description": "Authorization status derived from all four required gates.",
+            "status": "satisfied" if all_gates_satisfied else "blocked",
+            "authorization_status": authorization_status,
+        },
+        {
+            "stage": 5,
+            "stage_name": "runtime_selection",
+            "description": "Advisory runtime selection per selected agent.",
+            "status": "resolved" if not gate_007_blockers else "not_resolved",
+            "agent_results": agent_results,
+        },
+        {
+            "stage": 6,
+            "stage_name": "invocation_contract_resolution",
+            "description": "Invocation and runtime contracts validated per agent (gate-007).",
+            "status": gate_007["status"],
+        },
+        {
+            "stage": 7,
+            "stage_name": "execution_readiness_assessment",
+            "description": "Readiness assessed from all gate results; execution_allowed invariant enforced.",
+            "status": "satisfied" if execution_ready else "blocked",
+            "execution_ready": execution_ready,
+            "execution_allowed": False,
+        },
+        {
+            "stage": 8,
+            "stage_name": "audit_record_generation",
+            "description": "Immutable readiness evaluation record generated; no execution claimed.",
+            "status": "complete",
+        },
+    ]
+
+    # Stage 8 — Audit Record (readiness only; no execution claim)
+    audit_record = {
+        "pathway_id": pathway_id,
+        "audit_type": "readiness_evaluation",
+        "prompt_id": prompt_id,
+        "selected_agents": list(normalized_agents),
+        "gate_results": [
+            {"gate_id": g["gate_id"], "gate": g["gate"], "status": g["status"]}
+            for g in gate_results
+        ],
+        "authorization_status": authorization_status,
+        "execution_ready": execution_ready,
+        "execution_allowed": False,
+        "generated_at": generated_at,
+        "audit_completeness": "complete",
+        "human_review_required": True,
+    }
+
+    return {
+        "pathway_id": pathway_id,
+        "prompt_id": prompt_id,
+        "selected_agents": list(normalized_agents),
+        "stage_results": stage_results,
+        "gate_results": gate_results,
+        "authorization_status": authorization_status,
+        "execution_ready": execution_ready,
+        "execution_allowed": False,
+        "readiness_summary": readiness_summary,
+        "audit_record": audit_record,
+        "governance_boundaries": dict(_EPID_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_PATHWAY_INTEGRATION_ADVISORY,
+        "human_review_required": True,
+    }
+
+
 LIVE_EXECUTION_READINESS_ADVISORY = (
     "Live execution readiness assessment is informational; no prompts are executed."
 )
@@ -69767,6 +70031,20 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "invocation-contract-validation",
         ],
         "dependencies": ["approval_store_mvp"],
+        "successor_capabilities": ["execution_pathway_integration"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Pathway Integration",
+        "implemented_phase": "69D",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+        ],
+        "introduced_commands": ["execution-pathway-integration"],
+        "dependencies": ["invocation_contract_validation"],
         "successor_capabilities": [],
     },
 )
@@ -70731,8 +71009,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69C",
         "phase_title": "Invocation Contract Validation",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69B",
+        "successor": "69D",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69D",
+        "phase_title": "Execution Pathway Integration Architecture",
+        "status": "active",
+        "predecessor": "69C",
         "successor": "",
         "superseded_by": "",
     },
@@ -71743,7 +72030,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "approval_store_mvp",
         ],
-        "successors": [],
+        "successors": ["execution_pathway_integration"],
         "aliases": [],
         "contribution": (
             "hardens governed execution activation readiness by limiting scope to "
@@ -71751,6 +72038,28 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "(gep-gate-007), codex-local contract verification, claude-local contract "
             "verification, and runtime contract registry consistency; execution_allowed=False "
             "remains unchanged and no runtime invocation is introduced"
+        ),
+    },
+    {
+        "capability_name": "Execution Pathway Integration",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69D",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-pathway-integration --prompt-id <id> --selected-agent <id>",
+            "pcae execution-pathway-integration --prompt-id <id> --selected-agent <id> --json",
+        ],
+        "dependencies": [
+            "invocation_contract_validation",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "integrates 69B approval store, 69C invocation contract validation, and gate "
+            "evaluation into a single governed end-to-end pathway; all four required gates "
+            "(gep-gate-001/005/006/007) must be satisfied for authorization_status to reach "
+            "conditionally_authorized and execution_ready=True; execution_allowed=False "
+            "invariant enforced at every pathway stage; audit_type=readiness_evaluation only"
         ),
     },
     {
@@ -74023,7 +74332,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69C",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69C-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69C",
@@ -74031,7 +74340,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69C",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69C-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69C",
@@ -74039,10 +74348,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69C",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69C-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69C",
+    },
+    {
+        "phase_id": "69D",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69D-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69D",
+    },
+    {
+        "phase_id": "69D",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69D-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69D",
+    },
+    {
+        "phase_id": "69D",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69D-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69D",
     },
 )
 
@@ -79905,7 +80238,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69C",
+        "current_phase": "69D",
         "approved_by": "",
         "approved_at": "",
     },
@@ -80550,6 +80883,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "validates approved agents and invocation contracts for codex-local and "
             "claude-local, verifies runtime contract registry consistency, and keeps "
             "execution_allowed=False while execution activation remains out of scope"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_pathway_integration",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "integrates all four required governance gates into a single evaluated pathway; "
+            "authorization_status=conditionally_authorized only when gates 001/005/006/007 "
+            "all satisfied; execution_allowed=False invariant preserved throughout; "
+            "audit_type=readiness_evaluation only — no execution claimed"
         ),
         "decision_id": "",
         "recommendation_id": "",
