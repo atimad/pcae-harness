@@ -1,71 +1,39 @@
 {
   "active_task": {
-    "id": "20260614-1736-69g-execution-activation",
-    "title": "69I Execution Result Review Persistence"
+    "id": "20260615-1119-69j-rollback-aware-execution-design",
+    "title": "69J Rollback-Aware Execution Design"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "",
+  "current_objective": "69J Rollback-Aware Execution Design",
   "git": {
     "branch": "main",
     "changed_files": [
-      {
-        "path": ".pcae/strategic-lineage.json",
-        "status": " M"
-      },
       {
         "path": "CHANGELOG.md",
         "status": " M"
       },
       {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/ROADMAP_REGISTRY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
+        "path": "tasks/DONE.md",
         "status": " M"
       },
       {
         "path": "tasks/active/20260614-1736-69g-execution-activation.md",
-        "status": " M"
+        "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
+        "path": "tasks/active/20260615-1119-69j-rollback-aware-execution-design.md",
+        "status": "??"
       },
       {
-        "path": "tests/test_strategic_lineage.py",
-        "status": " M"
+        "path": "tasks/done/20260614-1736-69g-execution-activation.md",
+        "status": "??"
       }
     ],
-    "status_summary": "13 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "",
-  "next_recommended_step": "",
-  "timestamp": "2026-06-15T05:30:52.056228+00:00",
+  "last_completed_step": "Completed task 20260614-1736-69g-execution-activation: 69I Execution Result Review Persistence",
+  "next_recommended_step": "Continue active task 20260615-1119-69j-rollback-aware-execution-design.",
+  "timestamp": "2026-06-15T09:19:42.640229+00:00",
   "warnings": []
 }
