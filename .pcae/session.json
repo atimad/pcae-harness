@@ -1,39 +1,23 @@
 {
   "active_task": {
-    "id": "20260615-1119-69j-rollback-aware-execution-design",
-    "title": "69J Rollback-Aware Execution Design"
+    "id": "20260615-1306-69k-automatic-snapshot-integration",
+    "title": "69K Automatic Snapshot Integration"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69J Rollback-Aware Execution Design",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
       {
-        "path": "CHANGELOG.md",
+        "path": ".pcae/session.json",
         "status": " M"
-      },
-      {
-        "path": "tasks/DONE.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260614-1736-69g-execution-activation.md",
-        "status": " D"
-      },
-      {
-        "path": "tasks/active/20260615-1119-69j-rollback-aware-execution-design.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260614-1736-69g-execution-activation.md",
-        "status": "??"
       }
     ],
-    "status_summary": "5 changed files"
+    "status_summary": "1 changed file"
   },
-  "last_completed_step": "Completed task 20260614-1736-69g-execution-activation: 69I Execution Result Review Persistence",
-  "next_recommended_step": "Continue active task 20260615-1119-69j-rollback-aware-execution-design.",
-  "timestamp": "2026-06-15T09:19:42.640229+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-15T13:16:07.359423+00:00",
   "warnings": []
 }
