@@ -32,6 +32,7 @@ ACTIVATION_TIMESTAMP_69E = "2026-06-14T09:00:00+00:00"
 ACTIVATION_TIMESTAMP_69F = "2026-06-14T13:00:00+00:00"
 ACTIVATION_TIMESTAMP_69G = "2026-06-14T17:00:00+00:00"
 ACTIVATION_TIMESTAMP_69H = "2026-06-15T00:00:00+00:00"
+ACTIVATION_TIMESTAMP_69I = "2026-06-15T00:00:01+00:00"
 
 
 def _valid_record() -> dict:
@@ -622,7 +623,7 @@ def _valid_69h_record() -> dict:
     return {
         "lineage_id": "SLR-69H-TEST",
         "lineage_timestamp": ACTIVATION_TIMESTAMP_69H,
-        "lineage_status": "approved",
+        "lineage_status": "superseded",
         "decided_by": "human-user",
         "decision_basis": "roadmap_gap",
         "source_phase_id": "69G",
@@ -642,6 +643,38 @@ def _valid_69h_record() -> dict:
         "human_approved": True,
         "execution_allowed": False,
         "activation_event_id": ACTIVATION_TIMESTAMP_69H,
+        "activation_validation_status": "validated",
+    }
+
+
+def _valid_69i_record() -> dict:
+    return {
+        "lineage_id": "SLR-69I-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69I,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69H",
+        "predecessor_phase_id": "69H",
+        "activated_phase_id": "69I",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Introduces append-only ERRA store. Persists human reviewer disposition and ERG snapshot. "
+            "Completes APA→ARA→EAR→ERR→ERG→ERRA chain. "
+            "SLR-69I-001: multi-reviewer conflict resolution intentionally deferred."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": ["SLR-69I-001: multi-reviewer conflict resolution deferred to future phase"],
+        "supersedes_lineage_id": "SLR-69H-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69I,
         "activation_validation_status": "validated",
     }
 
@@ -666,6 +699,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69f_record(),
         _valid_69g_record(),
         _valid_69h_record(),
+        _valid_69i_record(),
     ]
 
 
@@ -825,6 +859,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69H",
             "timestamp": ACTIVATION_TIMESTAMP_69H,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69I",
+            "timestamp": ACTIVATION_TIMESTAMP_69I,
+        },
     ])
     return events
 
@@ -860,7 +902,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69H-TEST"
+    assert result.current_lineage_id == "SLR-69I-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -895,7 +937,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69H-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69I-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -996,7 +1038,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69H-TEST"
+    assert result.current_lineage_id == "SLR-69I-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1051,9 +1093,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69H-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69I-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 19
+    assert json.loads(capsys.readouterr().out)["record_count"] == 20
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {
@@ -1070,3 +1112,21 @@ def test_65j_duplicate_lineage_ids_fail(tmp_path: Path) -> None:
     _write_registry(tmp_path, [record, duplicate])
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any("Duplicate lineage_id" in error for error in result.errors)
+
+
+def test_69i_slr_present_in_strategic_lineage(tmp_path: Path) -> None:
+    import json as _json
+
+    data = _json.loads((Path(".pcae") / "strategic-lineage.json").read_text())
+    slr = next((r for r in data if r.get("lineage_id") == "SLR-69I-001"), None)
+    assert slr is not None, "SLR-69I-001 must be present in .pcae/strategic-lineage.json"
+    assert slr["activated_phase_id"] == "69I"
+    assert slr["selected_branch_id"] == "BR-005"
+    assert slr["supersedes_lineage_id"] == "SLR-69H-001"
+    assert slr["execution_allowed"] is False
+    assert "OBJ-002" in slr["objective_ids"]
+    assert "OBJ-003" in slr["objective_ids"]
+    assert slr["human_approved"] is True
+    assert any("conflict" in debt.lower() for debt in slr.get("roadmap_debt", [])), (
+        "SLR-69I-001 roadmap_debt must document deferred multi-reviewer conflict resolution"
+    )

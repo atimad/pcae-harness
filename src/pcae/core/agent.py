@@ -70111,6 +70111,25 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["execution-result-governance"],
         "dependencies": ["readonly_execution_activation"],
+        "successor_capabilities": ["execution_result_review_persistence"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Result Review Persistence",
+        "implemented_phase": "69I",
+        "status": "implemented",
+        "commands": [
+            "approval-store",
+            "invocation-contract-validation",
+            "execution-pathway-integration",
+            "authorization-store",
+            "audit-record",
+            "execution-activation",
+            "execution-result-governance",
+            "result-review",
+        ],
+        "introduced_commands": ["result-review"],
+        "dependencies": ["execution_result_governance"],
         "successor_capabilities": [],
     },
 )
@@ -71120,8 +71139,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69H",
         "phase_title": "Execution Result Governance",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69G",
+        "successor": "69I",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69I",
+        "phase_title": "Execution Result Review Persistence",
+        "status": "active",
+        "predecessor": "69H",
         "successor": "",
         "superseded_by": "",
     },
@@ -72248,7 +72276,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "readonly_execution_activation",
         ],
-        "successors": [],
+        "successors": ["execution_result_review_persistence"],
         "aliases": [],
         "contribution": (
             "classifies ExecutionResultRecord outcomes on two independent axes: "
@@ -72258,6 +72286,39 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "surfaces attention_signals explaining the classification; "
             "entirely read-only — no ERR, APA, ARA, or EAR state is mutated; "
             "no subprocess is invoked; result_review_does_not_authorize_execution=True"
+        ),
+    },
+    {
+        "capability_name": "Execution Result Review Persistence",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69I",
+        "status": "implemented",
+        "commands": [
+            "pcae result-review create --result-id <id> --reviewer <name> --disposition <value>",
+            "pcae result-review create --result-id <id> --reviewer <name> --disposition <value> --json",
+            "pcae result-review show --review-id <id>",
+            "pcae result-review show --review-id <id> --json",
+            "pcae result-review list --result-id <id>",
+            "pcae result-review list --result-id <id> --json",
+            "pcae result-review list-open",
+            "pcae result-review list-open --json",
+        ],
+        "dependencies": [
+            "execution_result_governance",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces append-only ExecutionResultReviewArtifact (ERRA) store at "
+            ".pcae/result-reviews/; persists human reviewer disposition (observed, "
+            "acceptable_for_context, unacceptable, needs_follow_up, unclear) plus ERG "
+            "classification snapshot (technical_status, governance_attention, "
+            "governance_severity, attention_signals) and governance_model_version=69H-v1; "
+            "review_state is derived automatically from human_disposition; "
+            "supersession model replaces mutation — new artifact references superseded_review_id; "
+            "execution_allowed=False and follow_on_execution_allowed=False are hard-coded; "
+            "accepted_as_observed_is_not_approval=True; multi-reviewer conflict resolution "
+            "deferred (SLR-69I-001); completes APA→ARA→EAR→ERR→ERG→ERRA governance chain"
         ),
     },
     {
@@ -74650,7 +74711,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69H",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69H-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69H",
@@ -74658,7 +74719,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69H",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69H-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69H",
@@ -74666,10 +74727,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69H",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69H-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69H",
+    },
+    {
+        "phase_id": "69I",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69I-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69I",
+    },
+    {
+        "phase_id": "69I",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69I-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69I",
+    },
+    {
+        "phase_id": "69I",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69I-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69I",
     },
 )
 
@@ -80532,7 +80617,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69H",
+        "current_phase": "69I",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81243,6 +81328,18 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "classifies ERR outcomes on technical_status and governance_attention axes; "
             "adds governance_severity; surfaces attention_signals; "
             "entirely read-only; no subprocess; no state mutation"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_result_review_persistence",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "persists human reviewer disposition for ExecutionResultRecord in append-only "
+            "ERRA store; embeds ERG classification snapshot; completes APA→ARA→EAR→ERR→ERG→ERRA chain; "
+            "no authorization, execution, rollback, or mutation of prior artifacts"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -89887,4 +89984,277 @@ def build_execution_result_governance(
         "classification_basis": classification_basis,
         "governance_boundaries": dict(_ERG_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_RESULT_GOVERNANCE_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69I — Execution Result Review Persistence (ERRA)
+# ---------------------------------------------------------------------------
+
+_ERRA_PHASE_ID: str = "69I"
+
+_ERRA_STORE_DIR: Path = Path(".pcae") / "result-reviews"
+
+_ERRA_GOVERNANCE_MODEL_VERSION: str = "69H-v1"
+
+_ERRA_VALID_DISPOSITIONS: frozenset[str] = frozenset({
+    "observed",
+    "acceptable_for_context",
+    "unacceptable",
+    "needs_follow_up",
+    "unclear",
+})
+
+_ERRA_VALID_REVIEW_STATES: frozenset[str] = frozenset({
+    "open",
+    "acknowledged",
+    "accepted_as_observed",
+    "rejected_as_unacceptable",
+    "needs_follow_up",
+    "superseded",
+})
+
+_ERRA_TERMINAL_REVIEW_STATES: frozenset[str] = frozenset({
+    "accepted_as_observed",
+    "rejected_as_unacceptable",
+    "superseded",
+})
+
+_ERRA_DISPOSITION_TO_STATE: dict[str, str] = {
+    "observed": "acknowledged",
+    "acceptable_for_context": "accepted_as_observed",
+    "unacceptable": "rejected_as_unacceptable",
+    "needs_follow_up": "needs_follow_up",
+    "unclear": "open",
+}
+
+_ERRA_GOVERNANCE_BOUNDARIES: dict = {
+    "result_review_does_not_execute": True,
+    "result_review_does_not_authorize_execution": True,
+    "result_review_does_not_authorize_retry": True,
+    "result_review_does_not_authorize_rollback": True,
+    "result_review_does_not_authorize_commit": True,
+    "result_review_does_not_authorize_push": True,
+    "accepted_as_observed_is_not_approval": True,
+    "acceptable_for_context_is_not_execution_permission": True,
+    "needs_follow_up_is_not_remediation": True,
+    "rejected_result_does_not_trigger_rollback": True,
+    "review_persistence_does_not_change_err": True,
+    "review_persistence_does_not_change_ara": True,
+    "review_persistence_does_not_change_apa": True,
+    "follow_on_execution_requires_new_authorization": True,
+    "automatic_review_allowed": False,
+}
+
+EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY: str = (
+    "ExecutionResultReviewArtifact records human review of an ExecutionResultRecord. "
+    "Review persistence does not authorize execution, retry, rollback, commit, or push. "
+    "accepted_as_observed_is_not_approval=True. "
+    "acceptable_for_context_is_not_execution_permission=True. "
+    "needs_follow_up_is_not_remediation=True. "
+    "rejected_result_does_not_trigger_rollback=True. "
+    "follow_on_execution_requires_new_authorization=True. "
+    "All review artifacts are immutable and append-only. "
+    "Supersession replaces mutation: write a new review referencing superseded_review_id."
+)
+
+
+def _erra_generate_review_id(ts: str) -> str:
+    import uuid
+
+    return f"erra-{ts}-{str(uuid.uuid4())[:8]}"
+
+
+def _erra_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    required_fields = {
+        "review_id", "execution_result_id", "audit_id", "authorization_id",
+        "prompt_id", "reviewer", "reviewed_at", "technical_status",
+        "governance_attention", "governance_severity", "attention_signals",
+        "classification_basis", "governance_model_version", "review_state",
+        "human_disposition", "review_notes", "created_at", "review_version",
+        "execution_allowed", "follow_on_execution_allowed",
+    }
+    for f in required_fields:
+        if f not in record:
+            errors.append(f"missing_required_field:{f}")
+    if record.get("reviewer", "") == "":
+        errors.append("reviewer_empty")
+    if record.get("human_disposition", "") not in _ERRA_VALID_DISPOSITIONS:
+        errors.append(f"invalid_human_disposition:{record.get('human_disposition', '')}")
+    if record.get("review_state", "") not in _ERRA_VALID_REVIEW_STATES:
+        errors.append(f"invalid_review_state:{record.get('review_state', '')}")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    if record.get("follow_on_execution_allowed") is not False:
+        errors.append("follow_on_execution_allowed_must_be_false")
+    return errors
+
+
+def store_execution_result_review(root: "HarnessPath", record: dict) -> dict:
+    errors = _erra_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": ""}
+    store_dir = root.path / _ERRA_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    review_id = record["review_id"]
+    file_path = store_dir / f"{review_id}.json"
+    with open(file_path, "w") as fh:
+        json.dump(record, fh, indent=2, sort_keys=True)
+    return {"stored": True, "errors": [], "path": str(file_path)}
+
+
+def lookup_execution_result_review(root: "HarnessPath", review_id: str) -> dict | None:
+    file_path = root.path / _ERRA_STORE_DIR / f"{review_id}.json"
+    if not file_path.exists():
+        return None
+    with open(file_path) as fh:
+        return json.load(fh)
+
+
+def _erra_load_all(root: "HarnessPath") -> list[dict]:
+    store_dir = root.path / _ERRA_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for p in sorted(store_dir.glob("*.json")):
+        with open(p) as fh:
+            records.append(json.load(fh))
+    return records
+
+
+def lookup_execution_result_reviews_for_result(
+    root: "HarnessPath", execution_result_id: str
+) -> list[dict]:
+    return [r for r in _erra_load_all(root) if r.get("execution_result_id") == execution_result_id]
+
+
+def lookup_open_execution_result_reviews(root: "HarnessPath") -> list[dict]:
+    all_records = _erra_load_all(root)
+    structurally_superseded = {
+        r["superseded_review_id"] for r in all_records if r.get("superseded_review_id")
+    }
+    return [
+        r for r in all_records
+        if r["review_id"] not in structurally_superseded
+        and r.get("review_state") not in _ERRA_TERMINAL_REVIEW_STATES
+    ]
+
+
+def create_execution_result_review(
+    root: "HarnessPath",
+    execution_result_id: str,
+    reviewer: str,
+    human_disposition: str,
+    review_notes: str = "",
+) -> dict:
+    from datetime import datetime, timezone
+
+    if not reviewer:
+        return {
+            "created": False,
+            "error": "missing_reviewer",
+            "review_id": "",
+            "execution_result_id": execution_result_id,
+            "execution_allowed": False,
+            "follow_on_execution_allowed": False,
+            "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+        }
+
+    if human_disposition not in _ERRA_VALID_DISPOSITIONS:
+        return {
+            "created": False,
+            "error": f"invalid_disposition:{human_disposition}",
+            "review_id": "",
+            "execution_result_id": execution_result_id,
+            "execution_allowed": False,
+            "follow_on_execution_allowed": False,
+            "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+        }
+
+    err_record = lookup_execution_result(root, execution_result_id)
+    if err_record is None:
+        return {
+            "created": False,
+            "error": "err_not_found",
+            "review_id": "",
+            "execution_result_id": execution_result_id,
+            "execution_allowed": False,
+            "follow_on_execution_allowed": False,
+            "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+        }
+
+    erg_data = build_execution_result_governance(root, execution_result_id)
+
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("%Y%m%dT%H%M%SZ")
+    review_id = _erra_generate_review_id(ts)
+    reviewed_at = now.isoformat()
+
+    review_state = _ERRA_DISPOSITION_TO_STATE[human_disposition]
+
+    artifact: dict = {
+        "review_id": review_id,
+        "execution_result_id": execution_result_id,
+        "audit_id": err_record.get("audit_id", ""),
+        "authorization_id": err_record.get("authorization_id", ""),
+        "prompt_id": err_record.get("prompt_id", ""),
+        "reviewer": reviewer,
+        "reviewed_at": reviewed_at,
+        "technical_status": erg_data.get("technical_status", "indeterminate"),
+        "governance_attention": erg_data.get("governance_attention", "requires_review"),
+        "governance_severity": erg_data.get("governance_severity", "critical"),
+        "attention_signals": list(erg_data.get("attention_signals", [])),
+        "classification_basis": dict(erg_data.get("classification_basis", {})),
+        "governance_model_version": _ERRA_GOVERNANCE_MODEL_VERSION,
+        "review_state": review_state,
+        "human_disposition": human_disposition,
+        "review_notes": review_notes,
+        "created_at": reviewed_at,
+        "review_version": 1,
+        "execution_allowed": False,
+        "follow_on_execution_allowed": False,
+        "superseded_review_id": None,
+    }
+
+    store_result = store_execution_result_review(root, artifact)
+
+    return {
+        "created": store_result["stored"],
+        "errors": store_result.get("errors", []),
+        "review_id": review_id if store_result["stored"] else "",
+        "execution_result_id": execution_result_id,
+        "review_state": review_state,
+        "human_disposition": human_disposition,
+        "path": store_result.get("path", ""),
+        "execution_allowed": False,
+        "follow_on_execution_allowed": False,
+        "governance_model_version": _ERRA_GOVERNANCE_MODEL_VERSION,
+        "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+    }
+
+
+def build_execution_result_review_store_summary(root: "HarnessPath") -> dict:
+    all_records = _erra_load_all(root)
+    superseded_ids = {r["superseded_review_id"] for r in all_records if r.get("superseded_review_id")}
+    open_reviews = [
+        r for r in all_records
+        if r["review_id"] not in superseded_ids
+        and r.get("review_state") not in _ERRA_TERMINAL_REVIEW_STATES
+    ]
+    terminal_reviews = [r for r in all_records if r.get("review_state") in _ERRA_TERMINAL_REVIEW_STATES]
+    return {
+        "store_dir": str(_ERRA_STORE_DIR),
+        "total_reviews": len(all_records),
+        "open_reviews": len(open_reviews),
+        "terminal_reviews": len(terminal_reviews),
+        "structurally_superseded_reviews": len(superseded_ids),
+        "execution_allowed": False,
+        "follow_on_execution_allowed": False,
+        "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
     }

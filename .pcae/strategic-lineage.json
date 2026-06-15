@@ -601,7 +601,7 @@
     "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
     "human_approved": true,
     "lineage_id": "SLR-69H-001",
-    "lineage_status": "approved",
+    "lineage_status": "superseded",
     "lineage_timestamp": "2026-06-15T00:00:00+00:00",
     "objective_ids": [
       "OBJ-002",
@@ -620,5 +620,37 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "69G",
     "supersedes_lineage_id": "SLR-69G-001"
+  },
+  {
+    "activated_phase_id": "69I",
+    "activation_event_id": "2026-06-15T00:00:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "f244516c0d4fd6f1c6356b7e27729dc604383068e2c6dde61e7b7bfe417869c5",
+    "human_approved": true,
+    "lineage_id": "SLR-69I-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-15T00:00:00+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69H",
+    "rationale": "Introduces append-only ExecutionResultReviewArtifact (ERRA) store at .pcae/result-reviews/. Persists human reviewer disposition and ERG classification snapshot. Completes APA\u2192ARA\u2192EAR\u2192ERR\u2192ERG\u2192ERRA governance chain. SLR-69I-001: multi-reviewer conflict resolution intentionally deferred. Conflicting reviews for the same ERR may coexist. Future governance phases may introduce conflict-resolution workflows. 69I preserves all review artifacts and performs no automatic reconciliation.",
+    "recommendation": "approve",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "SLR-69I-001: multi-reviewer conflict resolution deferred to future phase"
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69H",
+    "supersedes_lineage_id": "SLR-69H-001"
   }
 ]

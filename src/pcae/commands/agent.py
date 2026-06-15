@@ -123,6 +123,12 @@ from pcae.core.agent import (
     EXECUTION_ACTIVATION_ADVISORY,
     build_execution_result_governance,
     EXECUTION_RESULT_GOVERNANCE_ADVISORY,
+    create_execution_result_review,
+    lookup_execution_result_review,
+    lookup_execution_result_reviews_for_result,
+    lookup_open_execution_result_reviews,
+    build_execution_result_review_store_summary,
+    EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -138,7 +144,7 @@ from pcae.core.agent import (
     build_read_only_invocation_pilot,
     READ_ONLY_INVOCATION_PILOT_ADVISORY,
     build_execution_result_review_design,
-    EXECUTION_RESULT_REVIEW_ADVISORY,
+    EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
     build_authorization_expiration_design,
     AUTHORIZATION_EXPIRATION_ADVISORY,
     build_invocation_pilot_status,
@@ -15316,4 +15322,107 @@ def run_irg_challenge(args: argparse.Namespace) -> int:
         for line in render_irg_impact_compact_lines(impact_data):
             print(line)
 
+    return 0
+
+
+def run_result_review_create(args: argparse.Namespace) -> int:
+    from datetime import datetime, timezone
+
+    result = create_execution_result_review(
+        HarnessPath.cwd(),
+        args.result_id,
+        args.reviewer,
+        args.disposition,
+        getattr(args, "notes", "") or "",
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("created") else 1
+
+    if not result.get("created"):
+        print(f"ResultReview: CREATION FAILED")
+        print(f"  error:              {result.get('error', 'unknown')}")
+        print(f"  execution_result_id: {result['execution_result_id']}")
+        for err in result.get("errors", []):
+            print(f"    - {err}")
+        print()
+        print(EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY)
+        return 1
+
+    print(f"ResultReview: CREATED")
+    print(f"  review_id:           {result['review_id']}")
+    print(f"  execution_result_id: {result['execution_result_id']}")
+    print(f"  review_state:        {result['review_state']}")
+    print(f"  human_disposition:   {result['human_disposition']}")
+    print(f"  governance_model:    {result['governance_model_version']}")
+    print(f"  execution_allowed:   {result['execution_allowed']}")
+    print(f"  path: {result['path']}")
+    print()
+    print(EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY)
+    return 0
+
+
+def run_result_review_show(args: argparse.Namespace) -> int:
+    record = lookup_execution_result_review(HarnessPath.cwd(), args.review_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "review_not_found", "review_id": args.review_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"ResultReview: NOT FOUND — {args.review_id}")
+        return 1
+
+    print(f"ResultReview")
+    print(f"  review_id:           {record['review_id']}")
+    print(f"  execution_result_id: {record['execution_result_id']}")
+    print(f"  reviewer:            {record['reviewer']}")
+    print(f"  reviewed_at:         {record['reviewed_at']}")
+    print(f"  review_state:        {record['review_state']}")
+    print(f"  human_disposition:   {record['human_disposition']}")
+    print(f"  technical_status:    {record['technical_status']}")
+    print(f"  governance_attention: {record['governance_attention']}")
+    print(f"  governance_severity: {record['governance_severity']}")
+    print(f"  governance_model:    {record['governance_model_version']}")
+    print(f"  execution_allowed:   {record['execution_allowed']}")
+    if record.get("review_notes"):
+        print(f"  notes: {record['review_notes']}")
+    if record.get("superseded_review_id"):
+        print(f"  supersedes: {record['superseded_review_id']}")
+    print()
+    print(EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY)
+    return 0
+
+
+def run_result_review_list(args: argparse.Namespace) -> int:
+    records = lookup_execution_result_reviews_for_result(HarnessPath.cwd(), args.result_id)
+    if args.json:
+        print(json.dumps({"execution_result_id": args.result_id, "reviews": records}, indent=2, sort_keys=True))
+        return 0
+
+    print(f"ResultReview list for {args.result_id}")
+    if not records:
+        print("  (no reviews found)")
+        return 0
+    for r in records:
+        superseded_note = f"  [supersedes {r['superseded_review_id']}]" if r.get("superseded_review_id") else ""
+        print(f"  {r['review_id']}  state={r['review_state']}  disposition={r['human_disposition']}{superseded_note}")
+    return 0
+
+
+def run_result_review_list_open(args: argparse.Namespace) -> int:
+    records = lookup_open_execution_result_reviews(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({"open_reviews": records, "count": len(records)}, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Open result reviews: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['review_id']}  result={r['execution_result_id']}  state={r['review_state']}"
+              f"  disposition={r['human_disposition']}")
     return 0

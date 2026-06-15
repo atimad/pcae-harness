@@ -488,6 +488,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae execution-result-governance --result-id <id>`
 - `pcae execution-result-governance --result-id <id> --json`
 
+## result-review
+
+- `pcae result-review create --result-id <id> --reviewer <name> --disposition <value>`
+- `pcae result-review create --result-id <id> --reviewer <name> --disposition <value> --json`
+- `pcae result-review show --review-id <id>`
+- `pcae result-review show --review-id <id> --json`
+- `pcae result-review list --result-id <id>`
+- `pcae result-review list --result-id <id> --json`
+- `pcae result-review list-open`
+- `pcae result-review list-open --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

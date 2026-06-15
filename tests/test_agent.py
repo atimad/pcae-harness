@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -52412,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -52518,16 +52518,16 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
 
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52757,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -53060,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -53333,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -53656,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -54059,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -54386,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
 
 
@@ -54589,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69H" in active_drift[0]
+    assert "69I" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54709,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
     assert branch["current_phase"] == "65J"
 
 
@@ -55178,8 +55178,8 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries (64H added objective_coverage_hardening, "
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
         f"68A added challenge_attention_architecture, 68B added challenge_attention_rendering_integration, "
@@ -55189,7 +55189,9 @@ def test_64h_adds_self_map_entry(tmp_path) -> None:
         f"69D added execution_pathway_integration, "
         f"69E added execution_authorization_recording, "
         f"69F added execution_audit_recording, "
-        f"69G added readonly_execution_activation), "
+        f"69G added readonly_execution_activation, "
+        f"69H added execution_result_governance, "
+        f"69I added execution_result_review_persistence), "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -56680,7 +56682,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56940,7 +56942,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57252,7 +57254,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69H"
+    assert current["phase_id"] == "69I"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -58148,8 +58150,8 @@ def test_69d_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69d_map_count_is_60(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_pathway_integration"),
@@ -58433,8 +58435,8 @@ def test_69e_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69e_map_count_is_61(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_authorization_recording"),
@@ -58828,8 +58830,8 @@ def test_69f_cli_list_by_prompt_json(tmp_path, monkeypatch, capsys) -> None:
 def test_69f_map_count_is_62(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_audit_recording"),
@@ -59000,8 +59002,8 @@ def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
 def test_69g_map_count_is_63(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "readonly_execution_activation"),
@@ -59641,7 +59643,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69H"
+    assert data["current_phase"]["phase_id"] == "69I"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -59694,8 +59696,9 @@ def test_69h_phase_is_active_in_roadmap(tmp_path) -> None:
 
     phase_69h = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69H"), None)
     assert phase_69h is not None, "69H must be registered in _CRI_KNOWN_PHASES"
-    assert phase_69h["status"] == "active"
+    assert phase_69h["status"] == "completed"
     assert phase_69h["predecessor"] == "69G"
+    assert phase_69h["successor"] == "69I"
 
     phase_69g = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69G"), None)
     assert phase_69g is not None
@@ -59706,8 +59709,8 @@ def test_69h_phase_is_active_in_roadmap(tmp_path) -> None:
 def test_69h_map_count_is_64(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 64, (
-        f"Expected 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 64, (
+        f"Expected at least 64 map entries after 69H, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_result_governance"),
@@ -60033,3 +60036,485 @@ def test_69h_governance_boundaries_are_complete(tmp_path) -> None:
         "automatic_acceptance_allowed",
     }
     assert required.issubset(set(_ERG_GOVERNANCE_BOUNDARIES.keys()))
+
+
+# ---------------------------------------------------------------------------
+# Phase 69I — Execution Result Review Persistence tests
+# ---------------------------------------------------------------------------
+
+
+def test_69i_phase_is_active_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase_69i = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69I"), None)
+    assert phase_69i is not None, "69I must be registered in _CRI_KNOWN_PHASES"
+    assert phase_69i["status"] == "active"
+    assert phase_69i["predecessor"] == "69H"
+    assert phase_69i["track_name"] == "execution_governance_activation"
+
+
+def test_69i_69h_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+
+    phase_69h = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69H"), None)
+    assert phase_69h is not None
+    assert phase_69h["status"] == "completed"
+    assert phase_69h["successor"] == "69I"
+
+
+def test_69i_map_count_is_65(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+        f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_result_review_persistence"),
+        None,
+    )
+    assert entry is not None, "execution_result_review_persistence must be in _SRG_CAPABILITY_OBJECTIVE_MAP"
+
+
+def test_69i_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "69I"),
+        None,
+    )
+    assert cap is not None, "69I capability must be registered in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_name"] == "Execution Result Review Persistence"
+    assert cap["capability_domain"] == "execution_governance"
+
+
+def test_69i_constants_defined(tmp_path) -> None:
+    from pcae.core.agent import (
+        _ERRA_PHASE_ID,
+        _ERRA_STORE_DIR,
+        _ERRA_GOVERNANCE_MODEL_VERSION,
+        _ERRA_VALID_DISPOSITIONS,
+        _ERRA_VALID_REVIEW_STATES,
+        _ERRA_TERMINAL_REVIEW_STATES,
+        _ERRA_DISPOSITION_TO_STATE,
+        _ERRA_GOVERNANCE_BOUNDARIES,
+        EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+    )
+
+    assert _ERRA_PHASE_ID == "69I"
+    assert str(_ERRA_STORE_DIR) == ".pcae/result-reviews"
+    assert _ERRA_GOVERNANCE_MODEL_VERSION == "69H-v1"
+    assert "observed" in _ERRA_VALID_DISPOSITIONS
+    assert "acceptable_for_context" in _ERRA_VALID_DISPOSITIONS
+    assert "unacceptable" in _ERRA_VALID_DISPOSITIONS
+    assert "needs_follow_up" in _ERRA_VALID_DISPOSITIONS
+    assert "unclear" in _ERRA_VALID_DISPOSITIONS
+    assert len(_ERRA_VALID_DISPOSITIONS) == 5
+    assert "accepted_as_observed" in _ERRA_TERMINAL_REVIEW_STATES
+    assert "rejected_as_unacceptable" in _ERRA_TERMINAL_REVIEW_STATES
+    assert "superseded" in _ERRA_TERMINAL_REVIEW_STATES
+    assert len(_ERRA_TERMINAL_REVIEW_STATES) == 3
+    assert isinstance(EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY, str)
+    assert len(EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY) > 0
+
+
+def test_69i_disposition_to_state_mapping(tmp_path) -> None:
+    from pcae.core.agent import _ERRA_DISPOSITION_TO_STATE
+
+    assert _ERRA_DISPOSITION_TO_STATE["observed"] == "acknowledged"
+    assert _ERRA_DISPOSITION_TO_STATE["acceptable_for_context"] == "accepted_as_observed"
+    assert _ERRA_DISPOSITION_TO_STATE["unacceptable"] == "rejected_as_unacceptable"
+    assert _ERRA_DISPOSITION_TO_STATE["needs_follow_up"] == "needs_follow_up"
+    assert _ERRA_DISPOSITION_TO_STATE["unclear"] == "open"
+
+
+def test_69i_create_review_success(tmp_path) -> None:
+    monkeypatch_chdir = tmp_path
+    from pcae.core.agent import create_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok", stderr="")
+    _store_err(root, record)
+
+    result = create_execution_result_review(
+        root,
+        record["execution_result_id"],
+        reviewer="alice",
+        human_disposition="observed",
+    )
+    assert result["created"] is True
+    assert result["review_id"].startswith("erra-")
+    assert result["execution_result_id"] == record["execution_result_id"]
+    assert result["review_state"] == "acknowledged"
+    assert result["human_disposition"] == "observed"
+    assert result["governance_model_version"] == "69H-v1"
+    assert result["path"] != ""
+
+
+def test_69i_execution_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "bob", "observed")
+    assert result["execution_allowed"] is False
+
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["execution_allowed"] is False
+
+
+def test_69i_follow_on_execution_allowed_always_false(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "bob", "acceptable_for_context")
+    assert result["follow_on_execution_allowed"] is False
+
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["follow_on_execution_allowed"] is False
+
+
+def test_69i_missing_err_blocked(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    result = create_execution_result_review(root, "err-does-not-exist", "alice", "observed")
+    assert result["created"] is False
+    assert result["error"] == "err_not_found"
+    assert result["execution_allowed"] is False
+
+
+def test_69i_missing_reviewer_blocked(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "", "observed")
+    assert result["created"] is False
+    assert result["error"] == "missing_reviewer"
+
+
+def test_69i_invalid_disposition_blocked(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "approve_execution")
+    assert result["created"] is False
+    assert "invalid_disposition" in result["error"]
+
+
+def test_69i_all_five_dispositions_accepted(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, _ERRA_VALID_DISPOSITIONS
+    from pcae.core.paths import HarnessPath
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+
+    for i, disposition in enumerate(sorted(_ERRA_VALID_DISPOSITIONS)):
+        record = _make_err_record(result_id=f"err-test-disp-{i}-20260615T090000", return_code=0, stdout="ok")
+        _store_err(root, record)
+        result = create_execution_result_review(root, record["execution_result_id"], "alice", disposition)
+        assert result["created"] is True, f"disposition={disposition} should be accepted; error={result.get('error')}"
+
+
+def test_69i_erg_snapshot_embedded_in_artifact(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="output", stderr="")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "observed")
+    assert result["created"] is True
+
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert "technical_status" in artifact
+    assert "governance_attention" in artifact
+    assert "governance_severity" in artifact
+    assert "attention_signals" in artifact
+    assert "classification_basis" in artifact
+    assert artifact["technical_status"] == "success"
+
+
+def test_69i_governance_model_version_stored(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "observed")
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["governance_model_version"] == "69H-v1"
+
+
+def test_69i_accepted_as_observed_is_not_authorization(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review, _ERRA_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(
+        root, record["execution_result_id"], "alice", "acceptable_for_context"
+    )
+    assert result["created"] is True
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["review_state"] == "accepted_as_observed"
+    assert artifact["execution_allowed"] is False
+    assert artifact["follow_on_execution_allowed"] is False
+    assert _ERRA_GOVERNANCE_BOUNDARIES["accepted_as_observed_is_not_approval"] is True
+
+
+def test_69i_acceptable_for_context_not_execution_permission(tmp_path) -> None:
+    from pcae.core.agent import _ERRA_GOVERNANCE_BOUNDARIES
+
+    assert _ERRA_GOVERNANCE_BOUNDARIES["acceptable_for_context_is_not_execution_permission"] is True
+
+
+def test_69i_needs_follow_up_not_remediation(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review, _ERRA_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(result_id="err-test-followup-20260615T090000", return_code=1, execution_status="failed")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "needs_follow_up")
+    assert result["created"] is True
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["review_state"] == "needs_follow_up"
+    assert artifact["execution_allowed"] is False
+    assert _ERRA_GOVERNANCE_BOUNDARIES["needs_follow_up_is_not_remediation"] is True
+
+
+def test_69i_rejected_result_does_not_trigger_rollback(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review, _ERRA_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(result_id="err-test-reject-20260615T090000", return_code=1, execution_status="failed")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "unacceptable")
+    assert result["created"] is True
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["review_state"] == "rejected_as_unacceptable"
+    assert artifact["execution_allowed"] is False
+    assert _ERRA_GOVERNANCE_BOUNDARIES["rejected_result_does_not_trigger_rollback"] is True
+
+
+def test_69i_lookup_by_review_id(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_review
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    result = create_execution_result_review(root, record["execution_result_id"], "alice", "observed")
+    assert result["created"] is True
+
+    artifact = lookup_execution_result_review(root, result["review_id"])
+    assert artifact is not None
+    assert artifact["review_id"] == result["review_id"]
+    assert artifact["execution_result_id"] == record["execution_result_id"]
+
+
+def test_69i_lookup_by_execution_result_id(tmp_path) -> None:
+    from pcae.core.agent import create_execution_result_review, lookup_execution_result_reviews_for_result
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    create_execution_result_review(root, record["execution_result_id"], "alice", "observed")
+    create_execution_result_review(root, record["execution_result_id"], "bob", "acceptable_for_context")
+
+    reviews = lookup_execution_result_reviews_for_result(root, record["execution_result_id"])
+    assert len(reviews) == 2
+    assert all(r["execution_result_id"] == record["execution_result_id"] for r in reviews)
+
+
+def test_69i_open_review_lookup(tmp_path) -> None:
+    from pcae.core.agent import (
+        create_execution_result_review,
+        lookup_open_execution_result_reviews,
+    )
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    open_record = _make_err_record(result_id="err-open-20260615T090000", return_code=0, stdout="ok")
+    terminal_record = _make_err_record(result_id="err-terminal-20260615T090000", return_code=1, execution_status="failed")
+    _store_err(root, open_record)
+    _store_err(root, terminal_record)
+
+    create_execution_result_review(root, open_record["execution_result_id"], "alice", "needs_follow_up")
+    create_execution_result_review(root, terminal_record["execution_result_id"], "alice", "unacceptable")
+
+    open_reviews = lookup_open_execution_result_reviews(root)
+    open_ids = {r["execution_result_id"] for r in open_reviews}
+    assert open_record["execution_result_id"] in open_ids
+    assert terminal_record["execution_result_id"] not in open_ids
+
+
+def test_69i_superseded_review_excluded_from_open_lookup(tmp_path) -> None:
+    import json as _json
+    from pcae.core.agent import (
+        create_execution_result_review,
+        store_execution_result_review,
+        lookup_open_execution_result_reviews,
+    )
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(result_id="err-supersede-20260615T090000", return_code=0, stdout="ok")
+    _store_err(root, record)
+
+    first = create_execution_result_review(root, record["execution_result_id"], "alice", "needs_follow_up")
+    assert first["created"] is True
+
+    # Create a superseding review that references the first
+    from datetime import datetime, timezone
+    import uuid
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("%Y%m%dT%H%M%SZ")
+    new_review_id = f"erra-{ts}-{str(uuid.uuid4())[:8]}"
+
+    superseding = {
+        "review_id": new_review_id,
+        "execution_result_id": record["execution_result_id"],
+        "audit_id": "ear-test-20260615T090000",
+        "authorization_id": "auth-test-20260615T090000",
+        "prompt_id": "test-prompt",
+        "reviewer": "alice",
+        "reviewed_at": now.isoformat(),
+        "technical_status": "success",
+        "governance_attention": "clear",
+        "governance_severity": "low",
+        "attention_signals": [],
+        "classification_basis": {},
+        "governance_model_version": "69H-v1",
+        "review_state": "accepted_as_observed",
+        "human_disposition": "acceptable_for_context",
+        "review_notes": "Superseding prior review",
+        "created_at": now.isoformat(),
+        "review_version": 1,
+        "execution_allowed": False,
+        "follow_on_execution_allowed": False,
+        "superseded_review_id": first["review_id"],
+    }
+    store_result = store_execution_result_review(root, superseding)
+    assert store_result["stored"] is True
+
+    open_reviews = lookup_open_execution_result_reviews(root)
+    open_ids = {r["review_id"] for r in open_reviews}
+    assert first["review_id"] not in open_ids, "superseded review must not appear in open lookup"
+    assert new_review_id not in open_ids, "terminal superseding review must not appear in open lookup"
+
+
+def test_69i_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _ERRA_GOVERNANCE_BOUNDARIES
+
+    required = {
+        "result_review_does_not_execute",
+        "result_review_does_not_authorize_execution",
+        "result_review_does_not_authorize_retry",
+        "result_review_does_not_authorize_rollback",
+        "result_review_does_not_authorize_commit",
+        "result_review_does_not_authorize_push",
+        "accepted_as_observed_is_not_approval",
+        "acceptable_for_context_is_not_execution_permission",
+        "needs_follow_up_is_not_remediation",
+        "rejected_result_does_not_trigger_rollback",
+        "review_persistence_does_not_change_err",
+        "review_persistence_does_not_change_ara",
+        "review_persistence_does_not_change_apa",
+        "follow_on_execution_requires_new_authorization",
+        "automatic_review_allowed",
+    }
+    assert required.issubset(set(_ERRA_GOVERNANCE_BOUNDARIES.keys()))
+    assert _ERRA_GOVERNANCE_BOUNDARIES["result_review_does_not_execute"] is True
+    assert _ERRA_GOVERNANCE_BOUNDARIES["automatic_review_allowed"] is False
+    assert _ERRA_GOVERNANCE_BOUNDARIES["follow_on_execution_requires_new_authorization"] is True
+
+
+def test_69i_cli_create_json_output(tmp_path, monkeypatch) -> None:
+    import json as _json
+    monkeypatch.chdir(tmp_path)
+    from pcae.cli import main
+    from pcae.core.agent import store_execution_result
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(result_id="err-cli-69i-20260615T090000", return_code=0, stdout="cli test")
+    _store_err(root, record)
+
+    import sys
+    from io import StringIO
+    captured = StringIO()
+    monkeypatch.setattr(sys, "stdout", captured)
+    ret = main([
+        "result-review", "create",
+        "--result-id", record["execution_result_id"],
+        "--reviewer", "cli-tester",
+        "--disposition", "observed",
+        "--json",
+    ])
+    assert ret == 0
+    data = _json.loads(captured.getvalue())
+    assert data["created"] is True
+    assert data["execution_allowed"] is False
+    assert data["follow_on_execution_allowed"] is False
+    assert data["governance_model_version"] == "69H-v1"
+
+
+def test_69i_cli_list_open_json_output(tmp_path, monkeypatch) -> None:
+    import json as _json
+    monkeypatch.chdir(tmp_path)
+    from pcae.cli import main
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    record = _make_err_record(result_id="err-cli-open-20260615T090000", return_code=0, stdout="cli open test")
+    _store_err(root, record)
+
+    from pcae.core.agent import create_execution_result_review
+    create_execution_result_review(root, record["execution_result_id"], "alice", "needs_follow_up")
+
+    import sys
+    from io import StringIO
+    captured = StringIO()
+    monkeypatch.setattr(sys, "stdout", captured)
+    ret = main(["result-review", "list-open", "--json"])
+    assert ret == 0
+    data = _json.loads(captured.getvalue())
+    assert "open_reviews" in data
+    assert "count" in data
+    assert data["count"] >= 1

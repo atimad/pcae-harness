@@ -72,6 +72,10 @@ from pcae.commands.agent import (
     run_execution_activation_show,
     run_execution_activation_list,
     run_execution_result_governance,
+    run_result_review_create,
+    run_result_review_show,
+    run_result_review_list,
+    run_result_review_list_open,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2139,6 +2143,74 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     erg_parser.set_defaults(handler=run_execution_result_governance)
+
+    result_review_parser = subparsers.add_parser(
+        "result-review",
+        help=(
+            "Persist human review of an ExecutionResultRecord as an immutable "
+            "ExecutionResultReviewArtifact (Phase 69I). No execution, authorization, or mutation."
+        ),
+    )
+    result_review_subparsers = result_review_parser.add_subparsers(
+        dest="result_review_command", required=True
+    )
+
+    rr_create_parser = result_review_subparsers.add_parser(
+        "create",
+        help="Create an immutable ExecutionResultReviewArtifact for an ERR.",
+    )
+    rr_create_parser.add_argument(
+        "--result-id", required=True, help="ExecutionResultRecord ID to review."
+    )
+    rr_create_parser.add_argument(
+        "--reviewer", required=True, help="Name of the human reviewer."
+    )
+    rr_create_parser.add_argument(
+        "--disposition",
+        required=True,
+        choices=["observed", "acceptable_for_context", "unacceptable", "needs_follow_up", "unclear"],
+        help="Human disposition of the result.",
+    )
+    rr_create_parser.add_argument(
+        "--notes", default="", help="Optional reviewer notes."
+    )
+    rr_create_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rr_create_parser.set_defaults(handler=run_result_review_create)
+
+    rr_show_parser = result_review_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionResultReviewArtifact by review ID.",
+    )
+    rr_show_parser.add_argument(
+        "--review-id", required=True, help="Review ID to look up."
+    )
+    rr_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rr_show_parser.set_defaults(handler=run_result_review_show)
+
+    rr_list_parser = result_review_subparsers.add_parser(
+        "list",
+        help="List all ExecutionResultReviewArtifacts for an ExecutionResultRecord.",
+    )
+    rr_list_parser.add_argument(
+        "--result-id", required=True, help="ExecutionResultRecord ID to list reviews for."
+    )
+    rr_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rr_list_parser.set_defaults(handler=run_result_review_list)
+
+    rr_list_open_parser = result_review_subparsers.add_parser(
+        "list-open",
+        help="List all open (non-terminal, non-superseded) ExecutionResultReviewArtifacts.",
+    )
+    rr_list_open_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rr_list_open_parser.set_defaults(handler=run_result_review_list_open)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

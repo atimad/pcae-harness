@@ -1,9 +1,9 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-14T22:31:04.082047+00:00
+Generated: 2026-06-15T05:30:48.501315+00:00
 Phase: 64B.0 — Capability Inventory
-Total capabilities: 72
-Implemented: 70
+Total capabilities: 73
+Implemented: 71
 Dormant: 1
 Superseded: 1
 Roadmap gaps: 0
@@ -86,7 +86,8 @@ Assessment status: inventory_complete
 | Execution Authorization Recording | execution_governance | 69E | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store | execution_pathway_integration | execution_audit_recording |
 | Execution Audit Recording | execution_governance | 69F | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store; audit-record | execution_authorization_recording | readonly_execution_activation |
 | Readonly Execution Activation | execution_governance | 69G | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store; audit-record; execution-activation | execution_audit_recording | execution_result_governance |
-| Execution Result Governance | execution_governance | 69H | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store; audit-record; execution-activation; execution-result-governance | readonly_execution_activation | (none) |
+| Execution Result Governance | execution_governance | 69H | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store; audit-record; execution-activation; execution-result-governance | readonly_execution_activation | execution_result_review_persistence |
+| Execution Result Review Persistence | execution_governance | 69I | implemented | approval-store; invocation-contract-validation; execution-pathway-integration; authorization-store; audit-record; execution-activation; execution-result-governance; result-review | execution_result_governance | (none) |
 
 ## Governance Notes
 
@@ -99,4 +100,4 @@ Assessment status: inventory_complete
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
 
-*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=72. implemented_count=70. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
+*Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=73. implemented_count=71. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*
