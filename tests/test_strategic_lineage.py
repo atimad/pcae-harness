@@ -35,6 +35,7 @@ ACTIVATION_TIMESTAMP_69H = "2026-06-15T00:00:00+00:00"
 ACTIVATION_TIMESTAMP_69I = "2026-06-15T00:00:01+00:00"
 ACTIVATION_TIMESTAMP_69J = "2026-06-15T11:19:00+00:00"
 ACTIVATION_TIMESTAMP_69K = "2026-06-15T13:06:00+00:00"
+ACTIVATION_TIMESTAMP_69L = "2026-06-15T19:13:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -753,6 +754,53 @@ def _valid_69k_record() -> dict:
     }
 
 
+def _valid_69l_record() -> dict:
+    return {
+        "lineage_id": "SLR-69L-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69L,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "technical_debt",
+        "source_phase_id": "69K",
+        "predecessor_phase_id": "69K",
+        "activated_phase_id": "69L",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Introduces workspace isolation for invoke_readonly_execution via git worktree + rsync overlay. "
+            "Subprocess runs with cwd=sandbox_dir not root. Condition 13 blocks on sandbox creation or "
+            "rsync overlay failure. ERR schema expanded with sandbox_mode=workspace_isolation, sandbox_id, "
+            "sandbox_provider. ECR post_state sourced from sandbox before destruction. Six SLR entries "
+            "document forward-compatibility constraints for 69M write governance. "
+            "SLR-69L-001: sandbox_provider fixed to git_worktree; container providers deferred. "
+            "SLR-69L-002: os_isolation deferred; workspace_isolation is development containment only. "
+            "SLR-69L-003: sandbox_dir ephemeral; forensic artifact copy deferred. "
+            "SLR-69L-004: ECR captures paths not content; ECP class required in 69M for promotion. "
+            "SLR-69L-005: workspace isolation is behavioral not OS containment; absolute path writes uncontained. "
+            "SLR-69L-006: git worktree shares object store with root; git commits in sandbox persist in shared store."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [
+            "SLR-69L-001: sandbox_provider fixed to git_worktree; container providers deferred",
+            "SLR-69L-002: os_isolation deferred; workspace_isolation is development containment only",
+            "SLR-69L-003: sandbox_dir ephemeral; forensic artifact copy deferred",
+            "SLR-69L-004: ECR captures paths not content; ECP artifact class required in 69M for promotion payload",
+            "SLR-69L-005: workspace isolation is behavioral not OS containment; absolute path writes and symlink write-through uncontained",
+            "SLR-69L-006: git worktree shares object store with root; git commits inside sandbox persist in shared store",
+        ],
+        "supersedes_lineage_id": "SLR-69K-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69L,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -776,6 +824,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69i_record(),
         _valid_69j_record(),
         _valid_69k_record(),
+        _valid_69l_record(),
     ]
 
 
@@ -959,6 +1008,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69K",
             "timestamp": ACTIVATION_TIMESTAMP_69K,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69L",
+            "timestamp": ACTIVATION_TIMESTAMP_69L,
+        },
     ])
     return events
 
@@ -994,7 +1051,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69K-TEST"
+    assert result.current_lineage_id == "SLR-69L-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -1029,7 +1086,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69K-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69L-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -1130,7 +1187,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69K-TEST"
+    assert result.current_lineage_id == "SLR-69L-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1185,9 +1242,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69K-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69L-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 22
+    assert json.loads(capsys.readouterr().out)["record_count"] == 23
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {
@@ -1221,4 +1278,50 @@ def test_69i_slr_present_in_strategic_lineage(tmp_path: Path) -> None:
     assert slr["human_approved"] is True
     assert any("conflict" in debt.lower() for debt in slr.get("roadmap_debt", [])), (
         "SLR-69I-001 roadmap_debt must document deferred multi-reviewer conflict resolution"
+    )
+
+
+def test_69k_slr_present_in_strategic_lineage(tmp_path: Path) -> None:
+    import json as _json
+
+    data = _json.loads((Path(".pcae") / "strategic-lineage.json").read_text())
+    slr = next((r for r in data if r.get("lineage_id") == "SLR-69K-001"), None)
+    assert slr is not None, "SLR-69K-001 must be present in .pcae/strategic-lineage.json"
+    assert slr["activated_phase_id"] == "69K"
+    assert slr["selected_branch_id"] == "BR-005"
+    assert slr["supersedes_lineage_id"] == "SLR-69J-001"
+    assert slr["execution_allowed"] is False
+    assert "OBJ-002" in slr["objective_ids"]
+    assert "OBJ-003" in slr["objective_ids"]
+    assert slr["human_approved"] is True
+    assert slr["decision_basis"] == "technical_debt"
+    assert any("snapshot" in debt.lower() for debt in slr.get("roadmap_debt", [])), (
+        "SLR-69K-001 roadmap_debt must document snapshot-related technical debt"
+    )
+
+
+def test_69l_slr_present_in_strategic_lineage(tmp_path: Path) -> None:
+    import json as _json
+
+    data = _json.loads((Path(".pcae") / "strategic-lineage.json").read_text())
+    slr = next((r for r in data if r.get("lineage_id") == "SLR-69L-001"), None)
+    assert slr is not None, "SLR-69L-001 must be present in .pcae/strategic-lineage.json"
+    assert slr["activated_phase_id"] == "69L"
+    assert slr["selected_branch_id"] == "BR-005"
+    assert slr["supersedes_lineage_id"] == "SLR-69K-001"
+    assert slr["execution_allowed"] is False
+    assert "OBJ-002" in slr["objective_ids"]
+    assert "OBJ-003" in slr["objective_ids"]
+    assert slr["human_approved"] is True
+    assert slr["decision_basis"] == "technical_debt"
+    debts = slr.get("roadmap_debt", [])
+    assert len(debts) == 6, f"SLR-69L-001 must have 6 roadmap_debt entries, got {len(debts)}"
+    assert any("SLR-69L-001" in d for d in debts), "SLR-69L-001 must be in roadmap_debt"
+    assert any("SLR-69L-002" in d for d in debts), "SLR-69L-002 must be in roadmap_debt"
+    assert any("SLR-69L-003" in d for d in debts), "SLR-69L-003 must be in roadmap_debt"
+    assert any("SLR-69L-004" in d for d in debts), "SLR-69L-004 must be in roadmap_debt"
+    assert any("SLR-69L-005" in d for d in debts), "SLR-69L-005 must be in roadmap_debt"
+    assert any("SLR-69L-006" in d for d in debts), "SLR-69L-006 must be in roadmap_debt"
+    assert any("sandbox" in d.lower() or "worktree" in d.lower() for d in debts), (
+        "SLR-69L-001 roadmap_debt must document sandbox/worktree technical debt"
     )

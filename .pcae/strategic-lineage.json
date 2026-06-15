@@ -687,7 +687,9 @@
   },
   {
     "activated_phase_id": "69K",
+    "activation_event_id": "2026-06-15T13:06:00+00:00",
     "activation_timestamp": "2026-06-15T13:06:00+00:00",
+    "activation_validation_status": "validated",
     "considered_alternatives": [],
     "decided_by": "human-user",
     "decision_basis": "technical_debt",
@@ -718,8 +720,42 @@
     ],
     "selected_branch_id": "BR-005",
     "source_phase_id": "69J",
-    "supersedes_lineage_id": "SLR-69J-001",
-    "activation_event_id": "2026-06-15T13:06:00+00:00",
-    "activation_validation_status": "validated"
+    "supersedes_lineage_id": "SLR-69J-001"
+  },
+  {
+    "activated_phase_id": "69L",
+    "activation_event_id": "2026-06-15T19:13:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "technical_debt",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "human_approved": true,
+    "lineage_id": "SLR-69L-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-15T19:13:00+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69K",
+    "rationale": "Introduces workspace isolation for invoke_readonly_execution via git worktree + rsync overlay. Subprocess runs with cwd=sandbox_dir not root. Condition 13 blocks on sandbox creation or rsync overlay failure. ERR schema expanded with sandbox_mode=workspace_isolation, sandbox_id, sandbox_provider. ECR post_state sourced from sandbox before destruction. Six SLR entries document forward-compatibility constraints for 69M write governance. SLR-69L-001: sandbox_provider fixed to git_worktree; container providers deferred. SLR-69L-002: os_isolation deferred; workspace_isolation is development containment only. SLR-69L-003: sandbox_dir ephemeral; forensic artifact copy deferred. SLR-69L-004: ECR captures paths not content; ECP class required in 69M for promotion. SLR-69L-005: workspace isolation is behavioral not OS containment; absolute path writes uncontained. SLR-69L-006: git worktree shares object store with root; git commits in sandbox persist in shared store.",
+    "recommendation": "approve",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "SLR-69L-001: sandbox_provider fixed to git_worktree; container providers deferred",
+      "SLR-69L-002: os_isolation deferred; workspace_isolation is development containment only",
+      "SLR-69L-003: sandbox_dir ephemeral; forensic artifact copy deferred",
+      "SLR-69L-004: ECR captures paths not content; ECP artifact class required in 69M for promotion payload",
+      "SLR-69L-005: workspace isolation is behavioral not OS containment; absolute path writes and symlink write-through uncontained",
+      "SLR-69L-006: git worktree shares object store with root; git commits inside sandbox persist in shared store"
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69K",
+    "supersedes_lineage_id": "SLR-69K-001"
   }
 ]

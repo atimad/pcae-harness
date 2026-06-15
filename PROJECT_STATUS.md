@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69K: Automatic Snapshot Integration (BR-005 Execution Governance Activation).
+Phase 69L: Execution Sandboxing Architecture (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

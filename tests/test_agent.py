@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -52380,7 +52380,7 @@ def test_65c_1_non_hardening_phases_have_nonempty_introduced_commands(tmp_path) 
 
     data = build_capability_inventory(_HarnessPath65C1(tmp_path))
     # Integration phases that enhance existing commands without introducing new ones
-    hardening_phases = {"64B.4A", "64B.4B", "64B.6A", "64B.6B", "64B.6C", "64B.6D", "64B.6E", "69K"}
+    hardening_phases = {"64B.4A", "64B.4B", "64B.6A", "64B.6B", "64B.6C", "64B.6D", "64B.6E", "69K", "69L"}
     for r in data["capability_records"]:
         if r["implemented_phase"] not in hardening_phases and r["status"] == "implemented":
             if r["commands"]:
@@ -52413,7 +52413,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -52758,7 +52758,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -53061,7 +53061,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -53334,7 +53334,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -53657,7 +53657,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -54060,7 +54060,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -54387,7 +54387,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
 
 
@@ -54590,7 +54590,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69K" in active_drift[0]
+    assert "69L" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54710,7 +54710,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
     assert branch["current_phase"] == "65J"
 
 
@@ -56683,7 +56683,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56943,7 +56943,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57255,7 +57255,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69K"
+    assert current["phase_id"] == "69L"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -58952,7 +58952,7 @@ def _store_ear_69g(root, artifact: dict) -> None:
     (store / f"{artifact['audit_id']}-{ts}.json").write_text(_json.dumps(artifact))
 
 
-def _mock_subprocess_success(cmd: list, timeout: int) -> dict:
+def _mock_subprocess_success(cmd: list, timeout: int, cwd: str | None = None) -> dict:
     return {
         "stdout": "mock output",
         "stderr": "",
@@ -58963,7 +58963,7 @@ def _mock_subprocess_success(cmd: list, timeout: int) -> dict:
     }
 
 
-def _mock_subprocess_timeout(cmd: list, timeout: int) -> dict:
+def _mock_subprocess_timeout(cmd: list, timeout: int, cwd: str | None = None) -> dict:
     return {
         "stdout": "",
         "stderr": "",
@@ -58974,7 +58974,7 @@ def _mock_subprocess_timeout(cmd: list, timeout: int) -> dict:
     }
 
 
-def _mock_subprocess_invocation_error(cmd: list, timeout: int) -> dict:
+def _mock_subprocess_invocation_error(cmd: list, timeout: int, cwd: str | None = None) -> dict:
     return {
         "stdout": "",
         "stderr": "",
@@ -58983,6 +58983,40 @@ def _mock_subprocess_invocation_error(cmd: list, timeout: int) -> dict:
         "execution_status": "invocation_error",
         "capture_status": "none",
     }
+
+
+def _mock_sandbox_success(root, prompt_id: str) -> dict:
+    """Mock _esb_create_sandbox returning a successful sandbox creation."""
+    return {
+        "sandbox_id": f"sandbox-{prompt_id}-20260615T191300",
+        "sandbox_dir": "/tmp/pcae_sandbox_test",
+        "created": True,
+        "errors": [],
+    }
+
+
+def _mock_sandbox_failure(root, prompt_id: str) -> dict:
+    """Mock _esb_create_sandbox returning a failed sandbox creation."""
+    return {
+        "sandbox_id": f"sandbox-{prompt_id}-20260615T191300",
+        "sandbox_dir": None,
+        "created": False,
+        "errors": ["git_worktree_add_failed:mock failure"],
+    }
+
+
+def _mock_sandbox_overlay_failure(root, prompt_id: str) -> dict:
+    """Mock _esb_create_sandbox returning a failed rsync overlay."""
+    return {
+        "sandbox_id": f"sandbox-{prompt_id}-20260615T191300",
+        "sandbox_dir": None,
+        "created": False,
+        "errors": ["rsync_overlay_failed:mock rsync failure"],
+    }
+
+
+def _mock_sandbox_destroy(root, sandbox_dir: str) -> dict:
+    return {"destroyed": True, "errors": []}
 
 
 def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
@@ -59054,8 +59088,7 @@ def test_69g_governance_boundaries_execution_allowed_false(tmp_path) -> None:
 def test_69g_sandbox_limitations_documented(tmp_path) -> None:
     from pcae.core.agent import _EGA_SANDBOX_LIMITATIONS
 
-    assert _EGA_SANDBOX_LIMITATIONS["sandbox_mode"] == "none"
-    assert _EGA_SANDBOX_LIMITATIONS["filesystem_isolation"] is False
+    assert _EGA_SANDBOX_LIMITATIONS["sandbox_mode"] == "workspace_isolation"
     assert _EGA_SANDBOX_LIMITATIONS["network_isolation"] is False
 
 
@@ -59287,6 +59320,8 @@ def test_69g_invoke_blocks_ear_already_executed(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution
     from pcae.core.paths import HarnessPath
@@ -59317,6 +59352,8 @@ def test_69g_ear_remains_immutable_after_execution(tmp_path, monkeypatch) -> Non
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution, lookup_execution_audit_record
     from pcae.core.paths import HarnessPath
@@ -59344,6 +59381,8 @@ def test_69g_reexecution_does_not_call_subprocess(tmp_path, monkeypatch) -> None
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution
     from pcae.core.paths import HarnessPath
@@ -59362,10 +59401,10 @@ def test_69g_reexecution_does_not_call_subprocess(tmp_path, monkeypatch) -> None
 
     subprocess_call_count = 0
 
-    def _counting_mock(cmd: list, timeout: int) -> dict:
+    def _counting_mock(cmd: list, timeout: int, cwd: str | None = None) -> dict:
         nonlocal subprocess_call_count
         subprocess_call_count += 1
-        return _mock_subprocess_success(cmd, timeout)
+        return _mock_subprocess_success(cmd, timeout, cwd)
 
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _counting_mock)
 
@@ -59381,6 +59420,8 @@ def test_69g_invoke_uses_contract_for_command_source(tmp_path, monkeypatch) -> N
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     contract_calls: list[str] = []
     original_finder = _agent_mod._ivcv_find_invocation_contract
@@ -59463,6 +59504,8 @@ def test_69g_lookup_results_by_audit_id(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.paths import HarnessPath
 
@@ -59492,6 +59535,8 @@ def test_69g_invoke_all_conditions_met_stores_err(tmp_path, monkeypatch) -> None
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
     from pcae.core.paths import HarnessPath
@@ -59519,7 +59564,7 @@ def test_69g_invoke_all_conditions_met_stores_err(tmp_path, monkeypatch) -> None
     assert stored["execution_allowed"] is True
     assert stored["execution_occurred"] is True
     assert stored["shell_used"] is False
-    assert stored["sandbox_mode"] == "none"
+    assert stored["sandbox_mode"] == "workspace_isolation"
     assert stored["agent_id"] == "claude-local"
 
 
@@ -59527,6 +59572,8 @@ def test_69g_invoke_records_timeout_as_execution_occurred(tmp_path, monkeypatch)
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_timeout)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution
     from pcae.core.paths import HarnessPath
@@ -59553,6 +59600,8 @@ def test_69g_invoke_records_invocation_error_as_execution_occurred(tmp_path, mon
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_invocation_error)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution
     from pcae.core.paths import HarnessPath
@@ -59574,10 +59623,12 @@ def test_69g_invoke_records_invocation_error_as_execution_occurred(tmp_path, mon
     assert result["stored"] is True
 
 
-def test_69g_err_sandbox_mode_none_in_stored_record(tmp_path, monkeypatch) -> None:
+def test_69g_err_sandbox_mode_workspace_isolation_in_stored_record(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
     from pcae.core.paths import HarnessPath
@@ -59594,7 +59645,7 @@ def test_69g_err_sandbox_mode_none_in_stored_record(tmp_path, monkeypatch) -> No
         root, "test-69g-prompt", "auth-test-69g-prompt-20260614T090000", "ear-20260614T090200"
     )
     stored = lookup_execution_result(root, result["execution_result_id"])
-    assert stored["sandbox_mode"] == "none"
+    assert stored["sandbox_mode"] == "workspace_isolation"
     assert stored["shell_used"] is False
     assert stored["timeout_seconds"] == 120
     assert stored["max_output_bytes"] == 65536
@@ -59604,6 +59655,8 @@ def test_69g_lookup_execution_results_for_prompt(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     import pcae.core.agent as _agent_mod
     monkeypatch.setattr(_agent_mod, "_ega_run_subprocess", _mock_subprocess_success)
+    monkeypatch.setattr(_agent_mod, "_esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr(_agent_mod, "_esb_destroy_sandbox", _mock_sandbox_destroy)
 
     from pcae.core.agent import invoke_readonly_execution, lookup_execution_results_for_prompt
     from pcae.core.paths import HarnessPath
@@ -59644,7 +59697,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69K"
+    assert data["current_phase"]["phase_id"] == "69L"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -61291,11 +61344,17 @@ def _make_invokable_fixtures(tmp_path, monkeypatch):
         "generated_at": "2026-06-15T13:02:00+00:00",
     }))
 
+    # Phase 69L: sandbox functions default-mocked so existing tests are not broken
+    # by real git worktree/rsync calls in tmp_path. Tests that need real sandbox
+    # behavior or failure scenarios override these explicitly.
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _mock_sandbox_success)
+    monkeypatch.setattr("pcae.core.agent._esb_destroy_sandbox", _mock_sandbox_destroy)
+
     return root, prompt_id, authorization_id, audit_id
 
 
 def _mock_git_ok(git_head="HEAD-ABC"):
-    def _mock(r):
+    def _mock(r, cwd_path=None):
         return {
             "git_available": True, "git_head": git_head,
             "git_branch": "main", "git_status_porcelain": "",
@@ -61305,7 +61364,7 @@ def _mock_git_ok(git_head="HEAD-ABC"):
     return _mock
 
 
-def _mock_git_unavailable(r):
+def _mock_git_unavailable(r, cwd_path=None):
     return {
         "git_available": False, "git_head": None, "git_branch": None,
         "git_status_porcelain": None, "tracked_modified": [], "tracked_added": [],
@@ -61318,7 +61377,7 @@ def test_69k_phase_registered_in_roadmap(tmp_path) -> None:
     from pcae.core.agent import _CRI_KNOWN_PHASES
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69K"), None)
     assert phase is not None, "69K must be registered in _CRI_KNOWN_PHASES"
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "69J"
     assert phase["track_name"] == "execution_governance_activation"
 
@@ -61333,8 +61392,8 @@ def test_69k_69j_is_completed_in_roadmap(tmp_path) -> None:
 
 def test_69k_map_count_is_67(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 67, (
-        f"Expected 67 map entries after 69K, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 68, (
+        f"Expected 68 map entries after 69L, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "automatic_snapshot_integration"),
@@ -61433,7 +61492,7 @@ def test_69k_invoke_creates_esa_before_subprocess(tmp_path, monkeypatch) -> None
 
     original_subprocess = __import__("pcae.core.agent", fromlist=["_ega_run_subprocess"])._ega_run_subprocess
 
-    def _mock_subprocess(cmd, timeout):
+    def _mock_subprocess(cmd, timeout, cwd=None):
         from pathlib import Path
         esa_dir = tmp_path / ".pcae" / "execution-snapshots"
         nonlocal snapshot_created_before
@@ -61456,7 +61515,7 @@ def test_69k_err_contains_snapshot_fields(tmp_path, monkeypatch) -> None:
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "ok", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61485,7 +61544,7 @@ def test_69k_git_unavailable_proceeds_advisory(tmp_path, monkeypatch) -> None:
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_unavailable)
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "ok", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61532,7 +61591,7 @@ def test_69k_ecr_created_automatically_after_execution(tmp_path, monkeypatch) ->
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "ok", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61554,7 +61613,7 @@ def test_69k_automatic_ecr_execution_allowed_false(tmp_path, monkeypatch) -> Non
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61569,7 +61628,7 @@ def test_69k_automatic_ecr_rollback_executed_false(tmp_path, monkeypatch) -> Non
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61584,7 +61643,7 @@ def test_69k_automatic_esa_execution_allowed_false(tmp_path, monkeypatch) -> Non
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61601,7 +61660,7 @@ def test_69k_ecr_failure_does_not_block_err(tmp_path, monkeypatch) -> None:
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "ok", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61695,7 +61754,7 @@ def test_69k_ecr_references_precomputed_result_id(tmp_path, monkeypatch) -> None
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61717,7 +61776,7 @@ def test_69k_invoke_result_carries_easi_boundaries(tmp_path, monkeypatch) -> Non
 
     root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
     monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61736,7 +61795,7 @@ def test_69k_condition12_blocked_result_has_easi_fields(tmp_path, monkeypatch) -
     monkeypatch.setattr("pcae.core.agent.store_execution_snapshot", lambda r, rec: {
         "stored": False, "errors": ["validation_failure"], "path": None
     })
-    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t: {
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
         "stdout": "", "stderr": "", "return_code": 0,
         "timed_out": False, "execution_status": "success", "capture_status": "complete",
     })
@@ -61771,3 +61830,380 @@ def test_69k_strategic_lineage_has_slr_69k_002(tmp_path) -> None:
     assert slr_69k is not None
     debt = slr_69k.get("roadmap_debt", [])
     assert any("SLR-69K-002" in d for d in debt), "SLR-69K-002 must appear in SLR-69K-001 roadmap_debt"
+
+
+# ---------------------------------------------------------------------------
+# Phase 69L — Execution Sandboxing Architecture tests
+# ---------------------------------------------------------------------------
+
+
+def test_69l_phase_registered_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69L"), None)
+    assert phase is not None, "69L must be registered in _CRI_KNOWN_PHASES"
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "69K"
+    assert phase["track_name"] == "execution_governance_activation"
+
+
+def test_69l_69k_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69K"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "69L"
+
+
+def test_69l_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69L"),
+        None,
+    )
+    assert cap is not None, "69L capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_name"] == "Execution Sandboxing Architecture"
+    assert cap["capability_domain"] == "execution_governance"
+
+
+def test_69l_capability_registered_in_cri(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69L"),
+        None,
+    )
+    assert cap is not None, "69L capability must be in _CRI_KNOWN_CAPABILITIES"
+    assert "SLR-69L-001" in cap["contribution"]
+
+
+def test_69l_execution_sandboxing_in_capability_map(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_sandboxing_architecture"),
+        None,
+    )
+    assert entry is not None, "execution_sandboxing_architecture must be in _SRG_CAPABILITY_OBJECTIVE_MAP"
+    assert "OBJ-002" in entry["objective_ids"]
+    assert "OBJ-003" in entry["objective_ids"]
+
+
+def test_69l_valid_sandbox_modes(tmp_path) -> None:
+    from pcae.core.agent import _EGA_VALID_SANDBOX_MODES
+    assert "none" in _EGA_VALID_SANDBOX_MODES
+    assert "workspace_isolation" in _EGA_VALID_SANDBOX_MODES
+    assert "os_isolation" not in _EGA_VALID_SANDBOX_MODES, "os_isolation is deferred (SLR-69L-002)"
+
+
+def test_69l_workspace_isolation_mode_accepted_by_validate(tmp_path) -> None:
+    from pcae.core.agent import _ega_validate
+    record = {
+        "execution_result_id": "err-test",
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "test-prompt",
+        "authorization_id": "auth-test",
+        "audit_id": "ear-test",
+        "agent_id": "claude-local",
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt>"],
+        "return_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "capture_status": "complete",
+        "timed_out": False,
+        "execution_status": "success",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": "2026-06-15T19:13:00+00:00",
+        "execution_duration_ms": 1000,
+        "sandbox_mode": "workspace_isolation",
+        "sandbox_id": "sandbox-test-prompt-20260615T191300",
+        "sandbox_provider": "git_worktree",
+        "shell_used": False,
+    }
+    errors = _ega_validate(record)
+    assert not any("sandbox_mode" in e for e in errors), f"workspace_isolation rejected: {errors}"
+
+
+def test_69l_invalid_sandbox_mode_rejected_by_validate(tmp_path) -> None:
+    from pcae.core.agent import _ega_validate
+    record = {
+        "execution_result_id": "err-test",
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "test-prompt",
+        "authorization_id": "auth-test",
+        "audit_id": "ear-test",
+        "agent_id": "claude-local",
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt>"],
+        "return_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "capture_status": "complete",
+        "timed_out": False,
+        "execution_status": "success",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": "2026-06-15T19:13:00+00:00",
+        "execution_duration_ms": 1000,
+        "sandbox_mode": "container_isolation",
+        "shell_used": False,
+    }
+    errors = _ega_validate(record)
+    assert any("sandbox_mode_invalid" in e for e in errors), f"container_isolation not rejected: {errors}"
+
+
+def test_69l_esb_governance_boundaries_forward_compat(tmp_path) -> None:
+    from pcae.core.agent import _ESB_GOVERNANCE_BOUNDARIES
+    required_forward_compat = [
+        "containment_assumes_read_only_subprocess",
+        "write_execution_invalidates_isolation_claim",
+        "write_execution_requires_independent_boundary_review",
+        "git_worktree_shares_object_store_with_root",
+        "git_commits_from_sandbox_land_in_shared_object_store",
+        "external_symlinks_copied_as_live_symlinks",
+        "ecr_blind_to_external_symlink_write_targets",
+        "sandbox_destruction_is_not_lifecycle_aware",
+        "rollback_candidate_semantics_assume_root_execution",
+    ]
+    for key in required_forward_compat:
+        assert key in _ESB_GOVERNANCE_BOUNDARIES, f"forward-compat key missing: {key}"
+    assert _ESB_GOVERNANCE_BOUNDARIES["governance_boundaries_scope"] == "read_only_execution"
+
+
+def test_69l_production_containment_ready_false(tmp_path) -> None:
+    from pcae.core.agent import _ESB_GOVERNANCE_BOUNDARIES
+    assert _ESB_GOVERNANCE_BOUNDARIES["production_containment_ready"] is False
+    assert _ESB_GOVERNANCE_BOUNDARIES["auto_assert_production_containment_ready_allowed"] is False
+
+
+def test_69l_no_overclaiming_root_unchanged(tmp_path) -> None:
+    from pcae.core.agent import _ESB_GOVERNANCE_BOUNDARIES
+    assert "root_working_tree_unmodified_by_subprocess" not in _ESB_GOVERNANCE_BOUNDARIES
+    assert _ESB_GOVERNANCE_BOUNDARIES.get("root_not_used_as_execution_cwd") is True
+    assert _ESB_GOVERNANCE_BOUNDARIES.get("relative_workspace_changes_isolated_to_sandbox") is True
+    assert _ESB_GOVERNANCE_BOUNDARIES.get("absolute_path_access_not_contained_by_workspace_isolation") is True
+
+
+def test_69l_condition13_sandbox_creation_failure_blocks(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _mock_sandbox_failure)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert result["blocked"] is True
+    assert result["execution_allowed"] is False
+    assert result["execution_occurred"] is False
+    assert "condition_13_sandbox_creation_failed" in result["blockers"]
+
+
+def test_69l_condition13_sandbox_overlay_failure_blocks(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _mock_sandbox_overlay_failure)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert result["blocked"] is True
+    assert result["execution_allowed"] is False
+    assert "condition_13_sandbox_overlay_failed" in result["blockers"]
+
+
+def test_69l_condition13_blocks_before_subprocess(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _mock_sandbox_failure)
+    subprocess_called: list[bool] = []
+
+    def _tracking_subprocess(cmd, timeout, cwd=None):
+        subprocess_called.append(True)
+        return _mock_subprocess_success(cmd, timeout, cwd)
+
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _tracking_subprocess)
+    invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert len(subprocess_called) == 0, "subprocess must NOT be called when Condition 13 blocks"
+
+
+def test_69l_sandbox_created_before_subprocess(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+
+    creation_order: list[str] = []
+
+    def _tracking_sandbox_create(r, pid):
+        creation_order.append("sandbox_created")
+        return _mock_sandbox_success(r, pid)
+
+    def _tracking_subprocess(cmd, timeout, cwd=None):
+        creation_order.append("subprocess")
+        return {"stdout": "ok", "stderr": "", "return_code": 0,
+                "timed_out": False, "execution_status": "success", "capture_status": "complete"}
+
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _tracking_sandbox_create)
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _tracking_subprocess)
+    invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert creation_order.index("sandbox_created") < creation_order.index("subprocess"), (
+        "sandbox must be created before subprocess runs"
+    )
+
+
+def test_69l_subprocess_runs_in_sandbox_dir(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+
+    captured_cwd: list[str | None] = []
+
+    def _capturing_subprocess(cmd, timeout, cwd=None):
+        captured_cwd.append(cwd)
+        return {"stdout": "ok", "stderr": "", "return_code": 0,
+                "timed_out": False, "execution_status": "success", "capture_status": "complete"}
+
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _capturing_subprocess)
+    invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert len(captured_cwd) == 1, "subprocess must be called exactly once"
+    assert captured_cwd[0] == "/tmp/pcae_sandbox_test", (
+        f"subprocess must run in sandbox_dir, got: {captured_cwd[0]}"
+    )
+
+
+def test_69l_post_state_captured_before_sandbox_destroy(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
+        "stdout": "ok", "stderr": "", "return_code": 0,
+        "timed_out": False, "execution_status": "success", "capture_status": "complete",
+    })
+
+    ordering: list[str] = []
+
+    def _tracking_capture(r, cwd_path=None):
+        ordering.append("capture")
+        return _mock_git_ok()(r, cwd_path)
+
+    def _tracking_destroy(r, sandbox_dir):
+        ordering.append("destroy")
+        return {"destroyed": True, "errors": []}
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _tracking_capture)
+    monkeypatch.setattr("pcae.core.agent._esb_destroy_sandbox", _tracking_destroy)
+    invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    capture_idx = [i for i, x in enumerate(ordering) if x == "capture"]
+    destroy_idx = [i for i, x in enumerate(ordering) if x == "destroy"]
+    assert capture_idx, "capture must be called"
+    assert destroy_idx, "destroy must be called"
+    assert max(capture_idx) < min(destroy_idx), "post_state capture must precede sandbox destroy"
+
+
+def test_69l_err_contains_sandbox_fields(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
+        "stdout": "ok", "stderr": "", "return_code": 0,
+        "timed_out": False, "execution_status": "success", "capture_status": "complete",
+    })
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    assert stored is not None
+    for field in ("sandbox_mode", "sandbox_id", "sandbox_provider", "sandbox_dir", "sandbox_created"):
+        assert field in stored, f"ERR missing field: {field}"
+
+
+def test_69l_err_sandbox_mode_is_workspace_isolation(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
+        "stdout": "ok", "stderr": "", "return_code": 0,
+        "timed_out": False, "execution_status": "success", "capture_status": "complete",
+    })
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    assert stored["sandbox_mode"] == "workspace_isolation"
+    assert stored["sandbox_provider"] == "git_worktree"
+    assert stored["sandbox_created"] is True
+
+
+def test_69l_condition13_blocked_result_has_esb_fields(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._esb_create_sandbox", _mock_sandbox_failure)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert result["blocked"] is True
+    assert "esb_governance_boundaries" in result
+    assert "esb_advisory" in result
+    assert result["sandbox_created"] is False
+    assert len(result["sandbox_create_errors"]) > 0
+
+
+def test_69l_esb_advisory_present(tmp_path) -> None:
+    from pcae.core.agent import ESB_ADVISORY
+    assert isinstance(ESB_ADVISORY, str)
+    assert len(ESB_ADVISORY) > 0
+    assert "workspace_isolation" in ESB_ADVISORY
+    assert "SLR-69L" in ESB_ADVISORY
+    assert "production_containment_ready=False" in ESB_ADVISORY
+
+
+def test_69l_invoke_result_carries_esb_boundaries(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", lambda cmd, t, cwd=None: {
+        "stdout": "ok", "stderr": "", "return_code": 0,
+        "timed_out": False, "execution_status": "success", "capture_status": "complete",
+    })
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert "esb_governance_boundaries" in result
+    assert "esb_advisory" in result
+    bounds = result["esb_governance_boundaries"]
+    assert bounds.get("production_containment_ready") is False
+    assert bounds.get("sandbox_creation_failure_blocks_as_condition_13") is True
+
+
+def test_69l_no_rollback_in_esb(tmp_path) -> None:
+    from pcae.core.agent import _ESB_GOVERNANCE_BOUNDARIES
+    assert _ESB_GOVERNANCE_BOUNDARIES["rollback_executed_always_false"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["automatic_rollback_forbidden"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["git_commit_forbidden"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["git_reset_forbidden"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["git_push_forbidden"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["docker_dependency_forbidden"] is True
+    assert _ESB_GOVERNANCE_BOUNDARIES["sandbox_exec_dependency_forbidden"] is True
+
+
+def test_69l_esb_production_criteria_count(tmp_path) -> None:
+    from pcae.core.agent import _ESB_PRODUCTION_READINESS_CRITERIA
+    assert _ESB_PRODUCTION_READINESS_CRITERIA["auto_assert_production_ready_allowed"] is False
+    criteria = _ESB_PRODUCTION_READINESS_CRITERIA["criteria"]
+    assert len(criteria) == 8, f"Expected 8 ESB criteria, got {len(criteria)}"
+    ids = [c["criterion_id"] for c in criteria]
+    for expected_id in ("ESB-C-001", "ESB-C-002", "ESB-C-003", "ESB-C-004",
+                        "ESB-C-005", "ESB-C-006", "ESB-C-007", "ESB-C-008"):
+        assert expected_id in ids, f"Missing criterion: {expected_id}"
+
+
+def test_69l_strategic_lineage_has_slr_69l_001(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    ids = [r.get("lineage_id", "") for r in records]
+    assert "SLR-69L-001" in ids, "SLR-69L-001 must be in strategic-lineage.json"
+
+
+def test_69l_six_slr_entries_present(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    slr = next((r for r in records if r.get("lineage_id") == "SLR-69L-001"), None)
+    assert slr is not None
+    debt = slr.get("roadmap_debt", [])
+    assert len(debt) == 6, f"SLR-69L-001 must have 6 roadmap_debt entries, got {len(debt)}"
+    for i in range(1, 7):
+        assert any(f"SLR-69L-00{i}" in d for d in debt), f"SLR-69L-00{i} missing from roadmap_debt"

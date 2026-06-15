@@ -70156,6 +70156,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": [],
         "dependencies": ["rollback_aware_execution_detection"],
+        "successor_capabilities": ["execution_sandboxing_architecture"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Sandboxing Architecture",
+        "implemented_phase": "69L",
+        "status": "implemented",
+        "commands": [
+            "execution-snapshot",
+            "execution-change",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["automatic_snapshot_integration"],
         "successor_capabilities": [],
     },
 )
@@ -71192,8 +71205,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69K",
         "phase_title": "Automatic Snapshot Integration",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69J",
+        "successor": "69L",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69L",
+        "phase_title": "Execution Sandboxing Architecture",
+        "status": "active",
+        "predecessor": "69K",
         "successor": "",
         "superseded_by": "",
     },
@@ -72420,7 +72442,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "rollback_aware_execution_detection",
         ],
-        "successors": [],
+        "successors": ["execution_sandboxing_architecture"],
         "aliases": [],
         "contribution": (
             "closes SLR-69J-001 by integrating ESA creation into invoke_readonly_execution; "
@@ -72432,6 +72454,45 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "execution_allowed semantics unchanged; rollback_executed=False; "
             "_EASI_GOVERNANCE_BOUNDARIES enforces all boundaries; "
             "manual snapshot/change commands remain fully supported"
+        ),
+    },
+    {
+        "capability_name": "Execution Sandboxing Architecture",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69L",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id>",
+            "pcae execution-snapshot show --snapshot-id <id>",
+            "pcae execution-snapshot list --prompt-id <id>",
+            "pcae execution-change compare --snapshot-id <id> --result-id <id>",
+            "pcae execution-change show --change-id <id>",
+            "pcae execution-change list",
+            "pcae execution-change list-candidates",
+        ],
+        "dependencies": [
+            "automatic_snapshot_integration",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces workspace isolation for invoke_readonly_execution via git worktree + rsync overlay; "
+            "subprocess runs with cwd=sandbox_dir not root; "
+            "post_state captured from sandbox_dir before destruction; "
+            "Condition 13 blocks on sandbox creation or rsync overlay failure; "
+            "ERR schema expanded: sandbox_mode=workspace_isolation, sandbox_id, sandbox_provider, "
+            "sandbox_dir, sandbox_created, sandbox_create_errors; "
+            "ECR post_state sourced from sandbox (not root) when sandbox exists; "
+            "_ega_validate expanded: _EGA_VALID_SANDBOX_MODES enforces valid sandbox_mode enum; "
+            "sandbox_id and sandbox_provider required when sandbox_mode != none; "
+            "_esa_capture_git_state accepts cwd_path for sandbox post_state capture; "
+            "_easi_create_automatic_ecr accepts post_state param (fallback to root when None); "
+            "_esb_create_sandbox and _esb_destroy_sandbox are new governance functions; "
+            "_ESB_GOVERNANCE_BOUNDARIES encodes all sandbox boundaries including "
+            "10 forward-compatibility disclosures for 69M write governance; "
+            "_ESB_PRODUCTION_READINESS_CRITERIA defines 8 formal criteria; "
+            "production_containment_ready=False; workspace_isolation is development containment; "
+            "SLR-69L-001 through SLR-69L-006 document forward-compatibility constraints"
         ),
     },
     {
@@ -74896,7 +74957,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69K",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69K-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69K",
@@ -74904,7 +74965,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69K",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69K-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69K",
@@ -74912,10 +74973,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69K",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69K-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69K",
+    },
+    {
+        "phase_id": "69L",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69L-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69L",
+    },
+    {
+        "phase_id": "69L",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69L-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69L",
+    },
+    {
+        "phase_id": "69L",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69L-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69L",
     },
 )
 
@@ -80778,7 +80863,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69K",
+        "current_phase": "69L",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81528,6 +81613,20 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "before subprocess; ECR created automatically after subprocess; "
             "ERR carries snapshot_id, ecr_id linkage fields; "
             "snapshot_storage_failure blocks as condition_12; git failures are advisory"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_sandboxing_architecture",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces workspace isolation for invoke_readonly_execution via git worktree + rsync overlay; "
+            "subprocess runs with cwd=sandbox_dir not root (Condition 13 blocks sandbox failure); "
+            "post_state captured from sandbox before destruction; ECR sources sandbox post_state; "
+            "ERR schema expanded with sandbox_mode=workspace_isolation, sandbox_id, sandbox_provider; "
+            "six SLR-69L entries document forward-compatibility constraints for 69M"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -89656,6 +89755,177 @@ EASI_ADVISORY: str = (
     "Manual execution-snapshot and execution-change commands remain fully supported."
 )
 
+# ─── Phase 69L: Execution Sandbox ────────────────────────────────────────────
+
+_ESB_PHASE_ID: str = "69L"
+
+_ESB_GOVERNANCE_BOUNDARIES: dict = {
+    # Sandbox creation
+    "sandbox_created_before_subprocess": True,
+    "sandbox_uses_git_worktree_provider": True,
+    "sandbox_creation_is_not_execution": True,
+    "sandbox_creation_does_not_expand_execution_authority": True,
+    "sandbox_overlay_uses_rsync_not_symlinks": True,
+    # Sandbox failure
+    "sandbox_creation_failure_blocks_as_condition_13": True,
+    "sandbox_destruction_failure_is_advisory": True,
+    "temp_dir_leak_on_destroy_failure_is_acceptable": True,
+    # Isolation — precise claims only; no overclaiming
+    "root_not_used_as_execution_cwd": True,
+    "relative_workspace_changes_isolated_to_sandbox": True,
+    "absolute_path_access_not_contained_by_workspace_isolation": True,
+    # Forward-compatibility disclosures (69L→69M)
+    "containment_assumes_read_only_subprocess": True,
+    "write_execution_invalidates_isolation_claim": True,
+    "governance_boundaries_scope": "read_only_execution",
+    "write_execution_requires_independent_boundary_review": True,
+    "git_worktree_shares_object_store_with_root": True,
+    "git_commits_from_sandbox_land_in_shared_object_store": True,
+    "external_symlinks_copied_as_live_symlinks": True,
+    "ecr_blind_to_external_symlink_write_targets": True,
+    "sandbox_destruction_is_not_lifecycle_aware": True,
+    "rollback_candidate_semantics_assume_root_execution": True,
+    # Post-state capture ordering
+    "post_state_captured_from_sandbox_before_destroy": True,
+    "post_state_capture_failure_is_advisory": True,
+    "post_state_capture_ordering_is_hard_constraint": True,
+    # ECR
+    "ecr_post_state_sourced_from_sandbox_not_root": True,
+    "ecr_failure_is_advisory": True,
+    # execution_allowed
+    "execution_allowed_semantics_unchanged": True,
+    "sandbox_creation_does_not_assign_execution_allowed_true": True,
+    "execution_allowed_remains_false_in_esb": True,
+    # Containment tiers
+    "os_isolation_allowed_in_69l": False,
+    "workspace_isolation_is_development_containment": True,
+    "production_containment_requires_separate_phase": True,
+    # production_containment_ready
+    "production_containment_ready": False,
+    "auto_assert_production_containment_ready_allowed": False,
+    "production_containment_ready_requires_esb_criteria_all_pass": True,
+    # Rollback (inherited from EASI)
+    "rollback_executed_always_false": True,
+    "automatic_rollback_forbidden": True,
+    # Git operations
+    "git_add_forbidden": True,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    "git_reset_forbidden": True,
+    "git_revert_forbidden": True,
+    "git_checkout_forbidden": True,
+    # No Docker, no sandbox-exec, no OS isolation
+    "docker_dependency_forbidden": True,
+    "sandbox_exec_dependency_forbidden": True,
+}
+
+_ESB_COPY_EXCLUDES: tuple[str, ...] = (
+    ".git",
+    ".venv",
+    "__pycache__",
+    "*.pyc",
+    ".pytest_cache",
+    "dist",
+    "build",
+    "*.egg-info",
+    "node_modules",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".coverage",
+    "coverage",
+)
+
+_ESB_PRODUCTION_READINESS_CRITERIA: dict = {
+    "auto_assert_production_ready_allowed": False,
+    "production_containment_ready_requires_all_criteria": True,
+    "criteria": [
+        {
+            "criterion_id": "ESB-C-001",
+            "name": "write_isolation_verified",
+            "description": "Subprocess writes cannot escape sandbox_dir into root",
+            "evaluation": "test: subprocess writes a file; verify file absent in root",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-002",
+            "name": "ecr_fidelity_verified",
+            "description": "ECR post_state accurately reflects mutations inside sandbox",
+            "evaluation": "test: known write in sandbox yields corresponding ECR diff",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-003",
+            "name": "cleanup_on_success_verified",
+            "description": "sandbox_dir removed after successful execution path",
+            "evaluation": "test: sandbox_dir path does not exist after invoke returns",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-004",
+            "name": "cleanup_on_failure_verified",
+            "description": "sandbox_dir removed when subprocess fails or times out",
+            "evaluation": "test: inject subprocess failure; verify sandbox_dir cleanup",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-005",
+            "name": "concurrency_isolation_verified",
+            "description": "Concurrent invocations use independent sandbox_dirs",
+            "evaluation": "test: two concurrent calls produce distinct non-overlapping paths",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-006",
+            "name": "git_integrity_verified",
+            "description": "Root git state unchanged after execution",
+            "evaluation": "test: git status and git log unchanged in root after execution",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-007",
+            "name": "uncommitted_changes_visible",
+            "description": "Subprocess in sandbox can read uncommitted files from root",
+            "evaluation": "test: uncommitted file in root is readable by subprocess in sandbox",
+            "platform_scope": "all",
+            "required_for_production": True,
+        },
+        {
+            "criterion_id": "ESB-C-008",
+            "name": "platform_verification_complete",
+            "description": "ESB-C-001 through ESB-C-007 all pass in CI on target platform",
+            "evaluation": "CI run on target platform with full ESB test suite green",
+            "platform_scope": "platform_specific",
+            "required_for_production": True,
+        },
+    ],
+    "production_containment_ready_definition": (
+        "production_containment_ready=True only when ALL ESB-C-001 through ESB-C-008 "
+        "pass in the test suite for the target platform. "
+        "Asserting production_containment_ready from a governance constant alone is "
+        "insufficient and forbidden."
+    ),
+}
+
+ESB_ADVISORY: str = (
+    "Phase 69L Execution Sandboxing Architecture introduces workspace isolation. "
+    "subprocess runs inside git worktree sandbox (sandbox_dir), not root. "
+    "Containment is behavioral (cwd isolation), not OS-level filesystem enforcement. "
+    "Absolute path writes and external symlink write-through are not contained (SLR-69L-005). "
+    "git worktree shares object store with root (SLR-69L-006). "
+    "post_state captured from sandbox_dir before destruction; sandbox destroyed before ECR. "
+    "Condition 13 blocks on sandbox creation failure. "
+    "production_containment_ready=False; workspace_isolation is development containment only. "
+    "Six SLR-69L entries document forward-compatibility constraints for 69M."
+)
+
+_EGA_VALID_SANDBOX_MODES: frozenset[str] = frozenset({"none", "workspace_isolation"})
+
 _EGA_GOVERNANCE_BOUNDARIES: dict = {
     "execution_allowed_global": False,
     "execution_allowed_scope": "per_invocation_local_variable_only",
@@ -89673,29 +89943,33 @@ _EGA_GOVERNANCE_BOUNDARIES: dict = {
     "ara_mutation_forbidden": True,
     "apa_mutation_forbidden": True,
     "rollback_not_implemented": True,
-    "sandbox_mode": "none",
+    "sandbox_mode": "workspace_isolation",
     "allowed_agent": "claude-local",
     "allowed_mode": "read_only",
     "max_selected_agents": 1,
 }
 
 _EGA_SANDBOX_LIMITATIONS: dict = {
-    "sandbox_mode": "none",
-    "filesystem_isolation": False,
+    "sandbox_mode": "workspace_isolation",
+    "sandbox_provider": "git_worktree",
+    "filesystem_isolation": "workspace_level",
     "network_isolation": False,
     "process_isolation": False,
     "known_risk": (
-        "The invoked claude-local process runs without filesystem or network isolation. "
-        "It can read any file accessible to the PCAE process. "
-        "Sandboxing is deferred to 69L."
+        "The invoked claude-local process runs inside a git worktree sandbox. "
+        "Isolation is at workspace level only (cwd=sandbox_dir). "
+        "Absolute path writes and external symlink write-through targets are not contained. "
+        "Network access is not restricted. See SLR-69L-005."
     ),
-    "mitigations_in_69g": [
-        "no --permission-mode acceptEdits flag",
+    "mitigations_in_69l": [
+        "subprocess cwd set to sandbox_dir (relative writes isolated to sandbox)",
+        "no --permission-mode acceptEdits flag (behavioral read-only constraint)",
         "prompt sourced from APA artifact only",
         "hard timeout enforced (_EGA_DEFAULT_TIMEOUT_SECONDS=120)",
         "output captured and recorded in ERR before returning",
         "execution_allowed=True limited to invocation boundary only",
         "re-execution of same EAR hard-blocked",
+        "post-state captured from sandbox before destruction",
     ],
 }
 
@@ -89705,7 +89979,7 @@ _EGA_ROLLBACK_POSTURE: dict = {
     "mitigation": (
         "Execution is limited to claude-local without --permission-mode acceptEdits. "
         "If unexpected mutation is discovered post-execution, human intervention is required. "
-        "ERR records sandbox_mode=none explicitly."
+        "ERR records sandbox_mode=workspace_isolation; subprocess runs in sandbox_dir not root."
     ),
     "human_escalation_required": True,
 }
@@ -89733,8 +90007,15 @@ def _ega_validate(record: dict) -> list[str]:
         errors.append("shell_used_must_be_false")
     if record.get("mode") != "read_only":
         errors.append("mode_must_be_read_only")
+    if record.get("sandbox_mode") not in _EGA_VALID_SANDBOX_MODES:
+        errors.append(
+            f"sandbox_mode_invalid: must be one of {sorted(_EGA_VALID_SANDBOX_MODES)}"
+        )
     if record.get("sandbox_mode") != "none":
-        errors.append("sandbox_mode_must_be_none")
+        if not isinstance(record.get("sandbox_id"), str) or not record.get("sandbox_id"):
+            errors.append("sandbox_id_required_when_sandboxed")
+        if not isinstance(record.get("sandbox_provider"), str) or not record.get("sandbox_provider"):
+            errors.append("sandbox_provider_required_when_sandboxed")
     return errors
 
 
@@ -89802,7 +90083,7 @@ def _ega_lookup_results_by_audit_id(root: "HarnessPath", audit_id: str) -> list[
     return results
 
 
-def _ega_run_subprocess(cmd: list[str], timeout: int) -> dict:
+def _ega_run_subprocess(cmd: list[str], timeout: int, cwd: str | None = None) -> dict:
     """Execute subprocess. shell=True is never used; shell=False is the only allowed form."""
     import subprocess
 
@@ -89812,6 +90093,7 @@ def _ega_run_subprocess(cmd: list[str], timeout: int) -> dict:
             capture_output=True,
             timeout=timeout,
             shell=False,
+            cwd=cwd,
         )
         stdout_bytes = proc.stdout or b""
         stderr_bytes = proc.stderr or b""
@@ -89858,6 +90140,125 @@ def _ega_run_subprocess(cmd: list[str], timeout: int) -> dict:
             "execution_status": "invocation_error",
             "capture_status": "none",
         }
+
+
+def _esb_create_sandbox(root: "HarnessPath", prompt_id: str) -> dict:
+    """
+    Create an isolated sandbox via git worktree add --detach + rsync overlay.
+    sandbox_creation_is_not_execution=True. execution_allowed=False.
+    Returns sandbox_id, sandbox_dir (str path), created (bool), errors (list).
+    """
+    import subprocess as _sp
+    import tempfile as _tf
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    sandbox_id = f"sandbox-{prompt_id}-{ts}"
+
+    try:
+        sandbox_dir = _tf.mkdtemp(prefix="pcae_sandbox_")
+    except Exception as exc:
+        return {
+            "sandbox_id": sandbox_id,
+            "sandbox_dir": None,
+            "created": False,
+            "errors": [f"mkdtemp_failed:{type(exc).__name__}"],
+        }
+
+    # Step 1: git worktree add --detach <sandbox_dir> HEAD
+    # mkdtemp creates an empty directory; git worktree populates it in-place.
+    try:
+        wt_proc = _sp.run(
+            ["git", "worktree", "add", "--detach", sandbox_dir, "HEAD"],
+            capture_output=True,
+            timeout=60,
+            shell=False,
+            cwd=str(root.path),
+        )
+        if wt_proc.returncode != 0:
+            stderr = wt_proc.stderr.decode("utf-8", errors="replace").strip()
+            return {
+                "sandbox_id": sandbox_id,
+                "sandbox_dir": None,
+                "created": False,
+                "errors": [f"git_worktree_add_failed:{stderr}"],
+            }
+    except Exception as exc:
+        return {
+            "sandbox_id": sandbox_id,
+            "sandbox_dir": None,
+            "created": False,
+            "errors": [f"git_worktree_error:{type(exc).__name__}"],
+        }
+
+    # Step 2: rsync uncommitted working-tree changes into sandbox_dir.
+    # Excludes .git (worktree has its own pointer) and build/cache artifacts.
+    exclude_args: list[str] = []
+    for ex in _ESB_COPY_EXCLUDES:
+        exclude_args += ["--exclude", ex]
+    root_src = str(root.path).rstrip("/") + "/"
+    rsync_cmd = ["rsync", "-a"] + exclude_args + [root_src, sandbox_dir + "/"]
+
+    try:
+        rsync_proc = _sp.run(
+            rsync_cmd,
+            capture_output=True,
+            timeout=120,
+            shell=False,
+        )
+        if rsync_proc.returncode != 0:
+            stderr = rsync_proc.stderr.decode("utf-8", errors="replace").strip()
+            # Clean up the worktree before returning the error
+            _sp.run(
+                ["git", "worktree", "remove", "--force", sandbox_dir],
+                capture_output=True, timeout=30, shell=False, cwd=str(root.path),
+            )
+            return {
+                "sandbox_id": sandbox_id,
+                "sandbox_dir": None,
+                "created": False,
+                "errors": [f"rsync_overlay_failed:{stderr}"],
+            }
+    except Exception as exc:
+        _sp.run(
+            ["git", "worktree", "remove", "--force", sandbox_dir],
+            capture_output=True, timeout=30, shell=False, cwd=str(root.path),
+        )
+        return {
+            "sandbox_id": sandbox_id,
+            "sandbox_dir": None,
+            "created": False,
+            "errors": [f"rsync_error:{type(exc).__name__}"],
+        }
+
+    return {
+        "sandbox_id": sandbox_id,
+        "sandbox_dir": sandbox_dir,
+        "created": True,
+        "errors": [],
+    }
+
+
+def _esb_destroy_sandbox(root: "HarnessPath", sandbox_dir: str) -> dict:
+    """
+    Destroy sandbox via git worktree remove --force.
+    Failure is advisory — does not block ERR creation.
+    """
+    import subprocess as _sp
+
+    try:
+        proc = _sp.run(
+            ["git", "worktree", "remove", "--force", sandbox_dir],
+            capture_output=True,
+            timeout=30,
+            shell=False,
+            cwd=str(root.path),
+        )
+        if proc.returncode == 0:
+            return {"destroyed": True, "errors": []}
+        stderr = proc.stderr.decode("utf-8", errors="replace").strip()
+        return {"destroyed": False, "errors": [f"worktree_remove_failed:{stderr}"]}
+    except Exception as exc:
+        return {"destroyed": False, "errors": [f"destroy_error:{type(exc).__name__}"]}
 
 
 def invoke_readonly_execution(
@@ -89948,7 +90349,7 @@ def invoke_readonly_execution(
     # _ega_run_subprocess. No runtime command override is possible.
     cmd = ["claude", "-p", prompt_text]
 
-    # ── Phase 69K: Pre-compute result_id before subprocess ───────────────────
+    # ── Pre-compute result_id before any artifact creation ───────────────────
     pre_time = datetime.now(timezone.utc)
     result_id = f"err-{prompt_id}-{pre_time.strftime('%Y%m%dT%H%M%S')}"
 
@@ -89971,6 +90372,9 @@ def invoke_readonly_execution(
             "authorization_id": authorization_id,
             "audit_id": audit_id,
             "stored": False,
+            "sandbox_id": None,
+            "sandbox_created": False,
+            "sandbox_create_errors": [],
             "snapshot_id": None,
             "snapshot_created": False,
             "snapshot_capture_errors": snapshot_capture_errors,
@@ -89979,24 +90383,83 @@ def invoke_readonly_execution(
             "ecr_capture_errors": [],
             "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
             "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
+            "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
             "advisory": EXECUTION_ACTIVATION_ADVISORY,
             "easi_advisory": EASI_ADVISORY,
+            "esb_advisory": ESB_ADVISORY,
         }
-    # Advisory: git unavailable/timeout — partial ESA stored, snapshot_created=True, capture_errors populated
+    # Advisory: git unavailable/timeout — partial ESA stored, snapshot_created=True
 
-    # ── Subprocess execution ─────────────────────────────────────────────────
+    # ── Phase 69L: Sandbox creation (Condition 13) ──────────────────────────
+    # Sandbox must be created before subprocess. Failure blocks execution.
+    # ESA (snapshot_id) is already stored and preserved in the blocked return.
+    sandbox_result = _esb_create_sandbox(root, prompt_id)
+    sandbox_id: str | None = sandbox_result.get("sandbox_id")
+    sandbox_dir: str | None = sandbox_result.get("sandbox_dir")
+    sandbox_created: bool = sandbox_result["created"]
+    sandbox_create_errors: list[str] = sandbox_result.get("errors", [])
+
+    if not sandbox_created:
+        blocker = (
+            "condition_13_sandbox_overlay_failed"
+            if any("rsync" in e for e in sandbox_create_errors)
+            else "condition_13_sandbox_creation_failed"
+        )
+        blockers.append(blocker)
+        return {
+            "execution_allowed": False,
+            "execution_occurred": False,
+            "blocked": True,
+            "blockers": blockers,
+            "prompt_id": prompt_id,
+            "authorization_id": authorization_id,
+            "audit_id": audit_id,
+            "stored": False,
+            "sandbox_id": sandbox_id,
+            "sandbox_created": False,
+            "sandbox_create_errors": sandbox_create_errors,
+            # ESA was created before Condition 13; preserve the reference
+            "snapshot_id": snapshot_id,
+            "snapshot_created": snapshot_created,
+            "snapshot_capture_errors": snapshot_capture_errors,
+            "ecr_created": False,
+            "ecr_id": None,
+            "ecr_capture_errors": [],
+            "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
+            "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
+            "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ACTIVATION_ADVISORY,
+            "easi_advisory": EASI_ADVISORY,
+            "esb_advisory": ESB_ADVISORY,
+        }
+
+    # ── Subprocess execution in sandbox_dir ──────────────────────────────────
+    # subprocess runs with cwd=sandbox_dir; root is not the execution cwd.
     start_time = datetime.now(timezone.utc)
-    run_result = _ega_run_subprocess(cmd, _EGA_DEFAULT_TIMEOUT_SECONDS)
+    run_result = _ega_run_subprocess(cmd, _EGA_DEFAULT_TIMEOUT_SECONDS, cwd=sandbox_dir)
     end_time = datetime.now(timezone.utc)
     duration_ms = int((end_time - start_time).total_seconds() * 1000)
     executed_at = start_time.isoformat()
 
-    # ── Phase 69K: Automatic ECR creation (post-execution, advisory) ─────────
+    # ── Phase 69L: Capture post_state from sandbox BEFORE destroy ────────────
+    # Hard ordering constraint: capture must precede destroy.
+    post_state: dict | None = None
+    if sandbox_dir is not None:
+        post_state = _esa_capture_git_state(root, cwd_path=sandbox_dir)
+
+    # ── Phase 69L: Destroy sandbox (advisory on failure) ─────────────────────
+    if sandbox_dir is not None:
+        _esb_destroy_sandbox(root, sandbox_dir)
+
+    # ── Phase 69K/69L: Automatic ECR creation (post-execution, advisory) ─────
+    # ECR uses post_state from sandbox (not root) when available.
     ecr_id: str | None = None
     ecr_created: bool = False
     ecr_capture_errors: list[str] = []
     if snapshot_created and snapshot_id is not None:
-        ecr_result = _easi_create_automatic_ecr(root, snapshot_id, result_id)
+        ecr_result = _easi_create_automatic_ecr(
+            root, snapshot_id, result_id, post_state=post_state
+        )
         ecr_created = ecr_result.get("created", False)
         ecr_id = ecr_result.get("change_record_id") if ecr_created else None
         ecr_capture_errors = ecr_result.get("capture_errors", [])
@@ -90025,7 +90488,13 @@ def invoke_readonly_execution(
         "execution_occurred": True,
         "executed_at": executed_at,
         "execution_duration_ms": duration_ms,
-        "sandbox_mode": "none",
+        # ── Phase 69L: sandbox fields ──────────────────────────────────────────
+        "sandbox_mode": "workspace_isolation",
+        "sandbox_id": sandbox_id,
+        "sandbox_provider": "git_worktree",
+        "sandbox_dir": sandbox_dir,   # advisory; directory is already destroyed
+        "sandbox_created": sandbox_created,
+        "sandbox_create_errors": sandbox_create_errors,
         "timeout_seconds": _EGA_DEFAULT_TIMEOUT_SECONDS,
         "max_output_bytes": _EGA_MAX_OUTPUT_BYTES,
         "shell_used": False,
@@ -90054,7 +90523,13 @@ def invoke_readonly_execution(
         "execution_duration_ms": duration_ms,
         "stored": store_result["stored"],
         "path": store_result["path"],
-        "sandbox_mode": "none",
+        # ── Phase 69L: sandbox fields ──────────────────────────────────────────
+        "sandbox_mode": "workspace_isolation",
+        "sandbox_id": sandbox_id,
+        "sandbox_provider": "git_worktree",
+        "sandbox_dir": sandbox_dir,
+        "sandbox_created": sandbox_created,
+        "sandbox_create_errors": sandbox_create_errors,
         "blocked": False,
         "blockers": [],
         # ── Phase 69K: ESA/ECR linkage fields ────────────────────────────────
@@ -90066,8 +90541,10 @@ def invoke_readonly_execution(
         "ecr_capture_errors": ecr_capture_errors,
         "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
         "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
+        "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ACTIVATION_ADVISORY,
         "easi_advisory": EASI_ADVISORY,
+        "esb_advisory": ESB_ADVISORY,
     }
 
 
@@ -90637,10 +91114,15 @@ EXECUTION_CHANGE_RECORD_ADVISORY: str = (
 )
 
 
-def _esa_capture_git_state(root: "HarnessPath") -> dict:
-    """Capture current git working-tree state. Returns partial result on any failure."""
+def _esa_capture_git_state(root: "HarnessPath", cwd_path: str | None = None) -> dict:
+    """
+    Capture current git working-tree state. Returns partial result on any failure.
+    When cwd_path is provided, git commands run against that path instead of root.path.
+    Used by Phase 69L to capture post_state from sandbox_dir before destruction.
+    """
     import subprocess as _sp
 
+    _cwd = cwd_path if cwd_path is not None else str(root.path)
     result: dict = {
         "git_available": False,
         "git_head": None,
@@ -90659,7 +91141,7 @@ def _esa_capture_git_state(root: "HarnessPath") -> dict:
             capture_output=True,
             timeout=_ESA_GIT_TIMEOUT_SECONDS,
             shell=False,
-            cwd=str(root.path),
+            cwd=_cwd,
         )
         if head_proc.returncode == 0:
             result["git_available"] = True
@@ -90680,7 +91162,7 @@ def _esa_capture_git_state(root: "HarnessPath") -> dict:
             capture_output=True,
             timeout=_ESA_GIT_TIMEOUT_SECONDS,
             shell=False,
-            cwd=str(root.path),
+            cwd=_cwd,
         )
         if branch_proc.returncode == 0:
             result["git_branch"] = branch_proc.stdout.decode("utf-8", errors="replace").strip()
@@ -90693,7 +91175,7 @@ def _esa_capture_git_state(root: "HarnessPath") -> dict:
             capture_output=True,
             timeout=_ESA_GIT_TIMEOUT_SECONDS,
             shell=False,
-            cwd=str(root.path),
+            cwd=_cwd,
         )
         if status_proc.returncode == 0:
             raw = status_proc.stdout.decode("utf-8", errors="replace")
@@ -91089,12 +91571,15 @@ def _easi_create_automatic_ecr(
     root: "HarnessPath",
     snapshot_id: str,
     execution_result_id: str,
+    post_state: dict | None = None,
 ) -> dict:
     """
     Internal: create ECR automatically from within invoke_readonly_execution.
     Skips the ERR-exists lookup because ERR has not been stored yet at call time.
     The execution_result_id is pre-computed and trusted; the ERR will be stored after.
     No rollback. No subprocess. execution_allowed=False. rollback_executed=False.
+    Phase 69L: when post_state is provided (captured from sandbox_dir before destroy),
+    it is used instead of a fresh root capture. Falls back to root capture when None.
     """
     esa = lookup_execution_snapshot(root, snapshot_id)
     if esa is None:
@@ -91107,7 +91592,7 @@ def _easi_create_automatic_ecr(
 
     compared_at = datetime.now(timezone.utc).isoformat()
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-    post_git = _esa_capture_git_state(root)
+    post_git = post_state if post_state is not None else _esa_capture_git_state(root)
     capture_errors: list[str] = post_git.get("capture_errors", [])
     changes = _ecr_diff_snapshots(esa, post_git)
     severity, severity_basis = _ecr_classify_severity(changes)
