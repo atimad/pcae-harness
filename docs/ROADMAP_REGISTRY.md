@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-15T09:31:22.836328+00:00
+Generated: 2026-06-15T11:24:05.407647+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 70
+Total phases: 71
 Tracks: 9
 Superseded: 1
 Roadmap gaps: 0
@@ -110,7 +110,8 @@ Assessment status: intelligence_available
 | 69G | Execution Activation | completed | 69F | 69H |
 | 69H | Execution Result Governance | completed | 69G | 69I |
 | 69I | Execution Result Review Persistence | completed | 69H | 69J |
-| 69J | Rollback-Aware Execution Design | active | 69I | — |
+| 69J | Rollback-Aware Execution Design | completed | 69I | 69K |
+| 69K | Automatic Snapshot Integration | active | 69J | — |
 
 ## Track: roadmap_intelligence
 

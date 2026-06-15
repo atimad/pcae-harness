@@ -684,5 +684,42 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "69I",
     "supersedes_lineage_id": "SLR-69I-001"
+  },
+  {
+    "activated_phase_id": "69K",
+    "activation_timestamp": "2026-06-15T13:06:00+00:00",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "technical_debt",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "083ac483e55ef4742c20350a53c92fe15fa8c72ea14876308e2718af87ecfbe0",
+    "human_approved": true,
+    "lineage_id": "SLR-69K-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-15T13:06:00+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69J",
+    "rationale": "Closes SLR-69J-001 by integrating ESA creation into invoke_readonly_execution before subprocess and ECR creation immediately after subprocess. ERR carries snapshot_id, snapshot_created, ecr_id, ecr_created linkage fields. git unavailability and timeout are advisory. snapshot_storage_failure blocks as condition_12_snapshot_storage_failed. ECR failure is advisory. execution_allowed semantics unchanged. _EASI_GOVERNANCE_BOUNDARIES enforces all boundaries. Manual snapshot/change commands remain fully supported. SLR-69K-001: snapshot storage failure blocks execution; no degraded-mode fallback exists. SLR-69K-002: post-execution capture may include changes from concurrent processes when sandbox_mode=none.",
+    "recommendation": "approve",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "SLR-69K-001: snapshot storage failure blocks execution; no degraded-mode fallback exists",
+      "SLR-69K-002: post-execution capture may include changes from concurrent processes when sandbox_mode=none",
+      "SLR-69K-003: OS-level write exceptions in storage functions (store_execution_snapshot, store_execution_change_record, store_execution_result) are unhandled; filesystem write failures escape as unhandled exceptions rather than governed blocked returns with stored=False",
+      "SLR-69K-004: ECR stores execution_result_id before ERR is written; if ERR storage subsequently fails the ECR contains a dangling forward reference with no cleanup or tombstone mechanism",
+      "SLR-69K-005: change_record_id and snapshot_id generation use second-precision timestamps duplicated across automatic and manual paths; same-second invocations for the same prompt_id produce identical id field values; lookup functions return most-recent match and cannot distinguish automatic from manual artifacts"
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69J",
+    "supersedes_lineage_id": "SLR-69J-001",
+    "activation_event_id": "2026-06-15T13:06:00+00:00",
+    "activation_validation_status": "validated"
   }
 ]

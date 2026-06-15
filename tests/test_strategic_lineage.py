@@ -34,6 +34,7 @@ ACTIVATION_TIMESTAMP_69G = "2026-06-14T17:00:00+00:00"
 ACTIVATION_TIMESTAMP_69H = "2026-06-15T00:00:00+00:00"
 ACTIVATION_TIMESTAMP_69I = "2026-06-15T00:00:01+00:00"
 ACTIVATION_TIMESTAMP_69J = "2026-06-15T11:19:00+00:00"
+ACTIVATION_TIMESTAMP_69K = "2026-06-15T13:06:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -715,6 +716,43 @@ def _valid_69j_record() -> dict:
     }
 
 
+def _valid_69k_record() -> dict:
+    return {
+        "lineage_id": "SLR-69K-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69K,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "technical_debt",
+        "source_phase_id": "69J",
+        "predecessor_phase_id": "69J",
+        "activated_phase_id": "69K",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Closes SLR-69J-001 by integrating ESA creation into invoke_readonly_execution "
+            "before subprocess and ECR creation immediately after subprocess. "
+            "ERR carries snapshot_id, snapshot_created, ecr_id, ecr_created linkage fields. "
+            "snapshot_storage_failure blocks as condition_12_snapshot_storage_failed. "
+            "ECR failure is advisory. execution_allowed semantics unchanged."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [
+            "SLR-69K-001: snapshot storage failure blocks execution; no degraded-mode fallback exists",
+            "SLR-69K-002: post-execution capture may include changes from concurrent processes when sandbox_mode=none",
+        ],
+        "supersedes_lineage_id": "SLR-69J-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69K,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -737,6 +775,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69h_record(),
         _valid_69i_record(),
         _valid_69j_record(),
+        _valid_69k_record(),
     ]
 
 
@@ -912,6 +951,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69J",
             "timestamp": ACTIVATION_TIMESTAMP_69J,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69K",
+            "timestamp": ACTIVATION_TIMESTAMP_69K,
+        },
     ])
     return events
 
@@ -947,7 +994,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69J-TEST"
+    assert result.current_lineage_id == "SLR-69K-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -982,7 +1029,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69J-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69K-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -1083,7 +1130,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69J-TEST"
+    assert result.current_lineage_id == "SLR-69K-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1138,9 +1185,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69J-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69K-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 21
+    assert json.loads(capsys.readouterr().out)["record_count"] == 22
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

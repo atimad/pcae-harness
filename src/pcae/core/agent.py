@@ -70143,6 +70143,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["execution-snapshot", "execution-change"],
         "dependencies": ["execution_result_review_persistence"],
+        "successor_capabilities": ["automatic_snapshot_integration"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Automatic Snapshot Integration",
+        "implemented_phase": "69K",
+        "status": "implemented",
+        "commands": [
+            "execution-snapshot",
+            "execution-change",
+        ],
+        "introduced_commands": [],
+        "dependencies": ["rollback_aware_execution_detection"],
         "successor_capabilities": [],
     },
 )
@@ -71170,8 +71183,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69J",
         "phase_title": "Rollback-Aware Execution Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69I",
+        "successor": "69K",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69K",
+        "phase_title": "Automatic Snapshot Integration",
+        "status": "active",
+        "predecessor": "69J",
         "successor": "",
         "superseded_by": "",
     },
@@ -72367,7 +72389,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_result_review_persistence",
         ],
-        "successors": [],
+        "successors": ["automatic_snapshot_integration"],
         "aliases": [],
         "contribution": (
             "introduces ExecutionSnapshotArtifact (ESA) store at .pcae/execution-snapshots/ "
@@ -72378,7 +72400,38 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "in {medium,high,critical}; rollback_candidate_is_not_rollback=True; "
             "automatic_rollback_allowed=False; rollback_executed=False; execution_allowed=False; "
             "git_reset_not_performed=True; git_revert_not_performed=True; "
-            "manual command model (Option 1): no automatic integration with invoke_readonly_execution"
+            "manual command model (Option 1): automatic integration deferred to 69K"
+        ),
+    },
+    {
+        "capability_name": "Automatic Snapshot Integration",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69K",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id>",
+            "pcae execution-snapshot show --snapshot-id <id>",
+            "pcae execution-snapshot list --prompt-id <id>",
+            "pcae execution-change compare --snapshot-id <id> --result-id <id>",
+            "pcae execution-change show --change-id <id>",
+            "pcae execution-change list",
+            "pcae execution-change list-candidates",
+        ],
+        "dependencies": [
+            "rollback_aware_execution_detection",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "closes SLR-69J-001 by integrating ESA creation into invoke_readonly_execution; "
+            "ESA is created automatically before subprocess; ECR is created automatically after "
+            "subprocess; ERR carries snapshot_id, snapshot_created, ecr_id, ecr_created linkage fields; "
+            "git unavailability and timeout are advisory (execution proceeds); "
+            "snapshot storage failure blocks as condition_12_snapshot_storage_failed; "
+            "ECR failure is advisory (does not block ERR creation); "
+            "execution_allowed semantics unchanged; rollback_executed=False; "
+            "_EASI_GOVERNANCE_BOUNDARIES enforces all boundaries; "
+            "manual snapshot/change commands remain fully supported"
         ),
     },
     {
@@ -74819,7 +74872,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69J",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69J-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69J",
@@ -74827,7 +74880,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69J",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69J-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69J",
@@ -74835,10 +74888,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69J",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69J-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69J",
+    },
+    {
+        "phase_id": "69K",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69K-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69K",
+    },
+    {
+        "phase_id": "69K",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69K-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69K",
+    },
+    {
+        "phase_id": "69K",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69K-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69K",
     },
 )
 
@@ -80701,7 +80778,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69J",
+        "current_phase": "69K",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81438,6 +81515,19 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "ECR compares pre/post state with five severity levels; "
             "rollback_candidate=True when severity in {medium,high,critical}; "
             "automatic_rollback_allowed=False; rollback_executed=False; execution_allowed=False"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "automatic_snapshot_integration",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "closes SLR-69J-001: ESA created automatically inside invoke_readonly_execution "
+            "before subprocess; ECR created automatically after subprocess; "
+            "ERR carries snapshot_id, ecr_id linkage fields; "
+            "snapshot_storage_failure blocks as condition_12; git failures are advisory"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -89506,6 +89596,66 @@ _EGA_ERR_VERSION: str = "1.0"
 _EGA_APPROVED_CONTRACT_AGENT: str = "claude-local"
 _EGA_APPROVED_CONTRACT_COMMAND_PATTERN: str = 'claude -p "<prompt>"'
 
+# ── Phase 69K: Automatic Snapshot Integration (EASI) ────────────────────────
+
+_EASI_PHASE_ID: str = "69K"
+
+_EASI_GOVERNANCE_BOUNDARIES: dict = {
+    # Snapshot creation
+    "snapshot_created_before_subprocess": True,
+    "snapshot_is_pre_execution_only": True,
+    "snapshot_does_not_authorize_execution": True,
+    "snapshot_creation_is_not_execution": True,
+    "snapshot_uses_read_only_git_commands": True,
+    # Snapshot failure
+    "git_unavailable_is_advisory_not_blocker": True,
+    "git_timeout_is_advisory_not_blocker": True,
+    "snapshot_storage_failure_blocks_execution": True,
+    "partial_snapshot_is_valid_artifact": True,
+    # Authorization
+    "execution_allowed_semantics_unchanged": True,
+    "esa_creation_does_not_expand_execution_authority": True,
+    "esa_storage_failure_blocks_as_condition_12": True,
+    # execution_allowed
+    "execution_allowed_is_local_variable_only": True,
+    "execution_allowed_remains_false_in_esa": True,
+    "execution_allowed_remains_false_in_ecr": True,
+    # Rollback
+    "rollback_executed_always_false": True,
+    "automatic_rollback_forbidden": True,
+    "rollback_candidate_flag_is_informational_only": True,
+    # Git operations
+    "git_operations_are_read_only": True,
+    "git_add_forbidden": True,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    "git_reset_forbidden": True,
+    "git_revert_forbidden": True,
+    "git_checkout_forbidden": True,
+    # Remediation
+    "automatic_remediation_forbidden": True,
+    "automatic_execution_retry_forbidden": True,
+    # Post-execution
+    "ecr_creation_is_post_execution_observability": True,
+    "ecr_failure_is_advisory": True,
+    "ecr_does_not_block_err_creation": True,
+    # Manual commands
+    "manual_snapshot_commands_remain_supported": True,
+    "manual_change_commands_remain_supported": True,
+}
+
+EASI_ADVISORY: str = (
+    "Phase 69K Automatic Snapshot Integration closes SLR-69J-001. "
+    "ESA is created automatically inside invoke_readonly_execution before subprocess. "
+    "ECR is created automatically after subprocess. "
+    "git unavailability and timeout are advisory — execution proceeds. "
+    "snapshot_storage_failure blocks as condition_12_snapshot_storage_failed. "
+    "ECR failure is advisory and does not block ERR creation. "
+    "execution_allowed semantics are unchanged — ESA creation is not an authorization gate. "
+    "rollback_executed=False; automatic_rollback_forbidden=True. "
+    "Manual execution-snapshot and execution-change commands remain fully supported."
+)
+
 _EGA_GOVERNANCE_BOUNDARIES: dict = {
     "execution_allowed_global": False,
     "execution_allowed_scope": "per_invocation_local_variable_only",
@@ -89551,7 +89701,7 @@ _EGA_SANDBOX_LIMITATIONS: dict = {
 
 _EGA_ROLLBACK_POSTURE: dict = {
     "rollback_implemented": False,
-    "rollback_deferred_to": "69J",
+    "rollback_deferred_to": "future",
     "mitigation": (
         "Execution is limited to claude-local without --permission-mode acceptEdits. "
         "If unexpected mutation is discovered post-execution, human intervention is required. "
@@ -89798,13 +89948,59 @@ def invoke_readonly_execution(
     # _ega_run_subprocess. No runtime command override is possible.
     cmd = ["claude", "-p", prompt_text]
 
+    # ── Phase 69K: Pre-compute result_id before subprocess ───────────────────
+    pre_time = datetime.now(timezone.utc)
+    result_id = f"err-{prompt_id}-{pre_time.strftime('%Y%m%dT%H%M%S')}"
+
+    # ── Phase 69K: Automatic ESA creation (Condition 12) ────────────────────
+    # ESA is created before subprocess. git failures are advisory; storage failure blocks.
+    esa_result = build_execution_snapshot(root, prompt_id, authorization_id, audit_id)
+    snapshot_id: str | None = esa_result["snapshot_id"] if esa_result["created"] else None
+    snapshot_created: bool = esa_result["created"]
+    snapshot_capture_errors: list[str] = esa_result.get("capture_errors", [])
+
+    if not snapshot_created and esa_result.get("errors"):
+        # Storage/validation failure — condition 12 blocks execution
+        blockers.append("condition_12_snapshot_storage_failed")
+        return {
+            "execution_allowed": False,
+            "execution_occurred": False,
+            "blocked": True,
+            "blockers": blockers,
+            "prompt_id": prompt_id,
+            "authorization_id": authorization_id,
+            "audit_id": audit_id,
+            "stored": False,
+            "snapshot_id": None,
+            "snapshot_created": False,
+            "snapshot_capture_errors": snapshot_capture_errors,
+            "ecr_created": False,
+            "ecr_id": None,
+            "ecr_capture_errors": [],
+            "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
+            "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ACTIVATION_ADVISORY,
+            "easi_advisory": EASI_ADVISORY,
+        }
+    # Advisory: git unavailable/timeout — partial ESA stored, snapshot_created=True, capture_errors populated
+
+    # ── Subprocess execution ─────────────────────────────────────────────────
     start_time = datetime.now(timezone.utc)
     run_result = _ega_run_subprocess(cmd, _EGA_DEFAULT_TIMEOUT_SECONDS)
     end_time = datetime.now(timezone.utc)
     duration_ms = int((end_time - start_time).total_seconds() * 1000)
     executed_at = start_time.isoformat()
 
-    result_id = f"err-{prompt_id}-{start_time.strftime('%Y%m%dT%H%M%S')}"
+    # ── Phase 69K: Automatic ECR creation (post-execution, advisory) ─────────
+    ecr_id: str | None = None
+    ecr_created: bool = False
+    ecr_capture_errors: list[str] = []
+    if snapshot_created and snapshot_id is not None:
+        ecr_result = _easi_create_automatic_ecr(root, snapshot_id, result_id)
+        ecr_created = ecr_result.get("created", False)
+        ecr_id = ecr_result.get("change_record_id") if ecr_created else None
+        ecr_capture_errors = ecr_result.get("capture_errors", [])
+    # ECR failure is advisory — execution is already complete; do not block ERR creation
 
     err_record: dict = {
         "execution_result_id": result_id,
@@ -89833,6 +90029,13 @@ def invoke_readonly_execution(
         "timeout_seconds": _EGA_DEFAULT_TIMEOUT_SECONDS,
         "max_output_bytes": _EGA_MAX_OUTPUT_BYTES,
         "shell_used": False,
+        # ── Phase 69K: ESA/ECR linkage fields ────────────────────────────────
+        "snapshot_id": snapshot_id,
+        "snapshot_created": snapshot_created,
+        "snapshot_capture_errors": snapshot_capture_errors,
+        "ecr_created": ecr_created,
+        "ecr_id": ecr_id,
+        "ecr_capture_errors": ecr_capture_errors,
     }
 
     store_result = store_execution_result(root, err_record)
@@ -89854,8 +90057,17 @@ def invoke_readonly_execution(
         "sandbox_mode": "none",
         "blocked": False,
         "blockers": [],
+        # ── Phase 69K: ESA/ECR linkage fields ────────────────────────────────
+        "snapshot_id": snapshot_id,
+        "snapshot_created": snapshot_created,
+        "snapshot_capture_errors": snapshot_capture_errors,
+        "ecr_created": ecr_created,
+        "ecr_id": ecr_id,
+        "ecr_capture_errors": ecr_capture_errors,
         "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
+        "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ACTIVATION_ADVISORY,
+        "easi_advisory": EASI_ADVISORY,
     }
 
 
@@ -90870,4 +91082,79 @@ def build_execution_change_record(
         "execution_allowed": False,
         "governance_boundaries": dict(_ECR_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_CHANGE_RECORD_ADVISORY,
+    }
+
+
+def _easi_create_automatic_ecr(
+    root: "HarnessPath",
+    snapshot_id: str,
+    execution_result_id: str,
+) -> dict:
+    """
+    Internal: create ECR automatically from within invoke_readonly_execution.
+    Skips the ERR-exists lookup because ERR has not been stored yet at call time.
+    The execution_result_id is pre-computed and trusted; the ERR will be stored after.
+    No rollback. No subprocess. execution_allowed=False. rollback_executed=False.
+    """
+    esa = lookup_execution_snapshot(root, snapshot_id)
+    if esa is None:
+        return {
+            "change_record_id": None,
+            "created": False,
+            "error": "esa_not_found",
+            "capture_errors": [],
+        }
+
+    compared_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    post_git = _esa_capture_git_state(root)
+    capture_errors: list[str] = post_git.get("capture_errors", [])
+    changes = _ecr_diff_snapshots(esa, post_git)
+    severity, severity_basis = _ecr_classify_severity(changes)
+    rollback_candidate = severity in _ECR_ROLLBACK_CANDIDATE_THRESHOLD
+
+    change_record_id = f"ecr-{esa['prompt_id']}-{ts}"
+    record: dict = {
+        "change_record_id": change_record_id,
+        "change_version": _ECR_VERSION,
+        "snapshot_id": snapshot_id,
+        "execution_result_id": execution_result_id,
+        "audit_id": esa.get("audit_id", ""),
+        "authorization_id": esa.get("authorization_id", ""),
+        "prompt_id": esa.get("prompt_id", ""),
+        "compared_at": compared_at,
+        "change_detected": changes["change_detected"],
+        "modified_files": changes["modified_files"],
+        "added_files": changes["added_files"],
+        "deleted_files": changes["deleted_files"],
+        "untracked_added": changes["untracked_added"],
+        "untracked_removed": changes["untracked_removed"],
+        "git_head_changed": changes["git_head_changed"],
+        "pre_git_head": changes["pre_git_head"],
+        "post_git_head": changes["post_git_head"],
+        "change_severity": severity,
+        "change_severity_basis": severity_basis,
+        "rollback_candidate": rollback_candidate,
+        "rollback_candidate_basis": (
+            f"severity={severity} is in rollback_candidate_threshold="
+            f"{sorted(_ECR_ROLLBACK_CANDIDATE_THRESHOLD)}"
+            if rollback_candidate
+            else f"severity={severity} is not in rollback_candidate_threshold="
+            f"{sorted(_ECR_ROLLBACK_CANDIDATE_THRESHOLD)}"
+        ),
+        "rollback_executed": False,
+        "execution_allowed": False,
+        "automatic_integration": True,
+        "easi_phase": _EASI_PHASE_ID,
+    }
+    stored = store_execution_change_record(root, record)
+    return {
+        "change_record_id": change_record_id if stored["stored"] else None,
+        "created": stored["stored"],
+        "errors": stored.get("errors", []),
+        "capture_errors": capture_errors,
+        "change_severity": severity,
+        "rollback_candidate": rollback_candidate,
+        "rollback_executed": False,
+        "execution_allowed": False,
     }

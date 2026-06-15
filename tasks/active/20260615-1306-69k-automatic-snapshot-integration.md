@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260615-1119-69j-rollback-aware-execution-design
+20260615-1306-69k-automatic-snapshot-integration
 
 ## Title
 
-69J Rollback-Aware Execution Design
+69K Automatic Snapshot Integration
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-69J Rollback-Aware Execution Design
+69K Automatic Snapshot Integration
 
 ## Allowed Files
 
@@ -32,28 +32,36 @@ implementation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/COMMANDS.md
-- docs/CAPABILITY_INVENTORY.md
-- docs/ROADMAP_REGISTRY.md
-- src/pcae/cli.py
-- src/pcae/commands/agent.py
 - src/pcae/core/agent.py
+- src/pcae/commands/agent.py
+- src/pcae/cli.py
 - src/pcae/core/docs.py
 - tests/test_agent.py
 - tests/test_strategic_lineage.py
+- docs/COMMANDS.md
+- docs/CAPABILITY_INVENTORY.md
+- docs/ROADMAP_REGISTRY.md
 
 ## Forbidden Files
 
-- none
+- src/pcae/core/strategic_lineage.py
 
 ## Allowed Zones
+
+- core
+- commands
+- cli
+- tests
+- docs
+- tasks
+- session
+- config
 
 ## Forbidden Zones
 
 ## Allowed Dependencies
 
 ## Forbidden Dependencies
-
 
 ## Enforcement Mode
 
@@ -82,4 +90,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-15T11:19:42.623916+02:00
+2026-06-15T13:06:24.782077+02:00
