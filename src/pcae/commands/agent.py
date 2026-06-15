@@ -129,6 +129,15 @@ from pcae.core.agent import (
     lookup_open_execution_result_reviews,
     build_execution_result_review_store_summary,
     EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+    build_execution_snapshot,
+    lookup_execution_snapshot,
+    lookup_execution_snapshots_for_prompt,
+    EXECUTION_SNAPSHOT_ADVISORY,
+    build_execution_change_record,
+    lookup_execution_change_record,
+    list_execution_change_candidates,
+    list_execution_change_records,
+    EXECUTION_CHANGE_RECORD_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -15425,4 +15434,201 @@ def run_result_review_list_open(args: argparse.Namespace) -> int:
     for r in records:
         print(f"  {r['review_id']}  result={r['execution_result_id']}  state={r['review_state']}"
               f"  disposition={r['human_disposition']}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 69J — Execution Snapshot and Execution Change runners
+# ---------------------------------------------------------------------------
+
+
+def run_execution_snapshot_create(args: argparse.Namespace) -> int:
+    result = build_execution_snapshot(
+        HarnessPath.cwd(),
+        args.prompt_id,
+        args.authorization_id,
+        args.audit_id,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("created") else 1
+
+    if not result.get("created"):
+        print("ExecutionSnapshot: CREATION FAILED")
+        for err in result.get("errors", []):
+            print(f"  - {err}")
+        print()
+        print(EXECUTION_SNAPSHOT_ADVISORY)
+        return 1
+
+    print("ExecutionSnapshot: CREATED")
+    print(f"  snapshot_id:       {result['snapshot_id']}")
+    print(f"  prompt_id:         {result['prompt_id']}")
+    print(f"  captured_at:       {result['captured_at']}")
+    print(f"  git_available:     {result['git_available']}")
+    if result.get("capture_errors"):
+        print(f"  capture_errors:    {result['capture_errors']}")
+    print(f"  execution_allowed: {result['execution_allowed']}")
+    print(f"  rollback_executed: {result['rollback_executed']}")
+    print(f"  path: {result['path']}")
+    print()
+    print(EXECUTION_SNAPSHOT_ADVISORY)
+    return 0
+
+
+def run_execution_snapshot_show(args: argparse.Namespace) -> int:
+    record = lookup_execution_snapshot(HarnessPath.cwd(), args.snapshot_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "snapshot_not_found", "snapshot_id": args.snapshot_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"ExecutionSnapshot: NOT FOUND — {args.snapshot_id}")
+        return 1
+
+    print("ExecutionSnapshot")
+    print(f"  snapshot_id:       {record['snapshot_id']}")
+    print(f"  prompt_id:         {record['prompt_id']}")
+    print(f"  authorization_id:  {record['authorization_id']}")
+    print(f"  audit_id:          {record['audit_id']}")
+    print(f"  captured_at:       {record['captured_at']}")
+    print(f"  git_available:     {record['git_available']}")
+    print(f"  git_head:          {record.get('git_head')}")
+    print(f"  git_branch:        {record.get('git_branch')}")
+    print(f"  snapshot_scope:    {record.get('snapshot_scope')}")
+    print(f"  execution_allowed: {record['execution_allowed']}")
+    print(f"  rollback_executed: {record['rollback_executed']}")
+    if record.get("capture_errors"):
+        print(f"  capture_errors:    {record['capture_errors']}")
+    print()
+    print(EXECUTION_SNAPSHOT_ADVISORY)
+    return 0
+
+
+def run_execution_snapshot_list(args: argparse.Namespace) -> int:
+    records = lookup_execution_snapshots_for_prompt(HarnessPath.cwd(), args.prompt_id)
+    if args.json:
+        print(json.dumps({"prompt_id": args.prompt_id, "snapshots": records}, indent=2, sort_keys=True))
+        return 0
+
+    print(f"ExecutionSnapshots for {args.prompt_id}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['snapshot_id']}  captured={r['captured_at']}  git_available={r['git_available']}")
+    return 0
+
+
+def run_execution_change_compare(args: argparse.Namespace) -> int:
+    result = build_execution_change_record(
+        HarnessPath.cwd(),
+        args.snapshot_id,
+        args.result_id,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("created") else 1
+
+    if not result.get("created"):
+        print("ExecutionChangeRecord: CREATION FAILED")
+        print(f"  error: {result.get('error', 'unknown')}")
+        for err in result.get("errors", []):
+            print(f"  - {err}")
+        print()
+        print(EXECUTION_CHANGE_RECORD_ADVISORY)
+        return 1
+
+    print("ExecutionChangeRecord: CREATED")
+    print(f"  change_record_id:    {result['change_record_id']}")
+    print(f"  snapshot_id:         {result['snapshot_id']}")
+    print(f"  execution_result_id: {result['execution_result_id']}")
+    print(f"  compared_at:         {result['compared_at']}")
+    print(f"  change_detected:     {result['change_detected']}")
+    print(f"  change_severity:     {result['change_severity']}")
+    print(f"  rollback_candidate:  {result['rollback_candidate']}")
+    print(f"  rollback_executed:   {result['rollback_executed']}")
+    print(f"  execution_allowed:   {result['execution_allowed']}")
+    print(f"  path: {result['path']}")
+    print()
+    print(EXECUTION_CHANGE_RECORD_ADVISORY)
+    return 0
+
+
+def run_execution_change_show(args: argparse.Namespace) -> int:
+    record = lookup_execution_change_record(HarnessPath.cwd(), args.change_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "change_record_not_found", "change_id": args.change_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"ExecutionChangeRecord: NOT FOUND — {args.change_id}")
+        return 1
+
+    print("ExecutionChangeRecord")
+    print(f"  change_record_id:    {record['change_record_id']}")
+    print(f"  snapshot_id:         {record['snapshot_id']}")
+    print(f"  execution_result_id: {record['execution_result_id']}")
+    print(f"  prompt_id:           {record['prompt_id']}")
+    print(f"  compared_at:         {record['compared_at']}")
+    print(f"  change_detected:     {record['change_detected']}")
+    print(f"  change_severity:     {record['change_severity']}")
+    print(f"  change_severity_basis: {record.get('change_severity_basis')}")
+    print(f"  rollback_candidate:  {record['rollback_candidate']}")
+    print(f"  rollback_executed:   {record['rollback_executed']}")
+    print(f"  execution_allowed:   {record['execution_allowed']}")
+    if record.get("modified_files"):
+        print(f"  modified_files: {record['modified_files']}")
+    if record.get("added_files"):
+        print(f"  added_files:    {record['added_files']}")
+    if record.get("deleted_files"):
+        print(f"  deleted_files:  {record['deleted_files']}")
+    if record.get("untracked_added"):
+        print(f"  untracked_added: {record['untracked_added']}")
+    print()
+    print(EXECUTION_CHANGE_RECORD_ADVISORY)
+    return 0
+
+
+def run_execution_change_list(args: argparse.Namespace) -> int:
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_execution_change_records(HarnessPath.cwd(), prompt_id)
+    if args.json:
+        print(json.dumps({"prompt_id": prompt_id, "changes": records, "count": len(records)}, indent=2, sort_keys=True))
+        return 0
+
+    label = f" for {prompt_id}" if prompt_id else ""
+    print(f"ExecutionChangeRecords{label}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        candidate_flag = " [ROLLBACK_CANDIDATE]" if r.get("rollback_candidate") else ""
+        print(f"  {r['change_record_id']}  severity={r['change_severity']}{candidate_flag}")
+    return 0
+
+
+def run_execution_change_list_candidates(args: argparse.Namespace) -> int:
+    records = list_execution_change_candidates(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({"rollback_candidates": records, "count": len(records)}, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Rollback candidates: {len(records)}")
+    if not records:
+        print("  (none)")
+        print()
+        print(EXECUTION_CHANGE_RECORD_ADVISORY)
+        return 0
+    for r in records:
+        print(f"  {r['change_record_id']}  prompt={r['prompt_id']}"
+              f"  severity={r['change_severity']}  rollback_executed={r['rollback_executed']}")
+    print()
+    print(EXECUTION_CHANGE_RECORD_ADVISORY)
     return 0

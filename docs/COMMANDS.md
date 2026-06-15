@@ -499,6 +499,26 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae result-review list-open`
 - `pcae result-review list-open --json`
 
+## execution-snapshot
+
+- `pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id>`
+- `pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id> --json`
+- `pcae execution-snapshot show --snapshot-id <id>`
+- `pcae execution-snapshot show --snapshot-id <id> --json`
+- `pcae execution-snapshot list --prompt-id <id>`
+- `pcae execution-snapshot list --prompt-id <id> --json`
+
+## execution-change
+
+- `pcae execution-change compare --snapshot-id <id> --result-id <id>`
+- `pcae execution-change compare --snapshot-id <id> --result-id <id> --json`
+- `pcae execution-change show --change-id <id>`
+- `pcae execution-change show --change-id <id> --json`
+- `pcae execution-change list`
+- `pcae execution-change list --prompt-id <id> --json`
+- `pcae execution-change list-candidates`
+- `pcae execution-change list-candidates --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

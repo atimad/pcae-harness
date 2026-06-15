@@ -652,5 +652,37 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "69H",
     "supersedes_lineage_id": "SLR-69H-001"
+  },
+  {
+    "activated_phase_id": "69J",
+    "activation_event_id": "2026-06-15T11:19:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "finding_snapshot_hash": "ed8cd2d99148989c582832c69c814e9ccb0aa01b10c2e5d5ed705d47229b1400",
+    "human_approved": true,
+    "lineage_id": "SLR-69J-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-15T11:19:00+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69I",
+    "rationale": "Introduces ExecutionSnapshotArtifact (ESA) store at .pcae/execution-snapshots/ and ExecutionChangeRecord (ECR) store at .pcae/execution-changes/. ESA captures pre-execution git working-tree state. ECR compares pre/post and classifies change_severity (none/low/medium/high/critical). rollback_candidate=True when severity in {medium,high,critical}. Manual command model (Option 1): no automatic integration with invoke_readonly_execution. SLR-69J-001: automatic snapshot integration deferred to future phase (69K candidate). rollback_executed=False; automatic_rollback_allowed=False; execution_allowed=False.",
+    "recommendation": "approve",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "SLR-69J-001: automatic snapshot integration into invoke_readonly_execution deferred to future phase"
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69I",
+    "supersedes_lineage_id": "SLR-69I-001"
   }
 ]

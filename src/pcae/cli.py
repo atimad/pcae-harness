@@ -76,6 +76,13 @@ from pcae.commands.agent import (
     run_result_review_show,
     run_result_review_list,
     run_result_review_list_open,
+    run_execution_snapshot_create,
+    run_execution_snapshot_show,
+    run_execution_snapshot_list,
+    run_execution_change_compare,
+    run_execution_change_show,
+    run_execution_change_list,
+    run_execution_change_list_candidates,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2211,6 +2218,110 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     rr_list_open_parser.set_defaults(handler=run_result_review_list_open)
+
+    execution_snapshot_parser = subparsers.add_parser(
+        "execution-snapshot",
+        help=(
+            "Manage ExecutionSnapshotArtifacts (ESA) for rollback-aware execution governance "
+            "(Phase 69J). Captures git working-tree state. No execution, no rollback."
+        ),
+    )
+    execution_snapshot_subparsers = execution_snapshot_parser.add_subparsers(
+        dest="execution_snapshot_command", required=True
+    )
+
+    es_create_parser = execution_snapshot_subparsers.add_parser(
+        "create",
+        help="Capture pre-execution git working-tree state as an ESA artifact.",
+    )
+    es_create_parser.add_argument("--prompt-id", required=True, help="Prompt identifier.")
+    es_create_parser.add_argument(
+        "--authorization-id", required=True, help="Authorization artifact ID."
+    )
+    es_create_parser.add_argument("--audit-id", required=True, help="Audit record ID.")
+    es_create_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    es_create_parser.set_defaults(handler=run_execution_snapshot_create)
+
+    es_show_parser = execution_snapshot_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionSnapshotArtifact by snapshot_id.",
+    )
+    es_show_parser.add_argument("--snapshot-id", required=True, help="Snapshot ID to look up.")
+    es_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    es_show_parser.set_defaults(handler=run_execution_snapshot_show)
+
+    es_list_parser = execution_snapshot_subparsers.add_parser(
+        "list",
+        help="List ExecutionSnapshotArtifacts for a prompt.",
+    )
+    es_list_parser.add_argument(
+        "--prompt-id", required=True, help="List snapshots for this prompt."
+    )
+    es_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    es_list_parser.set_defaults(handler=run_execution_snapshot_list)
+
+    execution_change_parser = subparsers.add_parser(
+        "execution-change",
+        help=(
+            "Manage ExecutionChangeRecords (ECR) for rollback-aware execution governance "
+            "(Phase 69J). Compares pre/post workspace state. No rollback, no git reset."
+        ),
+    )
+    execution_change_subparsers = execution_change_parser.add_subparsers(
+        dest="execution_change_command", required=True
+    )
+
+    ec_compare_parser = execution_change_subparsers.add_parser(
+        "compare",
+        help="Compare pre-execution ESA with current workspace state and create an ECR.",
+    )
+    ec_compare_parser.add_argument(
+        "--snapshot-id", required=True, help="ExecutionSnapshotArtifact ID to compare against."
+    )
+    ec_compare_parser.add_argument(
+        "--result-id", required=True, help="ExecutionResultRecord ID associated with this comparison."
+    )
+    ec_compare_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ec_compare_parser.set_defaults(handler=run_execution_change_compare)
+
+    ec_show_parser = execution_change_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionChangeRecord by change_id.",
+    )
+    ec_show_parser.add_argument("--change-id", required=True, help="Change record ID to look up.")
+    ec_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ec_show_parser.set_defaults(handler=run_execution_change_show)
+
+    ec_list_parser = execution_change_subparsers.add_parser(
+        "list",
+        help="List ExecutionChangeRecords, optionally filtered by prompt.",
+    )
+    ec_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional)."
+    )
+    ec_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ec_list_parser.set_defaults(handler=run_execution_change_list)
+
+    ec_candidates_parser = execution_change_subparsers.add_parser(
+        "list-candidates",
+        help="List all ECRs where rollback_candidate=True.",
+    )
+    ec_candidates_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ec_candidates_parser.set_defaults(handler=run_execution_change_list_candidates)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

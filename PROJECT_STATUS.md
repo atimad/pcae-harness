@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69I: Execution Result Review Persistence (BR-005 Execution Governance Activation).
+Phase 69J: Rollback-Aware Execution Design (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

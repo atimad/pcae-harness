@@ -70130,6 +70130,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["result-review"],
         "dependencies": ["execution_result_governance"],
+        "successor_capabilities": ["rollback_aware_execution_detection"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Rollback Aware Execution Detection",
+        "implemented_phase": "69J",
+        "status": "implemented",
+        "commands": [
+            "execution-snapshot",
+            "execution-change",
+        ],
+        "introduced_commands": ["execution-snapshot", "execution-change"],
+        "dependencies": ["execution_result_review_persistence"],
         "successor_capabilities": [],
     },
 )
@@ -71148,8 +71161,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69I",
         "phase_title": "Execution Result Review Persistence",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69H",
+        "successor": "69J",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69J",
+        "phase_title": "Rollback-Aware Execution Design",
+        "status": "active",
+        "predecessor": "69I",
         "successor": "",
         "superseded_by": "",
     },
@@ -72306,7 +72328,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_result_governance",
         ],
-        "successors": [],
+        "successors": ["rollback_aware_execution_detection"],
         "aliases": [],
         "contribution": (
             "introduces append-only ExecutionResultReviewArtifact (ERRA) store at "
@@ -72319,6 +72341,44 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "execution_allowed=False and follow_on_execution_allowed=False are hard-coded; "
             "accepted_as_observed_is_not_approval=True; multi-reviewer conflict resolution "
             "deferred (SLR-69I-001); completes APA→ARA→EAR→ERR→ERG→ERRA governance chain"
+        ),
+    },
+    {
+        "capability_name": "Rollback Aware Execution Detection",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69J",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id>",
+            "pcae execution-snapshot create --prompt-id <id> --authorization-id <id> --audit-id <id> --json",
+            "pcae execution-snapshot show --snapshot-id <id>",
+            "pcae execution-snapshot show --snapshot-id <id> --json",
+            "pcae execution-snapshot list --prompt-id <id>",
+            "pcae execution-snapshot list --prompt-id <id> --json",
+            "pcae execution-change compare --snapshot-id <id> --result-id <id>",
+            "pcae execution-change compare --snapshot-id <id> --result-id <id> --json",
+            "pcae execution-change show --change-id <id>",
+            "pcae execution-change show --change-id <id> --json",
+            "pcae execution-change list",
+            "pcae execution-change list --prompt-id <id> --json",
+            "pcae execution-change list-candidates",
+            "pcae execution-change list-candidates --json",
+        ],
+        "dependencies": [
+            "execution_result_review_persistence",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces ExecutionSnapshotArtifact (ESA) store at .pcae/execution-snapshots/ "
+            "and ExecutionChangeRecord (ECR) store at .pcae/execution-changes/; "
+            "ESA captures git working-tree state (HEAD, branch, porcelain status, file lists) "
+            "before execution; ECR compares pre/post state and classifies change_severity on "
+            "five levels (none/low/medium/high/critical); rollback_candidate=True when severity "
+            "in {medium,high,critical}; rollback_candidate_is_not_rollback=True; "
+            "automatic_rollback_allowed=False; rollback_executed=False; execution_allowed=False; "
+            "git_reset_not_performed=True; git_revert_not_performed=True; "
+            "manual command model (Option 1): no automatic integration with invoke_readonly_execution"
         ),
     },
     {
@@ -74735,7 +74795,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69I",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69I-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69I",
@@ -74743,7 +74803,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69I",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69I-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69I",
@@ -74751,10 +74811,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69I",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69I-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69I",
+    },
+    {
+        "phase_id": "69J",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69J-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69J",
+    },
+    {
+        "phase_id": "69J",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69J-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69J",
+    },
+    {
+        "phase_id": "69J",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69J-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69J",
     },
 )
 
@@ -80617,7 +80701,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69I",
+        "current_phase": "69J",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81340,6 +81424,20 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "persists human reviewer disposition for ExecutionResultRecord in append-only "
             "ERRA store; embeds ERG classification snapshot; completes APA→ARA→EAR→ERR→ERG→ERRA chain; "
             "no authorization, execution, rollback, or mutation of prior artifacts"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "rollback_aware_execution_detection",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces ESA store (.pcae/execution-snapshots/) and ECR store "
+            "(.pcae/execution-changes/); ESA captures pre-execution git working-tree state; "
+            "ECR compares pre/post state with five severity levels; "
+            "rollback_candidate=True when severity in {medium,high,critical}; "
+            "automatic_rollback_allowed=False; rollback_executed=False; execution_allowed=False"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -90257,4 +90355,519 @@ def build_execution_result_review_store_summary(root: "HarnessPath") -> dict:
         "follow_on_execution_allowed": False,
         "governance_boundaries": dict(_ERRA_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_RESULT_REVIEW_PERSISTENCE_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69J — Rollback-Aware Execution Design (ESA + ECR)
+# ---------------------------------------------------------------------------
+
+_ESA_PHASE_ID: str = "69J"
+_ESA_STORE_DIR: Path = Path(".pcae") / "execution-snapshots"
+_ESA_VERSION: str = "1.0"
+_ESA_GIT_TIMEOUT_SECONDS: int = 30
+
+_ESA_GOVERNANCE_BOUNDARIES: dict = {
+    "snapshot_creation_is_not_execution": True,
+    "snapshot_creation_does_not_authorize_execution": True,
+    "snapshot_is_not_complete_filesystem_record": True,
+    "git_status_absence_is_not_guarantee_of_no_side_effects": True,
+    "snapshot_scope_is_git_working_tree_only": True,
+    "pcae_governance_files_excluded_from_scope": True,
+    "file_contents_not_captured": True,
+    "execution_allowed": False,
+    "rollback_executed": False,
+}
+
+EXECUTION_SNAPSHOT_ADVISORY: str = (
+    "ExecutionSnapshotArtifact (ESA) captures git working-tree state at a point in time. "
+    "snapshot_creation_is_not_execution=True. snapshot_is_not_complete_filesystem_record=True. "
+    "git_status_absence_is_not_guarantee_of_no_side_effects=True. "
+    "execution_allowed=False. rollback_executed=False."
+)
+
+_ECR_PHASE_ID: str = "69J"
+_ECR_STORE_DIR: Path = Path(".pcae") / "execution-changes"
+_ECR_VERSION: str = "1.0"
+
+_ECR_SEVERITY_VALUES: frozenset[str] = frozenset({
+    "none", "low", "medium", "high", "critical",
+})
+
+_ECR_ROLLBACK_CANDIDATE_THRESHOLD: frozenset[str] = frozenset({
+    "medium", "high", "critical",
+})
+
+_ECR_GOVERNANCE_BOUNDARIES: dict = {
+    "change_detection_is_not_execution": True,
+    "change_detection_is_not_rollback": True,
+    "rollback_candidate_is_not_rollback": True,
+    "rollback_candidate_does_not_authorize_rollback": True,
+    "rollback_candidate_does_not_block_execution": True,
+    "rollback_candidate_does_not_modify_erra": True,
+    "no_changes_detected_is_not_guarantee_of_no_side_effects": True,
+    "automatic_rollback_allowed": False,
+    "execution_allowed": False,
+    "rollback_executed": False,
+    "git_reset_not_performed": True,
+    "git_revert_not_performed": True,
+    "file_restoration_not_performed": True,
+    "branch_manipulation_not_performed": True,
+    "commit_creation_not_performed": True,
+    "push_not_performed": True,
+}
+
+EXECUTION_CHANGE_RECORD_ADVISORY: str = (
+    "ExecutionChangeRecord (ECR) compares pre-execution ESA with post-execution workspace state. "
+    "change_detection_is_not_rollback=True. rollback_candidate_is_not_rollback=True. "
+    "rollback_candidate_does_not_authorize_rollback=True. "
+    "automatic_rollback_allowed=False. rollback_executed=False. execution_allowed=False."
+)
+
+
+def _esa_capture_git_state(root: "HarnessPath") -> dict:
+    """Capture current git working-tree state. Returns partial result on any failure."""
+    import subprocess as _sp
+
+    result: dict = {
+        "git_available": False,
+        "git_head": None,
+        "git_branch": None,
+        "git_status_porcelain": None,
+        "tracked_modified": [],
+        "tracked_added": [],
+        "tracked_deleted": [],
+        "staged_changes": [],
+        "untracked_files": [],
+        "capture_errors": [],
+    }
+    try:
+        head_proc = _sp.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            timeout=_ESA_GIT_TIMEOUT_SECONDS,
+            shell=False,
+            cwd=str(root.path),
+        )
+        if head_proc.returncode == 0:
+            result["git_available"] = True
+            result["git_head"] = head_proc.stdout.decode("utf-8", errors="replace").strip()
+        else:
+            result["capture_errors"].append("git_rev_parse_failed")
+            return result
+    except FileNotFoundError:
+        result["capture_errors"].append("git_not_available")
+        return result
+    except Exception as exc:
+        result["capture_errors"].append(f"git_head_error:{type(exc).__name__}")
+        return result
+
+    try:
+        branch_proc = _sp.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            timeout=_ESA_GIT_TIMEOUT_SECONDS,
+            shell=False,
+            cwd=str(root.path),
+        )
+        if branch_proc.returncode == 0:
+            result["git_branch"] = branch_proc.stdout.decode("utf-8", errors="replace").strip()
+    except Exception:
+        pass
+
+    try:
+        status_proc = _sp.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            timeout=_ESA_GIT_TIMEOUT_SECONDS,
+            shell=False,
+            cwd=str(root.path),
+        )
+        if status_proc.returncode == 0:
+            raw = status_proc.stdout.decode("utf-8", errors="replace")
+            result["git_status_porcelain"] = raw
+            modified: list[str] = []
+            added: list[str] = []
+            deleted: list[str] = []
+            staged: list[str] = []
+            untracked: list[str] = []
+            for line in raw.splitlines():
+                if len(line) < 3:
+                    continue
+                xy = line[:2]
+                path_str = line[3:]
+                x, y = xy[0], xy[1]
+                if xy == "??":
+                    untracked.append(path_str)
+                else:
+                    if x in ("M", "A", "D", "R", "C"):
+                        staged.append(path_str)
+                    if y == "M":
+                        modified.append(path_str)
+                    elif y == "D":
+                        deleted.append(path_str)
+                    elif y == "A":
+                        added.append(path_str)
+                    elif x in ("M", "A") and y == " ":
+                        modified.append(path_str)
+                    elif x == "D" and y == " ":
+                        deleted.append(path_str)
+            result["tracked_modified"] = modified
+            result["tracked_added"] = added
+            result["tracked_deleted"] = deleted
+            result["staged_changes"] = staged
+            result["untracked_files"] = untracked
+        else:
+            result["capture_errors"].append("git_status_failed")
+    except Exception as exc:
+        if "TimeoutExpired" in type(exc).__name__:
+            result["capture_errors"].append("git_status_timeout")
+        else:
+            result["capture_errors"].append(f"git_status_error:{type(exc).__name__}")
+
+    return result
+
+
+def _esa_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in ("snapshot_id", "prompt_id", "authorization_id", "audit_id", "captured_at"):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("snapshot_type") != "pre_execution":
+        errors.append("invalid_snapshot_type")
+    if record.get("snapshot_version") != _ESA_VERSION:
+        errors.append("invalid_snapshot_version")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    if record.get("rollback_executed") is not False:
+        errors.append("rollback_executed_must_be_false")
+    return errors
+
+
+def store_execution_snapshot(root: "HarnessPath", record: dict) -> dict:
+    errors = _esa_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _ESA_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_id = record["snapshot_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    filename = f"{snapshot_id}-{ts}.json"
+    path = store_dir / filename
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_execution_snapshot(root: "HarnessPath", snapshot_id: str) -> dict | None:
+    store_dir = root.path / _ESA_STORE_DIR
+    if not store_dir.exists():
+        return None
+    matches = sorted(store_dir.glob(f"{snapshot_id}-*.json"), reverse=True)
+    for match in matches:
+        try:
+            return json.loads(match.read_text())
+        except Exception:
+            continue
+    return None
+
+
+def lookup_execution_snapshots_for_prompt(root: "HarnessPath", prompt_id: str) -> list[dict]:
+    store_dir = root.path / _ESA_STORE_DIR
+    if not store_dir.exists():
+        return []
+    results: list[dict] = []
+    for path in sorted(store_dir.glob("esa-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if record.get("prompt_id") == prompt_id:
+                results.append(record)
+        except Exception:
+            continue
+    return results
+
+
+def build_execution_snapshot(
+    root: "HarnessPath",
+    prompt_id: str,
+    authorization_id: str,
+    audit_id: str,
+) -> dict:
+    """
+    Capture pre-execution git working-tree state as an ESA artifact.
+    snapshot_creation_is_not_execution=True. execution_allowed=False.
+    """
+    captured_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    snapshot_id = f"esa-{prompt_id}-{ts}"
+    git_state = _esa_capture_git_state(root)
+    record: dict = {
+        "snapshot_id": snapshot_id,
+        "snapshot_type": "pre_execution",
+        "snapshot_version": _ESA_VERSION,
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "audit_id": audit_id,
+        "captured_at": captured_at,
+        "git_available": git_state["git_available"],
+        "git_head": git_state["git_head"],
+        "git_branch": git_state["git_branch"],
+        "git_status_porcelain": git_state["git_status_porcelain"],
+        "tracked_modified": git_state["tracked_modified"],
+        "tracked_added": git_state["tracked_added"],
+        "tracked_deleted": git_state["tracked_deleted"],
+        "staged_changes": git_state["staged_changes"],
+        "untracked_files": git_state["untracked_files"],
+        "snapshot_scope": "git_working_tree",
+        "capture_errors": git_state["capture_errors"],
+        "execution_allowed": False,
+        "rollback_executed": False,
+    }
+    stored = store_execution_snapshot(root, record)
+    return {
+        "snapshot_id": snapshot_id,
+        "prompt_id": prompt_id,
+        "authorization_id": authorization_id,
+        "audit_id": audit_id,
+        "captured_at": captured_at,
+        "created": stored["stored"],
+        "path": stored.get("path"),
+        "errors": stored.get("errors", []),
+        "git_available": git_state["git_available"],
+        "capture_errors": git_state["capture_errors"],
+        "execution_allowed": False,
+        "rollback_executed": False,
+        "governance_boundaries": dict(_ESA_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_SNAPSHOT_ADVISORY,
+    }
+
+
+def _ecr_diff_snapshots(pre: dict, post: dict) -> dict:
+    """Compute the difference between two git state captures."""
+    pre_modified = set(pre.get("tracked_modified", []))
+    pre_added = set(pre.get("tracked_added", []))
+    pre_deleted = set(pre.get("tracked_deleted", []))
+    pre_untracked = set(pre.get("untracked_files", []))
+    pre_head = pre.get("git_head")
+
+    post_modified = set(post.get("tracked_modified", []))
+    post_added = set(post.get("tracked_added", []))
+    post_deleted = set(post.get("tracked_deleted", []))
+    post_untracked = set(post.get("untracked_files", []))
+    post_head = post.get("git_head")
+    post_staged = post.get("staged_changes", [])
+
+    modified_files = sorted(post_modified - pre_modified)
+    added_files = sorted(post_added - pre_added)
+    deleted_files = sorted(post_deleted - pre_deleted)
+    untracked_added = sorted(post_untracked - pre_untracked)
+    untracked_removed = sorted(pre_untracked - post_untracked)
+    git_head_changed = bool(pre_head and post_head and pre_head != post_head)
+
+    change_detected = bool(
+        modified_files or added_files or deleted_files
+        or untracked_added or untracked_removed or git_head_changed
+    )
+
+    return {
+        "change_detected": change_detected,
+        "modified_files": modified_files,
+        "added_files": added_files,
+        "deleted_files": deleted_files,
+        "untracked_added": untracked_added,
+        "untracked_removed": untracked_removed,
+        "git_head_changed": git_head_changed,
+        "pre_git_head": pre_head,
+        "post_git_head": post_head,
+        "post_staged_changes": post_staged,
+    }
+
+
+def _ecr_classify_severity(changes: dict) -> tuple[str, str]:
+    """Return (severity, basis). Severity: none < low < medium < high < critical."""
+    if not changes["change_detected"]:
+        return "none", "no_changes_detected"
+    if changes["git_head_changed"]:
+        return "critical", "git_head_changed"
+    all_changed = changes["modified_files"] + changes["added_files"] + changes["deleted_files"]
+    if any(f.startswith(".pcae/") for f in all_changed):
+        return "critical", "governance_artifacts_modified"
+    if changes.get("post_staged_changes") or len(changes["modified_files"]) > 5:
+        return "high", "staged_changes_or_many_files_modified"
+    if changes["modified_files"] or changes["added_files"] or changes["deleted_files"]:
+        return "medium", "tracked_files_changed"
+    if changes["untracked_added"] or changes["untracked_removed"]:
+        return "low", "untracked_files_changed_only"
+    return "none", "no_meaningful_changes"
+
+
+def _ecr_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in (
+        "change_record_id", "snapshot_id", "execution_result_id",
+        "audit_id", "authorization_id", "prompt_id", "compared_at",
+    ):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("change_severity") not in _ECR_SEVERITY_VALUES:
+        errors.append("invalid_change_severity")
+    if record.get("rollback_executed") is not False:
+        errors.append("rollback_executed_must_be_false")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    return errors
+
+
+def store_execution_change_record(root: "HarnessPath", record: dict) -> dict:
+    errors = _ecr_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _ECR_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    change_id = record["change_record_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    filename = f"{change_id}-{ts}.json"
+    path = store_dir / filename
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_execution_change_record(root: "HarnessPath", change_id: str) -> dict | None:
+    store_dir = root.path / _ECR_STORE_DIR
+    if not store_dir.exists():
+        return None
+    matches = sorted(store_dir.glob(f"{change_id}-*.json"), reverse=True)
+    for match in matches:
+        try:
+            return json.loads(match.read_text())
+        except Exception:
+            continue
+    return None
+
+
+def list_execution_change_candidates(root: "HarnessPath") -> list[dict]:
+    """Return all ECRs where rollback_candidate=True."""
+    store_dir = root.path / _ECR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    candidates: list[dict] = []
+    for path in sorted(store_dir.glob("ecr-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if record.get("rollback_candidate") is True:
+                candidates.append(record)
+        except Exception:
+            continue
+    return candidates
+
+
+def list_execution_change_records(root: "HarnessPath", prompt_id: str | None = None) -> list[dict]:
+    """Return ECRs from the store, optionally filtered by prompt_id."""
+    store_dir = root.path / _ECR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("ecr-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if prompt_id is None or record.get("prompt_id") == prompt_id:
+                records.append(record)
+        except Exception:
+            continue
+    return records
+
+
+def build_execution_change_record(
+    root: "HarnessPath",
+    snapshot_id: str,
+    execution_result_id: str,
+) -> dict:
+    """
+    Compare pre-execution ESA against current workspace state.
+    No rollback is performed. No subprocess is invoked for the comparison.
+    execution_allowed=False. rollback_executed=False.
+    """
+    esa = lookup_execution_snapshot(root, snapshot_id)
+    if esa is None:
+        return {
+            "error": "esa_not_found",
+            "snapshot_id": snapshot_id,
+            "execution_result_id": execution_result_id,
+            "created": False,
+            "rollback_executed": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_ECR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_CHANGE_RECORD_ADVISORY,
+        }
+
+    err = lookup_execution_result(root, execution_result_id)
+    if err is None:
+        return {
+            "error": "err_not_found",
+            "snapshot_id": snapshot_id,
+            "execution_result_id": execution_result_id,
+            "created": False,
+            "rollback_executed": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_ECR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_CHANGE_RECORD_ADVISORY,
+        }
+
+    compared_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    post_git = _esa_capture_git_state(root)
+    changes = _ecr_diff_snapshots(esa, post_git)
+    severity, severity_basis = _ecr_classify_severity(changes)
+    rollback_candidate = severity in _ECR_ROLLBACK_CANDIDATE_THRESHOLD
+    rollback_candidate_basis = (
+        f"severity={severity} is in rollback_candidate_threshold="
+        f"{sorted(_ECR_ROLLBACK_CANDIDATE_THRESHOLD)}"
+        if rollback_candidate
+        else f"severity={severity} is not in rollback_candidate_threshold="
+        f"{sorted(_ECR_ROLLBACK_CANDIDATE_THRESHOLD)}"
+    )
+
+    change_record_id = f"ecr-{esa['prompt_id']}-{ts}"
+    record: dict = {
+        "change_record_id": change_record_id,
+        "change_version": _ECR_VERSION,
+        "snapshot_id": snapshot_id,
+        "execution_result_id": execution_result_id,
+        "audit_id": esa.get("audit_id", ""),
+        "authorization_id": esa.get("authorization_id", ""),
+        "prompt_id": esa.get("prompt_id", ""),
+        "compared_at": compared_at,
+        "change_detected": changes["change_detected"],
+        "modified_files": changes["modified_files"],
+        "added_files": changes["added_files"],
+        "deleted_files": changes["deleted_files"],
+        "untracked_added": changes["untracked_added"],
+        "untracked_removed": changes["untracked_removed"],
+        "git_head_changed": changes["git_head_changed"],
+        "pre_git_head": changes["pre_git_head"],
+        "post_git_head": changes["post_git_head"],
+        "change_severity": severity,
+        "change_severity_basis": severity_basis,
+        "rollback_candidate": rollback_candidate,
+        "rollback_candidate_basis": rollback_candidate_basis,
+        "rollback_executed": False,
+        "execution_allowed": False,
+    }
+    stored = store_execution_change_record(root, record)
+    return {
+        "change_record_id": change_record_id,
+        "snapshot_id": snapshot_id,
+        "execution_result_id": execution_result_id,
+        "prompt_id": esa.get("prompt_id", ""),
+        "compared_at": compared_at,
+        "created": stored["stored"],
+        "path": stored.get("path"),
+        "errors": stored.get("errors", []),
+        "change_detected": changes["change_detected"],
+        "change_severity": severity,
+        "change_severity_basis": severity_basis,
+        "rollback_candidate": rollback_candidate,
+        "rollback_executed": False,
+        "execution_allowed": False,
+        "governance_boundaries": dict(_ECR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_CHANGE_RECORD_ADVISORY,
     }

@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69H" in output
+    assert "69J" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -52412,7 +52412,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -52518,7 +52518,7 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
     assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) > 6, (
         f"Map should have more than 6 entries after 65D, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
 
@@ -52526,7 +52526,7 @@ def test_65d_mapped_count_increases(tmp_path) -> None:
 def test_65d_map_has_38_entries(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, "
         f"got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
@@ -52757,7 +52757,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -53060,7 +53060,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -53333,7 +53333,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -53656,7 +53656,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -54059,7 +54059,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -54386,7 +54386,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
 
 
@@ -54589,7 +54589,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69I" in active_drift[0]
+    assert "69J" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54709,7 +54709,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
     assert branch["current_phase"] == "65J"
 
 
@@ -55178,7 +55178,7 @@ def test_64h_advisory_acknowledges_rule_006_limitation(tmp_path) -> None:
 def test_64h_adds_self_map_entry(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries (64H added objective_coverage_hardening, "
         f"66D added bootstrap_irg_visibility_integration, 66E added automated_irg_challenge_architecture, "
         f"67A added comparative_irg_challenge_architecture, 67B added challenge_impact_architecture, "
@@ -56682,7 +56682,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56942,7 +56942,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57254,7 +57254,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69I"
+    assert current["phase_id"] == "69J"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -58150,7 +58150,7 @@ def test_69d_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69d_map_count_is_60(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -58435,7 +58435,7 @@ def test_69e_no_subprocess_execution(tmp_path, monkeypatch) -> None:
 def test_69e_map_count_is_61(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -58830,7 +58830,7 @@ def test_69f_cli_list_by_prompt_json(tmp_path, monkeypatch, capsys) -> None:
 def test_69f_map_count_is_62(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -59002,7 +59002,7 @@ def test_69g_phase_is_active_in_roadmap(tmp_path) -> None:
 def test_69g_map_count_is_63(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -59643,7 +59643,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69I"
+    assert data["current_phase"]["phase_id"] == "69J"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -60048,7 +60048,7 @@ def test_69i_phase_is_active_in_roadmap(tmp_path) -> None:
 
     phase_69i = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69I"), None)
     assert phase_69i is not None, "69I must be registered in _CRI_KNOWN_PHASES"
-    assert phase_69i["status"] == "active"
+    assert phase_69i["status"] == "completed"
     assert phase_69i["predecessor"] == "69H"
     assert phase_69i["track_name"] == "execution_governance_activation"
 
@@ -60065,7 +60065,7 @@ def test_69i_69h_is_completed_in_roadmap(tmp_path) -> None:
 def test_69i_map_count_is_65(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
 
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 65, (
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) >= 65, (
         f"Expected 65 map entries after 69I, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
@@ -60518,3 +60518,713 @@ def test_69i_cli_list_open_json_output(tmp_path, monkeypatch) -> None:
     assert "open_reviews" in data
     assert "count" in data
     assert data["count"] >= 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 69J — Rollback-Aware Execution Design tests
+# ---------------------------------------------------------------------------
+
+
+def test_69j_phase_is_active_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    active = [p for p in _CRI_KNOWN_PHASES if p["status"] == "active"]
+    phase_ids = [p["phase_id"] for p in active]
+    assert "69J" in phase_ids
+
+
+def test_69j_69i_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69I"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "69J"
+
+
+def test_69j_map_count_is_66(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 66, (
+        f"Expected 66 map entries after 69J, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    )
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "rollback_aware_execution_detection"),
+        None,
+    )
+    assert entry is not None, "rollback_aware_execution_detection must be in _SRG_CAPABILITY_OBJECTIVE_MAP"
+
+
+def test_69j_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c["implemented_phase"] == "69J"),
+        None,
+    )
+    assert cap is not None
+    assert cap["capability_domain"] == "execution_governance"
+    assert "execution-snapshot" in cap["introduced_commands"]
+    assert "execution-change" in cap["introduced_commands"]
+
+
+def test_69j_esa_constants_defined(tmp_path) -> None:
+    from pcae.core.agent import (
+        _ESA_PHASE_ID, _ESA_STORE_DIR, _ESA_VERSION,
+        _ESA_GOVERNANCE_BOUNDARIES, EXECUTION_SNAPSHOT_ADVISORY,
+    )
+    assert _ESA_PHASE_ID == "69J"
+    assert "execution-snapshots" in str(_ESA_STORE_DIR)
+    assert _ESA_VERSION == "1.0"
+    assert _ESA_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _ESA_GOVERNANCE_BOUNDARIES["rollback_executed"] is False
+    assert _ESA_GOVERNANCE_BOUNDARIES["snapshot_creation_is_not_execution"] is True
+    assert "execution_allowed=False" in EXECUTION_SNAPSHOT_ADVISORY
+
+
+def test_69j_ecr_constants_defined(tmp_path) -> None:
+    from pcae.core.agent import (
+        _ECR_PHASE_ID, _ECR_STORE_DIR, _ECR_VERSION,
+        _ECR_SEVERITY_VALUES, _ECR_ROLLBACK_CANDIDATE_THRESHOLD,
+        _ECR_GOVERNANCE_BOUNDARIES, EXECUTION_CHANGE_RECORD_ADVISORY,
+    )
+    assert _ECR_PHASE_ID == "69J"
+    assert "execution-changes" in str(_ECR_STORE_DIR)
+    assert _ECR_VERSION == "1.0"
+    assert _ECR_SEVERITY_VALUES == frozenset({"none", "low", "medium", "high", "critical"})
+    assert _ECR_ROLLBACK_CANDIDATE_THRESHOLD == frozenset({"medium", "high", "critical"})
+    assert _ECR_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _ECR_GOVERNANCE_BOUNDARIES["rollback_executed"] is False
+    assert _ECR_GOVERNANCE_BOUNDARIES["automatic_rollback_allowed"] is False
+    assert _ECR_GOVERNANCE_BOUNDARIES["git_reset_not_performed"] is True
+    assert _ECR_GOVERNANCE_BOUNDARIES["git_revert_not_performed"] is True
+    assert "rollback_executed=False" in EXECUTION_CHANGE_RECORD_ADVISORY
+
+
+def test_69j_esa_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _ESA_GOVERNANCE_BOUNDARIES
+    required = {
+        "snapshot_creation_is_not_execution",
+        "snapshot_creation_does_not_authorize_execution",
+        "snapshot_is_not_complete_filesystem_record",
+        "git_status_absence_is_not_guarantee_of_no_side_effects",
+        "snapshot_scope_is_git_working_tree_only",
+        "pcae_governance_files_excluded_from_scope",
+        "file_contents_not_captured",
+        "execution_allowed",
+        "rollback_executed",
+    }
+    assert required.issubset(set(_ESA_GOVERNANCE_BOUNDARIES.keys()))
+
+
+def test_69j_ecr_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _ECR_GOVERNANCE_BOUNDARIES
+    required = {
+        "change_detection_is_not_execution",
+        "change_detection_is_not_rollback",
+        "rollback_candidate_is_not_rollback",
+        "rollback_candidate_does_not_authorize_rollback",
+        "automatic_rollback_allowed",
+        "execution_allowed",
+        "rollback_executed",
+        "git_reset_not_performed",
+        "git_revert_not_performed",
+        "file_restoration_not_performed",
+        "branch_manipulation_not_performed",
+        "commit_creation_not_performed",
+        "push_not_performed",
+    }
+    assert required.issubset(set(_ECR_GOVERNANCE_BOUNDARIES.keys()))
+
+
+def test_69j_snapshot_creation_success(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_snapshot, lookup_execution_snapshot
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+
+    def _mock_git_state(r):
+        return {
+            "git_available": True,
+            "git_head": "abc123def456",
+            "git_branch": "main",
+            "git_status_porcelain": "",
+            "tracked_modified": [],
+            "tracked_added": [],
+            "tracked_deleted": [],
+            "staged_changes": [],
+            "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_state)
+    result = build_execution_snapshot(root, "prompt-01", "auth-01", "ear-01")
+    assert result["created"] is True
+    assert result["execution_allowed"] is False
+    assert result["rollback_executed"] is False
+    assert result["git_available"] is True
+
+    stored = lookup_execution_snapshot(root, result["snapshot_id"])
+    assert stored is not None
+    assert stored["prompt_id"] == "prompt-01"
+    assert stored["snapshot_type"] == "pre_execution"
+    assert stored["execution_allowed"] is False
+    assert stored["rollback_executed"] is False
+
+
+def test_69j_snapshot_git_unavailable_partial_stored(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_snapshot
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+
+    def _mock_git_unavailable(r):
+        return {
+            "git_available": False,
+            "git_head": None,
+            "git_branch": None,
+            "git_status_porcelain": None,
+            "tracked_modified": [],
+            "tracked_added": [],
+            "tracked_deleted": [],
+            "staged_changes": [],
+            "untracked_files": [],
+            "capture_errors": ["git_not_available"],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_unavailable)
+    result = build_execution_snapshot(root, "prompt-02", "auth-02", "ear-02")
+    assert result["created"] is True
+    assert result["git_available"] is False
+    assert "git_not_available" in result["capture_errors"]
+    assert result["execution_allowed"] is False
+
+
+def test_69j_snapshot_lookup_missing_returns_none(tmp_path) -> None:
+    from pcae.core.agent import lookup_execution_snapshot
+    from pcae.core.paths import HarnessPath
+    assert lookup_execution_snapshot(HarnessPath(tmp_path), "esa-nonexistent-xxx") is None
+
+
+def test_69j_snapshot_lookup_for_prompt(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_snapshot, lookup_execution_snapshots_for_prompt
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+
+    def _mock_git(r):
+        return {
+            "git_available": True, "git_head": "abc", "git_branch": "main",
+            "git_status_porcelain": "", "tracked_modified": [], "tracked_added": [],
+            "tracked_deleted": [], "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git)
+    build_execution_snapshot(root, "p-find-me", "auth-x", "ear-x")
+    results = lookup_execution_snapshots_for_prompt(root, "p-find-me")
+    assert len(results) == 1
+    assert results[0]["prompt_id"] == "p-find-me"
+
+
+def _make_esa_and_err_for_ecr(tmp_path, monkeypatch, *, post_git_state: dict):
+    """Helper: create ESA and ERR, return (root, snapshot_id, result_id)."""
+    from pcae.core.agent import (
+        build_execution_snapshot, store_execution_result,
+        _ESA_VERSION,
+    )
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+
+    def _mock_pre_git(r):
+        return {
+            "git_available": True, "git_head": "HEAD-BEFORE",
+            "git_branch": "main", "git_status_porcelain": "",
+            "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+            "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_pre_git)
+    snap = build_execution_snapshot(root, "p-ecr", "auth-ecr", "ear-ecr")
+    snapshot_id = snap["snapshot_id"]
+
+    # Store a minimal ERR
+    err_record = {
+        "execution_result_id": "err-ecr-20260615T120000",
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "p-ecr",
+        "authorization_id": "auth-ecr",
+        "audit_id": "ear-ecr",
+        "agent_id": "claude-local",
+        "agent_count": 1,
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt>"],
+        "return_code": 0,
+        "stdout": "done",
+        "stderr": "",
+        "capture_status": "complete",
+        "timed_out": False,
+        "execution_status": "success",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": "2026-06-15T12:00:00+00:00",
+        "execution_duration_ms": 100,
+        "sandbox_mode": "none",
+        "shell_used": False,
+    }
+    store_execution_result(root, err_record)
+    result_id = err_record["execution_result_id"]
+
+    # Now patch for post-execution git state
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", lambda r: post_git_state)
+
+    return root, snapshot_id, result_id
+
+
+def test_69j_no_change_detection(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": "",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["created"] is True
+    assert ecr["change_detected"] is False
+    assert ecr["change_severity"] == "none"
+    assert ecr["rollback_candidate"] is False
+    assert ecr["rollback_executed"] is False
+    assert ecr["execution_allowed"] is False
+
+
+def test_69j_modified_files_detected(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": " M src/foo.py\n",
+        "tracked_modified": ["src/foo.py"], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["change_detected"] is True
+    assert ecr["change_severity"] == "medium"
+    assert ecr["rollback_candidate"] is True
+    assert ecr["rollback_executed"] is False
+
+
+def test_69j_added_files_detected(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": " A new_file.py\n",
+        "tracked_modified": [], "tracked_added": ["new_file.py"], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["change_detected"] is True
+    assert ecr["change_severity"] == "medium"
+    assert ecr["rollback_candidate"] is True
+
+
+def test_69j_deleted_files_detected(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": " D gone.py\n",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": ["gone.py"],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["change_detected"] is True
+    assert ecr["change_severity"] == "medium"
+    assert ecr["rollback_candidate"] is True
+
+
+def test_69j_untracked_added_detected(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": "?? temp.log\n",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": ["temp.log"], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["change_detected"] is True
+    assert ecr["change_severity"] == "low"
+    assert ecr["rollback_candidate"] is False
+
+
+def test_69j_git_head_changed_detected(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-AFTER-COMMIT",
+        "git_branch": "main", "git_status_porcelain": "",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert ecr["change_detected"] is True
+    assert ecr["change_severity"] == "critical"
+    assert ecr["rollback_candidate"] is True
+    assert ecr["rollback_executed"] is False
+
+
+def test_69j_severity_none(tmp_path) -> None:
+    from pcae.core.agent import _ecr_classify_severity
+    changes = {
+        "change_detected": False,
+        "modified_files": [], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+        "git_head_changed": False, "post_staged_changes": [],
+    }
+    severity, basis = _ecr_classify_severity(changes)
+    assert severity == "none"
+    assert "no_changes" in basis
+
+
+def test_69j_severity_low_untracked_only(tmp_path) -> None:
+    from pcae.core.agent import _ecr_classify_severity
+    changes = {
+        "change_detected": True,
+        "modified_files": [], "added_files": [], "deleted_files": [],
+        "untracked_added": ["tmp.log"], "untracked_removed": [],
+        "git_head_changed": False, "post_staged_changes": [],
+    }
+    severity, basis = _ecr_classify_severity(changes)
+    assert severity == "low"
+
+
+def test_69j_severity_medium_tracked_modified(tmp_path) -> None:
+    from pcae.core.agent import _ecr_classify_severity
+    changes = {
+        "change_detected": True,
+        "modified_files": ["src/foo.py"], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+        "git_head_changed": False, "post_staged_changes": [],
+    }
+    severity, basis = _ecr_classify_severity(changes)
+    assert severity == "medium"
+
+
+def test_69j_severity_high_staged_changes(tmp_path) -> None:
+    from pcae.core.agent import _ecr_classify_severity
+    changes = {
+        "change_detected": True,
+        "modified_files": [], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+        "git_head_changed": False,
+        "post_staged_changes": ["src/bar.py"],
+    }
+    severity, basis = _ecr_classify_severity(changes)
+    assert severity == "high"
+
+
+def test_69j_severity_critical_git_head_changed(tmp_path) -> None:
+    from pcae.core.agent import _ecr_classify_severity
+    changes = {
+        "change_detected": True,
+        "modified_files": [], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+        "git_head_changed": True, "post_staged_changes": [],
+    }
+    severity, basis = _ecr_classify_severity(changes)
+    assert severity == "critical"
+    assert "git_head_changed" in basis
+
+
+def test_69j_rollback_candidate_true_on_medium(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": " M x.py\n",
+        "tracked_modified": ["x.py"], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+    assert ecr["rollback_candidate"] is True
+    assert ecr["change_severity"] == "medium"
+
+
+def test_69j_rollback_candidate_false_on_low(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": "?? tmp.log\n",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": ["tmp.log"], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+    assert ecr["rollback_candidate"] is False
+    assert ecr["change_severity"] == "low"
+
+
+def test_69j_rollback_candidate_false_on_none(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-BEFORE",
+        "git_branch": "main", "git_status_porcelain": "",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+    assert ecr["rollback_candidate"] is False
+    assert ecr["change_severity"] == "none"
+
+
+def test_69j_rollback_candidate_is_not_rollback_authorization(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record, _ECR_GOVERNANCE_BOUNDARIES
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-AFTER",
+        "git_branch": "main", "git_status_porcelain": "",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+
+    assert _ECR_GOVERNANCE_BOUNDARIES["rollback_candidate_is_not_rollback"] is True
+    assert _ECR_GOVERNANCE_BOUNDARIES["rollback_candidate_does_not_authorize_rollback"] is True
+    assert ecr["rollback_executed"] is False
+    assert ecr["execution_allowed"] is False
+
+
+def test_69j_no_git_reset_in_ecr(tmp_path) -> None:
+    from pcae.core.agent import _ECR_GOVERNANCE_BOUNDARIES
+    assert _ECR_GOVERNANCE_BOUNDARIES["git_reset_not_performed"] is True
+
+
+def test_69j_no_git_revert_in_ecr(tmp_path) -> None:
+    from pcae.core.agent import _ECR_GOVERNANCE_BOUNDARIES
+    assert _ECR_GOVERNANCE_BOUNDARIES["git_revert_not_performed"] is True
+
+
+def test_69j_list_candidates_filters_correctly(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record, list_execution_change_candidates
+
+    # Create one candidate (medium severity) and one non-candidate (low severity)
+    # post git_head must match pre_git "HEAD-BEFORE" to avoid critical classification
+    for i, (untracked, modified) in enumerate([
+        ([], ["changed.py"]),   # medium → candidate
+        (["tmp.log"], []),       # low → not candidate
+    ]):
+        post_git = {
+            "git_available": True, "git_head": "HEAD-BEFORE",
+            "git_branch": "main", "git_status_porcelain": "",
+            "tracked_modified": modified, "tracked_added": [], "tracked_deleted": [],
+            "staged_changes": [], "untracked_files": untracked, "capture_errors": [],
+        }
+        root, snapshot_id, result_id = _make_esa_and_err_for_ecr(
+            tmp_path / str(i), monkeypatch, post_git_state=post_git
+        )
+        build_execution_change_record(root, snapshot_id, result_id)
+
+    # Check in each directory
+    from pcae.core.paths import HarnessPath
+    candidates_medium = list_execution_change_candidates(HarnessPath(tmp_path / "0"))
+    candidates_low = list_execution_change_candidates(HarnessPath(tmp_path / "1"))
+    assert len(candidates_medium) == 1
+    assert len(candidates_low) == 0
+
+
+def test_69j_ecr_esa_not_found_returns_error(tmp_path) -> None:
+    from pcae.core.agent import build_execution_change_record
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+    result = build_execution_change_record(root, "esa-nonexistent", "err-nonexistent")
+    assert result["created"] is False
+    assert result["error"] == "esa_not_found"
+    assert result["rollback_executed"] is False
+    assert result["execution_allowed"] is False
+
+
+def test_69j_ecr_err_not_found_returns_error(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_snapshot, build_execution_change_record
+    from pcae.core.paths import HarnessPath
+
+    root = HarnessPath(tmp_path)
+
+    def _mock_git(r):
+        return {
+            "git_available": True, "git_head": "abc", "git_branch": "main",
+            "git_status_porcelain": "", "tracked_modified": [], "tracked_added": [],
+            "tracked_deleted": [], "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git)
+    snap = build_execution_snapshot(root, "p-err-missing", "auth-x", "ear-x")
+    result = build_execution_change_record(root, snap["snapshot_id"], "err-does-not-exist")
+    assert result["created"] is False
+    assert result["error"] == "err_not_found"
+    assert result["rollback_executed"] is False
+
+
+def test_69j_execution_allowed_always_false_in_esa(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_snapshot, _ESA_GOVERNANCE_BOUNDARIES
+    from pcae.core.paths import HarnessPath
+
+    def _mock_git(r):
+        return {
+            "git_available": True, "git_head": "abc", "git_branch": "main",
+            "git_status_porcelain": "", "tracked_modified": [], "tracked_added": [],
+            "tracked_deleted": [], "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git)
+    result = build_execution_snapshot(HarnessPath(tmp_path), "p-x", "auth-x", "ear-x")
+    assert result["execution_allowed"] is False
+    assert _ESA_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+
+
+def test_69j_rollback_executed_always_false_in_ecr(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import build_execution_change_record, _ECR_GOVERNANCE_BOUNDARIES
+
+    post_git = {
+        "git_available": True, "git_head": "HEAD-AFTER",
+        "git_branch": "main", "git_status_porcelain": "",
+        "tracked_modified": [], "tracked_added": [], "tracked_deleted": [],
+        "staged_changes": [], "untracked_files": [], "capture_errors": [],
+    }
+    root, snapshot_id, result_id = _make_esa_and_err_for_ecr(tmp_path, monkeypatch, post_git_state=post_git)
+    ecr = build_execution_change_record(root, snapshot_id, result_id)
+    assert ecr["rollback_executed"] is False
+    assert _ECR_GOVERNANCE_BOUNDARIES["rollback_executed"] is False
+
+
+def test_69j_cli_snapshot_create_json(tmp_path, monkeypatch) -> None:
+    import sys
+    from io import StringIO
+    from pcae.cli import main
+
+    monkeypatch.chdir(tmp_path)
+
+    def _mock_git(r):
+        return {
+            "git_available": True, "git_head": "abc123", "git_branch": "main",
+            "git_status_porcelain": "", "tracked_modified": [], "tracked_added": [],
+            "tracked_deleted": [], "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git)
+    captured = StringIO()
+    monkeypatch.setattr(sys, "stdout", captured)
+    ret = main([
+        "execution-snapshot", "create",
+        "--prompt-id", "p-cli-test",
+        "--authorization-id", "auth-cli",
+        "--audit-id", "ear-cli",
+        "--json",
+    ])
+    assert ret == 0
+    data = json.loads(captured.getvalue())
+    assert data["created"] is True
+    assert data["execution_allowed"] is False
+    assert data["rollback_executed"] is False
+
+
+def test_69j_cli_change_compare_json(tmp_path, monkeypatch) -> None:
+    import sys
+    from io import StringIO
+    from pcae.cli import main
+    from pcae.core.agent import store_execution_result
+    from pcae.core.paths import HarnessPath
+
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+
+    # Create ESA and ERR first
+    def _mock_pre(r):
+        return {
+            "git_available": True, "git_head": "abc", "git_branch": "main",
+            "git_status_porcelain": "", "tracked_modified": [], "tracked_added": [],
+            "tracked_deleted": [], "staged_changes": [], "untracked_files": [],
+            "capture_errors": [],
+        }
+
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_pre)
+    from pcae.core.agent import build_execution_snapshot
+    snap = build_execution_snapshot(root, "p-compare", "auth-compare", "ear-compare")
+
+    err_record = {
+        "execution_result_id": "err-compare-20260615T130000",
+        "result_type": "readonly_execution",
+        "err_version": "1.0",
+        "prompt_id": "p-compare",
+        "authorization_id": "auth-compare",
+        "audit_id": "ear-compare",
+        "agent_id": "claude-local",
+        "agent_count": 1,
+        "mode": "read_only",
+        "command_form": ["claude", "-p", "<prompt>"],
+        "return_code": 0,
+        "stdout": "ok",
+        "stderr": "",
+        "capture_status": "complete",
+        "timed_out": False,
+        "execution_status": "success",
+        "execution_allowed": True,
+        "execution_occurred": True,
+        "executed_at": "2026-06-15T13:00:00+00:00",
+        "execution_duration_ms": 50,
+        "sandbox_mode": "none",
+        "shell_used": False,
+    }
+    store_execution_result(root, err_record)
+
+    captured = StringIO()
+    monkeypatch.setattr(sys, "stdout", captured)
+    ret = main([
+        "execution-change", "compare",
+        "--snapshot-id", snap["snapshot_id"],
+        "--result-id", err_record["execution_result_id"],
+        "--json",
+    ])
+    assert ret == 0
+    data = json.loads(captured.getvalue())
+    assert data["created"] is True
+    assert data["rollback_executed"] is False
+    assert data["execution_allowed"] is False
+
+
+def test_69j_cli_list_candidates_json(tmp_path, monkeypatch) -> None:
+    import sys
+    from io import StringIO
+    from pcae.cli import main
+
+    monkeypatch.chdir(tmp_path)
+    captured = StringIO()
+    monkeypatch.setattr(sys, "stdout", captured)
+    ret = main(["execution-change", "list-candidates", "--json"])
+    assert ret == 0
+    data = json.loads(captured.getvalue())
+    assert "rollback_candidates" in data
+    assert "count" in data
+    assert data["count"] == 0
