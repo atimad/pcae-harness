@@ -4,6 +4,30 @@
 
 Phase 69O: Promotion Rollback Execution (BR-005 Execution Governance Activation).
 
+## Milestone: Governed Rollback Achieved
+
+PCAE can now reverse governed root mutations through explicit human invocation
+using evidence captured during promotion, completing the BR-005 execution
+governance lifecycle.
+
+`pcae rollback --per-id <id>` reverses a specific PromotionExecutionRecord's
+successfully-written files using the originating ECP's `before_content`/
+`before_hash`/`after_hash` evidence — never user-specified paths, never a
+range of PERs. Rollback is gated on `PER.rollback_payload_available=True` and
+a terminal PER status; without that evidence it is refused outright. It is
+idempotent (re-running it against an already-reverted PER is a safe no-op via
+`already_reverted` outcomes), refuses to proceed if root has diverged since
+promotion, and is created with `status="in_progress"` before the first
+restore and persisted after every file, so an interrupted rollback is always
+a stored, inspectable record (`pcae rollback-execution mark-interrupted` for
+bookkeeping only). There is no mechanism to roll back a rollback.
+
+With 69O, the full BR-005 lifecycle is in place end to end: sandboxed
+execution (69L) → evidence capture (69M ECP) → human review (69M EPR) →
+governed promotion (69N PER) → governed rollback (69O RER), each step gated
+on an explicit human authorization and each step leaving a durable,
+never-silent record.
+
 ## Milestone: Governed Root Mutation Achieved
 
 As of Phase 69N, PCAE can:
