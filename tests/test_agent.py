@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69M" in output
+    assert "69N" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -52413,7 +52413,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -52758,7 +52758,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -53061,7 +53061,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -53334,7 +53334,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -53657,7 +53657,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -54060,7 +54060,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -54387,7 +54387,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
 
 
@@ -54590,7 +54590,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69N" in active_drift[0]
+    assert "69O" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54710,7 +54710,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
     assert branch["current_phase"] == "65J"
 
 
@@ -56683,7 +56683,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56943,7 +56943,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57255,7 +57255,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69N"
+    assert current["phase_id"] == "69O"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -59697,7 +59697,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69N"
+    assert data["current_phase"]["phase_id"] == "69O"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -61392,8 +61392,8 @@ def test_69k_69j_is_completed_in_roadmap(tmp_path) -> None:
 
 def test_69k_map_count_is_67(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 70, (
-        f"Expected 70 map entries after 69N, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 71, (
+        f"Expected 71 map entries after 69O, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "automatic_snapshot_integration"),
@@ -62289,7 +62289,7 @@ def test_69m_in_capability_map(tmp_path) -> None:
 def test_69m_branch_registry_current_phase(tmp_path) -> None:
     from pcae.core.agent import _SRG_BRANCH_REGISTRY
     branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
-    assert branch["current_phase"] == "69N"
+    assert branch["current_phase"] == "69O"
 
 
 def test_69m_prompt_profiles_recommended(tmp_path) -> None:
@@ -63083,8 +63083,9 @@ def test_69n_phase_registered_in_roadmap(tmp_path) -> None:
     from pcae.core.agent import _CRI_KNOWN_PHASES
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69N"), None)
     assert phase is not None, "69N must be registered in _CRI_KNOWN_PHASES"
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "69M"
+    assert phase["successor"] == "69O"
     assert phase["track_name"] == "execution_governance_activation"
 
 
@@ -63125,14 +63126,14 @@ def test_69n_in_capability_map(tmp_path) -> None:
 def test_69n_branch_registry_current_phase(tmp_path) -> None:
     from pcae.core.agent import _SRG_BRANCH_REGISTRY
     branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
-    assert branch["current_phase"] == "69N"
+    assert branch["current_phase"] == "69O"
 
 
 def test_69n_prompt_profiles_recommended(tmp_path) -> None:
     from pcae.core.agent import _PRH_PROMPT_PROFILES
     profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69N"]
     assert len(profiles) == 3
-    assert all(p["prompt_status"] == "recommended" for p in profiles)
+    assert all(p["prompt_status"] == "historical" for p in profiles)
 
 
 def test_69n_69m_prompt_profiles_historical(tmp_path) -> None:
@@ -64050,3 +64051,910 @@ def test_69n_ten_slr_entries_present(tmp_path) -> None:
     assert len(debt) == 10, f"SLR-69N-001 must have 10 roadmap_debt entries, got {len(debt)}"
     for i in range(1, 11):
         assert any(f"SLR-69N-{i:03d}" in d for d in debt), f"SLR-69N-{i:03d} missing from roadmap_debt"
+
+
+# ---------------------------------------------------------------------------
+# Phase 69O -- Promotion Rollback Execution
+# ---------------------------------------------------------------------------
+
+def _make_rer_test_per(
+    root, per_id="per-rertest", ecp_id="ecp-pertest", epr_id="epr-pertest",
+    prompt_id="p-pertest", status="completed", rollback_payload_available=True,
+    file_results=None,
+):
+    from pcae.core.agent import store_promotion_execution_record
+    results = file_results if file_results is not None else []
+    record = {
+        "per_id": per_id, "per_version": "1.0", "epr_id": epr_id, "ecp_id": ecp_id,
+        "prompt_id": prompt_id, "started_at": "2026-06-16T00:00:00+00:00",
+        "divergence_check": {}, "file_plan": [r["path"] for r in results],
+        "file_results": results, "status": status,
+        "completed_at": "2026-06-16T00:00:01+00:00" if status != "in_progress" else None,
+        "promotion_executed": any(r.get("outcome") == "success" for r in results),
+        "rollback_payload_available": rollback_payload_available,
+        "execution_allowed": False, "rollback_executed": False,
+    }
+    store_promotion_execution_record(root, record)
+    return record
+
+
+def _rer_base_record(**overrides) -> dict:
+    base = {
+        "rer_id": "rer-base", "rer_version": "1.0", "per_id": "per-1", "ecp_id": "ecp-1",
+        "epr_id": "epr-1", "prompt_id": "p", "started_at": "2026-06-16T00:00:00+00:00",
+        "divergence_check": {}, "file_plan": [], "file_results": [], "status": "in_progress",
+        "completed_at": None, "rollback_executed": False, "execution_allowed": False,
+    }
+    base.update(overrides)
+    return base
+
+
+# --- Registry registration --------------------------------------------------
+
+def test_69o_phase_registered_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69O"), None)
+    assert phase is not None, "69O must be registered in _CRI_KNOWN_PHASES"
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "69N"
+    assert phase["track_name"] == "execution_governance_activation"
+
+
+def test_69o_69n_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69N"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "69O"
+
+
+def test_69o_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69O"), None,
+    )
+    assert cap is not None, "69O capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_name"] == "Promotion Rollback Execution"
+    assert cap["capability_domain"] == "execution_governance"
+
+
+def test_69o_capability_registered_in_cri(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69O"), None,
+    )
+    assert cap is not None, "69O capability must be in _CRI_KNOWN_CAPABILITIES"
+    assert "SLR-69O-001" in cap["contribution"]
+
+
+def test_69o_in_capability_map(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "promotion_rollback_execution"),
+        None,
+    )
+    assert entry is not None
+    assert "OBJ-002" in entry["objective_ids"]
+    assert "OBJ-003" in entry["objective_ids"]
+
+
+def test_69o_branch_registry_current_phase(tmp_path) -> None:
+    from pcae.core.agent import _SRG_BRANCH_REGISTRY
+    branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
+    assert branch["current_phase"] == "69O"
+
+
+def test_69o_prompt_profiles_recommended(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69O"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "recommended" for p in profiles)
+
+
+def test_69o_69n_prompt_profiles_historical(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69N"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "historical" for p in profiles)
+
+
+# --- Governance boundaries ---------------------------------------------------
+
+def test_69o_rer_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _RER_GOVERNANCE_BOUNDARIES
+    required = [
+        "automatic_rollback_allowed", "rollback_requires_explicit_human_command",
+        "rollback_gated_on_per_status_and_rollback_payload_available",
+        "root_mutation_only_via_explicit_rollback_command",
+        "rollback_applies_only_to_governed_promotions_recorded_by_per",
+        "rollback_cannot_operate_without_evidence",
+        "file_plan_derived_from_per_not_user_specified",
+        "already_applied_per_entries_excluded_from_rollback_plan",
+        "rollback_of_sandbox_execution_out_of_scope", "rollback_of_rollback_forbidden",
+        "user_specified_paths_not_supported", "per_file_hash_comparison_is_authoritative",
+        "any_per_file_conflict_blocks_entire_attempt", "conflict_blocks_before_any_file_is_touched",
+        "override_divergence_not_supported", "already_reverted_is_not_an_error",
+        "already_reverted_paths_are_skipped_not_rewritten", "resume_command_does_not_exist",
+        "reinvocation_of_rollback_is_the_only_recovery_path", "rollback_is_idempotent",
+        "partial_rollback_is_valid_terminal_state", "partial_rollback_is_not_automatically_retried",
+        "rer_created_before_any_file_write", "rer_persisted_after_every_file",
+        "concurrent_rollback_for_same_per_forbidden", "mark_interrupted_does_not_write_files",
+        "mark_interrupted_only_transitions_in_progress_to_partial",
+        "rollback_executed_is_dynamic_for_rer_only",
+        "rollback_executed_reflects_actual_restores_this_run",
+        "already_reverted_alone_does_not_set_rollback_executed",
+        "git_commit_forbidden", "git_push_forbidden", "multi_per_batch_rollback_forbidden",
+        "execution_allowed",
+    ]
+    for key in required:
+        assert key in _RER_GOVERNANCE_BOUNDARIES, f"missing boundary: {key}"
+    assert _RER_GOVERNANCE_BOUNDARIES["automatic_rollback_allowed"] is False
+    assert _RER_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _RER_GOVERNANCE_BOUNDARIES["rollback_of_rollback_forbidden"] is True
+    assert _RER_GOVERNANCE_BOUNDARIES["resume_command_does_not_exist"] is True
+
+
+def test_69o_advisory_present(tmp_path) -> None:
+    from pcae.core.agent import EXECUTION_ROLLBACK_RECORD_ADVISORY
+    assert isinstance(EXECUTION_ROLLBACK_RECORD_ADVISORY, str)
+    assert "already_reverted" in EXECUTION_ROLLBACK_RECORD_ADVISORY
+    assert "no --resume" in EXECUTION_ROLLBACK_RECORD_ADVISORY
+    assert "rollback_of_rollback_forbidden=True" in EXECUTION_ROLLBACK_RECORD_ADVISORY
+
+
+def test_69o_no_rollback_of_rollback_entry_point(tmp_path) -> None:
+    import inspect
+    from pcae.core.agent import build_rollback_execution
+    sig = inspect.signature(build_rollback_execution)
+    assert "rer_id" not in sig.parameters
+    assert "per_id" in sig.parameters
+
+
+# --- _rer_check_divergence: inverted three-way outcome -----------------------
+
+def test_69o_divergence_pending_when_matches_after_hash(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "f.txt").write_text("promoted content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"promoted content").hexdigest()
+    ecp = {"file_entries": [
+        {"path": "f.txt", "before_hash": "deadbeef", "after_hash": after_hash},
+    ]}
+    result = _rer_check_divergence(root, ecp, ["f.txt"])
+    assert result["file_checks"][0]["status"] == "pending"
+    assert result["blocking"] is False
+
+
+def test_69o_divergence_already_reverted_when_matches_before_hash(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "f.txt").write_text("original content")
+    root = HarnessPath(root_dir)
+    before_hash = hashlib.sha256(b"original content").hexdigest()
+    ecp = {"file_entries": [
+        {"path": "f.txt", "before_hash": before_hash, "after_hash": "afterhash"},
+    ]}
+    result = _rer_check_divergence(root, ecp, ["f.txt"])
+    assert result["file_checks"][0]["status"] == "already_reverted"
+    assert result["blocking"] is False
+
+
+def test_69o_divergence_conflict_when_matches_neither(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "f.txt").write_text("independently edited")
+    root = HarnessPath(root_dir)
+    ecp = {"file_entries": [
+        {"path": "f.txt", "before_hash": "before123", "after_hash": "after456"},
+    ]}
+    result = _rer_check_divergence(root, ecp, ["f.txt"])
+    assert result["file_checks"][0]["status"] == "conflict"
+    assert result["blocking"] is True
+    assert "f.txt" in result["blocking_paths"]
+
+
+def test_69o_divergence_missing_entry_is_conflict(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    root = HarnessPath(root_dir)
+    ecp = {"file_entries": []}
+    result = _rer_check_divergence(root, ecp, ["not_in_ecp.txt"])
+    assert result["file_checks"][0]["status"] == "conflict"
+    assert result["blocking"] is True
+
+
+def test_69o_divergence_added_file_pending_when_still_present(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "new.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    ecp = {"file_entries": [
+        {"path": "new.txt", "before_hash": None, "after_hash": after_hash},
+    ]}
+    result = _rer_check_divergence(root, ecp, ["new.txt"])
+    assert result["file_checks"][0]["status"] == "pending"
+
+
+def test_69o_divergence_added_file_already_reverted_when_absent(tmp_path) -> None:
+    from pcae.core.agent import _rer_check_divergence
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    root = HarnessPath(root_dir)
+    ecp = {"file_entries": [
+        {"path": "new.txt", "before_hash": None, "after_hash": "somehash"},
+    ]}
+    result = _rer_check_divergence(root, ecp, ["new.txt"])
+    assert result["file_checks"][0]["status"] == "already_reverted"
+
+
+# --- RER validate / store / lookup -------------------------------------------
+
+def test_69o_rer_validate_rejects_missing_fields(tmp_path) -> None:
+    from pcae.core.agent import _rer_validate
+    errors = _rer_validate({})
+    assert "missing_rer_id" in errors
+    assert "missing_per_id" in errors
+    assert "invalid_status" in errors
+
+
+def test_69o_rer_validate_rejects_invalid_file_outcome(tmp_path) -> None:
+    from pcae.core.agent import _rer_validate
+    record = _rer_base_record(file_results=[{"outcome": "bogus"}])
+    errors = _rer_validate(record)
+    assert "invalid_file_outcome" in errors
+
+
+def test_69o_store_and_lookup_rer(tmp_path) -> None:
+    from pcae.core.agent import store_rollback_execution_record, lookup_rollback_execution_record
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    result = store_rollback_execution_record(root, _rer_base_record(rer_id="rer-test-1"))
+    assert result["stored"] is True
+    looked_up = lookup_rollback_execution_record(root, "rer-test-1")
+    assert looked_up is not None
+    assert looked_up["status"] == "in_progress"
+
+
+def test_69o_lookup_rer_not_found(tmp_path) -> None:
+    from pcae.core.agent import lookup_rollback_execution_record
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    assert lookup_rollback_execution_record(root, "nonexistent") is None
+
+
+def test_69o_list_rer_filters_by_per(tmp_path) -> None:
+    from pcae.core.agent import store_rollback_execution_record, list_rollback_execution_records
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    store_rollback_execution_record(root, _rer_base_record(rer_id="rer-a", per_id="per-a"))
+    store_rollback_execution_record(root, _rer_base_record(rer_id="rer-b", per_id="per-b"))
+    records = list_rollback_execution_records(root, "per-a")
+    assert len(records) == 1
+    assert records[0]["rer_id"] == "rer-a"
+    assert list_rollback_execution_records(root, "nonexistent") == []
+
+
+# --- build_rollback_execution: gates -------------------------------------------
+
+def test_69o_rollback_blocked_when_per_missing(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    result = build_rollback_execution(root, "nonexistent-per")
+    assert result["error"] == "per_not_found"
+    assert result["reverted"] is False
+
+
+def test_69o_rollback_blocked_when_per_status_in_progress(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_rer_test_per(root, status="in_progress")
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "per_status_not_eligible"
+
+
+def test_69o_rollback_blocked_when_per_status_failed(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_rer_test_per(root, status="failed")
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "per_status_not_eligible"
+
+
+def test_69o_rollback_blocked_when_per_status_aborted_divergence(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_rer_test_per(root, status="aborted_divergence")
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "per_status_not_eligible"
+
+
+def test_69o_rollback_blocked_when_rollback_payload_unavailable(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_rer_test_per(root, rollback_payload_available=False)
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "rollback_payload_unavailable"
+
+
+def test_69o_rollback_blocked_when_ecp_missing(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_rer_test_per(root, ecp_id="nonexistent-ecp")
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "ecp_not_found"
+
+
+def test_69o_rollback_blocked_when_already_in_progress(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution, store_rollback_execution_record
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _make_per_test_ecp(root, ecp_id="ecp-pertest")
+    _make_rer_test_per(root)
+    store_rollback_execution_record(root, _rer_base_record(
+        rer_id="rer-existing", per_id="per-rertest",
+    ))
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "rollback_already_in_progress"
+    assert result["rer_id"] == "rer-existing"
+
+
+def test_69o_rollback_no_mutation_when_per_missing(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    (root_dir / "existing.txt").write_text("untouched")
+    root = HarnessPath(root_dir)
+    build_rollback_execution(root, "nonexistent")
+    assert (root_dir / "existing.txt").read_text() == "untouched"
+
+
+# --- dry_run --------------------------------------------------------------
+
+def test_69o_rollback_dry_run_no_root_mutation(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "added.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest", dry_run=True)
+    assert result["dry_run"] is True
+    assert result["would_block"] is False
+    assert (root_dir / "added.txt").exists()
+
+
+def test_69o_rollback_dry_run_does_not_persist_rer(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution, list_rollback_execution_records
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "added.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+    build_rollback_execution(root, "per-rertest", dry_run=True)
+    assert list_rollback_execution_records(root) == []
+
+
+# --- real rollback: restore vs remove ----------------------------------------
+
+def test_69o_rollback_removes_added_file(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "added.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "completed"
+    assert result["reverted"] is True
+    assert not (root_dir / "added.txt").exists()
+    assert result["file_results"][0]["action"] == "remove"
+
+
+def test_69o_rollback_restores_modified_file(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "f.txt").write_text("modified content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"modified content").hexdigest()
+    before_hash = hashlib.sha256(b"original content").hexdigest()
+    entries = [{"path": "f.txt", "before_hash": before_hash, "after_hash": after_hash,
+                "before_content": "original content", "before_exists": True, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "f.txt", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "completed"
+    assert (root_dir / "f.txt").read_text() == "original content"
+    assert result["file_results"][0]["action"] == "restore"
+
+
+def test_69o_rollback_restores_deleted_file(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    root = HarnessPath(root_dir)
+    before_hash = hashlib.sha256(b"will be restored").hexdigest()
+    entries = [{"path": "deleted.txt", "before_hash": before_hash, "after_hash": None,
+                "before_content": "will be restored", "before_exists": True, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "deleted.txt", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "completed"
+    assert (root_dir / "deleted.txt").read_text() == "will be restored"
+    assert result["file_results"][0]["action"] == "restore"
+
+
+def test_69o_rollback_restores_binary_file(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    import base64
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    raw_after = b"\x00\x01after"
+    raw_before = b"\x00\x01before"
+    (root_dir / "img.bin").write_bytes(raw_after)
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(raw_after).hexdigest()
+    before_hash = hashlib.sha256(raw_before).hexdigest()
+    entries = [{"path": "img.bin", "before_hash": before_hash, "after_hash": after_hash,
+                "before_content": base64.b64encode(raw_before).decode("ascii"),
+                "before_exists": True, "binary": True}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "img.bin", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "completed"
+    assert (root_dir / "img.bin").read_bytes() == raw_before
+
+
+def test_69o_rollback_excludes_already_applied_per_entries(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "written.txt").write_text("written content")
+    (root_dir / "preexisting.txt").write_text("was already there before promotion ran")
+    root = HarnessPath(root_dir)
+    after_hash_written = hashlib.sha256(b"written content").hexdigest()
+    entries = [
+        {"path": "written.txt", "before_hash": None, "after_hash": after_hash_written,
+         "before_content": None, "before_exists": False, "binary": False},
+        {"path": "preexisting.txt", "before_hash": "irrelevant", "after_hash": "irrelevant2",
+         "before_content": "irrelevant", "before_exists": True, "binary": False},
+    ]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[
+        {"path": "written.txt", "outcome": "success"},
+        {"path": "preexisting.txt", "outcome": "already_applied"},
+    ])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "completed"
+    paths_touched = [r["path"] for r in result["file_results"]]
+    assert "preexisting.txt" not in paths_touched
+    assert "written.txt" in paths_touched
+    assert (root_dir / "preexisting.txt").read_text() == "was already there before promotion ran"
+
+
+# --- idempotent re-invocation -------------------------------------------------
+
+def test_69o_rollback_idempotent_on_reinvocation(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "added.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+
+    first = build_rollback_execution(root, "per-rertest")
+    assert first["status"] == "completed"
+    assert first["rollback_executed"] is True
+
+    second = build_rollback_execution(root, "per-rertest")
+    assert second["status"] == "completed"
+    assert second["rollback_executed"] is False
+    assert all(r["outcome"] == "already_reverted" for r in second["file_results"])
+
+
+# --- partial rollback (mid-run failure after clean divergence) --------------
+
+def test_69o_rollback_partial_when_one_file_fails(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "good.txt").write_text("added good")
+    (root_dir / "blocked.txt").mkdir()  # forces a write failure: path is a directory
+    root = HarnessPath(root_dir)
+    good_after_hash = hashlib.sha256(b"added good").hexdigest()
+    entries = [
+        {"path": "good.txt", "before_hash": None, "after_hash": good_after_hash,
+         "before_content": None, "before_exists": False, "binary": False},
+        {"path": "blocked.txt", "before_hash": "irrelevant", "after_hash": None,
+         "before_content": "restore me", "before_exists": True, "binary": False},
+    ]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[
+        {"path": "good.txt", "outcome": "success"},
+        {"path": "blocked.txt", "outcome": "success"},
+    ])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["status"] == "partial"
+    assert not (root_dir / "good.txt").exists()
+    outcomes = {r["path"]: r["outcome"] for r in result["file_results"]}
+    assert outcomes["good.txt"] == "success"
+    assert outcomes["blocked.txt"] == "failed"
+
+
+# --- conflict abort: blocks before any write ---------------------------------
+
+def test_69o_rollback_aborts_on_conflict_no_writes(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "conflict.txt").write_text("independently edited after promotion")
+    (root_dir / "clean.txt").write_text("still promoted")
+    root = HarnessPath(root_dir)
+    clean_after_hash = hashlib.sha256(b"still promoted").hexdigest()
+    entries = [
+        {"path": "conflict.txt", "before_hash": "before123", "after_hash": "after456",
+         "before_content": "old content", "before_exists": True, "binary": False},
+        {"path": "clean.txt", "before_hash": None, "after_hash": clean_after_hash,
+         "before_content": None, "before_exists": False, "binary": False},
+    ]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[
+        {"path": "conflict.txt", "outcome": "success"},
+        {"path": "clean.txt", "outcome": "success"},
+    ])
+    result = build_rollback_execution(root, "per-rertest")
+    assert result["error"] == "divergence_conflict"
+    assert "conflict.txt" in result["blocking_paths"]
+    assert (root_dir / "clean.txt").read_text() == "still promoted", (
+        "no file should be touched when any path conflicts"
+    )
+    assert (root_dir / "conflict.txt").read_text() == "independently edited after promotion"
+
+
+def test_69o_rollback_aborted_divergence_persists_rer(tmp_path) -> None:
+    from pcae.core.agent import build_rollback_execution, lookup_rollback_execution_record
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "conflict.txt").write_text("independently edited")
+    root = HarnessPath(root_dir)
+    entries = [{"path": "conflict.txt", "before_hash": "before123", "after_hash": "after456",
+                "before_content": "old", "before_exists": True, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "conflict.txt", "outcome": "success"}])
+    result = build_rollback_execution(root, "per-rertest")
+    rer = lookup_rollback_execution_record(root, result["rer_id"])
+    assert rer is not None
+    assert rer["status"] == "aborted_divergence"
+    assert rer["file_results"] == []
+
+
+# --- interruption ordering ----------------------------------------------------
+
+def test_69o_rer_created_in_progress_before_any_write(tmp_path, monkeypatch) -> None:
+    import pcae.core.agent as agent_module
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "added.txt").write_text("added content")
+    root = HarnessPath(root_dir)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+
+    seen_initial_in_progress = []
+    real_store = agent_module.store_rollback_execution_record
+
+    def _tracking_store(r, record):
+        if record["status"] == "in_progress" and record["file_results"] == []:
+            seen_initial_in_progress.append(True)
+        return real_store(r, record)
+
+    monkeypatch.setattr(agent_module, "store_rollback_execution_record", _tracking_store)
+    agent_module.build_rollback_execution(root, "per-rertest")
+    assert seen_initial_in_progress, "RER must be persisted in_progress with no file_results before first write"
+
+
+def test_69o_simulated_crash_leaves_in_progress_rer_detectable(tmp_path, monkeypatch) -> None:
+    import pcae.core.agent as agent_module
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    import pytest
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    _init_git_root(root_dir)
+    (root_dir / "first.txt").write_text("first added")
+    (root_dir / "second.txt").write_text("second added")
+    root = HarnessPath(root_dir)
+    first_hash = hashlib.sha256(b"first added").hexdigest()
+    second_hash = hashlib.sha256(b"second added").hexdigest()
+    entries = [
+        {"path": "first.txt", "before_hash": None, "after_hash": first_hash,
+         "before_content": None, "before_exists": False, "binary": False},
+        {"path": "second.txt", "before_hash": None, "after_hash": second_hash,
+         "before_content": None, "before_exists": False, "binary": False},
+    ]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[
+        {"path": "first.txt", "outcome": "success"},
+        {"path": "second.txt", "outcome": "success"},
+    ])
+
+    real_store = agent_module.store_rollback_execution_record
+
+    def _crash_after_first_file(r, record):
+        result = real_store(r, record)
+        if len(record.get("file_results", [])) == 1:
+            raise RuntimeError("simulated crash mid-rollback")
+        return result
+
+    monkeypatch.setattr(agent_module, "store_rollback_execution_record", _crash_after_first_file)
+    with pytest.raises(RuntimeError):
+        agent_module.build_rollback_execution(root, "per-rertest")
+
+    monkeypatch.undo()
+    records = agent_module.list_rollback_execution_records(root)
+    assert len(records) == 1
+    assert records[0]["status"] == "in_progress"
+    assert len(records[0]["file_results"]) == 1
+    assert not (root_dir / "first.txt").exists()
+    assert (root_dir / "second.txt").exists()
+
+
+# --- mark_rollback_execution_interrupted -------------------------------------
+
+def test_69o_mark_interrupted_transitions_to_partial(tmp_path) -> None:
+    from pcae.core.agent import (
+        store_rollback_execution_record, mark_rollback_execution_interrupted,
+        lookup_rollback_execution_record,
+    )
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    store_rollback_execution_record(root, _rer_base_record(rer_id="rer-interrupted"))
+    result = mark_rollback_execution_interrupted(root, "rer-interrupted")
+    assert result["updated"] is True
+    assert result["status"] == "partial"
+    stored = lookup_rollback_execution_record(root, "rer-interrupted")
+    assert stored["status"] == "partial"
+    assert stored["completed_at"] is not None
+
+
+def test_69o_mark_interrupted_does_not_write_files(tmp_path) -> None:
+    from pcae.core.agent import store_rollback_execution_record, mark_rollback_execution_interrupted
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    store_rollback_execution_record(root, _rer_base_record(
+        rer_id="rer-x", file_plan=["never_touched.txt"],
+    ))
+    mark_rollback_execution_interrupted(root, "rer-x")
+    assert not (root_dir / "never_touched.txt").exists()
+
+
+def test_69o_mark_interrupted_not_found(tmp_path) -> None:
+    from pcae.core.agent import mark_rollback_execution_interrupted
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    result = mark_rollback_execution_interrupted(root, "nonexistent")
+    assert result["error"] == "rer_not_found"
+    assert result["updated"] is False
+
+
+def test_69o_mark_interrupted_rejects_non_in_progress(tmp_path) -> None:
+    from pcae.core.agent import store_rollback_execution_record, mark_rollback_execution_interrupted
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    store_rollback_execution_record(root, _rer_base_record(
+        rer_id="rer-done", status="completed", completed_at="2026-06-16T00:00:01+00:00",
+        rollback_executed=True,
+    ))
+    result = mark_rollback_execution_interrupted(root, "rer-done")
+    assert result["error"] == "rer_not_in_progress"
+    assert result["updated"] is False
+
+
+# --- CLI -----------------------------------------------------------------------
+
+def test_69o_cli_rollback_dry_run(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    from pcae.core.paths import HarnessPath
+    import hashlib
+    monkeypatch.chdir(tmp_path)
+    _init_git_root(tmp_path)
+    (tmp_path / "added.txt").write_text("added content")
+    root = HarnessPath(tmp_path)
+    after_hash = hashlib.sha256(b"added content").hexdigest()
+    entries = [{"path": "added.txt", "before_hash": None, "after_hash": after_hash,
+                "before_content": None, "before_exists": False, "binary": False}]
+    _make_per_test_ecp(root, file_entries=entries)
+    _make_rer_test_per(root, file_results=[{"path": "added.txt", "outcome": "success"}])
+    rc = main(["rollback", "--per-id", "per-rertest", "--dry-run", "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["dry_run"] is True
+
+
+def test_69o_cli_rollback_execution_mark_interrupted(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    from pcae.core.agent import store_rollback_execution_record
+    from pcae.core.paths import HarnessPath
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+    store_rollback_execution_record(root, _rer_base_record(rer_id="rer-cli-test"))
+    rc = main(["rollback-execution", "mark-interrupted", "--rer-id", "rer-cli-test", "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["status"] == "partial"
+
+
+# --- full pipeline integration --------------------------------------------------
+
+def test_69o_full_pipeline_promote_then_rollback(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import (
+        invoke_readonly_execution, build_promotion_review, build_promotion_execution,
+        build_rollback_execution,
+    )
+    from pcae.core.paths import HarnessPath
+    import json as _json
+    import subprocess
+
+    monkeypatch.chdir(tmp_path)
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-q", "--allow-empty", "-m", "init"], cwd=tmp_path, check=True)
+    root = HarnessPath(tmp_path)
+
+    prompt_id = "p-69o-pipeline"
+    authorization_id = f"auth-{prompt_id}-20260616T163000"
+    audit_id = "ear-20260616T163000"
+
+    (tmp_path / ".pcae" / "approvals").mkdir(parents=True)
+    ((tmp_path / ".pcae" / "approvals") / f"{prompt_id}-x.json").write_text(_json.dumps({
+        "artifact_id": f"appp-{prompt_id}", "approval_state": "approved", "prompt_id": prompt_id,
+        "prompt_text": "echo hi", "approved_agents": ["claude-local"],
+        "approved_by": "tester", "approved_at": "2026-06-16T16:30:00+00:00",
+    }))
+    (tmp_path / ".pcae" / "authorizations").mkdir(parents=True)
+    ((tmp_path / ".pcae" / "authorizations") / f"{prompt_id}-x.json").write_text(_json.dumps({
+        "authorization_id": authorization_id, "authorization_state": "authorized",
+        "prompt_id": prompt_id, "selected_agents": ["claude-local"], "authorized_by": "tester",
+        "authorized_at": "2026-06-16T16:30:00+00:00", "task_id": "t", "pathway_id": "p",
+        "gate_snapshot": [], "execution_allowed": False,
+    }))
+    (tmp_path / ".pcae" / "audit").mkdir(parents=True)
+    ((tmp_path / ".pcae" / "audit") / f"{audit_id}-x.json").write_text(_json.dumps({
+        "audit_id": audit_id, "audit_type": "readiness_evaluation", "prompt_id": prompt_id,
+        "authorization_id": authorization_id, "pathway_id": "p", "selected_agents": ["claude-local"],
+        "gate_snapshot": [], "execution_allowed": False, "execution_occurred": False,
+        "generated_at": "2026-06-16T16:30:00+00:00",
+    }))
+
+    def _write_subprocess(cmd, timeout, cwd=None):
+        from pathlib import Path as _P
+        (_P(cwd) / "produced.txt").write_text("produced by sandbox\n")
+        return {"stdout": "ok", "stderr": "", "return_code": 0, "timed_out": False,
+                "execution_status": "success", "capture_status": "complete"}
+
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _write_subprocess)
+
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    epr = build_promotion_review(
+        root, result["ecp_id"], "approved", reviewed_by="human-1", promotion_authorized=True,
+    )
+    promo = build_promotion_execution(root, epr["epr_id"])
+    assert promo["status"] == "completed"
+    assert (root.path / "produced.txt").read_text() == "produced by sandbox\n"
+
+    rb = build_rollback_execution(root, promo["per_id"])
+    assert rb["status"] == "completed"
+    assert not (root.path / "produced.txt").exists()
+
+
+# --- strategic lineage ----------------------------------------------------------
+
+def test_69o_strategic_lineage_has_slr_69o_001(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    ids = [r.get("lineage_id", "") for r in records]
+    assert "SLR-69O-001" in ids, "SLR-69O-001 must be in strategic-lineage.json"
+    slr = next(r for r in records if r["lineage_id"] == "SLR-69O-001")
+    assert slr["supersedes_lineage_id"] == "SLR-69N-001"
+
+
+def test_69o_ten_slr_entries_present(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    slr = next((r for r in records if r.get("lineage_id") == "SLR-69O-001"), None)
+    assert slr is not None
+    debt = slr.get("roadmap_debt", [])
+    assert len(debt) == 10, f"SLR-69O-001 must have 10 roadmap_debt entries, got {len(debt)}"
+    for i in range(1, 11):
+        assert any(f"SLR-69O-{i:03d}" in d for d in debt), f"SLR-69O-{i:03d} missing from roadmap_debt"

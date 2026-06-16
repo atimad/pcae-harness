@@ -2,7 +2,35 @@
 
 ## Current Phase
 
-Phase 69N: Write Promotion Execution (BR-005 Execution Governance Activation).
+Phase 69O: Promotion Rollback Execution (BR-005 Execution Governance Activation).
+
+## Milestone: Governed Root Mutation Achieved
+
+As of Phase 69N, PCAE can:
+
+- Execute in isolated workspaces (Phase 69L workspace isolation sandbox).
+- Capture evidence (Phase 69M Execution Change Package — content, diffs, hashes,
+  captured before sandbox destruction).
+- Record human review (Phase 69M Execution Promotion Review — content-level
+  approval with partial-path support).
+- Promote reviewed content into root under explicit authorization (Phase 69N
+  `pcae promote`, gated on EPR `promotion_authorized=True`).
+- Produce durable evidence of what reached root (Phase 69N Promotion Execution
+  Record — created before the first write, persisted after every file).
+
+This marks the point where PCAE changed from an observability framework into a
+governed execution system: `pcae promote` is the first command in PCAE's
+history that mutates root, and it does so only through an explicit human
+command, gated by an auditable chain of prior artifacts (APA → ARA → EAR →
+ESA → ERR/ECR → ECP → EPR → PER).
+
+Rollback execution is no longer deferred: Phase 69O adds `pcae rollback`,
+reversing a specific PER's successfully-written files using ECP's
+`before_content`/`before_hash`/`after_hash` evidence, gated on
+`PER.rollback_payload_available=True`. Rollback is idempotent (re-running it
+against an already-reverted PER is a safe no-op via `already_reverted`
+outcomes) and refuses to proceed if root has diverged since promotion. There
+is no mechanism to roll back a rollback.
 
 ## Post-61J Runtime Registry Checkpoint
 

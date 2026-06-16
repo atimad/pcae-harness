@@ -70195,6 +70195,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["promote", "promotion-execution"],
         "dependencies": ["execution_change_package_and_promotion_review"],
+        "successor_capabilities": ["promotion_rollback_execution"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Promotion Rollback Execution",
+        "implemented_phase": "69O",
+        "status": "implemented",
+        "commands": [
+            "rollback",
+            "rollback-execution",
+        ],
+        "introduced_commands": ["rollback", "rollback-execution"],
+        "dependencies": ["write_promotion_execution"],
         "successor_capabilities": [],
     },
 )
@@ -71258,8 +71271,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69N",
         "phase_title": "Write Promotion Execution",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69M",
+        "successor": "69O",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69O",
+        "phase_title": "Promotion Rollback Execution",
+        "status": "active",
+        "predecessor": "69N",
         "successor": "",
         "superseded_by": "",
     },
@@ -72594,7 +72616,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_change_package_and_promotion_review",
         ],
-        "successors": [],
+        "successors": ["promotion_rollback_execution"],
         "aliases": [],
         "contribution": (
             "introduces PromotionExecutionRecord (PER) store (.pcae/promotion-executions/); "
@@ -72618,6 +72640,47 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "consumption of EPR's override_divergence field; SLR-69N-001 documents the accepted "
             "scope and remaining deferred capabilities (rollback execution, divergence override, "
             "atomic staged writes, multi-EPR batch promotion)"
+        ),
+    },
+    {
+        "capability_name": "Promotion Rollback Execution",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69O",
+        "status": "implemented",
+        "commands": [
+            "pcae rollback --per-id <id> [--dry-run]",
+            "pcae rollback-execution show --rer-id <id>",
+            "pcae rollback-execution list --per-id <id>",
+            "pcae rollback-execution mark-interrupted --rer-id <id>",
+        ],
+        "dependencies": [
+            "write_promotion_execution",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces RollbackExecutionRecord (RER) store (.pcae/rollback-executions/); "
+            "reverses a specific, already-completed PER -- never a range of PERs, never "
+            "user-specified paths, never sandbox execution; file_plan is derived strictly from "
+            "PER.file_results where outcome=\"success\", excluding already_applied entries since "
+            "they were not written by the PER being rolled back; gated on PER.status in "
+            "{completed, partial} and PER.rollback_payload_available=True -- rollback is refused "
+            "outright without that evidence, no RER created; divergence is the inverse of "
+            "promotion's: a path whose current root hash matches the PER's after_hash is still "
+            "promoted and is restored (before_exists=True) or removed (before_exists=False); a "
+            "path matching before_hash is already_reverted and is skipped, never treated as an "
+            "error -- this is how re-running `pcae rollback` resumes a partial rollback and "
+            "achieves idempotency, with no --resume flag; a path matching neither is a conflict "
+            "that blocks the entire attempt before any file is touched (status=aborted_divergence, "
+            "file_results=[]); RER created with status=in_progress before the first restore and "
+            "persisted after every file, so an interrupted rollback is always a stored, "
+            "inspectable record; `pcae rollback-execution mark-interrupted` transitions "
+            "in_progress to partial as pure bookkeeping with no file writes; rollback_executed is "
+            "the first artifact where this field is dynamically True (only when this run actually "
+            "restored or removed a file); there is no mechanism to target an RER for reversal, so "
+            "rollback-of-rollback is forbidden by construction; no git commit, no git push, no "
+            "automatic rollback, no override-divergence support, no multi-PER batch rollback; "
+            "SLR-69O-001 documents the accepted scope"
         ),
     },
     {
@@ -75154,7 +75217,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69N",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69N-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69N",
@@ -75162,7 +75225,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69N",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69N-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69N",
@@ -75170,10 +75233,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69N",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69N-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69N",
+    },
+    {
+        "phase_id": "69O",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69O-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69O",
+    },
+    {
+        "phase_id": "69O",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69O-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69O",
+    },
+    {
+        "phase_id": "69O",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69O-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69O",
     },
 )
 
@@ -81036,7 +81123,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69N",
+        "current_phase": "69O",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81836,6 +81923,28 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "and persisted after every file, never silent on interruption; mark-interrupted is "
             "bookkeeping-only; no rollback execution, no git commit/push, no automatic promotion, "
             "no divergence-override consumption; SLR-69N-001 documents the accepted scope"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "promotion_rollback_execution",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces RER (.pcae/rollback-executions/) reversing a specific PER's "
+            "successfully-written files only, never user-specified paths, never already_applied "
+            "entries; gated on PER.status in {completed, partial} and "
+            "PER.rollback_payload_available=True; inverted per-file divergence check "
+            "distinguishes pending/already_reverted/conflict (mirrors 69N's check with "
+            "before_hash/after_hash roles swapped); already_reverted paths are skipped on re-run "
+            "(idempotent, resume-aware, no --resume flag); any conflict blocks the entire attempt "
+            "before any write; partial rollback is a valid terminal state; RER created before "
+            "first restore and persisted after every file, never silent on interruption; "
+            "mark-interrupted is bookkeeping-only; rollback_executed is the first artifact where "
+            "this field is dynamically True; no rollback-of-rollback (no rer_id-accepting entry "
+            "point exists), no git commit/push, no automatic rollback, no override-divergence "
+            "support; SLR-69O-001 documents the accepted scope"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -93045,4 +93154,416 @@ def mark_promotion_execution_interrupted(root: "HarnessPath", per_id: str) -> di
         "errors": stored.get("errors", []),
         "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+    }
+
+
+# ── Phase 69O: Rollback Execution Record (RER) ───────────────────────────────
+# RER reverses a specific, already-completed PER -- never a range of PERs,
+# never user-specified paths, never sandbox execution (the sandbox no longer
+# exists by the time rollback runs). file_plan is derived strictly from
+# PER.file_results where outcome="success"; already_applied PER entries are
+# never included, since they were not written by the PER being rolled back.
+#
+# Divergence is the mirror image of 69N's: a path whose current root hash
+# matches the PER's after_hash is still in the promoted state and is restored
+# (before_exists=True) or removed (before_exists=False); a path matching
+# before_hash is already_reverted and is skipped, never treated as an error --
+# this is how re-running `pcae rollback` resumes a partial rollback, with no
+# --resume flag, exactly mirroring 69N's already_applied mechanism. A path
+# matching neither is a conflict that blocks the entire attempt before any
+# file is touched. RER is created with status="in_progress" before the first
+# restore and persisted after every file, so an interrupted rollback is
+# always a stored, inspectable record, never silent.
+#
+# Rollback requires PER.rollback_payload_available=True and a terminal PER
+# status (completed or partial); without that evidence, rollback is refused
+# outright -- no RER is created for any gate failure prior to the divergence
+# check. There is no mechanism to target an RER for reversal (the API only
+# accepts a per_id), so rollback-of-rollback is forbidden by construction.
+
+_RER_PHASE_ID: str = "69O"
+_RER_STORE_DIR: Path = Path(".pcae") / "rollback-executions"
+_RER_VERSION: str = "1.0"
+
+_RER_VALID_STATUSES: frozenset[str] = frozenset({
+    "in_progress", "completed", "partial", "failed", "aborted_divergence",
+})
+_RER_VALID_FILE_OUTCOMES: frozenset[str] = frozenset({
+    "success", "failed", "already_reverted",
+})
+_RER_PER_ELIGIBLE_STATUSES: frozenset[str] = frozenset({"completed", "partial"})
+
+_RER_GOVERNANCE_BOUNDARIES: dict = {
+    # Authority
+    "automatic_rollback_allowed": False,
+    "rollback_requires_explicit_human_command": True,
+    "rollback_gated_on_per_status_and_rollback_payload_available": True,
+    "root_mutation_only_via_explicit_rollback_command": True,
+    "rollback_applies_only_to_governed_promotions_recorded_by_per": True,
+    "rollback_cannot_operate_without_evidence": True,
+    # Scope discipline
+    "file_plan_derived_from_per_not_user_specified": True,
+    "already_applied_per_entries_excluded_from_rollback_plan": True,
+    "rollback_of_sandbox_execution_out_of_scope": True,
+    "rollback_of_rollback_forbidden": True,
+    "user_specified_paths_not_supported": True,
+    # Divergence
+    "per_file_hash_comparison_is_authoritative": True,
+    "any_per_file_conflict_blocks_entire_attempt": True,
+    "conflict_blocks_before_any_file_is_touched": True,
+    "override_divergence_not_supported": True,
+    # Idempotency / resume
+    "already_reverted_is_not_an_error": True,
+    "already_reverted_paths_are_skipped_not_rewritten": True,
+    "resume_command_does_not_exist": True,
+    "reinvocation_of_rollback_is_the_only_recovery_path": True,
+    "rollback_is_idempotent": True,
+    # Partial rollback
+    "partial_rollback_is_valid_terminal_state": True,
+    "partial_rollback_is_not_automatically_retried": True,
+    # Interruption
+    "rer_created_before_any_file_write": True,
+    "rer_persisted_after_every_file": True,
+    "concurrent_rollback_for_same_per_forbidden": True,
+    "mark_interrupted_does_not_write_files": True,
+    "mark_interrupted_only_transitions_in_progress_to_partial": True,
+    # rollback_executed semantics (first artifact where this is dynamically True)
+    "rollback_executed_is_dynamic_for_rer_only": True,
+    "rollback_executed_reflects_actual_restores_this_run": True,
+    "already_reverted_alone_does_not_set_rollback_executed": True,
+    # Forbidden operations
+    "git_add_forbidden": True,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    "git_reset_forbidden": True,
+    "git_revert_forbidden": True,
+    "multi_per_batch_rollback_forbidden": True,
+    # Subprocess / execution
+    "execution_allowed": False,
+}
+
+EXECUTION_ROLLBACK_RECORD_ADVISORY: str = (
+    "RollbackExecutionRecord (RER) reverses a specific, already-completed "
+    "PromotionExecutionRecord (PER) -- never a range of PERs, never user-specified paths, "
+    "never sandbox execution. file_plan is derived strictly from PER.file_results where "
+    "outcome=\"success\"; already_applied PER entries (files a prior run found already in "
+    "place) are never included, since they were not written by the PER being rolled back. "
+    "Divergence is the inverse of promotion's: a path whose current root hash matches the "
+    "PER's after_hash is still in the promoted state and is restored or removed; a path "
+    "matching before_hash is already_reverted and is skipped, never treated as an error -- "
+    "this is how re-running `pcae rollback` resumes a partial rollback, with no --resume "
+    "flag. A path matching neither is a conflict that blocks the entire attempt before any "
+    "file is touched. Rollback requires PER.rollback_payload_available=True and a terminal "
+    "PER status (completed or partial); without that evidence, rollback is refused outright. "
+    "automatic_rollback_allowed=False. rollback_of_rollback_forbidden=True. "
+    "git_commit_forbidden=True. git_push_forbidden=True."
+)
+
+
+def _rer_check_divergence(root: "HarnessPath", ecp: dict, file_plan: list[str]) -> dict:
+    """
+    Inverted, resume-aware divergence check for rollback. Never raises.
+      pending: current hash matches the PER's after_hash (still promoted; needs reverting)
+      already_reverted: current hash matches before_hash (already undone; skip)
+      conflict: matches neither, or path missing from the ECP
+    """
+    entries_by_path = {e["path"]: e for e in ecp.get("file_entries", [])}
+    file_checks: list[dict] = []
+    blocking_paths: list[str] = []
+    for path in file_plan:
+        entry = entries_by_path.get(path)
+        if entry is None:
+            file_checks.append({"path": path, "status": "conflict", "current_hash": None})
+            blocking_paths.append(path)
+            continue
+        current_hash = _pxr_hash_file(root.path / path)
+        before_hash = entry.get("before_hash")
+        after_hash = entry.get("after_hash")
+        if current_hash == before_hash:
+            status = "already_reverted"
+        elif current_hash == after_hash:
+            status = "pending"
+        else:
+            status = "conflict"
+            blocking_paths.append(path)
+        file_checks.append({"path": path, "status": status, "current_hash": current_hash})
+
+    return {
+        "file_checks": file_checks,
+        "blocking": bool(blocking_paths),
+        "blocking_paths": blocking_paths,
+    }
+
+
+def _rer_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in ("rer_id", "per_id", "ecp_id", "prompt_id", "started_at"):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("status") not in _RER_VALID_STATUSES:
+        errors.append("invalid_status")
+    for result in record.get("file_results", []):
+        if result.get("outcome") not in _RER_VALID_FILE_OUTCOMES:
+            errors.append("invalid_file_outcome")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    return errors
+
+
+def store_rollback_execution_record(root: "HarnessPath", record: dict) -> dict:
+    errors = _rer_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _RER_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    rer_id = record["rer_id"]
+    path = store_dir / f"{rer_id}.json"
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_rollback_execution_record(root: "HarnessPath", rer_id: str) -> dict | None:
+    store_dir = root.path / _RER_STORE_DIR
+    path = store_dir / f"{rer_id}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return None
+
+
+def list_rollback_execution_records(root: "HarnessPath", per_id: str | None = None) -> list[dict]:
+    store_dir = root.path / _RER_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("rer-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if per_id is None or record.get("per_id") == per_id:
+                records.append(record)
+        except Exception:
+            continue
+    return records
+
+
+def _rer_in_progress_for_per(root: "HarnessPath", per_id: str) -> dict | None:
+    for record in list_rollback_execution_records(root, per_id):
+        if record.get("status") == "in_progress":
+            return record
+    return None
+
+
+def build_rollback_execution(
+    root: "HarnessPath",
+    per_id: str,
+    dry_run: bool = False,
+) -> dict:
+    """
+    Execute (or, if dry_run, preview) rollback of a specific PromotionExecutionRecord's
+    successfully-written files. The only PCAE code path that reverses a root mutation.
+    file_plan is derived strictly from PER.file_results where outcome="success" -- never
+    user-specified, never including already_applied entries. Gated on PER.status in
+    {"completed", "partial"} and PER.rollback_payload_available=True. dry_run performs
+    zero writes and persists no RER. execution_allowed=False throughout.
+    """
+    per = lookup_promotion_execution_record(root, per_id)
+    if per is None:
+        return {
+            "error": "per_not_found", "per_id": per_id, "reverted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+    if per.get("status") not in _RER_PER_ELIGIBLE_STATUSES:
+        return {
+            "error": "per_status_not_eligible", "per_id": per_id, "status": per.get("status"),
+            "reverted": False, "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+    if per.get("rollback_payload_available") is not True:
+        return {
+            "error": "rollback_payload_unavailable", "per_id": per_id, "reverted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+
+    ecp_id = per.get("ecp_id")
+    ecp = lookup_execution_change_package(root, ecp_id)
+    if ecp is None:
+        return {
+            "error": "ecp_not_found", "per_id": per_id, "ecp_id": ecp_id, "reverted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+
+    existing_in_progress = _rer_in_progress_for_per(root, per_id)
+    if existing_in_progress is not None:
+        return {
+            "error": "rollback_already_in_progress", "per_id": per_id,
+            "rer_id": existing_in_progress.get("rer_id"), "reverted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+
+    file_plan = [r["path"] for r in per.get("file_results", []) if r.get("outcome") == "success"]
+    divergence = _rer_check_divergence(root, ecp, file_plan)
+
+    if dry_run:
+        return {
+            "dry_run": True, "per_id": per_id, "ecp_id": ecp_id, "reverted": False,
+            "would_block": divergence["blocking"],
+            "blocking_paths": divergence["blocking_paths"],
+            "divergence_check": divergence,
+            "file_plan": file_plan,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+
+    started_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    rer_id = f"rer-{per.get('prompt_id', 'unknown')}-{ts}"
+    entries_by_path = {e["path"]: e for e in ecp.get("file_entries", [])}
+
+    record: dict = {
+        "rer_id": rer_id,
+        "rer_version": _RER_VERSION,
+        "per_id": per_id,
+        "ecp_id": ecp_id,
+        "epr_id": per.get("epr_id", ""),
+        "prompt_id": per.get("prompt_id", ""),
+        "started_at": started_at,
+        "divergence_check": divergence,
+        "file_plan": file_plan,
+        "file_results": [],
+        "status": "aborted_divergence" if divergence["blocking"] else "in_progress",
+        "completed_at": started_at if divergence["blocking"] else None,
+        "rollback_executed": False,
+        "execution_allowed": False,
+    }
+    stored = store_rollback_execution_record(root, record)
+    if divergence["blocking"]:
+        return {
+            "error": "divergence_conflict", "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
+            "reverted": False, "blocking_paths": divergence["blocking_paths"],
+            "divergence_check": divergence, "created": stored["stored"],
+            "execution_allowed": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+
+    status_by_path = {fc["path"]: fc["status"] for fc in divergence["file_checks"]}
+    any_success = False
+    any_failure = False
+
+    for path in file_plan:
+        entry = entries_by_path.get(path, {})
+        pre_status = status_by_path.get(path)
+        full_path = root.path / path
+
+        if pre_status == "already_reverted":
+            result = {
+                "path": path, "action": "skip", "outcome": "already_reverted",
+                "after_hash_verified": False,
+                "restored_hash_written": entry.get("before_hash"),
+                "error": None,
+            }
+        else:
+            before_exists = bool(entry.get("before_exists"))
+            try:
+                if before_exists:
+                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                    before_content = entry.get("before_content")
+                    if entry.get("binary"):
+                        import base64 as _base64
+                        full_path.write_bytes(
+                            _base64.b64decode(before_content) if before_content else b""
+                        )
+                    else:
+                        full_path.write_text(before_content if before_content is not None else "")
+                    restored_hash_written = _pxr_hash_file(full_path)
+                    action = "restore"
+                else:
+                    if full_path.exists():
+                        full_path.unlink()
+                    restored_hash_written = _pxr_hash_file(full_path)
+                    action = "remove"
+                result = {
+                    "path": path, "action": action, "outcome": "success",
+                    "after_hash_verified": True,
+                    "restored_hash_written": restored_hash_written, "error": None,
+                }
+                any_success = True
+            except Exception as exc:
+                result = {
+                    "path": path, "action": "restore" if before_exists else "remove",
+                    "outcome": "failed", "after_hash_verified": True,
+                    "restored_hash_written": None, "error": f"{type(exc).__name__}:{exc}",
+                }
+                any_failure = True
+
+        record["file_results"].append(result)
+        store_rollback_execution_record(root, record)
+
+    if any_failure and (any_success or any(
+        r["outcome"] == "already_reverted" for r in record["file_results"]
+    )):
+        final_status = "partial"
+    elif any_failure:
+        final_status = "failed"
+    else:
+        final_status = "completed"
+
+    record["status"] = final_status
+    record["completed_at"] = datetime.now(timezone.utc).isoformat()
+    record["rollback_executed"] = any_success
+    stored = store_rollback_execution_record(root, record)
+
+    return {
+        "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
+        "status": final_status, "reverted": any_success,
+        "rollback_executed": record["rollback_executed"],
+        "file_results": record["file_results"],
+        "created": stored["stored"],
+        "errors": stored.get("errors", []),
+        "execution_allowed": False,
+        "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+    }
+
+
+def mark_rollback_execution_interrupted(root: "HarnessPath", rer_id: str) -> dict:
+    """
+    Bookkeeping only: transitions a stored RER from status="in_progress" to
+    "partial" after a human has confirmed an interrupted run. Never touches
+    any file outside the RER record itself. Never writes to root.
+    """
+    record = lookup_rollback_execution_record(root, rer_id)
+    if record is None:
+        return {
+            "error": "rer_not_found", "rer_id": rer_id, "updated": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+    if record.get("status") != "in_progress":
+        return {
+            "error": "rer_not_in_progress", "rer_id": rer_id, "status": record.get("status"),
+            "updated": False,
+            "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        }
+    record["status"] = "partial"
+    record["completed_at"] = datetime.now(timezone.utc).isoformat()
+    stored = store_rollback_execution_record(root, record)
+    return {
+        "rer_id": rer_id, "status": "partial", "updated": stored["stored"],
+        "errors": stored.get("errors", []),
+        "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
     }

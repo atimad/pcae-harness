@@ -38,6 +38,7 @@ ACTIVATION_TIMESTAMP_69K = "2026-06-15T13:06:00+00:00"
 ACTIVATION_TIMESTAMP_69L = "2026-06-15T19:13:00+00:00"
 ACTIVATION_TIMESTAMP_69M = "2026-06-16T13:35:00+00:00"
 ACTIVATION_TIMESTAMP_69N = "2026-06-16T15:01:00+00:00"
+ACTIVATION_TIMESTAMP_69O = "2026-06-16T16:30:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -907,6 +908,58 @@ def _valid_69n_record() -> dict:
     }
 
 
+def _valid_69o_record() -> dict:
+    return {
+        "lineage_id": "SLR-69O-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69O,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69N",
+        "predecessor_phase_id": "69N",
+        "activated_phase_id": "69O",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Implements Promotion Rollback Execution: RollbackExecutionRecord (RER) is the "
+            "first PCAE artifact whose subject is reversing a root mutation, and `pcae "
+            "rollback` is the first command that does so. Rollback is gated on a PER with "
+            "status in {completed, partial} and rollback_payload_available=True. file_plan "
+            "is derived strictly from PER.file_results where outcome=\"success\" -- never "
+            "user-specified, never including already_applied entries. Divergence is the "
+            "inverse of 69N's: current hash vs after_hash (pending) / before_hash "
+            "(already_reverted) / neither (conflict). Any conflict blocks the entire attempt "
+            "before any file is touched. RER created before first restore, persisted after "
+            "every file. There is no mechanism to target an RER for reversal, so "
+            "rollback-of-rollback is forbidden by construction. Ten SLR entries document the "
+            "accepted scope."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [
+            "SLR-69O-001: RER is the first artifact reversing a root mutation; gated on PER.status in {completed, partial} and PER.rollback_payload_available=True",
+            "SLR-69O-002: file_plan is derived strictly from PER.file_results where outcome=\"success\"; already_applied PER entries are excluded",
+            "SLR-69O-003: divergence is inverted from 69N -- current hash vs after_hash (pending) / before_hash (already_reverted) / neither (conflict)",
+            "SLR-69O-004: any conflict blocks the entire attempt before any file is touched",
+            "SLR-69O-005: partial rollback is a valid terminal state, not automatically retried",
+            "SLR-69O-006: RER created before first restore, persisted after every file; interruption is always a stored record",
+            "SLR-69O-007: mark-interrupted is bookkeeping only, never writes files",
+            "SLR-69O-008: rollback is idempotent via the already_reverted skip; no --resume command",
+            "SLR-69O-009: rollback-of-rollback is forbidden by construction -- no rer_id-accepting entry point exists",
+            "SLR-69O-010: no automatic rollback, no git commit/push, no override-divergence support, no multi-PER batch rollback, no user-specified paths",
+        ],
+        "supersedes_lineage_id": "SLR-69N-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69O,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -933,6 +986,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69l_record(),
         _valid_69m_record(),
         _valid_69n_record(),
+        _valid_69o_record(),
     ]
 
 
@@ -1140,6 +1194,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69N",
             "timestamp": ACTIVATION_TIMESTAMP_69N,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69O",
+            "timestamp": ACTIVATION_TIMESTAMP_69O,
+        },
     ])
     return events
 
@@ -1175,7 +1237,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69N-TEST"
+    assert result.current_lineage_id == "SLR-69O-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -1210,7 +1272,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69N-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69O-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -1311,7 +1373,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69N-TEST"
+    assert result.current_lineage_id == "SLR-69O-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1366,9 +1428,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69N-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69O-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 25
+    assert json.loads(capsys.readouterr().out)["record_count"] == 26
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

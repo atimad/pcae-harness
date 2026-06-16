@@ -92,6 +92,10 @@ from pcae.commands.agent import (
     run_promotion_execution_show,
     run_promotion_execution_list,
     run_promotion_execution_mark_interrupted,
+    run_rollback,
+    run_rollback_execution_show,
+    run_rollback_execution_list,
+    run_rollback_execution_mark_interrupted,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2515,6 +2519,74 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     per_mark_interrupted_parser.set_defaults(handler=run_promotion_execution_mark_interrupted)
+
+    rollback_parser = subparsers.add_parser(
+        "rollback",
+        help=(
+            "Reverse a specific PromotionExecutionRecord's successfully-written files "
+            "(Phase 69O). file_plan is derived strictly from PER.file_results where "
+            "outcome=\"success\" -- never user-specified paths. Gated on PER status "
+            "(completed/partial) and PER.rollback_payload_available=True."
+        ),
+    )
+    rollback_parser.add_argument(
+        "--per-id", required=True, help="PromotionExecutionRecord to roll back."
+    )
+    rollback_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the rollback (divergence check, file plan) without writing anything.",
+    )
+    rollback_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rollback_parser.set_defaults(handler=run_rollback)
+
+    rollback_execution_parser = subparsers.add_parser(
+        "rollback-execution",
+        help=(
+            "Inspect RollbackExecutionRecords (RER, Phase 69O). Rollback can only be "
+            "created via `pcae rollback`; this surface also supports marking an "
+            "interrupted run as partial (bookkeeping only, no file writes)."
+        ),
+    )
+    rollback_execution_subparsers = rollback_execution_parser.add_subparsers(
+        dest="rollback_execution_command", required=True
+    )
+
+    rer_show_parser = rollback_execution_subparsers.add_parser(
+        "show",
+        help="Show a RollbackExecutionRecord by rer_id.",
+    )
+    rer_show_parser.add_argument("--rer-id", required=True, help="RER ID to look up.")
+    rer_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rer_show_parser.set_defaults(handler=run_rollback_execution_show)
+
+    rer_list_parser = rollback_execution_subparsers.add_parser(
+        "list",
+        help="List RollbackExecutionRecords, optionally filtered by PER.",
+    )
+    rer_list_parser.add_argument(
+        "--per-id", default=None, help="Filter by PER identifier (optional)."
+    )
+    rer_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rer_list_parser.set_defaults(handler=run_rollback_execution_list)
+
+    rer_mark_interrupted_parser = rollback_execution_subparsers.add_parser(
+        "mark-interrupted",
+        help="Transition an in_progress RER to partial after confirming an interrupted run.",
+    )
+    rer_mark_interrupted_parser.add_argument(
+        "--rer-id", required=True, help="RER ID to mark interrupted."
+    )
+    rer_mark_interrupted_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    rer_mark_interrupted_parser.set_defaults(handler=run_rollback_execution_mark_interrupted)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

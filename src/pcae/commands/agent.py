@@ -150,6 +150,11 @@ from pcae.core.agent import (
     list_promotion_execution_records,
     mark_promotion_execution_interrupted,
     EXECUTION_PROMOTION_RECORD_ADVISORY,
+    build_rollback_execution,
+    lookup_rollback_execution_record,
+    list_rollback_execution_records,
+    mark_rollback_execution_interrupted,
+    EXECUTION_ROLLBACK_RECORD_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -15900,4 +15905,113 @@ def run_promotion_execution_mark_interrupted(args: argparse.Namespace) -> int:
     print(f"  status: {result['status']}")
     print()
     print(EXECUTION_PROMOTION_RECORD_ADVISORY)
+    return 0
+
+
+def run_rollback(args: argparse.Namespace) -> int:
+    result = build_rollback_execution(HarnessPath.cwd(), args.per_id, dry_run=args.dry_run)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        if result.get("dry_run"):
+            return 0
+        return 0 if result.get("reverted") or result.get("status") == "completed" else 1
+
+    if result.get("dry_run"):
+        print("Rollback: DRY RUN")
+        print(f"  per_id:        {result['per_id']}")
+        print(f"  would_block:   {result['would_block']}")
+        if result["would_block"]:
+            print(f"  blocking_paths: {result['blocking_paths']}")
+        print(f"  file_plan:     {result['file_plan']}")
+        print()
+        print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
+        return 0
+
+    if result.get("error"):
+        print("Rollback: BLOCKED")
+        print(f"  error: {result['error']}")
+        if result.get("blocking_paths"):
+            print(f"  blocking_paths: {result['blocking_paths']}")
+        if result.get("rer_id"):
+            print(f"  rer_id: {result['rer_id']}")
+        print()
+        print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
+        return 1
+
+    print(f"Rollback: {result['status'].upper()}")
+    print(f"  rer_id:            {result['rer_id']}")
+    print(f"  per_id:            {result['per_id']}")
+    print(f"  reverted:          {result['reverted']}")
+    print(f"  rollback_executed: {result['rollback_executed']}")
+    for fr in result["file_results"]:
+        print(f"    {fr['path']}: {fr['outcome']}")
+    print()
+    print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
+    return 0 if result["status"] in ("completed", "partial") else 1
+
+
+def run_rollback_execution_show(args: argparse.Namespace) -> int:
+    record = lookup_rollback_execution_record(HarnessPath.cwd(), args.rer_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "rer_not_found", "rer_id": args.rer_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"RollbackExecutionRecord: NOT FOUND — {args.rer_id}")
+        return 1
+
+    print("RollbackExecutionRecord")
+    print(f"  rer_id:            {record['rer_id']}")
+    print(f"  per_id:            {record['per_id']}")
+    print(f"  ecp_id:            {record['ecp_id']}")
+    print(f"  status:            {record['status']}")
+    print(f"  started_at:        {record['started_at']}")
+    print(f"  completed_at:      {record.get('completed_at')}")
+    print(f"  rollback_executed: {record['rollback_executed']}")
+    for fr in record.get("file_results", []):
+        print(f"    {fr['path']}: {fr['outcome']}")
+    print()
+    print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
+    return 0
+
+
+def run_rollback_execution_list(args: argparse.Namespace) -> int:
+    per_id = getattr(args, "per_id", None)
+    records = list_rollback_execution_records(HarnessPath.cwd(), per_id)
+    if args.json:
+        print(json.dumps(
+            {"per_id": per_id, "executions": records, "count": len(records)},
+            indent=2, sort_keys=True,
+        ))
+        return 0
+
+    label = f" for {per_id}" if per_id else ""
+    print(f"RollbackExecutionRecords{label}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['rer_id']}  status={r['status']}")
+    return 0
+
+
+def run_rollback_execution_mark_interrupted(args: argparse.Namespace) -> int:
+    result = mark_rollback_execution_interrupted(HarnessPath.cwd(), args.rer_id)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("updated") else 1
+
+    if not result.get("updated"):
+        print("RollbackExecutionRecord: MARK-INTERRUPTED FAILED")
+        print(f"  error: {result.get('error', 'unknown')}")
+        return 1
+
+    print("RollbackExecutionRecord: MARKED INTERRUPTED")
+    print(f"  rer_id: {result['rer_id']}")
+    print(f"  status: {result['status']}")
+    print()
+    print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
     return 0

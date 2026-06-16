@@ -571,6 +571,21 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae promotion-execution mark-interrupted --per-id <id>`
 - `pcae promotion-execution mark-interrupted --per-id <id> --json`
 
+## rollback
+
+- `pcae rollback --per-id <id>`
+- `pcae rollback --per-id <id> --dry-run`
+- `pcae rollback --per-id <id> --json`
+
+## rollback-execution
+
+- `pcae rollback-execution show --rer-id <id>`
+- `pcae rollback-execution show --rer-id <id> --json`
+- `pcae rollback-execution list --per-id <id>`
+- `pcae rollback-execution list --per-id <id> --json`
+- `pcae rollback-execution mark-interrupted --rer-id <id>`
+- `pcae rollback-execution mark-interrupted --rer-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

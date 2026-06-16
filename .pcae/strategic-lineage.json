@@ -837,5 +837,45 @@
     "selected_branch_id": "BR-005",
     "source_phase_id": "69M",
     "supersedes_lineage_id": "SLR-69M-001"
+  },
+  {
+    "activated_phase_id": "69O",
+    "activation_event_id": "2026-06-16T16:30:00+00:00",
+    "activation_validation_status": "validated",
+    "considered_alternatives": [],
+    "decided_by": "human-user",
+    "decision_basis": "roadmap_gap",
+    "deferred_alternatives": [],
+    "execution_allowed": false,
+    "human_approved": true,
+    "lineage_id": "SLR-69O-001",
+    "lineage_status": "approved",
+    "lineage_timestamp": "2026-06-16T16:30:00+00:00",
+    "objective_ids": [
+      "OBJ-002",
+      "OBJ-003"
+    ],
+    "predecessor_phase_id": "69N",
+    "rationale": "Implements Promotion Rollback Execution: RollbackExecutionRecord (RER) is the first PCAE artifact whose subject is reversing a root mutation, and `pcae rollback` is the first command that does so. Rollback is gated on a PER with status in {completed, partial} and rollback_payload_available=True; without that evidence rollback is refused outright and no RER is created. file_plan is derived strictly from PER.file_results where outcome=\"success\" -- never user-specified, never including already_applied entries, since those were not written by the PER being rolled back. Divergence is the inverse of 69N's: a path whose current root hash matches the PER's after_hash is still promoted and is restored or removed; a path matching before_hash is already_reverted and is skipped, never treated as an error -- this is how re-running `pcae rollback` resumes a partial rollback and achieves idempotency, with no --resume flag. A path matching neither is a conflict that blocks the entire attempt before any file is touched. RER is created with status=in_progress before the first restore and persisted after every file, so an interrupted rollback is always a stored, inspectable record. `pcae rollback-execution mark-interrupted` is bookkeeping only. There is no mechanism to target an RER for reversal, so rollback-of-rollback is forbidden by construction. Ten SLR entries document the accepted scope. SLR-69O-001: RER is the first artifact reversing a root mutation; gated on PER.status in {completed, partial} and PER.rollback_payload_available=True. SLR-69O-002: file_plan is derived strictly from PER.file_results where outcome=\"success\"; already_applied PER entries are excluded. SLR-69O-003: divergence is inverted from 69N -- current hash vs after_hash (pending) / before_hash (already_reverted) / neither (conflict). SLR-69O-004: any conflict blocks the entire attempt before any file is touched. SLR-69O-005: partial rollback is a valid terminal state, not automatically retried. SLR-69O-006: RER created before first restore, persisted after every file; interruption is always a stored record. SLR-69O-007: mark-interrupted is bookkeeping only, never writes files. SLR-69O-008: rollback is idempotent via the already_reverted skip; no --resume command. SLR-69O-009: rollback-of-rollback is forbidden by construction -- no rer_id-accepting entry point exists. SLR-69O-010: no automatic rollback, no git commit/push, no override-divergence support, no multi-PER batch rollback, no user-specified paths.",
+    "recommendation": "approve",
+    "rejected_alternatives": [],
+    "review_ids": [
+      "SRR-66B-001"
+    ],
+    "roadmap_debt": [
+      "SLR-69O-001: RER is the first artifact reversing a root mutation; gated on PER.status in {completed, partial} and PER.rollback_payload_available=True",
+      "SLR-69O-002: file_plan is derived strictly from PER.file_results where outcome=\"success\"; already_applied PER entries are excluded",
+      "SLR-69O-003: divergence is inverted from 69N -- current hash vs after_hash (pending) / before_hash (already_reverted) / neither (conflict)",
+      "SLR-69O-004: any conflict blocks the entire attempt before any file is touched",
+      "SLR-69O-005: partial rollback is a valid terminal state, not automatically retried",
+      "SLR-69O-006: RER created before first restore, persisted after every file; interruption is always a stored record",
+      "SLR-69O-007: mark-interrupted is bookkeeping only, never writes files",
+      "SLR-69O-008: rollback is idempotent via the already_reverted skip; no --resume command",
+      "SLR-69O-009: rollback-of-rollback is forbidden by construction -- no rer_id-accepting entry point exists",
+      "SLR-69O-010: no automatic rollback, no git commit/push, no override-divergence support, no multi-PER batch rollback, no user-specified paths"
+    ],
+    "selected_branch_id": "BR-005",
+    "source_phase_id": "69N",
+    "supersedes_lineage_id": "SLR-69N-001"
   }
 ]
