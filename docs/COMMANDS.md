@@ -519,6 +519,22 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae execution-change list-candidates`
 - `pcae execution-change list-candidates --json`
 
+## execution-change-package
+
+- `pcae execution-change-package show --ecp-id <id>`
+- `pcae execution-change-package show --ecp-id <id> --json`
+- `pcae execution-change-package list --prompt-id <id>`
+- `pcae execution-change-package list --prompt-id <id> --json`
+
+## promotion-review
+
+- `pcae promotion-review create --ecp-id <id> --reviewed-by <human> --disposition <disposition>`
+- `pcae promotion-review create --ecp-id <id> --reviewed-by <human> --disposition <disposition> --approved-path <path> --json`
+- `pcae promotion-review show --epr-id <id>`
+- `pcae promotion-review show --epr-id <id> --json`
+- `pcae promotion-review list --ecp-id <id>`
+- `pcae promotion-review list --ecp-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

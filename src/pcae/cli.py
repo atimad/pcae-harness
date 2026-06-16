@@ -83,6 +83,11 @@ from pcae.commands.agent import (
     run_execution_change_show,
     run_execution_change_list,
     run_execution_change_list_candidates,
+    run_execution_change_package_show,
+    run_execution_change_package_list,
+    run_promotion_review_create,
+    run_promotion_review_show,
+    run_promotion_review_list,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2322,6 +2327,123 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     ec_candidates_parser.set_defaults(handler=run_execution_change_list_candidates)
+
+    execution_change_package_parser = subparsers.add_parser(
+        "execution-change-package",
+        help=(
+            "Inspect ExecutionChangePackages (ECP) capturing sandbox-produced file content, "
+            "diffs, and hashes (Phase 69M). ECP is created automatically during sandboxed "
+            "execution; this surface is read-only. No promotion, no root mutation."
+        ),
+    )
+    execution_change_package_subparsers = execution_change_package_parser.add_subparsers(
+        dest="execution_change_package_command", required=True
+    )
+
+    ecp_show_parser = execution_change_package_subparsers.add_parser(
+        "show",
+        help="Show an ExecutionChangePackage by ecp_id.",
+    )
+    ecp_show_parser.add_argument("--ecp-id", required=True, help="ECP ID to look up.")
+    ecp_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ecp_show_parser.set_defaults(handler=run_execution_change_package_show)
+
+    ecp_list_parser = execution_change_package_subparsers.add_parser(
+        "list",
+        help="List ExecutionChangePackages, optionally filtered by prompt.",
+    )
+    ecp_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional)."
+    )
+    ecp_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    ecp_list_parser.set_defaults(handler=run_execution_change_package_list)
+
+    promotion_review_parser = subparsers.add_parser(
+        "promotion-review",
+        help=(
+            "Record a human's content-level review of an ExecutionChangePackage (EPR, "
+            "Phase 69M). Review is not promotion: no root mutation, no promotion execution."
+        ),
+    )
+    promotion_review_subparsers = promotion_review_parser.add_subparsers(
+        dest="promotion_review_command", required=True
+    )
+
+    epr_create_parser = promotion_review_subparsers.add_parser(
+        "create",
+        help="Create an EPR reviewing a specific ECP.",
+    )
+    epr_create_parser.add_argument("--ecp-id", required=True, help="ECP identifier to review.")
+    epr_create_parser.add_argument(
+        "--reviewed-by", default=None, help="Human reviewer identifier."
+    )
+    epr_create_parser.add_argument(
+        "--disposition",
+        required=True,
+        choices=["approved", "rejected", "deferred", "escalated", "cancelled"],
+        help="Review disposition.",
+    )
+    epr_create_parser.add_argument(
+        "--approved-path",
+        dest="approved_paths",
+        action="append",
+        default=[],
+        help="Approved file path (must be promotion_eligible in the ECP). Repeat per file.",
+    )
+    epr_create_parser.add_argument(
+        "--required-modification",
+        dest="required_modifications",
+        action="append",
+        default=[],
+        help="Advisory condition requested before promotion. Repeat as needed.",
+    )
+    epr_create_parser.add_argument(
+        "--review-rationale", default=None, help="Free-text review rationale."
+    )
+    epr_create_parser.add_argument(
+        "--promotion-authorized",
+        action="store_true",
+        help="Explicitly authorize promotion in addition to approving review (no promotion "
+        "execution exists in this phase to consume this flag).",
+    )
+    epr_create_parser.add_argument(
+        "--override-divergence",
+        action="store_true",
+        help="Record an explicit override of detected root divergence.",
+    )
+    epr_create_parser.add_argument(
+        "--override-divergence-rationale", default=None, help="Rationale for divergence override."
+    )
+    epr_create_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    epr_create_parser.set_defaults(handler=run_promotion_review_create)
+
+    epr_show_parser = promotion_review_subparsers.add_parser(
+        "show",
+        help="Show an EPR by epr_id.",
+    )
+    epr_show_parser.add_argument("--epr-id", required=True, help="EPR ID to look up.")
+    epr_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    epr_show_parser.set_defaults(handler=run_promotion_review_show)
+
+    epr_list_parser = promotion_review_subparsers.add_parser(
+        "list",
+        help="List EPRs, optionally filtered by ECP.",
+    )
+    epr_list_parser.add_argument(
+        "--ecp-id", default=None, help="Filter by ECP identifier (optional)."
+    )
+    epr_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    epr_list_parser.set_defaults(handler=run_promotion_review_list)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

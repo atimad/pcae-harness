@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69K" in output
+    assert "69L" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -52413,7 +52413,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -52758,7 +52758,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -53061,7 +53061,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -53334,7 +53334,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -53657,7 +53657,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -54060,7 +54060,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -54387,7 +54387,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
 
 
@@ -54590,7 +54590,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69L" in active_drift[0]
+    assert "69M" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54710,7 +54710,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
     assert branch["current_phase"] == "65J"
 
 
@@ -56683,7 +56683,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56943,7 +56943,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57255,7 +57255,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69L"
+    assert current["phase_id"] == "69M"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -59697,7 +59697,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69L"
+    assert data["current_phase"]["phase_id"] == "69M"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -61392,8 +61392,8 @@ def test_69k_69j_is_completed_in_roadmap(tmp_path) -> None:
 
 def test_69k_map_count_is_67(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 68, (
-        f"Expected 68 map entries after 69L, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 69, (
+        f"Expected 69 map entries after 69M, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "automatic_snapshot_integration"),
@@ -61841,8 +61841,9 @@ def test_69l_phase_registered_in_roadmap(tmp_path) -> None:
     from pcae.core.agent import _CRI_KNOWN_PHASES
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69L"), None)
     assert phase is not None, "69L must be registered in _CRI_KNOWN_PHASES"
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "69K"
+    assert phase["successor"] == "69M"
     assert phase["track_name"] == "execution_governance_activation"
 
 
@@ -62207,3 +62208,802 @@ def test_69l_six_slr_entries_present(tmp_path) -> None:
     assert len(debt) == 6, f"SLR-69L-001 must have 6 roadmap_debt entries, got {len(debt)}"
     for i in range(1, 7):
         assert any(f"SLR-69L-00{i}" in d for d in debt), f"SLR-69L-00{i} missing from roadmap_debt"
+
+
+# ---------------------------------------------------------------------------
+# Phase 69M -- Write Governance Design: ECP + EPR
+# ---------------------------------------------------------------------------
+
+def _store_test_ecp(root, ecp_id="ecp-test", capture_outcome="success", file_entries=None):
+    from pcae.core.agent import store_execution_change_package
+    entries = file_entries or []
+    record = {
+        "ecp_id": ecp_id, "ecp_version": "1.0", "prompt_id": "p-test", "authorization_id": "a",
+        "audit_id": "ea", "snapshot_id": "esa-1", "change_record_id": None,
+        "execution_result_id": "err-1", "captured_at": "2026-06-16T00:00:00+00:00",
+        "capture_source": "sandbox_dir", "capture_outcome": capture_outcome, "sandbox_id": "sb-1",
+        "sandbox_provider": "git_worktree", "pre_git_head": "abc", "post_git_head": "abc",
+        "git_head_diverged": False, "git_commit_detected": False, "manifest_hash": None,
+        "file_count": len(entries), "file_entries": entries, "capture_errors": [],
+        "binary_file_count": 0, "symlink_count": 0, "external_symlink_count": 0,
+        "excluded_file_count": 0, "excluded_paths": [], "absolute_path_writes_detected": False,
+        "promotion_eligible_count": sum(1 for e in entries if e.get("promotion_eligible")),
+        "esa_available": True, "execution_allowed": False, "promotion_executed": False,
+        "rollback_executed": False,
+    }
+    store_execution_change_package(root, record)
+    return record
+
+
+# --- Registry registration -------------------------------------------------
+
+def test_69m_phase_registered_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69M"), None)
+    assert phase is not None, "69M must be registered in _CRI_KNOWN_PHASES"
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "69L"
+    assert phase["track_name"] == "execution_governance_activation"
+
+
+def test_69m_69l_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69L"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "69M"
+
+
+def test_69m_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69M"), None,
+    )
+    assert cap is not None, "69M capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_name"] == "Execution Change Package and Promotion Review"
+    assert cap["capability_domain"] == "execution_governance"
+
+
+def test_69m_capability_registered_in_cri(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69M"), None,
+    )
+    assert cap is not None, "69M capability must be in _CRI_KNOWN_CAPABILITIES"
+    assert "SLR-69M-001" in cap["contribution"]
+
+
+def test_69m_in_capability_map(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP
+         if e["capability_id"] == "execution_change_package_and_promotion_review"),
+        None,
+    )
+    assert entry is not None
+    assert "OBJ-002" in entry["objective_ids"]
+    assert "OBJ-003" in entry["objective_ids"]
+
+
+def test_69m_branch_registry_current_phase(tmp_path) -> None:
+    from pcae.core.agent import _SRG_BRANCH_REGISTRY
+    branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
+    assert branch["current_phase"] == "69M"
+
+
+def test_69m_prompt_profiles_recommended(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69M"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "recommended" for p in profiles)
+
+
+def test_69m_69l_prompt_profiles_historical(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69L"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "historical" for p in profiles)
+
+
+# --- Governance boundaries --------------------------------------------------
+
+def test_69m_ecp_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _ECP_GOVERNANCE_BOUNDARIES
+    required = [
+        "ecp_is_not_promotion", "ecp_is_not_approval", "ecp_is_not_authorization",
+        "ecp_does_not_modify_root", "ecp_creation_does_not_trigger_promotion",
+        "ecp_is_immutable_after_creation", "sandbox_changes_are_not_root_changes",
+        "rollback_candidate_is_not_rollback_authorization", "automatic_rollback_allowed",
+        "git_directory_promotable", "pcae_directory_promotable", "external_symlink_promotable",
+        "automatic_promotion_allowed", "execution_allowed", "promotion_executed",
+        "git_commit_forbidden", "git_push_forbidden", "production_containment_ready",
+    ]
+    for key in required:
+        assert key in _ECP_GOVERNANCE_BOUNDARIES, f"missing boundary: {key}"
+    assert _ECP_GOVERNANCE_BOUNDARIES["ecp_is_not_promotion"] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["promotion_executed"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["automatic_promotion_allowed"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["git_directory_promotable"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["pcae_directory_promotable"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["external_symlink_promotable"] is False
+    assert _ECP_GOVERNANCE_BOUNDARIES["production_containment_ready"] is False
+
+
+def test_69m_condition_14_category_boundaries(tmp_path) -> None:
+    from pcae.core.agent import _ECP_GOVERNANCE_BOUNDARIES
+    assert _ECP_GOVERNANCE_BOUNDARIES["condition_14_category"] == "post_execution"
+    assert _ECP_GOVERNANCE_BOUNDARIES[
+        "post_execution_condition_cannot_retroactively_set_execution_occurred_false"
+    ] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES[
+        "post_execution_condition_failure_sets_reviewability_flag_not_blocker"
+    ] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES["ecp_capture_attempt_is_mandatory"] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES["ecp_capture_success_is_not_mandatory"] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES["sandbox_destruction_proceeds_regardless_of_ecp_outcome"] is True
+    assert _ECP_GOVERNANCE_BOUNDARIES["execution_reviewable_false_blocks_epr_creation"] is True
+
+
+def test_69m_epr_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _EPR_GOVERNANCE_BOUNDARIES
+    required = [
+        "epr_does_not_modify_root", "epr_approval_does_not_execute_promotion",
+        "epr_requires_valid_ecp", "partial_approval_is_valid",
+        "partial_approval_does_not_promote_rejected_paths",
+        "reviewer_identity_not_verified_by_pcae", "epr_is_immutable_after_terminal_state",
+        "rejected_epr_does_not_block_re_execution", "external_symlinks_not_approvable",
+        "pcae_directory_not_approvable", "git_directory_not_approvable",
+        "automatic_approval_allowed", "promotion_authorized_requires_explicit_flag",
+        "execution_allowed", "promotion_executed",
+    ]
+    for key in required:
+        assert key in _EPR_GOVERNANCE_BOUNDARIES, f"missing boundary: {key}"
+    assert _EPR_GOVERNANCE_BOUNDARIES["automatic_approval_allowed"] is False
+    assert _EPR_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _EPR_GOVERNANCE_BOUNDARIES["promotion_executed"] is False
+
+
+def test_69m_advisory_strings_present(tmp_path) -> None:
+    from pcae.core.agent import (
+        EXECUTION_CHANGE_PACKAGE_ADVISORY, EXECUTION_PROMOTION_REVIEW_ADVISORY,
+    )
+    assert isinstance(EXECUTION_CHANGE_PACKAGE_ADVISORY, str)
+    assert "Condition 14" in EXECUTION_CHANGE_PACKAGE_ADVISORY
+    assert "execution_reviewable=False" in EXECUTION_CHANGE_PACKAGE_ADVISORY
+    assert isinstance(EXECUTION_PROMOTION_REVIEW_ADVISORY, str)
+    assert "epr_does_not_modify_root" in EXECUTION_PROMOTION_REVIEW_ADVISORY
+
+
+# --- ECP pure helper functions ----------------------------------------------
+
+def test_69m_is_binary_detects_null_bytes(tmp_path) -> None:
+    from pcae.core.agent import _ecp_is_binary
+    assert _ecp_is_binary(b"\x00\x01\x02binary") is True
+    assert _ecp_is_binary(b"hello world\n") is False
+    assert _ecp_is_binary(None) is False
+
+
+def test_69m_is_binary_detects_non_utf8(tmp_path) -> None:
+    from pcae.core.agent import _ecp_is_binary
+    assert _ecp_is_binary(b"\xff\xfe\x00invalid") is True
+
+
+def test_69m_hash_bytes(tmp_path) -> None:
+    from pcae.core.agent import _ecp_hash_bytes
+    import hashlib
+    data = b"hello"
+    assert _ecp_hash_bytes(data) == hashlib.sha256(data).hexdigest()
+    assert _ecp_hash_bytes(None) is None
+
+
+def test_69m_resolve_symlink_target_internal(tmp_path) -> None:
+    from pcae.core.agent import _ecp_resolve_symlink_target
+    base = tmp_path / "sandbox"
+    base.mkdir()
+    (base / "real.txt").write_text("hi")
+    (base / "link.txt").symlink_to(base / "real.txt")
+    is_symlink, external = _ecp_resolve_symlink_target(base, "link.txt")
+    assert is_symlink is True
+    assert external is None
+
+
+def test_69m_resolve_symlink_target_external_escape(tmp_path) -> None:
+    from pcae.core.agent import _ecp_resolve_symlink_target
+    base = tmp_path / "sandbox"
+    base.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("secret")
+    (base / "escape.txt").symlink_to(outside)
+    is_symlink, external = _ecp_resolve_symlink_target(base, "escape.txt")
+    assert is_symlink is True
+    assert external is not None
+    assert "outside.txt" in external
+
+
+def test_69m_resolve_symlink_target_not_a_symlink(tmp_path) -> None:
+    from pcae.core.agent import _ecp_resolve_symlink_target
+    base = tmp_path / "sandbox"
+    base.mkdir()
+    (base / "plain.txt").write_text("hi")
+    is_symlink, external = _ecp_resolve_symlink_target(base, "plain.txt")
+    assert is_symlink is False
+    assert external is None
+
+
+def test_69m_classify_exclusion_git_directory(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion(".git/config", False, None, False, False, None)
+    assert eligible is False
+    assert reason == "git_directory_excluded"
+
+
+def test_69m_classify_exclusion_pcae_directory(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion(
+        ".pcae/approvals/x.json", False, None, False, False, None,
+    )
+    assert eligible is False
+    assert reason == "governance_directory_excluded"
+
+
+def test_69m_classify_exclusion_external_symlink(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion("link.txt", True, "/etc/passwd", False, False, None)
+    assert eligible is False
+    assert reason == "symlink_escape"
+
+
+def test_69m_classify_exclusion_toolchain_artifact(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion(".venv/lib/foo.py", False, None, False, False, None)
+    assert eligible is False
+    assert reason == "toolchain_artifact_excluded"
+
+
+def test_69m_classify_exclusion_gitignored(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion("secret.env", False, None, True, False, None)
+    assert eligible is False
+    assert reason == "gitignored"
+
+
+def test_69m_classify_exclusion_oversized_binary(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion, _ECP_BINARY_SIZE_THRESHOLD_BYTES
+    eligible, reason = _ecp_classify_exclusion(
+        "big.bin", False, None, False, True, _ECP_BINARY_SIZE_THRESHOLD_BYTES + 1,
+    )
+    assert eligible is False
+    assert reason == "binary_size_threshold_exceeded"
+
+
+def test_69m_classify_exclusion_eligible(tmp_path) -> None:
+    from pcae.core.agent import _ecp_classify_exclusion
+    eligible, reason = _ecp_classify_exclusion("src/foo.py", False, None, False, False, None)
+    assert eligible is True
+    assert reason is None
+
+
+# --- ECP file-entry building -------------------------------------------------
+
+def test_69m_build_file_entries_captures_added_file(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    (sandbox_dir / "new.txt").write_text("new content\n")
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": [], "added_files": ["new.txt"], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert errors == []
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["path"] == "new.txt"
+    assert entry["change_type"] == "added"
+    assert entry["after_exists"] is True
+    assert entry["before_exists"] is False
+    assert entry["content"] == "new content\n"
+    assert entry["promotion_eligible"] is True
+
+
+def test_69m_build_file_entries_captures_diff_for_modified_file(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    (root_dir / "f.txt").write_text("line1\n")
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    (sandbox_dir / "f.txt").write_text("line1\nline2\n")
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": ["f.txt"], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["diff"] is not None
+    assert "+line2" in entry["diff"]
+    assert entry["before_content"] == "line1\n"
+    assert entry["content"] == "line1\nline2\n"
+    assert entry["before_hash"] is not None
+    assert entry["after_hash"] is not None
+    assert entry["before_hash"] != entry["after_hash"]
+
+
+def test_69m_build_file_entries_deleted_file_captures_before_content(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    (root_dir / "gone.txt").write_text("will be deleted\n")
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": [], "added_files": [], "deleted_files": ["gone.txt"],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["change_type"] == "deleted"
+    assert entry["before_content"] == "will be deleted\n"
+    assert entry["content"] is None
+    assert entry["after_exists"] is False
+
+
+def test_69m_build_file_entries_git_and_pcae_excluded(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir(parents=True)
+    (sandbox_dir / ".pcae").mkdir()
+    (sandbox_dir / ".pcae" / "evil.json").write_text("{}")
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": [], "added_files": [".pcae/evil.json"], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert len(entries) == 1
+    assert entries[0]["promotion_eligible"] is False
+    assert entries[0]["exclusion_reason"] == "governance_directory_excluded"
+
+
+def test_69m_build_file_entries_binary_content_base64(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    import base64
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    binary_data = b"\x00\x01\x02\x03binarydata"
+    (sandbox_dir / "img.bin").write_bytes(binary_data)
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": [], "added_files": ["img.bin"], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["binary"] is True
+    assert entry["diff"] is None
+    assert base64.b64decode(entry["content"]) == binary_data
+
+
+def test_69m_build_file_entries_external_symlink_not_eligible(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("secret")
+    (sandbox_dir / "escape.txt").symlink_to(outside)
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": [], "added_files": ["escape.txt"], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    entries, errors = _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert len(entries) == 1
+    assert entries[0]["symlink"] is True
+    assert entries[0]["external_target"] is not None
+    assert entries[0]["promotion_eligible"] is False
+    assert entries[0]["exclusion_reason"] == "symlink_escape"
+
+
+def test_69m_build_file_entries_no_root_mutation(tmp_path) -> None:
+    from pcae.core.agent import _ecp_build_file_entries
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    (root_dir / "existing.txt").write_text("original")
+    sandbox_dir = tmp_path / "sandbox"
+    sandbox_dir.mkdir()
+    (sandbox_dir / "existing.txt").write_text("modified in sandbox")
+    root = HarnessPath(root_dir)
+    changes = {
+        "modified_files": ["existing.txt"], "added_files": [], "deleted_files": [],
+        "untracked_added": [], "untracked_removed": [],
+    }
+    _ecp_build_file_entries(root, str(sandbox_dir), changes, frozenset())
+    assert (root_dir / "existing.txt").read_text() == "original"
+
+
+# --- ECP validate / store / lookup -------------------------------------------
+
+def test_69m_ecp_validate_rejects_missing_fields(tmp_path) -> None:
+    from pcae.core.agent import _ecp_validate
+    errors = _ecp_validate({})
+    assert "missing_ecp_id" in errors
+    assert "missing_prompt_id" in errors
+    assert "invalid_capture_outcome" in errors
+
+
+def test_69m_ecp_validate_rejects_execution_allowed_true(tmp_path) -> None:
+    from pcae.core.agent import _ecp_validate
+    record = {
+        "ecp_id": "ecp-x", "prompt_id": "p", "authorization_id": "a", "audit_id": "ea",
+        "execution_result_id": "err-x", "captured_at": "2026-06-16T00:00:00+00:00",
+        "capture_outcome": "success", "execution_allowed": True,
+        "promotion_executed": False, "rollback_executed": False,
+    }
+    errors = _ecp_validate(record)
+    assert "execution_allowed_must_be_false" in errors
+
+
+def test_69m_ecp_validate_accepts_failed_outcome(tmp_path) -> None:
+    from pcae.core.agent import _ecp_validate
+    record = {
+        "ecp_id": "ecp-x", "prompt_id": "p", "authorization_id": "a", "audit_id": "ea",
+        "execution_result_id": "err-x", "captured_at": "2026-06-16T00:00:00+00:00",
+        "capture_outcome": "failed", "execution_allowed": False,
+        "promotion_executed": False, "rollback_executed": False,
+    }
+    assert _ecp_validate(record) == []
+
+
+def test_69m_store_and_lookup_execution_change_package(tmp_path) -> None:
+    from pcae.core.agent import lookup_execution_change_package
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-test-1")
+    looked_up = lookup_execution_change_package(root, "ecp-test-1")
+    assert looked_up is not None
+    assert looked_up["ecp_id"] == "ecp-test-1"
+
+
+def test_69m_lookup_execution_change_package_not_found(tmp_path) -> None:
+    from pcae.core.agent import lookup_execution_change_package
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    assert lookup_execution_change_package(root, "nonexistent") is None
+
+
+def test_69m_list_execution_change_packages_filters_by_prompt(tmp_path) -> None:
+    from pcae.core.agent import list_execution_change_packages
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-list-1")
+    records = list_execution_change_packages(root, "p-test")
+    assert len(records) == 1
+    assert list_execution_change_packages(root, "nonexistent-prompt") == []
+
+
+# --- EPR validate -------------------------------------------------------------
+
+def test_69m_epr_validate_rejects_missing_fields(tmp_path) -> None:
+    from pcae.core.agent import _epr_validate
+    errors = _epr_validate({})
+    assert "missing_epr_id" in errors
+    assert "missing_ecp_id" in errors
+    assert "invalid_human_disposition" in errors
+
+
+def test_69m_epr_validate_requires_reviewer_for_terminal_disposition(tmp_path) -> None:
+    from pcae.core.agent import _epr_validate
+    record = {
+        "epr_id": "epr-x", "ecp_id": "ecp-x", "prompt_id": "p",
+        "created_at": "2026-06-16T00:00:00+00:00", "human_disposition": "approved",
+        "execution_allowed": False, "promotion_executed": False,
+    }
+    errors = _epr_validate(record)
+    assert "missing_reviewed_by" in errors
+    assert "missing_reviewed_at" in errors
+
+
+def test_69m_epr_validate_does_not_require_reviewer_for_deferred(tmp_path) -> None:
+    from pcae.core.agent import _epr_validate
+    record = {
+        "epr_id": "epr-x", "ecp_id": "ecp-x", "prompt_id": "p",
+        "created_at": "2026-06-16T00:00:00+00:00", "human_disposition": "deferred",
+        "execution_allowed": False, "promotion_executed": False,
+    }
+    errors = _epr_validate(record)
+    assert "missing_reviewed_by" not in errors
+
+
+# --- build_promotion_review gates and lifecycle ------------------------------
+
+def test_69m_build_promotion_review_blocked_when_ecp_missing(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    result = build_promotion_review(root, "nonexistent-ecp", "approved", reviewed_by="human-1")
+    assert result["created"] is False
+    assert result["error"] == "ecp_not_found"
+
+
+def test_69m_build_promotion_review_blocked_when_not_reviewable(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-failed", capture_outcome="failed")
+    result = build_promotion_review(root, "ecp-failed", "approved", reviewed_by="human-1")
+    assert result["created"] is False
+    assert result["error"] == "ecp_not_reviewable"
+
+
+def test_69m_build_promotion_review_rejects_ineligible_paths(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    entries = [
+        {"path": "ok.txt", "promotion_eligible": True},
+        {"path": ".git/config", "promotion_eligible": False,
+         "exclusion_reason": "git_directory_excluded"},
+    ]
+    _store_test_ecp(root, ecp_id="ecp-mixed", file_entries=entries)
+    result = build_promotion_review(
+        root, "ecp-mixed", "approved", reviewed_by="human-1", approved_paths=[".git/config"],
+    )
+    assert result["created"] is False
+    assert result["error"] == "ineligible_paths_requested"
+    assert ".git/config" in result["invalid_paths"]
+
+
+def test_69m_build_promotion_review_full_approval_defaults_to_all_eligible(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    entries = [
+        {"path": "a.txt", "promotion_eligible": True},
+        {"path": "b.txt", "promotion_eligible": True},
+    ]
+    _store_test_ecp(root, ecp_id="ecp-full", file_entries=entries)
+    result = build_promotion_review(root, "ecp-full", "approved", reviewed_by="human-1")
+    assert result["created"] is True
+    assert result["partial_approval"] is False
+    assert sorted(result["approved_paths"]) == ["a.txt", "b.txt"]
+    assert result["execution_allowed"] is False
+    assert result["promotion_executed"] is False
+
+
+def test_69m_build_promotion_review_partial_approval(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    entries = [
+        {"path": "a.txt", "promotion_eligible": True},
+        {"path": "b.txt", "promotion_eligible": True},
+    ]
+    _store_test_ecp(root, ecp_id="ecp-partial", file_entries=entries)
+    result = build_promotion_review(
+        root, "ecp-partial", "approved", reviewed_by="human-1", approved_paths=["a.txt"],
+    )
+    assert result["created"] is True
+    assert result["partial_approval"] is True
+    assert result["approved_paths"] == ["a.txt"]
+    assert result["rejected_paths"] == ["b.txt"]
+    assert result["review_state"] == "partial_approved"
+
+
+def test_69m_build_promotion_review_rejection_is_terminal(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review, lookup_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-reject")
+    result = build_promotion_review(root, "ecp-reject", "rejected", reviewed_by="human-1")
+    assert result["created"] is True
+    assert result["review_state"] == "rejected"
+    stored = lookup_promotion_review(root, result["epr_id"])
+    assert stored["review_state"] == "rejected"
+
+
+def test_69m_build_promotion_review_promotion_authorized_requires_approved(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-defer")
+    result = build_promotion_review(
+        root, "ecp-defer", "deferred", reviewed_by="human-1", promotion_authorized=True,
+    )
+    assert result["created"] is True
+    assert result["promotion_authorized"] is False
+
+
+def test_69m_build_promotion_review_never_modifies_root(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "myroot"
+    root_dir.mkdir()
+    (root_dir / "existing.txt").write_text("untouched")
+    root = HarnessPath(root_dir)
+    _store_test_ecp(root, ecp_id="ecp-rootcheck")
+    build_promotion_review(root, "ecp-rootcheck", "approved", reviewed_by="human-1")
+    assert (root_dir / "existing.txt").read_text() == "untouched"
+    extra = [p for p in root_dir.iterdir() if p.name not in ("existing.txt", ".pcae")]
+    assert extra == []
+
+
+def test_69m_list_promotion_reviews_filters_by_ecp(tmp_path) -> None:
+    from pcae.core.agent import build_promotion_review, list_promotion_reviews
+    from pcae.core.paths import HarnessPath
+    root = HarnessPath(tmp_path)
+    _store_test_ecp(root, ecp_id="ecp-listme")
+    build_promotion_review(root, "ecp-listme", "approved", reviewed_by="human-1")
+    records = list_promotion_reviews(root, "ecp-listme")
+    assert len(records) == 1
+    assert list_promotion_reviews(root, "nonexistent-ecp") == []
+
+
+# --- invoke_readonly_execution / Condition 14 integration -------------------
+
+def test_69m_ecp_created_automatically_on_invoke(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_change_package
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert result["ecp_created"] is True
+    assert result["execution_reviewable"] is True
+    ecp = lookup_execution_change_package(root, result["ecp_id"])
+    assert ecp is not None
+    assert ecp["capture_outcome"] == "success"
+
+
+def test_69m_err_carries_ecp_fields(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    for field in ("ecp_id", "ecp_created", "execution_reviewable", "ecp_capture_errors"):
+        assert field in stored, f"ERR missing field: {field}"
+    assert stored["execution_reviewable"] is True
+
+
+def test_69m_invoke_result_carries_ecp_boundaries(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert "ecp_governance_boundaries" in result
+    assert "ecp_advisory" in result
+    assert result["ecp_governance_boundaries"]["execution_allowed"] is False
+
+
+def test_69m_ecp_capture_runs_before_sandbox_destroy(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution
+    import pcae.core.agent as agent_module
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+
+    ordering: list[str] = []
+    real_ecp_capture = agent_module._ecp_capture
+
+    def _tracking_ecp_capture(*args, **kwargs):
+        ordering.append("ecp_capture")
+        return real_ecp_capture(*args, **kwargs)
+
+    def _tracking_destroy(r, sandbox_dir):
+        ordering.append("destroy")
+        return {"destroyed": True, "errors": []}
+
+    monkeypatch.setattr("pcae.core.agent._ecp_capture", _tracking_ecp_capture)
+    monkeypatch.setattr("pcae.core.agent._esb_destroy_sandbox", _tracking_destroy)
+    invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+    assert "ecp_capture" in ordering and "destroy" in ordering
+    assert ordering.index("ecp_capture") < ordering.index("destroy"), (
+        "ECP capture (Condition 14) must precede sandbox destroy"
+    )
+
+
+def test_69m_sandbox_destroyed_and_err_stored_when_ecp_capture_raises(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import invoke_readonly_execution, lookup_execution_result
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+
+    def _raising_ecp_capture(*args, **kwargs):
+        raise RuntimeError("simulated unexpected capture failure")
+
+    destroyed: list[bool] = []
+
+    def _tracking_destroy(r, sandbox_dir):
+        destroyed.append(True)
+        return {"destroyed": True, "errors": []}
+
+    monkeypatch.setattr("pcae.core.agent._ecp_capture", _raising_ecp_capture)
+    monkeypatch.setattr("pcae.core.agent._esb_destroy_sandbox", _tracking_destroy)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+
+    assert destroyed == [True], "sandbox destruction must proceed even if ECP capture raises"
+    assert result["execution_occurred"] is True, (
+        "Condition 14 failure must not retroactively set execution_occurred=False"
+    )
+    assert result["execution_reviewable"] is False
+    assert result["ecp_created"] is False
+    assert any("ecp_capture_call_exception" in e for e in result["ecp_capture_errors"])
+    stored = lookup_execution_result(root, result["execution_result_id"])
+    assert stored is not None, "ERR must still be created when ECP capture fails"
+    assert stored["execution_reviewable"] is False
+
+
+def test_69m_ecp_capture_internal_failure_yields_stored_failed_record(tmp_path, monkeypatch) -> None:
+    from pcae.core.agent import (
+        invoke_readonly_execution, lookup_execution_change_package,
+    )
+    root, prompt_id, authorization_id, audit_id = _make_invokable_fixtures(tmp_path, monkeypatch)
+    monkeypatch.setattr("pcae.core.agent._esa_capture_git_state", _mock_git_ok())
+    monkeypatch.setattr("pcae.core.agent._ega_run_subprocess", _mock_subprocess_success)
+
+    def _broken_build_file_entries(*args, **kwargs):
+        raise ValueError("simulated internal capture failure")
+
+    monkeypatch.setattr("pcae.core.agent._ecp_build_file_entries", _broken_build_file_entries)
+    result = invoke_readonly_execution(root, prompt_id, authorization_id, audit_id)
+
+    assert result["execution_occurred"] is True
+    assert result["execution_reviewable"] is False
+    assert result["ecp_created"] is True, "a failed-outcome ECP must still be stored, never absent"
+    ecp = lookup_execution_change_package(root, result["ecp_id"])
+    assert ecp is not None
+    assert ecp["capture_outcome"] == "failed"
+    assert any("ecp_capture_exception" in e for e in ecp["capture_errors"])
+
+
+# --- Strategic lineage --------------------------------------------------------
+
+def test_69m_strategic_lineage_has_slr_69m_001(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    ids = [r.get("lineage_id", "") for r in records]
+    assert "SLR-69M-001" in ids, "SLR-69M-001 must be in strategic-lineage.json"
+    slr = next(r for r in records if r["lineage_id"] == "SLR-69M-001")
+    assert slr["supersedes_lineage_id"] == "SLR-69L-001"
+
+
+def test_69m_ten_slr_entries_present(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    slr = next((r for r in records if r.get("lineage_id") == "SLR-69M-001"), None)
+    assert slr is not None
+    debt = slr.get("roadmap_debt", [])
+    assert len(debt) == 10, f"SLR-69M-001 must have 10 roadmap_debt entries, got {len(debt)}"
+    for i in range(1, 11):
+        assert any(f"SLR-69M-{i:03d}" in d for d in debt), f"SLR-69M-{i:03d} missing from roadmap_debt"

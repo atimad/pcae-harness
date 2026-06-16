@@ -138,6 +138,13 @@ from pcae.core.agent import (
     list_execution_change_candidates,
     list_execution_change_records,
     EXECUTION_CHANGE_RECORD_ADVISORY,
+    lookup_execution_change_package,
+    list_execution_change_packages,
+    EXECUTION_CHANGE_PACKAGE_ADVISORY,
+    build_promotion_review,
+    lookup_promotion_review,
+    list_promotion_reviews,
+    EXECUTION_PROMOTION_REVIEW_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -15631,4 +15638,150 @@ def run_execution_change_list_candidates(args: argparse.Namespace) -> int:
               f"  severity={r['change_severity']}  rollback_executed={r['rollback_executed']}")
     print()
     print(EXECUTION_CHANGE_RECORD_ADVISORY)
+    return 0
+
+
+def run_execution_change_package_show(args: argparse.Namespace) -> int:
+    record = lookup_execution_change_package(HarnessPath.cwd(), args.ecp_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "ecp_not_found", "ecp_id": args.ecp_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"ExecutionChangePackage: NOT FOUND — {args.ecp_id}")
+        return 1
+
+    print("ExecutionChangePackage")
+    print(f"  ecp_id:                 {record['ecp_id']}")
+    print(f"  prompt_id:              {record['prompt_id']}")
+    print(f"  execution_result_id:    {record['execution_result_id']}")
+    print(f"  captured_at:            {record['captured_at']}")
+    print(f"  capture_outcome:        {record['capture_outcome']}")
+    print(f"  file_count:             {record['file_count']}")
+    print(f"  promotion_eligible_count: {record.get('promotion_eligible_count')}")
+    print(f"  excluded_file_count:    {record.get('excluded_file_count')}")
+    print(f"  git_head_diverged:      {record.get('git_head_diverged')}")
+    print(f"  git_commit_detected:    {record.get('git_commit_detected')}")
+    if record.get("capture_errors"):
+        print(f"  capture_errors:         {record['capture_errors']}")
+    print(f"  execution_allowed:      {record['execution_allowed']}")
+    print(f"  promotion_executed:     {record['promotion_executed']}")
+    print()
+    print(EXECUTION_CHANGE_PACKAGE_ADVISORY)
+    return 0
+
+
+def run_execution_change_package_list(args: argparse.Namespace) -> int:
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_execution_change_packages(HarnessPath.cwd(), prompt_id)
+    if args.json:
+        print(json.dumps(
+            {"prompt_id": prompt_id, "packages": records, "count": len(records)},
+            indent=2, sort_keys=True,
+        ))
+        return 0
+
+    label = f" for {prompt_id}" if prompt_id else ""
+    print(f"ExecutionChangePackages{label}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['ecp_id']}  outcome={r['capture_outcome']}  files={r['file_count']}")
+    return 0
+
+
+def run_promotion_review_create(args: argparse.Namespace) -> int:
+    result = build_promotion_review(
+        HarnessPath.cwd(),
+        args.ecp_id,
+        args.disposition,
+        reviewed_by=args.reviewed_by,
+        approved_paths=list(args.approved_paths or []) or None,
+        required_modifications=list(args.required_modifications or []),
+        review_rationale=args.review_rationale,
+        promotion_authorized=args.promotion_authorized,
+        override_divergence=args.override_divergence,
+        override_divergence_rationale=args.override_divergence_rationale,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("created") else 1
+
+    if not result.get("created"):
+        print("ExecutionPromotionReview: CREATION FAILED")
+        print(f"  error: {result.get('error', 'unknown')}")
+        for err in result.get("errors", []):
+            print(f"  - {err}")
+        if result.get("invalid_paths"):
+            print(f"  invalid_paths: {result['invalid_paths']}")
+        print()
+        print(EXECUTION_PROMOTION_REVIEW_ADVISORY)
+        return 1
+
+    print("ExecutionPromotionReview: CREATED")
+    print(f"  epr_id:              {result['epr_id']}")
+    print(f"  ecp_id:              {result['ecp_id']}")
+    print(f"  review_state:        {result['review_state']}")
+    print(f"  human_disposition:   {result['human_disposition']}")
+    print(f"  partial_approval:    {result['partial_approval']}")
+    print(f"  approved_paths:      {result['approved_paths']}")
+    print(f"  rejected_paths:      {result['rejected_paths']}")
+    print(f"  promotion_authorized: {result['promotion_authorized']}")
+    print(f"  execution_allowed:   {result['execution_allowed']}")
+    print(f"  promotion_executed:  {result['promotion_executed']}")
+    print()
+    print(EXECUTION_PROMOTION_REVIEW_ADVISORY)
+    return 0
+
+
+def run_promotion_review_show(args: argparse.Namespace) -> int:
+    record = lookup_promotion_review(HarnessPath.cwd(), args.epr_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "epr_not_found", "epr_id": args.epr_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"ExecutionPromotionReview: NOT FOUND — {args.epr_id}")
+        return 1
+
+    print("ExecutionPromotionReview")
+    print(f"  epr_id:              {record['epr_id']}")
+    print(f"  ecp_id:              {record['ecp_id']}")
+    print(f"  review_state:        {record['review_state']}")
+    print(f"  human_disposition:   {record['human_disposition']}")
+    print(f"  partial_approval:    {record['partial_approval']}")
+    print(f"  reviewed_by:         {record.get('reviewed_by')}")
+    print(f"  reviewed_at:         {record.get('reviewed_at')}")
+    print(f"  promotion_authorized: {record['promotion_authorized']}")
+    print(f"  execution_allowed:   {record['execution_allowed']}")
+    print(f"  promotion_executed:  {record['promotion_executed']}")
+    print()
+    print(EXECUTION_PROMOTION_REVIEW_ADVISORY)
+    return 0
+
+
+def run_promotion_review_list(args: argparse.Namespace) -> int:
+    ecp_id = getattr(args, "ecp_id", None)
+    records = list_promotion_reviews(HarnessPath.cwd(), ecp_id)
+    if args.json:
+        print(json.dumps(
+            {"ecp_id": ecp_id, "reviews": records, "count": len(records)},
+            indent=2, sort_keys=True,
+        ))
+        return 0
+
+    label = f" for {ecp_id}" if ecp_id else ""
+    print(f"ExecutionPromotionReviews{label}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['epr_id']}  state={r['review_state']}")
     return 0

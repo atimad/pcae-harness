@@ -70169,6 +70169,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": [],
         "dependencies": ["automatic_snapshot_integration"],
+        "successor_capabilities": ["execution_change_package_and_promotion_review"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Change Package and Promotion Review",
+        "implemented_phase": "69M",
+        "status": "implemented",
+        "commands": [
+            "execution-change-package",
+            "promotion-review",
+        ],
+        "introduced_commands": ["execution-change-package", "promotion-review"],
+        "dependencies": ["execution_sandboxing_architecture"],
         "successor_capabilities": [],
     },
 )
@@ -71214,8 +71227,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69L",
         "phase_title": "Execution Sandboxing Architecture",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69K",
+        "successor": "69M",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69M",
+        "phase_title": "Write Governance Design",
+        "status": "active",
+        "predecessor": "69L",
         "successor": "",
         "superseded_by": "",
     },
@@ -72473,7 +72495,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "automatic_snapshot_integration",
         ],
-        "successors": [],
+        "successors": ["execution_change_package_and_promotion_review"],
         "aliases": [],
         "contribution": (
             "introduces workspace isolation for invoke_readonly_execution via git worktree + rsync overlay; "
@@ -72493,6 +72515,47 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "_ESB_PRODUCTION_READINESS_CRITERIA defines 8 formal criteria; "
             "production_containment_ready=False; workspace_isolation is development containment; "
             "SLR-69L-001 through SLR-69L-006 document forward-compatibility constraints"
+        ),
+    },
+    {
+        "capability_name": "Execution Change Package and Promotion Review",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69M",
+        "status": "implemented",
+        "commands": [
+            "pcae execution-change-package show --ecp-id <id>",
+            "pcae execution-change-package list --prompt-id <id>",
+            "pcae promotion-review create --ecp-id <id> --reviewed-by <human> --disposition <disposition>",
+            "pcae promotion-review show --epr-id <id>",
+            "pcae promotion-review list --ecp-id <id>",
+        ],
+        "dependencies": [
+            "execution_sandboxing_architecture",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces ExecutionChangePackage (ECP) store (.pcae/execution-packages/) and "
+            "ExecutionPromotionReview (EPR) store (.pcae/promotion-reviews/); "
+            "ECP captures sandbox-produced file content, diffs, before/after hashes, binary and "
+            "symlink classification, and per-file promotion_eligible decisions before sandbox "
+            "destruction -- closing SLR-69L-004 (ECR captures paths not content); "
+            "Condition 14 is the first post-execution governance condition: ECP capture attempt "
+            "is mandatory and ordering-enforced before sandbox destruction, but capture success "
+            "is not mandated -- failure is always recorded (capture_outcome=\"failed\") and surfaced "
+            "as execution_reviewable=False rather than retroactively blocking execution_occurred; "
+            "sandbox destruction proceeds regardless of ECP outcome (preserves ESB-C-003/004); "
+            ".git/ and .pcae/ are permanently excluded from promotion eligibility; external "
+            "symlinks are permanently non-promotable; gitignored and oversized binary files are "
+            "excluded by default; git_commit_detected (via git_head_diverged) is recorded for "
+            "future promotion blocking; EPR records a human's content-level review of a specific "
+            "ECP with partial-path approval support, distinct from ERRA (execution result review); "
+            "EPR creation is blocked when the referenced ECP is not execution_reviewable; "
+            "promotion_authorized is a separate explicit flag from review disposition; "
+            "no promotion execution, no rollback execution, no git commit, no git push, no "
+            "automatic promotion; production_containment_ready=False unchanged; "
+            "SLR-69M-001 documents the accepted scope (ECP + EPR only) and forward-compatibility "
+            "constraints for a future promotion-execution phase"
         ),
     },
     {
@@ -74981,7 +75044,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69L",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69L-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69L",
@@ -74989,7 +75052,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69L",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69L-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69L",
@@ -74997,10 +75060,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69L",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69L-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69L",
+    },
+    {
+        "phase_id": "69M",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69M-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69M",
+    },
+    {
+        "phase_id": "69M",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69M-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69M",
+    },
+    {
+        "phase_id": "69M",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69M-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69M",
     },
 )
 
@@ -80863,7 +80950,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69L",
+        "current_phase": "69M",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81627,6 +81714,24 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "post_state captured from sandbox before destruction; ECR sources sandbox post_state; "
             "ERR schema expanded with sandbox_mode=workspace_isolation, sandbox_id, sandbox_provider; "
             "six SLR-69L entries document forward-compatibility constraints for 69M"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_change_package_and_promotion_review",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces ECP (.pcae/execution-packages/) capturing sandbox file content, diffs, "
+            "hashes, and per-file promotion_eligible decisions before sandbox destruction; "
+            "introduces EPR (.pcae/promotion-reviews/) recording human content-level review of "
+            "an ECP with partial-path approval; Condition 14 (post-execution governance condition) "
+            "makes ECP capture attempt mandatory and ordering-enforced while capture success "
+            "remains optional and never silent; sandbox destruction proceeds regardless of ECP "
+            "outcome; .git/, .pcae/, and external symlinks permanently excluded from promotion "
+            "eligibility; no promotion execution, no rollback execution, no git commit/push; "
+            "SLR-69M-001 documents the accepted scope and forward-compatibility constraints"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -90381,6 +90486,9 @@ def invoke_readonly_execution(
             "ecr_created": False,
             "ecr_id": None,
             "ecr_capture_errors": [],
+            "ecp_id": None,
+            "ecp_created": False,
+            "execution_reviewable": False,
             "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
             "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
             "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
@@ -90425,6 +90533,9 @@ def invoke_readonly_execution(
             "ecr_created": False,
             "ecr_id": None,
             "ecr_capture_errors": [],
+            "ecp_id": None,
+            "ecp_created": False,
+            "execution_reviewable": False,
             "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
             "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
             "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
@@ -90447,7 +90558,38 @@ def invoke_readonly_execution(
     if sandbox_dir is not None:
         post_state = _esa_capture_git_state(root, cwd_path=sandbox_dir)
 
+    # ── Phase 69M: Condition 14 — mandatory ECP capture attempt ──────────────
+    # Post-execution governance condition: execution has already occurred and
+    # cannot be retroactively blocked. The *attempt* is mandatory and ordering-
+    # enforced (must run before sandbox destruction); capture *success* is not
+    # mandated. Failure is always recorded as a stored ECP (capture_outcome=
+    # "failed") and surfaced via execution_reviewable=False -- never silent.
+    esa_for_ecp = lookup_execution_snapshot(root, snapshot_id) if snapshot_id else None
+    ecp_id: str | None = None
+    ecp_created: bool = False
+    execution_reviewable: bool = False
+    ecp_capture_errors: list[str] = []
+    if esa_for_ecp is not None:
+        # Defense in depth: the mandatory-attempt-never-blocks guarantee is
+        # primarily enforced inside _ecp_capture's own try/except, but this
+        # call-site guard ensures that even an unanticipated failure (e.g. in
+        # _ecr_diff_snapshots or the final store call) cannot prevent sandbox
+        # destruction or ERR creation from proceeding.
+        try:
+            ecp_result = _ecp_capture(
+                root, esa_for_ecp, sandbox_dir, sandbox_id,
+                post_state or {}, result_id,
+            )
+            ecp_id = ecp_result.get("ecp_id")
+            ecp_created = ecp_result.get("created", False)
+            execution_reviewable = ecp_result.get("execution_reviewable", False)
+            ecp_capture_errors = ecp_result.get("capture_errors", [])
+        except Exception as exc:
+            ecp_capture_errors = [f"ecp_capture_call_exception:{type(exc).__name__}"]
+
     # ── Phase 69L: Destroy sandbox (advisory on failure) ─────────────────────
+    # Sandbox destruction proceeds regardless of ECP capture outcome — this
+    # preserves the ESB-C-003/004 cleanup guarantees established in 69L.
     if sandbox_dir is not None:
         _esb_destroy_sandbox(root, sandbox_dir)
 
@@ -90505,6 +90647,11 @@ def invoke_readonly_execution(
         "ecr_created": ecr_created,
         "ecr_id": ecr_id,
         "ecr_capture_errors": ecr_capture_errors,
+        # ── Phase 69M: ECP linkage / Condition 14 reviewability ──────────────
+        "ecp_id": ecp_id,
+        "ecp_created": ecp_created,
+        "execution_reviewable": execution_reviewable,
+        "ecp_capture_errors": ecp_capture_errors,
     }
 
     store_result = store_execution_result(root, err_record)
@@ -90539,12 +90686,19 @@ def invoke_readonly_execution(
         "ecr_created": ecr_created,
         "ecr_id": ecr_id,
         "ecr_capture_errors": ecr_capture_errors,
+        # ── Phase 69M: ECP linkage / Condition 14 reviewability ──────────────
+        "ecp_id": ecp_id,
+        "ecp_created": ecp_created,
+        "execution_reviewable": execution_reviewable,
+        "ecp_capture_errors": ecp_capture_errors,
         "governance_boundaries": dict(_EGA_GOVERNANCE_BOUNDARIES),
         "easi_governance_boundaries": dict(_EASI_GOVERNANCE_BOUNDARIES),
         "esb_governance_boundaries": dict(_ESB_GOVERNANCE_BOUNDARIES),
+        "ecp_governance_boundaries": dict(_ECP_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ACTIVATION_ADVISORY,
         "easi_advisory": EASI_ADVISORY,
         "esb_advisory": ESB_ADVISORY,
+        "ecp_advisory": EXECUTION_CHANGE_PACKAGE_ADVISORY,
     }
 
 
@@ -91642,4 +91796,684 @@ def _easi_create_automatic_ecr(
         "rollback_candidate": rollback_candidate,
         "rollback_executed": False,
         "execution_allowed": False,
+    }
+
+
+# ── Phase 69M: Execution Change Package (ECP) ────────────────────────────────
+# ECP is the canonical evidence artifact for sandbox-produced content: file
+# content, diffs, hashes, and per-file promotion eligibility. ECR (69J) only
+# records file *names* that changed; ECP records what those files *contain*.
+#
+# Condition 14 is the first post-execution governance condition. Conditions
+# 1-13 are pre-execution: failure prevents execution and sets
+# execution_occurred=False. Condition 14 evaluates after execution has already
+# occurred inside the sandbox and cannot retroactively block it. ECP capture
+# is a mandatory, ordering-enforced *attempt* (before sandbox destruction);
+# capture *success* is not mandated. Failure is always recorded as a stored
+# ECP with capture_outcome="failed" and never silently absent -- it sets
+# execution_reviewable=False instead of blocking anything retroactively.
+
+_ECP_PHASE_ID: str = "69M"
+_ECP_STORE_DIR: Path = Path(".pcae") / "execution-packages"
+_ECP_VERSION: str = "1.0"
+_ECP_CAPTURE_TIMEOUT_SECONDS: int = 30
+_ECP_BINARY_SIZE_THRESHOLD_BYTES: int = 1_000_000
+
+_ECP_VALID_CAPTURE_OUTCOMES: frozenset[str] = frozenset({"success", "failed"})
+
+_ECP_HARD_EXCLUDED_EXACT: frozenset[str] = frozenset({".git", ".pcae"})
+_ECP_HARD_EXCLUDED_PREFIXES: tuple[str, ...] = (".git/", ".pcae/")
+
+_ECP_DEFAULT_EXCLUDED_PREFIXES: tuple[str, ...] = (
+    ".venv/", "__pycache__/", ".pytest_cache/", "dist/", "build/",
+    "node_modules/", ".mypy_cache/", ".ruff_cache/",
+)
+
+_ECP_GOVERNANCE_BOUNDARIES: dict = {
+    # Fundamental separations
+    "ecp_is_not_promotion": True,
+    "ecp_is_not_approval": True,
+    "ecp_is_not_authorization": True,
+    "ecp_does_not_modify_root": True,
+    "ecp_creation_does_not_trigger_promotion": True,
+    "ecp_is_immutable_after_creation": True,
+    # Sandbox semantics
+    "sandbox_changes_are_not_root_changes": True,
+    "ecp_captures_sandbox_state_not_root_state": True,
+    "sandbox_destruction_does_not_remove_ecp": True,
+    # Rollback
+    "rollback_candidate_is_not_rollback_authorization": True,
+    "ecp_before_content_is_not_rollback_execution": True,
+    "automatic_rollback_allowed": False,
+    "rollback_executed": False,
+    # Hard exclusions (cannot be overridden by EPR)
+    "git_directory_promotable": False,
+    "pcae_directory_promotable": False,
+    "external_symlink_promotable": False,
+    "automatic_promotion_allowed": False,
+    # Execution gates
+    "execution_allowed": False,
+    "promotion_executed": False,
+    "git_add_forbidden": True,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    # Integrity
+    "ecp_hash_verification_required_before_promotion": True,
+    "partial_approval_does_not_authorize_rejected_paths": True,
+    "epr_must_reference_valid_ecp": True,
+    # Production readiness
+    "production_containment_ready": False,
+    "development_containment_ready_unchanged": True,
+    "production_containment_ready_requires_esb_criteria_all_pass": True,
+    # Condition 14: mandatory attempt, failure is recorded never silent
+    "ecp_capture_attempt_is_mandatory": True,
+    "ecp_capture_success_is_not_mandatory": True,
+    "sandbox_destruction_proceeds_regardless_of_ecp_outcome": True,
+    "execution_reviewable_false_blocks_epr_creation": True,
+    # Post-execution governance condition category (documentation-only;
+    # no new artifact, command, gate, or semantic change from this label)
+    "condition_14_category": "post_execution",
+    "post_execution_condition_cannot_retroactively_set_execution_occurred_false": True,
+    "post_execution_condition_failure_sets_reviewability_flag_not_blocker": True,
+}
+
+EXECUTION_CHANGE_PACKAGE_ADVISORY: str = (
+    "ExecutionChangePackage (ECP) captures sandbox-produced file content, diffs, and "
+    "hashes before sandbox destruction. ecp_is_not_promotion=True. "
+    "ecp_does_not_modify_root=True. execution_allowed=False. promotion_executed=False. "
+    "automatic_promotion_allowed=False. .git/ and .pcae/ are permanently excluded from "
+    "promotion eligibility; external symlinks are permanently non-promotable. "
+    "Condition 14 is the first post-execution governance condition: unlike Conditions "
+    "1-13 (pre-execution; failure sets execution_occurred=False), Condition 14 evaluates "
+    "after execution has occurred and cannot retroactively block it; failure sets "
+    "execution_reviewable=False instead. ECP capture attempt is mandatory and "
+    "ordering-enforced before sandbox destruction; capture success is not mandated -- "
+    "failure is always recorded, never silent."
+)
+
+
+def _ecp_is_binary(data: bytes | None) -> bool:
+    if data is None:
+        return False
+    if b"\x00" in data[:8192]:
+        return True
+    try:
+        data.decode("utf-8")
+        return False
+    except UnicodeDecodeError:
+        return True
+
+
+def _ecp_hash_bytes(data: bytes | None) -> str | None:
+    if data is None:
+        return None
+    return hashlib.sha256(data).hexdigest()
+
+
+def _ecp_read_file_bytes(path: "Path") -> bytes | None:
+    try:
+        return path.read_bytes()
+    except Exception:
+        return None
+
+
+def _ecp_resolve_symlink_target(base_dir: "Path", rel_path: str) -> tuple[bool, str | None]:
+    """Return (is_symlink, external_target). external_target is None unless the
+    resolved symlink target escapes base_dir."""
+    import os as _os
+
+    full = base_dir / rel_path
+    try:
+        if not full.is_symlink():
+            return False, None
+        target = _os.path.realpath(str(full))
+        base_real = _os.path.realpath(str(base_dir))
+        if target == base_real or target.startswith(base_real + _os.sep):
+            return True, None
+        return True, target
+    except Exception:
+        return False, None
+
+
+def _ecp_compute_gitignored(root: "HarnessPath", paths: list[str]) -> frozenset[str]:
+    """Batched, advisory git check-ignore. Returns empty set on any failure."""
+    if not paths:
+        return frozenset()
+    try:
+        proc = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            input="\n".join(paths).encode("utf-8"),
+            capture_output=True,
+            timeout=_ESA_GIT_TIMEOUT_SECONDS,
+            shell=False,
+            cwd=str(root.path),
+        )
+        out = proc.stdout.decode("utf-8", errors="replace")
+        return frozenset(line for line in out.splitlines() if line)
+    except Exception:
+        return frozenset()
+
+
+def _ecp_classify_exclusion(
+    path: str,
+    symlink: bool,
+    external_target: str | None,
+    gitignored: bool,
+    binary: bool,
+    after_size: int | None,
+) -> tuple[bool, str | None]:
+    """Return (promotion_eligible, exclusion_reason)."""
+    if path in _ECP_HARD_EXCLUDED_EXACT or any(
+        path.startswith(p) for p in _ECP_HARD_EXCLUDED_PREFIXES
+    ):
+        reason = "governance_directory_excluded" if path.startswith(".pcae") else "git_directory_excluded"
+        return False, reason
+    if symlink and external_target is not None:
+        return False, "symlink_escape"
+    if any(path.startswith(p) for p in _ECP_DEFAULT_EXCLUDED_PREFIXES):
+        return False, "toolchain_artifact_excluded"
+    if gitignored:
+        return False, "gitignored"
+    if binary and after_size is not None and after_size > _ECP_BINARY_SIZE_THRESHOLD_BYTES:
+        return False, "binary_size_threshold_exceeded"
+    return True, None
+
+
+def _ecp_build_file_entries(
+    root: "HarnessPath",
+    sandbox_dir: str | None,
+    changes: dict,
+    gitignored_set: frozenset[str],
+) -> tuple[list[dict], list[str]]:
+    """Build ECP FileEntry list by reading content from root (before) and
+    sandbox_dir (after) for every path the ECR-style diff identified as changed.
+    Never raises -- per-file errors are appended to capture_errors."""
+    import base64 as _base64
+    import difflib as _difflib
+    import time as _time
+
+    capture_errors: list[str] = []
+    candidate_paths: dict[str, str] = {}
+    for p in changes.get("modified_files", []):
+        candidate_paths[p] = "modified"
+    for p in changes.get("added_files", []):
+        candidate_paths[p] = "added"
+    for p in changes.get("deleted_files", []):
+        candidate_paths[p] = "deleted"
+    for p in changes.get("untracked_added", []):
+        candidate_paths.setdefault(p, "added")
+    for p in changes.get("untracked_removed", []):
+        candidate_paths.setdefault(p, "deleted")
+
+    entries: list[dict] = []
+    root_path = root.path
+    sandbox_path = Path(sandbox_dir) if sandbox_dir else None
+    loop_start = _time.monotonic()
+
+    for path, change_type in sorted(candidate_paths.items()):
+        if _time.monotonic() - loop_start > _ECP_CAPTURE_TIMEOUT_SECONDS:
+            capture_errors.append("ecp_capture_timeout_exceeded")
+            break
+        try:
+            before_full = root_path / path
+            after_full = (sandbox_path / path) if sandbox_path else None
+            before_exists = before_full.exists() or before_full.is_symlink()
+            after_exists = bool(after_full) and (after_full.exists() or after_full.is_symlink())
+
+            before_symlink, before_external = _ecp_resolve_symlink_target(root_path, path)
+            after_symlink, after_external = (
+                _ecp_resolve_symlink_target(sandbox_path, path) if sandbox_path else (False, None)
+            )
+            symlink = before_symlink or after_symlink
+            external_target = after_external if after_external is not None else before_external
+
+            before_data = (
+                _ecp_read_file_bytes(before_full) if before_exists and not before_symlink else None
+            )
+            after_data = (
+                _ecp_read_file_bytes(after_full) if after_exists and not after_symlink else None
+            )
+
+            binary = _ecp_is_binary(before_data) or _ecp_is_binary(after_data)
+            before_hash = _ecp_hash_bytes(before_data)
+            after_hash = _ecp_hash_bytes(after_data)
+
+            diff_text: str | None = None
+            content: str | None = None
+            before_content: str | None = None
+            if not binary:
+                before_text = before_data.decode("utf-8", errors="replace") if before_data is not None else ""
+                after_text = after_data.decode("utf-8", errors="replace") if after_data is not None else ""
+                if after_data is not None:
+                    content = after_text
+                if before_data is not None:
+                    before_content = before_text
+                if before_data is not None or after_data is not None:
+                    diff_text = "".join(_difflib.unified_diff(
+                        before_text.splitlines(keepends=True),
+                        after_text.splitlines(keepends=True),
+                        fromfile=f"a/{path}", tofile=f"b/{path}",
+                    ))
+            else:
+                if after_data is not None:
+                    content = _base64.b64encode(after_data).decode("ascii")
+                if before_data is not None:
+                    before_content = _base64.b64encode(before_data).decode("ascii")
+
+            gitignored = path in gitignored_set
+            after_size = len(after_data) if after_data is not None else None
+            promotion_eligible, exclusion_reason = _ecp_classify_exclusion(
+                path, symlink, external_target, gitignored, binary, after_size
+            )
+
+            entries.append({
+                "path": path,
+                "change_type": change_type,
+                "before_exists": before_exists,
+                "after_exists": after_exists,
+                "before_hash": before_hash,
+                "after_hash": after_hash,
+                "diff": diff_text,
+                "content": content,
+                "before_content": before_content,
+                "binary": binary,
+                "symlink": symlink,
+                "external_target": external_target,
+                "gitignored": gitignored,
+                "promotion_eligible": promotion_eligible,
+                "exclusion_reason": exclusion_reason,
+            })
+        except Exception as exc:
+            capture_errors.append(f"ecp_file_capture_error:{path}:{type(exc).__name__}")
+
+    return entries, capture_errors
+
+
+def _ecp_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in (
+        "ecp_id", "prompt_id", "authorization_id", "audit_id",
+        "execution_result_id", "captured_at",
+    ):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("capture_outcome") not in _ECP_VALID_CAPTURE_OUTCOMES:
+        errors.append("invalid_capture_outcome")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    if record.get("promotion_executed") is not False:
+        errors.append("promotion_executed_must_be_false")
+    if record.get("rollback_executed") is not False:
+        errors.append("rollback_executed_must_be_false")
+    return errors
+
+
+def store_execution_change_package(root: "HarnessPath", record: dict) -> dict:
+    errors = _ecp_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _ECP_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    ecp_id = record["ecp_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    filename = f"{ecp_id}-{ts}.json"
+    path = store_dir / filename
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_execution_change_package(root: "HarnessPath", ecp_id: str) -> dict | None:
+    store_dir = root.path / _ECP_STORE_DIR
+    if not store_dir.exists():
+        return None
+    matches = sorted(store_dir.glob(f"{ecp_id}-*.json"), reverse=True)
+    for match in matches:
+        try:
+            return json.loads(match.read_text())
+        except Exception:
+            continue
+    return None
+
+
+def list_execution_change_packages(root: "HarnessPath", prompt_id: str | None = None) -> list[dict]:
+    store_dir = root.path / _ECP_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("ecp-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if prompt_id is None or record.get("prompt_id") == prompt_id:
+                records.append(record)
+        except Exception:
+            continue
+    return records
+
+
+def _ecp_capture(
+    root: "HarnessPath",
+    esa: dict,
+    sandbox_dir: str | None,
+    sandbox_id: str | None,
+    post_state: dict,
+    execution_result_id: str,
+) -> dict:
+    """
+    Phase 69M Condition 14: mandatory ECP capture attempt before sandbox
+    destruction. Never raises -- always returns a dict and always stores a
+    record (capture_outcome="success" or "failed"). Capture success is not
+    mandated; failure is recorded, never silent. Does not modify root.
+    """
+    captured_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    ecp_id = f"ecp-{esa.get('prompt_id', 'unknown')}-{ts}"
+    changes = _ecr_diff_snapshots(esa, post_state)
+    git_head_diverged = bool(changes.get("git_head_changed"))
+
+    base_record: dict = {
+        "ecp_id": ecp_id,
+        "ecp_version": _ECP_VERSION,
+        "prompt_id": esa.get("prompt_id", ""),
+        "authorization_id": esa.get("authorization_id", ""),
+        "audit_id": esa.get("audit_id", ""),
+        "snapshot_id": esa.get("snapshot_id", ""),
+        "change_record_id": None,
+        "execution_result_id": execution_result_id,
+        "captured_at": captured_at,
+        "capture_source": "sandbox_dir" if sandbox_dir else "root_fallback",
+        "sandbox_id": sandbox_id,
+        "sandbox_provider": "git_worktree" if sandbox_dir else None,
+        "pre_git_head": changes.get("pre_git_head"),
+        "post_git_head": changes.get("post_git_head"),
+        "git_head_diverged": git_head_diverged,
+        "git_commit_detected": git_head_diverged,
+        "esa_available": True,
+        "absolute_path_writes_detected": False,
+        "execution_allowed": False,
+        "promotion_executed": False,
+        "rollback_executed": False,
+    }
+
+    try:
+        candidate_paths = sorted(set(
+            changes.get("modified_files", []) + changes.get("added_files", [])
+            + changes.get("deleted_files", []) + changes.get("untracked_added", [])
+            + changes.get("untracked_removed", [])
+        ))
+        gitignored_set = _ecp_compute_gitignored(root, candidate_paths)
+        file_entries, capture_errors = _ecp_build_file_entries(
+            root, sandbox_dir, changes, gitignored_set
+        )
+        manifest_hash = (
+            hashlib.sha256(
+                "|".join(
+                    f"{e['path']}:{e['after_hash'] or ''}"
+                    for e in sorted(file_entries, key=lambda e: e["path"])
+                ).encode("utf-8")
+            ).hexdigest()
+            if file_entries else None
+        )
+        binary_count = sum(1 for e in file_entries if e["binary"])
+        symlink_count = sum(1 for e in file_entries if e["symlink"])
+        external_symlink_count = sum(1 for e in file_entries if e["external_target"] is not None)
+        excluded = [e for e in file_entries if not e["promotion_eligible"]]
+
+        record = dict(base_record)
+        record.update({
+            "capture_outcome": "success",
+            "manifest_hash": manifest_hash,
+            "file_count": len(file_entries),
+            "file_entries": file_entries,
+            "capture_errors": capture_errors,
+            "binary_file_count": binary_count,
+            "symlink_count": symlink_count,
+            "external_symlink_count": external_symlink_count,
+            "excluded_file_count": len(excluded),
+            "excluded_paths": [e["path"] for e in excluded],
+            "promotion_eligible_count": len(file_entries) - len(excluded),
+        })
+    except Exception as exc:
+        record = dict(base_record)
+        record.update({
+            "capture_outcome": "failed",
+            "manifest_hash": None,
+            "file_count": 0,
+            "file_entries": [],
+            "capture_errors": [f"ecp_capture_exception:{type(exc).__name__}"],
+            "binary_file_count": 0,
+            "symlink_count": 0,
+            "external_symlink_count": 0,
+            "excluded_file_count": 0,
+            "excluded_paths": [],
+            "promotion_eligible_count": 0,
+        })
+
+    stored = store_execution_change_package(root, record)
+    execution_reviewable = bool(stored["stored"]) and record["capture_outcome"] == "success"
+    return {
+        "ecp_id": ecp_id if stored["stored"] else None,
+        "created": stored["stored"],
+        "errors": stored.get("errors", []),
+        "capture_outcome": record["capture_outcome"],
+        "execution_reviewable": execution_reviewable,
+        "file_count": record["file_count"],
+        "capture_errors": record["capture_errors"],
+    }
+
+
+# ── Phase 69M: Execution Promotion Review (EPR) ──────────────────────────────
+# EPR is a human's content-level review decision about a specific ECP. It
+# answers "should these specific file changes be applied to root?" -- a
+# different question from ERRA ("was the execution result acceptable?").
+# EPR never modifies root. No promotion execution exists in this phase.
+
+_EPR_PHASE_ID: str = "69M"
+_EPR_STORE_DIR: Path = Path(".pcae") / "promotion-reviews"
+_EPR_VERSION: str = "1.0"
+
+_EPR_VALID_DISPOSITIONS: frozenset[str] = frozenset({
+    "approved", "rejected", "deferred", "escalated", "cancelled",
+})
+_EPR_TERMINAL_DISPOSITIONS: frozenset[str] = frozenset({
+    "approved", "rejected", "cancelled",
+})
+_EPR_TERMINAL_REVIEW_STATES: frozenset[str] = frozenset({
+    "approved", "partial_approved", "rejected", "cancelled",
+})
+
+_EPR_GOVERNANCE_BOUNDARIES: dict = {
+    "epr_does_not_modify_root": True,
+    "epr_approval_does_not_execute_promotion": True,
+    "epr_requires_valid_ecp": True,
+    "partial_approval_is_valid": True,
+    "partial_approval_does_not_promote_rejected_paths": True,
+    "reviewer_identity_not_verified_by_pcae": True,
+    "epr_is_immutable_after_terminal_state": True,
+    "rejected_epr_does_not_block_re_execution": True,
+    "external_symlinks_not_approvable": True,
+    "pcae_directory_not_approvable": True,
+    "git_directory_not_approvable": True,
+    "automatic_approval_allowed": False,
+    "promotion_authorized_requires_explicit_flag": True,
+    "execution_allowed": False,
+    "promotion_executed": False,
+}
+
+EXECUTION_PROMOTION_REVIEW_ADVISORY: str = (
+    "ExecutionPromotionReview (EPR) records a human's content-level review decision "
+    "about a specific ECP. epr_does_not_modify_root=True. "
+    "epr_approval_does_not_execute_promotion=True. epr_requires_valid_ecp=True -- EPR "
+    "creation is blocked when the referenced ECP is not execution_reviewable. "
+    "External symlinks, .git/, and .pcae/ paths are never approvable regardless of "
+    "disposition. promotion_authorized is a separate explicit flag from disposition: "
+    "approving review means 'I understand these changes'; promotion_authorized means "
+    "'I permit these changes to modify root' -- no promotion execution exists in this "
+    "phase to consume that flag. execution_allowed=False. promotion_executed=False."
+)
+
+
+def _epr_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in ("epr_id", "ecp_id", "prompt_id", "created_at"):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("human_disposition") not in _EPR_VALID_DISPOSITIONS:
+        errors.append("invalid_human_disposition")
+    if record.get("human_disposition") in _EPR_TERMINAL_DISPOSITIONS:
+        if not record.get("reviewed_by"):
+            errors.append("missing_reviewed_by")
+        if not record.get("reviewed_at"):
+            errors.append("missing_reviewed_at")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    if record.get("promotion_executed") is not False:
+        errors.append("promotion_executed_must_be_false")
+    return errors
+
+
+def store_promotion_review(root: "HarnessPath", record: dict) -> dict:
+    errors = _epr_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _EPR_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    epr_id = record["epr_id"]
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    filename = f"{epr_id}-{ts}.json"
+    path = store_dir / filename
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_promotion_review(root: "HarnessPath", epr_id: str) -> dict | None:
+    store_dir = root.path / _EPR_STORE_DIR
+    if not store_dir.exists():
+        return None
+    matches = sorted(store_dir.glob(f"{epr_id}-*.json"), reverse=True)
+    for match in matches:
+        try:
+            return json.loads(match.read_text())
+        except Exception:
+            continue
+    return None
+
+
+def list_promotion_reviews(root: "HarnessPath", ecp_id: str | None = None) -> list[dict]:
+    store_dir = root.path / _EPR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("epr-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if ecp_id is None or record.get("ecp_id") == ecp_id:
+                records.append(record)
+        except Exception:
+            continue
+    return records
+
+
+def build_promotion_review(
+    root: "HarnessPath",
+    ecp_id: str,
+    human_disposition: str,
+    reviewed_by: str | None = None,
+    approved_paths: list[str] | None = None,
+    required_modifications: list[str] | None = None,
+    review_rationale: str | None = None,
+    promotion_authorized: bool = False,
+    override_divergence: bool = False,
+    override_divergence_rationale: str | None = None,
+) -> dict:
+    """
+    Create an EPR reviewing a specific ECP. Blocked when the ECP does not exist
+    or is not execution_reviewable (Condition 14 gate). approved_paths that are
+    not promotion_eligible in the ECP (hard exclusions: .git/, .pcae/, external
+    symlinks; default exclusions: toolchain/gitignored/oversized binary) are
+    rejected rather than silently dropped. Never modifies root.
+    """
+    ecp = lookup_execution_change_package(root, ecp_id)
+    if ecp is None:
+        return {
+            "error": "ecp_not_found", "ecp_id": ecp_id, "created": False,
+            "execution_allowed": False, "promotion_executed": False,
+            "governance_boundaries": dict(_EPR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_REVIEW_ADVISORY,
+        }
+    if ecp.get("capture_outcome") != "success":
+        return {
+            "error": "ecp_not_reviewable", "ecp_id": ecp_id, "created": False,
+            "execution_allowed": False, "promotion_executed": False,
+            "governance_boundaries": dict(_EPR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_REVIEW_ADVISORY,
+        }
+
+    eligible_paths = {e["path"] for e in ecp.get("file_entries", []) if e.get("promotion_eligible")}
+    requested_paths = list(approved_paths) if approved_paths is not None else []
+    invalid_paths = [p for p in requested_paths if p not in eligible_paths]
+    if invalid_paths:
+        return {
+            "error": "ineligible_paths_requested", "ecp_id": ecp_id, "created": False,
+            "invalid_paths": invalid_paths,
+            "execution_allowed": False, "promotion_executed": False,
+            "governance_boundaries": dict(_EPR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_REVIEW_ADVISORY,
+        }
+
+    if human_disposition == "approved" and not requested_paths:
+        approved_set = sorted(eligible_paths)
+    else:
+        approved_set = sorted(requested_paths)
+    rejected_set = sorted(eligible_paths - set(approved_set)) if human_disposition == "approved" else []
+    partial_approval = (
+        human_disposition == "approved" and bool(eligible_paths) and set(approved_set) != eligible_paths
+    )
+    if human_disposition == "approved":
+        review_state = "partial_approved" if partial_approval else "approved"
+    else:
+        review_state = human_disposition
+
+    created_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    epr_id = f"epr-{ecp.get('prompt_id', 'unknown')}-{ts}"
+    reviewed_at = created_at if human_disposition in _EPR_TERMINAL_DISPOSITIONS else None
+
+    record: dict = {
+        "epr_id": epr_id,
+        "epr_version": _EPR_VERSION,
+        "ecp_id": ecp_id,
+        "prompt_id": ecp.get("prompt_id", ""),
+        "created_at": created_at,
+        "review_state": review_state,
+        "human_disposition": human_disposition,
+        "partial_approval": partial_approval,
+        "approved_paths": approved_set,
+        "rejected_paths": rejected_set,
+        "deferred_paths": [],
+        "required_modifications": list(required_modifications or []),
+        "reviewed_by": reviewed_by,
+        "reviewed_at": reviewed_at,
+        "review_rationale": review_rationale,
+        "promotion_authorized": bool(promotion_authorized) and human_disposition == "approved",
+        "override_divergence": bool(override_divergence),
+        "override_divergence_rationale": override_divergence_rationale,
+        "execution_allowed": False,
+        "promotion_executed": False,
+    }
+    stored = store_promotion_review(root, record)
+    return {
+        "epr_id": epr_id if stored["stored"] else None,
+        "ecp_id": ecp_id,
+        "created": stored["stored"],
+        "errors": stored.get("errors", []),
+        "review_state": review_state,
+        "human_disposition": human_disposition,
+        "partial_approval": partial_approval,
+        "approved_paths": approved_set,
+        "rejected_paths": rejected_set,
+        "promotion_authorized": record["promotion_authorized"],
+        "execution_allowed": False,
+        "promotion_executed": False,
+        "governance_boundaries": dict(_EPR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_PROMOTION_REVIEW_ADVISORY,
     }

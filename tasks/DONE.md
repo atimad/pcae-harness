@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 69L Execution Sandboxing Architecture (20260615-1913-69l-execution-sandboxing-architecture)
 - 69K Automatic Snapshot Integration (20260615-1306-69k-automatic-snapshot-integration)
 - 69J Rollback-Aware Execution Design (20260615-1119-69j-rollback-aware-execution-design)
 - 69I Execution Result Review Persistence (20260614-1736-69g-execution-activation)

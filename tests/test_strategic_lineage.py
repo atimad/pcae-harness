@@ -36,6 +36,7 @@ ACTIVATION_TIMESTAMP_69I = "2026-06-15T00:00:01+00:00"
 ACTIVATION_TIMESTAMP_69J = "2026-06-15T11:19:00+00:00"
 ACTIVATION_TIMESTAMP_69K = "2026-06-15T13:06:00+00:00"
 ACTIVATION_TIMESTAMP_69L = "2026-06-15T19:13:00+00:00"
+ACTIVATION_TIMESTAMP_69M = "2026-06-16T13:35:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -801,6 +802,57 @@ def _valid_69l_record() -> dict:
     }
 
 
+def _valid_69m_record() -> dict:
+    return {
+        "lineage_id": "SLR-69M-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69M,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69L",
+        "predecessor_phase_id": "69L",
+        "activated_phase_id": "69M",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Closes SLR-69L-004 by introducing ExecutionChangePackage (ECP), the canonical "
+            "evidence artifact for sandbox-produced content, and ExecutionPromotionReview "
+            "(EPR), a human content-level review of a specific ECP with partial-path approval. "
+            "Accepted scope is ECP + EPR only -- no promotion execution, no rollback execution, "
+            "no git commit, no git push, no automatic promotion. Condition 14 is the first "
+            "post-execution governance condition: ECP capture attempt is mandatory and "
+            "ordering-enforced before sandbox destruction, but capture success is not "
+            "mandated -- failure is always recorded and surfaced as execution_reviewable=False "
+            "rather than retroactively setting execution_occurred=False. Ten SLR entries "
+            "document the accepted scope and forward-compatibility constraints for a future "
+            "promotion-execution phase."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [
+            "SLR-69M-001: ECP is the canonical evidence artifact, captured from sandbox_dir before destruction, immutable after creation, does not modify root",
+            "SLR-69M-002: EPR records human review of ECP content with partial-path approval; promotion_authorized is a separate explicit flag with no consumer until promotion execution exists",
+            "SLR-69M-003: .git/ and .pcae/ are permanently excluded from ECP promotion eligibility; cannot be overridden by EPR",
+            "SLR-69M-004: external symlink promotion is permanently forbidden",
+            "SLR-69M-005: root divergence detection is required before any future promotion; divergence with conflicting files is a hard block",
+            "SLR-69M-006: git commits made inside the sandbox are detected via git_head_diverged and must block promotion",
+            "SLR-69M-007: promotion execution is deferred to a future phase (69N)",
+            "SLR-69M-008: automatic_promotion_allowed=False is a permanent governance boundary, not specific to this phase",
+            "SLR-69M-009: before_content is captured per file entry as a rollback payload; rollback execution itself is deferred",
+            "SLR-69M-010: ECP capture attempt is mandatory and ordering-enforced (Condition 14) but capture success is not mandatory; sandbox destruction proceeds regardless of ECP outcome, preserving the ESB-C-003/004 cleanup guarantees from 69L",
+        ],
+        "supersedes_lineage_id": "SLR-69L-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69M,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -825,6 +877,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69j_record(),
         _valid_69k_record(),
         _valid_69l_record(),
+        _valid_69m_record(),
     ]
 
 
@@ -1016,6 +1069,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69L",
             "timestamp": ACTIVATION_TIMESTAMP_69L,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69M",
+            "timestamp": ACTIVATION_TIMESTAMP_69M,
+        },
     ])
     return events
 
@@ -1051,7 +1112,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69L-TEST"
+    assert result.current_lineage_id == "SLR-69M-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -1086,7 +1147,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69L-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69M-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -1187,7 +1248,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69L-TEST"
+    assert result.current_lineage_id == "SLR-69M-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1242,9 +1303,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69L-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69M-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 23
+    assert json.loads(capsys.readouterr().out)["record_count"] == 24
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {
