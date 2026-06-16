@@ -535,6 +535,21 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae promotion-review list --ecp-id <id>`
 - `pcae promotion-review list --ecp-id <id> --json`
 
+## promote
+
+- `pcae promote --epr-id <id>`
+- `pcae promote --epr-id <id> --dry-run`
+- `pcae promote --epr-id <id> --json`
+
+## promotion-execution
+
+- `pcae promotion-execution show --per-id <id>`
+- `pcae promotion-execution show --per-id <id> --json`
+- `pcae promotion-execution list --epr-id <id>`
+- `pcae promotion-execution list --epr-id <id> --json`
+- `pcae promotion-execution mark-interrupted --per-id <id>`
+- `pcae promotion-execution mark-interrupted --per-id <id> --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`

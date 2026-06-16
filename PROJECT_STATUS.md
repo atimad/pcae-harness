@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 69M: Write Governance Design (BR-005 Execution Governance Activation).
+Phase 69N: Write Promotion Execution (BR-005 Execution Governance Activation).
 
 ## Post-61J Runtime Registry Checkpoint
 

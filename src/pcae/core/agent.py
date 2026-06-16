@@ -70182,6 +70182,19 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["execution-change-package", "promotion-review"],
         "dependencies": ["execution_sandboxing_architecture"],
+        "successor_capabilities": ["write_promotion_execution"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Write Promotion Execution",
+        "implemented_phase": "69N",
+        "status": "implemented",
+        "commands": [
+            "promote",
+            "promotion-execution",
+        ],
+        "introduced_commands": ["promote", "promotion-execution"],
+        "dependencies": ["execution_change_package_and_promotion_review"],
         "successor_capabilities": [],
     },
 )
@@ -71236,8 +71249,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69M",
         "phase_title": "Write Governance Design",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69L",
+        "successor": "69N",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69N",
+        "phase_title": "Write Promotion Execution",
+        "status": "active",
+        "predecessor": "69M",
         "successor": "",
         "superseded_by": "",
     },
@@ -72532,7 +72554,7 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         "dependencies": [
             "execution_sandboxing_architecture",
         ],
-        "successors": [],
+        "successors": ["write_promotion_execution"],
         "aliases": [],
         "contribution": (
             "introduces ExecutionChangePackage (ECP) store (.pcae/execution-packages/) and "
@@ -72556,6 +72578,46 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "automatic promotion; production_containment_ready=False unchanged; "
             "SLR-69M-001 documents the accepted scope (ECP + EPR only) and forward-compatibility "
             "constraints for a future promotion-execution phase"
+        ),
+    },
+    {
+        "capability_name": "Write Promotion Execution",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69N",
+        "status": "implemented",
+        "commands": [
+            "pcae promote --epr-id <id> [--dry-run]",
+            "pcae promotion-execution show --per-id <id>",
+            "pcae promotion-execution list --epr-id <id>",
+            "pcae promotion-execution mark-interrupted --per-id <id>",
+        ],
+        "dependencies": [
+            "execution_change_package_and_promotion_review",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces PromotionExecutionRecord (PER) store (.pcae/promotion-executions/); "
+            "the first PCAE artifact and the first command (`pcae promote`) that mutates root; "
+            "gated on an EPR with promotion_authorized=True (never on an ECP alone); divergence "
+            "is checked per file by content hash rather than git HEAD alone: a path whose current "
+            "root hash matches the ECP after_hash is already_applied and is skipped without being "
+            "re-written or treated as an error -- this is how re-running `pcae promote` resumes a "
+            "partial promotion, with no --resume flag and no additional authority expansion; a "
+            "path matching neither before_hash nor after_hash is a conflict that blocks the entire "
+            "attempt before any file is touched; partial_promotion_is_valid_terminal_state=True for "
+            "mid-run write failures after divergence passed clean; PER is created with "
+            "status=in_progress before the first file write and persisted after every file, so an "
+            "interrupted run is always a stored, inspectable record, never silent; "
+            "`pcae promotion-execution mark-interrupted` transitions in_progress to partial as "
+            "pure bookkeeping with no file writes; promotion_executed is the first dynamic "
+            "occurrence of that field (True only when this run actually wrote a file, not when "
+            "skipping already_applied paths); rollback_payload_available reports whether "
+            "before_content exists for every promoted file, but no rollback execution exists; "
+            "no git commit, no git push, no automatic rollback, no automatic promotion, no "
+            "consumption of EPR's override_divergence field; SLR-69N-001 documents the accepted "
+            "scope and remaining deferred capabilities (rollback execution, divergence override, "
+            "atomic staged writes, multi-EPR batch promotion)"
         ),
     },
     {
@@ -75068,7 +75130,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69M",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69M-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69M",
@@ -75076,7 +75138,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69M",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69M-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69M",
@@ -75084,10 +75146,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69M",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69M-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69M",
+    },
+    {
+        "phase_id": "69N",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69N-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69N",
+    },
+    {
+        "phase_id": "69N",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69N-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69N",
+    },
+    {
+        "phase_id": "69N",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69N-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69N",
     },
 )
 
@@ -80950,7 +81036,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69M",
+        "current_phase": "69N",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81732,6 +81818,24 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "outcome; .git/, .pcae/, and external symlinks permanently excluded from promotion "
             "eligibility; no promotion execution, no rollback execution, no git commit/push; "
             "SLR-69M-001 documents the accepted scope and forward-compatibility constraints"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "write_promotion_execution",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "introduces PER (.pcae/promotion-executions/), the first artifact and command "
+            "(`pcae promote`) that mutates root, gated on EPR promotion_authorized=True; "
+            "per-file content-hash divergence check distinguishes pending/already_applied/"
+            "conflict; already_applied paths are skipped on re-run (resume-aware, no --resume "
+            "flag, no authority expansion); any conflict blocks the entire attempt before any "
+            "write; partial promotion is a valid terminal state; PER created before first write "
+            "and persisted after every file, never silent on interruption; mark-interrupted is "
+            "bookkeeping-only; no rollback execution, no git commit/push, no automatic promotion, "
+            "no divergence-override consumption; SLR-69N-001 documents the accepted scope"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -92476,4 +92580,469 @@ def build_promotion_review(
         "promotion_executed": False,
         "governance_boundaries": dict(_EPR_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_PROMOTION_REVIEW_ADVISORY,
+    }
+
+
+# ── Phase 69N: Promotion Execution Record (PER) ──────────────────────────────
+# PER is the first PCAE artifact whose subject is an actual root mutation.
+# Promotion is gated on a human-authorized EPR (promotion_authorized=True),
+# never on an ECP alone. Divergence is checked per-file by hash, not merely by
+# git HEAD: a file is "already_applied" when its current root hash equals the
+# ECP's after_hash (resume-aware skip, never re-written, never an error), and
+# a "conflict" when it matches neither before_hash nor after_hash. Any
+# conflict among approved_paths aborts the entire attempt before any file is
+# touched. Partial promotion (some files written, some failed mid-run after
+# divergence passed clean) is a legitimate terminal state, not an error.
+# The PER is written incrementally -- created with status="in_progress" (or
+# "aborted_divergence") before any file write, and persisted after every file
+# -- so an interrupted run is detectable as a stored, never-silent record,
+# mirroring the Condition 14 principle from 69M. No automatic resume exists:
+# re-running `pcae promote` against the same EPR is the only recovery path,
+# and already-applied files are skipped via the same hash comparison rather
+# than a dedicated --resume flag. No rollback execution. No git commit. No
+# git push. No automatic promotion -- root mutation occurs only through the
+# explicit `pcae promote` human command.
+
+_PXR_PHASE_ID: str = "69N"
+_PXR_STORE_DIR: Path = Path(".pcae") / "promotion-executions"
+_PXR_VERSION: str = "1.0"
+
+_PXR_VALID_STATUSES: frozenset[str] = frozenset({
+    "in_progress", "completed", "partial", "failed", "aborted_divergence",
+})
+_PXR_TERMINAL_STATUSES: frozenset[str] = frozenset({
+    "completed", "partial", "failed", "aborted_divergence",
+})
+_PXR_VALID_FILE_OUTCOMES: frozenset[str] = frozenset({
+    "success", "failed", "already_applied",
+})
+_PXR_VALID_DIVERGENCE_STATUSES: frozenset[str] = frozenset({
+    "pending", "already_applied", "conflict",
+})
+
+_PXR_GOVERNANCE_BOUNDARIES: dict = {
+    # Authority
+    "automatic_promotion_allowed": False,
+    "promotion_requires_explicit_human_command": True,
+    "promotion_requires_promotion_authorized_flag": True,
+    "promotion_gated_on_epr_not_ecp_alone": True,
+    "root_mutation_only_via_explicit_promote_command": True,
+    # Divergence
+    "per_file_hash_comparison_is_authoritative": True,
+    "git_head_divergence_alone_is_advisory": True,
+    "any_per_file_conflict_blocks_entire_attempt": True,
+    "conflict_blocks_before_any_file_is_touched": True,
+    "override_divergence_not_consumed_in_69n": True,
+    "git_commit_detected_blocks_promotion": True,
+    # Resume / already-applied (69N amendment)
+    "already_applied_is_not_an_error": True,
+    "already_applied_paths_are_skipped_not_rewritten": True,
+    "resume_command_does_not_exist": True,
+    "reinvocation_of_promote_is_the_only_recovery_path": True,
+    # Partial promotion
+    "partial_promotion_is_valid_terminal_state": True,
+    "partial_promotion_is_not_automatically_retried": True,
+    # Interruption
+    "per_created_before_any_file_write": True,
+    "per_persisted_after_every_file": True,
+    "concurrent_promotion_for_same_epr_forbidden": True,
+    "mark_interrupted_does_not_write_files": True,
+    "mark_interrupted_only_transitions_in_progress_to_partial": True,
+    # promotion_executed semantics (first dynamic occurrence of this field)
+    "promotion_executed_is_dynamic_for_per_only": True,
+    "promotion_executed_reflects_actual_writes_this_run": True,
+    "already_applied_alone_does_not_set_promotion_executed": True,
+    # Rollback (payload only, no execution)
+    "rollback_payload_available_is_advisory": True,
+    "automatic_rollback_allowed": False,
+    "rollback_executed": False,
+    "rollback_execution_deferred_to_future_phase": True,
+    # Forbidden operations
+    "git_add_forbidden": True,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    "git_reset_forbidden": True,
+    "git_revert_forbidden": True,
+    "multi_epr_batch_promotion_forbidden": True,
+    "promotion_outside_approved_paths_forbidden": True,
+    # Subprocess / execution
+    "execution_allowed": False,
+}
+
+EXECUTION_PROMOTION_RECORD_ADVISORY: str = (
+    "PromotionExecutionRecord (PER) is the first PCAE artifact that performs root "
+    "mutation, gated on an EPR with promotion_authorized=True (never on an ECP alone). "
+    "Divergence is checked per file by content hash: a path whose current root hash "
+    "equals the ECP after_hash is already_applied and is skipped, never re-written and "
+    "never treated as an error -- this is how re-running `pcae promote` resumes a "
+    "partial promotion, with no --resume flag and no additional authority expansion. "
+    "Any path whose current root hash matches neither before_hash nor after_hash is a "
+    "conflict and blocks the entire attempt before any file is touched. "
+    "partial_promotion_is_valid_terminal_state=True -- a mid-run write failure after "
+    "divergence passed clean is a recorded outcome, not a silent or automatically "
+    "retried one. The PER is created before any file write and persisted after every "
+    "file, so an interrupted run is always a stored, inspectable record. "
+    "automatic_rollback_allowed=False. rollback_executed=False. "
+    "automatic_promotion_allowed=False. git_commit_forbidden=True. git_push_forbidden=True."
+)
+
+
+def _pxr_hash_file(path: "Path") -> str | None:
+    """Return SHA-256 hash of a root file's current content, or None if absent."""
+    try:
+        if not path.exists() or path.is_dir():
+            return None
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except Exception:
+        return None
+
+
+def _pxr_check_divergence(root: "HarnessPath", ecp: dict, approved_paths: list[str]) -> dict:
+    """
+    Per-file resume-aware divergence check. Never raises. Returns:
+      head_diverged: bool (advisory only)
+      file_checks: [{"path", "status", "current_hash"}]
+      blocking: bool (True iff any path status == "conflict")
+      blocking_paths: [path, ...]
+    """
+    entries_by_path = {e["path"]: e for e in ecp.get("file_entries", [])}
+    current_head = None
+    try:
+        head_proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True, timeout=_ESA_GIT_TIMEOUT_SECONDS, shell=False,
+            cwd=str(root.path),
+        )
+        if head_proc.returncode == 0:
+            current_head = head_proc.stdout.decode("utf-8", errors="replace").strip()
+    except Exception:
+        current_head = None
+
+    pre_head = ecp.get("pre_git_head")
+    head_diverged = bool(pre_head and current_head and pre_head != current_head)
+
+    file_checks: list[dict] = []
+    blocking_paths: list[str] = []
+    for path in approved_paths:
+        entry = entries_by_path.get(path)
+        if entry is None or not entry.get("promotion_eligible"):
+            file_checks.append({"path": path, "status": "conflict", "current_hash": None})
+            blocking_paths.append(path)
+            continue
+        current_hash = _pxr_hash_file(root.path / path)
+        before_hash = entry.get("before_hash")
+        after_hash = entry.get("after_hash")
+        if current_hash == after_hash:
+            status = "already_applied"
+        elif current_hash == before_hash:
+            status = "pending"
+        else:
+            status = "conflict"
+            blocking_paths.append(path)
+        file_checks.append({"path": path, "status": status, "current_hash": current_hash})
+
+    return {
+        "head_diverged": head_diverged,
+        "pre_git_head": pre_head,
+        "current_git_head": current_head,
+        "file_checks": file_checks,
+        "blocking": bool(blocking_paths),
+        "blocking_paths": blocking_paths,
+    }
+
+
+def _pxr_validate(record: dict) -> list[str]:
+    errors: list[str] = []
+    for field in ("per_id", "epr_id", "ecp_id", "prompt_id", "started_at"):
+        if not isinstance(record.get(field), str) or not record[field]:
+            errors.append(f"missing_{field}")
+    if record.get("status") not in _PXR_VALID_STATUSES:
+        errors.append("invalid_status")
+    for result in record.get("file_results", []):
+        if result.get("outcome") not in _PXR_VALID_FILE_OUTCOMES:
+            errors.append("invalid_file_outcome")
+    if record.get("rollback_executed") is not False:
+        errors.append("rollback_executed_must_be_false")
+    if record.get("execution_allowed") is not False:
+        errors.append("execution_allowed_must_be_false")
+    return errors
+
+
+def store_promotion_execution_record(root: "HarnessPath", record: dict) -> dict:
+    errors = _pxr_validate(record)
+    if errors:
+        return {"stored": False, "errors": errors, "path": None}
+    store_dir = root.path / _PXR_STORE_DIR
+    store_dir.mkdir(parents=True, exist_ok=True)
+    per_id = record["per_id"]
+    path = store_dir / f"{per_id}.json"
+    path.write_text(json.dumps(record, indent=2, sort_keys=True))
+    return {"stored": True, "errors": [], "path": str(path)}
+
+
+def lookup_promotion_execution_record(root: "HarnessPath", per_id: str) -> dict | None:
+    store_dir = root.path / _PXR_STORE_DIR
+    path = store_dir / f"{per_id}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return None
+
+
+def list_promotion_execution_records(root: "HarnessPath", epr_id: str | None = None) -> list[dict]:
+    store_dir = root.path / _PXR_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("per-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text())
+            if epr_id is None or record.get("epr_id") == epr_id:
+                records.append(record)
+        except Exception:
+            continue
+    return records
+
+
+def _pxr_in_progress_for_epr(root: "HarnessPath", epr_id: str) -> dict | None:
+    for record in list_promotion_execution_records(root, epr_id):
+        if record.get("status") == "in_progress":
+            return record
+    return None
+
+
+def build_promotion_execution(
+    root: "HarnessPath",
+    epr_id: str,
+    dry_run: bool = False,
+) -> dict:
+    """
+    Execute (or, if dry_run, preview) promotion of an EPR's approved_paths into
+    root. The only PCAE code path that mutates root. Gated on promotion_authorized
+    =True. dry_run performs zero writes and persists no PER. A real attempt
+    always persists a PER -- in_progress before the first file write, updated
+    after every file, and a terminal status (completed/partial/failed/
+    aborted_divergence) at the end. execution_allowed=False throughout (no
+    subprocess is invoked).
+    """
+    epr = lookup_promotion_review(root, epr_id)
+    if epr is None:
+        return {
+            "error": "epr_not_found", "epr_id": epr_id, "promoted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    if epr.get("review_state") not in ("approved", "partial_approved"):
+        return {
+            "error": "epr_not_approved", "epr_id": epr_id, "promoted": False,
+            "review_state": epr.get("review_state"),
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    if epr.get("promotion_authorized") is not True:
+        return {
+            "error": "promotion_not_authorized", "epr_id": epr_id, "promoted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    ecp_id = epr.get("ecp_id")
+    ecp = lookup_execution_change_package(root, ecp_id)
+    if ecp is None:
+        return {
+            "error": "ecp_not_found", "epr_id": epr_id, "ecp_id": ecp_id, "promoted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    if ecp.get("capture_outcome") != "success":
+        return {
+            "error": "ecp_not_reviewable", "epr_id": epr_id, "ecp_id": ecp_id, "promoted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    if ecp.get("git_commit_detected"):
+        return {
+            "error": "git_commit_detected_blocks_promotion", "epr_id": epr_id, "ecp_id": ecp_id,
+            "promoted": False, "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    existing_in_progress = _pxr_in_progress_for_epr(root, epr_id)
+    if existing_in_progress is not None:
+        return {
+            "error": "promotion_already_in_progress", "epr_id": epr_id,
+            "per_id": existing_in_progress.get("per_id"), "promoted": False,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    approved_paths = list(epr.get("approved_paths", []))
+    divergence = _pxr_check_divergence(root, ecp, approved_paths)
+
+    if dry_run:
+        return {
+            "dry_run": True, "epr_id": epr_id, "ecp_id": ecp_id, "promoted": False,
+            "would_block": divergence["blocking"],
+            "blocking_paths": divergence["blocking_paths"],
+            "divergence_check": divergence,
+            "file_plan": approved_paths,
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    started_at = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+    per_id = f"per-{epr.get('prompt_id', 'unknown')}-{ts}"
+    entries_by_path = {e["path"]: e for e in ecp.get("file_entries", [])}
+
+    record: dict = {
+        "per_id": per_id,
+        "per_version": _PXR_VERSION,
+        "epr_id": epr_id,
+        "ecp_id": ecp_id,
+        "prompt_id": epr.get("prompt_id", ""),
+        "started_at": started_at,
+        "divergence_check": divergence,
+        "file_plan": approved_paths,
+        "file_results": [],
+        "status": "aborted_divergence" if divergence["blocking"] else "in_progress",
+        "completed_at": started_at if divergence["blocking"] else None,
+        "promotion_executed": False,
+        "rollback_payload_available": False,
+        "execution_allowed": False,
+        "rollback_executed": False,
+    }
+    stored = store_promotion_execution_record(root, record)
+    if divergence["blocking"]:
+        return {
+            "error": "divergence_conflict", "per_id": per_id, "epr_id": epr_id, "ecp_id": ecp_id,
+            "promoted": False, "blocking_paths": divergence["blocking_paths"],
+            "divergence_check": divergence, "created": stored["stored"],
+            "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    status_by_path = {fc["path"]: fc["status"] for fc in divergence["file_checks"]}
+    any_success = False
+    any_failure = False
+    rollback_available_for_all = True
+
+    for path in approved_paths:
+        entry = entries_by_path.get(path, {})
+        pre_status = status_by_path.get(path)
+        full_path = root.path / path
+
+        if pre_status == "already_applied":
+            result = {
+                "path": path, "action": "skip", "outcome": "already_applied",
+                "before_hash_verified": False,
+                "after_hash_written": entry.get("after_hash"),
+                "error": None,
+            }
+        else:
+            change_type = entry.get("change_type")
+            try:
+                if change_type == "deleted":
+                    if full_path.exists():
+                        full_path.unlink()
+                    after_hash_written = _pxr_hash_file(full_path)
+                else:
+                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                    content = entry.get("content")
+                    if entry.get("binary"):
+                        import base64 as _base64
+                        full_path.write_bytes(_base64.b64decode(content) if content else b"")
+                    else:
+                        full_path.write_text(content if content is not None else "")
+                    after_hash_written = _pxr_hash_file(full_path)
+                result = {
+                    "path": path, "action": "delete" if change_type == "deleted" else "write",
+                    "outcome": "success", "before_hash_verified": True,
+                    "after_hash_written": after_hash_written, "error": None,
+                }
+                any_success = True
+            except Exception as exc:
+                result = {
+                    "path": path, "action": "delete" if change_type == "deleted" else "write",
+                    "outcome": "failed", "before_hash_verified": True,
+                    "after_hash_written": None, "error": f"{type(exc).__name__}:{exc}",
+                }
+                any_failure = True
+
+        if result["outcome"] == "success" and not (
+            entry.get("before_content") is not None or entry.get("before_exists") is False
+        ):
+            rollback_available_for_all = False
+
+        record["file_results"].append(result)
+        store_promotion_execution_record(root, record)
+
+    if any_failure and (any_success or any(
+        r["outcome"] == "already_applied" for r in record["file_results"]
+    )):
+        final_status = "partial"
+    elif any_failure:
+        final_status = "failed"
+    else:
+        final_status = "completed"
+
+    record["status"] = final_status
+    record["completed_at"] = datetime.now(timezone.utc).isoformat()
+    record["promotion_executed"] = any_success
+    record["rollback_payload_available"] = rollback_available_for_all
+    stored = store_promotion_execution_record(root, record)
+
+    return {
+        "per_id": per_id, "epr_id": epr_id, "ecp_id": ecp_id,
+        "status": final_status, "promoted": any_success,
+        "promotion_executed": record["promotion_executed"],
+        "rollback_payload_available": rollback_available_for_all,
+        "file_results": record["file_results"],
+        "created": stored["stored"],
+        "errors": stored.get("errors", []),
+        "execution_allowed": False,
+        "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+    }
+
+
+def mark_promotion_execution_interrupted(root: "HarnessPath", per_id: str) -> dict:
+    """
+    Bookkeeping only: transitions a stored PER from status="in_progress" to
+    "partial" after a human has confirmed an interrupted run. Never touches
+    any file outside the PER record itself. Never writes to root.
+    """
+    record = lookup_promotion_execution_record(root, per_id)
+    if record is None:
+        return {
+            "error": "per_not_found", "per_id": per_id, "updated": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    if record.get("status") != "in_progress":
+        return {
+            "error": "per_not_in_progress", "per_id": per_id, "status": record.get("status"),
+            "updated": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+    record["status"] = "partial"
+    record["completed_at"] = datetime.now(timezone.utc).isoformat()
+    stored = store_promotion_execution_record(root, record)
+    return {
+        "per_id": per_id, "status": "partial", "updated": stored["stored"],
+        "errors": stored.get("errors", []),
+        "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
     }

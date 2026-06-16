@@ -1,11 +1,11 @@
 {
   "active_task": {
-    "id": "20260616-1335-69m-write-governance-design",
-    "title": "69M Write Governance Design"
+    "id": "20260616-1501-69n-write-promotion-execution-design",
+    "title": "69N Write Promotion Execution Design"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69M Write Governance Design",
+  "current_objective": "69N Write Promotion Execution Design",
   "git": {
     "branch": "main",
     "changed_files": [
@@ -18,22 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260615-1913-69l-execution-sandboxing-architecture.md",
+        "path": "tasks/active/20260616-1335-69m-write-governance-design.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260616-1335-69m-write-governance-design.md",
+        "path": "tasks/active/20260616-1501-69n-write-promotion-execution-design.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260615-1913-69l-execution-sandboxing-architecture.md",
+        "path": "tasks/done/20260616-1335-69m-write-governance-design.md",
         "status": "??"
       }
     ],
     "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260615-1913-69l-execution-sandboxing-architecture: 69L Execution Sandboxing Architecture",
-  "next_recommended_step": "Continue active task 20260616-1335-69m-write-governance-design.",
-  "timestamp": "2026-06-16T11:35:16.002412+00:00",
+  "last_completed_step": "Completed task 20260616-1335-69m-write-governance-design: 69M Write Governance Design",
+  "next_recommended_step": "Continue active task 20260616-1501-69n-write-promotion-execution-design.",
+  "timestamp": "2026-06-16T13:01:40.741918+00:00",
   "warnings": []
 }

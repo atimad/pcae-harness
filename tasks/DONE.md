@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 69M Write Governance Design (20260616-1335-69m-write-governance-design)
 - 69L Execution Sandboxing Architecture (20260615-1913-69l-execution-sandboxing-architecture)
 - 69K Automatic Snapshot Integration (20260615-1306-69k-automatic-snapshot-integration)
 - 69J Rollback-Aware Execution Design (20260615-1119-69j-rollback-aware-execution-design)

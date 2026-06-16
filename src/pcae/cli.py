@@ -88,6 +88,10 @@ from pcae.commands.agent import (
     run_promotion_review_create,
     run_promotion_review_show,
     run_promotion_review_list,
+    run_promote,
+    run_promotion_execution_show,
+    run_promotion_execution_list,
+    run_promotion_execution_mark_interrupted,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -2444,6 +2448,73 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     epr_list_parser.set_defaults(handler=run_promotion_review_list)
+
+    promote_parser = subparsers.add_parser(
+        "promote",
+        help=(
+            "Promote an EPR's approved_paths into root (Phase 69N). The only command "
+            "that mutates root. Gated on promotion_authorized=True. No automatic "
+            "promotion, no rollback execution, no git commit, no git push."
+        ),
+    )
+    promote_parser.add_argument(
+        "--epr-id", required=True, help="ExecutionPromotionReview to promote."
+    )
+    promote_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the promotion (divergence check, file plan) without writing anything.",
+    )
+    promote_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    promote_parser.set_defaults(handler=run_promote)
+
+    promotion_execution_parser = subparsers.add_parser(
+        "promotion-execution",
+        help=(
+            "Inspect PromotionExecutionRecords (PER, Phase 69N). Promotion can only be "
+            "created via `pcae promote`; this surface also supports marking an "
+            "interrupted run as partial (bookkeeping only, no file writes)."
+        ),
+    )
+    promotion_execution_subparsers = promotion_execution_parser.add_subparsers(
+        dest="promotion_execution_command", required=True
+    )
+
+    per_show_parser = promotion_execution_subparsers.add_parser(
+        "show",
+        help="Show a PromotionExecutionRecord by per_id.",
+    )
+    per_show_parser.add_argument("--per-id", required=True, help="PER ID to look up.")
+    per_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    per_show_parser.set_defaults(handler=run_promotion_execution_show)
+
+    per_list_parser = promotion_execution_subparsers.add_parser(
+        "list",
+        help="List PromotionExecutionRecords, optionally filtered by EPR.",
+    )
+    per_list_parser.add_argument(
+        "--epr-id", default=None, help="Filter by EPR identifier (optional)."
+    )
+    per_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    per_list_parser.set_defaults(handler=run_promotion_execution_list)
+
+    per_mark_interrupted_parser = promotion_execution_subparsers.add_parser(
+        "mark-interrupted",
+        help="Transition an in_progress PER to partial after confirming an interrupted run.",
+    )
+    per_mark_interrupted_parser.add_argument(
+        "--per-id", required=True, help="PER ID to mark interrupted."
+    )
+    per_mark_interrupted_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    per_mark_interrupted_parser.set_defaults(handler=run_promotion_execution_mark_interrupted)
 
     invocation_contract_validation_parser = subparsers.add_parser(
         "invocation-contract-validation",

@@ -145,6 +145,11 @@ from pcae.core.agent import (
     lookup_promotion_review,
     list_promotion_reviews,
     EXECUTION_PROMOTION_REVIEW_ADVISORY,
+    build_promotion_execution,
+    lookup_promotion_execution_record,
+    list_promotion_execution_records,
+    mark_promotion_execution_interrupted,
+    EXECUTION_PROMOTION_RECORD_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -15784,4 +15789,115 @@ def run_promotion_review_list(args: argparse.Namespace) -> int:
         return 0
     for r in records:
         print(f"  {r['epr_id']}  state={r['review_state']}")
+    return 0
+
+
+def run_promote(args: argparse.Namespace) -> int:
+    result = build_promotion_execution(HarnessPath.cwd(), args.epr_id, dry_run=args.dry_run)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        if result.get("dry_run"):
+            return 0
+        return 0 if result.get("promoted") or result.get("status") == "completed" else 1
+
+    if result.get("dry_run"):
+        print("Promotion: DRY RUN")
+        print(f"  epr_id:        {result['epr_id']}")
+        print(f"  would_block:   {result['would_block']}")
+        if result["would_block"]:
+            print(f"  blocking_paths: {result['blocking_paths']}")
+        print(f"  file_plan:     {result['file_plan']}")
+        print()
+        print(EXECUTION_PROMOTION_RECORD_ADVISORY)
+        return 0
+
+    if result.get("error"):
+        print("Promotion: BLOCKED")
+        print(f"  error: {result['error']}")
+        if result.get("blocking_paths"):
+            print(f"  blocking_paths: {result['blocking_paths']}")
+        if result.get("per_id"):
+            print(f"  per_id: {result['per_id']}")
+        print()
+        print(EXECUTION_PROMOTION_RECORD_ADVISORY)
+        return 1
+
+    print(f"Promotion: {result['status'].upper()}")
+    print(f"  per_id:                   {result['per_id']}")
+    print(f"  epr_id:                   {result['epr_id']}")
+    print(f"  promoted:                 {result['promoted']}")
+    print(f"  promotion_executed:       {result['promotion_executed']}")
+    print(f"  rollback_payload_available: {result['rollback_payload_available']}")
+    for fr in result["file_results"]:
+        print(f"    {fr['path']}: {fr['outcome']}")
+    print()
+    print(EXECUTION_PROMOTION_RECORD_ADVISORY)
+    return 0 if result["status"] in ("completed", "partial") else 1
+
+
+def run_promotion_execution_show(args: argparse.Namespace) -> int:
+    record = lookup_promotion_execution_record(HarnessPath.cwd(), args.per_id)
+    if args.json:
+        if record is None:
+            print(json.dumps({"error": "per_not_found", "per_id": args.per_id}, indent=2))
+            return 1
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if record is None:
+        print(f"PromotionExecutionRecord: NOT FOUND — {args.per_id}")
+        return 1
+
+    print("PromotionExecutionRecord")
+    print(f"  per_id:                     {record['per_id']}")
+    print(f"  epr_id:                     {record['epr_id']}")
+    print(f"  ecp_id:                     {record['ecp_id']}")
+    print(f"  status:                     {record['status']}")
+    print(f"  started_at:                 {record['started_at']}")
+    print(f"  completed_at:               {record.get('completed_at')}")
+    print(f"  promotion_executed:         {record['promotion_executed']}")
+    print(f"  rollback_payload_available: {record['rollback_payload_available']}")
+    for fr in record.get("file_results", []):
+        print(f"    {fr['path']}: {fr['outcome']}")
+    print()
+    print(EXECUTION_PROMOTION_RECORD_ADVISORY)
+    return 0
+
+
+def run_promotion_execution_list(args: argparse.Namespace) -> int:
+    epr_id = getattr(args, "epr_id", None)
+    records = list_promotion_execution_records(HarnessPath.cwd(), epr_id)
+    if args.json:
+        print(json.dumps(
+            {"epr_id": epr_id, "executions": records, "count": len(records)},
+            indent=2, sort_keys=True,
+        ))
+        return 0
+
+    label = f" for {epr_id}" if epr_id else ""
+    print(f"PromotionExecutionRecords{label}: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r['per_id']}  status={r['status']}")
+    return 0
+
+
+def run_promotion_execution_mark_interrupted(args: argparse.Namespace) -> int:
+    result = mark_promotion_execution_interrupted(HarnessPath.cwd(), args.per_id)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("updated") else 1
+
+    if not result.get("updated"):
+        print("PromotionExecutionRecord: MARK-INTERRUPTED FAILED")
+        print(f"  error: {result.get('error', 'unknown')}")
+        return 1
+
+    print("PromotionExecutionRecord: MARKED INTERRUPTED")
+    print(f"  per_id: {result['per_id']}")
+    print(f"  status: {result['status']}")
+    print()
+    print(EXECUTION_PROMOTION_RECORD_ADVISORY)
     return 0

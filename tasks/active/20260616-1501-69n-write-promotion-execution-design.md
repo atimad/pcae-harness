@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260616-1335-69m-write-governance-design
+20260616-1501-69n-write-promotion-execution-design
 
 ## Title
 
-69M Write Governance Design
+69N Write Promotion Execution Design
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-69M Write Governance Design
+69N Write Promotion Execution Design
 
 ## Allowed Files
 
@@ -89,4 +89,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-16T13:35:15.971688+02:00
+2026-06-16T15:01:40.725760+02:00
