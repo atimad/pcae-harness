@@ -65193,6 +65193,73 @@ def test_69p_list_authorization_artifacts_reads_store(tmp_path) -> None:
     assert records[0]["prompt_id"] == "pid-001"
 
 
+def test_69p_list_authorization_artifacts_prompt_id_filter(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_authorization_artifacts, store_authorization_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+
+    def _make_artifact(pid: str, aid: str) -> dict:
+        return {
+            "authorization_id": aid,
+            "authorization_state": "authorized",
+            "prompt_id": pid,
+            "selected_agents": ["claude-local"],
+            "authorized_by": "human",
+            "authorized_at": "2026-01-01T00:00:00+00:00",
+            "pathway_id": "pathway-001",
+            "gate_snapshot": [{"gate_id": "g1", "status": "satisfied"}],
+            "execution_allowed": False,
+        }
+
+    store_authorization_artifact(root, _make_artifact("pid-A", "auth-A"))
+    store_authorization_artifact(root, _make_artifact("pid-B", "auth-B"))
+
+    all_records = list_authorization_artifacts(root)
+    assert len(all_records) == 2
+
+    filtered = list_authorization_artifacts(root, prompt_id="pid-A")
+    assert len(filtered) == 1
+    assert filtered[0]["prompt_id"] == "pid-A"
+
+    filtered_b = list_authorization_artifacts(root, prompt_id="pid-B")
+    assert len(filtered_b) == 1
+    assert filtered_b[0]["prompt_id"] == "pid-B"
+
+
+def test_69p_list_authorization_artifacts_prompt_id_no_match(tmp_path) -> None:
+    from pcae.core.agent import list_authorization_artifacts, store_authorization_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    artifact = {
+        "authorization_id": "auth-001",
+        "authorization_state": "authorized",
+        "prompt_id": "pid-001",
+        "selected_agents": ["claude-local"],
+        "authorized_by": "human",
+        "authorized_at": "2026-01-01T00:00:00+00:00",
+        "pathway_id": "pathway-001",
+        "gate_snapshot": [{"gate_id": "g1", "status": "satisfied"}],
+        "execution_allowed": False,
+    }
+    store_authorization_artifact(root, artifact)
+    filtered = list_authorization_artifacts(root, prompt_id="pid-nonexistent")
+    assert filtered == []
+
+
+def test_69p_cli_authorization_store_list_prompt_id_filter(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    main(["authorization-store", "list", "--prompt-id", "test-pid"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
 # --- build_execution_chain_status -------------------------------------------
 
 def test_69p_chain_status_no_record(tmp_path) -> None:

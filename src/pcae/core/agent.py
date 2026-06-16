@@ -89540,7 +89540,10 @@ def lookup_authorization_artifact(root: "HarnessPath", prompt_id: str) -> dict |
     return None
 
 
-def list_authorization_artifacts(root: "HarnessPath") -> list[dict]:
+def list_authorization_artifacts(
+    root: "HarnessPath",
+    prompt_id: "str | None" = None,
+) -> list[dict]:
     store_dir = root.path / _ARA_STORE_DIR
     if not store_dir.exists():
         return []
@@ -89548,7 +89551,10 @@ def list_authorization_artifacts(root: "HarnessPath") -> list[dict]:
     for path in sorted(store_dir.glob("*.json"), reverse=True):
         try:
             with path.open(encoding="utf-8") as fh:
-                records.append(json.load(fh))
+                record = json.load(fh)
+            if prompt_id is not None and record.get("prompt_id") != prompt_id:
+                continue
+            records.append(record)
         except Exception:
             continue
     return records

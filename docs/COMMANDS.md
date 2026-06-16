@@ -522,6 +522,8 @@ AI-driven invocation.
 - `pcae authorization-store show --prompt-id <id> --json`
 - `pcae authorization-store list`
 - `pcae authorization-store list --json`
+- `pcae authorization-store list --prompt-id <id>`
+- `pcae authorization-store list --prompt-id <id> --json`
 
 ## audit-record
 

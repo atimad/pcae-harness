@@ -16093,11 +16093,16 @@ def run_authorization_store_show(args: argparse.Namespace) -> int:
 
 def run_authorization_store_list(args: argparse.Namespace) -> int:
     from pcae.core.paths import HarnessPath
-    records = list_authorization_artifacts(HarnessPath.cwd())
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_authorization_artifacts(HarnessPath.cwd(), prompt_id=prompt_id)
     if args.json:
-        print(json.dumps({"authorizations": records, "count": len(records)}, indent=2, sort_keys=True))
+        print(json.dumps(
+            {"prompt_id": prompt_id, "authorizations": records, "count": len(records)},
+            indent=2, sort_keys=True,
+        ))
         return 0
-    print(f"AuthorizationArtifacts: {len(records)}")
+    label = f" for prompt={prompt_id}" if prompt_id else ""
+    print(f"AuthorizationArtifacts{label}: {len(records)}")
     if not records:
         print("  (none)")
         return 0

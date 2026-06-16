@@ -2065,6 +2065,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="List all AuthorizationArtifacts in the store.",
     )
     authorization_store_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional, Phase 69P)."
+    )
+    authorization_store_list_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     authorization_store_list_parser.set_defaults(handler=run_authorization_store_list)
